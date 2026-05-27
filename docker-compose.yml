@@ -1,0 +1,56 @@
+version: "3.8"
+
+services:
+  # ── PostgreSQL ─────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: dnd-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: dnd_manager
+      POSTGRES_USER: dnd
+      POSTGRES_PASSWORD: dnd_secret
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dnd -d dnd_manager"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # ── Spring Boot Backend ────────────────────────────────────
+  backend:
+    # Бекендер должен предоставить образ или Dockerfile (см. README ниже)
+    build:
+      context: ../Super-Manager-of-Heresy-for-Idiots   # <-- путь к проекту бекенда
+      dockerfile: Dockerfile
+    container_name: dnd-backend
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/dnd_manager
+      SPRING_DATASOURCE_USERNAME: dnd
+      SPRING_DATASOURCE_PASSWORD: dnd_secret
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # ── React Frontend (nginx) ────────────────────────────────
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: dnd-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:

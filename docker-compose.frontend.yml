@@ -1,14 +1,9 @@
-# Add this service to your existing backend docker-compose.yml
-# Or use: docker-compose -f docker-compose.yml -f docker-compose.frontend.yml up
-
 version: "3.8"
 
 services:
   frontend:
     build:
-      context: ./frontend
+      context: .
       dockerfile: Dockerfile
     ports:
       - "80:80"
-    depends_on:
-      - backend
