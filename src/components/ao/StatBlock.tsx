@@ -4,6 +4,7 @@ interface StatBlockProps {
   label: string;
   value: number;
   modifier?: number;
+  big?: boolean;
   className?: string;
   style?: React.CSSProperties;
 }
@@ -12,6 +13,7 @@ export function StatBlock({
   label,
   value,
   modifier,
+  big = false,
   className = '',
   style,
 }: StatBlockProps) {
@@ -19,16 +21,11 @@ export function StatBlock({
   const sign = mod >= 0 ? '+' : '';
 
   return (
-    <div className={`ao-stat ao-frame ${className}`} style={style}>
-      <span className="ao-frame__corner ao-frame__corner--tl" />
-      <span className="ao-frame__corner ao-frame__corner--tr" />
-      <span className="ao-frame__corner ao-frame__corner--bl" />
-      <span className="ao-frame__corner ao-frame__corner--br" />
-      <div className="ao-stat__label ao-overline">{label}</div>
-      <div className="ao-stat__value ao-num">{value}</div>
-      <div className="ao-stat__mod ao-num">
-        {sign}{mod}
-      </div>
+    <div className={`ao-stat ao-frame ${className}`} style={big ? { padding: '16px 12px', ...style } : style}>
+      <span className="ao-frame-c" />
+      <div className="ao-stat-label">{label}</div>
+      <div className="ao-stat-value" style={big ? { fontSize: 48 } : {}}>{value}</div>
+      <div className="ao-stat-mod">{sign}{mod}</div>
     </div>
   );
 }

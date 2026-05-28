@@ -17,16 +17,24 @@ export function Divider({
   style,
 }: DividerProps) {
   return (
-    <div className={`ao-divide ${className}`} style={style}>
-      <span className="ao-divide__line" />
+    <div className={`ao-divide ${className}`} style={{ margin: '8px 0', ...style }}>
       {children ? (
-        <span className="ao-divide__label" style={{ color }}>
-          {children}
-        </span>
+        <>
+          <span style={{ flex: 1, height: 1, background: 'linear-gradient(90deg, transparent, var(--rule), var(--rule))' }} />
+          <span className="ao-overline" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Rune kind={glyph} size={9} color={color} />
+            {children}
+            <Rune kind={glyph} size={9} color={color} />
+          </span>
+          <span style={{ flex: 1, height: 1, background: 'linear-gradient(90deg, var(--rule), var(--rule), transparent)' }} />
+        </>
       ) : (
-        <Rune kind={glyph} size={10} color={color} />
+        <>
+          <span style={{ flex: 1, height: 1, background: 'linear-gradient(90deg, transparent, var(--rule), var(--rule))' }} />
+          <Rune kind={glyph} size={9} color={color} />
+          <span style={{ flex: 1, height: 1, background: 'linear-gradient(90deg, var(--rule), var(--rule), transparent)' }} />
+        </>
       )}
-      <span className="ao-divide__line" />
     </div>
   );
 }

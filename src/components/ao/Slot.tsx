@@ -1,7 +1,7 @@
 import React from 'react';
 import { Rune } from './Rune';
 
-type Rarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
+type Rarity = 'common' | 'rare' | 'epic' | 'cursed' | 'filled';
 
 interface SlotProps {
   children?: React.ReactNode;
@@ -17,7 +17,7 @@ interface SlotProps {
 
 export function Slot({
   children,
-  rarity = 'common',
+  rarity,
   empty = false,
   glyph,
   label,
@@ -28,7 +28,7 @@ export function Slot({
 }: SlotProps) {
   const cls = [
     'ao-slot',
-    `ao-slot--${rarity}`,
+    rarity && `ao-slot--${rarity}`,
     empty && 'ao-slot--empty',
     selected && 'ao-slot--selected',
     onClick && 'ao-slot--clickable',

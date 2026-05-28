@@ -36,14 +36,7 @@ export function Panel({
 
   return (
     <div className={cls} style={{ padding, ...style }} onClick={onClick}>
-      {frame && (
-        <>
-          <span className="ao-frame__corner ao-frame__corner--tl" />
-          <span className="ao-frame__corner ao-frame__corner--tr" />
-          <span className="ao-frame__corner ao-frame__corner--bl" />
-          <span className="ao-frame__corner ao-frame__corner--br" />
-        </>
-      )}
+      {frame && <span className="ao-frame-c" />}
       {children}
     </div>
   );
@@ -76,19 +69,23 @@ export function PanelHeader({
         : 'var(--gold)';
 
   return (
-    <div className={`ao-panel-header ${className}`}>
-      <div className="ao-panel-header__left">
-        <Rune kind={glyph} size={16} color={toneColor} />
-        <div>
-          <div className="ao-overline" style={{ color: toneColor }}>
-            {title}
-          </div>
-          {sub && (
-            <div className="ao-panel-header__sub">{sub}</div>
-          )}
-        </div>
+    <div
+      className={`ao-panel-header ${className}`}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 12,
+        padding: '14px 18px',
+        borderBottom: '1px solid var(--rule)',
+        background: 'linear-gradient(180deg, rgba(176,141,78,0.04), transparent)',
+      }}
+    >
+      <Rune kind={glyph} size={10} color={toneColor} />
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div className="ao-engraved" style={{ fontSize: 13 }}>{title}</div>
+        {sub && <div className="ao-codex" style={{ marginTop: 2 }}>{sub}</div>}
       </div>
-      {right && <div className="ao-panel-header__right">{right}</div>}
+      {right}
     </div>
   );
 }

@@ -31,7 +31,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           className={`ao-input ${error ? 'ao-input--error' : ''} ${className}`}
           {...rest}
         />
-        {error && <div className="ao-field__error">{error}</div>}
+        {error && <div className="ao-error">{error}</div>}
       </div>
     );
   }
@@ -54,7 +54,7 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           className={`ao-textarea ${error ? 'ao-textarea--error' : ''} ${className}`}
           {...rest}
         />
-        {error && <div className="ao-field__error">{error}</div>}
+        {error && <div className="ao-error">{error}</div>}
       </div>
     );
   }
@@ -86,7 +86,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
               ))
             : children}
         </select>
-        {error && <div className="ao-field__error">{error}</div>}
+        {error && <div className="ao-error">{error}</div>}
       </div>
     );
   }

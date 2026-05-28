@@ -20,24 +20,22 @@ export function Bar({
   style,
 }: BarProps) {
   const pct = max > 0 ? Math.min(100, Math.max(0, (value / max) * 100)) : 0;
+  const fillCls = tone === 'gold' ? 'ao-bar-fill--gold' : tone === 'arcane' ? 'ao-bar-fill--arcane' : '';
 
   return (
-    <div className={`ao-bar ${className}`} style={style}>
+    <div className={className} style={style}>
       {(label || showNumbers) && (
-        <div className="ao-bar__header">
-          {label && <span className="ao-bar__label ao-overline">{label}</span>}
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, alignItems: 'baseline' }}>
+          {label && <span className="ao-overline">{label}</span>}
           {showNumbers && (
-            <span className="ao-bar__numbers ao-num">
-              {value} / {max}
+            <span className="ao-num" style={{ color: 'var(--ink-bright)', fontSize: 13 }}>
+              {value}<span style={{ color: 'var(--ink-faint)' }}> / {max}</span>
             </span>
           )}
         </div>
       )}
-      <div className="ao-bar__track">
-        <div
-          className={`ao-bar__fill ao-bar__fill--${tone}`}
-          style={{ width: `${pct}%` }}
-        />
+      <div className="ao-bar">
+        <div className={`ao-bar-fill ${fillCls}`} style={{ width: `${pct}%` }} />
       </div>
     </div>
   );

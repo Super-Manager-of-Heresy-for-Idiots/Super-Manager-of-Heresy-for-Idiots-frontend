@@ -30,8 +30,8 @@ export function Button({
 
   return (
     <button className={cls} disabled={disabled} {...rest}>
-      {icon && <span className="ao-btn__icon">{icon}</span>}
-      {children && <span className="ao-btn__label">{children}</span>}
+      {icon}
+      {children}
     </button>
   );
 }

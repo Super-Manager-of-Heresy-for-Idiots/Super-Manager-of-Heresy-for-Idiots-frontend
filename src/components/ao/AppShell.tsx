@@ -1,6 +1,7 @@
 import React from 'react';
 import { Rune } from './Rune';
 import { Sigil } from './Sigil';
+import { Backdrop } from './Backdrop';
 
 /* ── Default navigation items ── */
 
@@ -9,6 +10,7 @@ export interface NavItem {
   label: string;
   glyph: string;
   path: string;
+  badge?: boolean;
 }
 
 export const DEFAULT_NAV: NavItem[] = [
@@ -25,49 +27,78 @@ interface RailProps {
   active: string;
   onNavigate: (item: NavItem) => void;
   onSettings?: () => void;
-  className?: string;
 }
 
-export function Rail({
-  nav,
-  active,
-  onNavigate,
-  onSettings,
-  className = '',
-}: RailProps) {
+export function Rail({ nav, active, onNavigate, onSettings }: RailProps) {
   return (
-    <nav className={`ao-rail ${className}`}>
-      <div className="ao-rail__top">
-        <div className="ao-rail__sigil">
-          <Sigil size={36} />
-        </div>
-        <div className="ao-rail__nav">
-          {nav.map((item) => (
+    <div
+      style={{
+        width: 68,
+        background: 'var(--abyss)',
+        borderRight: '1px solid var(--rule)',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        padding: '18px 0 14px',
+        flexShrink: 0,
+        position: 'relative',
+        zIndex: 2,
+      }}
+    >
+      <div style={{ marginBottom: 18 }}>
+        <Sigil size={40} glyph="sigil-2" />
+      </div>
+      <div style={{ width: 24, height: 1, background: 'var(--rule)', marginBottom: 14 }} />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: 1 }}>
+        {nav.map((item) => {
+          const isActive = active === item.key;
+          return (
             <button
               key={item.key}
-              className={`ao-rail__btn ${active === item.key ? 'ao-rail__btn--active' : ''}`}
-              onClick={() => onNavigate(item)}
               title={item.label}
+              className={`ao-iconbtn ${isActive ? 'is-active' : ''}`}
+              style={{
+                width: 40,
+                height: 40,
+                background: isActive ? 'var(--panel-raised)' : 'transparent',
+                color: isActive ? 'var(--gold-pale)' : 'var(--ink-faint)',
+                borderColor: isActive ? 'var(--brass)' : 'transparent',
+                position: 'relative',
+              }}
+              onClick={() => onNavigate(item)}
               type="button"
             >
-              <Rune kind={item.glyph} size={20} />
+              <Rune kind={item.glyph} size={16} />
+              {item.badge && (
+                <span
+                  style={{
+                    position: 'absolute',
+                    top: 4,
+                    right: 4,
+                    width: 5,
+                    height: 5,
+                    background: 'var(--ember)',
+                    boxShadow: '0 0 6px var(--ember)',
+                  }}
+                />
+              )}
             </button>
-          ))}
-        </div>
+          );
+        })}
       </div>
-      <div className="ao-rail__bottom">
-        {onSettings && (
-          <button
-            className="ao-rail__btn"
-            onClick={onSettings}
-            title="Settings"
-            type="button"
-          >
-            <Rune kind="cir-dot" size={20} />
-          </button>
-        )}
-      </div>
-    </nav>
+      <div style={{ width: 24, height: 1, background: 'var(--rule)', marginTop: 14, marginBottom: 14 }} />
+      {onSettings && (
+        <button
+          className="ao-iconbtn"
+          style={{ width: 40, height: 40, border: 'none', color: 'var(--ink-faint)' }}
+          title="Settings"
+          onClick={onSettings}
+          type="button"
+        >
+          <Rune kind="cir-dot" size={14} />
+        </button>
+      )}
+    </div>
   );
 }
 
@@ -75,38 +106,41 @@ export function Rail({
 
 interface TopBarProps {
   title?: string;
-  breadcrumb?: string[];
+  breadcrumb?: string;
   right?: React.ReactNode;
-  className?: string;
 }
 
-export function TopBar({
-  title,
-  breadcrumb,
-  right,
-  className = '',
-}: TopBarProps) {
+export function TopBar({ title, breadcrumb, right }: TopBarProps) {
   return (
-    <header className={`ao-topbar ${className}`}>
-      <div className="ao-topbar__left">
-        {breadcrumb && breadcrumb.length > 0 && (
-          <div className="ao-topbar__breadcrumb">
-            {breadcrumb.map((crumb, i) => (
-              <React.Fragment key={i}>
-                {i > 0 && (
-                  <Rune kind="chev-r" size={10} color="var(--ink-faint)" />
-                )}
-                <span className={i === breadcrumb.length - 1 ? 'ao-topbar__crumb--active' : 'ao-topbar__crumb'}>
-                  {crumb}
-                </span>
-              </React.Fragment>
-            ))}
-          </div>
-        )}
-        {title && <h1 className="ao-topbar__title ao-engraved">{title}</h1>}
+    <div
+      style={{
+        height: 60,
+        borderBottom: '1px solid var(--rule)',
+        display: 'flex',
+        alignItems: 'center',
+        padding: '0 28px',
+        gap: 18,
+        background: 'linear-gradient(180deg, var(--panel) 0%, var(--stone) 100%)',
+        flexShrink: 0,
+        position: 'relative',
+        zIndex: 2,
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <Rune kind="diamond-fill" size={8} color="var(--gold)" />
+        <span className="ao-engraved" style={{ fontSize: 14 }}>
+          {title}
+        </span>
       </div>
-      {right && <div className="ao-topbar__right">{right}</div>}
-    </header>
+      {breadcrumb && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: 'var(--ink-faint)' }}>
+          <Rune kind="chev-r" size={12} />
+          <span className="ao-codex">{breadcrumb}</span>
+        </div>
+      )}
+      <div style={{ flex: 1 }} />
+      {right}
+    </div>
   );
 }
 
@@ -119,7 +153,6 @@ interface AppShellProps {
   onNavigate?: (item: NavItem) => void;
   onSettings?: () => void;
   topBar?: React.ReactNode;
-  className?: string;
 }
 
 export function AppShell({
@@ -129,20 +162,18 @@ export function AppShell({
   onNavigate = () => {},
   onSettings,
   topBar,
-  className = '',
 }: AppShellProps) {
   return (
-    <div className={`ao-shell ${className}`}>
-      <Rail
-        nav={nav}
-        active={activeNav}
-        onNavigate={onNavigate}
-        onSettings={onSettings}
-      />
-      <div className="ao-shell__main">
-        {topBar}
-        <div className="ao-shell__content ao-scroll">{children}</div>
+    <Backdrop>
+      <div style={{ display: 'flex', height: '100%' }}>
+        <Rail nav={nav} active={activeNav} onNavigate={onNavigate} onSettings={onSettings} />
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+          {topBar}
+          <div className="ao-scroll" style={{ flex: 1, overflow: 'auto', padding: '20px 28px 28px' }}>
+            {children}
+          </div>
+        </div>
       </div>
-    </div>
+    </Backdrop>
   );
 }

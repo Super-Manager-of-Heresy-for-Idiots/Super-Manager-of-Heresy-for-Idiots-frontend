@@ -3,7 +3,7 @@ import { Rune } from './Rune';
 
 interface ChipProps {
   children: React.ReactNode;
-  tone?: 'gold' | 'arcane' | 'ember' | 'muted';
+  tone?: 'gold' | 'arcane' | 'ember' | 'rune' | 'muted';
   glyph?: string;
   className?: string;
   style?: React.CSSProperties;
@@ -24,7 +24,7 @@ export function Chip({
       style={style}
       onClick={onClick}
     >
-      {glyph && <Rune kind={glyph} size={12} />}
+      {glyph && <Rune kind={glyph} size={8} />}
       {children}
     </span>
   );
