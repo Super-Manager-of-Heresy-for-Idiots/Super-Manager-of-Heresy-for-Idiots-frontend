@@ -17,6 +17,13 @@ import GmTeamCreatePage from '@/pages/gm/GmTeamCreatePage';
 import GmTeamDetailPage from '@/pages/gm/GmTeamDetailPage';
 import GmCharacterViewPage from '@/pages/gm/GmCharacterViewPage';
 
+import MarketplaceBrowsePage from '@/pages/gm/homebrew/MarketplaceBrowsePage';
+import MarketplaceDetailPage from '@/pages/gm/homebrew/MarketplaceDetailPage';
+import MyDoctrinesPage from '@/pages/gm/homebrew/MyDoctrinesPage';
+import CreateDoctrinePage from '@/pages/gm/homebrew/CreateDoctrinePage';
+import EditDoctrinePage from '@/pages/gm/homebrew/EditDoctrinePage';
+import InstalledDoctrinesPage from '@/pages/gm/homebrew/InstalledDoctrinesPage';
+
 import AdminDashboardPage from '@/pages/admin/AdminDashboardPage';
 import UsersListPage from '@/pages/admin/UsersListPage';
 import TeamsListPage from '@/pages/admin/TeamsListPage';
@@ -24,6 +31,7 @@ import StatTypesPage from '@/pages/admin/StatTypesPage';
 import ItemTypesPage from '@/pages/admin/ItemTypesPage';
 import CharacterClassesPage from '@/pages/admin/CharacterClassesPage';
 import CharacterRacesPage from '@/pages/admin/CharacterRacesPage';
+import AdminHomebrewPage from '@/pages/admin/AdminHomebrewPage';
 
 export const router = createBrowserRouter([
   // Public routes
@@ -59,6 +67,12 @@ export const router = createBrowserRouter([
           { path: '/gm/teams/new', element: <GmTeamCreatePage /> },
           { path: '/gm/teams/:id', element: <GmTeamDetailPage /> },
           { path: '/gm/characters/:id', element: <GmCharacterViewPage /> },
+          { path: '/gm/homebrew/marketplace', element: <MarketplaceBrowsePage /> },
+          { path: '/gm/homebrew/marketplace/:id', element: <MarketplaceDetailPage /> },
+          { path: '/gm/homebrew/my', element: <MyDoctrinesPage /> },
+          { path: '/gm/homebrew/new', element: <CreateDoctrinePage /> },
+          { path: '/gm/homebrew/:id/edit', element: <EditDoctrinePage /> },
+          { path: '/gm/homebrew/installed', element: <InstalledDoctrinesPage /> },
         ],
       },
     ],
@@ -78,6 +92,7 @@ export const router = createBrowserRouter([
           { path: '/admin/item-types', element: <ItemTypesPage /> },
           { path: '/admin/character-classes', element: <CharacterClassesPage /> },
           { path: '/admin/character-races', element: <CharacterRacesPage /> },
+          { path: '/admin/homebrew', element: <AdminHomebrewPage /> },
         ],
       },
     ],

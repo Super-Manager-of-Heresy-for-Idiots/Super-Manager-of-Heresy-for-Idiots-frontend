@@ -7,6 +7,8 @@ import type {
   CharacterRace,
   User,
   Team,
+  Feat,
+  Skill,
 } from '@/types';
 
 export const adminApi = {
@@ -91,6 +93,18 @@ export const adminApi = {
   // Teams (read-only)
   getTeams: async (): Promise<ApiResponse<Team[]>> => {
     const response = await api.get<ApiResponse<Team[]>>('/admin/teams');
+    return response.data;
+  },
+
+  // Skills (used by homebrew content picker)
+  getSkills: async (): Promise<ApiResponse<Skill[]>> => {
+    const response = await api.get<ApiResponse<Skill[]>>('/admin/skills');
+    return response.data;
+  },
+
+  // Feats (used by homebrew content picker)
+  getFeats: async (): Promise<ApiResponse<Feat[]>> => {
+    const response = await api.get<ApiResponse<Feat[]>>('/admin/feats');
     return response.data;
   },
 };

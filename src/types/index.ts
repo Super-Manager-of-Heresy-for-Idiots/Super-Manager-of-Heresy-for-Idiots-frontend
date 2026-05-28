@@ -153,3 +153,119 @@ export interface LoginDto {
   username: string;
   password: string;
 }
+
+export interface Feat {
+  id: string;
+  name: string;
+  description: string;
+  prerequisites?: string;
+}
+
+export interface Skill {
+  id: string;
+  name: string;
+  description: string;
+  skillType?: string;
+}
+
+// === Homebrew Marketplace ===
+
+export type HomebrewStatus = 'DRAFT' | 'PUBLISHED' | 'UNPUBLISHED';
+
+export type ContentType = 'ITEM_TYPE' | 'CHARACTER_CLASS' | 'SKILL' | 'FEAT';
+
+export interface CreateHomebrewRequest {
+  title: string;
+  description?: string;
+  tagNames?: string[];
+}
+
+export interface UpdateHomebrewRequest {
+  title?: string;
+  description?: string;
+  tagNames?: string[];
+}
+
+export interface AddContentRequest {
+  contentType: ContentType;
+  contentId: string;
+}
+
+export interface HomebrewContentSummary {
+  itemTypeCount: number;
+  classCount: number;
+  skillCount: number;
+  featCount: number;
+}
+
+export interface ContentSummaryDto {
+  id: string;
+  name: string;
+  description?: string;
+  slot?: string;
+  skillType?: string;
+  prerequisites?: string;
+}
+
+export interface HomebrewPackageResponse {
+  id: string;
+  title: string;
+  description?: string;
+  status: HomebrewStatus;
+  version: number;
+  downloadCount: number;
+  authorUsername: string;
+  tags: string[];
+  contentSummary: HomebrewContentSummary;
+  publishedAt?: string;
+  createdAt: string;
+  isDeleted: boolean;
+}
+
+export interface HomebrewDetailResponse extends HomebrewPackageResponse {
+  contentByType: Partial<Record<ContentType, ContentSummaryDto[]>>;
+}
+
+export interface InstalledHomebrewResponse {
+  installationId: string;
+  packageId: string;
+  title: string;
+  authorUsername: string;
+  isDeleted: boolean;
+  installedAt: string;
+  sourceVersion: number;
+  contentSummary: HomebrewContentSummary;
+}
+
+export interface InstallResponse {
+  installedAt: string;
+  sourceVersion: number;
+  contentCount: number;
+}
+
+export interface SoftDeleteResponse {
+  message: string;
+  installationCount: number;
+}
+
+export interface HardDeleteResponse {
+  deletedPackageId: string;
+  affectedInstallations: number;
+}
+
+export interface HomebrewTagResponse {
+  id: string;
+  name: string;
+  usageCount: number;
+}
+
+export interface Page<T> {
+  content: T[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+  size: number;
+  first: boolean;
+  last: boolean;
+  empty: boolean;
+}

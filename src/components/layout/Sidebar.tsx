@@ -11,6 +11,10 @@ import {
   Swords,
   Gem,
   Crown,
+  BookOpen,
+  Store,
+  Download,
+  ShieldAlert,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/store/authStore';
@@ -30,6 +34,9 @@ const playerNav: NavItem[] = [
 
 const gmNav: NavItem[] = [
   { label: 'My Teams', path: '/gm/teams', icon: <Shield className="h-5 w-5" /> },
+  { label: 'My Doctrines', path: '/gm/homebrew/my', icon: <BookOpen className="h-5 w-5" /> },
+  { label: 'Catalogue', path: '/gm/homebrew/marketplace', icon: <Store className="h-5 w-5" /> },
+  { label: 'Instated', path: '/gm/homebrew/installed', icon: <Download className="h-5 w-5" /> },
 ];
 
 const adminNav: NavItem[] = [
@@ -40,6 +47,7 @@ const adminNav: NavItem[] = [
   { label: 'Item Types', path: '/admin/item-types', icon: <Package className="h-5 w-5" /> },
   { label: 'Classes', path: '/admin/character-classes', icon: <Swords className="h-5 w-5" /> },
   { label: 'Races', path: '/admin/character-races', icon: <Crown className="h-5 w-5" /> },
+  { label: 'Homebrew', path: '/admin/homebrew', icon: <ShieldAlert className="h-5 w-5" /> },
 ];
 
 export function Sidebar() {

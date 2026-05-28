@@ -49,3 +49,18 @@ export function maskInviteCode(code: string): string {
   if (code.length <= 3) return code;
   return code.slice(0, 3) + '•'.repeat(code.length - 3);
 }
+
+export function formatTimeAgo(dateString: string): string {
+  const now = Date.now();
+  const then = new Date(dateString).getTime();
+  const diff = now - then;
+  const minutes = Math.floor(diff / 60000);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days}d ago`;
+  const weeks = Math.floor(days / 7);
+  if (weeks < 4) return `${weeks}w ago`;
+  return formatDate(dateString);
+}
