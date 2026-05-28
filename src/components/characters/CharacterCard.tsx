@@ -1,8 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { Eye, Pencil, Trash2, Sword } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Panel, Button, Chip, Rune, Divider } from '@/components/ao';
 import type { Character } from '@/types';
 
 interface CharacterCardProps {
@@ -16,54 +13,64 @@ export function CharacterCard({ character, onDelete, basePath = '/characters', r
   const navigate = useNavigate();
 
   return (
-    <Card className="border-gold/20 hover:border-gold/40 transition-colors">
-      <CardContent className="p-6">
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <div className="h-12 w-12 rounded-full bg-gold/20 flex items-center justify-center">
-              <Sword className="h-6 w-6 text-gold" />
-            </div>
-            <div>
-              <h3 className="font-heading font-semibold text-lg">{character.name}</h3>
-              <p className="text-sm text-muted-foreground">
-                {character.race?.name} {character.characterClass?.name}
-              </p>
+    <Panel frame className="ao-rise">
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div
+            style={{
+              width: 44,
+              height: 44,
+              borderRadius: '50%',
+              background: 'var(--gold-dim)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Rune kind="sword" size={22} color="var(--gold)" />
+          </div>
+          <div>
+            <div className="ao-h4" style={{ margin: 0 }}>{character.name}</div>
+            <div style={{ fontSize: 13, color: 'var(--ink-muted)' }}>
+              {character.race?.name} {character.characterClass?.name}
             </div>
           </div>
-          <Badge variant="gold">Lv. {character.level}</Badge>
         </div>
-        <div className="flex gap-2 mt-4">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => navigate(`${basePath}/${character.id}`)}
-            className="flex-1"
-          >
-            <Eye className="h-4 w-4 mr-1" />
-            View
-          </Button>
-          {!readOnly && (
-            <>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => navigate(`${basePath}/${character.id}/edit`)}
-                className="flex-1"
-              >
-                <Pencil className="h-4 w-4 mr-1" />
-                Edit
-              </Button>
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={() => onDelete(character.id)}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+        <Chip tone="gold">Lv. {character.level}</Chip>
+      </div>
+
+      <Divider />
+
+      <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+        <Button
+          variant="ghost"
+          size="sm"
+          icon={<Rune kind="eye" size={14} />}
+          onClick={() => navigate(`${basePath}/${character.id}`)}
+          style={{ flex: 1 }}
+        >
+          View
+        </Button>
+        {!readOnly && (
+          <>
+            <Button
+              variant="ghost"
+              size="sm"
+              icon={<Rune kind="scroll" size={14} />}
+              onClick={() => navigate(`${basePath}/${character.id}/edit`)}
+              style={{ flex: 1 }}
+            >
+              Edit
+            </Button>
+            <Button
+              variant="danger"
+              size="sm"
+              icon={<Rune kind="x" size={14} />}
+              onClick={() => onDelete(character.id)}
+            />
+          </>
+        )}
+      </div>
+    </Panel>
   );
 }

@@ -9,6 +9,7 @@ import CharactersListPage from '@/pages/player/CharactersListPage';
 import CharacterCreatePage from '@/pages/player/CharacterCreatePage';
 import CharacterEditPage from '@/pages/player/CharacterEditPage';
 import CharacterDetailPage from '@/pages/player/CharacterDetailPage';
+import LevelUpPage from '@/pages/player/LevelUpPage';
 import JoinTeamPage from '@/pages/player/JoinTeamPage';
 import MyTeamsPage from '@/pages/player/MyTeamsPage';
 
@@ -24,6 +25,10 @@ import StatTypesPage from '@/pages/admin/StatTypesPage';
 import ItemTypesPage from '@/pages/admin/ItemTypesPage';
 import CharacterClassesPage from '@/pages/admin/CharacterClassesPage';
 import CharacterRacesPage from '@/pages/admin/CharacterRacesPage';
+import FeatsPage from '@/pages/admin/FeatsPage';
+import SubclassesPage from '@/pages/admin/SubclassesPage';
+import SkillsPage from '@/pages/admin/SkillsPage';
+import ClassLevelRewardsPage from '@/pages/admin/ClassLevelRewardsPage';
 
 export const router = createBrowserRouter([
   // Public routes
@@ -41,6 +46,7 @@ export const router = createBrowserRouter([
           { path: '/characters/new', element: <CharacterCreatePage /> },
           { path: '/characters/:id', element: <CharacterDetailPage /> },
           { path: '/characters/:id/edit', element: <CharacterEditPage /> },
+          { path: '/characters/:id/level-up', element: <LevelUpPage /> },
           { path: '/teams/join', element: <JoinTeamPage /> },
           { path: '/teams', element: <MyTeamsPage /> },
         ],
@@ -78,6 +84,10 @@ export const router = createBrowserRouter([
           { path: '/admin/item-types', element: <ItemTypesPage /> },
           { path: '/admin/character-classes', element: <CharacterClassesPage /> },
           { path: '/admin/character-races', element: <CharacterRacesPage /> },
+          { path: '/admin/feats', element: <FeatsPage /> },
+          { path: '/admin/subclasses', element: <SubclassesPage /> },
+          { path: '/admin/skills', element: <SkillsPage /> },
+          { path: '/admin/class-level-rewards', element: <ClassLevelRewardsPage /> },
         ],
       },
     ],

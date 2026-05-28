@@ -1,7 +1,6 @@
 import { useNavigate, useParams } from 'react-router-dom';
+import { Panel, Button } from '@/components/ao';
 import { CharacterForm } from '@/components/characters/CharacterForm';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Button } from '@/components/ui/button';
 import { useCharacter, useUpdateCharacter } from '@/hooks/useCharacters';
 
 export default function CharacterEditPage() {
@@ -22,26 +21,30 @@ export default function CharacterEditPage() {
   };
 
   if (isLoading) {
-    return <Skeleton className="h-96 max-w-2xl mx-auto" />;
+    return (
+      <div style={{ maxWidth: 560, margin: '0 auto' }}>
+        <Panel style={{ height: 384 }} className="ao-breathe">
+          <div style={{ background: 'var(--surface)', height: '100%', borderRadius: 4 }} />
+        </Panel>
+      </div>
+    );
   }
 
   if (error || !character) {
     return (
-      <div className="text-center py-12">
-        <p className="text-lg text-muted-foreground mb-4">Failed to load character</p>
-        <Button variant="outline" onClick={() => refetch()}>Retry</Button>
+      <div style={{ textAlign: 'center', padding: '48px 0' }}>
+        <p style={{ fontSize: 16, color: 'var(--ink-muted)', marginBottom: 16 }}>Failed to load character</p>
+        <Button variant="ghost" onClick={() => refetch()}>Retry</Button>
       </div>
     );
   }
 
   return (
-    <div>
-      <CharacterForm
-        title="Edit Character"
-        character={character}
-        onSubmit={handleSubmit}
-        isSubmitting={updateMutation.isPending}
-      />
-    </div>
+    <CharacterForm
+      title="Edit Character"
+      character={character}
+      onSubmit={handleSubmit}
+      isSubmitting={updateMutation.isPending}
+    />
   );
 }

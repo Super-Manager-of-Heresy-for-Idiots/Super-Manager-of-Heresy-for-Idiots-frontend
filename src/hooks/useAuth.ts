@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { authApi } from '@/api/auth.api';
 import { useAuthStore } from '@/store/authStore';
-import { getRoleRedirectPath } from '@/lib/utils';
+import { getRoleRedirect } from '@/lib/ao-utils';
 import type { LoginDto, RegisterDto, ApiError } from '@/types';
 import { AxiosError } from 'axios';
 
@@ -18,7 +18,7 @@ export function useLogin() {
       const { token, user } = response.data;
       login(user, token, variables.remember);
       toast.success('Welcome back, ' + user.username + '!');
-      navigate(getRoleRedirectPath(user.role));
+      navigate(getRoleRedirect(user.role));
     },
     onError: (error: AxiosError<ApiError>) => {
       const message = error.response?.data?.message || 'Login failed';

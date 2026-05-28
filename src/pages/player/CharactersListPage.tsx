@@ -1,19 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Sword } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Panel, PanelHeader, Button, Rune, AlertDialog } from '@/components/ao';
 import { CharacterCard } from '@/components/characters/CharacterCard';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
 import { useCharacters, useDeleteCharacter } from '@/hooks/useCharacters';
 
 export default function CharactersListPage() {
@@ -32,41 +20,51 @@ export default function CharactersListPage() {
 
   if (error) {
     return (
-      <div className="text-center py-12">
-        <p className="text-lg text-muted-foreground mb-4">Failed to load characters</p>
-        <Button variant="outline" onClick={() => refetch()}>Retry</Button>
+      <div style={{ textAlign: 'center', padding: '48px 0' }}>
+        <p style={{ fontSize: 16, color: 'var(--ink-muted)', marginBottom: 16 }}>Failed to load characters</p>
+        <Button variant="ghost" onClick={() => refetch()}>Retry</Button>
       </div>
     );
   }
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-heading font-bold">My Characters</h1>
-        <Button variant="gold" onClick={() => navigate('/characters/new')}>
-          <Plus className="h-4 w-4 mr-2" />
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+        <h1 className="ao-h2">My Characters</h1>
+        <Button
+          variant="primary"
+          icon={<Rune kind="plus" size={14} />}
+          onClick={() => navigate('/characters/new')}
+        >
           Create Character
         </Button>
       </div>
 
       {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 16 }}>
           {Array.from({ length: 6 }).map((_, i) => (
-            <Skeleton key={i} className="h-48" />
+            <Panel key={i} style={{ height: 180 }} className="ao-breathe">
+              <div style={{ background: 'var(--surface)', height: '100%', borderRadius: 4 }} />
+            </Panel>
           ))}
         </div>
       ) : !characters || characters.length === 0 ? (
-        <div className="text-center py-16">
-          <Sword className="h-16 w-16 text-gold/30 mx-auto mb-4" />
-          <h2 className="text-xl font-heading font-semibold mb-2">No Characters Yet</h2>
-          <p className="text-muted-foreground mb-6">Create your first character to begin your adventure!</p>
-          <Button variant="gold" onClick={() => navigate('/characters/new')}>
-            <Plus className="h-4 w-4 mr-2" />
+        <div style={{ textAlign: 'center', padding: '64px 0' }}>
+          <Rune kind="sword" size={64} color="var(--gold-dim)" style={{ marginBottom: 16 }} />
+          <h2 className="ao-h3" style={{ marginBottom: 8 }}>No Characters Yet</h2>
+          <p style={{ color: 'var(--ink-muted)', marginBottom: 24 }}>
+            Create your first character to begin your adventure!
+          </p>
+          <Button
+            variant="primary"
+            icon={<Rune kind="plus" size={14} />}
+            onClick={() => navigate('/characters/new')}
+          >
             Create Your First Character
           </Button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 16 }}>
           {characters.map((character) => (
             <CharacterCard
               key={character.id}
@@ -77,25 +75,16 @@ export default function CharactersListPage() {
         </div>
       )}
 
-      <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Character?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This character and all their data will be permanently deleted.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <AlertDialog
+        open={!!deleteId}
+        onClose={() => setDeleteId(null)}
+        onConfirm={handleDelete}
+        title="Delete Character?"
+        description="This action cannot be undone. This character and all their data will be permanently deleted."
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="danger"
+      />
     </div>
   );
 }

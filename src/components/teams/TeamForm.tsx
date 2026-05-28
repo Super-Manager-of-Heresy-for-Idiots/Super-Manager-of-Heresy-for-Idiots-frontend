@@ -1,11 +1,7 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Panel, PanelHeader, Button, Input, Label, Rune } from '@/components/ao';
 
 const teamSchema = z.object({
   name: z.string().min(1, 'Team name is required').max(80, 'Team name must be 80 characters or less'),
@@ -31,23 +27,27 @@ export function TeamForm({ defaultName, onSubmit, isSubmitting, title }: TeamFor
   });
 
   return (
-    <Card className="max-w-lg mx-auto border-gold/20">
-      <CardHeader>
-        <CardTitle>{title}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <div className="space-y-2">
+    <div style={{ maxWidth: 480, margin: '0 auto' }}>
+      <Panel frame padding={24}>
+        <PanelHeader title={title} glyph="helm" tone="gold" />
+
+        <form onSubmit={handleSubmit(onSubmit)} style={{ display: 'flex', flexDirection: 'column', gap: 20, marginTop: 20 }}>
+          <div>
             <Label htmlFor="name">Team Name</Label>
             <Input id="name" {...register('name')} placeholder="Enter team name" />
-            {errors.name && <p className="text-sm text-dnd-red">{errors.name.message}</p>}
+            {errors.name && <p style={{ fontSize: 12, color: 'var(--ember)', marginTop: 4 }}>{errors.name.message}</p>}
           </div>
-          <Button type="submit" variant="gold" className="w-full" disabled={isSubmitting}>
-            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          <Button
+            type="submit"
+            variant="primary"
+            block
+            disabled={isSubmitting}
+            icon={isSubmitting ? <Rune kind="sigil-3" size={14} className="ao-spin" /> : undefined}
+          >
             {defaultName ? 'Update Team' : 'Create Team'}
           </Button>
         </form>
-      </CardContent>
-    </Card>
+      </Panel>
+    </div>
   );
 }

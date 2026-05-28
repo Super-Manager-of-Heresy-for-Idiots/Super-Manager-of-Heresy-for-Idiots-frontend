@@ -7,6 +7,14 @@ import type {
   CharacterRace,
   User,
   Team,
+  Feat,
+  Subclass,
+  Skill,
+  ClassLevelReward,
+  CreateFeatDto,
+  CreateSubclassDto,
+  CreateSkillDto,
+  CreateClassLevelRewardDto,
 } from '@/types';
 
 export const adminApi = {
@@ -91,6 +99,75 @@ export const adminApi = {
   // Teams (read-only)
   getTeams: async (): Promise<ApiResponse<Team[]>> => {
     const response = await api.get<ApiResponse<Team[]>>('/admin/teams');
+    return response.data;
+  },
+
+  // Feats
+  getFeats: async (): Promise<ApiResponse<Feat[]>> => {
+    const response = await api.get<ApiResponse<Feat[]>>('/admin/feats');
+    return response.data;
+  },
+  createFeat: async (data: CreateFeatDto): Promise<ApiResponse<Feat>> => {
+    const response = await api.post<ApiResponse<Feat>>('/admin/feats', data);
+    return response.data;
+  },
+  updateFeat: async (id: string, data: CreateFeatDto): Promise<ApiResponse<Feat>> => {
+    const response = await api.put<ApiResponse<Feat>>(`/admin/feats/${id}`, data);
+    return response.data;
+  },
+  deleteFeat: async (id: string): Promise<ApiResponse<null>> => {
+    const response = await api.delete<ApiResponse<null>>(`/admin/feats/${id}`);
+    return response.data;
+  },
+
+  // Subclasses
+  getSubclasses: async (): Promise<ApiResponse<Subclass[]>> => {
+    const response = await api.get<ApiResponse<Subclass[]>>('/admin/subclasses');
+    return response.data;
+  },
+  createSubclass: async (data: CreateSubclassDto): Promise<ApiResponse<Subclass>> => {
+    const response = await api.post<ApiResponse<Subclass>>('/admin/subclasses', data);
+    return response.data;
+  },
+  updateSubclass: async (id: string, data: CreateSubclassDto): Promise<ApiResponse<Subclass>> => {
+    const response = await api.put<ApiResponse<Subclass>>(`/admin/subclasses/${id}`, data);
+    return response.data;
+  },
+  deleteSubclass: async (id: string): Promise<ApiResponse<null>> => {
+    const response = await api.delete<ApiResponse<null>>(`/admin/subclasses/${id}`);
+    return response.data;
+  },
+
+  // Skills
+  getSkills: async (): Promise<ApiResponse<Skill[]>> => {
+    const response = await api.get<ApiResponse<Skill[]>>('/admin/skills');
+    return response.data;
+  },
+  createSkill: async (data: CreateSkillDto): Promise<ApiResponse<Skill>> => {
+    const response = await api.post<ApiResponse<Skill>>('/admin/skills', data);
+    return response.data;
+  },
+  updateSkill: async (id: string, data: CreateSkillDto): Promise<ApiResponse<Skill>> => {
+    const response = await api.put<ApiResponse<Skill>>(`/admin/skills/${id}`, data);
+    return response.data;
+  },
+  deleteSkill: async (id: string): Promise<ApiResponse<null>> => {
+    const response = await api.delete<ApiResponse<null>>(`/admin/skills/${id}`);
+    return response.data;
+  },
+
+  // Class Level Rewards
+  getClassLevelRewards: async (classId?: string): Promise<ApiResponse<ClassLevelReward[]>> => {
+    const url = classId ? `/admin/class-level-rewards?classId=${classId}` : '/admin/class-level-rewards';
+    const response = await api.get<ApiResponse<ClassLevelReward[]>>(url);
+    return response.data;
+  },
+  createClassLevelReward: async (data: CreateClassLevelRewardDto): Promise<ApiResponse<ClassLevelReward>> => {
+    const response = await api.post<ApiResponse<ClassLevelReward>>('/admin/class-level-rewards', data);
+    return response.data;
+  },
+  deleteClassLevelReward: async (id: string): Promise<ApiResponse<null>> => {
+    const response = await api.delete<ApiResponse<null>>(`/admin/class-level-rewards/${id}`);
     return response.data;
   },
 };

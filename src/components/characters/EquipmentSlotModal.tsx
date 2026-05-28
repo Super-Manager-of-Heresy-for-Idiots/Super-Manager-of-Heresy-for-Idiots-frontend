@@ -1,17 +1,5 @@
-import { useState } from 'react';
-import { Loader2 } from 'lucide-react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useState, useEffect } from 'react';
+import { Dialog, Button, Input, Label, Textarea, Select, Rune } from '@/components/ao';
 import { EQUIPMENT_SLOT_LABELS } from '@/types';
 import { useItemTypes } from '@/hooks/useAdmin';
 import type { InventorySlot } from '@/types';
@@ -33,12 +21,11 @@ export function EquipmentSlotModal({ slot, open, onClose, onSave, isSaving }: Eq
   const [quantity, setQuantity] = useState(slot?.quantity || 1);
   const [notes, setNotes] = useState(slot?.notes || '');
 
-  // Reset form when slot changes
-  useState(() => {
+  useEffect(() => {
     setItemTypeId(slot?.itemType?.id || '');
     setQuantity(slot?.quantity || 1);
     setNotes(slot?.notes || '');
-  });
+  }, [slot]);
 
   const handleSave = () => {
     onSave({
@@ -59,64 +46,68 @@ export function EquipmentSlotModal({ slot, open, onClose, onSave, isSaving }: Eq
   if (!slot) return null;
 
   return (
-    <Dialog open={open} onOpenChange={() => onClose()}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{EQUIPMENT_SLOT_LABELS[slot.slot]} Slot</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label>Item</Label>
-            <Select value={itemTypeId} onValueChange={setItemTypeId}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select an item" />
-              </SelectTrigger>
-              <SelectContent>
-                {filteredItems.map((item) => (
-                  <SelectItem key={item.id} value={item.id}>{item.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {filteredItems.length === 0 && (
-              <p className="text-xs text-muted-foreground">No items available for this slot</p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label>Quantity</Label>
-            <Input
-              type="number"
-              min={1}
-              value={quantity}
-              onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>Notes (optional)</Label>
-            <Textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Add notes about this item..."
-              rows={2}
-            />
-          </div>
-        </div>
-        <DialogFooter className="gap-2">
-          {slot.itemType && (
-            <Button variant="destructive" onClick={handleClear} disabled={isSaving}>
-              Clear Slot
-            </Button>
+    <Dialog open={open} onClose={onClose} title={`${EQUIPMENT_SLOT_LABELS[slot.slot]} Slot`}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div>
+          <Label htmlFor="eq-item">Item</Label>
+          <Select
+            id="eq-item"
+            value={itemTypeId}
+            onChange={(e) => setItemTypeId(e.target.value)}
+          >
+            <option value="">Select an item</option>
+            {filteredItems.map((item) => (
+              <option key={item.id} value={item.id}>{item.name}</option>
+            ))}
+          </Select>
+          {filteredItems.length === 0 && (
+            <p style={{ fontSize: 12, color: 'var(--ink-muted)', marginTop: 4 }}>
+              No items available for this slot
+            </p>
           )}
-          <Button variant="outline" onClick={onClose} disabled={isSaving}>
-            Cancel
+        </div>
+
+        <div>
+          <Label htmlFor="eq-qty">Quantity</Label>
+          <Input
+            id="eq-qty"
+            type="number"
+            min={1}
+            value={quantity}
+            onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="eq-notes">Notes (optional)</Label>
+          <Textarea
+            id="eq-notes"
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="Add notes about this item..."
+            rows={2}
+          />
+        </div>
+      </div>
+
+      <div className="ao-dialog__actions" style={{ marginTop: 20 }}>
+        {slot.itemType && (
+          <Button variant="danger" onClick={handleClear} disabled={isSaving}>
+            Clear Slot
           </Button>
-          <Button variant="gold" onClick={handleSave} disabled={isSaving || !itemTypeId}>
-            {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Equip
-          </Button>
-        </DialogFooter>
-      </DialogContent>
+        )}
+        <Button variant="ghost" onClick={onClose} disabled={isSaving}>
+          Cancel
+        </Button>
+        <Button
+          variant="primary"
+          onClick={handleSave}
+          disabled={isSaving || !itemTypeId}
+          icon={isSaving ? <Rune kind="sigil-3" size={14} className="ao-spin" /> : undefined}
+        >
+          Equip
+        </Button>
+      </div>
     </Dialog>
   );
 }

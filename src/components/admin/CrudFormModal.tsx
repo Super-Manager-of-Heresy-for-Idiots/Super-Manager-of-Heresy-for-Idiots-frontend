@@ -2,26 +2,17 @@ import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Loader2 } from 'lucide-react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, Button, Input, Label, Textarea, Select } from '@/components/ao';
 import { EQUIPMENT_SLOTS, EQUIPMENT_SLOT_LABELS } from '@/types';
 
 interface FieldDef {
   name: string;
   label: string;
-  type: 'text' | 'textarea' | 'slot-select';
+  type: 'text' | 'textarea' | 'slot-select' | 'select' | 'number';
   required?: boolean;
+  options?: { value: string; label: string }[];
+  min?: number;
+  max?: number;
 }
 
 interface CrudFormModalProps {
@@ -76,52 +67,75 @@ export function CrudFormModal({
   }, [open, defaultValues, reset]);
 
   return (
-    <Dialog open={open} onOpenChange={() => onClose()}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-        </DialogHeader>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          {fields.map((field) => (
-            <div key={field.name} className="space-y-2">
-              <Label>{field.label}</Label>
-              {field.type === 'textarea' ? (
-                <Textarea {...register(field.name)} placeholder={`Enter ${field.label.toLowerCase()}`} />
-              ) : field.type === 'slot-select' ? (
-                <Select
-                  value={watch(field.name) || ''}
-                  onValueChange={(v) => setValue(field.name, v, { shouldValidate: true })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a slot" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {EQUIPMENT_SLOTS.map((slot) => (
-                      <SelectItem key={slot} value={slot}>
-                        {EQUIPMENT_SLOT_LABELS[slot]}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              ) : (
-                <Input {...register(field.name)} placeholder={`Enter ${field.label.toLowerCase()}`} />
-              )}
-              {errors[field.name] && (
-                <p className="text-sm text-dnd-red">{errors[field.name]?.message as string}</p>
-              )}
-            </div>
-          ))}
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>
-              Cancel
-            </Button>
-            <Button type="submit" variant="gold" disabled={isSubmitting}>
-              {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Save
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
+    <Dialog open={open} onClose={onClose} title={title}>
+      <form onSubmit={handleSubmit(onSubmit)} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        {fields.map((field) => (
+          <div key={field.name}>
+            <Label htmlFor={field.name}>{field.label}</Label>
+            {field.type === 'textarea' ? (
+              <Textarea
+                {...register(field.name)}
+                placeholder={`Enter ${field.label.toLowerCase()}`}
+                error={errors[field.name]?.message as string}
+              />
+            ) : field.type === 'number' ? (
+              <Input
+                type="number"
+                min={field.min}
+                max={field.max}
+                {...register(field.name)}
+                placeholder={`Enter ${field.label.toLowerCase()}`}
+                error={errors[field.name]?.message as string}
+              />
+            ) : field.type === 'select' && field.options ? (
+              <Select
+                value={watch(field.name) || ''}
+                onChange={(e) =>
+                  setValue(field.name, e.target.value, { shouldValidate: true })
+                }
+                error={errors[field.name]?.message as string}
+              >
+                <option value="">Select {field.label.toLowerCase()}</option>
+                {field.options.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </Select>
+            ) : field.type === 'slot-select' ? (
+              <Select
+                value={watch(field.name) || ''}
+                onChange={(e) =>
+                  setValue(field.name, e.target.value, { shouldValidate: true })
+                }
+                error={errors[field.name]?.message as string}
+              >
+                <option value="">Select a slot</option>
+                {EQUIPMENT_SLOTS.map((slot) => (
+                  <option key={slot} value={slot}>
+                    {EQUIPMENT_SLOT_LABELS[slot]}
+                  </option>
+                ))}
+              </Select>
+            ) : (
+              <Input
+                {...register(field.name)}
+                placeholder={`Enter ${field.label.toLowerCase()}`}
+                error={errors[field.name]?.message as string}
+              />
+            )}
+          </div>
+        ))}
+
+        <div className="ao-dialog__actions">
+          <Button variant="ghost" type="button" onClick={onClose} disabled={isSubmitting}>
+            Cancel
+          </Button>
+          <Button variant="primary" type="submit" disabled={isSubmitting}>
+            {isSubmitting ? 'Saving...' : 'Save'}
+          </Button>
+        </div>
+      </form>
     </Dialog>
   );
 }

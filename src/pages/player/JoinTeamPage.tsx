@@ -1,11 +1,7 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Loader2, UserPlus } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Panel, PanelHeader, Button, Input, Label, Rune, Sigil } from '@/components/ao';
 import { useJoinTeam } from '@/hooks/useTeams';
 
 const joinSchema = z.object({
@@ -37,36 +33,40 @@ export default function JoinTeamPage() {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-8">
-      <Card className="border-gold/20">
-        <CardHeader className="text-center">
-          <div className="flex justify-center mb-3">
-            <UserPlus className="h-10 w-10 text-gold" />
+    <div style={{ maxWidth: 420, margin: '32px auto 0' }}>
+      <Panel frame padding={28}>
+        <div style={{ textAlign: 'center', marginBottom: 20 }}>
+          <Rune kind="scroll" size={40} color="var(--gold)" style={{ marginBottom: 12 }} />
+          <h2 className="ao-h3" style={{ margin: '0 0 4px' }}>Join a Team</h2>
+          <p style={{ color: 'var(--ink-muted)', fontSize: 14 }}>
+            Enter the invite code provided by your Game Master
+          </p>
+        </div>
+
+        <form onSubmit={handleSubmit(onSubmit)} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div>
+            <Label htmlFor="inviteCode">Invite Code</Label>
+            <Input
+              id="inviteCode"
+              {...register('inviteCode')}
+              placeholder="Enter invite code"
+              style={{ textAlign: 'center', fontSize: 18, letterSpacing: '0.15em', fontFamily: 'var(--font-mono, monospace)' }}
+            />
+            {errors.inviteCode && (
+              <p style={{ fontSize: 12, color: 'var(--ember)', marginTop: 4 }}>{errors.inviteCode.message}</p>
+            )}
           </div>
-          <CardTitle>Join a Team</CardTitle>
-          <CardDescription>Enter the invite code provided by your Game Master</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="inviteCode">Invite Code</Label>
-              <Input
-                id="inviteCode"
-                {...register('inviteCode')}
-                placeholder="Enter invite code"
-                className="text-center text-lg tracking-widest font-mono"
-              />
-              {errors.inviteCode && (
-                <p className="text-sm text-dnd-red">{errors.inviteCode.message}</p>
-              )}
-            </div>
-            <Button type="submit" variant="gold" className="w-full" disabled={joinMutation.isPending}>
-              {joinMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Join Team
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+          <Button
+            type="submit"
+            variant="primary"
+            block
+            disabled={joinMutation.isPending}
+            icon={joinMutation.isPending ? <Rune kind="sigil-3" size={14} className="ao-spin" /> : undefined}
+          >
+            Join Team
+          </Button>
+        </form>
+      </Panel>
     </div>
   );
 }

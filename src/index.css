@@ -1,74 +1,18 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* Ordo Arcanum — entry point styles */
+@import './styles/ordo-arcanum.css';
 
-@layer base {
-  :root {
-    --background: 222 47% 11%;
-    --foreground: 38 30% 88%;
-    --card: 222 40% 14%;
-    --card-foreground: 38 30% 88%;
-    --popover: 222 40% 14%;
-    --popover-foreground: 38 30% 88%;
-    --primary: 43 72% 52%;
-    --primary-foreground: 222 47% 11%;
-    --secondary: 222 30% 20%;
-    --secondary-foreground: 38 30% 88%;
-    --muted: 222 30% 18%;
-    --muted-foreground: 38 10% 55%;
-    --accent: 222 30% 22%;
-    --accent-foreground: 38 30% 88%;
-    --destructive: 0 100% 27%;
-    --destructive-foreground: 38 30% 95%;
-    --border: 43 30% 25%;
-    --input: 222 30% 22%;
-    --ring: 43 72% 52%;
-    --radius: 0.5rem;
-  }
+/* Additional app-level overrides */
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
 }
 
-@layer base {
-  * {
-    @apply border-border;
-  }
-
-  body {
-    @apply bg-background text-foreground font-body;
-    font-feature-settings: "rlig" 1, "calt" 1;
-  }
-
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-heading;
-  }
-}
-
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: hsl(222 47% 11%);
-}
-
-::-webkit-scrollbar-thumb {
-  background: hsl(43 30% 25%);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: hsl(43 72% 52%);
-}
-
-/* Toaster styles */
-.toast-success {
-  background: hsl(222 40% 14%) !important;
-  color: hsl(38 30% 88%) !important;
-  border: 1px solid hsl(43 30% 25%) !important;
-}
-
-.toast-error {
-  background: hsl(222 40% 14%) !important;
-  color: hsl(38 30% 88%) !important;
-  border: 1px solid hsl(0 100% 27%) !important;
+/* React Hot Toast overrides */
+[data-sonner-toaster] {
+  --normal-bg: var(--panel);
+  --normal-border: var(--rule);
+  --normal-text: var(--ink);
 }

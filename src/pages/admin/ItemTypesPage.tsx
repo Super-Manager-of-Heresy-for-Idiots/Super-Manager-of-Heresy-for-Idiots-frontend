@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Badge } from '@/components/ui/badge';
+import { Chip } from '@/components/ao';
 import { EQUIPMENT_SLOT_LABELS } from '@/types';
 import { CrudTable } from '@/components/admin/CrudTable';
 import { CrudFormModal } from '@/components/admin/CrudFormModal';
@@ -60,9 +60,9 @@ export default function ItemTypesPage() {
           {
             header: 'Slot',
             accessor: (item) => (
-              <Badge variant="outline">
+              <Chip tone="muted">
                 {EQUIPMENT_SLOT_LABELS[item.slot] || item.slot}
-              </Badge>
+              </Chip>
             ),
           },
         ]}

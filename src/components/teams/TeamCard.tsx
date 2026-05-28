@@ -1,7 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { Eye, Pencil, Trash2, Users, RefreshCw } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Panel, Button, Rune, Divider } from '@/components/ao';
 import { InviteCodeDisplay } from './InviteCodeDisplay';
 import type { Team } from '@/types';
 
@@ -17,62 +15,60 @@ export function TeamCard({ team, onDelete, onRegenerate, basePath = '/gm/teams',
   const navigate = useNavigate();
 
   return (
-    <Card className="border-gold/20 hover:border-gold/40 transition-colors">
-      <CardContent className="p-6">
-        <div className="flex items-start justify-between mb-4">
-          <div>
-            <h3 className="font-heading font-semibold text-lg">{team.name}</h3>
-            <p className="text-sm text-muted-foreground">
-              GM: {team.gameMaster?.username || 'Unknown'}
-            </p>
-          </div>
-          <div className="flex items-center gap-1 text-muted-foreground">
-            <Users className="h-4 w-4" />
-            <span className="text-sm">{team.members?.length || team.memberCount || 0}</span>
+    <Panel frame className="ao-rise">
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 12 }}>
+        <div>
+          <div className="ao-h4" style={{ margin: 0 }}>{team.name}</div>
+          <div style={{ fontSize: 13, color: 'var(--ink-muted)', marginTop: 2 }}>
+            GM: {team.gameMaster?.username || 'Unknown'}
           </div>
         </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--ink-muted)' }}>
+          <Rune kind="shield" size={14} />
+          <span style={{ fontSize: 13 }}>{team.members?.length || team.memberCount || 0}</span>
+        </div>
+      </div>
 
-        {!readOnly && team.inviteCode && (
-          <div className="mb-4">
-            <InviteCodeDisplay code={team.inviteCode} />
-          </div>
+      {!readOnly && team.inviteCode && (
+        <div style={{ marginBottom: 12 }}>
+          <InviteCodeDisplay code={team.inviteCode} />
+        </div>
+      )}
+
+      <Divider />
+
+      <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+        <Button
+          variant="ghost"
+          size="sm"
+          icon={<Rune kind="eye" size={14} />}
+          onClick={() => navigate(`${basePath}/${team.id}`)}
+          style={{ flex: 1 }}
+        >
+          View
+        </Button>
+        {!readOnly && (
+          <>
+            {onRegenerate && (
+              <Button
+                variant="ghost"
+                size="sm"
+                icon={<Rune kind="sigil-3" size={14} />}
+                onClick={() => onRegenerate(team.id)}
+                title="Regenerate invite code"
+              />
+            )}
+            {onDelete && (
+              <Button
+                variant="danger"
+                size="sm"
+                icon={<Rune kind="x" size={14} />}
+                onClick={() => onDelete(team.id)}
+              />
+            )}
+          </>
         )}
-
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => navigate(`${basePath}/${team.id}`)}
-            className="flex-1"
-          >
-            <Eye className="h-4 w-4 mr-1" />
-            View
-          </Button>
-          {!readOnly && (
-            <>
-              {onRegenerate && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onRegenerate(team.id)}
-                  title="Regenerate invite code"
-                >
-                  <RefreshCw className="h-4 w-4" />
-                </Button>
-              )}
-              {onDelete && (
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => onDelete(team.id)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              )}
-            </>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+      </div>
+    </Panel>
   );
 }

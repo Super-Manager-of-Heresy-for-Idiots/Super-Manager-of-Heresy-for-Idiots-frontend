@@ -22,20 +22,28 @@ function App() {
         toastOptions={{
           duration: 4000,
           style: {
-            background: 'hsl(222 40% 14%)',
-            color: 'hsl(38 30% 88%)',
-            border: '1px solid hsl(43 30% 25%)',
+            background: 'var(--panel)',
+            color: 'var(--ink)',
+            border: '1px solid var(--rule-strong)',
+            fontFamily: 'var(--font-sans)',
+            fontSize: 'var(--t-small)',
           },
           success: {
+            style: {
+              borderLeft: '2px solid var(--gold)',
+            },
             iconTheme: {
-              primary: '#D4AF37',
-              secondary: 'hsl(222 40% 14%)',
+              primary: '#b08d4e',
+              secondary: '#1c1816',
             },
           },
           error: {
+            style: {
+              borderLeft: '2px solid var(--ember)',
+            },
             iconTheme: {
-              primary: '#8B0000',
-              secondary: 'hsl(38 30% 88%)',
+              primary: '#b3461a',
+              secondary: '#e6dcc4',
             },
           },
         }}

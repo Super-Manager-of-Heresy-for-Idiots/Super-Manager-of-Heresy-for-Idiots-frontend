@@ -15,12 +15,10 @@ export default function CharacterCreatePage() {
   };
 
   return (
-    <div>
-      <CharacterForm
-        title="Create New Character"
-        onSubmit={handleSubmit}
-        isSubmitting={createMutation.isPending}
-      />
-    </div>
+    <CharacterForm
+      title="Create New Character"
+      onSubmit={handleSubmit}
+      isSubmitting={createMutation.isPending}
+    />
   );
 }

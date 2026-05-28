@@ -1,6 +1,5 @@
-import { Skeleton } from '@/components/ui/skeleton';
-import { Button } from '@/components/ui/button';
-import { formatDate } from '@/lib/utils';
+import { Panel, Table, Button } from '@/components/ao';
+import { formatDate } from '@/lib/ao-utils';
 import { useAdminTeams } from '@/hooks/useAdmin';
 
 export default function TeamsListPage() {
@@ -8,53 +7,41 @@ export default function TeamsListPage() {
 
   if (error) {
     return (
-      <div className="text-center py-12">
-        <p className="text-lg text-muted-foreground mb-4">Failed to load teams</p>
-        <Button variant="outline" onClick={() => refetch()}>Retry</Button>
+      <div style={{ textAlign: 'center', padding: '48px 0' }}>
+        <p style={{ fontSize: 16, color: 'var(--ink-muted)', marginBottom: 16 }}>Failed to load teams</p>
+        <Button variant="ghost" onClick={() => refetch()}>Retry</Button>
       </div>
     );
   }
 
   return (
     <div>
-      <h1 className="text-2xl font-heading font-bold mb-6">Teams Management</h1>
+      <h1 className="ao-h2" style={{ marginBottom: 24 }}>Teams Management</h1>
 
       {isLoading ? (
-        <div className="space-y-3">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {Array.from({ length: 5 }).map((_, i) => (
-            <Skeleton key={i} className="h-12 w-full" />
+            <div key={i} className="ao-skeleton" style={{ height: 44, width: '100%' }} />
           ))}
         </div>
       ) : (
-        <div className="border border-border rounded-lg overflow-hidden">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-border bg-muted/50">
-                <th className="px-4 py-3 text-left text-sm font-semibold">Team Name</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold">Game Master</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold">Members</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold">Created</th>
-              </tr>
-            </thead>
-            <tbody>
-              {teams?.map((team) => (
-                <tr key={team.id} className="border-b border-border last:border-0 hover:bg-accent/30 transition-colors">
-                  <td className="px-4 py-3 text-sm font-medium">{team.name}</td>
-                  <td className="px-4 py-3 text-sm text-muted-foreground">{team.gameMaster?.username || 'N/A'}</td>
-                  <td className="px-4 py-3 text-sm text-muted-foreground">{team.members?.length || team.memberCount || 0}</td>
-                  <td className="px-4 py-3 text-sm text-muted-foreground">{formatDate(team.createdAt)}</td>
-                </tr>
-              ))}
-              {(!teams || teams.length === 0) && (
-                <tr>
-                  <td colSpan={4} className="px-4 py-8 text-center text-muted-foreground">
-                    No teams found
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+        <Panel>
+          <Table
+            columns={[
+              { key: 'name', header: 'Team Name', render: (row) => row.name },
+              { key: 'gm', header: 'Game Master', render: (row) => row.gameMaster?.username || 'N/A' },
+              { key: 'members', header: 'Members', render: (row) => String(row.members?.length || row.memberCount || 0) },
+              { key: 'createdAt', header: 'Created', render: (row) => formatDate(row.createdAt) },
+            ]}
+            data={teams || []}
+            rowKey={(row) => row.id}
+          />
+          {(!teams || teams.length === 0) && (
+            <div style={{ textAlign: 'center', padding: '32px 16px', color: 'var(--ink-faint)' }}>
+              No teams found
+            </div>
+          )}
+        </Panel>
       )}
     </div>
   );

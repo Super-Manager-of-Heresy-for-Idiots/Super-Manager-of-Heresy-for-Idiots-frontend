@@ -1,22 +1,12 @@
-import { Pencil, Trash2, Plus } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
+import React, { useState } from 'react';
+import { Panel, PanelHeader, Table, Button, AlertDialog, Rune } from '@/components/ao';
 
 interface Column<T> {
   header: string;
   accessor: keyof T | ((item: T) => React.ReactNode);
   className?: string;
+  width?: string;
+  align?: 'left' | 'center' | 'right';
 }
 
 interface CrudTableProps<T extends { id: string }> {
@@ -42,105 +32,99 @@ export function CrudTable<T extends { id: string }>({
   canDelete,
   addLabel = 'Add New',
 }: CrudTableProps<T>) {
-  const renderCell = (item: T, col: Column<T>) => {
-    if (typeof col.accessor === 'function') {
-      return col.accessor(item);
-    }
-    return String(item[col.accessor] ?? '');
-  };
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+
+  const hasActions = !!(onEdit || onDelete);
+
+  const tableColumns = [
+    ...columns.map((col, i) => ({
+      key: String(i),
+      header: col.header,
+      width: col.width,
+      align: col.align,
+      render: (row: T) => {
+        if (typeof col.accessor === 'function') {
+          return col.accessor(row);
+        }
+        return String(row[col.accessor] ?? '');
+      },
+    })),
+    ...(hasActions
+      ? [
+          {
+            key: '__actions',
+            header: 'Actions',
+            width: '100px',
+            align: 'right' as const,
+            render: (row: T) => (
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 4 }}>
+                {onEdit && (
+                  <Button variant="ghost" size="sm" onClick={() => onEdit(row)}>
+                    <Rune kind="scroll" size={14} />
+                  </Button>
+                )}
+                {onDelete && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    disabled={canDelete ? !canDelete(row) : false}
+                    onClick={() => setDeleteId(row.id)}
+                    style={{ color: 'var(--ember)' }}
+                  >
+                    <Rune kind="x" size={14} />
+                  </Button>
+                )}
+              </div>
+            ),
+          },
+        ]
+      : []),
+  ];
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-heading font-bold">{title}</h1>
-        <Button variant="gold" onClick={onAdd}>
-          <Plus className="h-4 w-4 mr-2" />
-          {addLabel}
-        </Button>
-      </div>
+    <Panel>
+      <PanelHeader
+        title={title}
+        right={
+          <Button variant="primary" size="sm" onClick={onAdd}>
+            <Rune kind="plus" size={14} color="var(--bg)" />
+            <span style={{ marginLeft: 4 }}>{addLabel}</span>
+          </Button>
+        }
+      />
 
       {isLoading ? (
-        <div className="space-y-3">
+        <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
           {Array.from({ length: 5 }).map((_, i) => (
-            <Skeleton key={i} className="h-12 w-full" />
+            <div key={i} className="ao-skeleton" style={{ height: 40, width: '100%' }} />
           ))}
         </div>
       ) : !data || data.length === 0 ? (
-        <div className="text-center py-12 text-muted-foreground">
-          <p className="text-lg">No items found</p>
-          <p className="text-sm mt-1">Click "{addLabel}" to create one</p>
+        <div style={{ textAlign: 'center', padding: '48px 16px', color: 'var(--ink-faint)' }}>
+          <div className="ao-overline" style={{ marginBottom: 4 }}>No items found</div>
+          <div style={{ fontSize: 13 }}>Click "{addLabel}" to create one</div>
         </div>
       ) : (
-        <div className="border border-border rounded-lg overflow-hidden">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-border bg-muted/50">
-                {columns.map((col, i) => (
-                  <th key={i} className={`px-4 py-3 text-left text-sm font-semibold ${col.className || ''}`}>
-                    {col.header}
-                  </th>
-                ))}
-                {(onEdit || onDelete) && (
-                  <th className="px-4 py-3 text-right text-sm font-semibold w-24">Actions</th>
-                )}
-              </tr>
-            </thead>
-            <tbody>
-              {data.map((item) => (
-                <tr key={item.id} className="border-b border-border last:border-0 hover:bg-accent/30 transition-colors">
-                  {columns.map((col, i) => (
-                    <td key={i} className={`px-4 py-3 text-sm ${col.className || ''}`}>
-                      {renderCell(item, col)}
-                    </td>
-                  ))}
-                  {(onEdit || onDelete) && (
-                    <td className="px-4 py-3 text-right">
-                      <div className="flex justify-end gap-1">
-                        {onEdit && (
-                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onEdit(item)}>
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                        )}
-                        {onDelete && (
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 text-dnd-red hover:text-dnd-red"
-                                disabled={canDelete ? !canDelete(item) : false}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  This action cannot be undone. This will permanently delete this item.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction
-                                  onClick={() => onDelete(item.id)}
-                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                >
-                                  Delete
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        )}
-                      </div>
-                    </td>
-                  )}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <Table
+          columns={tableColumns}
+          data={data as (T & Record<string, unknown>)[]}
+          rowKey={(row) => (row as T).id}
+        />
       )}
-    </div>
+
+      <AlertDialog
+        open={!!deleteId}
+        onClose={() => setDeleteId(null)}
+        onConfirm={() => {
+          if (deleteId && onDelete) onDelete(deleteId);
+          setDeleteId(null);
+        }}
+        title="Confirm Deletion"
+        description="This action cannot be undone. This will permanently delete this item."
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="danger"
+      />
+    </Panel>
   );
 }

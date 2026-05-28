@@ -1,0 +1,1070 @@
+/* ============================================================
+   ORDO ARCANUM — Design tokens
+   Visual system for the D&D character archive
+   ============================================================ */
+
+:root {
+  /* Surfaces (volcanic stone -> ash) */
+  --void:          #050403;
+  --abyss:         #0a0908;
+  --stone:         #14110f;
+  --panel:         #1c1816;
+  --panel-raised: #221d1a;
+  --panel-edge:   #2a241f;
+  --ash:           #2f2823;
+  --ash-light:    #3a322c;
+
+  /* Borders (worn bronze, oxidized brass) */
+  --hairline:      rgba(122, 99, 64, 0.18);
+  --rule:          rgba(122, 99, 64, 0.32);
+  --rule-strong:  rgba(150, 122, 78, 0.55);
+  --bronze:        #5a4a35;
+  --bronze-warm:  #6f5a3e;
+  --brass:         #8e7448;
+
+  /* Ink (parchment text) */
+  --ink-bright:    #e6dcc4;
+  --ink:           #cdc1a6;
+  --ink-quiet:     #968c75;
+  --ink-faint:     #6a614f;
+  --ink-ghost:     #443c30;
+
+  /* Heraldic accents */
+  --gold:          #b08d4e;
+  --gold-deep:     #836a3a;
+  --gold-pale:     #d4b478;
+  --ember:         #b3461a;
+  --ember-deep:    #7d2f10;
+  --burgundy:      #6b2a2a;
+  --burgundy-deep: #401717;
+  --arcane:        #5a8e94;
+  --arcane-deep:   #2f5a60;
+  --verdigris:     #4a6b53;
+
+  /* Type */
+  --font-display: 'Cinzel', 'Trajan Pro', 'Times New Roman', serif;
+  --font-serif:   'Cormorant Garamond', 'Garamond', 'Times New Roman', serif;
+  --font-sans:    'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-mono:    'JetBrains Mono', 'Menlo', 'Consolas', monospace;
+
+  /* type scale */
+  --t-overline: 11px;
+  --t-micro:    12px;
+  --t-small:    13px;
+  --t-body:     14px;
+  --t-body-lg:  16px;
+  --t-h6:       18px;
+  --t-h5:       22px;
+  --t-h4:       28px;
+  --t-h3:       36px;
+  --t-h2:       48px;
+  --t-h1:       64px;
+
+  /* tracking */
+  --track-tight: -0.01em;
+  --track-body:  0;
+  --track-wide:  0.08em;
+  --track-eng:   0.22em;
+
+  /* Space */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 32px;
+  --s-7: 48px;
+  --s-8: 64px;
+
+  /* Depth */
+  --shadow-inset:  inset 0 1px 0 rgba(176, 141, 78, 0.06), inset 0 -1px 0 rgba(0,0,0,0.4);
+  --shadow-low:    0 1px 0 rgba(0,0,0,0.6), 0 2px 6px rgba(0,0,0,0.4);
+  --shadow-mid:    0 2px 0 rgba(0,0,0,0.55), 0 8px 18px rgba(0,0,0,0.5);
+  --shadow-high:   0 4px 0 rgba(0,0,0,0.6), 0 24px 60px rgba(0,0,0,0.65);
+  --glow-ember:    0 0 18px rgba(179, 70, 26, 0.35);
+  --glow-arcane:   0 0 14px rgba(90, 142, 148, 0.28);
+  --glow-gold:     0 0 10px rgba(176, 141, 78, 0.25);
+}
+
+
+/* ============================================================
+   Global reset
+   ============================================================ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  background: var(--void);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: var(--t-body);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  height: 100%;
+  width: 100%;
+}
+
+
+/* ============================================================
+   Base: .ao-root, grain overlay, vignette
+   ============================================================ */
+
+.ao-root {
+  position: relative;
+  min-height: 100vh;
+  background: var(--void);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: var(--t-body);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+.ao-grain::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
+}
+
+.ao-vignette::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 50%,
+    rgba(5, 4, 3, 0.45) 100%
+  );
+}
+
+
+/* ============================================================
+   Type primitives
+   ============================================================ */
+
+.ao-engraved {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: var(--track-eng);
+  text-transform: uppercase;
+  color: var(--gold);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+.ao-overline {
+  font-family: var(--font-sans);
+  font-size: var(--t-overline);
+  font-weight: 600;
+  letter-spacing: var(--track-eng);
+  text-transform: uppercase;
+  color: var(--ink-quiet);
+}
+
+.ao-codex {
+  font-family: var(--font-serif);
+  font-size: var(--t-body-lg);
+  line-height: 1.75;
+  color: var(--ink);
+  letter-spacing: var(--track-body);
+}
+
+.ao-h1 {
+  font-family: var(--font-display);
+  font-size: var(--t-h1);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: var(--track-tight);
+  color: var(--ink-bright);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.ao-h2 {
+  font-family: var(--font-display);
+  font-size: var(--t-h2);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: var(--track-tight);
+  color: var(--ink-bright);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.ao-h3 {
+  font-family: var(--font-display);
+  font-size: var(--t-h3);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: var(--track-tight);
+  color: var(--ink-bright);
+}
+
+.ao-h4 {
+  font-family: var(--font-display);
+  font-size: var(--t-h4);
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--ink-bright);
+}
+
+.ao-h5 {
+  font-family: var(--font-display);
+  font-size: var(--t-h5);
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--ink-bright);
+}
+
+.ao-h6 {
+  font-family: var(--font-display);
+  font-size: var(--t-h6);
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--ink);
+}
+
+.ao-italic {
+  font-family: var(--font-serif);
+  font-style: italic;
+  color: var(--ink-quiet);
+}
+
+.ao-num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--track-tight);
+  color: var(--gold-pale);
+}
+
+
+/* ============================================================
+   Panels
+   ============================================================ */
+
+.ao-panel {
+  background: var(--panel);
+  border: 1px solid var(--hairline);
+  border-radius: 6px;
+  padding: var(--s-5);
+  box-shadow: var(--shadow-low);
+}
+
+.ao-panel--inset {
+  background: var(--abyss);
+  border: 1px solid var(--hairline);
+  border-radius: 4px;
+  padding: var(--s-4);
+  box-shadow: var(--shadow-inset);
+}
+
+.ao-panel--raised {
+  background: var(--panel-raised);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  padding: var(--s-5);
+  box-shadow: var(--shadow-mid);
+}
+
+.ao-frame {
+  position: relative;
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  padding: var(--s-6);
+  box-shadow: var(--shadow-mid);
+}
+
+.ao-frame::before,
+.ao-frame::after {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-color: var(--bronze-warm);
+  border-style: solid;
+}
+
+.ao-frame::before {
+  top: 6px;
+  left: 6px;
+  border-width: 2px 0 0 2px;
+}
+
+.ao-frame::after {
+  bottom: 6px;
+  right: 6px;
+  border-width: 0 2px 2px 0;
+}
+
+
+/* ============================================================
+   Divider
+   ============================================================ */
+
+.ao-divide {
+  border: none;
+  height: 1px;
+  background: var(--rule);
+  margin: var(--s-5) 0;
+}
+
+.ao-divide-glyph {
+  border: none;
+  height: 1px;
+  background: var(--rule);
+  margin: var(--s-6) 0;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ao-divide-glyph::after {
+  content: '\2726';
+  position: absolute;
+  background: var(--panel);
+  padding: 0 var(--s-3);
+  color: var(--bronze-warm);
+  font-size: var(--t-small);
+  line-height: 1;
+}
+
+
+/* ============================================================
+   Buttons
+   ============================================================ */
+
+.ao-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-2);
+  padding: 10px 20px;
+  font-family: var(--font-sans);
+  font-size: var(--t-small);
+  font-weight: 600;
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  color: var(--ink);
+  background: var(--panel-raised);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: var(--shadow-low);
+  text-decoration: none;
+  line-height: 1;
+  user-select: none;
+}
+
+.ao-btn:hover {
+  background: var(--ash);
+  border-color: var(--rule-strong);
+  color: var(--ink-bright);
+  box-shadow: var(--shadow-mid);
+}
+
+.ao-btn:active {
+  background: var(--panel);
+  box-shadow: var(--shadow-inset);
+  transform: translateY(1px);
+}
+
+.ao-btn--primary {
+  background: linear-gradient(180deg, var(--gold) 0%, var(--gold-deep) 100%);
+  border-color: var(--gold-deep);
+  color: var(--void);
+  text-shadow: 0 1px 0 rgba(176, 141, 78, 0.3);
+}
+
+.ao-btn--primary:hover {
+  background: linear-gradient(180deg, var(--gold-pale) 0%, var(--gold) 100%);
+  border-color: var(--gold);
+  box-shadow: var(--shadow-mid), var(--glow-gold);
+}
+
+.ao-btn--danger {
+  background: linear-gradient(180deg, var(--ember) 0%, var(--ember-deep) 100%);
+  border-color: var(--ember-deep);
+  color: var(--ink-bright);
+}
+
+.ao-btn--danger:hover {
+  background: linear-gradient(180deg, #c85020 0%, var(--ember) 100%);
+  border-color: var(--ember);
+  box-shadow: var(--shadow-mid), var(--glow-ember);
+}
+
+.ao-btn--ghost {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  color: var(--ink-quiet);
+}
+
+.ao-btn--ghost:hover {
+  background: rgba(122, 99, 64, 0.1);
+  border-color: var(--hairline);
+  color: var(--ink);
+  box-shadow: none;
+}
+
+.ao-btn--lg {
+  padding: 14px 28px;
+  font-size: var(--t-body);
+}
+
+.ao-btn--sm {
+  padding: 6px 12px;
+  font-size: var(--t-micro);
+}
+
+.ao-btn--block {
+  display: flex;
+  width: 100%;
+}
+
+.ao-iconbtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: var(--ink-quiet);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.ao-iconbtn:hover {
+  background: rgba(122, 99, 64, 0.12);
+  border-color: var(--hairline);
+  color: var(--ink);
+}
+
+.ao-iconbtn:active {
+  background: rgba(122, 99, 64, 0.06);
+  transform: translateY(1px);
+}
+
+
+/* ============================================================
+   Form inputs
+   ============================================================ */
+
+.ao-input {
+  width: 100%;
+  padding: 10px 14px;
+  font-family: var(--font-sans);
+  font-size: var(--t-body);
+  color: var(--ink);
+  background: var(--abyss);
+  border: 1px solid var(--hairline);
+  border-radius: 4px;
+  outline: none;
+  transition: all 0.15s ease;
+  box-shadow: var(--shadow-inset);
+}
+
+.ao-input:focus {
+  border-color: var(--gold-deep);
+  box-shadow: var(--shadow-inset), var(--glow-gold);
+  color: var(--ink-bright);
+}
+
+.ao-input::placeholder {
+  color: var(--ink-ghost);
+  font-style: italic;
+}
+
+.ao-label {
+  display: block;
+  font-family: var(--font-sans);
+  font-size: var(--t-micro);
+  font-weight: 600;
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  color: var(--ink-quiet);
+  margin-bottom: var(--s-1);
+}
+
+
+/* ============================================================
+   Tabs
+   ============================================================ */
+
+.ao-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--rule);
+  padding: 0;
+}
+
+.ao-tab {
+  position: relative;
+  padding: var(--s-3) var(--s-5);
+  font-family: var(--font-sans);
+  font-size: var(--t-small);
+  font-weight: 600;
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.ao-tab:hover {
+  color: var(--ink-quiet);
+  background: rgba(122, 99, 64, 0.06);
+}
+
+.ao-tab.is-active {
+  color: var(--gold);
+  border-bottom-color: var(--gold);
+}
+
+.ao-tab.is-active::after {
+  content: '\25C6';
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 6px;
+  color: var(--gold);
+  line-height: 1;
+}
+
+
+/* ============================================================
+   Chips
+   ============================================================ */
+
+.ao-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-1);
+  padding: 3px 10px;
+  font-family: var(--font-sans);
+  font-size: var(--t-micro);
+  font-weight: 600;
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  color: var(--ink-quiet);
+  background: var(--panel-edge);
+  border: 1px solid var(--hairline);
+  border-radius: 3px;
+  line-height: 1.4;
+}
+
+.ao-chip--arcane {
+  color: var(--arcane);
+  background: rgba(90, 142, 148, 0.1);
+  border-color: rgba(90, 142, 148, 0.25);
+}
+
+.ao-chip--gold {
+  color: var(--gold);
+  background: rgba(176, 141, 78, 0.1);
+  border-color: rgba(176, 141, 78, 0.25);
+}
+
+.ao-chip--ember {
+  color: var(--ember);
+  background: rgba(179, 70, 26, 0.1);
+  border-color: rgba(179, 70, 26, 0.25);
+}
+
+.ao-chip--rune {
+  font-family: var(--font-display);
+  font-size: var(--t-overline);
+  letter-spacing: var(--track-eng);
+  color: var(--gold-pale);
+  background: rgba(176, 141, 78, 0.08);
+  border-color: rgba(176, 141, 78, 0.2);
+}
+
+
+/* ============================================================
+   Stat blocks
+   ============================================================ */
+
+.ao-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s-1);
+  padding: var(--s-3);
+  text-align: center;
+}
+
+.ao-stat-label {
+  font-family: var(--font-sans);
+  font-size: var(--t-overline);
+  font-weight: 600;
+  letter-spacing: var(--track-eng);
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.ao-stat-value {
+  font-family: var(--font-display);
+  font-size: var(--t-h3);
+  font-weight: 700;
+  line-height: 1;
+  color: var(--ink-bright);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+.ao-stat-mod {
+  font-family: var(--font-mono);
+  font-size: var(--t-body);
+  font-weight: 600;
+  color: var(--gold);
+}
+
+
+/* ============================================================
+   Bars
+   ============================================================ */
+
+.ao-bar {
+  width: 100%;
+  height: 8px;
+  background: var(--abyss);
+  border: 1px solid var(--hairline);
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: var(--shadow-inset);
+}
+
+.ao-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--ember-deep), var(--ember));
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+
+.ao-bar-fill--gold {
+  background: linear-gradient(90deg, var(--gold-deep), var(--gold));
+}
+
+.ao-bar-fill--arcane {
+  background: linear-gradient(90deg, var(--arcane-deep), var(--arcane));
+}
+
+
+/* ============================================================
+   Table
+   ============================================================ */
+
+.ao-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-sans);
+  font-size: var(--t-body);
+}
+
+.ao-table th {
+  padding: var(--s-2) var(--s-3);
+  font-size: var(--t-micro);
+  font-weight: 600;
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  text-align: left;
+  color: var(--ink-faint);
+  background: var(--abyss);
+  border-bottom: 1px solid var(--rule);
+}
+
+.ao-table td {
+  padding: var(--s-2) var(--s-3);
+  color: var(--ink);
+  border-bottom: 1px solid var(--hairline);
+  vertical-align: middle;
+}
+
+.ao-table tr:hover td {
+  background: rgba(122, 99, 64, 0.05);
+  color: var(--ink-bright);
+}
+
+
+/* ============================================================
+   Inventory slots
+   ============================================================ */
+
+.ao-slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  background: var(--abyss);
+  border: 1px solid var(--hairline);
+  border-radius: 4px;
+  box-shadow: var(--shadow-inset);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  color: var(--ink-ghost);
+  font-size: var(--t-h6);
+}
+
+.ao-slot:hover {
+  border-color: var(--rule);
+  background: var(--stone);
+  box-shadow: var(--shadow-low);
+  color: var(--ink-faint);
+}
+
+.ao-slot--filled {
+  border-color: var(--rule);
+  background: var(--panel);
+  color: var(--ink);
+}
+
+.ao-slot--rare {
+  border-color: rgba(90, 142, 148, 0.4);
+  box-shadow: var(--shadow-inset), var(--glow-arcane);
+}
+
+.ao-slot--epic {
+  border-color: rgba(176, 141, 78, 0.4);
+  box-shadow: var(--shadow-inset), var(--glow-gold);
+}
+
+.ao-slot--cursed {
+  border-color: rgba(179, 70, 26, 0.4);
+  box-shadow: var(--shadow-inset), var(--glow-ember);
+}
+
+
+/* ============================================================
+   Image placeholder
+   ============================================================ */
+
+.ao-ph {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  aspect-ratio: 1;
+  background: var(--abyss);
+  border: 1px solid var(--hairline);
+  border-radius: 4px;
+  color: var(--ink-ghost);
+  font-family: var(--font-display);
+  font-size: var(--t-h4);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+
+
+/* ============================================================
+   Seal
+   ============================================================ */
+
+.ao-seal {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, var(--gold), var(--gold-deep) 70%);
+  box-shadow: var(--shadow-mid), var(--glow-gold);
+  color: var(--void);
+  font-family: var(--font-display);
+  font-size: var(--t-h5);
+  font-weight: 700;
+}
+
+.ao-seal::before {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  border: 1px solid rgba(5, 4, 3, 0.3);
+}
+
+.ao-seal::after {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border-radius: 50%;
+  border: 1px dashed rgba(5, 4, 3, 0.2);
+}
+
+
+/* ============================================================
+   Tooltip
+   ============================================================ */
+
+.ao-tooltip {
+  position: absolute;
+  z-index: 2000;
+  padding: var(--s-2) var(--s-3);
+  font-family: var(--font-sans);
+  font-size: var(--t-micro);
+  color: var(--ink-bright);
+  background: var(--stone);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  box-shadow: var(--shadow-high);
+  pointer-events: none;
+  white-space: nowrap;
+  max-width: 260px;
+}
+
+
+/* ============================================================
+   Animations
+   ============================================================ */
+
+@keyframes ao-flicker {
+  0%, 100%  { opacity: 1; }
+  50%       { opacity: 0.85; }
+  75%       { opacity: 0.95; }
+}
+
+@keyframes ao-breathe {
+  0%, 100%  { opacity: 0.6; }
+  50%       { opacity: 1; }
+}
+
+@keyframes ao-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes ao-pageturn {
+  from {
+    opacity: 0;
+    transform: perspective(800px) rotateY(-8deg);
+  }
+  to {
+    opacity: 1;
+    transform: perspective(800px) rotateY(0deg);
+  }
+}
+
+.ao-flicker {
+  animation: ao-flicker 4s ease-in-out infinite;
+}
+
+.ao-breathe {
+  animation: ao-breathe 3s ease-in-out infinite;
+}
+
+.ao-rise {
+  animation: ao-rise 0.4s ease-out both;
+}
+
+
+/* ============================================================
+   Toast
+   ============================================================ */
+
+.ao-toast {
+  position: fixed;
+  bottom: var(--s-6);
+  right: var(--s-6);
+  z-index: 3000;
+  padding: var(--s-3) var(--s-5);
+  font-family: var(--font-sans);
+  font-size: var(--t-small);
+  font-weight: 500;
+  color: var(--ink-bright);
+  background: var(--panel-raised);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  box-shadow: var(--shadow-high);
+  animation: ao-rise 0.35s ease-out both;
+}
+
+
+/* ============================================================
+   Scrollbar
+   ============================================================ */
+
+.ao-scroll {
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--bronze) var(--abyss);
+}
+
+.ao-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+
+.ao-scroll::-webkit-scrollbar-track {
+  background: var(--abyss);
+}
+
+.ao-scroll::-webkit-scrollbar-thumb {
+  background: var(--bronze);
+  border-radius: 4px;
+  border: 1px solid var(--abyss);
+}
+
+.ao-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--bronze-warm);
+}
+
+
+/* ============================================================
+   Select (styled <select>)
+   ============================================================ */
+
+.ao-select {
+  width: 100%;
+  padding: 10px 36px 10px 14px;
+  font-family: var(--font-sans);
+  font-size: var(--t-body);
+  color: var(--ink);
+  background: var(--abyss);
+  border: 1px solid var(--hairline);
+  border-radius: 4px;
+  outline: none;
+  transition: all 0.15s ease;
+  box-shadow: var(--shadow-inset);
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23968c75' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 10px 6px;
+}
+
+.ao-select:focus {
+  border-color: var(--gold-deep);
+  box-shadow: var(--shadow-inset), var(--glow-gold);
+  color: var(--ink-bright);
+}
+
+
+/* ============================================================
+   Textarea
+   ============================================================ */
+
+.ao-textarea {
+  width: 100%;
+  padding: 10px 14px;
+  font-family: var(--font-sans);
+  font-size: var(--t-body);
+  color: var(--ink);
+  background: var(--abyss);
+  border: 1px solid var(--hairline);
+  border-radius: 4px;
+  outline: none;
+  transition: all 0.15s ease;
+  box-shadow: var(--shadow-inset);
+  resize: vertical;
+  min-height: 80px;
+  line-height: 1.6;
+}
+
+.ao-textarea:focus {
+  border-color: var(--gold-deep);
+  box-shadow: var(--shadow-inset), var(--glow-gold);
+  color: var(--ink-bright);
+}
+
+.ao-textarea::placeholder {
+  color: var(--ink-ghost);
+  font-style: italic;
+}
+
+
+/* ============================================================
+   Dialog overlay & dialog
+   ============================================================ */
+
+.ao-dialog-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(5, 4, 3, 0.85);
+}
+
+.ao-dialog {
+  position: relative;
+  z-index: 1001;
+  max-width: 640px;
+  width: 90%;
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  padding: var(--s-6);
+  box-shadow: var(--shadow-high);
+  animation: ao-rise 0.3s ease-out both;
+}
+
+
+/* ============================================================
+   Mobile responsive
+   ============================================================ */
+
+@media (max-width: 768px) {
+  .ao-h1 {
+    font-size: 36px;
+  }
+
+  .ao-h2 {
+    font-size: 32px;
+  }
+
+  .ao-h3 {
+    font-size: 24px;
+  }
+
+  .ao-stat-value {
+    font-size: 28px;
+  }
+
+  .ao-btn--lg {
+    padding: 12px 20px;
+  }
+}

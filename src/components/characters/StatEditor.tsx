@@ -1,7 +1,5 @@
 import { useState } from 'react';
-import { Check, X, Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Button, Input, Rune } from '@/components/ao';
 import type { CharacterStat } from '@/types';
 
 interface StatEditorProps {
@@ -14,6 +12,10 @@ interface StatEditorProps {
 export function StatEditor({ stat, onSave, onCancel, isSaving }: StatEditorProps) {
   const [value, setValue] = useState(stat.value);
 
+  const label = stat.statType.name.length > 3
+    ? stat.statType.name.slice(0, 3).toUpperCase()
+    : stat.statType.name.toUpperCase();
+
   const handleSave = () => {
     if (value >= 1 && value <= 30) {
       onSave(value);
@@ -21,26 +23,42 @@ export function StatEditor({ stat, onSave, onCancel, isSaving }: StatEditorProps
   };
 
   return (
-    <div className="flex flex-col items-center p-4 rounded-lg border-2 border-gold bg-gold/10 min-w-[100px]">
-      <span className="text-xs font-heading font-semibold text-gold uppercase tracking-wider mb-2">
-        {stat.statType.name.length > 3 ? stat.statType.name.slice(0, 3).toUpperCase() : stat.statType.name.toUpperCase()}
-      </span>
+    <div
+      className="ao-stat ao-frame"
+      style={{ borderColor: 'var(--gold)', background: 'var(--gold-dim)' }}
+    >
+      <span className="ao-frame__corner ao-frame__corner--tl" />
+      <span className="ao-frame__corner ao-frame__corner--tr" />
+      <span className="ao-frame__corner ao-frame__corner--bl" />
+      <span className="ao-frame__corner ao-frame__corner--br" />
+      <div className="ao-stat__label ao-overline">{label}</div>
       <Input
         type="number"
         min={1}
         max={30}
         value={value}
         onChange={(e) => setValue(parseInt(e.target.value) || 0)}
-        className="w-20 text-center text-lg font-bold"
+        style={{ width: 64, textAlign: 'center', fontSize: 18, fontWeight: 700 }}
         autoFocus
       />
-      <div className="flex gap-1 mt-2">
-        <Button size="icon" variant="ghost" onClick={handleSave} disabled={isSaving} className="h-7 w-7">
-          {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4 text-green-500" />}
-        </Button>
-        <Button size="icon" variant="ghost" onClick={onCancel} disabled={isSaving} className="h-7 w-7">
-          <X className="h-4 w-4 text-red-500" />
-        </Button>
+      <div style={{ display: 'flex', gap: 4, marginTop: 6 }}>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleSave}
+          disabled={isSaving}
+          icon={isSaving
+            ? <Rune kind="sigil-3" size={14} className="ao-spin" />
+            : <Rune kind="check" size={14} color="var(--arcane)" />
+          }
+        />
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onCancel}
+          disabled={isSaving}
+          icon={<Rune kind="x" size={14} color="var(--ember)" />}
+        />
       </div>
     </div>
   );

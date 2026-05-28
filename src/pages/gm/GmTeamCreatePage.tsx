@@ -15,12 +15,10 @@ export default function GmTeamCreatePage() {
   };
 
   return (
-    <div>
-      <TeamForm
-        title="Create New Team"
-        onSubmit={handleSubmit}
-        isSubmitting={createMutation.isPending}
-      />
-    </div>
+    <TeamForm
+      title="Create New Team"
+      onSubmit={handleSubmit}
+      isSubmitting={createMutation.isPending}
+    />
   );
 }

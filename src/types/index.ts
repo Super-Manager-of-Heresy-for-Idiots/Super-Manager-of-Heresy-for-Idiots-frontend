@@ -153,3 +153,118 @@ export interface LoginDto {
   username: string;
   password: string;
 }
+
+// === Level-Up & Multiclass System ===
+
+export interface CharacterClassEntry {
+  id: string;
+  characterClass: { id: string; name: string; description?: string };
+  classLevel: number;
+  subclass?: { id: string; name: string; description?: string } | null;
+}
+
+export interface CharacterDetailed extends Character {
+  totalLevel: number;
+  experience: number;
+  experienceThreshold: number;
+  classEntries: CharacterClassEntry[];
+  canLevelUp: boolean;
+}
+
+export interface Reward {
+  id: string;
+  name: string;
+  description: string;
+  rewardType: string;
+}
+
+export interface ClassLevelReward {
+  id: string;
+  classId: string;
+  className?: string;
+  level: number;
+  reward: Reward;
+  rewardType: string;
+  isChoice: boolean;
+}
+
+export interface AcquiredReward {
+  id: string;
+  reward: Reward;
+  rewardType: string;
+  classEntry: { className: string; classLevel: number };
+  acquiredAt: string;
+}
+
+export interface LevelUpClassOption {
+  classId: string;
+  className: string;
+  currentClassLevel: number;
+  newClassLevel: number;
+  rewardGroups: RewardGroup[];
+  isNewClass: boolean;
+}
+
+export interface RewardGroup {
+  rewardType: string;
+  isChoice: boolean;
+  rewards: Reward[];
+}
+
+export interface LevelUpPreview {
+  currentTotalLevel: number;
+  newTotalLevel: number;
+  availableClasses: LevelUpClassOption[];
+}
+
+export interface LevelUpRequest {
+  classId: string;
+  selectedRewardIds: string[];
+}
+
+export interface Feat {
+  id: string;
+  name: string;
+  description: string;
+  prerequisites?: string;
+}
+
+export interface Subclass {
+  id: string;
+  name: string;
+  description: string;
+  parentClass: { id: string; name: string };
+}
+
+export interface Skill {
+  id: string;
+  name: string;
+  description: string;
+  skillType?: string;
+}
+
+export interface CreateFeatDto {
+  name: string;
+  description: string;
+  prerequisites?: string;
+}
+
+export interface CreateSubclassDto {
+  name: string;
+  description: string;
+  classId: string;
+}
+
+export interface CreateSkillDto {
+  name: string;
+  description: string;
+  skillType?: string;
+}
+
+export interface CreateClassLevelRewardDto {
+  classId: string;
+  level: number;
+  rewardId: string;
+  rewardType: string;
+  isChoice: boolean;
+}

@@ -1,4 +1,3 @@
-import { Users, Sword, Shield, ScrollText, Package, Swords, Crown } from 'lucide-react';
 import { DashboardCard } from '@/components/admin/DashboardCard';
 import { useUsers, useAdminTeams, useStatTypes, useItemTypes, useCharacterClasses, useCharacterRaces } from '@/hooks/useAdmin';
 
@@ -12,47 +11,47 @@ export default function AdminDashboardPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-heading font-bold mb-6">Admin Dashboard</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <h1 className="ao-h2" style={{ marginBottom: 24 }}>Admin Dashboard</h1>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 16 }}>
         <DashboardCard
           title="Total Users"
           value={users?.length}
-          icon={<Users className="h-6 w-6" />}
+          glyph="shield"
           href="/admin/users"
           isLoading={usersLoading}
         />
         <DashboardCard
           title="Total Teams"
           value={teams?.length}
-          icon={<Shield className="h-6 w-6" />}
+          glyph="helm"
           href="/admin/teams"
           isLoading={teamsLoading}
         />
         <DashboardCard
           title="Stat Types"
           value={statTypes?.length}
-          icon={<ScrollText className="h-6 w-6" />}
+          glyph="scroll"
           href="/admin/stat-types"
           isLoading={statTypesLoading}
         />
         <DashboardCard
           title="Item Types"
           value={itemTypes?.length}
-          icon={<Package className="h-6 w-6" />}
+          glyph="sword"
           href="/admin/item-types"
           isLoading={itemTypesLoading}
         />
         <DashboardCard
           title="Character Classes"
           value={classes?.length}
-          icon={<Swords className="h-6 w-6" />}
+          glyph="sigil-3"
           href="/admin/character-classes"
           isLoading={classesLoading}
         />
         <DashboardCard
           title="Character Races"
           value={races?.length}
-          icon={<Crown className="h-6 w-6" />}
+          glyph="diamond"
           href="/admin/character-races"
           isLoading={racesLoading}
         />

@@ -1,14 +1,8 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useCharacterClasses } from '@/hooks/useAdmin';
-import { useCharacterRaces } from '@/hooks/useAdmin';
+import { Panel, PanelHeader, Button, Input, Label, Select, Rune } from '@/components/ao';
+import { useCharacterClasses, useCharacterRaces } from '@/hooks/useAdmin';
 import type { Character } from '@/types';
 
 const characterSchema = z.object({
@@ -51,68 +45,70 @@ export function CharacterForm({ character, onSubmit, isSubmitting, title }: Char
   const selectedRaceId = watch('raceId');
 
   return (
-    <Card className="max-w-2xl mx-auto border-gold/20">
-      <CardHeader>
-        <CardTitle>{title}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <div className="space-y-2">
+    <div style={{ maxWidth: 560, margin: '0 auto' }}>
+      <Panel frame padding={24}>
+        <PanelHeader
+          title={title}
+          glyph={character ? 'scroll' : 'sword'}
+          tone="gold"
+        />
+
+        <form onSubmit={handleSubmit(onSubmit)} style={{ display: 'flex', flexDirection: 'column', gap: 20, marginTop: 20 }}>
+          <div>
             <Label htmlFor="name">Character Name</Label>
             <Input id="name" {...register('name')} placeholder="Enter character name" />
-            {errors.name && <p className="text-sm text-dnd-red">{errors.name.message}</p>}
+            {errors.name && <p style={{ fontSize: 12, color: 'var(--ember)', marginTop: 4 }}>{errors.name.message}</p>}
           </div>
 
-          <div className="space-y-2">
+          <div>
             <Label htmlFor="classId">Class</Label>
             <Select
+              id="classId"
               value={selectedClassId}
-              onValueChange={(value) => setValue('classId', value, { shouldValidate: true })}
+              onChange={(e) => setValue('classId', e.target.value, { shouldValidate: true })}
               disabled={classesLoading}
             >
-              <SelectTrigger>
-                <SelectValue placeholder={classesLoading ? 'Loading...' : 'Select a class'} />
-              </SelectTrigger>
-              <SelectContent>
-                {classes?.map((c) => (
-                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                ))}
-              </SelectContent>
+              <option value="">{classesLoading ? 'Loading...' : 'Select a class'}</option>
+              {classes?.map((c) => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
             </Select>
-            {errors.classId && <p className="text-sm text-dnd-red">{errors.classId.message}</p>}
+            {errors.classId && <p style={{ fontSize: 12, color: 'var(--ember)', marginTop: 4 }}>{errors.classId.message}</p>}
           </div>
 
-          <div className="space-y-2">
+          <div>
             <Label htmlFor="raceId">Race</Label>
             <Select
+              id="raceId"
               value={selectedRaceId}
-              onValueChange={(value) => setValue('raceId', value, { shouldValidate: true })}
+              onChange={(e) => setValue('raceId', e.target.value, { shouldValidate: true })}
               disabled={racesLoading}
             >
-              <SelectTrigger>
-                <SelectValue placeholder={racesLoading ? 'Loading...' : 'Select a race'} />
-              </SelectTrigger>
-              <SelectContent>
-                {races?.map((r) => (
-                  <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
-                ))}
-              </SelectContent>
+              <option value="">{racesLoading ? 'Loading...' : 'Select a race'}</option>
+              {races?.map((r) => (
+                <option key={r.id} value={r.id}>{r.name}</option>
+              ))}
             </Select>
-            {errors.raceId && <p className="text-sm text-dnd-red">{errors.raceId.message}</p>}
+            {errors.raceId && <p style={{ fontSize: 12, color: 'var(--ember)', marginTop: 4 }}>{errors.raceId.message}</p>}
           </div>
 
-          <div className="space-y-2">
+          <div>
             <Label htmlFor="level">Level</Label>
             <Input id="level" type="number" min={1} max={20} {...register('level')} />
-            {errors.level && <p className="text-sm text-dnd-red">{errors.level.message}</p>}
+            {errors.level && <p style={{ fontSize: 12, color: 'var(--ember)', marginTop: 4 }}>{errors.level.message}</p>}
           </div>
 
-          <Button type="submit" variant="gold" className="w-full" disabled={isSubmitting}>
-            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          <Button
+            type="submit"
+            variant="primary"
+            block
+            disabled={isSubmitting}
+            icon={isSubmitting ? <Rune kind="sigil-3" size={14} className="ao-spin" /> : undefined}
+          >
             {character ? 'Update Character' : 'Create Character'}
           </Button>
         </form>
-      </CardContent>
-    </Card>
+      </Panel>
+    </div>
   );
 }

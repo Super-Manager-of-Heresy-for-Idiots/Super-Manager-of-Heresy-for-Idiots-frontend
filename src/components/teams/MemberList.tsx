@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronDown, ChevronRight, Sword } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { formatDate } from '@/lib/utils';
+import { Panel, Button, Rune, Chip } from '@/components/ao';
+import { formatDate } from '@/lib/ao-utils';
 import type { TeamMember } from '@/types';
 
 interface MemberListProps {
@@ -26,45 +25,56 @@ export function MemberList({ members, characterBasePath = '/gm/characters' }: Me
 
   if (members.length === 0) {
     return (
-      <div className="text-center py-8 text-muted-foreground">
+      <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--ink-muted)' }}>
         No members yet. Share the invite code to get players!
       </div>
     );
   }
 
   return (
-    <div className="space-y-2">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
       {members.map((member) => {
         const isExpanded = expandedIds.has(member.player.id);
         return (
-          <div key={member.player.id} className="border border-border rounded-lg">
+          <Panel key={member.player.id} inset>
             <button
               onClick={() => toggleExpand(member.player.id)}
-              className="w-full flex items-center justify-between p-4 hover:bg-accent/50 transition-colors"
+              style={{
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '12px 0',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                color: 'var(--ink)',
+              }}
             >
-              <div className="flex items-center gap-3">
-                {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                <span className="font-medium">{member.player.username}</span>
-                <span className="text-sm text-muted-foreground">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <Rune kind={isExpanded ? 'chev-d' : 'chev-r'} size={14} />
+                <span style={{ fontWeight: 600 }}>{member.player.username}</span>
+                <span style={{ fontSize: 13, color: 'var(--ink-muted)' }}>
                   ({member.characters.length} character{member.characters.length !== 1 ? 's' : ''})
                 </span>
               </div>
-              <span className="text-sm text-muted-foreground">
+              <span style={{ fontSize: 13, color: 'var(--ink-muted)' }}>
                 Joined {formatDate(member.joinedAt)}
               </span>
             </button>
             {isExpanded && member.characters.length > 0 && (
-              <div className="px-4 pb-4 pl-12 space-y-2">
+              <div style={{ paddingLeft: 28, paddingBottom: 12, display: 'flex', flexDirection: 'column', gap: 6 }}>
                 {member.characters.map((char) => (
                   <Button
                     key={char.id}
-                    variant="outline"
-                    className="w-full justify-start gap-2"
+                    variant="ghost"
+                    size="sm"
+                    icon={<Rune kind="sword" size={14} color="var(--gold)" />}
                     onClick={() => navigate(`${characterBasePath}/${char.id}`)}
+                    style={{ justifyContent: 'flex-start', width: '100%' }}
                   >
-                    <Sword className="h-4 w-4 text-gold" />
-                    <span>{char.name}</span>
-                    <span className="text-muted-foreground">
+                    {char.name}
+                    <span style={{ color: 'var(--ink-muted)', marginLeft: 8 }}>
                       Lv.{char.level} {char.race?.name} {char.characterClass?.name}
                     </span>
                   </Button>
@@ -72,11 +82,11 @@ export function MemberList({ members, characterBasePath = '/gm/characters' }: Me
               </div>
             )}
             {isExpanded && member.characters.length === 0 && (
-              <div className="px-4 pb-4 pl-12 text-sm text-muted-foreground italic">
+              <div style={{ paddingLeft: 28, paddingBottom: 12, fontSize: 13, color: 'var(--ink-muted)', fontStyle: 'italic' }}>
                 No characters created yet
               </div>
             )}
-          </div>
+          </Panel>
         );
       })}
     </div>

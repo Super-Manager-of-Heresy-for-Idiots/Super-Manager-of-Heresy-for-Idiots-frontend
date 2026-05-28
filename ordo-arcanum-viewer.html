@@ -1,0 +1,2825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ordo Arcanum — Design System Viewer</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+<style>
+/* ============================================================
+   ORDO ARCANUM — Design tokens
+   Visual system for the D&D character archive
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+:root {
+  /* ── Surfaces (volcanic stone → ash) ───────────────── */
+  --void:          #050403;
+  --abyss:         #0a0908;
+  --stone:         #14110f;
+  --panel:         #1c1816;
+  --panel-raised: #221d1a;
+  --panel-edge:   #2a241f;
+  --ash:           #2f2823;
+  --ash-light:    #3a322c;
+
+  /* ── Borders (worn bronze, oxidized brass) ────────── */
+  --hairline:      rgba(122, 99, 64, 0.18);
+  --rule:          rgba(122, 99, 64, 0.32);
+  --rule-strong:  rgba(150, 122, 78, 0.55);
+  --bronze:        #5a4a35;
+  --bronze-warm:  #6f5a3e;
+  --brass:         #8e7448;
+
+  /* ── Ink (parchment text) ─────────────────────────── */
+  --ink-bright:    #e6dcc4;
+  --ink:           #cdc1a6;
+  --ink-quiet:     #968c75;
+  --ink-faint:     #6a614f;
+  --ink-ghost:     #443c30;
+
+  /* ── Heraldic accents ─────────────────────────────── */
+  --gold:          #b08d4e;    /* dim gold — primary action */
+  --gold-deep:     #836a3a;
+  --gold-pale:     #d4b478;
+  --ember:         #b3461a;    /* danger / warning */
+  --ember-deep:    #7d2f10;
+  --burgundy:      #6b2a2a;    /* sacred warning */
+  --burgundy-deep: #401717;
+  --arcane:        #5a8e94;    /* MAGIC ONLY — muted cyan */
+  --arcane-deep:   #2f5a60;
+  --verdigris:     #4a6b53;    /* rare nature/poison */
+
+  /* ── Type ─────────────────────────────────────────── */
+  --font-display: 'Cinzel', 'Trajan Pro', 'Times New Roman', serif;
+  --font-serif:   'Cormorant Garamond', 'Garamond', 'Times New Roman', serif;
+  --font-sans:    'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-mono:    'JetBrains Mono', 'Menlo', 'Consolas', monospace;
+
+  /* type scale */
+  --t-overline: 11px;
+  --t-micro:    12px;
+  --t-small:    13px;
+  --t-body:     14px;
+  --t-body-lg:  16px;
+  --t-h6:       18px;
+  --t-h5:       22px;
+  --t-h4:       28px;
+  --t-h3:       36px;
+  --t-h2:       48px;
+  --t-h1:       64px;
+
+  /* tracking */
+  --track-tight: -0.01em;
+  --track-body:  0;
+  --track-wide:  0.08em;
+  --track-eng:   0.22em;   /* engraved caps */
+
+  /* ── Space ────────────────────────────────────────── */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 32px;
+  --s-7: 48px;
+  --s-8: 64px;
+
+  /* ── Depth ────────────────────────────────────────── */
+  --shadow-inset:  inset 0 1px 0 rgba(176, 141, 78, 0.06), inset 0 -1px 0 rgba(0,0,0,0.4);
+  --shadow-low:    0 1px 0 rgba(0,0,0,0.6), 0 2px 6px rgba(0,0,0,0.4);
+  --shadow-mid:    0 2px 0 rgba(0,0,0,0.55), 0 8px 18px rgba(0,0,0,0.5);
+  --shadow-high:   0 4px 0 rgba(0,0,0,0.6), 0 24px 60px rgba(0,0,0,0.65);
+  --glow-ember:    0 0 18px rgba(179, 70, 26, 0.35);
+  --glow-arcane:   0 0 14px rgba(90, 142, 148, 0.28);
+  --glow-gold:     0 0 10px rgba(176, 141, 78, 0.25);
+}
+
+/* ============================================================
+   Base
+   ============================================================ */
+.ao-root {
+  background: var(--stone);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: var(--t-body);
+  line-height: 1.55;
+  letter-spacing: var(--track-body);
+  font-feature-settings: 'liga' 1, 'kern' 1, 'tnum' 0;
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Grain — applied to every screen surface */
+.ao-grain::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.5;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.1  0 0 0 0 0.08  0 0 0 0 0.06  0 0 0 0.35 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  z-index: 1;
+}
+
+/* Vignette — for big surfaces */
+.ao-vignette::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(120% 90% at 50% 30%, transparent 40%, rgba(0,0,0,0.55) 100%);
+  z-index: 1;
+}
+
+/* ============================================================
+   Type primitives
+   ============================================================ */
+.ao-engraved {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--track-eng);
+  font-weight: 500;
+  color: var(--ink-bright);
+}
+
+.ao-overline {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--track-eng);
+  font-size: var(--t-overline);
+  font-weight: 500;
+  color: var(--ink-quiet);
+}
+
+.ao-codex {
+  font-family: var(--font-mono);
+  font-size: var(--t-micro);
+  letter-spacing: 0.05em;
+  color: var(--ink-quiet);
+  font-variant-numeric: tabular-nums;
+}
+
+.ao-h1 { font-family: var(--font-display); font-size: var(--t-h1); font-weight: 600; letter-spacing: var(--track-wide); text-transform: uppercase; color: var(--ink-bright); line-height: 1.05; }
+.ao-h2 { font-family: var(--font-display); font-size: var(--t-h2); font-weight: 500; letter-spacing: var(--track-eng); text-transform: uppercase; color: var(--ink-bright); line-height: 1.1; }
+.ao-h3 { font-family: var(--font-serif); font-size: var(--t-h3); font-weight: 500; color: var(--ink-bright); line-height: 1.15; letter-spacing: var(--track-tight); }
+.ao-h4 { font-family: var(--font-serif); font-size: var(--t-h4); font-weight: 500; color: var(--ink-bright); line-height: 1.2; letter-spacing: var(--track-tight); }
+.ao-h5 { font-family: var(--font-serif); font-size: var(--t-h5); font-weight: 600; color: var(--ink-bright); line-height: 1.25; }
+.ao-h6 { font-family: var(--font-serif); font-size: var(--t-h6); font-weight: 600; color: var(--ink-bright); line-height: 1.3; }
+
+.ao-italic { font-family: var(--font-serif); font-style: italic; color: var(--ink-quiet); }
+.ao-num    { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+/* ============================================================
+   Panels (the foundational surface — framed cards)
+   ============================================================ */
+.ao-panel {
+  position: relative;
+  background:
+    linear-gradient(180deg, var(--panel-raised) 0%, var(--panel) 100%);
+  border: 1px solid var(--rule);
+  box-shadow: var(--shadow-inset), var(--shadow-low);
+}
+
+.ao-panel--inset {
+  background:
+    linear-gradient(180deg, var(--panel) 0%, var(--abyss) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(0,0,0,0.5),
+    inset 0 0 0 1px rgba(0,0,0,0.4);
+  border: 1px solid var(--rule);
+}
+
+.ao-panel--raised {
+  background: linear-gradient(180deg, #2a241f 0%, var(--panel) 100%);
+  box-shadow: var(--shadow-mid);
+}
+
+/* Corner ornaments (subtle bronze brackets) */
+.ao-frame {
+  position: relative;
+}
+.ao-frame::before,
+.ao-frame::after,
+.ao-frame > .ao-frame-c::before,
+.ao-frame > .ao-frame-c::after {
+  content: '';
+  position: absolute;
+  width: 12px; height: 12px;
+  border: 1px solid var(--brass);
+  pointer-events: none;
+}
+.ao-frame::before        { top: -1px; left: -1px;  border-right: 0; border-bottom: 0; }
+.ao-frame::after         { top: -1px; right: -1px; border-left: 0;  border-bottom: 0; }
+.ao-frame > .ao-frame-c::before { bottom: -1px; left: -1px;  border-right: 0; border-top: 0; }
+.ao-frame > .ao-frame-c::after  { bottom: -1px; right: -1px; border-left: 0;  border-top: 0; }
+
+/* Engraved horizontal separator with central diamond */
+.ao-divide {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--rule);
+}
+.ao-divide::before,
+.ao-divide::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--rule) 30%, var(--rule) 70%, transparent);
+}
+.ao-divide-glyph {
+  width: 8px; height: 8px;
+  transform: rotate(45deg);
+  background: var(--bronze);
+  box-shadow: 0 0 6px rgba(176, 141, 78, 0.4);
+  flex-shrink: 0;
+}
+
+/* ============================================================
+   Buttons
+   ============================================================ */
+.ao-btn {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--track-eng);
+  font-weight: 500;
+  font-size: var(--t-micro);
+  padding: 10px 18px;
+  background: linear-gradient(180deg, var(--panel-edge) 0%, var(--panel) 100%);
+  color: var(--ink);
+  border: 1px solid var(--rule-strong);
+  cursor: pointer;
+  position: relative;
+  transition: all 200ms cubic-bezier(0.3, 0, 0.2, 1);
+  box-shadow: var(--shadow-inset), 0 1px 0 rgba(0,0,0,0.5);
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.ao-btn:hover {
+  border-color: var(--brass);
+  color: var(--ink-bright);
+  background: linear-gradient(180deg, #2c2620 0%, #1f1a16 100%);
+  box-shadow: var(--shadow-inset), 0 1px 0 rgba(0,0,0,0.5), 0 0 12px rgba(176, 141, 78, 0.15);
+}
+.ao-btn:active { transform: translateY(1px); }
+
+.ao-btn--primary {
+  background: linear-gradient(180deg, #6a522d 0%, #4a3a20 100%);
+  border-color: var(--brass);
+  color: var(--ink-bright);
+}
+.ao-btn--primary:hover {
+  background: linear-gradient(180deg, #8a6a3a 0%, #5e4a28 100%);
+  box-shadow: var(--shadow-inset), 0 1px 0 rgba(0,0,0,0.5), var(--glow-gold);
+}
+
+.ao-btn--danger {
+  background: linear-gradient(180deg, #5a2018 0%, #3a1410 100%);
+  border-color: #8a3a28;
+  color: #e0c4b8;
+}
+.ao-btn--danger:hover {
+  background: linear-gradient(180deg, #7a2c20 0%, #4a1a14 100%);
+  box-shadow: var(--shadow-inset), 0 1px 0 rgba(0,0,0,0.5), var(--glow-ember);
+}
+
+.ao-btn--ghost {
+  background: transparent;
+  border-color: var(--rule);
+  color: var(--ink-quiet);
+}
+.ao-btn--ghost:hover { color: var(--ink); }
+
+.ao-btn--lg { padding: 14px 28px; font-size: var(--t-small); }
+.ao-btn--sm { padding: 6px 12px; font-size: 10px; }
+.ao-btn--block { width: 100%; }
+
+/* Icon button */
+.ao-iconbtn {
+  width: 32px; height: 32px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: transparent;
+  border: 1px solid var(--rule);
+  color: var(--ink-quiet);
+  cursor: pointer;
+  transition: all 150ms;
+}
+.ao-iconbtn:hover { border-color: var(--brass); color: var(--ink-bright); }
+
+/* ============================================================
+   Form inputs
+   ============================================================ */
+.ao-input {
+  width: 100%;
+  background: var(--abyss);
+  border: 1px solid var(--rule);
+  color: var(--ink-bright);
+  font-family: var(--font-sans);
+  font-size: var(--t-body);
+  padding: 10px 14px;
+  outline: none;
+  box-shadow: inset 0 1px 0 rgba(0,0,0,0.5);
+  transition: border-color 150ms, box-shadow 150ms;
+}
+.ao-input:focus {
+  border-color: var(--brass);
+  box-shadow: inset 0 1px 0 rgba(0,0,0,0.5), 0 0 0 1px rgba(176, 141, 78, 0.2);
+}
+.ao-input::placeholder { color: var(--ink-faint); font-style: italic; font-family: var(--font-serif); }
+
+.ao-label {
+  display: block;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--track-eng);
+  font-size: var(--t-overline);
+  color: var(--ink-quiet);
+  margin-bottom: 6px;
+}
+
+/* ============================================================
+   Tabs / Pills / Chips
+   ============================================================ */
+.ao-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--rule);
+}
+.ao-tab {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--track-eng);
+  font-size: var(--t-micro);
+  padding: 12px 18px;
+  background: transparent;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  color: var(--ink-faint);
+  cursor: pointer;
+  transition: all 150ms;
+  position: relative;
+}
+.ao-tab:hover { color: var(--ink-quiet); }
+.ao-tab.is-active {
+  color: var(--gold-pale);
+  border-bottom-color: var(--gold);
+}
+.ao-tab.is-active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px; left: 50%;
+  transform: translateX(-50%);
+  width: 5px; height: 5px;
+  background: var(--gold);
+  transform-origin: center;
+  transform: translateX(-50%) translateY(50%) rotate(45deg);
+}
+
+.ao-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  background: rgba(0,0,0,0.4);
+  border: 1px solid var(--hairline);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--ink-quiet);
+  text-transform: uppercase;
+}
+.ao-chip--arcane { color: var(--arcane); border-color: rgba(90, 142, 148, 0.4); }
+.ao-chip--gold   { color: var(--gold-pale); border-color: rgba(176, 141, 78, 0.4); }
+.ao-chip--ember  { color: #d8896a; border-color: rgba(179, 70, 26, 0.4); }
+.ao-chip--rune   { color: var(--ink-quiet); }
+
+/* ============================================================
+   Stat blocks
+   ============================================================ */
+.ao-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 8px;
+  background: var(--abyss);
+  border: 1px solid var(--rule);
+  box-shadow: inset 0 1px 0 rgba(0,0,0,0.5);
+  position: relative;
+}
+.ao-stat-label {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--track-eng);
+  font-size: 10px;
+  color: var(--ink-faint);
+}
+.ao-stat-value {
+  font-family: var(--font-serif);
+  font-size: 36px;
+  font-weight: 500;
+  color: var(--ink-bright);
+  line-height: 1;
+  margin-top: 4px;
+}
+.ao-stat-mod {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--gold-pale);
+  margin-top: 2px;
+}
+
+/* ============================================================
+   Progression bar (HP, XP, resource)
+   ============================================================ */
+.ao-bar {
+  width: 100%;
+  height: 6px;
+  background: var(--void);
+  border: 1px solid var(--rule);
+  position: relative;
+  overflow: hidden;
+  box-shadow: inset 0 1px 0 rgba(0,0,0,0.6);
+}
+.ao-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--burgundy-deep), var(--ember));
+  box-shadow: 0 0 8px rgba(179, 70, 26, 0.4);
+  transition: width 500ms ease-out;
+}
+.ao-bar-fill--gold   { background: linear-gradient(90deg, var(--gold-deep), var(--gold-pale)); box-shadow: var(--glow-gold); }
+.ao-bar-fill--arcane { background: linear-gradient(90deg, var(--arcane-deep), var(--arcane));   box-shadow: var(--glow-arcane); }
+
+/* ============================================================
+   Table
+   ============================================================ */
+.ao-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.ao-table th {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--track-eng);
+  font-size: var(--t-overline);
+  color: var(--ink-faint);
+  text-align: left;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--rule);
+  background: var(--abyss);
+  font-weight: 500;
+}
+.ao-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--hairline);
+  font-size: var(--t-body);
+  color: var(--ink);
+}
+.ao-table tr:hover td { background: rgba(176, 141, 78, 0.03); }
+
+/* ============================================================
+   Inventory slots
+   ============================================================ */
+.ao-slot {
+  aspect-ratio: 1;
+  background: var(--abyss);
+  border: 1px solid var(--rule);
+  box-shadow: inset 0 1px 0 rgba(0,0,0,0.5), inset 0 0 12px rgba(0,0,0,0.4);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 150ms;
+  cursor: pointer;
+}
+.ao-slot:hover { border-color: var(--brass); }
+.ao-slot--filled {
+  background: linear-gradient(180deg, var(--panel-raised) 0%, var(--panel) 100%);
+}
+.ao-slot--rare    { border-color: rgba(90, 142, 148, 0.45); box-shadow: inset 0 1px 0 rgba(0,0,0,0.5), inset 0 0 12px rgba(90, 142, 148, 0.08); }
+.ao-slot--epic    { border-color: rgba(176, 141, 78, 0.55); box-shadow: inset 0 1px 0 rgba(0,0,0,0.5), inset 0 0 14px rgba(176, 141, 78, 0.08); }
+.ao-slot--cursed  { border-color: rgba(179, 70, 26, 0.55);   box-shadow: inset 0 1px 0 rgba(0,0,0,0.5), inset 0 0 14px rgba(179, 70, 26, 0.08); }
+
+/* Image placeholder — striped parchment look */
+.ao-ph {
+  width: 100%; height: 100%;
+  background:
+    repeating-linear-gradient(45deg, transparent 0 8px, rgba(176, 141, 78, 0.06) 8px 9px),
+    linear-gradient(180deg, #1a1612 0%, #0d0a08 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-faint);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* ============================================================
+   Wax seal / sigil (decorative)
+   ============================================================ */
+.ao-seal {
+  width: 56px; height: 56px;
+  border: 1px solid var(--brass);
+  background: radial-gradient(circle at 30% 30%, #2a241f, #0d0a08);
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
+}
+.ao-seal::before,
+.ao-seal::after {
+  content: '';
+  position: absolute;
+  border: 1px solid var(--hairline);
+  pointer-events: none;
+}
+.ao-seal::before { inset: 4px;  border-radius: 0; }
+.ao-seal::after  { inset: 10px; }
+
+/* ============================================================
+   Tooltip
+   ============================================================ */
+.ao-tooltip {
+  background: var(--abyss);
+  border: 1px solid var(--brass);
+  box-shadow: var(--shadow-mid);
+  padding: 10px 14px;
+  max-width: 280px;
+  font-size: var(--t-small);
+  color: var(--ink);
+}
+
+/* ============================================================
+   Slow atmospheric animations
+   ============================================================ */
+@keyframes ao-flicker {
+  0%, 100%  { opacity: 1; }
+  45%       { opacity: 0.92; }
+  50%       { opacity: 0.85; }
+  55%       { opacity: 0.94; }
+}
+@keyframes ao-breathe {
+  0%, 100% { opacity: 0.55; transform: scale(1); }
+  50%      { opacity: 1;    transform: scale(1.03); }
+}
+@keyframes ao-rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes ao-pageturn {
+  from { opacity: 0; transform: rotateY(-3deg) translateX(-6px); transform-origin: left; }
+  to   { opacity: 1; transform: rotateY(0)    translateX(0); }
+}
+
+.ao-flicker { animation: ao-flicker 3.4s ease-in-out infinite; }
+.ao-breathe { animation: ao-breathe 4s ease-in-out infinite; }
+.ao-rise    { animation: ao-rise 600ms cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+
+/* Notification */
+.ao-toast {
+  background: linear-gradient(180deg, var(--panel-raised) 0%, var(--panel) 100%);
+  border: 1px solid var(--rule-strong);
+  border-left: 2px solid var(--gold);
+  padding: 14px 18px;
+  display: flex;
+  gap: 14px;
+  box-shadow: var(--shadow-mid);
+  font-size: var(--t-small);
+  color: var(--ink);
+  max-width: 360px;
+}
+
+/* Scrollbar */
+.ao-scroll { scrollbar-width: thin; scrollbar-color: var(--bronze) var(--abyss); }
+.ao-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+.ao-scroll::-webkit-scrollbar-track { background: var(--abyss); }
+.ao-scroll::-webkit-scrollbar-thumb { background: var(--bronze); }
+
+/* ── Viewer chrome ─────────────────────── */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body, #root { height: 100%; width: 100%; overflow: hidden; }
+
+.viewer-nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  background: #0d0b09; border-bottom: 1px solid rgba(122,99,64,0.32);
+  display: flex; align-items: center; gap: 0; padding: 0 16px;
+  height: 44px; font-family: 'Inter', sans-serif;
+  overflow-x: auto; scrollbar-width: none;
+}
+.viewer-nav::-webkit-scrollbar { display: none; }
+.viewer-nav button {
+  background: transparent; border: none; color: #968c75;
+  padding: 10px 14px; cursor: pointer; white-space: nowrap;
+  font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: 0.12em;
+  text-transform: uppercase; transition: color 0.15s, background 0.15s;
+}
+.viewer-nav button:hover { color: #cdc1a6; background: rgba(176,141,78,0.06); }
+.viewer-nav button.active { color: #d4b478; border-bottom: 2px solid #b08d4e; }
+
+.screen-frame {
+  position: absolute; top: 44px; left: 0; right: 0; bottom: 0;
+  overflow: hidden;
+}
+
+.mobile-frame .screen-frame-inner {
+  width: 390px; height: 844px;
+  transform-origin: top left;
+  border: 1px solid rgba(122,99,64,0.32);
+  border-radius: 12px; overflow: hidden;
+  position: absolute; top: 50%; left: 50%;
+}
+.desktop-frame .screen-frame-inner {
+  width: 100%; height: 100%;
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+/* global React */
+// Shared visual primitives for Ordo Arcanum
+
+const { useState } = React;
+
+// ─── Rune-like geometric glyph ─────────────────────────────
+function Rune({ kind = 'diamond', size = 14, color = 'currentColor', stroke = 1.2 }) {
+  const s = size;
+  const props = { width: s, height: s, viewBox: '0 0 24 24', fill: 'none', stroke: color, strokeWidth: stroke, strokeLinecap: 'square', strokeLinejoin: 'miter' };
+  switch (kind) {
+    case 'diamond': return <svg {...props}><path d="M12 3l9 9-9 9-9-9 9-9z"/></svg>;
+    case 'diamond-fill': return <svg {...props} fill={color}><path d="M12 3l9 9-9 9-9-9 9-9z"/></svg>;
+    case 'square': return <svg {...props}><path d="M4 4h16v16H4z"/></svg>;
+    case 'square-rot': return <svg {...props}><path d="M12 2l10 10-10 10L2 12 12 2z M12 7l5 5-5 5-5-5 5-5z"/></svg>;
+    case 'cross': return <svg {...props}><path d="M12 3v18M3 12h18"/></svg>;
+    case 'cross-pat': return <svg {...props}><path d="M12 3v18M3 12h18M6 6l12 12M18 6L6 18"/></svg>;
+    case 'cir': return <svg {...props}><circle cx="12" cy="12" r="9"/></svg>;
+    case 'cir-dot': return <svg {...props}><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.5" fill={color}/></svg>;
+    case 'tri': return <svg {...props}><path d="M12 3l10 18H2L12 3z"/></svg>;
+    case 'tri-inv': return <svg {...props}><path d="M2 4h20L12 21 2 4z"/></svg>;
+    case 'hex': return <svg {...props}><path d="M12 2l8.66 5v10L12 22 3.34 17V7L12 2z"/></svg>;
+    case 'eye': return <svg {...props}><path d="M2 12c4-6 16-6 20 0-4 6-16 6-20 0z"/><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="0.8" fill={color}/></svg>;
+    case 'check': return <svg {...props}><path d="M4 12l5 5L20 6"/></svg>;
+    case 'plus': return <svg {...props}><path d="M12 5v14M5 12h14"/></svg>;
+    case 'minus': return <svg {...props}><path d="M5 12h14"/></svg>;
+    case 'arrow-r': return <svg {...props}><path d="M5 12h14M13 6l6 6-6 6"/></svg>;
+    case 'arrow-l': return <svg {...props}><path d="M19 12H5M11 6l-6 6 6 6"/></svg>;
+    case 'arrow-up': return <svg {...props}><path d="M12 19V5M6 11l6-6 6 6"/></svg>;
+    case 'lock': return <svg {...props}><rect x="5" y="11" width="14" height="10"/><path d="M8 11V7a4 4 0 018 0v4"/></svg>;
+    case 'flame': return <svg {...props}><path d="M12 3c2 4 6 6 6 11a6 6 0 11-12 0c0-3 2-4 2-7 2 2 4 2 4-4z"/></svg>;
+    case 'book': return <svg {...props}><path d="M4 4h7v16H4zM13 4h7v16h-7zM4 8h7M13 8h7M4 12h7M13 12h7"/></svg>;
+    case 'scroll': return <svg {...props}><path d="M4 5h14a2 2 0 012 2v10M4 5v12a2 2 0 002 2h12a2 2 0 002-2M4 5a2 2 0 012-2h12M8 9h8M8 13h6"/></svg>;
+    case 'shield': return <svg {...props}><path d="M12 3l8 3v6c0 5-3 8-8 9-5-1-8-4-8-9V6l8-3z"/></svg>;
+    case 'sword': return <svg {...props}><path d="M14 4l6 0 0 6-9 9-3-3 6-12zM5 19l3 3M4 16l4 4"/></svg>;
+    case 'helm': return <svg {...props}><path d="M4 14c0-6 4-10 8-10s8 4 8 10v3a3 3 0 01-3 3H7a3 3 0 01-3-3v-3z M9 14h6"/></svg>;
+    case 'coin': return <svg {...props}><circle cx="12" cy="12" r="9"/><path d="M12 6v12M9 9h4a2 2 0 010 4h-2a2 2 0 000 4h4"/></svg>;
+    case 'chev-r': return <svg {...props}><path d="M9 6l6 6-6 6"/></svg>;
+    case 'chev-d': return <svg {...props}><path d="M6 9l6 6 6-6"/></svg>;
+    case 'dots': return <svg {...props} fill={color} stroke="none"><circle cx="6" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="18" cy="12" r="1.6"/></svg>;
+    case 'search': return <svg {...props}><circle cx="11" cy="11" r="6"/><path d="M16 16l5 5"/></svg>;
+    case 'filter': return <svg {...props}><path d="M3 5h18l-7 9v6l-4-2v-4L3 5z"/></svg>;
+    case 'plus-sm': return <svg {...props}><path d="M12 6v12M6 12h12"/></svg>;
+    case 'x': return <svg {...props}><path d="M6 6l12 12M18 6L6 18"/></svg>;
+    case 'menu': return <svg {...props}><path d="M3 7h18M3 12h18M3 17h18"/></svg>;
+    case 'sigil-1': return <svg {...props}><circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18M5.6 5.6l12.8 12.8M18.4 5.6L5.6 18.4"/></svg>;
+    case 'sigil-2': return <svg {...props}><path d="M12 2l10 10-10 10L2 12 12 2z"/><circle cx="12" cy="12" r="4"/><path d="M12 8v8M8 12h8"/></svg>;
+    case 'sigil-3': return <svg {...props}><path d="M12 3l9 5v8l-9 5-9-5V8l9-5zM12 12l9-5M12 12l-9-5M12 12v9"/></svg>;
+    default: return <svg {...props}><circle cx="12" cy="12" r="9"/></svg>;
+  }
+}
+
+// ─── Engraved divider with central glyph ───────────────────
+function Divider({ glyph = 'diamond-fill', children, color = 'var(--bronze)' }) {
+  return (
+    <div className="ao-divide" style={{ margin: '8px 0' }}>
+      {children ? (
+        <>
+          <span style={{ flex: 1, height: 1, background: 'linear-gradient(90deg, transparent, var(--rule), var(--rule))' }} />
+          <span className="ao-overline" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Rune kind={glyph} size={9} color={color} />
+            {children}
+            <Rune kind={glyph} size={9} color={color} />
+          </span>
+          <span style={{ flex: 1, height: 1, background: 'linear-gradient(90deg, var(--rule), var(--rule), transparent)' }} />
+        </>
+      ) : (
+        <>
+          <span style={{ flex: 1, height: 1, background: 'linear-gradient(90deg, transparent, var(--rule), var(--rule))' }} />
+          <Rune kind={glyph} size={9} color={color} />
+          <span style={{ flex: 1, height: 1, background: 'linear-gradient(90deg, var(--rule), var(--rule), transparent)' }} />
+        </>
+      )}
+    </div>
+  );
+}
+
+// ─── Framed panel with bronze corner brackets ──────────────
+function Panel({ children, raised = false, inset = false, frame = false, style, className = '', padding = 16, onClick }) {
+  const cls = ['ao-panel'];
+  if (raised) cls.push('ao-panel--raised');
+  if (inset) cls.push('ao-panel--inset');
+  if (frame) cls.push('ao-frame');
+  if (className) cls.push(className);
+  return (
+    <div className={cls.join(' ')} style={{ padding, ...style }} onClick={onClick}>
+      {frame && <span className="ao-frame-c" />}
+      {children}
+    </div>
+  );
+}
+
+// ─── Engraved header bar above a panel (codex-style) ───────
+function PanelHeader({ title, sub, glyph = 'diamond-fill', right, tone = 'gold' }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 18px', borderBottom: '1px solid var(--rule)', background: 'linear-gradient(180deg, rgba(176,141,78,0.04), transparent)' }}>
+      <Rune kind={glyph} size={10} color={tone === 'gold' ? 'var(--gold)' : tone === 'arcane' ? 'var(--arcane)' : 'var(--ember)'} />
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div className="ao-engraved" style={{ fontSize: 13 }}>{title}</div>
+        {sub && <div className="ao-codex" style={{ marginTop: 2 }}>{sub}</div>}
+      </div>
+      {right}
+    </div>
+  );
+}
+
+// ─── Stat block (D&D ability score) ────────────────────────
+function StatBlock({ label, value, mod, big = false }) {
+  return (
+    <div className="ao-stat ao-frame" style={big ? { padding: '16px 12px' } : {}}>
+      <span className="ao-frame-c" />
+      <div className="ao-stat-label">{label}</div>
+      <div className="ao-stat-value" style={big ? { fontSize: 48 } : {}}>{value}</div>
+      <div className="ao-stat-mod">{mod >= 0 ? `+${mod}` : mod}</div>
+    </div>
+  );
+}
+
+// ─── Resource bar (HP, XP, mana) ───────────────────────────
+function Bar({ value, max, tone = 'ember', label, showNumbers = true }) {
+  const pct = Math.min(100, Math.max(0, (value / max) * 100));
+  const fillCls = tone === 'gold' ? 'ao-bar-fill--gold' : tone === 'arcane' ? 'ao-bar-fill--arcane' : '';
+  return (
+    <div>
+      {(label || showNumbers) && (
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, alignItems: 'baseline' }}>
+          {label && <span className="ao-overline">{label}</span>}
+          {showNumbers && <span className="ao-num" style={{ color: 'var(--ink-bright)', fontSize: 13 }}>{value}<span style={{ color: 'var(--ink-faint)' }}> / {max}</span></span>}
+        </div>
+      )}
+      <div className="ao-bar"><div className={`ao-bar-fill ${fillCls}`} style={{ width: `${pct}%` }} /></div>
+    </div>
+  );
+}
+
+// ─── Sigil (decorative wax seal) ───────────────────────────
+function Sigil({ size = 64, glyph = 'sigil-1', color = 'var(--gold)' }) {
+  return (
+    <div className="ao-seal" style={{ width: size, height: size }}>
+      <Rune kind={glyph} size={size * 0.5} color={color} />
+    </div>
+  );
+}
+
+// ─── Image placeholder ─────────────────────────────────────
+function Placeholder({ children = 'portrait', style }) {
+  return <div className="ao-ph" style={style}>{children}</div>;
+}
+
+// ─── Chip / Tag ────────────────────────────────────────────
+function Chip({ children, tone, glyph }) {
+  const cls = `ao-chip${tone ? ' ao-chip--' + tone : ''}`;
+  return (
+    <span className={cls}>
+      {glyph && <Rune kind={glyph} size={8} />}
+      {children}
+    </span>
+  );
+}
+
+// ─── Tabs ──────────────────────────────────────────────────
+function Tabs({ items, active, onChange }) {
+  return (
+    <div className="ao-tabs">
+      {items.map((it) => (
+        <button key={it.id} className={`ao-tab ${active === it.id ? 'is-active' : ''}`} onClick={() => onChange && onChange(it.id)}>
+          {it.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// ─── Codex ID (e.g. file number) ───────────────────────────
+function CodexID({ children }) {
+  return <span className="ao-codex">№ {children}</span>;
+}
+
+// ─── Atmospheric backdrop (cathedral haze + grain) ─────────
+function Backdrop({ children, dark = false }) {
+  return (
+    <div className="ao-root ao-grain ao-vignette" style={{ background: dark ? 'var(--void)' : 'var(--stone)' }}>
+      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(80% 60% at 50% 0%, rgba(176, 141, 78, 0.04), transparent 60%)', pointerEvents: 'none', zIndex: 0 }} />
+      <div style={{ position: 'relative', zIndex: 2, height: '100%', display: 'flex', flexDirection: 'column' }}>{children}</div>
+    </div>
+  );
+}
+
+// ─── App chrome — left rail + top bar layout ───────────────
+function AppShell({ nav, topbar, children }) {
+  return (
+    <Backdrop>
+      <div style={{ display: 'flex', height: '100%' }}>
+        <Rail items={nav} />
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+          {topbar}
+          <div className="ao-scroll" style={{ flex: 1, overflow: 'auto', padding: '20px 28px 28px' }}>{children}</div>
+        </div>
+      </div>
+    </Backdrop>
+  );
+}
+
+function Rail({ items = [] }) {
+  return (
+    <div style={{ width: 68, background: 'var(--abyss)', borderRight: '1px solid var(--rule)', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '18px 0 14px', flexShrink: 0, position: 'relative', zIndex: 2 }}>
+      <div style={{ marginBottom: 18 }}>
+        <Sigil size={40} glyph="sigil-2" />
+      </div>
+      <div style={{ width: 24, height: 1, background: 'var(--rule)', marginBottom: 14 }} />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: 1 }}>
+        {items.map((it, i) => (
+          <button key={i} title={it.label} className={`ao-iconbtn ${it.active ? 'is-active' : ''}`} style={{ width: 40, height: 40, background: it.active ? 'var(--panel-raised)' : 'transparent', color: it.active ? 'var(--gold-pale)' : 'var(--ink-faint)', borderColor: it.active ? 'var(--brass)' : 'transparent', position: 'relative' }}>
+            <Rune kind={it.glyph} size={16} />
+            {it.badge && <span style={{ position: 'absolute', top: 4, right: 4, width: 5, height: 5, background: 'var(--ember)', boxShadow: '0 0 6px var(--ember)' }} />}
+          </button>
+        ))}
+      </div>
+      <div style={{ width: 24, height: 1, background: 'var(--rule)', marginTop: 14, marginBottom: 14 }} />
+      <button className="ao-iconbtn" style={{ width: 40, height: 40, border: 'none', color: 'var(--ink-faint)' }} title="Settings">
+        <Rune kind="cir-dot" size={14} />
+      </button>
+    </div>
+  );
+}
+
+function TopBar({ title, breadcrumb, right }) {
+  return (
+    <div style={{ height: 60, borderBottom: '1px solid var(--rule)', display: 'flex', alignItems: 'center', padding: '0 28px', gap: 18, background: 'linear-gradient(180deg, var(--panel) 0%, var(--stone) 100%)', flexShrink: 0, position: 'relative', zIndex: 2 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <Rune kind="diamond-fill" size={8} color="var(--gold)" />
+        <span className="ao-engraved" style={{ fontSize: 14 }}>{title}</span>
+      </div>
+      {breadcrumb && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: 'var(--ink-faint)' }}>
+          <Rune kind="chev-r" size={12} />
+          <span className="ao-codex">{breadcrumb}</span>
+        </div>
+      )}
+      <div style={{ flex: 1 }} />
+      {right}
+    </div>
+  );
+}
+
+// ─── Default nav items (used across screens) ───────────────
+const DEFAULT_NAV = [
+  { glyph: 'shield', label: 'Roster',     active: false },
+  { glyph: 'sigil-3', label: 'Sheet',     active: true },
+  { glyph: 'sword',   label: 'Arsenal',   active: false },
+  { glyph: 'helm',    label: 'Conclave',  active: false },
+  { glyph: 'scroll',  label: 'Bestiary',  active: false },
+  { glyph: 'book',    label: 'Archive',   active: false, badge: true },
+];
+
+Object.assign(window, {
+  Rune, Divider, Panel, PanelHeader, StatBlock, Bar, Sigil, Placeholder,
+  Chip, Tabs, CodexID, Backdrop, AppShell, Rail, TopBar, DEFAULT_NAV,
+});
+
+/* global React, Backdrop, Panel, PanelHeader, Rune, Divider, Sigil, CodexID, Chip */
+// Auth screens — Login + Invite code
+
+const { useState: useStateAuth } = React;
+
+function LoginScreen() {
+  const [email, setEmail] = useStateAuth('archivist.vellan@ordo.arc');
+  const [pwd, setPwd] = useStateAuth('');
+  return (
+    <Backdrop dark>
+      <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 1fr', height: '100%' }}>
+        {/* Left — atmospheric panel */}
+        <div style={{ position: 'relative', overflow: 'hidden', borderRight: '1px solid var(--rule)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '56px 64px' }}>
+          <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(60% 50% at 50% 35%, rgba(176, 141, 78, 0.10), transparent 60%)' }} />
+          <div style={{ position: 'absolute', inset: 0, background: "repeating-linear-gradient(0deg, transparent 0 6px, rgba(176,141,78,0.025) 6px 7px)" }} />
+
+          <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 14 }}>
+            <Sigil size={48} glyph="sigil-3" />
+            <div>
+              <div className="ao-engraved" style={{ fontSize: 12, color: 'var(--gold-pale)' }}>Ordo Arcanum</div>
+              <div className="ao-codex">Imperial Archive · MMDXLIV</div>
+            </div>
+          </div>
+
+          <div style={{ position: 'relative' }}>
+            <div className="ao-codex" style={{ marginBottom: 16, color: 'var(--ink-faint)' }}>— SACRAMENTUM —</div>
+            <div className="ao-h2" style={{ fontSize: 56, lineHeight: 1.05, maxWidth: 520 }}>The Chronicler's Vigil</div>
+            <p className="ao-italic" style={{ fontSize: 20, marginTop: 18, maxWidth: 480, color: 'var(--ink-quiet)' }}>
+              Every blade, every wound, every covenant — recorded in the Hand of the Ordo, sealed against time and ash.
+            </p>
+
+            <Divider glyph="diamond-fill">SEAL OF ENTRY</Divider>
+
+            <div style={{ display: 'flex', gap: 28, marginTop: 28 }}>
+              <div>
+                <div className="ao-overline">Chapters</div>
+                <div className="ao-h4 ao-num" style={{ fontFamily: 'var(--font-mono)' }}>148</div>
+              </div>
+              <div style={{ width: 1, background: 'var(--rule)' }} />
+              <div>
+                <div className="ao-overline">Souls Recorded</div>
+                <div className="ao-h4 ao-num" style={{ fontFamily: 'var(--font-mono)' }}>3,402</div>
+              </div>
+              <div style={{ width: 1, background: 'var(--rule)' }} />
+              <div>
+                <div className="ao-overline">Vigil Continues</div>
+                <div className="ao-h4 ao-num" style={{ fontFamily: 'var(--font-mono)' }}>912 d</div>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ position: 'relative', display: 'flex', justifyContent: 'space-between', alignItems: 'end', color: 'var(--ink-faint)' }}>
+            <div className="ao-codex">Cohort VII — Vault of Ash and Brass</div>
+            <div className="ao-codex">v · 4.21.3 — gilded</div>
+          </div>
+        </div>
+
+        {/* Right — sign-in panel */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 56, background: 'linear-gradient(180deg, var(--stone), var(--abyss))' }}>
+          <div style={{ width: '100%', maxWidth: 400 }}>
+            <Panel frame padding={36} style={{ position: 'relative' }}>
+              <span className="ao-frame-c" />
+
+              <div style={{ textAlign: 'center', marginBottom: 28 }}>
+                <Rune kind="diamond" size={18} color="var(--gold)" />
+                <div className="ao-engraved ao-flicker" style={{ fontSize: 16, marginTop: 14 }}>Present Thy Seal</div>
+                <div className="ao-italic" style={{ fontSize: 14, marginTop: 6 }}>The Archive awaits authorisation</div>
+              </div>
+
+              <Divider glyph="diamond-fill" />
+
+              <div style={{ marginTop: 22 }}>
+                <label className="ao-label">Sigil Address</label>
+                <input className="ao-input" value={email} onChange={(e) => setEmail(e.target.value)} />
+              </div>
+
+              <div style={{ marginTop: 18 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                  <label className="ao-label">Cipher Word</label>
+                  <a className="ao-codex" style={{ cursor: 'pointer', color: 'var(--gold-pale)' }}>recover</a>
+                </div>
+                <div style={{ position: 'relative' }}>
+                  <input className="ao-input" type="password" value={pwd} onChange={(e) => setPwd(e.target.value)} placeholder="••••••••••••" style={{ paddingRight: 40 }} />
+                  <Rune kind="lock" size={14} color="var(--ink-faint)" />
+                  <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--ink-faint)' }}>
+                    <Rune kind="eye" size={14} />
+                  </span>
+                </div>
+              </div>
+
+              <div style={{ marginTop: 14, display: 'flex', alignItems: 'center', gap: 8, color: 'var(--ink-quiet)', fontSize: 12 }}>
+                <span style={{ width: 14, height: 14, border: '1px solid var(--rule-strong)', background: 'var(--abyss)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Rune kind="check" size={10} color="var(--gold)" />
+                </span>
+                Bind this Hand to my Sigil
+              </div>
+
+              <button className="ao-btn ao-btn--primary ao-btn--lg ao-btn--block" style={{ marginTop: 22 }}>
+                <Rune kind="diamond-fill" size={9} /> Enter the Archive
+              </button>
+
+              <Divider>OR</Divider>
+
+              <button className="ao-btn ao-btn--ghost ao-btn--block" style={{ marginTop: 8 }}>
+                <Rune kind="scroll" size={12} /> Accept Invitation
+              </button>
+            </Panel>
+
+            <div style={{ textAlign: 'center', marginTop: 20, color: 'var(--ink-faint)' }}>
+              <span className="ao-codex">Inscribed by the Ordo · Bound by oath</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Backdrop>
+  );
+}
+
+function InviteScreen() {
+  const code = ['V', 'X', '7', 'R', 'M', '4'];
+  return (
+    <Backdrop dark>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', padding: 60 }}>
+        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(50% 40% at 50% 40%, rgba(176, 141, 78, 0.07), transparent 70%)' }} />
+
+        <Sigil size={68} glyph="sigil-2" />
+        <div className="ao-codex" style={{ marginTop: 18, color: 'var(--ink-faint)' }}>— WRIT OF ADMISSION —</div>
+
+        <div className="ao-h2 ao-flicker" style={{ marginTop: 12 }}>Speak the Cipher</div>
+        <p className="ao-italic" style={{ marginTop: 8, fontSize: 16, maxWidth: 460, textAlign: 'center', color: 'var(--ink-quiet)' }}>
+          Six glyphs, given by the Chapter-Warden. Each invitation expires with the next dusk.
+        </p>
+
+        <Panel padding={36} frame style={{ marginTop: 36, minWidth: 540, position: 'relative' }}>
+          <span className="ao-frame-c" />
+
+          <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+            {code.map((c, i) => (
+              <div key={i} className="ao-panel--inset" style={{ width: 64, height: 76, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', border: i === 3 ? '1px solid var(--brass)' : '1px solid var(--rule)', boxShadow: i === 3 ? 'inset 0 1px 0 rgba(0,0,0,0.5), 0 0 12px rgba(176,141,78,0.2)' : 'inset 0 1px 0 rgba(0,0,0,0.5)' }}>
+                <span style={{ fontFamily: 'var(--font-display)', fontSize: 32, color: c === '_' ? 'var(--ink-faint)' : 'var(--ink-bright)' }}>{c === '_' ? '·' : c}</span>
+                <span style={{ width: 14, height: 1, background: i === 3 ? 'var(--gold)' : 'var(--rule)', marginTop: 4 }} />
+              </div>
+            ))}
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginTop: 20 }}>
+            {Array.from({ length: 6 }).map((_, i) => (
+              <span key={i} style={{ width: 5, height: 5, background: i < 4 ? 'var(--gold)' : 'var(--rule)', transform: 'rotate(45deg)' }} />
+            ))}
+          </div>
+
+          <div style={{ marginTop: 24, padding: '12px 14px', background: 'var(--abyss)', border: '1px solid var(--rule)', display: 'flex', alignItems: 'center', gap: 12 }}>
+            <Rune kind="flame" size={14} color="var(--ember)" />
+            <div style={{ flex: 1, fontSize: 13, color: 'var(--ink-quiet)' }}>
+              <span className="ao-italic">Vouched by</span> <span style={{ color: 'var(--ink-bright)' }}>Warden Kollesh of the Iron Vigil</span>
+            </div>
+            <CodexID>4421-VIII</CodexID>
+          </div>
+        </Panel>
+
+        <div style={{ display: 'flex', gap: 12, marginTop: 28 }}>
+          <button className="ao-btn ao-btn--ghost">Cancel</button>
+          <button className="ao-btn ao-btn--primary ao-btn--lg">
+            <Rune kind="diamond-fill" size={9} /> Submit Cipher
+          </button>
+        </div>
+
+        <div style={{ position: 'absolute', bottom: 32, color: 'var(--ink-faint)' }}>
+          <span className="ao-codex">Cipher expires in 14h 32m · Rite of the Threshold</span>
+        </div>
+      </div>
+    </Backdrop>
+  );
+}
+
+Object.assign(window, { LoginScreen, InviteScreen });
+
+/* global React, AppShell, TopBar, DEFAULT_NAV, Panel, PanelHeader, Rune, Divider, Sigil, Placeholder, Chip, CodexID, Bar */
+// Roster — character list
+
+const CHARACTERS = [
+  { id: 'V-001', name: 'Vellan Ostrau',     class: 'Paladin of the Sealed',     subclass: 'Oath of the Embered Vow', race: 'Half-Elf',   lvl: 11, hp: 96,  hpMax: 112, xp: 84, party: 'Iron Vigil', status: 'awake' },
+  { id: 'V-002', name: 'Iskra "Nine-Bell"', class: 'Rogue · Archivist',         subclass: 'Veil of the Library',     race: 'Human',      lvl: 9,  hp: 54,  hpMax: 68,  xp: 41, party: 'Iron Vigil', status: 'wounded' },
+  { id: 'V-003', name: 'Brother Tomek',     class: 'Cleric · Censor',           subclass: 'Domain of Cold Light',    race: 'Dwarf',      lvl: 10, hp: 78,  hpMax: 84,  xp: 12, party: 'Iron Vigil', status: 'awake' },
+  { id: 'V-004', name: 'Marrowfen',         class: 'Druid of the Hollow',       subclass: 'Circle of Pale Loam',     race: 'Firbolg',    lvl: 8,  hp: 12,  hpMax: 72,  xp: 67, party: 'Iron Vigil', status: 'unconscious' },
+  { id: 'V-005', name: 'Asch the Pale',     class: 'Warlock · Scribe',          subclass: 'Pact of the Quiet Aeon',  race: 'Tiefling',   lvl: 12, hp: 64,  hpMax: 80,  xp: 92, party: 'Black Censer', status: 'awake' },
+  { id: 'V-006', name: 'Captain Hulvane',   class: 'Fighter · Iron-Hand',       subclass: 'Banner of the Tenth',     race: 'Goliath',    lvl: 13, hp: 118, hpMax: 134, xp: 22, party: 'Black Censer', status: 'awake' },
+  { id: 'V-007', name: 'Una Saint-Quill',   class: 'Wizard · Pale-Scribe',      subclass: 'School of the Sealed Word', race: 'Halfling', lvl: 7,  hp: 28,  hpMax: 44,  xp: 88, party: 'Black Censer', status: 'awake' },
+  { id: 'V-008', name: 'Karel of Ash',      class: 'Barbarian · Penitent',      subclass: 'Path of the Old Wound',   race: 'Human',      lvl: 6,  hp: 52,  hpMax: 80,  xp: 33, party: 'Reserve',    status: 'wounded' },
+];
+
+function StatusGlyph({ status }) {
+  const map = {
+    awake:       { glyph: 'cir-dot',  color: 'var(--gold)',    label: 'Vigilant' },
+    wounded:     { glyph: 'flame',    color: 'var(--ember)',   label: 'Wounded' },
+    unconscious: { glyph: 'cross-pat', color: 'var(--burgundy)', label: 'Fallen' },
+  };
+  const m = map[status] || map.awake;
+  return (
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: m.color, fontSize: 11 }}>
+      <Rune kind={m.glyph} size={10} />
+      <span className="ao-overline" style={{ color: m.color }}>{m.label}</span>
+    </span>
+  );
+}
+
+function RosterScreen() {
+  const [filter, setFilter] = React.useState('all');
+  const [view, setView] = React.useState('grid');
+
+  const navItems = DEFAULT_NAV.map((n) => ({ ...n, active: n.label === 'Roster' }));
+
+  return (
+    <AppShell
+      nav={navItems}
+      topbar={
+        <TopBar
+          title="Codex of Souls"
+          breadcrumb="Roster · 8 of 24 recorded"
+          right={
+            <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+              <div style={{ position: 'relative' }}>
+                <input className="ao-input" placeholder="Search by name, oath, ledger…" style={{ width: 280, paddingLeft: 36 }} />
+                <Rune kind="search" size={14} color="var(--ink-faint)" />
+                <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--ink-faint)' }}>
+                  <Rune kind="search" size={14} />
+                </span>
+              </div>
+              <button className="ao-btn ao-btn--ghost"><Rune kind="filter" size={11} /> Filter</button>
+              <button className="ao-btn ao-btn--primary"><Rune kind="plus" size={11} /> Inscribe New</button>
+            </div>
+          }
+        />
+      }
+    >
+      {/* Heading band */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 20 }}>
+        <div>
+          <div className="ao-overline">Cohort VII · Iron Vigil et alia</div>
+          <div className="ao-h3" style={{ marginTop: 4 }}>The Recorded</div>
+          <div className="ao-italic" style={{ marginTop: 4 }}>Eight souls under your seal. Three await ritual.</div>
+        </div>
+        <div style={{ display: 'flex', gap: 4, padding: 4, border: '1px solid var(--rule)', background: 'var(--abyss)' }}>
+          {['all', 'iron', 'censer', 'reserve'].map((f) => (
+            <button key={f} onClick={() => setFilter(f)} className="ao-tab" style={{ padding: '6px 14px', borderBottom: 'none', background: filter === f ? 'var(--panel-raised)' : 'transparent', color: filter === f ? 'var(--gold-pale)' : 'var(--ink-faint)' }}>
+              {f === 'all' ? 'All' : f === 'iron' ? 'Iron Vigil' : f === 'censer' ? 'Black Censer' : 'Reserve'}
+            </button>
+          ))}
+          <div style={{ width: 1, background: 'var(--rule)', margin: '0 4px' }} />
+          <button onClick={() => setView('grid')} className="ao-iconbtn" style={{ border: 'none', color: view === 'grid' ? 'var(--gold-pale)' : 'var(--ink-faint)' }} title="Grid"><Rune kind="square" size={12} /></button>
+          <button onClick={() => setView('list')} className="ao-iconbtn" style={{ border: 'none', color: view === 'list' ? 'var(--gold-pale)' : 'var(--ink-faint)' }} title="List"><Rune kind="menu" size={12} /></button>
+        </div>
+      </div>
+
+      {/* Grid */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(290px, 1fr))', gap: 18 }}>
+        {CHARACTERS.map((c, i) => (
+          <Panel key={c.id} padding={0} className="ao-frame" style={{ animationDelay: `${i * 40}ms` }}>
+            <span className="ao-frame-c" />
+
+            {/* Card head */}
+            <div style={{ padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 12, borderBottom: '1px solid var(--hairline)' }}>
+              <CodexID>{c.id}</CodexID>
+              <div style={{ flex: 1 }} />
+              <StatusGlyph status={c.status} />
+            </div>
+
+            {/* Portrait + name */}
+            <div style={{ padding: 16, display: 'flex', gap: 14 }}>
+              <Placeholder style={{ width: 88, height: 110, border: '1px solid var(--rule)', flexShrink: 0 }}>portrait</Placeholder>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div className="ao-h6" style={{ fontSize: 17, lineHeight: 1.15 }}>{c.name}</div>
+                <div className="ao-italic" style={{ fontSize: 13, marginTop: 4, color: 'var(--ink-quiet)' }}>{c.class}</div>
+                <div className="ao-codex" style={{ marginTop: 6 }}>{c.race} · {c.subclass}</div>
+
+                <div style={{ marginTop: 12, display: 'flex', alignItems: 'baseline', gap: 8 }}>
+                  <span className="ao-overline">Level</span>
+                  <span className="ao-num" style={{ color: 'var(--gold-pale)', fontSize: 22, fontFamily: 'var(--font-serif)' }}>{c.lvl}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Bars */}
+            <div style={{ padding: '0 16px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <Bar value={c.hp} max={c.hpMax} label="Vitae" />
+              <Bar value={c.xp} max={100} tone="gold" label="To Ascend" showNumbers={false} />
+            </div>
+
+            {/* Footer actions */}
+            <div style={{ display: 'flex', borderTop: '1px solid var(--rule)' }}>
+              <button className="ao-btn ao-btn--ghost" style={{ flex: 1, border: 0, padding: '12px 0' }}>
+                <Rune kind="book" size={12} /> Open Folio
+              </button>
+              <div style={{ width: 1, background: 'var(--rule)' }} />
+              <button className="ao-btn ao-btn--ghost" style={{ width: 48, border: 0, padding: '12px 0' }}>
+                <Rune kind="dots" size={12} />
+              </button>
+            </div>
+          </Panel>
+        ))}
+      </div>
+
+      <Divider glyph="diamond-fill">Vault foot</Divider>
+
+      {/* Summary footer */}
+      <div style={{ marginTop: 12, display: 'flex', justifyContent: 'space-between', color: 'var(--ink-faint)' }}>
+        <span className="ao-codex">Archive sealed · 7 hours, 14 minutes since last writ</span>
+        <span className="ao-codex">Page I of III</span>
+      </div>
+    </AppShell>
+  );
+}
+
+Object.assign(window, { RosterScreen });
+
+/* global React, AppShell, TopBar, DEFAULT_NAV, Panel, PanelHeader, Rune, Divider, Sigil, Placeholder, Chip, CodexID, Bar, StatBlock, Tabs */
+// Character sheet — the main view
+
+const ABILITIES = [
+  { label: 'STR', value: 16, mod: 3, save: '+5', skills: ['Athletics +5'] },
+  { label: 'DEX', value: 12, mod: 1, save: '+1', skills: ['Stealth +1'] },
+  { label: 'CON', value: 14, mod: 2, save: '+4', skills: [] },
+  { label: 'INT', value: 10, mod: 0, save: '+0', skills: ['Religion +2'] },
+  { label: 'WIS', value: 15, mod: 2, save: '+4', skills: ['Insight +4', 'Perception +4'] },
+  { label: 'CHA', value: 17, mod: 3, save: '+5', skills: ['Persuasion +5', 'Intimidation +5'] },
+];
+
+const COMBAT = [
+  { label: 'Armour', value: 18, mod: 'Plate · +1' },
+  { label: 'Initiative', value: '+1', mod: 'reaction +0' },
+  { label: 'Speed', value: 30, mod: 'feet · burdened' },
+  { label: 'Prof.', value: '+4', mod: 'Tier II' },
+];
+
+const FEATURES = [
+  { name: 'Lay on Hands',         pool: '55 / 55',  type: 'pool',  desc: 'Heal or purge by touch. Pool refreshes upon long rest.' },
+  { name: 'Divine Sense',         pool: '4 / 4',    type: 'pool',  desc: 'Sense celestial, fiend, undead within 60 ft.' },
+  { name: 'Channel Divinity',     pool: '1 / 1',    type: 'pool',  desc: 'Sacred Weapon · Turn the Unholy.' },
+  { name: 'Aura of Embered Vow',  pool: '10 ft',    type: 'aura',  desc: 'Allies within glow gain +CHA to saves.' },
+  { name: 'Sacred Marks',         pool: '3 / 3',    type: 'pool',  desc: 'Inscribe a foe for the Ordo. Marks burn at dawn.' },
+];
+
+const SPELLS = [
+  { lvl: 'I',   name: 'Sanctuary',       prep: true,  ritual: false, sch: 'Abjuration' },
+  { lvl: 'I',   name: 'Searing Smite',   prep: true,  ritual: false, sch: 'Evocation'  },
+  { lvl: 'I',   name: 'Compelled Duel',  prep: false, ritual: false, sch: 'Enchantment'},
+  { lvl: 'II',  name: 'Aid',             prep: true,  ritual: false, sch: 'Abjuration' },
+  { lvl: 'II',  name: 'Branding Smite',  prep: true,  ritual: false, sch: 'Evocation'  },
+  { lvl: 'III', name: 'Aura of Vitality',prep: true,  ritual: false, sch: 'Evocation'  },
+  { lvl: 'III', name: 'Crusader\'s Mantle',prep: false, ritual: false, sch: 'Evocation' },
+];
+
+const ATTACKS = [
+  { name: 'Greatsword of the Vow', hit: '+9', dmg: '2d6 + 4', type: 'slash · radiant', range: 'reach' },
+  { name: 'Heavy Crossbow',         hit: '+5', dmg: '1d10 + 1', type: 'pierce',         range: '100/400' },
+  { name: 'Sacred Pommel',          hit: '+9', dmg: '1d4 + 4',  type: 'bludgeon',       range: 'reach' },
+];
+
+function CharacterSheetScreen() {
+  const [tab, setTab] = React.useState('combat');
+  const navItems = DEFAULT_NAV.map((n) => ({ ...n, active: n.label === 'Sheet' }));
+
+  return (
+    <AppShell
+      nav={navItems}
+      topbar={
+        <TopBar
+          title="Folio of the Soul"
+          breadcrumb="V-001 · Vellan Ostrau"
+          right={
+            <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+              <span className="ao-codex">Sealed · 12 hr ago</span>
+              <button className="ao-btn ao-btn--ghost"><Rune kind="scroll" size={11} /> Notes</button>
+              <button className="ao-btn ao-btn--ghost"><Rune kind="book" size={11} /> History</button>
+              <button className="ao-btn ao-btn--primary"><Rune kind="diamond-fill" size={9} /> Long Rest</button>
+            </div>
+          }
+        />
+      }
+    >
+      {/* ── HEADER ROW ───────────────────────────────────── */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 18 }}>
+        {/* Identity */}
+        <Panel padding={0} className="ao-frame">
+          <span className="ao-frame-c" />
+          <div style={{ display: 'flex', gap: 18, padding: 20 }}>
+            <Placeholder style={{ width: 140, height: 180, border: '1px solid var(--rule)' }}>portrait · plate & burgundy cloak</Placeholder>
+
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <CodexID>V-001 · Cohort VII</CodexID>
+                <Chip glyph="diamond-fill" tone="gold">Sealed</Chip>
+                <Chip glyph="flame" tone="ember">Wounded</Chip>
+              </div>
+              <div className="ao-h3" style={{ marginTop: 8, fontSize: 32 }}>Vellan Ostrau</div>
+              <div className="ao-italic" style={{ marginTop: 2, fontSize: 16 }}>“The Embered Vow shall outlast the candle that lit it.”</div>
+
+              <Divider glyph="diamond-fill" />
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
+                <div>
+                  <div className="ao-overline">Class</div>
+                  <div className="ao-h6">Paladin</div>
+                  <div className="ao-codex">Oath of the Embered Vow</div>
+                </div>
+                <div>
+                  <div className="ao-overline">Race</div>
+                  <div className="ao-h6">Half-Elf</div>
+                  <div className="ao-codex">Sevenshore highland</div>
+                </div>
+                <div>
+                  <div className="ao-overline">Background</div>
+                  <div className="ao-h6">Acolyte-Marshal</div>
+                  <div className="ao-codex">Order of the Sealed</div>
+                </div>
+                <div>
+                  <div className="ao-overline">Alignment</div>
+                  <div className="ao-h6">Lawful Grave</div>
+                  <div className="ao-codex">Penitent · oathkeeper</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Level / XP / HP rail */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr 1fr', borderTop: '1px solid var(--rule)' }}>
+            <div style={{ padding: 18, borderRight: '1px solid var(--rule)', display: 'flex', alignItems: 'center', gap: 14 }}>
+              <Sigil size={56} glyph="sigil-3" />
+              <div>
+                <div className="ao-overline">Level</div>
+                <div style={{ fontFamily: 'var(--font-serif)', fontSize: 44, color: 'var(--ink-bright)', lineHeight: 1 }}>11</div>
+              </div>
+            </div>
+            <div style={{ padding: '18px 20px', borderRight: '1px solid var(--rule)' }}>
+              <Bar value={96} max={112} label="Vitae · Hit Points" />
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 10 }}>
+                <span className="ao-codex">Temp +0 · Death saves 0 / 0</span>
+                <span className="ao-codex">Hit Dice 8d10</span>
+              </div>
+            </div>
+            <div style={{ padding: '18px 20px' }}>
+              <Bar value={84} max={100} tone="gold" label="Ascent · XP to 12" />
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 10 }}>
+                <span className="ao-codex">Inspiration · 1 ember</span>
+                <span className="ao-codex">100,400 / 120,000</span>
+              </div>
+            </div>
+          </div>
+        </Panel>
+
+        {/* Oath / Vow */}
+        <Panel padding={0} className="ao-frame">
+          <span className="ao-frame-c" />
+          <PanelHeader title="Oath & Tenets" sub="Sworn at the Ember Gate, 4221 IIIs" glyph="flame" tone="ember" />
+          <div style={{ padding: 18 }}>
+            <div className="ao-italic" style={{ fontSize: 15, marginBottom: 14, color: 'var(--ink)' }}>
+              "I shall not let the ember die. I shall not lay down the watch. I shall not unmake what the Ordo has sealed."
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {[
+                { name: 'Vigil',     state: 'Held',     desc: 'No dawn passes without the rite.' },
+                { name: 'Mercy',     state: 'Held',     desc: 'A wounded foe disarmed is a foe redeemed.' },
+                { name: 'Memory',    state: 'Strained', desc: 'Sevenshore must not be forgotten.' },
+              ].map((t, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: 10, background: 'var(--abyss)', border: '1px solid var(--hairline)' }}>
+                  <Rune kind={t.state === 'Strained' ? 'cross-pat' : 'diamond-fill'} size={10} color={t.state === 'Strained' ? 'var(--ember)' : 'var(--gold)'} />
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <span className="ao-engraved" style={{ fontSize: 11 }}>Tenet · {t.name}</span>
+                      <span className="ao-overline" style={{ color: t.state === 'Strained' ? 'var(--ember)' : 'var(--gold-pale)' }}>{t.state}</span>
+                    </div>
+                    <div className="ao-italic" style={{ fontSize: 13, marginTop: 2 }}>{t.desc}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </Panel>
+      </div>
+
+      {/* ── ABILITIES + COMBAT ───────────────────────────── */}
+      <Divider glyph="diamond-fill">Abilities & Combat</Divider>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr) 280px', gap: 12 }}>
+        {ABILITIES.map((a) => <StatBlock key={a.label} {...a} />)}
+        <Panel padding={14}>
+          <div className="ao-overline" style={{ marginBottom: 8 }}>Saves & Tier</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+            {COMBAT.map((c) => (
+              <div key={c.label} style={{ padding: 8, background: 'var(--abyss)', border: '1px solid var(--rule)', textAlign: 'center' }}>
+                <div className="ao-overline" style={{ fontSize: 9 }}>{c.label}</div>
+                <div style={{ fontFamily: 'var(--font-serif)', fontSize: 22, color: 'var(--ink-bright)', lineHeight: 1.1 }}>{c.value}</div>
+                <div className="ao-codex" style={{ fontSize: 9 }}>{c.mod}</div>
+              </div>
+            ))}
+          </div>
+        </Panel>
+      </div>
+
+      {/* ── TABS BELOW ───────────────────────────────────── */}
+      <div style={{ marginTop: 24 }}>
+        <Tabs
+          active={tab}
+          onChange={setTab}
+          items={[
+            { id: 'combat',    label: 'Combat · Attacks' },
+            { id: 'spells',    label: 'Litanies & Spells' },
+            { id: 'features',  label: 'Class Features' },
+            { id: 'skills',    label: 'Skills' },
+            { id: 'biography', label: 'Biography' },
+          ]}
+        />
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 18, marginTop: 18 }}>
+        {/* LEFT — attacks + spells */}
+        <Panel padding={0} className="ao-frame">
+          <span className="ao-frame-c" />
+          <PanelHeader title="Sanctioned Strikes" sub="Three blades, three covenants" glyph="sword" right={<button className="ao-btn ao-btn--ghost ao-btn--sm"><Rune kind="plus-sm" size={9} /> Add</button>} />
+          <table className="ao-table">
+            <thead><tr>
+              <th>Weapon</th><th>Hit</th><th>Damage</th><th>Type</th><th>Range</th><th></th>
+            </tr></thead>
+            <tbody>
+              {ATTACKS.map((a, i) => (
+                <tr key={i}>
+                  <td style={{ color: 'var(--ink-bright)' }}>{a.name}{i === 0 && <span style={{ marginLeft: 8 }}><Chip tone="gold" glyph="diamond-fill">attuned</Chip></span>}</td>
+                  <td className="ao-num" style={{ color: 'var(--gold-pale)' }}>{a.hit}</td>
+                  <td className="ao-num">{a.dmg}</td>
+                  <td className="ao-italic">{a.type}</td>
+                  <td className="ao-codex">{a.range}</td>
+                  <td><button className="ao-btn ao-btn--sm">Roll</button></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          <Divider glyph="cross-pat">Litanies</Divider>
+
+          <div style={{ padding: '0 18px 18px' }}>
+            <div style={{ display: 'flex', gap: 8, marginBottom: 14, flexWrap: 'wrap' }}>
+              {['I','II','III','IV','V'].map((lvl, i) => (
+                <div key={lvl} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 10px', background: 'var(--abyss)', border: '1px solid var(--rule)' }}>
+                  <span className="ao-engraved" style={{ fontSize: 11, color: 'var(--gold-pale)' }}>{lvl}</span>
+                  <div style={{ display: 'flex', gap: 3 }}>
+                    {Array.from({ length: [4,3,3,1,0][i] || 0 }).map((_, j) => <span key={'on'+j} style={{ width: 8, height: 8, background: j < [3,2,1,0,0][i] ? 'var(--gold)' : 'transparent', border: '1px solid var(--brass)', transform: 'rotate(45deg)' }} />)}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 6 }}>
+              {SPELLS.map((s, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', background: s.prep ? 'rgba(176,141,78,0.04)' : 'var(--abyss)', border: '1px solid ' + (s.prep ? 'var(--rule-strong)' : 'var(--hairline)') }}>
+                  <span style={{ width: 22, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid ' + (s.prep ? 'var(--brass)' : 'var(--rule)') }}>
+                    <span className="ao-engraved" style={{ fontSize: 10, color: s.prep ? 'var(--gold-pale)' : 'var(--ink-faint)' }}>{s.lvl}</span>
+                  </span>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ color: 'var(--ink-bright)', fontSize: 13 }}>{s.name}</div>
+                    <div className="ao-codex">{s.sch}</div>
+                  </div>
+                  {s.prep && <Rune kind="diamond-fill" size={8} color="var(--gold)" />}
+                </div>
+              ))}
+            </div>
+          </div>
+        </Panel>
+
+        {/* RIGHT — features */}
+        <Panel padding={0} className="ao-frame">
+          <span className="ao-frame-c" />
+          <PanelHeader title="Class Features" sub="Granted by Oath & Tier" glyph="sigil-3" />
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            {FEATURES.map((f, i) => (
+              <div key={i} style={{ padding: 14, borderBottom: i < FEATURES.length - 1 ? '1px solid var(--hairline)' : 'none' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 4 }}>
+                  <span className="ao-h6" style={{ fontSize: 15 }}>{f.name}</span>
+                  <span className="ao-num" style={{ color: f.type === 'aura' ? 'var(--arcane)' : 'var(--gold-pale)', fontSize: 13 }}>{f.pool}</span>
+                </div>
+                <div className="ao-italic" style={{ fontSize: 13 }}>{f.desc}</div>
+              </div>
+            ))}
+          </div>
+        </Panel>
+      </div>
+    </AppShell>
+  );
+}
+
+Object.assign(window, { CharacterSheetScreen });
+
+/* global React, AppShell, TopBar, DEFAULT_NAV, Panel, PanelHeader, Rune, Divider, Sigil, Placeholder, Chip, CodexID, Bar, Tabs */
+// Arsenal / Inventory
+
+const EQUIPPED = [
+  { slot: 'Head',      item: 'Veiled Diadem',        rarity: 'epic',   glyph: 'helm' },
+  { slot: 'Mantle',    item: 'Cloak of Sealed Ash',  rarity: 'rare',   glyph: 'shield' },
+  { slot: 'Cuirass',   item: 'Plate of the Vow',     rarity: 'epic',   glyph: 'shield' },
+  { slot: 'Gauntlets', item: 'Bronze Vambraces',     rarity: 'rare',   glyph: 'square-rot' },
+  { slot: 'Greaves',   item: 'Pilgrim\'s Greaves',   rarity: 'normal', glyph: 'square' },
+  { slot: 'Boots',     item: 'Cinder-Boots',         rarity: 'normal', glyph: 'tri-inv' },
+  { slot: 'Main Hand', item: 'Greatsword of the Vow', rarity: 'epic',  glyph: 'sword' },
+  { slot: 'Off Hand',  item: '—',                    rarity: 'empty',  glyph: null },
+  { slot: 'Trinket I', item: 'Pendant of Ashes',     rarity: 'cursed', glyph: 'flame' },
+  { slot: 'Trinket II',item: 'Signet of the Ordo',   rarity: 'rare',   glyph: 'cir-dot' },
+  { slot: 'Belt',      item: 'Cingulum of Discipline', rarity: 'normal', glyph: 'square' },
+  { slot: 'Focus',     item: 'Reliquary of Memory',  rarity: 'epic',   glyph: 'sigil-2' },
+];
+
+const BAG = [
+  { name: 'Manacles of Silence', glyph: 'lock', count: 1, rarity: 'rare' },
+  { name: 'Phial of Pale Light', glyph: 'cir-dot', count: 3, rarity: 'normal' },
+  { name: 'Bandages, sanctified', glyph: 'plus', count: 8, rarity: 'normal' },
+  { name: 'Ration, ash-cured', glyph: 'square', count: 12, rarity: 'normal' },
+  { name: 'Iron Spike', glyph: 'tri', count: 22, rarity: 'normal' },
+  { name: 'Salt of Ordination', glyph: 'diamond', count: 2, rarity: 'rare' },
+  { name: 'Quill, archivist\'s', glyph: 'minus', count: 1, rarity: 'normal' },
+  { name: 'Tome, water-damaged', glyph: 'book', count: 1, rarity: 'cursed' },
+  { name: 'Wax, sealing', glyph: 'cir', count: 6, rarity: 'normal' },
+  { name: 'Bell, soundless', glyph: 'hex', count: 1, rarity: 'epic' },
+  { name: 'Brass Key, unidentified', glyph: 'cross', count: 1, rarity: 'rare' },
+  { name: 'Map, charred edge', glyph: 'scroll', count: 1, rarity: 'normal' },
+  { name: 'Vial, black ichor', glyph: 'flame', count: 1, rarity: 'cursed' },
+  { name: 'Censer, cracked', glyph: 'sigil-1', count: 1, rarity: 'normal' },
+];
+
+function slotClass(rarity) {
+  if (rarity === 'rare') return 'ao-slot ao-slot--rare';
+  if (rarity === 'epic') return 'ao-slot ao-slot--epic';
+  if (rarity === 'cursed') return 'ao-slot ao-slot--cursed';
+  return 'ao-slot';
+}
+function rarityColor(r) {
+  return r === 'rare' ? 'var(--arcane)' : r === 'epic' ? 'var(--gold)' : r === 'cursed' ? 'var(--ember)' : 'var(--ink-quiet)';
+}
+
+function ArsenalScreen() {
+  const navItems = DEFAULT_NAV.map((n) => ({ ...n, active: n.label === 'Arsenal' }));
+  const [selected, setSelected] = React.useState(6);
+
+  return (
+    <AppShell
+      nav={navItems}
+      topbar={
+        <TopBar
+          title="Arsenal & Reliquary"
+          breadcrumb="V-001 · Vellan Ostrau · loadout"
+          right={
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button className="ao-btn ao-btn--ghost"><Rune kind="filter" size={11} /> Filter</button>
+              <button className="ao-btn ao-btn--ghost"><Rune kind="arrow-r" size={11} /> Transfer</button>
+              <button className="ao-btn ao-btn--primary"><Rune kind="plus" size={11} /> Inscribe Relic</button>
+            </div>
+          }
+        />
+      }
+    >
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.3fr 1fr', gap: 18 }}>
+        {/* ── LEFT: equipped slots (paper-doll) ──────────── */}
+        <Panel padding={0} className="ao-frame">
+          <span className="ao-frame-c" />
+          <PanelHeader title="Bound to the Body" sub="12 slots · 3 attuned" glyph="shield" />
+          <div style={{ padding: 16 }}>
+            <div style={{ position: 'relative', height: 320, marginBottom: 12 }}>
+              <Placeholder style={{ position: 'absolute', inset: 0 }}>silhouette · plate vellan</Placeholder>
+              {/* anchor markers */}
+              {[ {t:14,l:'50%'},{t:64,l:14},{t:64,r:14},{t:130,l:'50%'},{t:200,l:14},{t:200,r:14},{t:260,l:'50%'} ].map((p, i) => (
+                <div key={i} style={{ position:'absolute', width: 36, height: 36, transform: 'translate(-50%, 0)', top: p.t, left: p.l, right: p.r, border: '1px solid var(--brass)', background: 'rgba(20,17,15,0.85)', display:'flex',alignItems:'center',justifyContent:'center', boxShadow: '0 0 10px rgba(0,0,0,0.6)' }}>
+                  <Rune kind={['helm','shield','sword','flame','square','tri-inv','cir-dot'][i] || 'square'} size={14} color="var(--gold-pale)" />
+                </div>
+              ))}
+            </div>
+            <Divider glyph="diamond-fill">Loadout</Divider>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
+              {EQUIPPED.map((it, i) => (
+                <button key={i} onClick={() => setSelected(i)} className={slotClass(it.rarity)} style={{ aspectRatio: '1', padding: 0, position: 'relative', outline: selected === i ? '1px solid var(--brass)' : 'none', outlineOffset: 1 }}>
+                  {it.glyph ? <Rune kind={it.glyph} size={20} color={rarityColor(it.rarity)} /> : <span style={{ color: 'var(--ink-ghost)', fontSize: 16 }}>+</span>}
+                </button>
+              ))}
+            </div>
+          </div>
+        </Panel>
+
+        {/* ── MIDDLE: bag grid ──────────────────────────── */}
+        <Panel padding={0} className="ao-frame">
+          <span className="ao-frame-c" />
+          <PanelHeader title="The Bag" sub="14 of 30 · weight 42 / 110 lb" glyph="scroll" right={
+            <div style={{ display: 'flex', gap: 4 }}>
+              <button className="ao-iconbtn" style={{ width: 28, height: 28 }}><Rune kind="search" size={12} /></button>
+              <button className="ao-iconbtn" style={{ width: 28, height: 28 }}><Rune kind="filter" size={12} /></button>
+            </div>
+          } />
+          <div style={{ padding: 16 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 6 }}>
+              {Array.from({ length: 30 }).map((_, i) => {
+                const item = BAG[i];
+                if (!item) return <div key={i} className="ao-slot" style={{ aspectRatio: '1' }} />;
+                return (
+                  <div key={i} className={slotClass(item.rarity)} style={{ aspectRatio: '1', position: 'relative' }} title={item.name}>
+                    <Rune kind={item.glyph} size={18} color={rarityColor(item.rarity)} />
+                    {item.count > 1 && (
+                      <span className="ao-num" style={{ position: 'absolute', bottom: 2, right: 4, fontSize: 10, color: 'var(--ink-bright)', textShadow: '0 1px 2px #000' }}>{item.count}</span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            <Divider glyph="diamond-fill">Coin & Wealth</Divider>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
+              {[['Platinum','PP',12,'var(--ink-bright)'],['Gold','GP',418,'var(--gold-pale)'],['Silver','SP',204,'var(--ink)'],['Copper','CP',88,'#a87858']].map((c, i) => (
+                <div key={i} style={{ padding: 10, background: 'var(--abyss)', border: '1px solid var(--rule)', display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <Rune kind="coin" size={16} color={c[3]} />
+                  <div style={{ flex: 1 }}>
+                    <div className="ao-overline" style={{ fontSize: 9 }}>{c[1]}</div>
+                    <div className="ao-num" style={{ color: c[3], fontSize: 18, fontFamily: 'var(--font-serif)' }}>{c[2]}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </Panel>
+
+        {/* ── RIGHT: selected item detail ───────────────── */}
+        <Panel padding={0} className="ao-frame">
+          <span className="ao-frame-c" />
+          <PanelHeader title="Relic Folio" sub="Greatsword of the Vow" glyph="sword" tone="ember" />
+          <div style={{ padding: 18 }}>
+            <Placeholder style={{ width: '100%', height: 180, border: '1px solid var(--rule)' }}>relic plate · two-handed blade, ash-etched</Placeholder>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 14 }}>
+              <Chip tone="gold" glyph="diamond-fill">Epic · Attuned</Chip>
+              <Chip tone="ember" glyph="flame">Bound</Chip>
+            </div>
+
+            <div className="ao-h5" style={{ marginTop: 12 }}>Greatsword of the Vow</div>
+            <div className="ao-italic" style={{ marginTop: 2 }}>Two-handed · forged at the Sealing of Ostrau</div>
+
+            <Divider glyph="diamond-fill" />
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
+              <div><div className="ao-overline">Damage</div><div className="ao-num" style={{ color: 'var(--ink-bright)', fontSize: 18 }}>2d6 + 4</div></div>
+              <div><div className="ao-overline">Type</div><div style={{ color: 'var(--ink-bright)' }}>Slash · Radiant</div></div>
+              <div><div className="ao-overline">Weight</div><div className="ao-num">6 lb</div></div>
+              <div><div className="ao-overline">Charges</div><div className="ao-num" style={{ color: 'var(--gold-pale)' }}>3 / 3</div></div>
+            </div>
+
+            <Divider glyph="cross-pat">Inscription</Divider>
+
+            <p className="ao-italic" style={{ fontSize: 14, color: 'var(--ink)' }}>
+              "Once per dawn, the bearer may invoke the Vow: their next strike deals +2d8 radiant and marks the target for the Ordo until the next nightfall."
+            </p>
+
+            <Divider glyph="diamond-fill">Provenance</Divider>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 12, color: 'var(--ink-quiet)' }}>
+              <div style={{ display: 'flex', gap: 10 }}><Rune kind="diamond" size={8} color="var(--bronze)" /><span>Forged · 4188 IIIs · Sevenshore High Smithy</span></div>
+              <div style={{ display: 'flex', gap: 10 }}><Rune kind="diamond" size={8} color="var(--bronze)" /><span>Sealed · Hand of Warden Kollesh</span></div>
+              <div style={{ display: 'flex', gap: 10 }}><Rune kind="diamond" size={8} color="var(--bronze)" /><span>Bound · to Vellan Ostrau, 4221</span></div>
+            </div>
+
+            <div style={{ display: 'flex', gap: 8, marginTop: 18 }}>
+              <button className="ao-btn ao-btn--primary" style={{ flex: 1 }}><Rune kind="check" size={10} /> Attune</button>
+              <button className="ao-btn ao-btn--ghost"><Rune kind="arrow-r" size={10} /></button>
+              <button className="ao-btn ao-btn--danger"><Rune kind="x" size={10} /></button>
+            </div>
+          </div>
+        </Panel>
+      </div>
+    </AppShell>
+  );
+}
+
+Object.assign(window, { ArsenalScreen });
+
+/* global React, AppShell, TopBar, DEFAULT_NAV, Panel, PanelHeader, Rune, Divider, Sigil, Placeholder, Chip, CodexID, Bar */
+// Team / Conclave management + Admin reference data
+
+const PARTY = [
+  { id: 'V-001', name: 'Vellan Ostrau',     role: 'Aegis',     class: 'Paladin · Embered Vow', lvl: 11, hp: 96,  hpMax: 112, mana: 'IV/IV', status: 'present', mark: 'leader' },
+  { id: 'V-002', name: 'Iskra Nine-Bell',   role: 'Knife',     class: 'Rogue · Archivist',     lvl: 9,  hp: 54,  hpMax: 68,  mana: '—',     status: 'present', mark: 'scout' },
+  { id: 'V-003', name: 'Brother Tomek',     role: 'Censer',    class: 'Cleric · Cold Light',   lvl: 10, hp: 78,  hpMax: 84,  mana: 'V/V',   status: 'present', mark: 'medic' },
+  { id: 'V-004', name: 'Marrowfen',         role: 'Verdant',   class: 'Druid · Pale Loam',     lvl: 8,  hp: 12,  hpMax: 72,  mana: 'III/V', status: 'wounded', mark: null },
+  { id: 'V-005', name: 'Asch the Pale',     role: 'Scribe',    class: 'Warlock · Quiet Aeon',  lvl: 12, hp: 64,  hpMax: 80,  mana: 'III/III',status: 'distant', mark: null },
+];
+
+const TIMELINE = [
+  { time: 'Dawn',  event: 'Tomek inscribes the morning rite',     glyph: 'plus' },
+  { time: '03:14', event: 'Vellan refuses the Pact of Aeon',      glyph: 'shield' },
+  { time: '02:48', event: 'Iskra recovers the brass key',         glyph: 'lock' },
+  { time: '02:01', event: 'Marrowfen fells, vitae 12 / 72',       glyph: 'flame' },
+  { time: '01:30', event: 'The Censer\'s third lamp goes out',     glyph: 'cross-pat' },
+  { time: 'Dusk',  event: 'Conclave departs Sevenshore',          glyph: 'arrow-r' },
+];
+
+function TeamScreen() {
+  const navItems = DEFAULT_NAV.map((n) => ({ ...n, active: n.label === 'Conclave' }));
+  return (
+    <AppShell
+      nav={navItems}
+      topbar={
+        <TopBar
+          title="Conclave of the Iron Vigil"
+          breadcrumb="Cohort VII · Chapter XI · current expedition"
+          right={
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button className="ao-btn ao-btn--ghost"><Rune kind="scroll" size={11} /> Conclave Charter</button>
+              <button className="ao-btn ao-btn--primary"><Rune kind="plus" size={11} /> Summon</button>
+            </div>
+          }
+        />
+      }
+    >
+      {/* Banner */}
+      <Panel padding={0} className="ao-frame" style={{ marginBottom: 20 }}>
+        <span className="ao-frame-c" />
+        <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr 1fr 1fr', alignItems: 'stretch' }}>
+          <div style={{ padding: '20px 24px', borderRight: '1px solid var(--rule)', display: 'flex', gap: 16, alignItems: 'center' }}>
+            <Sigil size={56} glyph="sigil-1" />
+            <div style={{ flex: 1 }}>
+              <CodexID>Conclave Charter · 4221-VIII</CodexID>
+              <div className="ao-h4" style={{ fontSize: 26, marginTop: 6 }}>The Iron Vigil</div>
+              <div className="ao-italic" style={{ marginTop: 2 }}>"We do not lower the lantern."</div>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <Chip tone="gold" glyph="diamond-fill">Sworn</Chip>
+              <Chip tone="ember" glyph="flame">Bleeding</Chip>
+            </div>
+          </div>
+          <div style={{ padding: 20, borderRight: '1px solid var(--rule)' }}>
+            <div className="ao-overline">Cohort Vitae</div>
+            <div style={{ marginTop: 10 }}><Bar value={304} max={416} /></div>
+            <div className="ao-codex" style={{ marginTop: 6 }}>304 / 416 across 5 souls</div>
+          </div>
+          <div style={{ padding: 20, borderRight: '1px solid var(--rule)' }}>
+            <div className="ao-overline">Coffer</div>
+            <div className="ao-num" style={{ color: 'var(--gold-pale)', fontSize: 26, fontFamily: 'var(--font-serif)', marginTop: 4 }}>1,842 GP</div>
+            <div className="ao-codex">14 PP · 88 SP · 408 CP</div>
+          </div>
+          <div style={{ padding: 20 }}>
+            <div className="ao-overline">Watch · Hours</div>
+            <div className="ao-num" style={{ color: 'var(--ink-bright)', fontSize: 26, fontFamily: 'var(--font-serif)', marginTop: 4 }}>02:14</div>
+            <div className="ao-codex">to next rite at dawn</div>
+          </div>
+        </div>
+      </Panel>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr', gap: 18 }}>
+        {/* Members */}
+        <Panel padding={0} className="ao-frame">
+          <span className="ao-frame-c" />
+          <PanelHeader title="The Sworn" sub="5 of 6 souls present" glyph="shield" />
+          <div>
+            {PARTY.map((p, i) => (
+              <div key={p.id} style={{ display: 'grid', gridTemplateColumns: '48px 1fr 1.2fr 1fr auto', gap: 14, alignItems: 'center', padding: '14px 18px', borderBottom: i < PARTY.length - 1 ? '1px solid var(--hairline)' : 'none', background: i === 0 ? 'rgba(176, 141, 78, 0.03)' : 'transparent' }}>
+                <Placeholder style={{ width: 48, height: 48, border: '1px solid var(--rule)' }}> </Placeholder>
+
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span className="ao-h6" style={{ fontSize: 15 }}>{p.name}</span>
+                    {p.mark === 'leader' && <Chip tone="gold" glyph="diamond-fill">aegis</Chip>}
+                    {p.mark === 'scout' && <Chip tone="rune" glyph="eye">scout</Chip>}
+                    {p.mark === 'medic' && <Chip tone="gold" glyph="plus">medic</Chip>}
+                  </div>
+                  <div className="ao-codex" style={{ marginTop: 2 }}>{p.id} · {p.role}</div>
+                </div>
+
+                <div>
+                  <div className="ao-italic" style={{ fontSize: 13, color: 'var(--ink)' }}>{p.class}</div>
+                  <div className="ao-codex">Tier · level {p.lvl}</div>
+                </div>
+
+                <div>
+                  <Bar value={p.hp} max={p.hpMax} tone={p.hp < p.hpMax * 0.3 ? 'ember' : 'ember'} showNumbers={false} />
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
+                    <span className="ao-codex">{p.hp}/{p.hpMax}</span>
+                    <span className="ao-codex" style={{ color: 'var(--arcane)' }}>{p.mana}</span>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: p.status === 'wounded' ? 'var(--ember)' : p.status === 'distant' ? 'var(--ink-faint)' : 'var(--gold-pale)' }}>
+                    <Rune kind={p.status === 'wounded' ? 'flame' : p.status === 'distant' ? 'cross' : 'cir-dot'} size={10} />
+                    <span className="ao-overline" style={{ color: 'inherit' }}>{p.status}</span>
+                  </span>
+                  <button className="ao-iconbtn" style={{ width: 28, height: 28 }}><Rune kind="dots" size={12} /></button>
+                </div>
+              </div>
+            ))}
+            <div style={{ padding: 14, textAlign: 'center', background: 'var(--abyss)', borderTop: '1px solid var(--rule)' }}>
+              <button className="ao-btn ao-btn--ghost ao-btn--block"><Rune kind="plus" size={11} /> One Seat Remains · Issue Invitation</button>
+            </div>
+          </div>
+        </Panel>
+
+        {/* Timeline */}
+        <Panel padding={0} className="ao-frame">
+          <span className="ao-frame-c" />
+          <PanelHeader title="Day-Ledger" sub="01 Lichtmas, 4222" glyph="scroll" />
+          <div style={{ padding: '6px 0' }}>
+            {TIMELINE.map((t, i) => (
+              <div key={i} style={{ display: 'flex', gap: 14, padding: '10px 18px', position: 'relative' }}>
+                <div style={{ position: 'absolute', left: 30, top: 0, bottom: 0, width: 1, background: i === TIMELINE.length - 1 ? 'transparent' : 'var(--rule)' }} />
+                <div style={{ flexShrink: 0, width: 24, height: 24, border: '1px solid var(--brass)', background: 'var(--abyss)', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', zIndex: 1 }}>
+                  <Rune kind={t.glyph} size={11} color="var(--gold-pale)" />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div className="ao-overline">{t.time}</div>
+                  <div style={{ color: 'var(--ink)', fontSize: 13, marginTop: 2 }}>{t.event}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Panel>
+      </div>
+    </AppShell>
+  );
+}
+
+// ========================================================================
+// Admin reference data screen
+// ========================================================================
+const TABLES = [
+  { name: 'Classes',     count: 13, edited: '2d ago', tag: 'core' },
+  { name: 'Subclasses',  count: 41, edited: '4h ago', tag: 'core' },
+  { name: 'Races',       count: 28, edited: '7d ago', tag: 'core' },
+  { name: 'Feats',       count: 67, edited: '5h ago', tag: 'core', sel: true },
+  { name: 'Spells',      count: 412, edited: '12h ago', tag: 'spells' },
+  { name: 'Conditions',  count: 24, edited: '3w ago', tag: 'rules' },
+  { name: 'Items · Mundane', count: 184, edited: '1d ago', tag: 'items' },
+  { name: 'Items · Relic',   count: 88, edited: '6h ago', tag: 'items' },
+  { name: 'Backgrounds', count: 22, edited: '1w ago', tag: 'core' },
+  { name: 'Languages',   count: 19, edited: '—',       tag: 'core' },
+];
+
+const FEATS = [
+  { id: 'F-014', name: 'Sentinel of the Ash',         tier: 'I',  prereq: 'Heavy Armour proficiency', ed: 'Vellan, 4d ago', flag: 'sealed' },
+  { id: 'F-015', name: 'Penitent\'s Hand',            tier: 'II', prereq: 'CHA 13+',                 ed: 'Tomek, 1w ago',   flag: 'draft' },
+  { id: 'F-016', name: 'Witness of the Quiet Hour',   tier: 'III',prereq: 'Oath: Pale Witness',      ed: 'Asch, 12h ago',   flag: 'sealed' },
+  { id: 'F-017', name: 'Inkbinder',                   tier: 'I',  prereq: 'INT 13+, prof. Calligraphy', ed: 'Asch, 2d ago',  flag: 'review' },
+  { id: 'F-018', name: 'Reliquary Bearer',            tier: 'II', prereq: 'Attune ≥ 1 relic',        ed: 'Vellan, 6h ago',  flag: 'sealed' },
+  { id: 'F-019', name: 'Salt-Bound',                  tier: 'III',prereq: 'Oath: Salted Page',       ed: '—',               flag: 'draft' },
+  { id: 'F-020', name: 'Vow of Silence',              tier: 'II', prereq: 'WIS 13+',                 ed: 'Tomek, 4h ago',   flag: 'sealed' },
+];
+
+function flagChip(flag) {
+  if (flag === 'sealed') return <Chip tone="gold" glyph="diamond-fill">sealed</Chip>;
+  if (flag === 'review') return <Chip tone="ember" glyph="eye">in review</Chip>;
+  return <Chip tone="rune" glyph="minus">draft</Chip>;
+}
+
+function AdminScreen() {
+  const navItems = DEFAULT_NAV.map((n) => ({ ...n, active: n.label === 'Archive' }));
+  return (
+    <AppShell
+      nav={navItems}
+      topbar={
+        <TopBar
+          title="Master Archive"
+          breadcrumb="Reference data · Feats"
+          right={
+            <div style={{ display: 'flex', gap: 10 }}>
+              <Chip tone="ember" glyph="flame">Archivist privileges</Chip>
+              <button className="ao-btn ao-btn--ghost"><Rune kind="scroll" size={11} /> Audit log</button>
+              <button className="ao-btn ao-btn--primary"><Rune kind="plus" size={11} /> New Entry</button>
+            </div>
+          }
+        />
+      }
+    >
+      <div style={{ display: 'grid', gridTemplateColumns: '260px 1fr', gap: 18, height: 'calc(100% - 4px)' }}>
+        {/* Side: tables */}
+        <Panel padding={0} className="ao-frame">
+          <span className="ao-frame-c" />
+          <PanelHeader title="Reference Tomes" sub="10 tables · 950 entries" glyph="book" />
+          <div className="ao-scroll" style={{ overflow: 'auto', maxHeight: 'calc(100% - 56px)' }}>
+            {TABLES.map((t, i) => (
+              <button key={i} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '11px 16px', borderBottom: '1px solid var(--hairline)', background: t.sel ? 'rgba(176, 141, 78, 0.06)' : 'transparent', borderLeft: t.sel ? '2px solid var(--gold)' : '2px solid transparent', textAlign: 'left', cursor: 'pointer', color: 'var(--ink)' }}>
+                <Rune kind="diamond-fill" size={8} color={t.sel ? 'var(--gold)' : 'var(--bronze)'} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ color: t.sel ? 'var(--ink-bright)' : 'var(--ink)', fontSize: 14 }}>{t.name}</div>
+                  <div className="ao-codex">{t.count} entries · ed. {t.edited}</div>
+                </div>
+                <Rune kind="chev-r" size={10} color="var(--ink-faint)" />
+              </button>
+            ))}
+          </div>
+        </Panel>
+
+        {/* Main: table view */}
+        <Panel padding={0} className="ao-frame">
+          <span className="ao-frame-c" />
+          <PanelHeader title="Tome of Feats" sub="67 entries · 4 in review" glyph="scroll" right={
+            <div style={{ display: 'flex', gap: 8 }}>
+              <input className="ao-input" placeholder="Search feats…" style={{ width: 220, padding: '6px 12px' }} />
+              <button className="ao-btn ao-btn--sm ao-btn--ghost"><Rune kind="filter" size={9} /> Filter</button>
+            </div>
+          } />
+
+          <div style={{ display: 'flex', gap: 14, padding: '12px 18px', borderBottom: '1px solid var(--hairline)', alignItems: 'center', background: 'rgba(0,0,0,0.2)' }}>
+            <Chip glyph="check" tone="gold">All · 67</Chip>
+            <Chip glyph="diamond" tone="rune">Sealed · 58</Chip>
+            <Chip glyph="eye" tone="ember">In review · 4</Chip>
+            <Chip glyph="minus" tone="rune">Draft · 5</Chip>
+            <div style={{ flex: 1 }} />
+            <span className="ao-codex">sorted by · most recent</span>
+          </div>
+
+          <table className="ao-table">
+            <thead><tr>
+              <th style={{ width: 36 }}><span style={{ width: 14, height: 14, border: '1px solid var(--rule)', display: 'inline-block' }} /></th>
+              <th>Codex №</th>
+              <th>Name</th>
+              <th>Tier</th>
+              <th>Prerequisite</th>
+              <th>Last Edit</th>
+              <th>State</th>
+              <th></th>
+            </tr></thead>
+            <tbody>
+              {FEATS.map((f, i) => (
+                <tr key={f.id} style={{ background: i === 2 ? 'rgba(176, 141, 78, 0.04)' : 'transparent' }}>
+                  <td><span style={{ width: 14, height: 14, border: '1px solid var(--rule)', display: 'inline-block', background: i === 2 ? 'var(--bronze)' : 'transparent' }} /></td>
+                  <td><CodexID>{f.id}</CodexID></td>
+                  <td style={{ color: 'var(--ink-bright)' }}>{f.name}</td>
+                  <td><span className="ao-engraved" style={{ fontSize: 11, color: 'var(--gold-pale)' }}>{f.tier}</span></td>
+                  <td className="ao-italic">{f.prereq}</td>
+                  <td className="ao-codex">{f.ed}</td>
+                  <td>{flagChip(f.flag)}</td>
+                  <td><button className="ao-iconbtn" style={{ width: 26, height: 26, border: 'none' }}><Rune kind="dots" size={11} /></button></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '14px 18px', borderTop: '1px solid var(--rule)', background: 'var(--abyss)' }}>
+            <span className="ao-codex">Page 3 of 10 · 67 entries</span>
+            <div style={{ display: 'flex', gap: 4 }}>
+              <button className="ao-iconbtn" style={{ width: 28, height: 28 }}><Rune kind="arrow-l" size={11} /></button>
+              {[1,2,3,4,5,'…',10].map((p, i) => (
+                <button key={i} className="ao-iconbtn" style={{ width: 28, height: 28, color: p === 3 ? 'var(--gold-pale)' : 'var(--ink-faint)', borderColor: p === 3 ? 'var(--brass)' : 'var(--rule)' }}>{p}</button>
+              ))}
+              <button className="ao-iconbtn" style={{ width: 28, height: 28 }}><Rune kind="arrow-r" size={11} /></button>
+            </div>
+          </div>
+        </Panel>
+      </div>
+    </AppShell>
+  );
+}
+
+Object.assign(window, { TeamScreen, AdminScreen });
+
+/* global React, Backdrop, Panel, PanelHeader, Rune, Divider, Sigil, Placeholder, Chip, CodexID, Bar */
+// Progression — Level-up ceremony, reward selection, subclass selection
+
+// ========================================================================
+// 1. LEVEL-UP CEREMONY — the sacred modal
+// ========================================================================
+function LevelUpModal() {
+  return (
+    <div style={{ position: 'relative', width: '100%', height: '100%', background: 'var(--void)', overflow: 'hidden' }}>
+      {/* Dimmed background — the app behind, ghosted */}
+      <div style={{ position: 'absolute', inset: 0, opacity: 0.18 }}>
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, var(--stone), var(--abyss))' }} />
+        <div style={{ position: 'absolute', top: 60, left: 60, right: 60, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
+          {Array.from({ length: 6 }).map((_, i) => <div key={i} style={{ height: 90, background: 'var(--panel)', border: '1px solid var(--hairline)' }} />)}
+        </div>
+      </div>
+
+      {/* Heavy vignette */}
+      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(50% 40% at 50% 45%, transparent 0%, rgba(0,0,0,0.85) 80%)' }} />
+
+      {/* Atmospheric ember glow */}
+      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(40% 30% at 50% 45%, rgba(176, 141, 78, 0.12), transparent 70%)' }} />
+
+      {/* Grain */}
+      <div className="ao-grain" style={{ position: 'absolute', inset: 0 }} />
+
+      {/* The ceremony scroll */}
+      <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 40 }}>
+        <div style={{ width: 720, maxWidth: '100%' }}>
+          {/* Top sigil */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 18 }}>
+            <Sigil size={88} glyph="sigil-2" />
+            <div className="ao-codex ao-flicker" style={{ marginTop: 12, color: 'var(--gold-pale)' }}>— RITE OF ASCENT —</div>
+          </div>
+
+          {/* The codex panel */}
+          <Panel padding={0} frame style={{ background: 'linear-gradient(180deg, #221d1a 0%, #14110f 100%)', position: 'relative', boxShadow: '0 4px 0 rgba(0,0,0,0.6), 0 32px 80px rgba(0,0,0,0.8), 0 0 60px rgba(176, 141, 78, 0.06)' }}>
+            <span className="ao-frame-c" />
+
+            {/* Decorative top band */}
+            <div style={{ padding: '24px 48px 0', textAlign: 'center' }}>
+              <div className="ao-codex" style={{ color: 'var(--ink-faint)' }}>Cohort VII · Folio V-001</div>
+              <div className="ao-engraved" style={{ fontSize: 13, color: 'var(--ink-quiet)', marginTop: 6 }}>By the witnessing of the Ordo</div>
+              <Divider glyph="diamond-fill" />
+            </div>
+
+            {/* Number reveal */}
+            <div style={{ padding: '0 48px', textAlign: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 32 }}>
+                <div style={{ textAlign: 'right' }}>
+                  <div className="ao-overline">Previous</div>
+                  <div style={{ fontFamily: 'var(--font-serif)', fontSize: 64, color: 'var(--ink-faint)', lineHeight: 1, fontStyle: 'italic' }}>XI</div>
+                </div>
+                <Rune kind="arrow-r" size={28} color="var(--gold)" />
+                <div className="ao-breathe">
+                  <div style={{ fontFamily: 'var(--font-display)', fontSize: 120, fontWeight: 700, color: 'var(--gold-pale)', lineHeight: 1, textShadow: '0 0 32px rgba(176, 141, 78, 0.4)' }}>XII</div>
+                </div>
+              </div>
+              <div className="ao-h4" style={{ marginTop: 18, fontStyle: 'italic' }}>The Twelfth Mantle is offered</div>
+              <p className="ao-italic" style={{ fontSize: 16, marginTop: 8, color: 'var(--ink)', maxWidth: 540, margin: '8px auto 0' }}>
+                Vellan Ostrau, the Ordo recognises thy vigil. Three rights may now be claimed — chosen with care, sealed for the records of the Eleventh Chapter.
+              </p>
+            </div>
+
+            {/* Grants summary */}
+            <div style={{ padding: 32, paddingTop: 24 }}>
+              <Divider glyph="diamond-fill">Granted by the Ascent</Divider>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginTop: 14 }}>
+                {[
+                  { label: 'Vitae', value: '+8', sub: 'Hit Points', glyph: 'flame', tone: 'var(--ember)' },
+                  { label: 'Litany', value: 'IV', sub: 'Spell slot earned', glyph: 'scroll', tone: 'var(--arcane)' },
+                  { label: 'Aspect', value: '+1', sub: 'Ability score', glyph: 'sigil-3', tone: 'var(--gold)' },
+                ].map((g, i) => (
+                  <div key={i} style={{ padding: 16, background: 'var(--abyss)', border: '1px solid var(--rule-strong)', textAlign: 'center', position: 'relative' }}>
+                    <Rune kind={g.glyph} size={22} color={g.tone} />
+                    <div style={{ fontFamily: 'var(--font-serif)', fontSize: 32, color: 'var(--ink-bright)', lineHeight: 1, marginTop: 6 }}>{g.value}</div>
+                    <div className="ao-overline" style={{ marginTop: 4 }}>{g.label}</div>
+                    <div className="ao-codex" style={{ fontSize: 10, marginTop: 2 }}>{g.sub}</div>
+                  </div>
+                ))}
+              </div>
+
+              <Divider glyph="cross-pat">Rites yet to be chosen</Divider>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {[
+                  { name: 'Select Feat or Aspect', state: 'pending' },
+                  { name: 'Inscribe new Litany of IV', state: 'pending' },
+                  { name: 'Reaffirm Oath of the Embered Vow', state: 'complete' },
+                ].map((r, i) => (
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px', background: 'var(--abyss)', border: '1px solid ' + (r.state === 'complete' ? 'rgba(176, 141, 78, 0.4)' : 'var(--hairline)') }}>
+                    <span style={{ width: 22, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid ' + (r.state === 'complete' ? 'var(--brass)' : 'var(--rule)'), background: r.state === 'complete' ? 'var(--bronze)' : 'transparent' }}>
+                      <Rune kind={r.state === 'complete' ? 'check' : 'diamond'} size={10} color={r.state === 'complete' ? 'var(--ink-bright)' : 'var(--ink-faint)'} />
+                    </span>
+                    <span style={{ flex: 1, color: r.state === 'complete' ? 'var(--ink-quiet)' : 'var(--ink-bright)', textDecoration: r.state === 'complete' ? 'line-through' : 'none' }}>{r.name}</span>
+                    <span className="ao-overline" style={{ color: r.state === 'complete' ? 'var(--gold-pale)' : 'var(--ember)' }}>{r.state === 'complete' ? 'Sealed' : 'Open'}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div style={{ display: 'flex', gap: 12, marginTop: 24, justifyContent: 'space-between', alignItems: 'center' }}>
+                <button className="ao-btn ao-btn--ghost"><Rune kind="arrow-l" size={11} /> Postpone</button>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <span className="ao-codex">Step 1 of 3</span>
+                  <span style={{ display: 'flex', gap: 4 }}>
+                    <span style={{ width: 16, height: 4, background: 'var(--gold)' }} />
+                    <span style={{ width: 16, height: 4, background: 'var(--rule)' }} />
+                    <span style={{ width: 16, height: 4, background: 'var(--rule)' }} />
+                  </span>
+                </div>
+                <button className="ao-btn ao-btn--primary ao-btn--lg"><Rune kind="diamond-fill" size={9} /> Proceed to Rite</button>
+              </div>
+            </div>
+
+            {/* Footer ribbon */}
+            <div style={{ padding: '12px 24px', borderTop: '1px solid var(--rule)', background: 'var(--abyss)', display: 'flex', justifyContent: 'space-between', color: 'var(--ink-faint)' }}>
+              <span className="ao-codex">Witnessed by · Warden Kollesh, Brother Tomek</span>
+              <span className="ao-codex">Sealed at 04:14 by candle and seal</span>
+            </div>
+          </Panel>
+
+          <div style={{ textAlign: 'center', marginTop: 18 }}>
+            <span className="ao-codex" style={{ color: 'var(--ink-faint)' }}>Press <span style={{ color: 'var(--gold-pale)' }}>esc</span> to defer · the rite remains open until dawn</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ========================================================================
+// 2. REWARD SELECTION — choose one of three relic cards
+// ========================================================================
+const REWARDS = [
+  {
+    name: 'Ember-Marked Plate',
+    type: 'Heavy Armour · Relic',
+    tone: 'gold',
+    rarity: 'Epic · Bound',
+    glyph: 'shield',
+    desc: 'Worn through the Sack of Ostrau. Each scratch is a name remembered.',
+    stats: [['AC', '+1 plate'], ['Vitae', '+12'], ['Save', '+1 con']],
+    inscription: 'The wearer cannot be moved against their will while standing on consecrated ground.',
+  },
+  {
+    name: 'The Quiet Aeon',
+    type: 'Litany · Pact-Touched',
+    tone: 'arcane',
+    rarity: 'Epic · Forbidden',
+    glyph: 'sigil-1',
+    desc: 'A spell whispered into a candle that has never been lit. Speak it backwards.',
+    stats: [['Slot', 'IV'], ['Range', '60 ft'], ['Save', 'WIS · DC 16']],
+    inscription: 'All sound within the aeon becomes one slow heartbeat. Hostile creatures roll initiative twice and take the lower.',
+  },
+  {
+    name: 'The Censer of Last Light',
+    type: 'Trinket · Channeled',
+    tone: 'ember',
+    rarity: 'Cursed · Hungering',
+    glyph: 'flame',
+    desc: 'A brass thurible that holds the breath of a saint. It is heavier when you are afraid.',
+    stats: [['Charges', '3 / dusk'], ['Range', '15 ft'], ['Cost', '1 oath frayed']],
+    inscription: 'Once per long rest, fill the censer with prayer. All allies within regain 4d6 vitae; you lose proficiency in your next save.',
+  },
+];
+
+function RewardSelectionScreen() {
+  const [picked, setPicked] = React.useState(1);
+  return (
+    <Backdrop dark>
+      <div style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: '40px 56px' }}>
+        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(60% 50% at 50% 30%, rgba(176, 141, 78, 0.08), transparent 60%)' }} />
+
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 8, position: 'relative' }}>
+          <Sigil size={48} glyph="sigil-3" />
+          <div style={{ flex: 1 }}>
+            <div className="ao-overline">Rite of Ascent · Step II of III</div>
+            <div className="ao-h3" style={{ fontSize: 32, marginTop: 4 }}>Choose Thy Boon</div>
+          </div>
+          <div className="ao-codex">V-001 · Vellan Ostrau · Folio open</div>
+          <button className="ao-iconbtn"><Rune kind="x" size={14} /></button>
+        </div>
+
+        <p className="ao-italic" style={{ fontSize: 16, color: 'var(--ink-quiet)', maxWidth: 720, position: 'relative' }}>
+          The Ordo lays before thee three relics, one of which thou shalt seal to thy person. The unchosen are returned to the Vault and forgotten until thy next ascent.
+        </p>
+
+        <Divider glyph="diamond-fill">Three Offerings</Divider>
+
+        {/* Cards */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 22, flex: 1, marginBottom: 24, position: 'relative' }}>
+          {REWARDS.map((r, i) => {
+            const isPicked = picked === i;
+            const toneColor = r.tone === 'arcane' ? 'var(--arcane)' : r.tone === 'ember' ? 'var(--ember)' : 'var(--gold)';
+            return (
+              <Panel
+                key={i}
+                padding={0}
+                frame
+                onClick={() => setPicked(i)}
+                style={{
+                  cursor: 'pointer',
+                  position: 'relative',
+                  transform: isPicked ? 'translateY(-6px)' : 'none',
+                  transition: 'transform 300ms cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 300ms',
+                  boxShadow: isPicked
+                    ? `var(--shadow-inset), 0 8px 0 rgba(0,0,0,0.6), 0 24px 60px rgba(0,0,0,0.65), 0 0 24px ${toneColor === 'var(--arcane)' ? 'rgba(90,142,148,0.25)' : toneColor === 'var(--ember)' ? 'rgba(179,70,26,0.25)' : 'rgba(176,141,78,0.25)'}`
+                    : 'var(--shadow-inset), var(--shadow-low)',
+                  borderColor: isPicked ? toneColor : undefined,
+                  background: isPicked
+                    ? `linear-gradient(180deg, #2a241f 0%, var(--panel) 100%)`
+                    : `linear-gradient(180deg, var(--panel-raised) 0%, var(--panel) 100%)`,
+                }}
+              >
+                <span className="ao-frame-c" />
+                <div style={{ padding: '14px 18px', borderBottom: '1px solid var(--rule)', display: 'flex', justifyContent: 'space-between' }}>
+                  <CodexID>{r.rarity}</CodexID>
+                  {isPicked ? (
+                    <Chip glyph="check" tone={r.tone === 'arcane' ? 'arcane' : r.tone === 'ember' ? 'ember' : 'gold'}>Sealing</Chip>
+                  ) : (
+                    <span className="ao-codex">click to seal</span>
+                  )}
+                </div>
+
+                <div style={{ padding: 20, textAlign: 'center' }}>
+                  <div style={{ width: 130, height: 130, margin: '0 auto', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid ' + toneColor, background: `radial-gradient(circle at 50% 30%, rgba(20,17,15,0.5), var(--abyss))`, boxShadow: `inset 0 0 24px ${isPicked ? toneColor : 'rgba(0,0,0,0.5)'}` }}>
+                    <div style={{ position: 'absolute', inset: 6, border: '1px solid var(--hairline)' }} />
+                    <Rune kind={r.glyph} size={56} color={toneColor} />
+                  </div>
+
+                  <div className="ao-overline" style={{ marginTop: 16, color: toneColor }}>{r.type}</div>
+                  <div className="ao-h5" style={{ marginTop: 4, fontSize: 22 }}>{r.name}</div>
+                  <div className="ao-italic" style={{ marginTop: 6, fontSize: 13 }}>{r.desc}</div>
+                </div>
+
+                <div style={{ padding: '0 18px' }}>
+                  <Divider glyph="diamond" color={toneColor} />
+                </div>
+
+                <div style={{ padding: '8px 18px 14px', display: 'flex', justifyContent: 'space-between' }}>
+                  {r.stats.map((s, j) => (
+                    <div key={j} style={{ textAlign: 'center' }}>
+                      <div className="ao-overline">{s[0]}</div>
+                      <div className="ao-num" style={{ color: 'var(--ink-bright)', fontSize: 17, fontFamily: 'var(--font-serif)' }}>{s[1]}</div>
+                    </div>
+                  ))}
+                </div>
+
+                <div style={{ padding: '12px 18px', background: 'var(--abyss)', borderTop: '1px solid var(--rule)' }}>
+                  <div className="ao-overline" style={{ marginBottom: 4 }}>Inscription</div>
+                  <div className="ao-italic" style={{ fontSize: 12, color: 'var(--ink)' }}>"{r.inscription}"</div>
+                </div>
+              </Panel>
+            );
+          })}
+        </div>
+
+        {/* Footer ribbon */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 20px', background: 'var(--abyss)', border: '1px solid var(--rule-strong)', position: 'relative' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <Rune kind="lock" size={14} color="var(--ember)" />
+            <span className="ao-italic" style={{ fontSize: 13 }}>This choice cannot be unwritten. The unchosen will not return.</span>
+          </div>
+          <div style={{ display: 'flex', gap: 10 }}>
+            <button className="ao-btn ao-btn--ghost"><Rune kind="arrow-l" size={11} /> Back to Rite</button>
+            <button className="ao-btn ao-btn--primary ao-btn--lg">
+              <Rune kind="diamond-fill" size={9} />
+              Seal · {REWARDS[picked].name}
+            </button>
+          </div>
+        </div>
+      </div>
+    </Backdrop>
+  );
+}
+
+// ========================================================================
+// 3. SUBCLASS SELECTION
+// ========================================================================
+const SUBCLASSES = [
+  { name: 'Oath of the Embered Vow', tag: 'oath · sacred', glyph: 'flame',     desc: 'A vow whispered to the dying coal — that no flame shall be allowed to fail unwitnessed.', features: ['Searing Smite at I', 'Aura of Embered Vow', 'Wreath of the Last Light'], tone: 'ember', selected: true },
+  { name: 'Oath of the Pale Witness', tag: 'oath · grave',  glyph: 'eye',       desc: 'A vow taken at the foot of the Pale Statue — to behold what others refuse to record.',         features: ['Reveal Unholy', 'Aura of Cold Sight', 'Witness\'s Mark'],         tone: 'arcane', selected: false },
+  { name: 'Oath of the Salted Page',  tag: 'oath · archive',glyph: 'book',      desc: 'A vow inscribed in salt upon the Charter — to preserve the word against forgetfulness.',     features: ['Bind Memory', 'Aura of the Sealed Page', 'Compelled Confession'], tone: 'gold',   selected: false },
+];
+
+function SubclassScreen() {
+  const [picked, setPicked] = React.useState(0);
+  return (
+    <Backdrop dark>
+      <div style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: '36px 48px', position: 'relative' }}>
+        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(50% 50% at 30% 30%, rgba(179, 70, 26, 0.05), transparent 60%)' }} />
+
+        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 16, marginBottom: 14, position: 'relative' }}>
+          <div style={{ flex: 1 }}>
+            <div className="ao-overline">Folio V-001 · Tier II Ascent · Subclass Rite</div>
+            <div className="ao-h2" style={{ marginTop: 6, fontSize: 44 }}>The Choosing of Oaths</div>
+            <p className="ao-italic" style={{ marginTop: 6, fontSize: 16, maxWidth: 720 }}>
+              At the third ascent, a Paladin must bind themselves to a sworn calling. The Oath cannot be exchanged, only deepened or broken — and the breaking is its own ruin.
+            </p>
+          </div>
+          <button className="ao-btn ao-btn--ghost"><Rune kind="book" size={11} /> Compare Tomes</button>
+        </div>
+
+        <Divider glyph="diamond-fill" />
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 18, flex: 1, position: 'relative' }}>
+          {SUBCLASSES.map((s, i) => {
+            const isPicked = picked === i;
+            const tone = s.tone === 'arcane' ? 'var(--arcane)' : s.tone === 'ember' ? 'var(--ember)' : 'var(--gold)';
+            return (
+              <Panel
+                key={i}
+                padding={0}
+                frame
+                onClick={() => setPicked(i)}
+                style={{
+                  cursor: 'pointer',
+                  borderColor: isPicked ? tone : undefined,
+                  background: isPicked ? `linear-gradient(180deg, rgba(176, 141, 78, 0.06) 0%, var(--panel) 100%)` : undefined,
+                  transition: 'border-color 200ms',
+                }}
+              >
+                <span className="ao-frame-c" />
+                <div style={{ position: 'relative', height: 140, borderBottom: '1px solid var(--rule)', overflow: 'hidden' }}>
+                  <Placeholder>banner · iconography of {s.name}</Placeholder>
+                  <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(180deg, transparent 0%, var(--panel) 100%)` }} />
+                  <div style={{ position: 'absolute', top: 14, left: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <Sigil size={36} glyph={s.glyph} color={tone} />
+                  </div>
+                  <div style={{ position: 'absolute', bottom: 14, left: 14, right: 14 }}>
+                    <div className="ao-overline" style={{ color: tone }}>{s.tag}</div>
+                    <div className="ao-h5" style={{ fontSize: 22, marginTop: 2 }}>{s.name}</div>
+                  </div>
+                  {isPicked && (
+                    <div style={{ position: 'absolute', top: 14, right: 14 }}>
+                      <Chip glyph="diamond-fill" tone={s.tone === 'arcane' ? 'arcane' : s.tone === 'ember' ? 'ember' : 'gold'}>Considering</Chip>
+                    </div>
+                  )}
+                </div>
+
+                <div style={{ padding: 18 }}>
+                  <p className="ao-italic" style={{ fontSize: 14, color: 'var(--ink)' }}>"{s.desc}"</p>
+                </div>
+
+                <div style={{ padding: '0 18px' }}><Divider glyph="diamond" color={tone}>Granted Rites</Divider></div>
+
+                <div style={{ padding: '0 18px 18px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  {s.features.map((f, j) => (
+                    <div key={j} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', background: 'var(--abyss)', border: '1px solid var(--hairline)' }}>
+                      <span className="ao-engraved" style={{ fontSize: 10, color: tone, minWidth: 28 }}>{['III','VII','XV','XX'][j]}</span>
+                      <span style={{ fontSize: 13, color: 'var(--ink-bright)' }}>{f}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <div style={{ padding: '12px 18px', background: 'var(--abyss)', borderTop: '1px solid var(--rule)', display: 'flex', justifyContent: 'space-between' }}>
+                  <span className="ao-codex">Sworn by · 412 souls</span>
+                  <Rune kind="chev-r" size={12} color={isPicked ? tone : 'var(--ink-faint)'} />
+                </div>
+              </Panel>
+            );
+          })}
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 18, position: 'relative' }}>
+          <div className="ao-italic" style={{ color: 'var(--ink-quiet)' }}>"To swear is to be sworn back to. Choose what shall sworn thee."</div>
+          <div style={{ display: 'flex', gap: 10 }}>
+            <button className="ao-btn ao-btn--ghost">Defer Until Dawn</button>
+            <button className="ao-btn ao-btn--primary ao-btn--lg"><Rune kind="diamond-fill" size={9} /> Take the Oath</button>
+          </div>
+        </div>
+      </div>
+    </Backdrop>
+  );
+}
+
+Object.assign(window, { LevelUpModal, RewardSelectionScreen, SubclassScreen });
+
+/* global React, Backdrop, Panel, PanelHeader, Rune, Divider, Sigil, Placeholder, Chip, CodexID, Bar, StatBlock */
+// Mobile adaptation + Design system overview card
+
+function MobileSheet() {
+  return (
+    <Backdrop>
+      {/* Status bar */}
+      <div style={{ height: 40, padding: '0 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--hairline)', background: 'var(--abyss)' }}>
+        <span className="ao-codex" style={{ color: 'var(--ink-bright)' }}>04:14</span>
+        <div style={{ display: 'flex', gap: 6, color: 'var(--ink-quiet)' }}>
+          <Rune kind="diamond-fill" size={8} color="var(--gold)" />
+          <Rune kind="cir-dot" size={9} />
+          <Rune kind="square" size={9} />
+        </div>
+      </div>
+
+      {/* Top bar */}
+      <div style={{ padding: '14px 18px', display: 'flex', alignItems: 'center', gap: 12, borderBottom: '1px solid var(--rule)' }}>
+        <Rune kind="menu" size={18} color="var(--ink-quiet)" />
+        <div style={{ flex: 1, textAlign: 'center' }}>
+          <div className="ao-engraved" style={{ fontSize: 11 }}>Folio</div>
+          <div className="ao-codex">V-001 · Vellan</div>
+        </div>
+        <Rune kind="dots" size={16} color="var(--ink-quiet)" />
+      </div>
+
+      <div className="ao-scroll" style={{ flex: 1, overflow: 'auto', padding: '16px 14px' }}>
+        {/* Portrait + name */}
+        <Panel padding={14} className="ao-frame">
+          <span className="ao-frame-c" />
+          <div style={{ display: 'flex', gap: 12 }}>
+            <Placeholder style={{ width: 80, height: 100, border: '1px solid var(--rule)', flexShrink: 0 }}>portrait</Placeholder>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <CodexID>V-001</CodexID>
+              <div className="ao-h6" style={{ marginTop: 4 }}>Vellan Ostrau</div>
+              <div className="ao-italic" style={{ fontSize: 12, marginTop: 2 }}>Paladin · Embered Vow</div>
+              <div style={{ marginTop: 8, display: 'flex', alignItems: 'baseline', gap: 6 }}>
+                <span className="ao-overline" style={{ fontSize: 9 }}>LVL</span>
+                <span className="ao-num" style={{ color: 'var(--gold-pale)', fontSize: 22, fontFamily: 'var(--font-serif)' }}>11</span>
+                <Chip tone="ember" glyph="flame">wounded</Chip>
+              </div>
+            </div>
+          </div>
+        </Panel>
+
+        {/* HP / XP */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 14 }}>
+          <Bar value={96} max={112} label="Vitae" />
+          <Bar value={84} max={100} tone="gold" label="To Ascend" />
+        </div>
+
+        <Divider glyph="diamond-fill">Aspects</Divider>
+
+        {/* Stat blocks 3x2 */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+          {[['STR',16,3],['DEX',12,1],['CON',14,2],['INT',10,0],['WIS',15,2],['CHA',17,3]].map((a, i) => (
+            <div key={i} className="ao-stat" style={{ padding: '8px 4px' }}>
+              <div className="ao-stat-label" style={{ fontSize: 9 }}>{a[0]}</div>
+              <div className="ao-stat-value" style={{ fontSize: 24 }}>{a[1]}</div>
+              <div className="ao-stat-mod" style={{ fontSize: 10 }}>{a[2] >= 0 ? '+' + a[2] : a[2]}</div>
+            </div>
+          ))}
+        </div>
+
+        <Divider glyph="diamond-fill">Combat</Divider>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
+          {[['Armour', 18, 'plate +1'], ['Init', '+1', 'reaction'], ['Speed', 30, 'ft burdened'], ['Prof', '+4', 'tier II']].map((c, i) => (
+            <div key={i} style={{ padding: 10, background: 'var(--abyss)', border: '1px solid var(--rule)' }}>
+              <div className="ao-overline" style={{ fontSize: 9 }}>{c[0]}</div>
+              <div style={{ fontFamily: 'var(--font-serif)', fontSize: 20, color: 'var(--ink-bright)', lineHeight: 1.1 }}>{c[1]}</div>
+              <div className="ao-codex" style={{ fontSize: 10 }}>{c[2]}</div>
+            </div>
+          ))}
+        </div>
+
+        <Divider glyph="cross-pat">Litanies</Divider>
+
+        <div style={{ display: 'flex', gap: 6, marginBottom: 10, flexWrap: 'wrap' }}>
+          {['I','II','III','IV'].map((lvl, i) => (
+            <div key={lvl} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 8px', background: 'var(--abyss)', border: '1px solid var(--rule)' }}>
+              <span className="ao-engraved" style={{ fontSize: 10, color: 'var(--gold-pale)' }}>{lvl}</span>
+              <span className="ao-codex">{[3,2,1,0][i]}/{[4,3,3,1][i]}</span>
+            </div>
+          ))}
+        </div>
+
+        {['Sanctuary','Searing Smite','Aid','Branding Smite'].map((s, i) => (
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', background: i === 1 ? 'rgba(176, 141, 78, 0.04)' : 'var(--abyss)', border: '1px solid var(--hairline)', marginBottom: 4 }}>
+            <span style={{ width: 20, height: 20, border: '1px solid var(--brass)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span className="ao-engraved" style={{ fontSize: 9, color: 'var(--gold-pale)' }}>{['I','I','II','II'][i]}</span></span>
+            <span style={{ flex: 1, color: 'var(--ink-bright)', fontSize: 13 }}>{s}</span>
+            <Rune kind="diamond-fill" size={7} color="var(--gold)" />
+          </div>
+        ))}
+
+        <button className="ao-btn ao-btn--primary ao-btn--block ao-btn--lg" style={{ marginTop: 16 }}>
+          <Rune kind="diamond-fill" size={9} /> Begin Long Rest
+        </button>
+
+        <div style={{ height: 24 }} />
+      </div>
+
+      {/* Bottom nav */}
+      <div style={{ display: 'flex', borderTop: '1px solid var(--rule)', background: 'var(--abyss)', padding: '8px 0 14px' }}>
+        {[
+          { glyph: 'shield', label: 'Roster' },
+          { glyph: 'sigil-3', label: 'Folio', active: true },
+          { glyph: 'sword', label: 'Arsenal' },
+          { glyph: 'helm', label: 'Conclave' },
+          { glyph: 'book', label: 'Archive' },
+        ].map((it, i) => (
+          <button key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, padding: '6px 0', background: 'transparent', border: 'none', color: it.active ? 'var(--gold-pale)' : 'var(--ink-faint)', cursor: 'pointer' }}>
+            <Rune kind={it.glyph} size={16} />
+            <span className="ao-overline" style={{ fontSize: 9, color: 'inherit' }}>{it.label}</span>
+            {it.active && <span style={{ width: 4, height: 4, background: 'var(--gold)', transform: 'rotate(45deg)' }} />}
+          </button>
+        ))}
+      </div>
+    </Backdrop>
+  );
+}
+
+// Mobile · Level-Up
+function MobileLevelUp() {
+  return (
+    <Backdrop dark>
+      <div style={{ height: 40, padding: '0 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--void)' }}>
+        <span className="ao-codex" style={{ color: 'var(--ink-bright)' }}>04:14</span>
+        <div style={{ display: 'flex', gap: 6, color: 'var(--ink-quiet)' }}>
+          <Rune kind="cir-dot" size={9} /><Rune kind="square" size={9} />
+        </div>
+      </div>
+
+      <div style={{ flex: 1, padding: '20px 18px', display: 'flex', flexDirection: 'column', position: 'relative' }}>
+        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(50% 40% at 50% 35%, rgba(176, 141, 78, 0.12), transparent 70%)', pointerEvents: 'none' }} />
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative' }}>
+          <button className="ao-iconbtn" style={{ width: 32, height: 32, border: 'none' }}><Rune kind="x" size={14} /></button>
+          <span className="ao-codex">Step II of III</span>
+          <div style={{ width: 32 }} />
+        </div>
+
+        <div style={{ textAlign: 'center', marginTop: 18, position: 'relative' }}>
+          <Sigil size={56} glyph="sigil-2" />
+          <div className="ao-codex ao-flicker" style={{ marginTop: 12, color: 'var(--gold-pale)' }}>— RITE OF ASCENT —</div>
+          <div className="ao-breathe" style={{ marginTop: 4 }}>
+            <span style={{ fontFamily: 'var(--font-display)', fontSize: 76, fontWeight: 700, color: 'var(--gold-pale)', lineHeight: 1 }}>XII</span>
+          </div>
+          <div className="ao-h6" style={{ marginTop: 4, fontStyle: 'italic' }}>Choose Thy Boon</div>
+        </div>
+
+        <div className="ao-scroll" style={{ flex: 1, overflow: 'auto', marginTop: 18, display: 'flex', flexDirection: 'column', gap: 10, position: 'relative' }}>
+          {[
+            { name: 'Ember-Marked Plate', glyph: 'shield', tag: 'Epic · Heavy', tone: 'gold', pick: false },
+            { name: 'The Quiet Aeon',     glyph: 'sigil-1', tag: 'Epic · Litany', tone: 'arcane', pick: true },
+            { name: 'Censer of Last Light', glyph: 'flame', tag: 'Cursed · Trinket', tone: 'ember', pick: false },
+          ].map((r, i) => {
+            const tone = r.tone === 'arcane' ? 'var(--arcane)' : r.tone === 'ember' ? 'var(--ember)' : 'var(--gold)';
+            return (
+              <Panel key={i} padding={14} className="ao-frame" style={{ borderColor: r.pick ? tone : undefined, background: r.pick ? `linear-gradient(180deg, rgba(90, 142, 148, 0.04), var(--panel))` : undefined }}>
+                <span className="ao-frame-c" />
+                <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                  <div style={{ width: 56, height: 56, border: '1px solid ' + tone, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--abyss)', boxShadow: r.pick ? `inset 0 0 12px ${tone}` : 'inset 0 0 12px rgba(0,0,0,0.5)' }}>
+                    <Rune kind={r.glyph} size={26} color={tone} />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div className="ao-overline" style={{ color: tone, fontSize: 9 }}>{r.tag}</div>
+                    <div className="ao-h6" style={{ fontSize: 15, marginTop: 2 }}>{r.name}</div>
+                  </div>
+                  <span style={{ width: 18, height: 18, border: '1px solid ' + (r.pick ? tone : 'var(--rule)'), display: 'flex', alignItems: 'center', justifyContent: 'center', background: r.pick ? tone : 'var(--abyss)' }}>
+                    {r.pick && <Rune kind="check" size={10} color="var(--abyss)" />}
+                  </span>
+                </div>
+              </Panel>
+            );
+          })}
+        </div>
+
+        <button className="ao-btn ao-btn--primary ao-btn--block ao-btn--lg" style={{ marginTop: 14, position: 'relative' }}>
+          <Rune kind="diamond-fill" size={9} /> Seal Boon
+        </button>
+      </div>
+    </Backdrop>
+  );
+}
+
+// ========================================================================
+// Design system reference card — visual library overview
+// ========================================================================
+function SystemReferenceCard() {
+  return (
+    <Backdrop>
+      <div className="ao-scroll" style={{ padding: '36px 44px', overflow: 'auto', height: '100%' }}>
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 18, marginBottom: 20 }}>
+          <Sigil size={64} glyph="sigil-3" />
+          <div style={{ flex: 1 }}>
+            <div className="ao-codex">Ordo Arcanum · Visual Manual</div>
+            <div className="ao-h2" style={{ marginTop: 4, fontSize: 44 }}>Design System</div>
+            <div className="ao-italic" style={{ marginTop: 4 }}>Folio of tokens, primitives and conventions for the Archive.</div>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
+            <Chip tone="gold" glyph="diamond-fill">v 1.0 · sealed</Chip>
+            <span className="ao-codex">issued 4222 · I</span>
+          </div>
+        </div>
+
+        <Divider glyph="diamond-fill">Palette</Divider>
+
+        {/* Color tokens */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 28 }}>
+          {[
+            ['Void',     '#050403', 'volcanic stone, deepest'],
+            ['Abyss',    '#0a0908', 'inset surfaces, recesses'],
+            ['Stone',    '#14110f', 'root background'],
+            ['Panel',    '#1c1816', 'cards, framed surfaces'],
+            ['Bronze',   '#5a4a35', 'frame edges, brackets'],
+            ['Brass',    '#8e7448', 'hover, emphasis edges'],
+            ['Ink',      '#cdc1a6', 'body text · parchment'],
+            ['Ink Bright','#e6dcc4','headings · titles'],
+            ['Gold',     '#b08d4e', 'primary action, sealed'],
+            ['Burgundy', '#6b2a2a', 'sacred warning'],
+            ['Ember',    '#b3461a', 'danger · wounded'],
+            ['Arcane',   '#5a8e94', 'magic only · muted'],
+          ].map((c, i) => (
+            <div key={i} style={{ background: 'var(--abyss)', border: '1px solid var(--rule)' }}>
+              <div style={{ height: 48, background: c[1], borderBottom: '1px solid var(--rule)' }} />
+              <div style={{ padding: 10 }}>
+                <div className="ao-engraved" style={{ fontSize: 11 }}>{c[0]}</div>
+                <div className="ao-codex" style={{ marginTop: 2 }}>{c[1]}</div>
+                <div className="ao-italic" style={{ fontSize: 12, marginTop: 4 }}>{c[2]}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <Divider glyph="diamond-fill">Typography</Divider>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 18, marginBottom: 28 }}>
+          {[
+            { fam: 'Cinzel', use: 'Engraved display caps · ceremonial titles', sample: 'ORDO ARCANUM', extra: 'tracking 0.22em, uppercase only', font: 'var(--font-display)' },
+            { fam: 'Cormorant Garamond', use: 'Serif headers · prose · italics', sample: 'The Folio of Souls', extra: 'h1–h5, italics for voice', font: 'var(--font-serif)' },
+            { fam: 'Inter', use: 'Body text · UI labels · forms', sample: 'Aa Bb Cc · 0123456789', extra: 'tracking 0, weight 400/500/600', font: 'var(--font-sans)' },
+            { fam: 'JetBrains Mono', use: 'Codex numerals · IDs · ledger', sample: 'V-001 · 4221-VIII', extra: 'tabular nums, ALL CAPS micro', font: 'var(--font-mono)' },
+          ].map((t, i) => (
+            <Panel key={i} padding={18}>
+              <div className="ao-overline">{t.fam}</div>
+              <div style={{ fontFamily: t.font, fontSize: 32, color: 'var(--ink-bright)', marginTop: 4, lineHeight: 1.1 }}>{t.sample}</div>
+              <div className="ao-italic" style={{ marginTop: 6 }}>{t.use}</div>
+              <div className="ao-codex" style={{ marginTop: 2 }}>{t.extra}</div>
+            </Panel>
+          ))}
+        </div>
+
+        <Divider glyph="diamond-fill">Primitives</Divider>
+
+        {/* Components */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14, marginBottom: 24 }}>
+          <Panel padding={18}>
+            <div className="ao-overline">Buttons</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 10 }}>
+              <button className="ao-btn ao-btn--primary"><Rune kind="diamond-fill" size={9} /> Seal Rite</button>
+              <button className="ao-btn">Defer</button>
+              <button className="ao-btn ao-btn--ghost">Cancel</button>
+              <button className="ao-btn ao-btn--danger"><Rune kind="flame" size={10} /> Unmake</button>
+            </div>
+          </Panel>
+
+          <Panel padding={18}>
+            <div className="ao-overline">Chips & Status</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 10, alignItems: 'flex-start' }}>
+              <Chip tone="gold" glyph="diamond-fill">sealed</Chip>
+              <Chip tone="arcane" glyph="eye">attuned</Chip>
+              <Chip tone="ember" glyph="flame">wounded</Chip>
+              <Chip tone="rune" glyph="minus">draft</Chip>
+            </div>
+          </Panel>
+
+          <Panel padding={18}>
+            <div className="ao-overline">Bars</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 10 }}>
+              <Bar value={64} max={100} label="Vitae" />
+              <Bar value={42} max={100} tone="gold" label="Ascend" />
+              <Bar value={28} max={100} tone="arcane" label="Aeon" />
+            </div>
+          </Panel>
+
+          <Panel padding={18}>
+            <div className="ao-overline">Stat Block</div>
+            <div style={{ marginTop: 10, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
+              {[['STR',16,3],['WIS',15,2],['CHA',17,3]].map((a, i) => (
+                <div key={i} className="ao-stat" style={{ padding: '8px 4px' }}>
+                  <div className="ao-stat-label" style={{ fontSize: 9 }}>{a[0]}</div>
+                  <div className="ao-stat-value" style={{ fontSize: 24 }}>{a[1]}</div>
+                  <div className="ao-stat-mod" style={{ fontSize: 10 }}>+{a[2]}</div>
+                </div>
+              ))}
+            </div>
+          </Panel>
+
+          <Panel padding={18}>
+            <div className="ao-overline">Form Inputs</div>
+            <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <input className="ao-input" placeholder="Sigil address…" />
+              <input className="ao-input" type="password" placeholder="••••••••" />
+            </div>
+          </Panel>
+
+          <Panel padding={18}>
+            <div className="ao-overline">Slots & Rarity</div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6, marginTop: 10 }}>
+              {['ao-slot', 'ao-slot ao-slot--rare', 'ao-slot ao-slot--epic', 'ao-slot ao-slot--cursed'].map((cls, i) => (
+                <div key={i} className={cls} style={{ aspectRatio: '1' }}>
+                  <Rune kind={['minus','shield','sword','flame'][i]} size={16} color={[' var(--ink-faint)','var(--arcane)','var(--gold)','var(--ember)'][i]} />
+                </div>
+              ))}
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6 }}>
+              {['empty','rare','epic','cursed'].map((r, i) => <span key={i} className="ao-codex" style={{ fontSize: 9 }}>{r}</span>)}
+            </div>
+          </Panel>
+
+          <Panel padding={18}>
+            <div className="ao-overline">Runes & Glyphs</div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginTop: 10, color: 'var(--gold-pale)' }}>
+              {['diamond','square','square-rot','tri','hex','cir','cir-dot','cross','cross-pat','flame','shield','sword','helm','scroll','book','eye','lock','sigil-1','sigil-2','sigil-3'].map((g, i) => (
+                <div key={i} title={g} style={{ width: 28, height: 28, border: '1px solid var(--hairline)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Rune kind={g} size={14} />
+                </div>
+              ))}
+            </div>
+          </Panel>
+
+          <Panel padding={18}>
+            <div className="ao-overline">Sigils</div>
+            <div style={{ display: 'flex', gap: 14, marginTop: 12, justifyContent: 'space-around' }}>
+              <Sigil size={56} glyph="sigil-1" />
+              <Sigil size={56} glyph="sigil-2" />
+              <Sigil size={56} glyph="sigil-3" />
+            </div>
+          </Panel>
+
+          <Panel padding={18}>
+            <div className="ao-overline">Toast / Notice</div>
+            <div className="ao-toast" style={{ marginTop: 10, maxWidth: 'unset', padding: 12 }}>
+              <Rune kind="flame" size={14} color="var(--gold)" />
+              <div>
+                <div style={{ color: 'var(--ink-bright)' }}>Rite of Ascent ready</div>
+                <div className="ao-italic" style={{ fontSize: 12 }}>Vellan may now advance to the Twelfth.</div>
+              </div>
+            </div>
+          </Panel>
+        </div>
+
+        <Divider glyph="diamond-fill">Spacing & Depth</Divider>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 18 }}>
+          <Panel padding={18}>
+            <div className="ao-overline">Spacing scale (px)</div>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end', marginTop: 14, height: 80 }}>
+              {[4, 8, 12, 16, 24, 32, 48, 64].map((s, i) => (
+                <div key={i} style={{ textAlign: 'center' }}>
+                  <div style={{ width: 24, height: s, background: 'var(--bronze)', border: '1px solid var(--brass)' }} />
+                  <div className="ao-codex" style={{ marginTop: 4, fontSize: 9 }}>{s}</div>
+                </div>
+              ))}
+            </div>
+            <div style={{ marginTop: 18 }}>
+              <div className="ao-overline">Border styles</div>
+              <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
+                <div style={{ flex: 1, height: 1, background: 'var(--hairline)' }} title="hairline" />
+                <div style={{ flex: 1, height: 1, background: 'var(--rule)' }} title="rule" />
+                <div style={{ flex: 1, height: 1, background: 'var(--rule-strong)' }} title="rule strong" />
+                <div style={{ flex: 1, height: 1, background: 'var(--brass)' }} title="brass" />
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
+                {['hairline','rule','rule-strong','brass'].map((l, i) => <span key={i} className="ao-codex" style={{ fontSize: 9 }}>{l}</span>)}
+              </div>
+            </div>
+          </Panel>
+
+          <Panel padding={18}>
+            <div className="ao-overline">Depth · panel kinds</div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginTop: 10 }}>
+              <Panel padding={12}><span className="ao-codex">panel</span></Panel>
+              <Panel padding={12} raised><span className="ao-codex">raised</span></Panel>
+              <Panel padding={12} inset><span className="ao-codex">inset</span></Panel>
+            </div>
+            <div style={{ marginTop: 18 }}>
+              <div className="ao-overline">Animations</div>
+              <div style={{ display: 'flex', gap: 12, marginTop: 10, alignItems: 'center' }}>
+                <span className="ao-flicker" style={{ fontFamily: 'var(--font-display)', color: 'var(--gold-pale)' }}>FLICKER</span>
+                <span className="ao-breathe" style={{ fontFamily: 'var(--font-display)', color: 'var(--arcane)' }}>BREATHE</span>
+                <span className="ao-rise" style={{ fontFamily: 'var(--font-display)', color: 'var(--ember)' }}>RISE</span>
+              </div>
+            </div>
+          </Panel>
+        </div>
+
+        <Divider glyph="diamond-fill">Voice</Divider>
+
+        <Panel padding={20}>
+          <div className="ao-italic" style={{ fontSize: 16, color: 'var(--ink)' }}>
+            "Every notice begins as a ritual. The system speaks like a Warden — terse, weighted, never cheerful. Verbs are inscribe, seal, defer, sanction, witness. Errors are not failures — they are <span style={{ color: 'var(--ember)' }}>oaths frayed</span>. Loading states are not 'loading' — they are <span style={{ color: 'var(--gold-pale)' }}>awaiting the candle</span>."
+          </div>
+        </Panel>
+
+        <div style={{ marginTop: 18, display: 'flex', justifyContent: 'space-between', color: 'var(--ink-faint)' }}>
+          <span className="ao-codex">— end of manual —</span>
+          <span className="ao-codex">issued by the Iron Vigil · sealed by the Archivist</span>
+        </div>
+      </div>
+    </Backdrop>
+  );
+}
+
+Object.assign(window, { MobileSheet, MobileLevelUp, SystemReferenceCard });
+
+// ── Viewer App ──────────────────────────────────────
+const SCREENS = [
+  { id: 'login',      label: 'Login',           component: 'LoginScreen',           mobile: false },
+  { id: 'invite',     label: 'Invite',          component: 'InviteScreen',          mobile: false },
+  { id: 'roster',     label: 'Roster',          component: 'RosterScreen',          mobile: false },
+  { id: 'sheet',      label: 'Character Sheet', component: 'CharacterSheetScreen',  mobile: false },
+  { id: 'arsenal',    label: 'Arsenal',         component: 'ArsenalScreen',         mobile: false },
+  { id: 'team',       label: 'Conclave',        component: 'TeamScreen',            mobile: false },
+  { id: 'admin',      label: 'Archive',         component: 'AdminScreen',           mobile: false },
+  { id: 'levelup',    label: 'Level Up',        component: 'LevelUpModal',          mobile: false },
+  { id: 'rewards',    label: 'Rewards',         component: 'RewardSelectionScreen', mobile: false },
+  { id: 'subclass',   label: 'Subclass',        component: 'SubclassScreen',        mobile: false },
+  { id: 'mob-sheet',  label: 'Mobile Sheet',    component: 'MobileSheet',           mobile: true },
+  { id: 'mob-lvl',    label: 'Mobile Level Up', component: 'MobileLevelUp',         mobile: true },
+  { id: 'system',     label: 'Design System',   component: 'SystemReferenceCard',   mobile: false },
+];
+
+function ViewerApp() {
+  const [current, setCurrent] = React.useState('login');
+  const screen = SCREENS.find(s => s.id === current);
+  const Comp = window[screen.component];
+  const isMobile = screen.mobile;
+
+  const [scale, setScale] = React.useState(1);
+  const frameRef = React.useRef(null);
+
+  React.useEffect(() => {
+    if (!isMobile) { setScale(1); return; }
+    const resize = () => {
+      if (!frameRef.current) return;
+      const container = frameRef.current;
+      const cw = container.clientWidth;
+      const ch = container.clientHeight;
+      const s = Math.min(cw / 390, ch / 844, 1);
+      setScale(s);
+    };
+    resize();
+    window.addEventListener('resize', resize);
+    return () => window.removeEventListener('resize', resize);
+  }, [isMobile]);
+
+  return (
+    <div style={{ height: '100%', background: '#0a0908' }}>
+      <div className="viewer-nav">
+        {SCREENS.map(s => (
+          <button key={s.id} className={current === s.id ? 'active' : ''} onClick={() => setCurrent(s.id)}>
+            {s.label}
+          </button>
+        ))}
+      </div>
+      <div ref={frameRef} className={`screen-frame ${isMobile ? 'mobile-frame' : 'desktop-frame'}`}>
+        <div className="screen-frame-inner"
+          style={isMobile ? {
+            transform: `translate(-50%, -50%) scale(${scale})`,
+          } : {}}>
+          {Comp ? <Comp /> : <div style={{color:'#fff',padding:40}}>Component not found: {screen.component}</div>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.render(<ViewerApp />, document.getElementById('root'));
+</script>
+</body>
+</html>

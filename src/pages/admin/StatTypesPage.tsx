@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Badge } from '@/components/ui/badge';
+import { Chip } from '@/components/ao';
 import { CrudTable } from '@/components/admin/CrudTable';
 import { CrudFormModal } from '@/components/admin/CrudFormModal';
 import {
@@ -60,7 +60,7 @@ export default function StatTypesPage() {
           {
             header: 'Default',
             accessor: (item) =>
-              item.isDefault ? <Badge variant="gold">Default</Badge> : null,
+              item.isDefault ? <Chip tone="gold">Default</Chip> : null,
           },
         ]}
       />
