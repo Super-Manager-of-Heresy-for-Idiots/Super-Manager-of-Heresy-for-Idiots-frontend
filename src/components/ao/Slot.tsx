@@ -1,7 +1,7 @@
 import React from 'react';
 import { Rune } from './Rune';
 
-type Rarity = 'common' | 'rare' | 'epic' | 'cursed' | 'filled';
+type Rarity = 'common' | 'rare' | 'epic' | 'cursed' | 'filled' | 'uncommon';
 
 interface SlotProps {
   children?: React.ReactNode;
