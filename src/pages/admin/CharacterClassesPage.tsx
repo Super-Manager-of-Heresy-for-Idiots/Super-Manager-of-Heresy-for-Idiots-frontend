@@ -7,7 +7,7 @@ import {
   useUpdateCharacterClass,
   useDeleteCharacterClass,
 } from '@/hooks/useAdmin';
-import type { CharacterClass } from '@/types';
+import type { CharacterClassResponse } from '@/types';
 
 export default function CharacterClassesPage() {
   const { data, isLoading } = useCharacterClasses();
@@ -16,14 +16,14 @@ export default function CharacterClassesPage() {
   const deleteMutation = useDeleteCharacterClass();
 
   const [modalOpen, setModalOpen] = useState(false);
-  const [editing, setEditing] = useState<CharacterClass | null>(null);
+  const [editing, setEditing] = useState<CharacterClassResponse | null>(null);
 
   const handleAdd = () => {
     setEditing(null);
     setModalOpen(true);
   };
 
-  const handleEdit = (item: CharacterClass) => {
+  const handleEdit = (item: CharacterClassResponse) => {
     setEditing(item);
     setModalOpen(true);
   };

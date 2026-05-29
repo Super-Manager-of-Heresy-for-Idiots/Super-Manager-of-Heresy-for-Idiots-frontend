@@ -9,7 +9,7 @@ import {
   useUpdateItemType,
   useDeleteItemType,
 } from '@/hooks/useAdmin';
-import type { ItemType } from '@/types';
+import type { ItemTypeResponse } from '@/types';
 
 export default function ItemTypesPage() {
   const { data, isLoading } = useItemTypes();
@@ -18,14 +18,14 @@ export default function ItemTypesPage() {
   const deleteMutation = useDeleteItemType();
 
   const [modalOpen, setModalOpen] = useState(false);
-  const [editing, setEditing] = useState<ItemType | null>(null);
+  const [editing, setEditing] = useState<ItemTypeResponse | null>(null);
 
   const handleAdd = () => {
     setEditing(null);
     setModalOpen(true);
   };
 
-  const handleEdit = (item: ItemType) => {
+  const handleEdit = (item: ItemTypeResponse) => {
     setEditing(item);
     setModalOpen(true);
   };

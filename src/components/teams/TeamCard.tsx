@@ -1,12 +1,11 @@
 import { useNavigate } from 'react-router-dom';
-import { Eye, Pencil, Trash2, Users, RefreshCw } from 'lucide-react';
+import { Eye, Trash2, Users, RefreshCw } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { InviteCodeDisplay } from './InviteCodeDisplay';
-import type { Team } from '@/types';
+import type { TeamResponse } from '@/types';
 
 interface TeamCardProps {
-  team: Team;
+  team: TeamResponse;
   onDelete?: (id: string) => void;
   onRegenerate?: (id: string) => void;
   basePath?: string;
@@ -23,20 +22,14 @@ export function TeamCard({ team, onDelete, onRegenerate, basePath = '/gm/teams',
           <div>
             <h3 className="font-heading font-semibold text-lg">{team.name}</h3>
             <p className="text-sm text-muted-foreground">
-              GM: {team.gameMaster?.username || 'Unknown'}
+              GM: {team.gameMasterUsername || 'Unknown'}
             </p>
           </div>
           <div className="flex items-center gap-1 text-muted-foreground">
             <Users className="h-4 w-4" />
-            <span className="text-sm">{team.members?.length || team.memberCount || 0}</span>
+            <span className="text-sm">{team.members?.length || 0}</span>
           </div>
         </div>
-
-        {!readOnly && team.inviteCode && (
-          <div className="mb-4">
-            <InviteCodeDisplay code={team.inviteCode} />
-          </div>
-        )}
 
         <div className="flex gap-2">
           <Button

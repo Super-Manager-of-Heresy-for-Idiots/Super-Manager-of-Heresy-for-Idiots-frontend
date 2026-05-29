@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { teamsApi } from '@/api/teams.api';
-import type { CreateTeamDto, JoinTeamDto, ApiError } from '@/types';
+import type { CreateTeamRequest, JoinTeamRequest, ApiError } from '@/types';
 import { AxiosError } from 'axios';
 
 export function useTeams() {
@@ -29,7 +29,7 @@ export function useCreateTeam() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: CreateTeamDto) => teamsApi.create(data),
+    mutationFn: (data: CreateTeamRequest) => teamsApi.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['teams'] });
       toast.success('Team created successfully!');
@@ -45,7 +45,7 @@ export function useUpdateTeam() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: CreateTeamDto }) =>
+    mutationFn: ({ id, data }: { id: string; data: CreateTeamRequest }) =>
       teamsApi.update(id, data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['teams'] });
@@ -107,7 +107,7 @@ export function useJoinTeam() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: JoinTeamDto) => teamsApi.join(data),
+    mutationFn: (data: JoinTeamRequest) => teamsApi.join(data),
     onSuccess: (response) => {
       queryClient.invalidateQueries({ queryKey: ['teams'] });
       const teamName = response.data?.name || 'the team';

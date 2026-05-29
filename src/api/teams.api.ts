@@ -1,24 +1,24 @@
 import api from './axios';
-import type { ApiResponse, Team, CreateTeamDto, JoinTeamDto } from '@/types';
+import type { ApiResponse, TeamResponse, CreateTeamRequest, JoinTeamRequest, InviteCodeResponse } from '@/types';
 
 export const teamsApi = {
-  list: async (): Promise<ApiResponse<Team[]>> => {
-    const response = await api.get<ApiResponse<Team[]>>('/teams');
+  list: async (): Promise<ApiResponse<TeamResponse[]>> => {
+    const response = await api.get<ApiResponse<TeamResponse[]>>('/teams');
     return response.data;
   },
 
-  getById: async (id: string): Promise<ApiResponse<Team>> => {
-    const response = await api.get<ApiResponse<Team>>(`/teams/${id}`);
+  getById: async (id: string): Promise<ApiResponse<TeamResponse>> => {
+    const response = await api.get<ApiResponse<TeamResponse>>(`/teams/${id}`);
     return response.data;
   },
 
-  create: async (data: CreateTeamDto): Promise<ApiResponse<Team>> => {
-    const response = await api.post<ApiResponse<Team>>('/teams', data);
+  create: async (data: CreateTeamRequest): Promise<ApiResponse<TeamResponse>> => {
+    const response = await api.post<ApiResponse<TeamResponse>>('/teams', data);
     return response.data;
   },
 
-  update: async (id: string, data: CreateTeamDto): Promise<ApiResponse<Team>> => {
-    const response = await api.put<ApiResponse<Team>>(`/teams/${id}`, data);
+  update: async (id: string, data: CreateTeamRequest): Promise<ApiResponse<TeamResponse>> => {
+    const response = await api.put<ApiResponse<TeamResponse>>(`/teams/${id}`, data);
     return response.data;
   },
 
@@ -27,18 +27,18 @@ export const teamsApi = {
     return response.data;
   },
 
-  regenerateInvite: async (id: string): Promise<ApiResponse<{ inviteCode: string }>> => {
-    const response = await api.post<ApiResponse<{ inviteCode: string }>>(`/teams/${id}/regenerate-invite`);
+  getInviteCode: async (id: string): Promise<ApiResponse<InviteCodeResponse>> => {
+    const response = await api.get<ApiResponse<InviteCodeResponse>>(`/teams/${id}/invite-code`);
     return response.data;
   },
 
-  getInviteCode: async (id: string): Promise<ApiResponse<{ inviteCode: string }>> => {
-    const response = await api.get<ApiResponse<{ inviteCode: string }>>(`/teams/${id}/invite-code`);
+  regenerateInvite: async (id: string): Promise<ApiResponse<InviteCodeResponse>> => {
+    const response = await api.post<ApiResponse<InviteCodeResponse>>(`/teams/${id}/regenerate-invite`);
     return response.data;
   },
 
-  join: async (data: JoinTeamDto): Promise<ApiResponse<Team>> => {
-    const response = await api.post<ApiResponse<Team>>('/teams/join', data);
+  join: async (data: JoinTeamRequest): Promise<ApiResponse<TeamResponse>> => {
+    const response = await api.post<ApiResponse<TeamResponse>>('/teams/join', data);
     return response.data;
   },
 };

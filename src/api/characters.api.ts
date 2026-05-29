@@ -1,33 +1,34 @@
 import api from './axios';
 import type {
   ApiResponse,
-  Character,
-  CharacterStat,
-  InventorySlot,
-  CreateCharacterDto,
-  UpdateStatDto,
-  UpdateInventoryDto,
+  CharacterResponse,
+  CharacterStatResponse,
+  InventorySlotResponse,
+  CreateCharacterRequest,
+  UpdateCharacterRequest,
+  UpdateStatRequest,
+  UpdateInventorySlotRequest,
   EquipmentSlot,
 } from '@/types';
 
 export const charactersApi = {
-  list: async (): Promise<ApiResponse<Character[]>> => {
-    const response = await api.get<ApiResponse<Character[]>>('/characters');
+  list: async (): Promise<ApiResponse<CharacterResponse[]>> => {
+    const response = await api.get<ApiResponse<CharacterResponse[]>>('/characters');
     return response.data;
   },
 
-  getById: async (id: string): Promise<ApiResponse<Character>> => {
-    const response = await api.get<ApiResponse<Character>>(`/characters/${id}`);
+  getById: async (id: string): Promise<ApiResponse<CharacterResponse>> => {
+    const response = await api.get<ApiResponse<CharacterResponse>>(`/characters/${id}`);
     return response.data;
   },
 
-  create: async (data: CreateCharacterDto): Promise<ApiResponse<Character>> => {
-    const response = await api.post<ApiResponse<Character>>('/characters', data);
+  create: async (data: CreateCharacterRequest): Promise<ApiResponse<CharacterResponse>> => {
+    const response = await api.post<ApiResponse<CharacterResponse>>('/characters', data);
     return response.data;
   },
 
-  update: async (id: string, data: CreateCharacterDto): Promise<ApiResponse<Character>> => {
-    const response = await api.put<ApiResponse<Character>>(`/characters/${id}`, data);
+  update: async (id: string, data: UpdateCharacterRequest): Promise<ApiResponse<CharacterResponse>> => {
+    const response = await api.put<ApiResponse<CharacterResponse>>(`/characters/${id}`, data);
     return response.data;
   },
 
@@ -36,27 +37,27 @@ export const charactersApi = {
     return response.data;
   },
 
-  getStats: async (characterId: string): Promise<ApiResponse<CharacterStat[]>> => {
-    const response = await api.get<ApiResponse<CharacterStat[]>>(`/characters/${characterId}/stats`);
+  getStats: async (characterId: string): Promise<ApiResponse<CharacterStatResponse[]>> => {
+    const response = await api.get<ApiResponse<CharacterStatResponse[]>>(`/characters/${characterId}/stats`);
     return response.data;
   },
 
-  updateStat: async (characterId: string, statId: string, data: UpdateStatDto): Promise<ApiResponse<CharacterStat>> => {
-    const response = await api.put<ApiResponse<CharacterStat>>(`/characters/${characterId}/stats/${statId}`, data);
+  updateStat: async (characterId: string, statId: string, data: UpdateStatRequest): Promise<ApiResponse<CharacterStatResponse>> => {
+    const response = await api.put<ApiResponse<CharacterStatResponse>>(`/characters/${characterId}/stats/${statId}`, data);
     return response.data;
   },
 
-  getInventory: async (characterId: string): Promise<ApiResponse<InventorySlot[]>> => {
-    const response = await api.get<ApiResponse<InventorySlot[]>>(`/characters/${characterId}/inventory`);
+  getInventory: async (characterId: string): Promise<ApiResponse<InventorySlotResponse[]>> => {
+    const response = await api.get<ApiResponse<InventorySlotResponse[]>>(`/characters/${characterId}/inventory`);
     return response.data;
   },
 
   updateInventorySlot: async (
     characterId: string,
     slot: EquipmentSlot,
-    data: UpdateInventoryDto
-  ): Promise<ApiResponse<InventorySlot>> => {
-    const response = await api.put<ApiResponse<InventorySlot>>(`/characters/${characterId}/inventory/${slot}`, data);
+    data: UpdateInventorySlotRequest
+  ): Promise<ApiResponse<InventorySlotResponse>> => {
+    const response = await api.put<ApiResponse<InventorySlotResponse>>(`/characters/${characterId}/inventory/${slot}`, data);
     return response.data;
   },
 };

@@ -4,7 +4,7 @@ import toast from 'react-hot-toast';
 import { authApi } from '@/api/auth.api';
 import { useAuthStore } from '@/store/authStore';
 import { getRoleRedirectPath } from '@/lib/utils';
-import type { LoginDto, RegisterDto, ApiError } from '@/types';
+import type { LoginRequest, RegisterRequest, ApiError } from '@/types';
 import { AxiosError } from 'axios';
 
 export function useLogin() {
@@ -12,10 +12,10 @@ export function useLogin() {
   const login = useAuthStore((s) => s.login);
 
   return useMutation({
-    mutationFn: (data: LoginDto & { remember: boolean }) =>
+    mutationFn: (data: LoginRequest & { remember: boolean }) =>
       authApi.login({ username: data.username, password: data.password }),
     onSuccess: (response, variables) => {
-      const { token, user } = response.data;
+      const { token, user } = response.data!;
       login(user, token, variables.remember);
       toast.success('Welcome back, ' + user.username + '!');
       navigate(getRoleRedirectPath(user.role));
@@ -31,7 +31,7 @@ export function useRegister() {
   const navigate = useNavigate();
 
   return useMutation({
-    mutationFn: (data: RegisterDto) => authApi.register(data),
+    mutationFn: (data: RegisterRequest) => authApi.register(data),
     onSuccess: () => {
       toast.success('Registration successful! Please log in.');
       navigate('/login');

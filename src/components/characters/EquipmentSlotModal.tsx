@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
 import {
   Dialog,
@@ -14,10 +14,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { EQUIPMENT_SLOT_LABELS } from '@/types';
 import { useItemTypes } from '@/hooks/useAdmin';
-import type { InventorySlot } from '@/types';
+import type { InventorySlotResponse } from '@/types';
 
 interface EquipmentSlotModalProps {
-  slot: InventorySlot | null;
+  slot: InventorySlotResponse | null;
   characterId: string;
   open: boolean;
   onClose: () => void;
@@ -29,16 +29,17 @@ export function EquipmentSlotModal({ slot, open, onClose, onSave, isSaving }: Eq
   const { data: allItemTypes } = useItemTypes();
   const filteredItems = allItemTypes?.filter((item) => item.slot === slot?.slot) || [];
 
-  const [itemTypeId, setItemTypeId] = useState<string>(slot?.itemType?.id || '');
-  const [quantity, setQuantity] = useState(slot?.quantity || 1);
-  const [notes, setNotes] = useState(slot?.notes || '');
+  const [itemTypeId, setItemTypeId] = useState<string>('');
+  const [quantity, setQuantity] = useState(1);
+  const [notes, setNotes] = useState('');
 
-  // Reset form when slot changes
-  useState(() => {
-    setItemTypeId(slot?.itemType?.id || '');
-    setQuantity(slot?.quantity || 1);
-    setNotes(slot?.notes || '');
-  });
+  useEffect(() => {
+    if (slot) {
+      setItemTypeId(slot.itemTypeId || '');
+      setQuantity(slot.quantity || 1);
+      setNotes(slot.notes || '');
+    }
+  }, [slot]);
 
   const handleSave = () => {
     onSave({
@@ -103,7 +104,7 @@ export function EquipmentSlotModal({ slot, open, onClose, onSave, isSaving }: Eq
           </div>
         </div>
         <DialogFooter className="gap-2">
-          {slot.itemType && (
+          {slot.itemTypeId && (
             <Button variant="destructive" onClick={handleClear} disabled={isSaving}>
               Clear Slot
             </Button>

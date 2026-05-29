@@ -3,10 +3,10 @@ import { Eye, Pencil, Trash2, Sword } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import type { Character } from '@/types';
+import type { CharacterResponse } from '@/types';
 
 interface CharacterCardProps {
-  character: Character;
+  character: CharacterResponse;
   onDelete: (id: string) => void;
   basePath?: string;
   readOnly?: boolean;
@@ -14,6 +14,10 @@ interface CharacterCardProps {
 
 export function CharacterCard({ character, onDelete, basePath = '/characters', readOnly = false }: CharacterCardProps) {
   const navigate = useNavigate();
+
+  const classDisplay = character.classLevels
+    ?.map((cl) => cl.className)
+    .join(' / ') || 'Unknown';
 
   return (
     <Card className="border-gold/20 hover:border-gold/40 transition-colors">
@@ -26,11 +30,11 @@ export function CharacterCard({ character, onDelete, basePath = '/characters', r
             <div>
               <h3 className="font-heading font-semibold text-lg">{character.name}</h3>
               <p className="text-sm text-muted-foreground">
-                {character.race?.name} {character.characterClass?.name}
+                {character.race?.name} {classDisplay}
               </p>
             </div>
           </div>
-          <Badge variant="gold">Lv. {character.level}</Badge>
+          <Badge variant="gold">Lv. {character.totalLevel}</Badge>
         </div>
         <div className="flex gap-2 mt-4">
           <Button

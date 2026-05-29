@@ -2,10 +2,10 @@ import { useState } from 'react';
 import { Check, X, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import type { CharacterStat } from '@/types';
+import type { CharacterStatResponse } from '@/types';
 
 interface StatEditorProps {
-  stat: CharacterStat;
+  stat: CharacterStatResponse;
   onSave: (value: number) => void;
   onCancel: () => void;
   isSaving: boolean;
@@ -23,7 +23,7 @@ export function StatEditor({ stat, onSave, onCancel, isSaving }: StatEditorProps
   return (
     <div className="flex flex-col items-center p-4 rounded-lg border-2 border-gold bg-gold/10 min-w-[100px]">
       <span className="text-xs font-heading font-semibold text-gold uppercase tracking-wider mb-2">
-        {stat.statType.name.length > 3 ? stat.statType.name.slice(0, 3).toUpperCase() : stat.statType.name.toUpperCase()}
+        {stat.statTypeName.length > 3 ? stat.statTypeName.slice(0, 3).toUpperCase() : stat.statTypeName.toUpperCase()}
       </span>
       <Input
         type="number"

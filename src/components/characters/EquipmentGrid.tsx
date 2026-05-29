@@ -3,7 +3,7 @@ import {
   CircleDot, Gem, Scroll
 } from 'lucide-react';
 import { EQUIPMENT_SLOT_LABELS } from '@/types';
-import type { InventorySlot, EquipmentSlot } from '@/types';
+import type { InventorySlotResponse, EquipmentSlot } from '@/types';
 
 const slotIcons: Record<EquipmentSlot, React.ReactNode> = {
   HEAD: <Crown className="h-5 w-5" />,
@@ -19,19 +19,19 @@ const slotIcons: Record<EquipmentSlot, React.ReactNode> = {
 };
 
 interface EquipmentGridProps {
-  inventory: InventorySlot[];
-  onSlotClick?: (slot: InventorySlot) => void;
+  inventory: InventorySlotResponse[];
+  onSlotClick?: (slot: InventorySlotResponse) => void;
   readOnly?: boolean;
 }
 
 export function EquipmentGrid({ inventory, onSlotClick, readOnly = false }: EquipmentGridProps) {
-  const getSlotData = (slotName: EquipmentSlot): InventorySlot | undefined => {
+  const getSlotData = (slotName: EquipmentSlot): InventorySlotResponse | undefined => {
     return inventory.find((s) => s.slot === slotName);
   };
 
   const renderSlot = (slotName: EquipmentSlot) => {
     const slotData = getSlotData(slotName);
-    const hasItem = slotData?.itemType != null;
+    const hasItem = slotData?.itemTypeId != null;
     const isClickable = !readOnly && onSlotClick && slotData;
 
     return (
@@ -56,8 +56,10 @@ export function EquipmentGrid({ inventory, onSlotClick, readOnly = false }: Equi
         </span>
         {hasItem ? (
           <>
-            <span className="text-sm font-medium text-center">{slotData?.itemType?.name}</span>
-            {slotData && slotData.quantity > 1 && (
+            <span className="text-sm font-medium text-center">
+              {slotData?.artifactName || slotData?.itemTypeName}
+            </span>
+            {slotData && slotData.quantity && slotData.quantity > 1 && (
               <span className="text-xs text-muted-foreground">x{slotData.quantity}</span>
             )}
             {slotData?.notes && (

@@ -7,7 +7,7 @@ import {
   useUpdateCharacterRace,
   useDeleteCharacterRace,
 } from '@/hooks/useAdmin';
-import type { CharacterRace } from '@/types';
+import type { CharacterRaceResponse } from '@/types';
 
 export default function CharacterRacesPage() {
   const { data, isLoading } = useCharacterRaces();
@@ -16,14 +16,14 @@ export default function CharacterRacesPage() {
   const deleteMutation = useDeleteCharacterRace();
 
   const [modalOpen, setModalOpen] = useState(false);
-  const [editing, setEditing] = useState<CharacterRace | null>(null);
+  const [editing, setEditing] = useState<CharacterRaceResponse | null>(null);
 
   const handleAdd = () => {
     setEditing(null);
     setModalOpen(true);
   };
 
-  const handleEdit = (item: CharacterRace) => {
+  const handleEdit = (item: CharacterRaceResponse) => {
     setEditing(item);
     setModalOpen(true);
   };

@@ -1,20 +1,20 @@
 import { create } from 'zustand';
-import type { User } from '@/types';
+import type { UserResponse } from '@/types';
 
 interface AuthState {
-  user: User | null;
+  user: UserResponse | null;
   token: string | null;
   isAuthenticated: boolean;
-  login: (user: User, token: string, remember: boolean) => void;
+  login: (user: UserResponse, token: string, remember: boolean) => void;
   logout: () => void;
-  setUser: (user: User) => void;
+  setUser: (user: UserResponse) => void;
 }
 
 function getStoredToken(): string | null {
   return localStorage.getItem('token') || sessionStorage.getItem('token');
 }
 
-function getStoredUser(): User | null {
+function getStoredUser(): UserResponse | null {
   const userJson = localStorage.getItem('user') || sessionStorage.getItem('user');
   if (userJson) {
     try {
@@ -30,7 +30,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   user: getStoredUser(),
   token: getStoredToken(),
   isAuthenticated: !!getStoredToken(),
-  login: (user: User, token: string, remember: boolean) => {
+  login: (user: UserResponse, token: string, remember: boolean) => {
     const storage = remember ? localStorage : sessionStorage;
     storage.setItem('token', token);
     storage.setItem('user', JSON.stringify(user));
@@ -43,7 +43,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     sessionStorage.removeItem('user');
     set({ user: null, token: null, isAuthenticated: false });
   },
-  setUser: (user: User) => {
+  setUser: (user: UserResponse) => {
     const storage = localStorage.getItem('token') ? localStorage : sessionStorage;
     storage.setItem('user', JSON.stringify(user));
     set({ user });

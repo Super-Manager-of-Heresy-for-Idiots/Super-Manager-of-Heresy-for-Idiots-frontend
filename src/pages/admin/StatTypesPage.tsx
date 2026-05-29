@@ -8,7 +8,7 @@ import {
   useUpdateStatType,
   useDeleteStatType,
 } from '@/hooks/useAdmin';
-import type { StatType } from '@/types';
+import type { StatTypeResponse } from '@/types';
 
 export default function StatTypesPage() {
   const { data, isLoading } = useStatTypes();
@@ -17,14 +17,14 @@ export default function StatTypesPage() {
   const deleteMutation = useDeleteStatType();
 
   const [modalOpen, setModalOpen] = useState(false);
-  const [editing, setEditing] = useState<StatType | null>(null);
+  const [editing, setEditing] = useState<StatTypeResponse | null>(null);
 
   const handleAdd = () => {
     setEditing(null);
     setModalOpen(true);
   };
 
-  const handleEdit = (item: StatType) => {
+  const handleEdit = (item: StatTypeResponse) => {
     setEditing(item);
     setModalOpen(true);
   };

@@ -16,12 +16,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { useTeam, useRegenerateInvite } from '@/hooks/useTeams';
+import { useTeam, useInviteCode, useRegenerateInvite } from '@/hooks/useTeams';
 
 export default function GmTeamDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { data: team, isLoading, error, refetch } = useTeam(id!);
+  const { data: inviteData, refetch: refetchInvite } = useInviteCode(id!);
   const regenerateMutation = useRegenerateInvite();
   const [showRegenerate, setShowRegenerate] = useState(false);
 
@@ -29,7 +30,7 @@ export default function GmTeamDetailPage() {
     regenerateMutation.mutate(id!, {
       onSuccess: () => {
         setShowRegenerate(false);
-        refetch();
+        refetchInvite();
       },
     });
   };
@@ -70,11 +71,11 @@ export default function GmTeamDetailPage() {
       </div>
 
       {/* Invite Code Section */}
-      {team.inviteCode && (
+      {inviteData?.inviteCode && (
         <div className="flex items-center gap-4">
           <div className="flex-1">
             <p className="text-sm text-muted-foreground mb-2">Invite Code</p>
-            <InviteCodeDisplay code={team.inviteCode} />
+            <InviteCodeDisplay code={inviteData.inviteCode} />
           </div>
           <Button variant="outline" onClick={() => setShowRegenerate(true)}>
             <RefreshCw className="h-4 w-4 mr-2" />

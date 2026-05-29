@@ -1,7 +1,15 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { charactersApi } from '@/api/characters.api';
-import type { CreateCharacterDto, UpdateStatDto, UpdateInventoryDto, EquipmentSlot, ApiError, CharacterStat } from '@/types';
+import type {
+  CreateCharacterRequest,
+  UpdateCharacterRequest,
+  UpdateStatRequest,
+  UpdateInventorySlotRequest,
+  EquipmentSlot,
+  ApiError,
+  CharacterStatResponse,
+} from '@/types';
 import { AxiosError } from 'axios';
 
 export function useCharacters() {
@@ -29,7 +37,7 @@ export function useCreateCharacter() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: CreateCharacterDto) => charactersApi.create(data),
+    mutationFn: (data: CreateCharacterRequest) => charactersApi.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['characters'] });
       toast.success('Character created successfully!');
@@ -45,7 +53,7 @@ export function useUpdateCharacter() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: CreateCharacterDto }) =>
+    mutationFn: ({ id, data }: { id: string; data: UpdateCharacterRequest }) =>
       charactersApi.update(id, data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['characters'] });
@@ -97,12 +105,12 @@ export function useUpdateStat() {
     }: {
       characterId: string;
       statId: string;
-      data: UpdateStatDto;
+      data: UpdateStatRequest;
     }) => charactersApi.updateStat(characterId, statId, data),
     onMutate: async ({ characterId, statId, data }) => {
       await queryClient.cancelQueries({ queryKey: ['characters', characterId, 'stats'] });
-      const previousStats = queryClient.getQueryData<CharacterStat[]>(['characters', characterId, 'stats']);
-      queryClient.setQueryData<CharacterStat[]>(
+      const previousStats = queryClient.getQueryData<CharacterStatResponse[]>(['characters', characterId, 'stats']);
+      queryClient.setQueryData<CharacterStatResponse[]>(
         ['characters', characterId, 'stats'],
         (old) => old?.map((s) => (s.id === statId ? { ...s, value: data.value } : s))
       );
@@ -120,6 +128,7 @@ export function useUpdateStat() {
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['characters', variables.characterId, 'stats'] });
+      queryClient.invalidateQueries({ queryKey: ['characters', variables.characterId] });
       toast.success('Stat updated!');
     },
   });
@@ -147,11 +156,14 @@ export function useUpdateInventorySlot() {
     }: {
       characterId: string;
       slot: EquipmentSlot;
-      data: UpdateInventoryDto;
+      data: UpdateInventorySlotRequest;
     }) => charactersApi.updateInventorySlot(characterId, slot, data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
         queryKey: ['characters', variables.characterId, 'inventory'],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['characters', variables.characterId],
       });
       toast.success('Equipment updated!');
     },
