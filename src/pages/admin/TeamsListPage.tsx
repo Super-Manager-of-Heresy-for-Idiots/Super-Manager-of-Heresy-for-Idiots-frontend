@@ -40,8 +40,8 @@ export default function TeamsListPage() {
               {teams?.map((team) => (
                 <tr key={team.id} className="border-b border-border last:border-0 hover:bg-accent/30 transition-colors">
                   <td className="px-4 py-3 text-sm font-medium">{team.name}</td>
-                  <td className="px-4 py-3 text-sm text-muted-foreground">{team.gameMaster?.username || 'N/A'}</td>
-                  <td className="px-4 py-3 text-sm text-muted-foreground">{team.members?.length || team.memberCount || 0}</td>
+                  <td className="px-4 py-3 text-sm text-muted-foreground">{team.gameMasterUsername || 'N/A'}</td>
+                  <td className="px-4 py-3 text-sm text-muted-foreground">{team.members?.length || 0}</td>
                   <td className="px-4 py-3 text-sm text-muted-foreground">{formatDate(team.createdAt)}</td>
                 </tr>
               ))}

@@ -11,14 +11,28 @@ const config: Config = {
     extend: {
       colors: {
         gold: {
-          DEFAULT: '#D4AF37',
-          light: '#E5C76B',
-          dark: '#B8960C',
+          DEFAULT: '#b08d4e',
+          light: '#d4b478',
+          dark: '#836a3a',
+          pale: '#d4b478',
+          deep: '#836a3a',
         },
+        ember: {
+          DEFAULT: '#b3461a',
+          deep: '#7d2f10',
+        },
+        burgundy: {
+          DEFAULT: '#6b2a2a',
+          deep: '#401717',
+        },
+        arcane: {
+          DEFAULT: '#5a8e94',
+          deep: '#2f5a60',
+        },
+        verdigris: '#4a6b53',
         parchment: {
-          DEFAULT: '#F4E4C1',
-          dark: '#D4C4A1',
-          light: '#FFF8E7',
+          DEFAULT: '#cdc1a6',
+          bright: '#e6dcc4',
         },
         'dnd-red': {
           DEFAULT: '#8B0000',
@@ -61,12 +75,14 @@ const config: Config = {
       },
       borderRadius: {
         lg: 'var(--radius)',
-        md: 'calc(var(--radius) - 2px)',
-        sm: 'calc(var(--radius) - 4px)',
+        md: 'var(--radius)',
+        sm: 'var(--radius)',
       },
       fontFamily: {
         heading: ['Cinzel', 'serif'],
+        serif: ['Cormorant Garamond', 'Garamond', 'serif'],
         body: ['Inter', 'system-ui', 'sans-serif'],
+        mono: ['JetBrains Mono', 'Menlo', 'monospace'],
       },
     },
   },

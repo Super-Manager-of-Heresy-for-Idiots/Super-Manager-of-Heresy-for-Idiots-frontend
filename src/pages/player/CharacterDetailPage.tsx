@@ -1,11 +1,6 @@
 import { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Pencil, ArrowLeft, Shield as ShieldIcon, ArrowUp } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Separator } from '@/components/ui/separator';
-import { StatCard } from '@/components/characters/StatCard';
+import { Rune, Sigil, OrdoDivider, OrdoPanel, OrdoChip } from '@/components/ordo';
 import { StatEditor } from '@/components/characters/StatEditor';
 import { EquipmentGrid } from '@/components/characters/EquipmentGrid';
 import { EquipmentSlotModal } from '@/components/characters/EquipmentSlotModal';
@@ -18,7 +13,8 @@ import {
 } from '@/hooks/useCharacters';
 import { useCharacterConditions } from '@/hooks/useConditions';
 import { useAuthStore } from '@/store/authStore';
-import type { CharacterStatResponse, InventorySlotResponse } from '@/types';
+import { formatModifier } from '@/lib/utils';
+import type { CharacterStatResponse, InventorySlotResponse, CharacterConditionResponse, ConditionModifierResponse } from '@/types';
 
 interface CharacterDetailPageProps {
   isGmView?: boolean;
@@ -59,149 +55,196 @@ export default function CharacterDetailPage({ isGmView = false }: CharacterDetai
 
   if (charLoading) {
     return (
-      <div className="space-y-6">
-        <Skeleton className="h-24 w-full" />
-        <Skeleton className="h-48 w-full" />
-        <Skeleton className="h-64 w-full" />
+      <div style={{ maxWidth: 960, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 24, padding: '24px 0' }}>
+        <div className="ao-breathe" style={{ height: 96, background: 'var(--abyss)', borderRadius: 4 }} />
+        <div className="ao-breathe" style={{ height: 192, background: 'var(--abyss)', borderRadius: 4 }} />
+        <div className="ao-breathe" style={{ height: 256, background: 'var(--abyss)', borderRadius: 4 }} />
       </div>
     );
   }
 
   if (charError || !character) {
     return (
-      <div className="text-center py-12">
-        <p className="text-lg text-muted-foreground mb-4">Failed to load character</p>
-        <Button variant="outline" onClick={() => refetchChar()}>Retry</Button>
+      <div style={{ textAlign: 'center', padding: '48px 0' }}>
+        <Sigil size={56} glyph="eye" />
+        <p className="ao-italic" style={{ color: 'var(--ink-faint)', margin: '16px 0' }}>
+          Failed to load character folio
+        </p>
+        <button className="ao-btn ao-btn--ghost" onClick={() => refetchChar()}>Retry</button>
       </div>
     );
   }
 
-  // Class levels display
   const classDisplay = character.classLevels
     ?.map((cl) => `${cl.className} ${cl.classLevel}`)
     .join(' / ') || 'Unknown';
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
+    <div style={{ maxWidth: 960, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 24, padding: '24px 0' }}>
       {/* Back button */}
-      <Button variant="ghost" onClick={() => navigate(-1)} className="gap-2">
-        <ArrowLeft className="h-4 w-4" /> Back
-      </Button>
+      <button className="ao-btn ao-btn--ghost" onClick={() => navigate(-1)} style={{ alignSelf: 'flex-start', display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+        <Rune kind="arrow-l" size={14} /> Back
+      </button>
 
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <div>
-            <div className="flex items-center gap-3">
-              <h1 className="text-3xl font-heading font-bold">{character.name}</h1>
-              <Badge variant="gold" className="text-lg px-3">Lv. {character.totalLevel}</Badge>
-            </div>
-            <p className="text-muted-foreground mt-1">
-              {character.race?.name} &middot; {classDisplay}
-            </p>
-            {character.experience !== undefined && (
-              <p className="text-sm text-muted-foreground mt-0.5">
-                XP: {character.experience}
+      {/* Header Panel */}
+      <OrdoPanel frame padding={24}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            <Sigil size={64} glyph="sigil-2" />
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <h1 className="ao-h3" style={{ margin: 0 }}>{character.name}</h1>
+                <span className="ao-num" style={{ fontSize: 28, color: 'var(--gold)', lineHeight: 1 }}>
+                  {character.totalLevel}
+                </span>
+              </div>
+              <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginTop: 4 }}>
+                {character.race?.name} &middot; {classDisplay}
               </p>
+              {character.experience !== undefined && (
+                <span className="ao-codex" style={{ color: 'var(--ink-faint)', marginTop: 2, display: 'block' }}>
+                  XP: {character.experience}
+                </span>
+              )}
+            </div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+            {isGmView && (
+              <OrdoChip tone="arcane" glyph="shield">Viewing as Game Master</OrdoChip>
+            )}
+            {isOwner && !isGmView && (
+              <>
+                <Link to={`/characters/${id}/level-up`} className="ao-btn ao-btn--primary" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}>
+                  <Rune kind="arrow-up" size={14} /> Level Up
+                </Link>
+                <button className="ao-btn ao-btn--ghost" onClick={() => navigate(`/characters/${id}/edit`)} style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                  <Rune kind="scroll" size={14} /> Edit
+                </button>
+              </>
             )}
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          {isGmView && (
-            <Badge variant="secondary" className="gap-1">
-              <ShieldIcon className="h-3 w-3" /> Viewing as Game Master
-            </Badge>
-          )}
-          {isOwner && !isGmView && (
-            <>
-              <Button variant="outline" asChild>
-                <Link to={`/characters/${id}/level-up`}>
-                  <ArrowUp className="h-4 w-4 mr-2" /> Level Up
-                </Link>
-              </Button>
-              <Button variant="outline" onClick={() => navigate(`/characters/${id}/edit`)}>
-                <Pencil className="h-4 w-4 mr-2" /> Edit
-              </Button>
-            </>
-          )}
-        </div>
-      </div>
 
-      <Separator className="bg-gold/20" />
+        {/* HP & XP bars */}
+        {character.experience !== undefined && (
+          <div style={{ marginTop: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+              <span className="ao-overline">Ascent Progress</span>
+            </div>
+            <div className="ao-bar">
+              <div
+                className="ao-bar-fill ao-bar-fill--gold"
+                style={{ width: `${Math.min(100, (character.experience % 100))}%` }}
+              />
+            </div>
+          </div>
+        )}
+      </OrdoPanel>
 
       {/* Active Conditions */}
       {conditions && conditions.length > 0 && (
         <>
-          <div>
-            <h2 className="text-xl font-heading font-semibold mb-3">Active Conditions</h2>
-            <div className="flex flex-wrap gap-2">
-              {conditions.map((c) => (
-                <Badge key={c.id} variant="secondary" className="text-sm py-1 px-3">
-                  {c.conditionName}
-                  {c.modifiers.length > 0 && (
-                    <span className="ml-1 text-xs opacity-70">
-                      ({c.modifiers.map((m) => `${m.statTypeName} ${m.modifierValue > 0 ? '+' : ''}${m.modifierValue}`).join(', ')})
-                    </span>
-                  )}
-                </Badge>
-              ))}
-            </div>
+          <OrdoDivider glyph="eye">ACTIVE CONDITIONS</OrdoDivider>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+            {conditions.map((c: CharacterConditionResponse) => (
+              <OrdoChip key={c.id} tone="ember" glyph="flame">
+                {c.conditionName}
+                {c.modifiers.length > 0 && (
+                  <span style={{ marginLeft: 4, opacity: 0.75, fontSize: '0.8em' }}>
+                    ({c.modifiers.map((m: ConditionModifierResponse) => `${m.statTypeName} ${m.modifierValue > 0 ? '+' : ''}${m.modifierValue}`).join(', ')})
+                  </span>
+                )}
+              </OrdoChip>
+            ))}
           </div>
-          <Separator className="bg-gold/20" />
         </>
       )}
 
       {/* Stats Section */}
-      <div>
-        <h2 className="text-xl font-heading font-semibold mb-4">Ability Scores</h2>
-        {statsLoading ? (
-          <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <Skeleton key={i} className="h-24" />
-            ))}
-          </div>
-        ) : (
-          <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
-            {(stats || []).map((stat) =>
-              editingStatId === stat.id ? (
-                <StatEditor
-                  key={stat.id}
-                  stat={stat}
-                  onSave={(value) => handleStatSave(stat.id, value)}
-                  onCancel={() => setEditingStatId(null)}
-                  isSaving={updateStat.isPending}
-                />
-              ) : (
-                <StatCard
-                  key={stat.id}
-                  stat={stat}
-                  onClick={canEditStats ? () => setEditingStatId(stat.id) : undefined}
-                />
-              )
-            )}
-          </div>
-        )}
-      </div>
+      <OrdoDivider glyph="sigil-3">ASPECTS</OrdoDivider>
 
-      <Separator className="bg-gold/20" />
+      {statsLoading ? (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: 12 }}>
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="ao-breathe" style={{ height: 96, background: 'var(--abyss)', borderRadius: 4 }} />
+          ))}
+        </div>
+      ) : (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: 12 }}>
+          {(stats || []).map((stat: CharacterStatResponse) =>
+            editingStatId === stat.id ? (
+              <StatEditor
+                key={stat.id}
+                stat={stat}
+                onSave={(value) => handleStatSave(stat.id, value)}
+                onCancel={() => setEditingStatId(null)}
+                isSaving={updateStat.isPending}
+              />
+            ) : (
+              <button
+                key={stat.id}
+                className="ao-stat"
+                onClick={canEditStats ? () => setEditingStatId(stat.id) : undefined}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  padding: 12,
+                  background: 'var(--abyss)',
+                  border: '1px solid var(--rule)',
+                  borderRadius: 4,
+                  cursor: canEditStats ? 'pointer' : 'default',
+                  minWidth: 100,
+                }}
+              >
+                <span className="ao-stat-label">
+                  {stat.statTypeName.length > 3
+                    ? stat.statTypeName.slice(0, 3).toUpperCase()
+                    : stat.statTypeName.toUpperCase()}
+                </span>
+                <span
+                  className="ao-stat-value"
+                  style={{
+                    color:
+                      stat.effectiveValue != null && stat.effectiveValue !== stat.value
+                        ? stat.effectiveValue > stat.value
+                          ? '#6ee77a'
+                          : '#e76e6e'
+                        : 'var(--ink)',
+                  }}
+                >
+                  {stat.effectiveValue ?? stat.value}
+                </span>
+                {stat.effectiveValue != null && stat.effectiveValue !== stat.value && (
+                  <span className="ao-codex" style={{ color: 'var(--ink-faint)', fontSize: '0.7em' }}>
+                    base {stat.value}
+                  </span>
+                )}
+                <span className="ao-stat-mod">
+                  {formatModifier(stat.effectiveValue ?? stat.value)}
+                </span>
+              </button>
+            )
+          )}
+        </div>
+      )}
 
       {/* Equipment Section */}
-      <div>
-        <h2 className="text-xl font-heading font-semibold mb-4">Equipment</h2>
-        {invLoading ? (
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-            {Array.from({ length: 10 }).map((_, i) => (
-              <Skeleton key={i} className="h-24" />
-            ))}
-          </div>
-        ) : (
-          <EquipmentGrid
-            inventory={inventory || []}
-            onSlotClick={canEditInventory ? (slot) => setSelectedSlot(slot) : undefined}
-            readOnly={!canEditInventory}
-          />
-        )}
-      </div>
+      <OrdoDivider glyph="helm">EQUIPMENT</OrdoDivider>
+
+      {invLoading ? (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 12 }}>
+          {Array.from({ length: 10 }).map((_, i) => (
+            <div key={i} className="ao-breathe" style={{ height: 96, background: 'var(--abyss)', borderRadius: 4 }} />
+          ))}
+        </div>
+      ) : (
+        <EquipmentGrid
+          inventory={inventory || []}
+          onSlotClick={canEditInventory ? (slot) => setSelectedSlot(slot) : undefined}
+          readOnly={!canEditInventory}
+        />
+      )}
 
       {/* Equipment Modal */}
       <EquipmentSlotModal

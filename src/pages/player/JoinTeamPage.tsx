@@ -1,11 +1,8 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Loader2, UserPlus } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { useNavigate } from 'react-router-dom';
+import { Rune, Sigil, OrdoPanel, OrdoField } from '@/components/ordo';
 import { useJoinTeam } from '@/hooks/useTeams';
 
 const joinSchema = z.object({
@@ -18,6 +15,7 @@ const joinSchema = z.object({
 type JoinFormData = z.infer<typeof joinSchema>;
 
 export default function JoinTeamPage() {
+  const navigate = useNavigate();
   const joinMutation = useJoinTeam();
 
   const {
@@ -37,36 +35,54 @@ export default function JoinTeamPage() {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-8">
-      <Card className="border-gold/20">
-        <CardHeader className="text-center">
-          <div className="flex justify-center mb-3">
-            <UserPlus className="h-10 w-10 text-gold" />
-          </div>
-          <CardTitle>Join a Team</CardTitle>
-          <CardDescription>Enter the invite code provided by your Game Master</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="inviteCode">Invite Code</Label>
-              <Input
-                id="inviteCode"
-                {...register('inviteCode')}
-                placeholder="Enter invite code"
-                className="text-center text-lg tracking-widest font-mono"
-              />
-              {errors.inviteCode && (
-                <p className="text-sm text-dnd-red">{errors.inviteCode.message}</p>
-              )}
-            </div>
-            <Button type="submit" variant="gold" className="w-full" disabled={joinMutation.isPending}>
-              {joinMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Join Team
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+    <div style={{ maxWidth: 420, margin: '0 auto', padding: '48px 16px', textAlign: 'center' }}>
+      <Sigil size={64} glyph="sigil-3" />
+
+      <p className="ao-codex" style={{ color: 'var(--gold)', letterSpacing: 4, margin: '20px 0 8px' }}>
+        &mdash; WRIT OF ADMISSION &mdash;
+      </p>
+
+      <OrdoPanel frame padding={28} style={{ marginTop: 24, textAlign: 'left' }}>
+        <h2 className="ao-h5" style={{ textAlign: 'center', margin: '0 0 20px' }}>
+          Speak the Cipher
+        </h2>
+
+        <form onSubmit={handleSubmit(onSubmit)} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+          <OrdoField label="Invite Code" required>
+            <input
+              className="ao-input"
+              {...register('inviteCode')}
+              placeholder="Enter the cipher"
+              style={{ textAlign: 'center', letterSpacing: 4, fontFamily: 'monospace', fontSize: 18 }}
+            />
+            {errors.inviteCode && (
+              <span style={{ color: 'var(--ember)', fontSize: 12 }}>{errors.inviteCode.message}</span>
+            )}
+          </OrdoField>
+
+          <button
+            type="submit"
+            className="ao-btn ao-btn--primary ao-btn--block"
+            disabled={joinMutation.isPending}
+            style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
+          >
+            {joinMutation.isPending ? (
+              <span className="ao-breathe"><Rune kind="sigil-1" size={16} /></span>
+            ) : (
+              <Rune kind="scroll" size={14} />
+            )}
+            Submit Cipher
+          </button>
+        </form>
+      </OrdoPanel>
+
+      <button
+        className="ao-btn ao-btn--ghost ao-btn--sm"
+        onClick={() => navigate(-1)}
+        style={{ marginTop: 16, display: 'inline-flex', alignItems: 'center', gap: 6 }}
+      >
+        <Rune kind="arrow-l" size={12} /> Back
+      </button>
     </div>
   );
 }

@@ -1,8 +1,4 @@
-import { Users } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Rune, Sigil, OrdoPanel, OrdoChip } from '@/components/ordo';
 import { useTeams } from '@/hooks/useTeams';
 
 export default function MyTeamsPage() {
@@ -10,47 +6,54 @@ export default function MyTeamsPage() {
 
   if (error) {
     return (
-      <div className="text-center py-12">
-        <p className="text-lg text-muted-foreground mb-4">Failed to load teams</p>
-        <Button variant="outline" onClick={() => refetch()}>Retry</Button>
+      <div style={{ textAlign: 'center', padding: '48px 0' }}>
+        <Sigil size={56} glyph="eye" />
+        <p className="ao-italic" style={{ color: 'var(--ink-faint)', margin: '16px 0' }}>
+          Failed to summon conclave records
+        </p>
+        <button className="ao-btn ao-btn--ghost" onClick={() => refetch()}>Retry</button>
       </div>
     );
   }
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-heading font-bold">My Teams</h1>
-      </div>
+    <div style={{ maxWidth: 960, margin: '0 auto', padding: '24px 0' }}>
+      <h1 className="ao-h3" style={{ marginBottom: 24 }}>My Conclaves</h1>
 
       {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
           {Array.from({ length: 3 }).map((_, i) => (
-            <Skeleton key={i} className="h-32" />
+            <div key={i} className="ao-breathe" style={{ height: 128, background: 'var(--abyss)', borderRadius: 4 }} />
           ))}
         </div>
       ) : !teams || teams.length === 0 ? (
-        <div className="text-center py-16">
-          <Users className="h-16 w-16 text-gold/30 mx-auto mb-4" />
-          <h2 className="text-xl font-heading font-semibold mb-2">Not in Any Teams</h2>
-          <p className="text-muted-foreground">Ask your Game Master for an invite code to join a team.</p>
+        <div style={{ textAlign: 'center', padding: '64px 0' }}>
+          <Sigil size={72} glyph="sigil-3" />
+          <h2 className="ao-h5" style={{ marginTop: 16, color: 'var(--ink-faint)' }}>
+            Not yet sworn to any fellowship
+          </h2>
+          <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginTop: 8 }}>
+            Seek a Cipher from your Game Master to join a Conclave.
+          </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
           {teams.map((team) => (
-            <Card key={team.id} className="border-gold/20">
-              <CardContent className="p-6">
-                <h3 className="font-heading font-semibold text-lg mb-2">{team.name}</h3>
-                <div className="space-y-2 text-sm text-muted-foreground">
-                  <p>GM: {team.gameMaster?.username || 'Unknown'}</p>
-                  <div className="flex items-center gap-1">
-                    <Users className="h-4 w-4" />
-                    <span>{team.members?.length || team.memberCount || 0} members</span>
-                  </div>
-                </div>
-                <Badge variant="outline" className="mt-3">Member</Badge>
-              </CardContent>
-            </Card>
+            <OrdoPanel key={team.id} frame padding={20}>
+              <h3 className="ao-h5" style={{ margin: '0 0 10px' }}>{team.name}</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <span className="ao-codex" style={{ color: 'var(--ink-faint)' }}>
+                  GM: {team.gameMasterUsername || 'Unknown'}
+                </span>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: 'var(--ink-faint)', fontSize: 13 }}>
+                  <Rune kind="shield" size={14} color="var(--ink-faint)" />
+                  {team.members?.length || 0} members
+                </span>
+              </div>
+              <div style={{ marginTop: 12 }}>
+                <OrdoChip tone="gold" glyph="diamond">Member</OrdoChip>
+              </div>
+            </OrdoPanel>
           ))}
         </div>
       )}

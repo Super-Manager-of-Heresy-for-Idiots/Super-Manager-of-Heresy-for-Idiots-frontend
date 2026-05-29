@@ -17,11 +17,17 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { EQUIPMENT_SLOTS, EQUIPMENT_SLOT_LABELS } from '@/types';
 
+interface SelectOption {
+  value: string;
+  label: string;
+}
+
 interface FieldDef {
   name: string;
   label: string;
-  type: 'text' | 'textarea' | 'slot-select';
+  type: 'text' | 'textarea' | 'slot-select' | 'select';
   required?: boolean;
+  options?: SelectOption[];
 }
 
 interface CrudFormModalProps {
@@ -99,6 +105,22 @@ export function CrudFormModal({
                     {EQUIPMENT_SLOTS.map((slot) => (
                       <SelectItem key={slot} value={slot}>
                         {EQUIPMENT_SLOT_LABELS[slot]}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : field.type === 'select' && field.options ? (
+                <Select
+                  value={watch(field.name) || ''}
+                  onValueChange={(v) => setValue(field.name, v, { shouldValidate: true })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={`Select ${field.label.toLowerCase()}`} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {field.options.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>
+                        {opt.label}
                       </SelectItem>
                     ))}
                   </SelectContent>

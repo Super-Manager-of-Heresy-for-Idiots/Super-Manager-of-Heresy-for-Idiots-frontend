@@ -33,12 +33,12 @@ export default function ItemTypesPage() {
   const handleSubmit = (formData: Record<string, string>) => {
     if (editing) {
       updateMutation.mutate(
-        { id: editing.id, data: { name: formData.name, description: formData.description, slot: formData.slot } },
+        { id: editing.id, data: { name: formData.name, description: formData.description, slot: formData.slot as import('@/types').EquipmentSlot } },
         { onSuccess: () => setModalOpen(false) }
       );
     } else {
       createMutation.mutate(
-        { name: formData.name, description: formData.description, slot: formData.slot },
+        { name: formData.name, description: formData.description, slot: formData.slot as import('@/types').EquipmentSlot },
         { onSuccess: () => setModalOpen(false) }
       );
     }
@@ -61,7 +61,7 @@ export default function ItemTypesPage() {
             header: 'Slot',
             accessor: (item) => (
               <Badge variant="outline">
-                {EQUIPMENT_SLOT_LABELS[item.slot] || item.slot}
+                {EQUIPMENT_SLOT_LABELS[item.slot as import('@/types').EquipmentSlot] || item.slot}
               </Badge>
             ),
           },
@@ -80,7 +80,7 @@ export default function ItemTypesPage() {
         ]}
         defaultValues={
           editing
-            ? { name: editing.name, description: editing.description, slot: editing.slot }
+            ? { name: editing.name, description: editing.description || '', slot: editing.slot }
             : undefined
         }
       />

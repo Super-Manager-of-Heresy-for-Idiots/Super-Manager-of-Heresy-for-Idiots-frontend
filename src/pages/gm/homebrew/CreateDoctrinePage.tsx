@@ -41,7 +41,7 @@ export default function CreateDoctrinePage() {
       {
         onSuccess: (res) => {
           const pkg = res.data;
-          navigate(`/gm/homebrew/${pkg.id}/edit`);
+          navigate(`/gm/homebrew/${pkg?.id}/edit`);
         },
       }
     );

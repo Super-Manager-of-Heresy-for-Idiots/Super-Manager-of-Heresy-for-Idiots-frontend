@@ -1,12 +1,8 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Rune, OrdoPanel, OrdoField } from '@/components/ordo';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useCharacterClasses, useCharacterRaces } from '@/hooks/useAdmin';
 import type { CharacterResponse } from '@/types';
 
@@ -62,64 +58,75 @@ export function CharacterForm({ character, onSubmit, isSubmitting, title }: Char
   const selectedClassId = !isEditing ? watch('classId') : undefined;
 
   return (
-    <Card className="max-w-2xl mx-auto border-gold/20">
-      <CardHeader>
-        <CardTitle>{title}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="name">Character Name</Label>
-            <Input id="name" {...register('name')} placeholder="Enter character name" />
-            {errors.name && <p className="text-sm text-dnd-red">{errors.name.message}</p>}
-          </div>
-
-          {!isEditing && (
-            <div className="space-y-2">
-              <Label htmlFor="classId">Class</Label>
-              <Select
-                value={selectedClassId}
-                onValueChange={(value) => setValue('classId', value, { shouldValidate: true })}
-                disabled={classesLoading}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={classesLoading ? 'Loading...' : 'Select a class'} />
-                </SelectTrigger>
-                <SelectContent>
-                  {classes?.map((c) => (
-                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.classId && <p className="text-sm text-dnd-red">{errors.classId.message}</p>}
-            </div>
+    <OrdoPanel frame padding={28} style={{ maxWidth: 560, margin: '0 auto' }}>
+      <form onSubmit={handleSubmit(onSubmit)} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <OrdoField label="Soul Name" required>
+          <input
+            className="ao-input"
+            {...register('name')}
+            placeholder="Enter the name"
+          />
+          {errors.name && (
+            <span style={{ color: 'var(--ember)', fontSize: 12 }}>{errors.name.message}</span>
           )}
+        </OrdoField>
 
-          <div className="space-y-2">
-            <Label htmlFor="raceId">Race</Label>
+        {!isEditing && (
+          <OrdoField label="Class" required>
             <Select
-              value={selectedRaceId}
-              onValueChange={(value) => setValue('raceId', value, { shouldValidate: true })}
-              disabled={racesLoading}
+              value={selectedClassId}
+              onValueChange={(value) => setValue('classId', value, { shouldValidate: true })}
+              disabled={classesLoading}
             >
-              <SelectTrigger>
-                <SelectValue placeholder={racesLoading ? 'Loading...' : 'Select a race'} />
+              <SelectTrigger className="ao-input" style={{ width: '100%' }}>
+                <SelectValue placeholder={classesLoading ? 'Loading...' : 'Select a class'} />
               </SelectTrigger>
               <SelectContent>
-                {races?.map((r) => (
-                  <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
+                {classes?.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            {errors.raceId && <p className="text-sm text-dnd-red">{errors.raceId.message}</p>}
-          </div>
+            {errors.classId && (
+              <span style={{ color: 'var(--ember)', fontSize: 12 }}>{errors.classId.message}</span>
+            )}
+          </OrdoField>
+        )}
 
-          <Button type="submit" variant="gold" className="w-full" disabled={isSubmitting}>
-            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {isEditing ? 'Update Character' : 'Create Character'}
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
+        <OrdoField label="Race" required>
+          <Select
+            value={selectedRaceId}
+            onValueChange={(value) => setValue('raceId', value, { shouldValidate: true })}
+            disabled={racesLoading}
+          >
+            <SelectTrigger className="ao-input" style={{ width: '100%' }}>
+              <SelectValue placeholder={racesLoading ? 'Loading...' : 'Select a race'} />
+            </SelectTrigger>
+            <SelectContent>
+              {races?.map((r) => (
+                <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {errors.raceId && (
+            <span style={{ color: 'var(--ember)', fontSize: 12 }}>{errors.raceId.message}</span>
+          )}
+        </OrdoField>
+
+        <button
+          type="submit"
+          className="ao-btn ao-btn--primary ao-btn--block"
+          disabled={isSubmitting}
+          style={{ marginTop: 8, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
+        >
+          {isSubmitting ? (
+            <span className="ao-breathe"><Rune kind="sigil-1" size={16} /></span>
+          ) : (
+            <Rune kind="scroll" size={14} />
+          )}
+          {isEditing ? 'Amend the Record' : 'Inscribe New Soul'}
+        </button>
+      </form>
+    </OrdoPanel>
   );
 }

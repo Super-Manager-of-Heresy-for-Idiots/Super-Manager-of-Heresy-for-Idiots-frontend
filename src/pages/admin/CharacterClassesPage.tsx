@@ -68,7 +68,7 @@ export default function CharacterClassesPage() {
           { name: 'description', label: 'Description', type: 'textarea' },
         ]}
         defaultValues={
-          editing ? { name: editing.name, description: editing.description } : undefined
+          editing ? { name: editing.name, description: editing.description || '' } : undefined
         }
       />
     </>

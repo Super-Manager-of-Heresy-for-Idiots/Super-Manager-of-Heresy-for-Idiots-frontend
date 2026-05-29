@@ -9,7 +9,7 @@ export default function GmTeamCreatePage() {
   const handleSubmit = (data: { name: string }) => {
     createMutation.mutate(data, {
       onSuccess: (response) => {
-        navigate(`/gm/teams/${response.data.id}`);
+        navigate(`/gm/teams/${response.data?.id}`);
       },
     });
   };

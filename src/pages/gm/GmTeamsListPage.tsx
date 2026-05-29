@@ -1,9 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Shield } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
-import { TeamCard } from '@/components/teams/TeamCard';
+import { Rune, Sigil, OrdoDivider, OrdoPanel } from '@/components/ordo';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -40,50 +37,140 @@ export default function GmTeamsListPage() {
     }
   };
 
+  const totalMembers = teams?.reduce((sum, t) => sum + (t.members?.length || 0), 0) || 0;
+
   if (error) {
     return (
-      <div className="text-center py-12">
-        <p className="text-lg text-muted-foreground mb-4">Failed to load teams</p>
-        <Button variant="outline" onClick={() => refetch()}>Retry</Button>
+      <div style={{ textAlign: 'center', padding: '48px 0' }}>
+        <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginBottom: 16 }}>
+          The registry could not be consulted. The ink has faded.
+        </p>
+        <button className="ao-btn" onClick={() => refetch()}>Retry</button>
       </div>
     );
   }
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-heading font-bold">My Teams</h1>
-        <Button variant="gold" onClick={() => navigate('/gm/teams/new')}>
-          <Plus className="h-4 w-4 mr-2" />
-          Create Team
-        </Button>
+      {/* Header */}
+      <div style={{ textAlign: 'center', marginBottom: 32 }}>
+        <p className="ao-overline" style={{ color: 'var(--gold)' }}>
+          Fellowships under thy charter
+        </p>
+        <h3 className="ao-h3" style={{ marginTop: 4 }}>The Conclaves</h3>
       </div>
 
+      <OrdoDivider glyph="diamond" color="var(--rule)" />
+
+      {/* Stats row */}
+      <div style={{ display: 'flex', justifyContent: 'center', gap: 48, margin: '24px 0' }}>
+        <div className="ao-stat" style={{ textAlign: 'center' }}>
+          <span className="ao-stat-value" style={{ color: 'var(--gold)' }}>
+            {isLoading ? '\u2014' : (teams?.length || 0)}
+          </span>
+          <span className="ao-stat-label">Conclaves</span>
+        </div>
+        <div className="ao-stat" style={{ textAlign: 'center' }}>
+          <span className="ao-stat-value" style={{ color: 'var(--arcane)' }}>
+            {isLoading ? '\u2014' : totalMembers}
+          </span>
+          <span className="ao-stat-label">Total Members</span>
+        </div>
+      </div>
+
+      <OrdoDivider glyph="diamond" color="var(--rule)" />
+
+      {/* Action bar */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', margin: '20px 0' }}>
+        <button
+          className="ao-btn ao-btn--primary"
+          onClick={() => navigate('/gm/teams/new')}
+        >
+          <Rune kind="plus" size={14} color="currentColor" />
+          <span style={{ marginLeft: 6 }}>Found New Conclave</span>
+        </button>
+      </div>
+
+      {/* Loading */}
       {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
           {Array.from({ length: 3 }).map((_, i) => (
-            <Skeleton key={i} className="h-48" />
+            <div key={i} className="ao-panel ao-frame ao-breathe" style={{ padding: 24, minHeight: 180 }}>
+              <span className="ao-frame-c" />
+              <div className="ao-ph" style={{ width: '60%', height: 20, marginBottom: 12 }} />
+              <div className="ao-ph" style={{ width: '40%', height: 14 }} />
+            </div>
           ))}
         </div>
       ) : !teams || teams.length === 0 ? (
-        <div className="text-center py-16">
-          <Shield className="h-16 w-16 text-gold/30 mx-auto mb-4" />
-          <h2 className="text-xl font-heading font-semibold mb-2">No Teams Yet</h2>
-          <p className="text-muted-foreground mb-6">Create your first team and invite players!</p>
-          <Button variant="gold" onClick={() => navigate('/gm/teams/new')}>
-            <Plus className="h-4 w-4 mr-2" />
-            Create Your First Team
-          </Button>
+        <div style={{ textAlign: 'center', padding: '64px 0' }}>
+          <Sigil size={80} glyph="shield" color="var(--gold-pale)" />
+          <h4 className="ao-h4" style={{ marginTop: 20 }}>No Conclaves Yet</h4>
+          <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginTop: 8, marginBottom: 24 }}>
+            Forge thy first fellowship and summon thy players.
+          </p>
+          <button
+            className="ao-btn ao-btn--primary ao-btn--lg"
+            onClick={() => navigate('/gm/teams/new')}
+          >
+            <Rune kind="plus" size={14} color="currentColor" />
+            <span style={{ marginLeft: 6 }}>Found Thy First Conclave</span>
+          </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
           {teams.map((team) => (
-            <TeamCard
-              key={team.id}
-              team={team}
-              onDelete={(id) => setDeleteId(id)}
-              onRegenerate={(id) => setRegenerateId(id)}
-            />
+            <OrdoPanel key={team.id} frame padding={0}>
+              <div style={{ padding: 20 }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
+                  <Sigil size={44} glyph="shield" color="var(--gold)" />
+                  <div style={{ flex: 1 }}>
+                    <h4 className="ao-h4" style={{ margin: 0 }}>{team.name}</h4>
+                    <p className="ao-codex" style={{ color: 'var(--ink-faint)', marginTop: 2 }}>
+                      GM: {team.gameMasterUsername || 'Unknown'}
+                    </p>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 14 }}>
+                  <Rune kind="helm" size={14} color="var(--ink-quiet)" />
+                  <span className="ao-codex" style={{ color: 'var(--ink-quiet)' }}>
+                    {team.members?.length || 0} {(team.members?.length || 0) === 1 ? 'member' : 'members'}
+                  </span>
+                </div>
+              </div>
+
+              <div style={{
+                display: 'flex',
+                gap: 6,
+                padding: '12px 20px',
+                borderTop: '1px solid var(--rule)',
+                background: 'var(--abyss)',
+              }}>
+                <button
+                  className="ao-btn ao-btn--primary ao-btn--sm"
+                  style={{ flex: 1 }}
+                  onClick={() => navigate(`/gm/teams/${team.id}`)}
+                >
+                  <Rune kind="eye" size={12} color="currentColor" />
+                  <span style={{ marginLeft: 4 }}>View Conclave</span>
+                </button>
+                <button
+                  className="ao-btn ao-btn--ghost ao-btn--sm"
+                  onClick={() => setRegenerateId(team.id)}
+                  title="Regenerate invite code"
+                >
+                  <Rune kind="cross-pat" size={14} color="var(--arcane)" />
+                </button>
+                <button
+                  className="ao-btn ao-btn--danger ao-btn--sm"
+                  onClick={() => setDeleteId(team.id)}
+                  title="Unmake conclave"
+                >
+                  <Rune kind="x" size={14} color="currentColor" />
+                </button>
+              </div>
+            </OrdoPanel>
           ))}
         </div>
       )}
@@ -92,18 +179,18 @@ export default function GmTeamsListPage() {
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Team?</AlertDialogTitle>
+            <AlertDialogTitle>Unmake this Conclave?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This team and all its data will be permanently deleted.
+              This rite cannot be undone. The conclave and all its records shall be erased from the registry.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>Withhold</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Delete
+              Unmake
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -113,14 +200,14 @@ export default function GmTeamsListPage() {
       <AlertDialog open={!!regenerateId} onOpenChange={() => setRegenerateId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Regenerate Invite Code?</AlertDialogTitle>
+            <AlertDialogTitle>Re-forge Invite Sigil?</AlertDialogTitle>
             <AlertDialogDescription>
-              The current invite code will stop working. A new code will be generated.
+              The current invite sigil shall be voided. A new cipher shall be conjured in its place.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleRegenerate}>Regenerate</AlertDialogAction>
+            <AlertDialogCancel>Withhold</AlertDialogCancel>
+            <AlertDialogAction onClick={handleRegenerate}>Re-forge</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
