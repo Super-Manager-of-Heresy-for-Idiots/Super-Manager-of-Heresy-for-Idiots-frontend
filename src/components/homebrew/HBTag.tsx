@@ -1,5 +1,4 @@
 import React from 'react';
-import { cn } from '@/lib/utils';
 
 interface HBTagProps {
   children: React.ReactNode;
@@ -12,23 +11,29 @@ export function HBTag({ children, active, count, onClick }: HBTagProps) {
   return (
     <span
       onClick={onClick}
-      className={cn(
-        'inline-flex items-center gap-1.5 px-2 py-1 text-xs font-mono border rounded-sm',
-        active
-          ? 'bg-gold/10 border-gold/30 text-gold'
-          : 'bg-muted border-border text-muted-foreground',
-        onClick && 'cursor-pointer hover:bg-accent',
-      )}
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 6,
+        padding: '4px 9px',
+        background: active ? 'rgba(176, 141, 78, 0.10)' : 'var(--abyss)',
+        border: `1px solid ${active ? 'var(--brass)' : 'var(--hairline)'}`,
+        fontFamily: 'var(--font-mono)',
+        fontSize: 11,
+        color: active ? 'var(--gold-pale)' : 'var(--ink-quiet)',
+        cursor: onClick ? 'pointer' : undefined,
+      }}
     >
-      <span
-        className={cn(
-          'w-1 h-1 rotate-45 shrink-0',
-          active ? 'bg-gold' : 'bg-muted-foreground',
-        )}
-      />
+      <span style={{
+        width: 4,
+        height: 4,
+        background: active ? 'var(--gold)' : 'var(--bronze)',
+        transform: 'rotate(45deg)',
+        flexShrink: 0,
+      }} />
       {children}
       {count != null && (
-        <span className="text-[10px] text-muted-foreground">·{count}</span>
+        <span className="ao-codex" style={{ color: 'var(--ink-faint)', fontSize: 10 }}>·{count}</span>
       )}
     </span>
   );

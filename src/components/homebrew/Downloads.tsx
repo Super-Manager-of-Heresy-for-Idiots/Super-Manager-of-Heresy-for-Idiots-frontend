@@ -1,4 +1,4 @@
-import { ArrowUp } from 'lucide-react';
+import { Rune } from '@/components/ordo';
 
 interface DownloadsProps {
   value: number;
@@ -6,10 +6,10 @@ interface DownloadsProps {
 
 export function Downloads({ value }: DownloadsProps) {
   return (
-    <span className="inline-flex items-center gap-1.5 text-muted-foreground">
-      <ArrowUp className="h-3 w-3" />
-      <span className="text-sm font-mono text-foreground">{value.toLocaleString()}</span>
-      <span className="text-[9px] uppercase tracking-wider">instated</span>
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: 'var(--ink-quiet)' }}>
+      <Rune kind="arrow-up" size={11} color="var(--bronze)" />
+      <span className="ao-num" style={{ color: 'var(--ink-bright)', fontSize: 13 }}>{value.toLocaleString()}</span>
+      <span className="ao-overline" style={{ fontSize: 9 }}>instated</span>
     </span>
   );
 }

@@ -1,24 +1,56 @@
 import { useState, useMemo } from 'react';
-import { Rune, OrdoDivider, OrdoPanel } from '@/components/ordo';
+import { Rune, OrdoPanel, OrdoChip, PanelHeader } from '@/components/ordo';
 import { formatDate } from '@/lib/utils';
 import { useUsers } from '@/hooks/useAdmin';
 
-const ROLE_CONFIG: Record<string, { label: string; color: string }> = {
-  PLAYER: { label: 'Player', color: '#7a9866' },
-  GAME_MASTER: { label: 'Chronicler', color: '#c9a84c' },
-  ADMIN: { label: 'Inquisitor', color: '#c0584a' },
+/* ── role config ─────────────────────────────────────────────── */
+const ROLE_CFG: Record<string, { c: string; glyph: string; label: string }> = {
+  PLAYER:      { c: '#7a9866', glyph: 'shield', label: 'Player' },
+  GAME_MASTER: { c: '#c9a84c', glyph: 'helm',   label: 'Game Master' },
+  ADMIN:       { c: '#c0584a', glyph: 'lock',    label: 'Admin' },
 };
 
 type RoleFilter = 'all' | 'PLAYER' | 'GAME_MASTER' | 'ADMIN';
 
+/* ── role badge ──────────────────────────────────────────────── */
+function RoleBadge({ role }: { role: string }) {
+  const cfg = ROLE_CFG[role] ?? { c: 'var(--ink-quiet)', glyph: 'cir', label: role };
+  const color = cfg.c;
+
+  return (
+    <span
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 7,
+        padding: '4px 10px 4px 7px',
+        background: 'rgba(0,0,0,0.45)',
+        border: `1px solid ${color}66`,
+        borderLeft: `2px solid ${color}`,
+        fontFamily: 'var(--font-display)',
+        fontSize: 10,
+        letterSpacing: '0.18em',
+        color: color,
+        textTransform: 'uppercase',
+      }}
+    >
+      <Rune kind={cfg.glyph} size={10} color={color} />
+      {cfg.label}
+    </span>
+  );
+}
+
+/* ── main page ───────────────────────────────────────────────── */
 export default function UsersListPage() {
   const { data: users, isLoading, error, refetch } = useUsers();
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState<RoleFilter>('all');
 
+  /* derived data */
   const filteredUsers = useMemo(() => {
     return users?.filter((user) => {
-      const matchesSearch = user.username.toLowerCase().includes(search.toLowerCase()) ||
+      const matchesSearch =
+        user.username.toLowerCase().includes(search.toLowerCase()) ||
         user.email.toLowerCase().includes(search.toLowerCase());
       const matchesRole = roleFilter === 'all' || user.role === roleFilter;
       return matchesSearch && matchesRole;
@@ -35,6 +67,7 @@ export default function UsersListPage() {
     };
   }, [users]);
 
+  /* ── error state ────────────────────────────────────────────── */
   if (error) {
     return (
       <div style={{ textAlign: 'center', padding: '48px 0' }}>
@@ -46,90 +79,133 @@ export default function UsersListPage() {
     );
   }
 
+  /* ── filter tab definitions ─────────────────────────────────── */
+  const tabs: { key: RoleFilter; label: string; count: number }[] = [
+    { key: 'all',         label: 'All',          count: roleCounts.total },
+    { key: 'PLAYER',      label: 'Players',      count: roleCounts.PLAYER },
+    { key: 'GAME_MASTER', label: 'Chroniclers',  count: roleCounts.GAME_MASTER },
+    { key: 'ADMIN',       label: 'Inquisitors',  count: roleCounts.ADMIN },
+  ];
+
+  /* ── render ─────────────────────────────────────────────────── */
   return (
     <div>
-      {/* Header */}
-      <div style={{ textAlign: 'center', marginBottom: 32 }}>
-        <p className="ao-overline" style={{ color: 'var(--gold)' }}>Census of Souls</p>
-        <h3 className="ao-h3" style={{ marginTop: 4 }}>Registered Members</h3>
-      </div>
-
-      <OrdoDivider glyph="diamond" color="var(--rule)" />
-
-      {/* Stats counters */}
-      <div style={{ display: 'flex', justifyContent: 'center', gap: 40, margin: '24px 0' }}>
-        <div className="ao-stat" style={{ textAlign: 'center' }}>
-          <span className="ao-stat-value" style={{ color: 'var(--ink-bright)' }}>
-            {isLoading ? '\u2014' : roleCounts.total}
-          </span>
-          <span className="ao-stat-label">Total</span>
+      {/* ── header row ──────────────────────────────────────── */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'flex-end',
+          justifyContent: 'space-between',
+          marginBottom: 28,
+        }}
+      >
+        {/* left: overline + title */}
+        <div>
+          <p className="ao-overline" style={{ color: 'var(--gold)', marginBottom: 2 }}>
+            Every name on the rolls
+          </p>
+          <h3 className="ao-h3" style={{ margin: 0 }}>The Census</h3>
         </div>
-        <div className="ao-stat" style={{ textAlign: 'center' }}>
-          <span className="ao-stat-value" style={{ color: ROLE_CONFIG.PLAYER.color }}>
-            {isLoading ? '\u2014' : roleCounts.PLAYER}
-          </span>
-          <span className="ao-stat-label">Players</span>
-        </div>
-        <div className="ao-stat" style={{ textAlign: 'center' }}>
-          <span className="ao-stat-value" style={{ color: ROLE_CONFIG.GAME_MASTER.color }}>
-            {isLoading ? '\u2014' : roleCounts.GAME_MASTER}
-          </span>
-          <span className="ao-stat-label">Chroniclers</span>
-        </div>
-        <div className="ao-stat" style={{ textAlign: 'center' }}>
-          <span className="ao-stat-value" style={{ color: ROLE_CONFIG.ADMIN.color }}>
-            {isLoading ? '\u2014' : roleCounts.ADMIN}
-          </span>
-          <span className="ao-stat-label">Inquisitors</span>
-        </div>
-      </div>
 
-      <OrdoDivider glyph="diamond" color="var(--rule)" />
-
-      {/* Role filter tabs + Search */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', margin: '20px 0', gap: 16 }}>
-        <div style={{ display: 'flex', gap: 4 }}>
+        {/* right: stat counters */}
+        <div style={{ display: 'flex', gap: 32 }}>
           {([
-            { key: 'all' as RoleFilter, label: 'All' },
-            { key: 'PLAYER' as RoleFilter, label: 'Players' },
-            { key: 'GAME_MASTER' as RoleFilter, label: 'Chroniclers' },
-            { key: 'ADMIN' as RoleFilter, label: 'Inquisitors' },
-          ]).map((tab) => (
+            { label: 'Players',      value: roleCounts.PLAYER,      color: '#7a9866' },
+            { label: 'Chroniclers',   value: roleCounts.GAME_MASTER, color: '#c9a84c' },
+            { label: 'Inquisitors',   value: roleCounts.ADMIN,       color: '#c0584a' },
+          ] as const).map((stat) => (
+            <div key={stat.label} style={{ textAlign: 'center' }}>
+              <div
+                style={{
+                  fontFamily: 'var(--font-serif, Georgia, serif)',
+                  fontSize: 28,
+                  lineHeight: 1,
+                  color: 'var(--ink-bright)',
+                }}
+              >
+                {isLoading ? '\u2014' : stat.value}
+              </div>
+              <div
+                className="ao-overline"
+                style={{ fontSize: 9, marginTop: 4, color: stat.color }}
+              >
+                {stat.label}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── framed panel ────────────────────────────────────── */}
+      <OrdoPanel frame padding={0}>
+        {/* panel header with search */}
+        <PanelHeader
+          title="Roll of Souls"
+          glyph="scroll"
+          right={
+            <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+              <Rune
+                kind="search"
+                size={13}
+                color="var(--ink-faint)"
+                className=""
+              />
+              <input
+                className="ao-input"
+                style={{
+                  paddingLeft: 8,
+                  width: 220,
+                  fontSize: 12,
+                  background: 'transparent',
+                  border: 'none',
+                  borderBottom: '1px solid var(--rule)',
+                  borderRadius: 0,
+                }}
+                placeholder="Search by name or sigil..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+          }
+        />
+
+        {/* ── role filter tabs ──────────────────────────────── */}
+        <div
+          style={{
+            display: 'flex',
+            gap: 4,
+            padding: '10px 16px',
+            borderBottom: '1px solid var(--rule)',
+          }}
+        >
+          {tabs.map((tab) => (
             <button
               key={tab.key}
-              className={`ao-btn ao-btn--sm ${roleFilter === tab.key ? 'ao-btn--primary' : 'ao-btn--ghost'}`}
+              className={`ao-tab ${roleFilter === tab.key ? 'ao-tab--active' : ''}`}
               onClick={() => setRoleFilter(tab.key)}
             >
               {tab.label}
+              <span
+                style={{
+                  marginLeft: 5,
+                  opacity: 0.5,
+                  fontSize: '0.85em',
+                }}
+              >
+                {isLoading ? '\u2014' : tab.count}
+              </span>
             </button>
           ))}
         </div>
-        <div style={{ position: 'relative', flex: '0 1 320px' }}>
-          <Rune
-            kind="search"
-            size={14}
-            color="var(--ink-faint)"
-            className=""
-          />
-          <input
-            className="ao-input"
-            style={{ paddingLeft: 12, width: '100%' }}
-            placeholder="Search by name or sigil address..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
-      </div>
 
-      {/* Table */}
-      {isLoading ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="ao-ph" style={{ width: '100%', height: 48 }} />
-          ))}
-        </div>
-      ) : (
-        <OrdoPanel frame padding={0}>
+        {/* ── table ─────────────────────────────────────────── */}
+        {isLoading ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: 16 }}>
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="ao-ph" style={{ width: '100%', height: 48 }} />
+            ))}
+          </div>
+        ) : (
           <table className="ao-table" style={{ width: '100%' }}>
             <thead>
               <tr>
@@ -137,50 +213,80 @@ export default function UsersListPage() {
                 <th style={{ textAlign: 'left', padding: '12px 16px' }}>Sigil Address</th>
                 <th style={{ textAlign: 'left', padding: '12px 16px' }}>Office</th>
                 <th style={{ textAlign: 'left', padding: '12px 16px' }}>Inscribed</th>
+                <th style={{ width: 40, padding: '12px 8px' }} />
               </tr>
             </thead>
             <tbody>
-              {filteredUsers?.map((user) => {
-                const roleConf = ROLE_CONFIG[user.role] || { label: user.role, color: 'var(--ink-quiet)' };
-                return (
-                  <tr key={user.id}>
-                    <td style={{ padding: '12px 16px' }}>
-                      <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--ink-bright)' }}>
-                        {user.username}
-                      </span>
-                    </td>
-                    <td style={{ padding: '12px 16px' }}>
-                      <span className="ao-italic" style={{ color: 'var(--ink-quiet)', fontSize: 13 }}>
-                        {user.email}
-                      </span>
-                    </td>
-                    <td style={{ padding: '12px 16px' }}>
-                      <span
+              {filteredUsers?.map((user) => (
+                <tr key={user.id}>
+                  {/* username with placeholder avatar */}
+                  <td style={{ padding: '10px 16px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <div
                         style={{
-                          display: 'inline-block',
-                          padding: '3px 10px',
-                          borderRadius: 4,
-                          fontSize: 11,
-                          fontWeight: 600,
-                          background: `${roleConf.color}22`,
-                          color: roleConf.color,
-                          border: `1px solid ${roleConf.color}44`,
+                          width: 28,
+                          height: 28,
+                          borderRadius: '50%',
+                          background: 'var(--abyss)',
+                          border: '1px solid var(--rule)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          flexShrink: 0,
                         }}
                       >
-                        {roleConf.label}
+                        <Rune kind="sigil-1" size={14} color="var(--ink-faint)" />
+                      </div>
+                      <span
+                        style={{
+                          fontFamily: 'var(--font-mono)',
+                          color: 'var(--ink-bright)',
+                          fontSize: 13,
+                        }}
+                      >
+                        {user.username}
                       </span>
-                    </td>
-                    <td style={{ padding: '12px 16px' }}>
-                      <span className="ao-codex" style={{ color: 'var(--ink-faint)' }}>
-                        {formatDate(user.createdAt)}
-                      </span>
-                    </td>
-                  </tr>
-                );
-              })}
+                    </div>
+                  </td>
+
+                  {/* email / sigil address */}
+                  <td style={{ padding: '10px 16px' }}>
+                    <span
+                      className="ao-italic"
+                      style={{ color: 'var(--ink-quiet)', fontSize: 13 }}
+                    >
+                      {user.email}
+                    </span>
+                  </td>
+
+                  {/* office / role badge */}
+                  <td style={{ padding: '10px 16px' }}>
+                    <RoleBadge role={user.role} />
+                  </td>
+
+                  {/* inscribed / created date */}
+                  <td style={{ padding: '10px 16px' }}>
+                    <span className="ao-codex" style={{ color: 'var(--ink-faint)', fontSize: 12 }}>
+                      {formatDate(user.createdAt)}
+                    </span>
+                  </td>
+
+                  {/* dots menu */}
+                  <td style={{ padding: '10px 8px', textAlign: 'center' }}>
+                    <button
+                      className="ao-btn ao-btn--ghost"
+                      style={{ padding: 4, lineHeight: 1, minWidth: 0 }}
+                      aria-label="Actions"
+                    >
+                      <Rune kind="dots" size={16} color="var(--ink-quiet)" />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+
               {filteredUsers?.length === 0 && (
                 <tr>
-                  <td colSpan={4} style={{ padding: '32px 16px', textAlign: 'center' }}>
+                  <td colSpan={5} style={{ padding: '32px 16px', textAlign: 'center' }}>
                     <span className="ao-italic" style={{ color: 'var(--ink-faint)' }}>
                       No souls match thy inquiry
                     </span>
@@ -189,8 +295,30 @@ export default function UsersListPage() {
               )}
             </tbody>
           </table>
-        </OrdoPanel>
-      )}
+        )}
+
+        {/* ── footer ────────────────────────────────────────── */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '10px 16px',
+            borderTop: '1px solid var(--rule)',
+            fontSize: 11,
+            color: 'var(--ink-faint)',
+            fontFamily: 'var(--font-display)',
+            letterSpacing: '0.06em',
+          }}
+        >
+          <span>
+            {isLoading
+              ? '\u2014'
+              : `${filteredUsers?.length ?? 0} of ${roleCounts.total} souls`}
+          </span>
+          <span style={{ opacity: 0.6 }}>sorted by &middot; most recent</span>
+        </div>
+      </OrdoPanel>
     </div>
   );
 }

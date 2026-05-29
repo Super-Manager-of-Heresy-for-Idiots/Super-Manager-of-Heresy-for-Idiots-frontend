@@ -1,5 +1,4 @@
-import { Badge } from '@/components/ui/badge';
-import { Diamond, Lock, Minus, XCircle, Check } from 'lucide-react';
+import { Rune } from '@/components/ordo';
 
 type BadgeStatus = 'DRAFT' | 'PUBLISHED' | 'UNPUBLISHED' | 'DELETED' | 'INSTALLED';
 
@@ -7,20 +6,33 @@ interface StatusBadgeProps {
   status: BadgeStatus;
 }
 
-const STATUS_MAP: Record<BadgeStatus, { icon: React.ReactNode; label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' | 'gold' }> = {
-  DRAFT:       { icon: <Minus className="h-3 w-3" />,    label: 'Draft',     variant: 'secondary' },
-  PUBLISHED:   { icon: <Diamond className="h-3 w-3" />,  label: 'Sealed',    variant: 'gold' },
-  UNPUBLISHED: { icon: <Lock className="h-3 w-3" />,     label: 'Withheld',  variant: 'outline' },
-  DELETED:     { icon: <XCircle className="h-3 w-3" />,  label: 'Redacted',  variant: 'destructive' },
-  INSTALLED:   { icon: <Check className="h-3 w-3" />,    label: 'Instated',  variant: 'default' },
+const STATUS_MAP: Record<BadgeStatus, { glyph: string; label: string; stripe: string; text: string }> = {
+  DRAFT:       { glyph: 'minus',        label: 'DRAFT',    stripe: '#3a322c',          text: 'var(--ink-quiet)' },
+  PUBLISHED:   { glyph: 'diamond-fill', label: 'SEALED',   stripe: 'var(--gold)',      text: 'var(--gold-pale)' },
+  UNPUBLISHED: { glyph: 'lock',         label: 'WITHHELD', stripe: 'var(--ink-quiet)',  text: 'var(--ink-quiet)' },
+  DELETED:     { glyph: 'cross-pat',    label: 'REDACTED', stripe: 'var(--ember)',      text: '#d8896a' },
+  INSTALLED:   { glyph: 'check',        label: 'INSTATED', stripe: 'var(--arcane)',     text: '#84c0c8' },
 };
 
 export function StatusBadge({ status }: StatusBadgeProps) {
   const m = STATUS_MAP[status] || STATUS_MAP.DRAFT;
   return (
-    <Badge variant={m.variant} className="gap-1 text-[10px] uppercase tracking-wider">
-      {m.icon}
+    <span style={{
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: 6,
+      padding: '4px 9px 4px 6px',
+      background: 'rgba(0,0,0,0.5)',
+      border: '1px solid var(--rule-strong)',
+      borderLeft: `2px solid ${m.stripe}`,
+      fontFamily: 'var(--font-display)',
+      fontSize: 10,
+      letterSpacing: '0.22em',
+      color: m.text,
+      textTransform: 'uppercase',
+    }}>
+      <Rune kind={m.glyph} size={9} color={m.stripe} />
       {m.label}
-    </Badge>
+    </span>
   );
 }

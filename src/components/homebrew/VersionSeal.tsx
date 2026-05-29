@@ -1,26 +1,40 @@
-import { cn } from '@/lib/utils';
-
 interface VersionSealProps {
   version: number | string;
   size?: number;
-  className?: string;
 }
 
-export function VersionSeal({ version, size = 44, className }: VersionSealProps) {
+export function VersionSeal({ version, size = 44 }: VersionSealProps) {
   return (
-    <div
-      className={cn('relative flex items-center justify-center shrink-0', className)}
-      style={{ width: size, height: size }}
-    >
-      <div
-        className="absolute inset-0 border border-gold/30 bg-card"
-        style={{ clipPath: 'polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%)' }}
-      />
-      <div className="relative text-center leading-none">
-        <div className="text-[8px] uppercase tracking-widest text-muted-foreground">VER</div>
-        <div className="font-heading font-semibold text-gold" style={{ fontSize: size * 0.38 }}>
-          {version}
-        </div>
+    <div style={{
+      width: size,
+      height: size,
+      position: 'relative',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      flexShrink: 0,
+    }}>
+      <div style={{
+        position: 'absolute',
+        inset: 0,
+        border: '1px solid var(--brass)',
+        background: 'radial-gradient(circle at 30% 30%, #2a241f, var(--abyss))',
+        clipPath: 'polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%)',
+      }} />
+      <div style={{
+        position: 'absolute',
+        inset: 4,
+        border: '1px solid var(--hairline)',
+        clipPath: 'polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%)',
+      }} />
+      <div style={{ position: 'relative', textAlign: 'center', lineHeight: 1 }}>
+        <div className="ao-codex" style={{ fontSize: 8, color: 'var(--ink-faint)' }}>VER</div>
+        <div style={{
+          fontFamily: 'var(--font-serif)',
+          fontSize: size * 0.42,
+          color: 'var(--gold-pale)',
+          fontWeight: 600,
+        }}>{version}</div>
       </div>
     </div>
   );

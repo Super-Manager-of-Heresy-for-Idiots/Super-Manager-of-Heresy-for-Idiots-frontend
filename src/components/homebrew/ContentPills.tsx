@@ -1,5 +1,4 @@
-import { Sword, Shield, Eye, Star } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Rune } from '@/components/ordo';
 
 interface ContentPillsProps {
   items?: number;
@@ -11,32 +10,28 @@ interface ContentPillsProps {
 
 export function ContentPills({ items = 0, classes = 0, skills = 0, feats = 0, compact = false }: ContentPillsProps) {
   const data = [
-    { label: 'Items', v: items, icon: Sword },
-    { label: 'Classes', v: classes, icon: Shield },
-    { label: 'Skills', v: skills, icon: Eye },
-    { label: 'Feats', v: feats, icon: Star },
+    { label: 'Items',   v: items,   g: 'sword' },
+    { label: 'Classes', v: classes, g: 'helm' },
+    { label: 'Skills',  v: skills,  g: 'eye' },
+    { label: 'Feats',   v: feats,   g: 'sigil-3' },
   ];
 
   return (
-    <div className={cn('flex flex-wrap', compact ? 'gap-1.5' : 'gap-2')}>
-      {data.map((d) => {
-        const Icon = d.icon;
-        return (
-          <div
-            key={d.label}
-            className={cn(
-              'inline-flex items-center gap-1.5 bg-muted border border-border rounded-sm',
-              compact ? 'px-2 py-0.5' : 'px-2.5 py-1',
-            )}
-          >
-            <Icon className={cn('shrink-0', compact ? 'h-3 w-3' : 'h-3.5 w-3.5', d.v ? 'text-gold' : 'text-muted-foreground/40')} />
-            <span className={cn('font-mono', compact ? 'text-[11px]' : 'text-xs', d.v ? 'text-foreground' : 'text-muted-foreground/40')}>
-              {d.v}
-            </span>
-            <span className="text-[9px] text-muted-foreground">{d.label}</span>
-          </div>
-        );
-      })}
+    <div style={{ display: 'flex', gap: compact ? 6 : 8, flexWrap: 'wrap' }}>
+      {data.map((d) => (
+        <div key={d.label} style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 6,
+          padding: compact ? '3px 8px' : '5px 10px',
+          background: 'var(--abyss)',
+          border: '1px solid var(--hairline)',
+        }}>
+          <Rune kind={d.g} size={compact ? 9 : 11} color={d.v ? 'var(--gold-pale)' : 'var(--ink-ghost)'} />
+          <span className="ao-num" style={{ fontSize: compact ? 11 : 12, color: d.v ? 'var(--ink-bright)' : 'var(--ink-ghost)' }}>{d.v}</span>
+          <span className="ao-codex" style={{ fontSize: 9, color: 'var(--ink-faint)' }}>{d.label}</span>
+        </div>
+      ))}
     </div>
   );
 }

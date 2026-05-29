@@ -31,18 +31,10 @@ type RegisterFormData = z.infer<typeof registerSchema>;
 function FieldError({ message }: { message?: string }) {
   if (!message) return null;
   return (
-    <span
-      style={{
-        fontSize: 'var(--t-micro)',
-        color: 'var(--ember)',
-        display: 'flex',
-        alignItems: 'center',
-        gap: 6,
-      }}
-    >
+    <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', gap: 7, color: '#d8896a', fontSize: 12 }}>
       <Rune kind="flame" size={11} color="var(--ember)" />
-      {message}
-    </span>
+      <span className="ao-italic">{message}</span>
+    </div>
   );
 }
 
@@ -86,408 +78,197 @@ export default function RegisterPage() {
   };
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--void)' }}>
-      {/* ── LEFT PANEL (55%) ──────────────────────────── */}
+    <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 1fr', height: '100vh', background: 'var(--void)' }}>
+      {/* ── LEFT — atmospheric panel ──────────────────── */}
       <div
         style={{
-          width: '55%',
           position: 'relative',
+          overflow: 'hidden',
+          borderRight: '1px solid var(--rule)',
           display: 'flex',
           flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          overflow: 'hidden',
-          padding: 48,
+          justifyContent: 'space-between',
+          padding: '56px 64px',
         }}
       >
-        {/* Atmospheric background */}
-        <div
-          style={{
-            position: 'absolute',
-            inset: 0,
-            background:
-              'radial-gradient(ellipse 80% 60% at 50% 40%, rgba(90, 142, 148, 0.06) 0%, transparent 70%), var(--abyss)',
-          }}
-        />
-        {/* Horizontal line pattern overlay */}
-        <div
-          style={{
-            position: 'absolute',
-            inset: 0,
-            opacity: 0.04,
-            backgroundImage:
-              'repeating-linear-gradient(0deg, transparent 0px, transparent 3px, rgba(176, 141, 78, 0.3) 3px, rgba(176, 141, 78, 0.3) 4px)',
-            pointerEvents: 'none',
-          }}
-        />
+        {/* Radial glow */}
+        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(60% 50% at 50% 35%, rgba(176, 141, 78, 0.10), transparent 60%)' }} />
+        {/* Horizontal line pattern */}
+        <div style={{ position: 'absolute', inset: 0, background: 'repeating-linear-gradient(0deg, transparent 0 6px, rgba(176,141,78,0.025) 6px 7px)' }} />
 
-        <div
-          style={{
-            position: 'relative',
-            zIndex: 2,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: 32,
-            maxWidth: 420,
-          }}
-        >
-          {/* Branding */}
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
-            <Sigil size={72} glyph="sigil-2" color="var(--arcane)" />
-            <h1
-              className="ao-engraved"
-              style={{
-                fontSize: 'var(--t-h5)',
-                color: 'var(--gold-pale)',
-                marginTop: 8,
-              }}
-            >
-              Ordo Arcanum
-            </h1>
+        {/* Top — branding */}
+        <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 14 }}>
+          <Sigil size={48} glyph="sigil-3" />
+          <div>
+            <div className="ao-engraved" style={{ fontSize: 12, color: 'var(--gold-pale)' }}>Ordo Arcanum</div>
+            <div className="ao-codex">Imperial Archive &middot; MMDXLIV</div>
           </div>
+        </div>
 
-          {/* Center text */}
-          <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <span className="ao-codex" style={{ color: 'var(--arcane)' }}>
-              &mdash; INSCRIPTIO NOVA &mdash;
-            </span>
-            <h2
-              className="ao-h4"
-              style={{ color: 'var(--ink-bright)', margin: 0 }}
-            >
-              Inscribe Thy Name
-            </h2>
-            <p
-              className="ao-italic"
-              style={{
-                fontSize: 'var(--t-body)',
-                color: 'var(--ink-quiet)',
-                maxWidth: 320,
-                margin: '0 auto',
-              }}
-            >
-              A new chronicle begins with a single name. Step forth and claim thy
-              place among the Ordo.
-            </p>
-          </div>
+        {/* Middle — hero text */}
+        <div style={{ position: 'relative' }}>
+          <div className="ao-codex" style={{ marginBottom: 16, color: 'var(--ink-faint)' }}>&mdash; INSCRIPTIO NOVA &mdash;</div>
+          <div className="ao-h2" style={{ fontSize: 56, lineHeight: 1.05, maxWidth: 520 }}>Inscribe Thy Name</div>
+          <p className="ao-italic" style={{ fontSize: 20, marginTop: 18, maxWidth: 480, color: 'var(--ink-quiet)' }}>
+            No soul enters the Archive unrecorded. Choose thy office, set thy cipher, and be bound to the ledger of the Ordo.
+          </p>
 
-          {/* Diamond divider */}
-          <OrdoDivider glyph="diamond" color="var(--arcane-deep)">
-            RITE OF INSCRIPTION
-          </OrdoDivider>
+          <OrdoDivider glyph="diamond-fill">RITE OF ENROLMENT</OrdoDivider>
 
-          {/* Stats row */}
-          <div style={{ display: 'flex', gap: 24, width: '100%' }}>
+          <div style={{ display: 'flex', gap: 28, marginTop: 28 }}>
             {[
-              { label: 'Hands Sworn', value: '2,841' },
-              { label: 'Chroniclers', value: '187' },
-              { label: 'Names This Moon', value: '64' },
+              { label: 'Hands Sworn', value: '2,118' },
+              { label: 'Chroniclers', value: '284' },
+              { label: 'Names This Moon', value: '61' },
             ].map((stat) => (
-              <div key={stat.label} className="ao-stat" style={{ flex: 1 }}>
-                <span className="ao-stat-label">{stat.label}</span>
-                <span
-                  className="ao-stat-value"
-                  style={{ fontSize: 24, marginTop: 4 }}
-                >
-                  {stat.value}
-                </span>
+              <div key={stat.label}>
+                <div className="ao-overline">{stat.label}</div>
+                <div className="ao-h4 ao-num" style={{ fontFamily: 'var(--font-mono)' }}>{stat.value}</div>
               </div>
             ))}
           </div>
+        </div>
 
-          {/* Bottom version info */}
-          <div
-            className="ao-codex"
-            style={{ textAlign: 'center', color: 'var(--ink-ghost)', marginTop: 16 }}
-          >
-            v0.9.4 &middot; Cohort Sanguine &middot; Est. MMXXIV
-          </div>
+        {/* Bottom — version */}
+        <div style={{ position: 'relative', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', color: 'var(--ink-faint)' }}>
+          <div className="ao-codex">Cohort VII &mdash; Vault of Ash and Brass</div>
+          <div className="ao-codex">v &middot; 4.21.3 &mdash; gilded</div>
         </div>
       </div>
 
-      {/* ── RIGHT PANEL (45%) ─────────────────────────── */}
+      {/* ── RIGHT — registration form ─────────────────── */}
       <div
+        className="ao-scroll"
         style={{
-          width: '45%',
+          overflow: 'auto',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          padding: 48,
-          background:
-            'linear-gradient(180deg, var(--stone) 0%, var(--abyss) 100%)',
-          overflowY: 'auto',
+          padding: '40px 56px',
+          background: 'linear-gradient(180deg, var(--stone), var(--abyss))',
         }}
       >
-        <div style={{ width: '100%', maxWidth: 440 }}>
-          <OrdoPanel frame raised padding={36}>
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: 20,
-              }}
+        <div style={{ width: '100%', maxWidth: 460 }}>
+          <OrdoPanel frame padding={32} style={{ position: 'relative' }}>
+            <div style={{ textAlign: 'center', marginBottom: 18 }}>
+              <Rune kind="diamond" size={18} color="var(--gold)" />
+              <div className="ao-engraved" style={{ fontSize: 16, marginTop: 12 }}>Rite of Inscription</div>
+              <div className="ao-italic" style={{ fontSize: 14, marginTop: 6 }}>Set thy mark upon the rolls</div>
+            </div>
+
+            <OrdoDivider glyph="diamond-fill" />
+
+            <form
+              onSubmit={handleSubmit(onSubmit)}
+              style={{ display: 'flex', flexDirection: 'column', gap: 16, marginTop: 18 }}
             >
-              {/* Top rune */}
-              <Rune kind="sigil-2" size={22} color="var(--arcane)" />
-
-              {/* Title */}
-              <div style={{ textAlign: 'center' }}>
-                <h2
-                  className="ao-engraved"
-                  style={{
-                    fontSize: 'var(--t-h6)',
-                    color: 'var(--ink-bright)',
-                    margin: 0,
-                  }}
-                >
-                  Rite of Inscription
-                </h2>
-                <p
-                  className="ao-italic"
-                  style={{
-                    fontSize: 'var(--t-small)',
-                    color: 'var(--ink-quiet)',
-                    marginTop: 8,
-                  }}
-                >
-                  Declare thy name and purpose unto the Archive
-                </p>
-              </div>
-
-              <OrdoDivider glyph="diamond" color="var(--rule)" />
-
-              {/* Form */}
-              <form
-                onSubmit={handleSubmit(onSubmit)}
-                style={{
-                  width: '100%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: 18,
-                }}
-              >
-                {/* Username */}
-                <OrdoField label="Chosen Name" required>
+              {/* Username */}
+              <div>
+                <OrdoField label="Chosen Name" required hint={!errors.username ? '3\u201330 glyphs \u00b7 letters, numerals, underscore' : undefined}>
                   <input
                     className="ao-input"
                     {...register('username')}
-                    placeholder="Thy chosen name..."
-                    autoComplete="username"
+                    style={{ borderColor: errors.username ? 'var(--ember)' : undefined, boxShadow: errors.username ? 'inset 0 1px 0 rgba(0,0,0,0.5), 0 0 0 1px rgba(179,70,26,0.25)' : undefined }}
                   />
-                  <FieldError message={errors.username?.message} />
                 </OrdoField>
+                <FieldError message={errors.username?.message} />
+              </div>
 
-                {/* Email */}
-                <OrdoField label="Sigil Address" required>
-                  <input
-                    className="ao-input"
-                    type="email"
-                    {...register('email')}
-                    placeholder="name@thy-domain.com"
-                    autoComplete="email"
-                  />
-                  <FieldError message={errors.email?.message} />
+              {/* Email */}
+              <OrdoField label="Sigil Address" required>
+                <input className="ao-input" type="email" {...register('email')} />
+                <FieldError message={errors.email?.message} />
+              </OrdoField>
+
+              {/* Passwords side by side */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <OrdoField label="Cipher Word" required hint="min. 8 glyphs">
+                  <input className="ao-input" type="password" {...register('password')} placeholder="••••••••" />
+                  <FieldError message={errors.password?.message} />
                 </OrdoField>
+                <OrdoField label="Repeat Cipher" required>
+                  <input className="ao-input" type="password" {...register('confirmPassword')} placeholder="••••••••" />
+                  <FieldError message={errors.confirmPassword?.message} />
+                </OrdoField>
+              </div>
 
-                {/* Side-by-side passwords */}
-                <div style={{ display: 'flex', gap: 14 }}>
-                  <div style={{ flex: 1 }}>
-                    <OrdoField label="Cipher Word" required>
-                      <input
-                        className="ao-input"
-                        type="password"
-                        {...register('password')}
-                        placeholder="Secret ward..."
-                        autoComplete="new-password"
-                      />
-                      <FieldError message={errors.password?.message} />
-                    </OrdoField>
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <OrdoField label="Repeat Cipher" required>
-                      <input
-                        className="ao-input"
-                        type="password"
-                        {...register('confirmPassword')}
-                        placeholder="Confirm ward..."
-                        autoComplete="new-password"
-                      />
-                      <FieldError message={errors.confirmPassword?.message} />
-                    </OrdoField>
-                  </div>
-                </div>
+              <OrdoDivider glyph="cross-pat">CHOOSE THY OFFICE</OrdoDivider>
 
-                {/* Role divider */}
-                <OrdoDivider glyph="sigil-1" color="var(--gold-deep)">
-                  CHOOSE THY OFFICE
-                </OrdoDivider>
-
-                {/* Role choice cards */}
-                <div style={{ display: 'flex', gap: 14 }}>
-                  {/* Player card */}
-                  <button
-                    type="button"
-                    onClick={() => setValue('role', 'PLAYER', { shouldValidate: true })}
-                    style={{
-                      flex: 1,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      gap: 8,
-                      padding: '16px 12px',
-                      background:
-                        selectedRole === 'PLAYER'
-                          ? 'rgba(176, 141, 78, 0.08)'
-                          : 'var(--abyss)',
-                      border:
-                        selectedRole === 'PLAYER'
-                          ? '1px solid var(--brass)'
-                          : '1px solid var(--rule)',
-                      color:
-                        selectedRole === 'PLAYER'
-                          ? 'var(--gold-pale)'
-                          : 'var(--ink-faint)',
-                      cursor: 'pointer',
-                      transition: 'all 200ms',
-                      boxShadow:
-                        selectedRole === 'PLAYER'
-                          ? 'var(--glow-gold)'
-                          : 'none',
-                    }}
-                  >
-                    <Rune
-                      kind="shield"
-                      size={24}
-                      color={
-                        selectedRole === 'PLAYER' ? 'var(--gold-pale)' : 'var(--ink-faint)'
-                      }
-                    />
-                    <span
-                      className="ao-engraved"
-                      style={{ fontSize: 'var(--t-micro)' }}
-                    >
-                      Player
-                    </span>
-                    <span
-                      className="ao-italic"
-                      style={{
-                        fontSize: 11,
-                        color:
-                          selectedRole === 'PLAYER'
-                            ? 'var(--ink-quiet)'
-                            : 'var(--ink-ghost)',
-                        textAlign: 'center',
-                        lineHeight: 1.4,
-                      }}
-                    >
-                      The Hand of Fate &mdash; seek adventure, forge thy legend.
-                    </span>
-                  </button>
-
-                  {/* Game Master card */}
-                  <button
-                    type="button"
-                    onClick={() => setValue('role', 'GAME_MASTER', { shouldValidate: true })}
-                    style={{
-                      flex: 1,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      gap: 8,
-                      padding: '16px 12px',
-                      background:
-                        selectedRole === 'GAME_MASTER'
-                          ? 'rgba(90, 142, 148, 0.08)'
-                          : 'var(--abyss)',
-                      border:
-                        selectedRole === 'GAME_MASTER'
-                          ? '1px solid var(--arcane)'
-                          : '1px solid var(--rule)',
-                      color:
-                        selectedRole === 'GAME_MASTER'
-                          ? 'var(--arcane)'
-                          : 'var(--ink-faint)',
-                      cursor: 'pointer',
-                      transition: 'all 200ms',
-                      boxShadow:
-                        selectedRole === 'GAME_MASTER'
-                          ? 'var(--glow-arcane)'
-                          : 'none',
-                    }}
-                  >
-                    <Rune
-                      kind="helm"
-                      size={24}
-                      color={
-                        selectedRole === 'GAME_MASTER'
-                          ? 'var(--arcane)'
-                          : 'var(--ink-faint)'
-                      }
-                    />
-                    <span
-                      className="ao-engraved"
-                      style={{ fontSize: 'var(--t-micro)' }}
-                    >
-                      Game Master
-                    </span>
-                    <span
-                      className="ao-italic"
-                      style={{
-                        fontSize: 11,
-                        color:
-                          selectedRole === 'GAME_MASTER'
-                            ? 'var(--ink-quiet)'
-                            : 'var(--ink-ghost)',
-                        textAlign: 'center',
-                        lineHeight: 1.4,
-                      }}
-                    >
-                      The Chronicler &mdash; weave the tale, command the stage.
-                    </span>
-                  </button>
-                </div>
-
-                {/* Submit */}
+              {/* Role selection — ChoiceCard style */}
+              <div style={{ display: 'flex', gap: 12 }}>
+                {/* Player */}
                 <button
-                  type="submit"
-                  className="ao-btn ao-btn--primary ao-btn--block ao-btn--lg"
-                  disabled={registerMutation.isPending}
-                  style={{ marginTop: 8 }}
-                >
-                  {registerMutation.isPending ? (
-                    <Rune kind="cir-dot" size={14} color="var(--ink-bright)" />
-                  ) : (
-                    <Rune kind="scroll" size={14} />
-                  )}
-                  {registerMutation.isPending ? 'Inscribing...' : 'Inscribe My Name'}
-                </button>
-              </form>
-
-              {/* Login link */}
-              <div style={{ textAlign: 'center', marginTop: 4 }}>
-                <span
-                  className="ao-italic"
-                  style={{ fontSize: 'var(--t-small)', color: 'var(--ink-faint)' }}
-                >
-                  Already a member?{' '}
-                </span>
-                <Link
-                  to="/login"
+                  type="button"
+                  onClick={() => setValue('role', 'PLAYER', { shouldValidate: true })}
                   style={{
-                    color: 'var(--gold)',
-                    fontSize: 'var(--t-small)',
-                    fontFamily: 'var(--font-serif)',
-                    fontStyle: 'italic',
-                    textDecoration: 'none',
+                    flex: 1, textAlign: 'left', cursor: 'pointer',
+                    background: selectedRole === 'PLAYER' ? 'linear-gradient(180deg, rgba(176,141,78,0.08), var(--panel))' : 'linear-gradient(180deg, var(--panel-raised), var(--panel))',
+                    border: `1px solid ${selectedRole === 'PLAYER' ? 'var(--gold)' : 'var(--rule)'}`,
+                    boxShadow: selectedRole === 'PLAYER' ? 'var(--shadow-inset), 0 0 16px rgba(176,141,78,0.13)' : 'var(--shadow-inset)',
+                    padding: 18, display: 'flex', flexDirection: 'column', gap: 10, transition: 'all 180ms',
                   }}
                 >
-                  Enter the Vigil &rarr;
-                </Link>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <span style={{ width: 44, height: 44, border: `1px solid ${selectedRole === 'PLAYER' ? 'var(--gold)' : 'var(--rule)'}`, background: 'var(--abyss)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: selectedRole === 'PLAYER' ? 'inset 0 0 12px rgba(176,141,78,0.2)' : 'inset 0 0 10px rgba(0,0,0,0.5)' }}>
+                      <Rune kind="shield" size={22} color={selectedRole === 'PLAYER' ? 'var(--gold)' : 'var(--ink-quiet)'} />
+                    </span>
+                    <span style={{ width: 18, height: 18, border: `1px solid ${selectedRole === 'PLAYER' ? 'var(--gold)' : 'var(--rule)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', background: selectedRole === 'PLAYER' ? 'var(--gold)' : 'var(--abyss)' }}>
+                      {selectedRole === 'PLAYER' && <Rune kind="check" size={10} color="var(--abyss)" />}
+                    </span>
+                  </div>
+                  <div>
+                    <div className="ao-h6" style={{ fontSize: 16, color: selectedRole === 'PLAYER' ? 'var(--ink-bright)' : 'var(--ink)' }}>Player</div>
+                    <div className="ao-italic" style={{ fontSize: 13, marginTop: 3, color: 'var(--ink-quiet)' }}>The Hand of Fate &mdash; seek adventure, forge thy legend.</div>
+                  </div>
+                </button>
+
+                {/* Game Master */}
+                <button
+                  type="button"
+                  onClick={() => setValue('role', 'GAME_MASTER', { shouldValidate: true })}
+                  style={{
+                    flex: 1, textAlign: 'left', cursor: 'pointer',
+                    background: selectedRole === 'GAME_MASTER' ? 'linear-gradient(180deg, rgba(90,142,148,0.08), var(--panel))' : 'linear-gradient(180deg, var(--panel-raised), var(--panel))',
+                    border: `1px solid ${selectedRole === 'GAME_MASTER' ? 'var(--arcane)' : 'var(--rule)'}`,
+                    boxShadow: selectedRole === 'GAME_MASTER' ? 'var(--shadow-inset), 0 0 16px rgba(90,142,148,0.13)' : 'var(--shadow-inset)',
+                    padding: 18, display: 'flex', flexDirection: 'column', gap: 10, transition: 'all 180ms',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <span style={{ width: 44, height: 44, border: `1px solid ${selectedRole === 'GAME_MASTER' ? 'var(--arcane)' : 'var(--rule)'}`, background: 'var(--abyss)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: selectedRole === 'GAME_MASTER' ? 'inset 0 0 12px rgba(90,142,148,0.2)' : 'inset 0 0 10px rgba(0,0,0,0.5)' }}>
+                      <Rune kind="helm" size={22} color={selectedRole === 'GAME_MASTER' ? 'var(--arcane)' : 'var(--ink-quiet)'} />
+                    </span>
+                    <span style={{ width: 18, height: 18, border: `1px solid ${selectedRole === 'GAME_MASTER' ? 'var(--arcane)' : 'var(--rule)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', background: selectedRole === 'GAME_MASTER' ? 'var(--arcane)' : 'var(--abyss)' }}>
+                      {selectedRole === 'GAME_MASTER' && <Rune kind="check" size={10} color="var(--abyss)" />}
+                    </span>
+                  </div>
+                  <div>
+                    <div className="ao-h6" style={{ fontSize: 16, color: selectedRole === 'GAME_MASTER' ? 'var(--ink-bright)' : 'var(--ink)' }}>Game Master</div>
+                    <div className="ao-italic" style={{ fontSize: 13, marginTop: 3, color: 'var(--ink-quiet)' }}>The Chronicler &mdash; weave the tale, command the stage.</div>
+                  </div>
+                </button>
               </div>
+
+              <button
+                type="submit"
+                className="ao-btn ao-btn--primary ao-btn--lg ao-btn--block"
+                disabled={registerMutation.isPending}
+                style={{ marginTop: 4 }}
+              >
+                <Rune kind="diamond-fill" size={9} />
+                {registerMutation.isPending ? 'Inscribing...' : 'Inscribe My Name'}
+              </button>
+            </form>
+
+            <div style={{ textAlign: 'center', marginTop: 16 }}>
+              <span className="ao-codex" style={{ color: 'var(--ink-quiet)' }}>Already a member? </span>
+              <Link to="/login" className="ao-codex" style={{ color: 'var(--gold-pale)', textDecoration: 'none' }}>Enter the Vigil &rarr;</Link>
             </div>
           </OrdoPanel>
+
+          <div style={{ textAlign: 'center', marginTop: 18, color: 'var(--ink-faint)' }}>
+            <span className="ao-codex">By inscribing, thou submit to the Archive Charter</span>
+          </div>
         </div>
       </div>
     </div>
