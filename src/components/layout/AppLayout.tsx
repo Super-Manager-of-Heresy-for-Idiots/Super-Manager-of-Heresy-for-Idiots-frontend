@@ -17,16 +17,16 @@ const playerNav: NavEntry[] = [
 ];
 
 const gmNav: NavEntry[] = [
-  { label: 'Roster', path: '/gm/teams', glyph: 'shield' },
+  { label: 'Conclave', path: '/gm/teams', glyph: 'helm' },
   { label: 'Arsenal', path: '/gm/artifacts', glyph: 'sword' },
-  { label: 'Conclave', path: '/gm/conditions', glyph: 'helm' },
+  { label: 'Edicts', path: '/gm/conditions', glyph: 'shield' },
   { label: 'Doctrines', path: '/gm/homebrew/marketplace', glyph: 'scroll' },
 ];
 
 const adminNav: NavEntry[] = [
-  { label: 'Roster', path: '/gm/teams', glyph: 'shield' },
+  { label: 'Conclave', path: '/gm/teams', glyph: 'helm' },
   { label: 'Arsenal', path: '/gm/artifacts', glyph: 'sword' },
-  { label: 'Conclave', path: '/gm/conditions', glyph: 'helm' },
+  { label: 'Edicts', path: '/gm/conditions', glyph: 'shield' },
   { label: 'Doctrines', path: '/gm/homebrew/marketplace', glyph: 'scroll' },
   { label: 'Archive', path: '/admin', glyph: 'book' },
 ];

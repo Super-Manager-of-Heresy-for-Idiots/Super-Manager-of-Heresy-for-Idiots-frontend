@@ -789,6 +789,7 @@ export default function ConditionsPage() {
               Withhold
             </button>
             <button
+              type="button"
               className="ao-btn ao-btn--primary"
               onClick={handleSubmit}
               disabled={!formName || createMutation.isPending || updateMutation.isPending}

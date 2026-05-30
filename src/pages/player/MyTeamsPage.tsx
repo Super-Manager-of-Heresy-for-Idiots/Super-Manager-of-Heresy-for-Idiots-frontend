@@ -1,7 +1,9 @@
+import { useNavigate } from 'react-router-dom';
 import { Rune, Sigil, OrdoPanel, OrdoChip } from '@/components/ordo';
 import { useTeams } from '@/hooks/useTeams';
 
 export default function MyTeamsPage() {
+  const navigate = useNavigate();
   const { data: teams, isLoading, error, refetch } = useTeams();
 
   if (error) {
@@ -18,7 +20,13 @@ export default function MyTeamsPage() {
 
   return (
     <div style={{ maxWidth: 960, margin: '0 auto', padding: '24px 0' }}>
-      <h1 className="ao-h3" style={{ marginBottom: 24 }}>My Conclaves</h1>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+        <h1 className="ao-h3" style={{ margin: 0 }}>My Conclaves</h1>
+        <button className="ao-btn ao-btn--primary" onClick={() => navigate('/teams/join')}>
+          <Rune kind="scroll" size={14} color="currentColor" />
+          <span style={{ marginLeft: 6 }}>Enter Cipher</span>
+        </button>
+      </div>
 
       {isLoading ? (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>

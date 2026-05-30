@@ -501,6 +501,7 @@ export default function ArtifactsPage() {
               Withhold
             </button>
             <button
+              type="button"
               className="ao-btn ao-btn--primary"
               onClick={handleSubmit}
               disabled={!formName || !formItemTypeId || createMutation.isPending || updateMutation.isPending}

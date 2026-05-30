@@ -209,6 +209,11 @@
 
 /* Corner ornaments */
 .ao-frame { position: relative; }
+.ao-frame > .ao-frame-c {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
 .ao-frame::before,
 .ao-frame::after,
 .ao-frame > .ao-frame-c::before,
@@ -294,6 +299,11 @@
 .ao-btn--lg { padding: 14px 28px; font-size: var(--t-small); }
 .ao-btn--sm { padding: 6px 12px; font-size: 10px; }
 .ao-btn--block { width: 100%; }
+.ao-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
 
 .ao-iconbtn {
   width: 32px; height: 32px;
