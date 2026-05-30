@@ -1,7 +1,9 @@
 import type { ReactElement } from 'react';
 
+export type GlyphKind = string;
+
 interface RuneProps {
-  kind: string;
+  kind: GlyphKind;
   size?: number;
   color?: string;
   className?: string;

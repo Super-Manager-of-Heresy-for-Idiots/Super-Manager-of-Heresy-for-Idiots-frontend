@@ -20,12 +20,35 @@ import GmCharacterViewPage from '@/pages/gm/GmCharacterViewPage';
 import ArtifactsPage from '@/pages/gm/ArtifactsPage';
 import ConditionsPage from '@/pages/gm/ConditionsPage';
 
+// Campaign v2 pages
+import CampaignListPage from '@/pages/gm/campaigns/CampaignListPage';
+import CampaignDashboardPage from '@/pages/gm/campaigns/CampaignDashboardPage';
+import CampaignMembersPage from '@/pages/gm/campaigns/CampaignMembersPage';
+import CampaignInvitePage from '@/pages/gm/campaigns/CampaignInvitePage';
+import SharedStoragePage from '@/pages/gm/campaigns/SharedStoragePage';
+import SessionNotesPage from '@/pages/gm/campaigns/SessionNotesPage';
+import XPGrantPage from '@/pages/gm/campaigns/XPGrantPage';
+import ApplyEffectPage from '@/pages/gm/campaigns/ApplyEffectPage';
+import InventoryV2Page from '@/pages/gm/campaigns/InventoryV2Page';
+import NPCManagerPage from '@/pages/gm/campaigns/NPCManagerPage';
+import NPCDetailPage from '@/pages/gm/campaigns/NPCDetailPage';
+import QuestManagerPage from '@/pages/gm/campaigns/QuestManagerPage';
+import QuestDetailPage from '@/pages/gm/campaigns/QuestDetailPage';
+import LocationsPage from '@/pages/gm/campaigns/LocationsPage';
+
+// Homebrew pages (existing)
 import MarketplaceBrowsePage from '@/pages/gm/homebrew/MarketplaceBrowsePage';
 import MarketplaceDetailPage from '@/pages/gm/homebrew/MarketplaceDetailPage';
 import MyDoctrinesPage from '@/pages/gm/homebrew/MyDoctrinesPage';
 import CreateDoctrinePage from '@/pages/gm/homebrew/CreateDoctrinePage';
 import EditDoctrinePage from '@/pages/gm/homebrew/EditDoctrinePage';
 import InstalledDoctrinesPage from '@/pages/gm/homebrew/InstalledDoctrinesPage';
+
+// Homebrew v2 pages
+import VersionManagerPage from '@/pages/gm/homebrew/VersionManagerPage';
+import OverrideCreatorPage from '@/pages/gm/homebrew/OverrideCreatorPage';
+import HomebrewLibraryPage from '@/pages/gm/homebrew/HomebrewLibraryPage';
+import MarketplaceV2Page from '@/pages/gm/homebrew/MarketplaceV2Page';
 
 import AdminDashboardPage from '@/pages/admin/AdminDashboardPage';
 import UsersListPage from '@/pages/admin/UsersListPage';
@@ -73,18 +96,43 @@ export const router = createBrowserRouter([
       {
         element: <AppLayout />,
         children: [
+          // Legacy Teams
           { path: '/gm/teams', element: <GmTeamsListPage /> },
           { path: '/gm/teams/new', element: <GmTeamCreatePage /> },
           { path: '/gm/teams/:id', element: <GmTeamDetailPage /> },
           { path: '/gm/characters/:id', element: <GmCharacterViewPage /> },
           { path: '/gm/artifacts', element: <ArtifactsPage /> },
           { path: '/gm/conditions', element: <ConditionsPage /> },
+
+          // Campaigns v2
+          { path: '/gm/campaigns', element: <CampaignListPage /> },
+          { path: '/gm/campaigns/:id', element: <CampaignDashboardPage /> },
+          { path: '/gm/campaigns/:id/members', element: <CampaignMembersPage /> },
+          { path: '/gm/campaigns/:id/invite', element: <CampaignInvitePage /> },
+          { path: '/gm/campaigns/:id/storage', element: <SharedStoragePage /> },
+          { path: '/gm/campaigns/:id/notes', element: <SessionNotesPage /> },
+          { path: '/gm/campaigns/:id/xp', element: <XPGrantPage /> },
+          { path: '/gm/campaigns/:id/characters/:characterId/effects', element: <ApplyEffectPage /> },
+          { path: '/gm/campaigns/:id/characters/:characterId/inventory', element: <InventoryV2Page /> },
+          { path: '/gm/campaigns/:id/npcs', element: <NPCManagerPage /> },
+          { path: '/gm/campaigns/:id/npcs/:npcId', element: <NPCDetailPage /> },
+          { path: '/gm/campaigns/:id/quests', element: <QuestManagerPage /> },
+          { path: '/gm/campaigns/:id/quests/:questId', element: <QuestDetailPage /> },
+          { path: '/gm/campaigns/:id/locations', element: <LocationsPage /> },
+
+          // Homebrew (existing)
           { path: '/gm/homebrew/marketplace', element: <MarketplaceBrowsePage /> },
           { path: '/gm/homebrew/marketplace/:id', element: <MarketplaceDetailPage /> },
           { path: '/gm/homebrew/my', element: <MyDoctrinesPage /> },
           { path: '/gm/homebrew/new', element: <CreateDoctrinePage /> },
           { path: '/gm/homebrew/:id/edit', element: <EditDoctrinePage /> },
           { path: '/gm/homebrew/installed', element: <InstalledDoctrinesPage /> },
+
+          // Homebrew v2
+          { path: '/gm/homebrew/library', element: <HomebrewLibraryPage /> },
+          { path: '/gm/homebrew/marketplace-v2', element: <MarketplaceV2Page /> },
+          { path: '/gm/homebrew/versions/:packageId', element: <VersionManagerPage /> },
+          { path: '/gm/homebrew/override/new', element: <OverrideCreatorPage /> },
         ],
       },
     ],

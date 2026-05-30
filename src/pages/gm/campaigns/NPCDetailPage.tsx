@@ -1,0 +1,323 @@
+import { useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { Loader2 } from 'lucide-react';
+import { OrdoPanel, PanelHeader, Rune, OrdoDivider, Placeholder, EmptyVault } from '@/components/ordo';
+import { CodexID } from '@/components/homebrew/CodexID';
+import { VisibilityToggle, QuestStatusBadge } from '@/components/narrative';
+import {
+  useNpc,
+  useNpcNotes,
+  useAddNpcNote,
+  useSetNpcVisibility,
+} from '@/hooks/useNpcs';
+import type { NpcNoteResponse, QuestStatus } from '@/types';
+
+/* ── page ────────────────────────────────────────────────────── */
+
+export default function NPCDetailPage() {
+  const { campaignId, npcId } = useParams<{ campaignId: string; npcId: string }>();
+  const { data: npc, isLoading, error, refetch } = useNpc(campaignId!, npcId!);
+  const { data: notes, isLoading: notesLoading } = useNpcNotes(campaignId!, npcId!);
+  const addNoteMutation = useAddNpcNote();
+  const visibilityMutation = useSetNpcVisibility();
+
+  const [noteText, setNoteText] = useState('');
+
+  const toggleVisibility = () => {
+    if (!npc) return;
+    visibilityMutation.mutate({
+      campaignId: campaignId!,
+      npcId: npcId!,
+      data: { visible: !npc.visible },
+    });
+  };
+
+  const handleAddNote = () => {
+    if (!noteText.trim()) return;
+    addNoteMutation.mutate(
+      {
+        campaignId: campaignId!,
+        npcId: npcId!,
+        data: { text: noteText.trim() },
+      },
+      { onSuccess: () => setNoteText('') },
+    );
+  };
+
+  /* ── loading ─────────────────────────────────────────────── */
+
+  if (isLoading) {
+    return (
+      <div>
+        <div style={{ display: 'flex', gap: 24 }}>
+          <div style={{ flex: '1.5 1 0' }}>
+            <div className="ao-panel ao-frame ao-breathe" style={{ padding: 24, minHeight: 300 }}>
+              <span className="ao-frame-c" />
+              <div className="ao-ph" style={{ width: '30%', height: 14, marginBottom: 12 }} />
+              <div className="ao-ph" style={{ width: '50%', height: 24, marginBottom: 16 }} />
+              <div className="ao-ph" style={{ width: '80%', height: 14, marginBottom: 8 }} />
+              <div className="ao-ph" style={{ width: '60%', height: 14 }} />
+            </div>
+          </div>
+          <div style={{ flex: '1 1 0' }}>
+            <div className="ao-panel ao-frame ao-breathe" style={{ padding: 24, minHeight: 200 }}>
+              <span className="ao-frame-c" />
+              <div className="ao-ph" style={{ width: '60%', height: 14, marginBottom: 12 }} />
+              <div className="ao-ph" style={{ width: '40%', height: 14 }} />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  /* ── error ───────────────────────────────────────────────── */
+
+  if (error || !npc) {
+    return (
+      <div style={{ textAlign: 'center', padding: '48px 0' }}>
+        <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginBottom: 16 }}>
+          This soul could not be found within the chronicle.
+        </p>
+        <button className="ao-btn" onClick={() => refetch()}>Retry</button>
+      </div>
+    );
+  }
+
+  /* ── linked entities (from quest/location data on the NPC, if available) ── */
+  const linkedQuests: { id: string; name: string; status?: QuestStatus }[] =
+    (npc as any).linkedQuests ?? [];
+  const linkedLocations: { id: string; name: string }[] =
+    (npc as any).linkedLocations ?? [];
+
+  /* ── main ────────────────────────────────────────────────── */
+
+  return (
+    <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start' }}>
+      {/* ═══ Left column ═══ */}
+      <div style={{ flex: '1.5 1 0', display: 'flex', flexDirection: 'column', gap: 20 }}>
+        {/* Identity block */}
+        <OrdoPanel frame padding={20}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
+            {/* Portrait placeholder */}
+            <Placeholder style={{ width: 80, height: 80, flexShrink: 0 }}>
+              Portrait
+            </Placeholder>
+
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                <CodexID>{npc.id.slice(0, 8).toUpperCase()}</CodexID>
+                <VisibilityToggle visible={npc.visible} onToggle={toggleVisibility} />
+              </div>
+              <h3 className="ao-h3" style={{ marginTop: 6, color: 'var(--ink-bright)' }}>
+                {npc.name}
+              </h3>
+              {npc.role && (
+                <p className="ao-italic" style={{ fontSize: 14, color: 'var(--ink-faint)', marginTop: 2 }}>
+                  {npc.role}
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Reveal button */}
+          <div style={{ marginTop: 16 }}>
+            <button
+              className={`ao-btn ${npc.visible ? 'ao-btn--ghost' : 'ao-btn--primary'}`}
+              onClick={toggleVisibility}
+              disabled={visibilityMutation.isPending}
+            >
+              {visibilityMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              <Rune kind={npc.visible ? 'lock' : 'eye'} size={14} color="currentColor" />
+              <span style={{ marginLeft: 6 }}>{npc.visible ? 'Hide from Players' : 'Reveal to Players'}</span>
+            </button>
+          </div>
+        </OrdoPanel>
+
+        {/* Public account box */}
+        <OrdoPanel frame padding={0}>
+          <PanelHeader title="PUBLIC ACCOUNT" glyph="eye" tone="gold" sub="Visible to players when revealed" />
+          <div style={{ padding: 16 }}>
+            <p style={{ fontSize: 14, color: 'var(--ink)', lineHeight: 1.6, margin: 0 }}>
+              {npc.publicDescription || (
+                <span className="ao-italic" style={{ color: 'var(--ink-ghost)' }}>
+                  No public account recorded.
+                </span>
+              )}
+            </p>
+          </div>
+        </OrdoPanel>
+
+        {/* Private account box */}
+        <OrdoPanel
+          frame
+          padding={0}
+          style={{
+            borderColor: 'rgba(140,40,50,0.3)',
+            background: 'rgba(100,20,30,0.06)',
+          }}
+        >
+          <PanelHeader title="PRIVATE ACCOUNT" glyph="lock" tone="ember" sub="GM eyes only" />
+          <div style={{ padding: 16 }}>
+            <p style={{ fontSize: 14, color: 'var(--ink)', lineHeight: 1.6, margin: 0 }}>
+              {npc.privateDescription || (
+                <span className="ao-italic" style={{ color: 'var(--ink-ghost)' }}>
+                  No private notes inscribed.
+                </span>
+              )}
+            </p>
+          </div>
+        </OrdoPanel>
+
+        {/* Notes feed */}
+        <OrdoPanel frame padding={0}>
+          <PanelHeader title="CHRONICLE NOTES" glyph="scroll" tone="gold" />
+          <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {notesLoading ? (
+              <div className="ao-breathe">
+                <div className="ao-ph" style={{ width: '70%', height: 14, marginBottom: 8 }} />
+                <div className="ao-ph" style={{ width: '50%', height: 14 }} />
+              </div>
+            ) : !notes || notes.length === 0 ? (
+              <p className="ao-italic" style={{ color: 'var(--ink-ghost)', fontSize: 13 }}>
+                No notes recorded yet.
+              </p>
+            ) : (
+              notes.map((note: NpcNoteResponse) => (
+                <div
+                  key={note.id}
+                  style={{
+                    padding: 12,
+                    background: note.isGmNote ? 'rgba(100,20,30,0.08)' : 'transparent',
+                    border: note.isGmNote
+                      ? '1px solid rgba(140,40,50,0.25)'
+                      : '1px solid rgba(180,140,80,0.25)',
+                    borderLeft: note.isGmNote
+                      ? '3px solid rgba(140,40,50,0.4)'
+                      : '3px solid rgba(180,140,80,0.4)',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                    <Rune
+                      kind={note.isGmNote ? 'lock' : 'scroll'}
+                      size={10}
+                      color={note.isGmNote ? 'rgba(180,80,80,0.6)' : 'var(--brass)'}
+                    />
+                    <span className="ao-overline" style={{ fontSize: 8 }}>
+                      {note.authorUsername} &mdash; {new Date(note.createdAt).toLocaleDateString()}
+                    </span>
+                    {note.isGmNote && (
+                      <span className="ao-overline" style={{ fontSize: 8, color: 'rgba(180,80,80,0.6)' }}>
+                        GM
+                      </span>
+                    )}
+                  </div>
+                  <p style={{ fontSize: 13, color: 'var(--ink)', lineHeight: 1.5, margin: 0 }}>
+                    {note.text}
+                  </p>
+                </div>
+              ))
+            )}
+
+            <OrdoDivider glyph="diamond" />
+
+            {/* Inline add-note */}
+            <div style={{ display: 'flex', gap: 8 }}>
+              <input
+                className="ao-input"
+                value={noteText}
+                onChange={(e) => setNoteText(e.target.value)}
+                placeholder="Add a note..."
+                style={{ flex: 1 }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleAddNote();
+                }}
+              />
+              <button
+                className="ao-btn ao-btn--primary ao-btn--sm"
+                onClick={handleAddNote}
+                disabled={!noteText.trim() || addNoteMutation.isPending}
+              >
+                {addNoteMutation.isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Rune kind="plus" size={12} color="currentColor" />
+                )}
+              </button>
+            </div>
+          </div>
+        </OrdoPanel>
+      </div>
+
+      {/* ═══ Right column ═══ */}
+      <div style={{ flex: '1 1 0', display: 'flex', flexDirection: 'column', gap: 20 }}>
+        {/* Linked Quests */}
+        <OrdoPanel frame padding={0}>
+          <PanelHeader title="LINKED QUESTS" glyph="scroll" tone="gold" />
+          <div style={{ padding: 16 }}>
+            {linkedQuests.length === 0 ? (
+              <p className="ao-italic" style={{ color: 'var(--ink-ghost)', fontSize: 13 }}>
+                No quests linked to this NPC.
+              </p>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {linkedQuests.map((q) => (
+                  <div
+                    key={q.id}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 8,
+                      padding: '8px 10px',
+                      background: 'rgba(0,0,0,0.2)',
+                      border: '1px solid var(--rule)',
+                    }}
+                  >
+                    <Rune kind="scroll" size={12} color="var(--brass)" />
+                    <span style={{ flex: 1, fontSize: 13, color: 'var(--ink-bright)' }}>
+                      {q.name}
+                    </span>
+                    {q.status && <QuestStatusBadge status={q.status} />}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </OrdoPanel>
+
+        {/* Linked Locations */}
+        <OrdoPanel frame padding={0}>
+          <PanelHeader title="LINKED LOCATIONS" glyph="sigil-3" tone="arcane" />
+          <div style={{ padding: 16 }}>
+            {linkedLocations.length === 0 ? (
+              <p className="ao-italic" style={{ color: 'var(--ink-ghost)', fontSize: 13 }}>
+                No locations linked to this NPC.
+              </p>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {linkedLocations.map((loc) => (
+                  <div
+                    key={loc.id}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 8,
+                      padding: '8px 10px',
+                      background: 'rgba(0,0,0,0.2)',
+                      border: '1px solid var(--rule)',
+                    }}
+                  >
+                    <Rune kind="sigil-3" size={12} color="var(--arcane)" />
+                    <span style={{ fontSize: 13, color: 'var(--ink-bright)' }}>
+                      {loc.name}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </OrdoPanel>
+      </div>
+    </div>
+  );
+}
