@@ -242,7 +242,7 @@ export default function EnchantmentTypesPage() {
           <Rune kind="plus" size={11} /> Inscribe New Enchantment
         </button>
         <OrdoChip tone="ember" glyph="lock">Inquisitor privileges</OrdoChip>
-      </div>
+      </div>nr
     </div>
   );
 
