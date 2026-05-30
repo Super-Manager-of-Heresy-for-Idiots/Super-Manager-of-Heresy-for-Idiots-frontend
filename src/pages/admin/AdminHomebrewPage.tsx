@@ -1,14 +1,10 @@
 import { useState } from 'react';
-import { Flame, X, Check, Minus, Shield } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
+import { Rune, OrdoPanel, OrdoChip, Sigil } from '@/components/ordo';
+import { StatusBadge, CodexID } from '@/components/homebrew';
 import {
   AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle,
   AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction,
 } from '@/components/ui/alert-dialog';
-import { StatusBadge } from '@/components/homebrew';
 import {
   useAdminHomebrewPackages,
   useAdminHardDelete,
@@ -24,36 +20,55 @@ export default function AdminHomebrewPage() {
   const [tab, setTab] = useState<AdminTab>('moderation');
 
   return (
-    <div className="space-y-4">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Shield className="h-10 w-10 text-destructive" />
+    <div>
+      {/* ── tab header ────────────────────────────────────────── */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'flex-end',
+          justifyContent: 'space-between',
+          marginBottom: 24,
+        }}
+      >
+        {/* left */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+          <Sigil size={48} color="var(--ember)" />
           <div>
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Master Archive</p>
-            <h1 className="text-xl font-heading font-bold">Inquisitorial Ledger</h1>
+            <CodexID>Inquisitor &middot; grand.assessor</CodexID>
+            <h3 className="ao-h3" style={{ margin: 0, marginTop: 2 }}>All Doctrines</h3>
           </div>
         </div>
-        <Badge variant="destructive" className="gap-1">
-          <Flame className="h-3 w-3" /> Inquisitor access
-        </Badge>
+
+        {/* right */}
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+          <OrdoChip tone="ember" glyph="flame">Inquisitor access</OrdoChip>
+          <button className="ao-btn ao-btn--ghost">
+            <Rune kind="scroll" size={11} /> Audit log
+          </button>
+          <button className="ao-btn ao-btn--ghost">
+            <Rune kind="book" size={11} /> Tag registry
+          </button>
+        </div>
       </div>
 
-      {/* Tabs */}
-      <div className="flex border-b">
+      {/* ── tabs bar ──────────────────────────────────────────── */}
+      <div
+        style={{
+          display: 'flex',
+          gap: 0,
+          borderBottom: '1px solid var(--rule)',
+          marginBottom: 24,
+        }}
+      >
         <button
+          className={`ao-tab ${tab === 'moderation' ? 'is-active' : ''}`}
           onClick={() => setTab('moderation')}
-          className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${
-            tab === 'moderation' ? 'border-gold text-gold' : 'border-transparent text-muted-foreground hover:text-foreground'
-          }`}
         >
           Doctrine Moderation
         </button>
         <button
+          className={`ao-tab ${tab === 'tags' ? 'is-active' : ''}`}
           onClick={() => setTab('tags')}
-          className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${
-            tab === 'tags' ? 'border-gold text-gold' : 'border-transparent text-muted-foreground hover:text-foreground'
-          }`}
         >
           Tag Registry
         </button>
@@ -63,6 +78,10 @@ export default function AdminHomebrewPage() {
     </div>
   );
 }
+
+/* ══════════════════════════════════════════════════════════════
+   MODERATION TAB
+   ══════════════════════════════════════════════════════════════ */
 
 function ModerationPanel() {
   const [statusFilter, setStatusFilter] = useState<HomebrewStatus | 'all'>('all');
@@ -92,91 +111,255 @@ function ModerationPanel() {
       )
     : packages;
 
+  /* stat counts */
+  const sealedCount = packages.filter((p) => p.status === 'PUBLISHED' && !p.isDeleted).length;
+  const draftCount = packages.filter((p) => p.status === 'DRAFT' && !p.isDeleted).length;
+  const withheldCount = packages.filter((p) => p.status === 'UNPUBLISHED' && !p.isDeleted).length;
+  const deletedCount = packages.filter((p) => p.isDeleted).length;
+
+  /* status filter defs */
+  const statusFilters: { id: HomebrewStatus | 'all'; label: string }[] = [
+    { id: 'all', label: 'All' },
+    { id: 'PUBLISHED', label: 'Sealed' },
+    { id: 'DRAFT', label: 'Draft' },
+    { id: 'UNPUBLISHED', label: 'Withheld' },
+  ];
+
   return (
     <>
-      {/* Filter bar */}
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex items-center gap-3 flex-wrap">
-            <Input
+      {/* ── banner panel: stats grid ──────────────────────────── */}
+      <OrdoPanel frame padding={0} style={{ marginBottom: 18 }}>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '1.4fr 1fr 1fr 1fr 1fr 1fr',
+            alignItems: 'center',
+            padding: '18px 20px',
+          }}
+        >
+          {/* user identity */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <Sigil size={40} color="var(--ember)" />
+            <div>
+              <div className="ao-overline" style={{ color: 'var(--ember)', marginBottom: 2 }}>
+                Grand Assessor
+              </div>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--ink-quiet)' }}>
+                Inquisitorial review
+              </div>
+            </div>
+          </div>
+
+          {/* stats */}
+          {([
+            { label: 'Total',    value: totalElements, color: 'var(--ink-bright)' },
+            { label: 'Sealed',   value: sealedCount,   color: 'var(--gold)' },
+            { label: 'Draft',    value: draftCount,     color: 'var(--ink-quiet)' },
+            { label: 'Withheld', value: withheldCount,  color: 'var(--ink-quiet)' },
+            { label: 'Flagged',  value: deletedCount,   color: 'var(--ember)' },
+          ] as const).map((s) => (
+            <div key={s.label} style={{ textAlign: 'center' }}>
+              <div
+                className="ao-num"
+                style={{
+                  fontFamily: 'var(--font-serif, Georgia, serif)',
+                  fontSize: 28,
+                  lineHeight: 1,
+                  color: s.color,
+                }}
+              >
+                {isLoading ? '\u2014' : s.value}
+              </div>
+              <div
+                className="ao-overline"
+                style={{ fontSize: 9, marginTop: 4, color: s.color, opacity: 0.8 }}
+              >
+                {s.label}
+              </div>
+            </div>
+          ))}
+        </div>
+      </OrdoPanel>
+
+      {/* ── filter bar panel ──────────────────────────────────── */}
+      <OrdoPanel frame padding={0} style={{ marginBottom: 18 }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 12,
+            padding: '12px 18px',
+            flexWrap: 'wrap',
+          }}
+        >
+          {/* search */}
+          <div style={{ position: 'relative', width: 300 }}>
+            <input
+              className="ao-input"
               placeholder="Search by title, codex, or author..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-80"
+              style={{ paddingLeft: 34, width: '100%' }}
             />
-            <div className="w-px h-6 bg-border" />
-            <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Status</span>
-            {([
-              { id: 'all' as const, label: 'All' },
-              { id: 'PUBLISHED' as const, label: 'Sealed' },
-              { id: 'DRAFT' as const, label: 'Draft' },
-              { id: 'UNPUBLISHED' as const, label: 'Withheld' },
-            ]).map((s) => (
-              <Button
-                key={s.id}
-                variant={statusFilter === s.id ? 'gold' : 'outline'}
-                size="sm"
-                onClick={() => { setStatusFilter(s.id); setPage(0); }}
-              >
-                {s.label}
-              </Button>
-            ))}
-            <div className="flex-1" />
-            <span className="text-xs text-muted-foreground">{filtered.length} of {totalElements} rows</span>
+            <span
+              style={{
+                position: 'absolute',
+                left: 10,
+                top: '50%',
+                transform: 'translateY(-50%)',
+                color: 'var(--ink-faint)',
+              }}
+            >
+              <Rune kind="search" size={13} />
+            </span>
           </div>
-        </CardContent>
-      </Card>
 
-      {/* Table */}
+          {/* divider */}
+          <div style={{ width: 1, height: 24, background: 'var(--rule)' }} />
+
+          {/* status label */}
+          <span className="ao-overline">Status</span>
+
+          {/* status filter buttons */}
+          {statusFilters.map((s) => (
+            <button
+              key={s.id}
+              className={`ao-btn ao-btn--ghost ao-btn--sm`}
+              onClick={() => { setStatusFilter(s.id); setPage(0); }}
+              style={{
+                borderColor: statusFilter === s.id ? 'var(--brass)' : 'var(--rule)',
+                color: statusFilter === s.id ? 'var(--gold-pale)' : undefined,
+                background: statusFilter === s.id ? 'rgba(201,168,76,0.08)' : undefined,
+              }}
+            >
+              {s.label}
+            </button>
+          ))}
+
+          {/* divider */}
+          <div style={{ width: 1, height: 24, background: 'var(--rule)' }} />
+
+          {/* author placeholder */}
+          <span className="ao-overline">Author</span>
+          <select
+            className="ao-input"
+            style={{
+              width: 140,
+              padding: '4px 8px',
+              fontSize: 12,
+              background: 'transparent',
+              border: '1px solid var(--rule)',
+              color: 'var(--ink-quiet)',
+            }}
+          >
+            <option value="">All authors</option>
+          </select>
+
+          {/* spacer */}
+          <div style={{ flex: 1 }} />
+
+          {/* row count */}
+          <span className="ao-codex" style={{ fontSize: 11, color: 'var(--ink-faint)' }}>
+            {filtered.length} of {totalElements} rows
+          </span>
+        </div>
+      </OrdoPanel>
+
+      {/* ── ledger table ──────────────────────────────────────── */}
       {isLoading ? (
-        <Card className="h-96 animate-pulse">
-          <div className="h-full bg-muted rounded-lg" />
-        </Card>
+        <OrdoPanel frame padding={0}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: 16 }}>
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="ao-ph" style={{ width: '100%', height: 48 }} />
+            ))}
+          </div>
+        </OrdoPanel>
       ) : (
-        <Card>
-          <table className="w-full text-sm">
+        <OrdoPanel frame padding={0}>
+          <table className="ao-table" style={{ width: '100%' }}>
             <thead>
-              <tr className="border-b bg-muted/50">
-                <th className="text-left px-4 py-2.5 text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Codex</th>
-                <th className="text-left px-4 py-2.5 text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Doctrine</th>
-                <th className="text-left px-4 py-2.5 text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Author</th>
-                <th className="text-left px-4 py-2.5 text-[10px] uppercase tracking-wider text-muted-foreground font-medium">State</th>
-                <th className="text-right px-4 py-2.5 text-[10px] uppercase tracking-wider text-muted-foreground font-medium">v</th>
-                <th className="text-right px-4 py-2.5 text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Downloads</th>
-                <th className="text-left px-4 py-2.5 text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Created</th>
-                <th className="text-left px-4 py-2.5 text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Sealed</th>
-                <th className="px-4 py-2.5" />
+              <tr>
+                <th style={{ width: 36, padding: '12px 8px 12px 16px' }}>
+                  <input type="checkbox" style={{ accentColor: 'var(--gold)' }} />
+                </th>
+                <th style={{ textAlign: 'left', padding: '12px 12px' }}>Codex</th>
+                <th style={{ textAlign: 'left', padding: '12px 12px' }}>Doctrine</th>
+                <th style={{ textAlign: 'left', padding: '12px 12px' }}>Author</th>
+                <th style={{ textAlign: 'left', padding: '12px 12px' }}>State</th>
+                <th style={{ textAlign: 'right', padding: '12px 12px', width: 40 }}>v</th>
+                <th style={{ textAlign: 'right', padding: '12px 12px' }}>Downloads</th>
+                <th style={{ textAlign: 'right', padding: '12px 12px' }}>Installs</th>
+                <th style={{ textAlign: 'left', padding: '12px 12px' }}>Inscribed</th>
+                <th style={{ textAlign: 'left', padding: '12px 12px' }}>Sealed</th>
+                <th style={{ width: 110, padding: '12px 16px 12px 12px' }} />
               </tr>
             </thead>
             <tbody>
               {filtered.map((r) => (
                 <AdminDoctrineRow key={r.id} pkg={r} onHardDelete={() => setDeleteId(r.id)} />
               ))}
+              {filtered.length === 0 && (
+                <tr>
+                  <td colSpan={11} style={{ padding: '32px 16px', textAlign: 'center' }}>
+                    <span className="ao-italic" style={{ color: 'var(--ink-faint)' }}>
+                      No doctrines match thy inquiry
+                    </span>
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
-          <div className="flex justify-between px-4 py-3 border-t bg-muted/50">
-            <span className="text-xs text-muted-foreground">Page {page + 1} of {totalPages || 1}</span>
+
+          {/* pagination footer */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '10px 18px',
+              borderTop: '1px solid var(--rule)',
+              background: 'var(--abyss)',
+              fontSize: 11,
+              color: 'var(--ink-faint)',
+              fontFamily: 'var(--font-display)',
+              letterSpacing: '0.06em',
+            }}
+          >
+            <span>Page {page + 1} of {totalPages || 1}</span>
             {totalPages > 1 && (
-              <div className="flex gap-1">
-                <Button variant="outline" size="sm" disabled={page === 0} onClick={() => setPage(page - 1)}>‹</Button>
-                <Button variant="outline" size="sm" disabled={page >= totalPages - 1} onClick={() => setPage(page + 1)}>›</Button>
+              <div style={{ display: 'flex', gap: 4 }}>
+                <button
+                  className="ao-btn ao-btn--ghost ao-btn--sm"
+                  disabled={page === 0}
+                  onClick={() => setPage(page - 1)}
+                >
+                  &lsaquo;
+                </button>
+                <button
+                  className="ao-btn ao-btn--ghost ao-btn--sm"
+                  disabled={page >= totalPages - 1}
+                  onClick={() => setPage(page + 1)}
+                >
+                  &rsaquo;
+                </button>
               </div>
             )}
           </div>
-        </Card>
+        </OrdoPanel>
       )}
 
+      {/* ── hard delete confirmation ──────────────────────────── */}
       <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Unmake this Doctrine — Permanently?</AlertDialogTitle>
+            <AlertDialogTitle>Unmake this Doctrine &mdash; Permanently?</AlertDialogTitle>
             <AlertDialogDescription>
               This Doctrine shall be unmade. Its content reference shall be severed from all instated Hands. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Withdraw Order</AlertDialogCancel>
-            <AlertDialogAction onClick={handleHardDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+            <AlertDialogAction onClick={handleHardDelete}>
               Authorize Unmaking
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -186,27 +369,117 @@ function ModerationPanel() {
   );
 }
 
+/* ── moderation row ──────────────────────────────────────────── */
+
 function AdminDoctrineRow({ pkg, onHardDelete }: { pkg: HomebrewPackageResponse; onHardDelete: () => void }) {
   const isDeleted = pkg.isDeleted;
 
+  const rowBg = isDeleted
+    ? 'rgba(179,70,26,0.02)'
+    : undefined;
+
   return (
-    <tr className={`border-b last:border-0 ${isDeleted ? 'bg-destructive/5' : ''}`}>
-      <td className="px-4 py-2.5 text-xs font-mono text-muted-foreground">{pkg.id.substring(0, 8)}</td>
-      <td className={`px-4 py-2.5 ${isDeleted ? 'text-muted-foreground line-through' : 'font-medium'}`}>{pkg.title}</td>
-      <td className="px-4 py-2.5 text-xs text-muted-foreground">{pkg.authorUsername}</td>
-      <td className="px-4 py-2.5"><StatusBadge status={isDeleted ? 'DELETED' : pkg.status} /></td>
-      <td className="px-4 py-2.5 text-right font-mono text-gold">{pkg.version}</td>
-      <td className="px-4 py-2.5 text-right font-mono">{pkg.downloadCount.toLocaleString()}</td>
-      <td className="px-4 py-2.5 text-xs text-muted-foreground">{formatDate(pkg.createdAt)}</td>
-      <td className="px-4 py-2.5 text-xs text-muted-foreground">{pkg.publishedAt ? formatDate(pkg.publishedAt) : '—'}</td>
-      <td className="px-4 py-2.5 text-right">
-        <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={onHardDelete} title="Hard delete">
-          <Flame className="h-3.5 w-3.5" />
-        </Button>
+    <tr style={{ background: rowBg }}>
+      {/* checkbox */}
+      <td style={{ padding: '10px 8px 10px 16px' }}>
+        <input type="checkbox" style={{ accentColor: 'var(--gold)' }} />
+      </td>
+
+      {/* codex */}
+      <td style={{ padding: '10px 12px' }}>
+        <CodexID>{pkg.id.substring(0, 8)}</CodexID>
+      </td>
+
+      {/* doctrine title */}
+      <td style={{ padding: '10px 12px' }}>
+        <span
+          style={{
+            color: isDeleted ? 'var(--ink-faint)' : 'var(--ink-bright)',
+            textDecoration: isDeleted ? 'line-through' : 'none',
+            fontFamily: 'var(--font-serif, Georgia, serif)',
+            fontSize: 13,
+          }}
+        >
+          {pkg.title}
+        </span>
+      </td>
+
+      {/* author */}
+      <td style={{ padding: '10px 12px' }}>
+        <span style={{ fontSize: 12, color: 'var(--ink-quiet)', fontFamily: 'var(--font-mono)' }}>
+          {pkg.authorUsername}
+        </span>
+      </td>
+
+      {/* state */}
+      <td style={{ padding: '10px 12px' }}>
+        <StatusBadge status={isDeleted ? 'DELETED' : pkg.status} />
+      </td>
+
+      {/* version */}
+      <td style={{ padding: '10px 12px', textAlign: 'right' }}>
+        <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--gold)', fontSize: 12 }}>
+          {pkg.version}
+        </span>
+      </td>
+
+      {/* downloads */}
+      <td style={{ padding: '10px 12px', textAlign: 'right' }}>
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--ink-quiet)' }}>
+          {pkg.downloadCount.toLocaleString()}
+        </span>
+      </td>
+
+      {/* installs (using downloadCount as proxy) */}
+      <td style={{ padding: '10px 12px', textAlign: 'right' }}>
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--ink-quiet)' }}>
+          {pkg.downloadCount.toLocaleString()}
+        </span>
+      </td>
+
+      {/* inscribed / created */}
+      <td style={{ padding: '10px 12px' }}>
+        <span className="ao-codex" style={{ color: 'var(--ink-faint)', fontSize: 11 }}>
+          {formatDate(pkg.createdAt)}
+        </span>
+      </td>
+
+      {/* sealed / published */}
+      <td style={{ padding: '10px 12px' }}>
+        <span className="ao-codex" style={{ color: 'var(--ink-faint)', fontSize: 11 }}>
+          {pkg.publishedAt ? formatDate(pkg.publishedAt) : '\u2014'}
+        </span>
+      </td>
+
+      {/* actions */}
+      <td style={{ padding: '10px 16px 10px 12px' }}>
+        <div style={{ display: 'inline-flex', gap: 4 }}>
+          {/* view */}
+          <button className="ao-iconbtn" style={{ width: 26, height: 26 }} title="View doctrine">
+            <Rune kind="book" size={12} />
+          </button>
+          {/* audit */}
+          <button className="ao-iconbtn" style={{ width: 26, height: 26 }} title="Audit">
+            <Rune kind="eye" size={12} />
+          </button>
+          {/* hard delete */}
+          <button
+            className="ao-iconbtn"
+            style={{ width: 26, height: 26, color: '#d8896a' }}
+            title="Hard delete"
+            onClick={onHardDelete}
+          >
+            <Rune kind="flame" size={12} />
+          </button>
+        </div>
       </td>
     </tr>
   );
 }
+
+/* ══════════════════════════════════════════════════════════════
+   TAG REGISTRY TAB
+   ══════════════════════════════════════════════════════════════ */
 
 function TagRegistryPanel() {
   const { data: tags, isLoading } = useAdminTags();
@@ -230,38 +503,77 @@ function TagRegistryPanel() {
 
   return (
     <>
-      <div className="flex items-end justify-between">
-        <div>
-          <p className="text-xs uppercase tracking-wider text-muted-foreground">Imperial Classification</p>
-          <h2 className="text-xl font-heading font-bold mt-1">Classification Marks</h2>
-          <p className="text-sm text-muted-foreground italic mt-1">
-            Marks bind doctrines to one another.
-          </p>
-        </div>
-        <span className="text-xs text-muted-foreground">{allTags.length} marks · {inUseCount} in use</span>
+      {/* ── heading ───────────────────────────────────────────── */}
+      <div style={{ marginBottom: 18 }}>
+        <p className="ao-overline" style={{ color: 'var(--gold)', marginBottom: 2 }}>
+          Imperial Classification
+        </p>
+        <h3 className="ao-h3" style={{ margin: 0, marginTop: 2 }}>Classification Marks</h3>
+        <p className="ao-italic" style={{ marginTop: 6, color: 'var(--ink-quiet)', fontSize: 13 }}>
+          Marks bind doctrines to one another. Manage the registry of classification marks below.
+        </p>
       </div>
 
+      {/* ── main panel ────────────────────────────────────────── */}
       {isLoading ? (
-        <Card className="h-72 animate-pulse">
-          <div className="h-full bg-muted rounded-lg" />
-        </Card>
+        <OrdoPanel frame padding={0}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: 16 }}>
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="ao-ph" style={{ width: '100%', height: 48 }} />
+            ))}
+          </div>
+        </OrdoPanel>
       ) : (
-        <Card>
-          <div className="flex items-center gap-3 p-4 border-b">
-            <Input placeholder="Search marks..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-72" />
-            <Badge variant="gold" className="gap-1"><Check className="h-3 w-3" /> In use · {inUseCount}</Badge>
-            <Badge variant="secondary" className="gap-1"><Minus className="h-3 w-3" /> Unused · {unusedCount}</Badge>
-            <div className="flex-1" />
-            <span className="text-xs text-muted-foreground">sorted · usage descending</span>
+        <OrdoPanel frame padding={0}>
+          {/* search + chip row */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 12,
+              padding: '12px 18px',
+              borderBottom: '1px solid var(--rule)',
+            }}
+          >
+            <div style={{ position: 'relative', width: 260 }}>
+              <input
+                className="ao-input"
+                placeholder="Search marks..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                style={{ paddingLeft: 34, width: '100%' }}
+              />
+              <span
+                style={{
+                  position: 'absolute',
+                  left: 10,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  color: 'var(--ink-faint)',
+                }}
+              >
+                <Rune kind="search" size={13} />
+              </span>
+            </div>
+
+            <OrdoChip tone="gold" glyph="check">In use &middot; {inUseCount}</OrdoChip>
+            <OrdoChip tone="rune" glyph="minus">Unused &middot; {unusedCount}</OrdoChip>
+
+            <div style={{ flex: 1 }} />
+
+            <span className="ao-codex" style={{ fontSize: 11, color: 'var(--ink-faint)' }}>
+              sorted &middot; usage descending
+            </span>
           </div>
 
-          <table className="w-full text-sm">
+          {/* table */}
+          <table className="ao-table" style={{ width: '100%' }}>
             <thead>
-              <tr className="border-b bg-muted/50">
-                <th className="text-left px-4 py-2.5 text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Mark</th>
-                <th className="text-right px-4 py-2.5 text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Doctrines using</th>
-                <th className="text-left px-4 py-2.5 text-[10px] uppercase tracking-wider text-muted-foreground font-medium">State</th>
-                <th className="px-4 py-2.5" />
+              <tr>
+                <th style={{ textAlign: 'left', padding: '12px 16px' }}>Mark</th>
+                <th style={{ textAlign: 'right', padding: '12px 16px' }}>Doctrines using</th>
+                <th style={{ textAlign: 'left', padding: '12px 16px' }}>State</th>
+                <th style={{ width: 80, padding: '12px 16px' }} />
               </tr>
             </thead>
             <tbody>
@@ -270,17 +582,34 @@ function TagRegistryPanel() {
                 .map((t) => (
                   <TagRow key={t.id} tag={t} onDelete={() => setDeleteId(t.id)} />
                 ))}
+              {filtered.length === 0 && (
+                <tr>
+                  <td colSpan={4} style={{ padding: '32px 16px', textAlign: 'center' }}>
+                    <span className="ao-italic" style={{ color: 'var(--ink-faint)' }}>
+                      No marks match thy inquiry
+                    </span>
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
 
-          <div className="p-3 bg-muted/50 border-t">
-            <p className="text-xs text-muted-foreground italic">
+          {/* footer note */}
+          <div
+            style={{
+              padding: '10px 18px',
+              borderTop: '1px solid var(--rule)',
+              background: 'var(--abyss)',
+            }}
+          >
+            <p className="ao-italic" style={{ fontSize: 11, color: 'var(--ink-faint)', margin: 0 }}>
               Marks bound to one or more doctrines cannot be unmade.
             </p>
           </div>
-        </Card>
+        </OrdoPanel>
       )}
 
+      {/* ── delete confirmation ───────────────────────────────── */}
       <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -291,7 +620,7 @@ function TagRegistryPanel() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteTag} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+            <AlertDialogAction onClick={handleDeleteTag}>
               Delete Mark
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -301,38 +630,88 @@ function TagRegistryPanel() {
   );
 }
 
+/* ── tag row ─────────────────────────────────────────────────── */
+
 function TagRow({ tag, onDelete }: { tag: HomebrewTagResponse; onDelete: () => void }) {
   const inUse = tag.usageCount > 0;
 
   return (
-    <tr className="border-b last:border-0">
-      <td className="px-4 py-2.5">
-        <span className="inline-flex items-center gap-2 px-2 py-1 bg-muted border rounded-sm font-mono text-xs">
-          <span className={`w-1 h-1 rotate-45 ${inUse ? 'bg-gold' : 'bg-muted-foreground'}`} />
+    <tr>
+      {/* mark name with diamond dot */}
+      <td style={{ padding: '10px 16px' }}>
+        <span
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 8,
+            padding: '4px 10px',
+            background: 'rgba(0,0,0,0.35)',
+            border: '1px solid var(--rule)',
+            fontFamily: 'var(--font-mono)',
+            fontSize: 12,
+            color: 'var(--ink-bright)',
+          }}
+        >
+          <span
+            style={{
+              display: 'inline-block',
+              width: 5,
+              height: 5,
+              transform: 'rotate(45deg)',
+              background: inUse ? 'var(--gold)' : 'var(--ink-faint)',
+              flexShrink: 0,
+            }}
+          />
           {tag.name}
         </span>
       </td>
-      <td className={`px-4 py-2.5 text-right font-mono ${inUse ? 'text-foreground' : 'text-muted-foreground'}`}>
-        {tag.usageCount}
+
+      {/* usage count */}
+      <td style={{ padding: '10px 16px', textAlign: 'right' }}>
+        <span
+          style={{
+            fontFamily: 'var(--font-mono)',
+            fontSize: 13,
+            color: inUse ? 'var(--ink-bright)' : 'var(--ink-faint)',
+          }}
+        >
+          {tag.usageCount}
+        </span>
       </td>
-      <td className="px-4 py-2.5">
+
+      {/* state chip */}
+      <td style={{ padding: '10px 16px' }}>
         {inUse ? (
-          <Badge variant="gold" className="gap-1"><Check className="h-3 w-3" /> In use</Badge>
+          <OrdoChip tone="gold" glyph="check">In use</OrdoChip>
         ) : (
-          <Badge variant="secondary" className="gap-1"><Minus className="h-3 w-3" /> Unused</Badge>
+          <OrdoChip tone="rune" glyph="minus">Unused</OrdoChip>
         )}
       </td>
-      <td className="px-4 py-2.5 text-right">
-        <Button
-          variant="ghost"
-          size="icon"
-          className={`h-7 w-7 ${inUse ? 'text-muted-foreground cursor-not-allowed' : 'text-destructive'}`}
-          title={inUse ? `Cannot delete: in use by ${tag.usageCount} doctrines` : 'Delete mark'}
-          disabled={inUse}
-          onClick={onDelete}
-        >
-          <X className="h-3.5 w-3.5" />
-        </Button>
+
+      {/* actions */}
+      <td style={{ padding: '10px 16px', textAlign: 'right' }}>
+        <div style={{ display: 'inline-flex', gap: 4 }}>
+          {/* audit */}
+          <button className="ao-iconbtn" style={{ width: 26, height: 26 }} title="Audit">
+            <Rune kind="eye" size={12} />
+          </button>
+          {/* delete */}
+          <button
+            className="ao-iconbtn"
+            style={{
+              width: 26,
+              height: 26,
+              color: inUse ? 'var(--ink-faint)' : '#d8896a',
+              cursor: inUse ? 'not-allowed' : 'pointer',
+              opacity: inUse ? 0.4 : 1,
+            }}
+            title={inUse ? `Cannot delete: in use by ${tag.usageCount} doctrines` : 'Delete mark'}
+            disabled={inUse}
+            onClick={onDelete}
+          >
+            <Rune kind="x" size={12} />
+          </button>
+        </div>
       </td>
     </tr>
   );

@@ -1,13 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, BookOpen, Plus, Diamond, Lock, Flame, ScrollText } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Rune, OrdoPanel, OrdoChip, Sigil } from '@/components/ordo';
+import { VersionSeal, StatusBadge, HBTag, ContentPills, Downloads, CodexID } from '@/components/homebrew';
 import {
   AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle,
   AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction,
 } from '@/components/ui/alert-dialog';
-import { VersionSeal, StatusBadge, HBTag, ContentPills, Downloads } from '@/components/homebrew';
 import { useMyPackages, useDeleteHomebrew, usePublishHomebrew, useUnpublishHomebrew } from '@/hooks/useHomebrew';
 import { useAuthStore } from '@/store/authStore';
 import { formatTimeAgo } from '@/lib/utils';
@@ -19,6 +17,7 @@ export default function MyDoctrinesPage() {
   const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
   const [filter, setFilter] = useState<FilterStatus>('all');
+  const [search, setSearch] = useState('');
   const [page, setPage] = useState(0);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
@@ -44,98 +43,156 @@ export default function MyDoctrinesPage() {
     deleted: packages.filter((p) => p.isDeleted).length,
   };
 
+  const tabs: { id: FilterStatus; label: string }[] = [
+    { id: 'all', label: `All \u00b7 ${totalElements}` },
+    { id: 'DRAFT', label: `Draft \u00b7 ${statusCounts.draft}` },
+    { id: 'PUBLISHED', label: `Sealed \u00b7 ${statusCounts.published}` },
+    { id: 'UNPUBLISHED', label: `Withheld \u00b7 ${statusCounts.unpublished}` },
+    { id: 'DELETED', label: `Redacted \u00b7 ${statusCounts.deleted}` },
+  ];
+
   return (
-    <div className="space-y-4">
-      {/* Banner */}
-      <Card>
-        <div className="grid grid-cols-5">
-          <div className="p-5 border-r flex items-center gap-3 col-span-1">
+    <div>
+      {/* ── Banner panel ── */}
+      <OrdoPanel padding={0} frame>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: '1.4fr 1fr 1fr 1fr 1fr',
+        }}>
+          {/* Author info */}
+          <div style={{
+            padding: '20px 24px',
+            borderRight: '1px solid var(--rule)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 14,
+          }}>
+            <Sigil size={52} glyph="sigil-2" color="var(--gold)" />
             <div>
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Game-Master · {user?.username}</p>
-              <h2 className="font-heading font-semibold mt-1">Private Archive</h2>
-              <p className="text-xs text-muted-foreground">restricted workshop</p>
+              <div className="ao-overline" style={{ color: 'var(--ink-faint)' }}>
+                Game-Master &middot; {user?.username}
+              </div>
+              <div className="ao-h5" style={{ marginTop: 4 }}>Private Archive</div>
+              <div className="ao-italic" style={{ fontSize: 12, color: 'var(--ink-quiet)', marginTop: 2 }}>
+                restricted workshop
+              </div>
             </div>
           </div>
+
+          {/* Stat columns */}
           {[
-            { l: 'Drafts', v: statusCounts.draft },
-            { l: 'Sealed', v: statusCounts.published, gold: true },
-            { l: 'Withheld', v: statusCounts.unpublished },
-            { l: 'Redacted', v: statusCounts.deleted, danger: true },
+            { label: 'Drafts', value: statusCounts.draft, color: 'var(--ink-quiet)' },
+            { label: 'Sealed', value: statusCounts.published, color: 'var(--gold)' },
+            { label: 'Withheld', value: statusCounts.unpublished, color: 'var(--ink-quiet)' },
+            { label: 'Redacted', value: statusCounts.deleted, color: 'var(--ember)' },
           ].map((s, i) => (
-            <div key={i} className={`p-5 ${i < 3 ? 'border-r' : ''}`}>
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{s.l}</p>
-              <p className={`text-3xl font-heading mt-1 ${s.gold ? 'text-gold' : s.danger ? 'text-destructive' : 'text-muted-foreground'}`}>
-                {s.v}
-              </p>
+            <div key={i} style={{
+              padding: '20px 24px',
+              borderRight: i < 3 ? '1px solid var(--rule)' : undefined,
+            }}>
+              <div className="ao-overline" style={{ color: 'var(--ink-faint)' }}>{s.label}</div>
+              <div style={{
+                fontFamily: 'var(--font-display)',
+                fontSize: 32,
+                lineHeight: 1.1,
+                marginTop: 6,
+                color: s.color,
+              }}>
+                {s.value}
+              </div>
             </div>
           ))}
         </div>
-      </Card>
+      </OrdoPanel>
 
-      {/* Actions */}
-      <div className="flex items-center justify-between">
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={() => navigate('/gm/homebrew/marketplace')}>
-            <ArrowRight className="h-4 w-4 mr-1" /> Catalogue
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => navigate('/gm/homebrew/installed')}>
-            <BookOpen className="h-4 w-4 mr-1" /> Instated
-          </Button>
+      {/* ── Top actions ── */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginTop: 18,
+        marginBottom: 12,
+      }}>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <div style={{ position: 'relative' }}>
+            <input
+              className="ao-input"
+              placeholder="Search doctrines..."
+              value={search}
+              onChange={(e) => { setSearch(e.target.value); setPage(0); }}
+              style={{ paddingLeft: 34, width: 260 }}
+            />
+            <span style={{ position: 'absolute', left: 11, top: '50%', transform: 'translateY(-50%)', color: 'var(--ink-faint)' }}>
+              <Rune kind="search" size={13} />
+            </span>
+          </div>
+          <button className="ao-iconbtn" title="Filter">
+            <Rune kind="filter" size={13} />
+          </button>
         </div>
-        <Button variant="gold" size="sm" onClick={() => navigate('/gm/homebrew/new')}>
-          <Plus className="h-4 w-4 mr-1" /> Author New Doctrine
-        </Button>
+        <button className="ao-btn ao-btn--primary" onClick={() => navigate('/gm/homebrew/new')}>
+          <Rune kind="plus" size={11} /> Author New Doctrine
+        </button>
       </div>
 
-      {/* Status tabs */}
-      <div className="flex border-b">
-        {([
-          { id: 'all' as FilterStatus, label: `All · ${totalElements}` },
-          { id: 'DRAFT' as FilterStatus, label: `Draft · ${statusCounts.draft}` },
-          { id: 'PUBLISHED' as FilterStatus, label: `Sealed · ${statusCounts.published}` },
-          { id: 'UNPUBLISHED' as FilterStatus, label: `Withheld · ${statusCounts.unpublished}` },
-          { id: 'DELETED' as FilterStatus, label: `Redacted · ${statusCounts.deleted}` },
-        ]).map((t) => (
+      {/* ── Status tabs ── */}
+      <div style={{
+        display: 'flex',
+        borderBottom: '1px solid var(--rule)',
+        marginBottom: 18,
+      }}>
+        {tabs.map((t) => (
           <button
             key={t.id}
+            className={`ao-tab${filter === t.id ? ' is-active' : ''}`}
             onClick={() => { setFilter(t.id); setPage(0); }}
-            className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${
-              filter === t.id
-                ? 'border-gold text-gold'
-                : 'border-transparent text-muted-foreground hover:text-foreground'
-            }`}
           >
             {t.label}
           </button>
         ))}
       </div>
 
-      {/* List */}
+      {/* ── Ledger ── */}
       {isLoading ? (
-        <Card className="h-72 animate-pulse">
-          <div className="h-full bg-muted rounded-lg" />
-        </Card>
+        <OrdoPanel padding={0} frame style={{ height: 320 }}>
+          <div className="ao-ph" style={{ height: '100%' }} />
+        </OrdoPanel>
       ) : packages.length === 0 ? (
-        <div className="text-center py-16">
-          <ScrollText className="h-16 w-16 text-muted-foreground/30 mx-auto mb-4" />
-          <h2 className="text-xl font-heading font-semibold mb-2">No Doctrines Yet</h2>
-          <p className="text-muted-foreground mb-6">Author your first doctrine and publish it to the marketplace.</p>
-          <Button variant="gold" onClick={() => navigate('/gm/homebrew/new')}>
-            <Plus className="h-4 w-4 mr-1" /> Author Your First Doctrine
-          </Button>
+        <div style={{ textAlign: 'center', padding: 60 }}>
+          <Rune kind="scroll" size={64} color="var(--ink-quiet)" />
+          <div className="ao-codex" style={{ marginTop: 14, color: 'var(--ink-faint)' }}>
+            &mdash; THE ARCHIVE IS EMPTY &mdash;
+          </div>
+          <div className="ao-h5" style={{ marginTop: 10, color: 'var(--ink)' }}>No Doctrines Yet</div>
+          <p className="ao-italic" style={{ fontSize: 14, color: 'var(--ink-quiet)', maxWidth: 440, margin: '8px auto 0' }}>
+            Author your first doctrine and publish it to the marketplace.
+          </p>
+          <div style={{ marginTop: 22, display: 'flex', justifyContent: 'center' }}>
+            <button className="ao-btn ao-btn--primary" onClick={() => navigate('/gm/homebrew/new')}>
+              <Rune kind="plus" size={11} /> Author Your First Doctrine
+            </button>
+          </div>
         </div>
       ) : (
-        <Card>
-          {/* Table header */}
-          <div className="grid grid-cols-[60px_1fr_180px_180px_140px_120px] px-4 py-2.5 border-b bg-muted/50 items-center text-[10px] uppercase tracking-wider text-muted-foreground">
-            <span>Ver</span>
-            <span>Doctrine</span>
-            <span>State</span>
-            <span>Content</span>
-            <span>Last Update</span>
+        <OrdoPanel padding={0} frame>
+          {/* Header row */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: '60px 1fr 240px 200px 200px 60px',
+            padding: '10px 16px',
+            borderBottom: '1px solid var(--rule)',
+            background: 'rgba(0,0,0,0.25)',
+            alignItems: 'center',
+          }}>
+            <span className="ao-overline">Ver</span>
+            <span className="ao-overline">Doctrine</span>
+            <span className="ao-overline">State</span>
+            <span className="ao-overline">Content</span>
+            <span className="ao-overline">Last Inscription</span>
             <span />
           </div>
 
+          {/* Rows */}
           {packages.map((p, i) => (
             <PackageRow
               key={p.id}
@@ -148,9 +205,10 @@ export default function MyDoctrinesPage() {
               onView={() => navigate(`/gm/homebrew/${p.id}/edit`)}
             />
           ))}
-        </Card>
+        </OrdoPanel>
       )}
 
+      {/* ── Delete confirmation ── */}
       <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -171,6 +229,10 @@ export default function MyDoctrinesPage() {
   );
 }
 
+
+/* ─────────────────────────────────────────
+   Package row
+   ───────────────────────────────────────── */
 
 function PackageRow({
   pkg,
@@ -195,72 +257,124 @@ function PackageRow({
   const isDraft = pkg.status === 'DRAFT';
   const s = pkg.contentSummary;
 
-  return (
-    <div
-      className={`grid grid-cols-[60px_1fr_180px_180px_140px_120px] px-4 py-4 items-center relative ${
-        !isLast ? 'border-b' : ''
-      } ${isDeleted ? 'bg-destructive/5 opacity-85' : ''}`}
-    >
-      <VersionSeal version={isDraft ? '—' : pkg.version} size={40} />
+  const rowStyle: React.CSSProperties = {
+    display: 'grid',
+    gridTemplateColumns: '60px 1fr 240px 200px 200px 60px',
+    padding: '14px 16px',
+    alignItems: 'center',
+    position: 'relative',
+    borderBottom: !isLast ? '1px solid var(--hairline)' : undefined,
+    background: isDeleted ? 'rgba(179,70,26,0.03)' : undefined,
+    opacity: isDeleted ? 0.85 : undefined,
+  };
 
-      <div>
-        <div className="flex items-center gap-2">
-          <span className={`font-heading font-medium text-[15px] ${isDeleted ? 'text-muted-foreground line-through decoration-destructive/60' : ''}`}>
+  return (
+    <div style={rowStyle}>
+      {/* Diagonal stripe overlay for deleted */}
+      {isDeleted && (
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          pointerEvents: 'none',
+          backgroundImage:
+            'repeating-linear-gradient(135deg, transparent, transparent 10px, rgba(179,70,26,0.04) 10px, rgba(179,70,26,0.04) 11px)',
+        }} />
+      )}
+
+      {/* Ver */}
+      <VersionSeal version={isDraft ? '\u2014' : pkg.version} size={40} />
+
+      {/* Doctrine */}
+      <div style={{ minWidth: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span
+            className="ao-h6"
+            style={{
+              fontSize: 15,
+              textDecoration: isDeleted ? 'line-through' : undefined,
+              textDecorationColor: isDeleted ? 'var(--ember)' : undefined,
+              color: isDeleted ? 'var(--ink-quiet)' : undefined,
+            }}
+          >
             {pkg.title}
           </span>
           {isDeleted && (
-            <span className="text-[9px] uppercase tracking-widest px-1.5 py-0.5 bg-destructive/20 text-destructive font-mono">
+            <span style={{
+              fontSize: 9,
+              letterSpacing: '0.15em',
+              textTransform: 'uppercase' as const,
+              padding: '2px 6px',
+              background: 'rgba(179,70,26,0.18)',
+              color: 'var(--ember)',
+              fontFamily: 'var(--font-mono)',
+            }}>
               [REDACTED]
             </span>
           )}
         </div>
-        <div className="flex items-center gap-2 mt-1">
-          <span className="text-xs font-mono text-muted-foreground">{pkg.id.substring(0, 8)}</span>
-          <span className="text-xs text-muted-foreground">·</span>
-          <div className="flex gap-1">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4 }}>
+          <CodexID>{pkg.id.substring(0, 8)}</CodexID>
+          <span style={{ color: 'var(--ink-faint)', fontSize: 11 }}>&middot;</span>
+          <div style={{ display: 'flex', gap: 4 }}>
             {pkg.tags.slice(0, 3).map((t) => <HBTag key={t}>{t}</HBTag>)}
-            {pkg.tags.length > 3 && <span className="text-xs text-muted-foreground">+{pkg.tags.length - 3}</span>}
+            {pkg.tags.length > 3 && (
+              <span style={{ fontSize: 11, color: 'var(--ink-faint)' }}>+{pkg.tags.length - 3}</span>
+            )}
           </div>
         </div>
       </div>
 
+      {/* State */}
       <div>
         <StatusBadge status={isDeleted ? 'DELETED' : pkg.status} />
-        {isPublished && <div className="mt-1"><Downloads value={pkg.downloadCount} /></div>}
-        {isDeleted && <p className="text-xs text-destructive/70 mt-1">{pkg.downloadCount} installs persist</p>}
+        {isPublished && (
+          <div style={{ marginTop: 6 }}>
+            <Downloads value={pkg.downloadCount} />
+          </div>
+        )}
+        {isDeleted && (
+          <div style={{ fontSize: 11, color: 'rgba(179,70,26,0.7)', marginTop: 4 }}>
+            {pkg.downloadCount} installs persist
+          </div>
+        )}
       </div>
 
+      {/* Content */}
       <div>
         <ContentPills items={s.itemTypeCount} classes={s.classCount} skills={s.skillCount} feats={s.featCount} compact />
       </div>
 
-      <div className="text-xs text-muted-foreground">{formatTimeAgo(pkg.createdAt)}</div>
+      {/* Last Inscription */}
+      <div style={{ fontSize: 12, color: 'var(--ink-quiet)' }}>
+        {formatTimeAgo(pkg.createdAt)}
+      </div>
 
-      <div className="flex gap-1 justify-end">
+      {/* Actions */}
+      <div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end', alignItems: 'center' }}>
         {isDraft && (
-          <Button variant="gold" size="sm" onClick={onEdit}>
-            <Diamond className="h-3 w-3 mr-1" /> Edit
-          </Button>
+          <button className="ao-btn ao-btn--primary ao-btn--sm" onClick={onEdit}>
+            <Rune kind="diamond" size={9} /> Edit
+          </button>
         )}
         {isPublished && (
-          <Button variant="outline" size="sm" onClick={onUnpublish}>
-            <Lock className="h-3 w-3 mr-1" /> Withhold
-          </Button>
+          <button className="ao-btn ao-btn--ghost ao-btn--sm" onClick={onUnpublish}>
+            <Rune kind="lock" size={9} /> Withhold
+          </button>
         )}
         {isUnpub && (
-          <Button variant="gold" size="sm" onClick={onPublish}>
-            <Diamond className="h-3 w-3 mr-1" /> Re-Seal
-          </Button>
+          <button className="ao-btn ao-btn--primary ao-btn--sm" onClick={onPublish}>
+            <Rune kind="diamond-fill" size={9} /> Re-Seal
+          </button>
         )}
         {!isDeleted && (
-          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={onDelete} title="Delete">
-            <Flame className="h-3.5 w-3.5 text-destructive" />
-          </Button>
+          <button className="ao-iconbtn" onClick={onDelete} title="More actions" style={{ width: 28, height: 28 }}>
+            <Rune kind="dots" size={13} color="var(--ink-quiet)" />
+          </button>
         )}
         {isDeleted && (
-          <Button variant="ghost" size="sm" className="text-muted-foreground" onClick={onView}>
+          <button className="ao-btn ao-btn--ghost ao-btn--sm" onClick={onView}>
             Audit
-          </Button>
+          </button>
         )}
       </div>
     </div>

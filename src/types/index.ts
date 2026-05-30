@@ -564,6 +564,7 @@ export interface ContentSummaryDto {
   slot?: string;
   skillType?: string;
   prerequisites?: string;
+  tier?: string;
 }
 
 export interface HomebrewPackageResponse {

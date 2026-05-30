@@ -1,12 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, X, Diamond, Check, Minus } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
+import { Rune, OrdoPanel, OrdoChip, Sigil, PanelHeader } from '@/components/ordo';
 import { useCreateHomebrew } from '@/hooks/useHomebrew';
 
 export default function CreateDoctrinePage() {
@@ -48,93 +42,140 @@ export default function CreateDoctrinePage() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
-      {/* Top actions */}
-      <div className="flex items-center justify-between">
-        <Button variant="ghost" size="sm" onClick={() => navigate('/gm/homebrew/my')}>
-          <ArrowLeft className="h-4 w-4 mr-1" /> Back to Workshop
-        </Button>
-        <div className="flex gap-2">
-          <Button variant="ghost" size="sm" onClick={() => navigate('/gm/homebrew/my')}>
-            <X className="h-4 w-4 mr-1" /> Discard
-          </Button>
-          <Button
-            variant="gold"
-            size="sm"
-            onClick={handleSubmit}
-            disabled={!isValid || createMutation.isPending}
-          >
-            <Diamond className="h-4 w-4 mr-1" /> Inscribe as Draft
-          </Button>
-        </div>
-      </div>
+    <div style={{ maxWidth: 720, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 28 }}>
 
-      {/* Header */}
-      <div className="text-center">
-        <p className="text-xs uppercase tracking-wider text-gold mt-3">— RITE OF REGISTRATION —</p>
-        <h1 className="text-3xl font-heading font-bold mt-2">A New Doctrine</h1>
-        <p className="text-sm text-muted-foreground italic mt-2">
+      {/* ── Header area ──────────────────────────────── */}
+      <div style={{ textAlign: 'center', paddingTop: 12 }}>
+        <div style={{ display: 'inline-block' }}>
+          <Sigil size={56} glyph="sigil-2" />
+        </div>
+        <div
+          className="ao-codex"
+          style={{ marginTop: 16, color: 'var(--gold-pale)', fontSize: 12 }}
+        >
+          &mdash; RITE OF REGISTRATION &mdash;
+        </div>
+        <div className="ao-h2" style={{ fontSize: 40, marginTop: 8 }}>
+          A New Doctrine
+        </div>
+        <p
+          className="ao-italic"
+          style={{ fontSize: 14, marginTop: 10, color: 'var(--ink-quiet)', maxWidth: 500, margin: '10px auto 0' }}
+        >
           Inscribe its outer form. Content shall be added once it is laid into the Workshop.
         </p>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Outer Inscription</CardTitle>
-          <p className="text-xs text-muted-foreground">metadata · tags · description</p>
-        </CardHeader>
-        <CardContent className="space-y-5">
-          {/* Title */}
+      {/* ── Form panel ───────────────────────────────── */}
+      <OrdoPanel padding={0} frame>
+        <PanelHeader title="Outer Inscription" sub="metadata &middot; tags &middot; description" glyph="scroll" />
+
+        <div style={{ padding: '24px 24px 28px', display: 'flex', flexDirection: 'column', gap: 24 }}>
+
+          {/* ── Title field ─────────────────────────── */}
           <div>
-            <div className="flex justify-between items-baseline mb-1.5">
-              <Label>Title <span className="text-destructive">· required</span></Label>
-              <span className="text-xs text-muted-foreground">{title.length} / 120</span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8 }}>
+              <label className="ao-label">
+                Title <span style={{ color: 'var(--ember)' }}>&middot; required</span>
+              </label>
+              <span className="ao-codex" style={{ fontSize: 11, color: 'var(--ink-faint)' }}>
+                {title.length} / 120
+              </span>
             </div>
-            <Input
+            <input
+              className="ao-input"
               value={title}
               onChange={(e) => setTitle(e.target.value.slice(0, 120))}
               placeholder="Enter doctrine title..."
-              className="font-heading text-lg"
+              style={{ fontFamily: 'var(--font-heading)', fontSize: 18, width: '100%' }}
             />
           </div>
 
-          {/* Description */}
+          {/* ── Description field ───────────────────── */}
           <div>
-            <div className="flex justify-between items-baseline mb-1.5">
-              <Label>Description</Label>
-              <span className="text-xs text-muted-foreground">{description.length} / 2000</span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8 }}>
+              <label className="ao-label">Description</label>
+              <span className="ao-codex" style={{ fontSize: 11, color: 'var(--ink-faint)' }}>
+                {description.length} / 2000
+              </span>
             </div>
-            <Textarea
+            <textarea
+              className="ao-input"
               value={description}
               onChange={(e) => setDescription(e.target.value.slice(0, 2000))}
               rows={5}
               placeholder="Describe the contents of your doctrine..."
+              style={{ width: '100%', resize: 'vertical' }}
             />
-            <p className="text-xs text-muted-foreground mt-1.5">The first 240 characters appear on the catalogue card.</p>
+            <p className="ao-italic" style={{ fontSize: 12, marginTop: 8, color: 'var(--ink-faint)' }}>
+              The first 240 characters appear on the catalogue card.
+            </p>
           </div>
 
-          {/* Tags */}
+          {/* ── Tags (Classification Marks) ─────────── */}
           <div>
-            <div className="flex justify-between items-baseline mb-1.5">
-              <Label>Classification Marks</Label>
-              <span className="text-xs text-muted-foreground">{tags.length} / 10 · lowercase, hyphenated</span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8 }}>
+              <label className="ao-label">Classification Marks</label>
+              <span className="ao-codex" style={{ fontSize: 11, color: 'var(--ink-faint)' }}>
+                {tags.length} / 10 &middot; lowercase, hyphenated
+              </span>
             </div>
-            <div className="p-2.5 bg-muted border rounded-md flex flex-wrap gap-1.5 items-center">
+
+            {/* Tag container */}
+            <div
+              style={{
+                padding: 10,
+                background: 'var(--abyss)',
+                border: '1px solid var(--rule)',
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: 8,
+                alignItems: 'center',
+              }}
+            >
               {tags.map((t, i) => (
                 <span
                   key={i}
-                  className="inline-flex items-center gap-1.5 px-2 py-1 bg-gold/10 border border-gold/30 text-xs font-mono text-gold rounded-sm"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    padding: '4px 10px',
+                    background: 'rgba(176,141,78,0.10)',
+                    border: '1px solid rgba(176,141,78,0.30)',
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: 12,
+                    color: 'var(--gold)',
+                  }}
                 >
-                  <span className="w-1 h-1 bg-gold rotate-45" />
+                  <span
+                    style={{
+                      width: 5,
+                      height: 5,
+                      background: 'var(--gold)',
+                      transform: 'rotate(45deg)',
+                      flexShrink: 0,
+                    }}
+                  />
                   {t}
                   <button
                     onClick={() => setTags(tags.filter((_, j) => j !== i))}
-                    className="text-muted-foreground hover:text-foreground ml-0.5"
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      padding: 0,
+                      marginLeft: 2,
+                      display: 'flex',
+                      alignItems: 'center',
+                      color: 'var(--ink-faint)',
+                    }}
                   >
-                    <X className="h-3 w-3" />
+                    <Rune kind="x" size={10} color="var(--ink-faint)" />
                   </button>
                 </span>
               ))}
+
               <input
                 value={tagText}
                 onChange={(e) => setTagText(e.target.value)}
@@ -145,56 +186,92 @@ export default function CreateDoctrinePage() {
                   }
                 }}
                 placeholder="add mark and press Enter"
-                className="flex-1 min-w-[140px] bg-transparent border-0 text-foreground outline-none font-mono text-xs px-1.5 py-1"
+                style={{
+                  flex: 1,
+                  minWidth: 140,
+                  background: 'transparent',
+                  border: 'none',
+                  outline: 'none',
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 12,
+                  color: 'var(--ink)',
+                  padding: '4px 6px',
+                }}
               />
             </div>
+
+            {/* Normalization preview */}
             {tagText && (
-              <p className="text-xs text-gold mt-1.5">
-                will be sealed as · <span className="font-mono">{normalizeTag(tagText)}</span>
+              <p style={{ fontSize: 12, marginTop: 8, color: 'var(--gold)' }}>
+                will be sealed as &middot;{' '}
+                <span style={{ fontFamily: 'var(--font-mono)' }}>{normalizeTag(tagText)}</span>
               </p>
             )}
-            <p className="text-xs text-muted-foreground mt-1">
-              Examples: <span className="font-mono">dark-fantasy</span> · <span className="font-mono">necromancy</span> · <span className="font-mono">imperial</span>
+
+            {/* Examples */}
+            <p className="ao-italic" style={{ fontSize: 12, marginTop: 6, color: 'var(--ink-faint)' }}>
+              Examples:{' '}
+              <span style={{ fontFamily: 'var(--font-mono)' }}>dark-fantasy</span> &middot;{' '}
+              <span style={{ fontFamily: 'var(--font-mono)' }}>necromancy</span> &middot;{' '}
+              <span style={{ fontFamily: 'var(--font-mono)' }}>imperial</span>
             </p>
           </div>
 
-          {/* Validation strip */}
-          <div className={`flex items-center gap-3 p-3 rounded-md border ${isValid ? 'border-gold/30 bg-gold/5' : 'border-destructive/30 bg-destructive/5'}`}>
-            {isValid ? (
-              <Check className="h-4 w-4 text-gold shrink-0" />
-            ) : (
-              <Minus className="h-4 w-4 text-destructive shrink-0" />
-            )}
-            <div className="flex-1">
-              <p className={`text-xs font-medium ${isValid ? 'text-gold' : 'text-destructive'}`}>
+          {/* ── Validation strip ────────────────────── */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 12,
+              padding: 14,
+              border: `1px solid ${isValid ? 'rgba(176,141,78,0.30)' : 'rgba(179,70,26,0.30)'}`,
+              borderLeft: `3px solid ${isValid ? 'var(--gold)' : 'var(--ember)'}`,
+              background: isValid ? 'rgba(176,141,78,0.05)' : 'rgba(179,70,26,0.05)',
+            }}
+          >
+            <Rune
+              kind={isValid ? 'check' : 'minus'}
+              size={16}
+              color={isValid ? 'var(--gold)' : 'var(--ember)'}
+            />
+            <div style={{ flex: 1 }}>
+              <p style={{ fontSize: 13, fontWeight: 600, color: isValid ? 'var(--gold)' : 'var(--ember)' }}>
                 {isValid ? 'Inscription valid' : 'Title required'}
               </p>
-              <p className="text-xs text-muted-foreground">
+              <p className="ao-italic" style={{ fontSize: 12, marginTop: 2, color: 'var(--ink-faint)' }}>
                 {isValid
                   ? 'Doctrine may now be registered as a draft. Content can be added afterwards.'
                   : 'Please provide a title to continue.'}
               </p>
             </div>
-            <Badge variant="secondary" className="text-[10px]">DRAFT</Badge>
+            <OrdoChip tone="gold">DRAFT</OrdoChip>
           </div>
 
-          {/* Actions */}
-          <div className="flex justify-between items-center pt-2">
-            <span className="text-xs text-muted-foreground">By registering, thou agree to the Archive Charter.</span>
-            <div className="flex gap-2">
-              <Button variant="ghost" onClick={() => navigate('/gm/homebrew/my')}>Cancel</Button>
-              <Button
-                variant="gold"
-                size="lg"
+          {/* ── Bottom actions ──────────────────────── */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 4 }}>
+            <span className="ao-codex" style={{ fontSize: 11, color: 'var(--ink-faint)' }}>
+              By registering, thou agree to the Archive Charter &mdash; Article XIV.
+            </span>
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button
+                className="ao-btn ao-btn--ghost"
+                onClick={() => navigate('/gm/homebrew/my')}
+              >
+                Cancel
+              </button>
+              <button
+                className="ao-btn ao-btn--primary ao-btn--lg"
                 onClick={handleSubmit}
                 disabled={!isValid || createMutation.isPending}
               >
-                <Diamond className="h-4 w-4 mr-1" /> Register Draft
-              </Button>
+                <Rune kind="diamond-fill" size={9} />
+                {createMutation.isPending ? 'Registering...' : 'Register Draft'}
+              </button>
             </div>
           </div>
-        </CardContent>
-      </Card>
+
+        </div>
+      </OrdoPanel>
     </div>
   );
 }

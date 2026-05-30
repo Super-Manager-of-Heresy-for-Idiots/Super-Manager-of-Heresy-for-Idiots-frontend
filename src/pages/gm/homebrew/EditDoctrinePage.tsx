@@ -1,21 +1,12 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft, Diamond, BookOpen, Flame, Plus, X, Sword, Shield, Eye, Star } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from '@/components/ui/select';
+import { Rune, OrdoPanel, OrdoChip, PanelHeader } from '@/components/ordo';
+import { ContentPills } from '@/components/homebrew';
 import {
   AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle,
   AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction,
 } from '@/components/ui/alert-dialog';
-import { ContentPills } from '@/components/homebrew';
 import {
   useMyPackage,
   useUpdateHomebrew,
@@ -27,11 +18,11 @@ import {
 import { adminApi } from '@/api/admin.api';
 import type { ContentType } from '@/types';
 
-const CONTENT_GROUPS: { title: string; icon: React.ElementType; type: ContentType }[] = [
-  { title: 'Items', icon: Sword, type: 'ITEM_TYPE' },
-  { title: 'Classes', icon: Shield, type: 'CHARACTER_CLASS' },
-  { title: 'Skills', icon: Eye, type: 'SKILL' },
-  { title: 'Feats', icon: Star, type: 'FEAT' },
+const CONTENT_GROUPS: { title: string; icon: string; type: ContentType }[] = [
+  { title: 'Items', icon: 'sword', type: 'ITEM_TYPE' },
+  { title: 'Classes', icon: 'helm', type: 'CHARACTER_CLASS' },
+  { title: 'Skills', icon: 'eye', type: 'SKILL' },
+  { title: 'Feats', icon: 'sigil-3', type: 'FEAT' },
 ];
 
 export default function EditDoctrinePage() {
@@ -83,9 +74,19 @@ export default function EditDoctrinePage() {
 
   if (isLoading || !pkg) {
     return (
-      <Card className="h-96 animate-pulse">
-        <div className="h-full bg-muted rounded-lg" />
-      </Card>
+      <div>
+        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 18 }}>
+          <div>
+            <div className="ao-overline">Homebrew editor</div>
+            <div className="ao-h3" style={{ marginTop: 4 }}>Loading doctrine...</div>
+          </div>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="ao-ph" style={{ width: '100%', height: 48 }} />
+          ))}
+        </div>
+      </div>
     );
   }
 
@@ -165,53 +166,78 @@ export default function EditDoctrinePage() {
   };
 
   return (
-    <div className="space-y-4">
-      {/* Top actions */}
-      <div className="flex items-center justify-between">
-        <Button variant="ghost" size="sm" onClick={() => navigate('/gm/homebrew/my')}>
-          <ArrowLeft className="h-4 w-4 mr-1" /> Workshop
-        </Button>
-        <div className="flex items-center gap-2">
-          <Badge variant={isDraft ? 'secondary' : 'gold'}>{pkg.status}</Badge>
-          <Button variant="outline" size="sm" onClick={handleSave} disabled={updateMutation.isPending}>
-            <Diamond className="h-4 w-4 mr-1" /> Save Draft
-          </Button>
-          {isDraft && (
-            <Button variant="gold" size="sm" onClick={() => setShowPublish(true)}>
-              <Diamond className="h-4 w-4 mr-1" /> Seal & Publish
-            </Button>
-          )}
+    <div>
+      {/* Top bar */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+        <button className="ao-btn ao-btn--ghost ao-btn--sm" onClick={() => navigate('/gm/homebrew/my')}>
+          <Rune kind="arrow-l" size={11} /> Workshop
+        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <OrdoChip tone={isDraft ? 'rune' : 'gold'}>{pkg.status}</OrdoChip>
         </div>
       </div>
 
-      <p className="text-xs text-muted-foreground font-mono">{pkg.id.substring(0, 8)} · {pkg.title} · {pkg.status}</p>
+      <div className="ao-codex" style={{ marginBottom: 16, color: 'var(--ink-faint)' }}>
+        {pkg.id.substring(0, 8)} &middot; {pkg.title} &middot; {pkg.status}
+      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.4fr] gap-4">
-        {/* LEFT: metadata */}
-        <div className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Outer Inscription</CardTitle>
-              <p className="text-xs text-muted-foreground">editable · draft state</p>
-            </CardHeader>
-            <CardContent className="space-y-4">
+      {/* Two-column grid */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.4fr', gap: 16 }}>
+        {/* LEFT column */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {/* Outer Inscription */}
+          <OrdoPanel padding={0} frame>
+            <PanelHeader title="Outer Inscription" glyph="scroll" sub="editable &middot; draft state" />
+            <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 16 }}>
               <div>
-                <Label>Title</Label>
-                <Input value={title} onChange={(e) => setTitle(e.target.value.slice(0, 120))} className="font-heading" />
+                <label className="ao-label">Title</label>
+                <input
+                  className="ao-input"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value.slice(0, 120))}
+                  style={{ fontFamily: 'var(--font-serif)', fontSize: 17, width: '100%' }}
+                />
               </div>
               <div>
-                <Label>Description</Label>
-                <Textarea value={description} onChange={(e) => setDescription(e.target.value.slice(0, 2000))} rows={5} />
+                <label className="ao-label">Description</label>
+                <textarea
+                  className="ao-input"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value.slice(0, 2000))}
+                  rows={5}
+                  style={{ width: '100%', resize: 'vertical' }}
+                />
               </div>
               <div>
-                <Label>Marks</Label>
-                <div className="p-2 bg-muted border rounded-md flex flex-wrap gap-1.5">
+                <label className="ao-label">Marks</label>
+                <div style={{
+                  padding: 8,
+                  background: 'var(--abyss)',
+                  border: '1px solid var(--hairline)',
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: 6,
+                  alignItems: 'center',
+                }}>
                   {tags.map((t, i) => (
-                    <span key={i} className="inline-flex items-center gap-1 px-2 py-0.5 bg-gold/10 border border-gold/30 text-xs font-mono text-gold rounded-sm">
-                      <span className="w-1 h-1 bg-gold rotate-45" />
+                    <span key={i} style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 4,
+                      padding: '2px 8px',
+                      background: 'rgba(var(--gold-rgb, 201,176,120), 0.1)',
+                      border: '1px solid rgba(var(--gold-rgb, 201,176,120), 0.3)',
+                      fontSize: 11,
+                      fontFamily: 'var(--font-mono)',
+                      color: 'var(--gold)',
+                    }}>
+                      <Rune kind="diamond-fill" size={5} color="var(--gold)" />
                       {t}
-                      <button onClick={() => setTags(tags.filter((_, j) => j !== i))} className="ml-0.5 text-muted-foreground hover:text-foreground">
-                        <X className="h-3 w-3" />
+                      <button
+                        onClick={() => setTags(tags.filter((_, j) => j !== i))}
+                        style={{ marginLeft: 2, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ink-faint)', padding: 0, display: 'flex' }}
+                      >
+                        <Rune kind="x" size={9} color="currentColor" />
                       </button>
                     </span>
                   ))}
@@ -220,76 +246,114 @@ export default function EditDoctrinePage() {
                     onChange={(e) => setTagText(e.target.value)}
                     onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddTag(); } }}
                     placeholder="+ add"
-                    className="flex-1 min-w-[60px] bg-transparent border-0 text-foreground outline-none font-mono text-xs px-1 py-0.5"
+                    style={{
+                      flex: 1,
+                      minWidth: 60,
+                      background: 'transparent',
+                      border: 'none',
+                      color: 'var(--ink)',
+                      outline: 'none',
+                      fontFamily: 'var(--font-mono)',
+                      fontSize: 11,
+                      padding: '2px 4px',
+                    }}
                   />
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </OrdoPanel>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Lifecycle</CardTitle>
-              <p className="text-xs text-muted-foreground">actions available in {pkg.status}</p>
-            </CardHeader>
-            <CardContent className="space-y-2">
+          {/* Lifecycle */}
+          <OrdoPanel padding={0} frame>
+            <PanelHeader title="Lifecycle" glyph="sigil-1" sub={`actions available in ${pkg.status}`} />
+            <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
               {isDraft && (
-                <Button variant="gold" className="w-full" onClick={() => setShowPublish(true)} disabled={publishMutation.isPending}>
-                  <Diamond className="h-4 w-4 mr-1" /> Seal & Publish (v {pkg.version + 1})
-                </Button>
+                <button
+                  className="ao-btn ao-btn--primary ao-btn--block"
+                  onClick={() => setShowPublish(true)}
+                  disabled={publishMutation.isPending}
+                >
+                  <Rune kind="diamond-fill" size={10} /> Seal &amp; Publish (v {pkg.version + 1})
+                </button>
               )}
-              <Button variant="outline" className="w-full" onClick={handleSave} disabled={updateMutation.isPending}>
-                <Diamond className="h-4 w-4 mr-1" /> Save as Draft
-              </Button>
-              <Button variant="ghost" className="w-full" onClick={() => navigate(`/gm/homebrew/marketplace/${pkg.id}`)}>
-                <BookOpen className="h-4 w-4 mr-1" /> Preview as Reader
-              </Button>
-              <Button variant="ghost" className="w-full text-destructive" onClick={() => setShowDelete(true)} disabled={deleteMutation.isPending}>
-                <Flame className="h-4 w-4 mr-1" /> Redact (Soft Delete)
-              </Button>
-            </CardContent>
-          </Card>
+              <button
+                className="ao-btn ao-btn--block"
+                onClick={handleSave}
+                disabled={updateMutation.isPending}
+              >
+                <Rune kind="diamond" size={10} /> Save as Draft
+              </button>
+              <button
+                className="ao-btn ao-btn--ghost ao-btn--block"
+                onClick={() => navigate(`/gm/homebrew/marketplace/${pkg.id}`)}
+              >
+                <Rune kind="book" size={10} /> Preview as Reader
+              </button>
+              <button
+                className="ao-btn ao-btn--danger ao-btn--block"
+                onClick={() => setShowDelete(true)}
+                disabled={deleteMutation.isPending}
+              >
+                <Rune kind="flame" size={10} /> Redact (Soft Delete)
+              </button>
+            </div>
+          </OrdoPanel>
         </div>
 
-        {/* RIGHT: content */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle className="text-base">Content Folio</CardTitle>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                {s.itemTypeCount} items · {s.classCount} classes · {s.skillCount} skills · {s.featCount} feats
-              </p>
-            </div>
-            <Button variant="gold" size="sm" onClick={() => setAdding(!adding)}>
-              <Plus className="h-4 w-4 mr-1" /> {adding ? 'Close' : 'Slot New Entry'}
-            </Button>
-          </CardHeader>
+        {/* RIGHT column: Content Folio */}
+        <OrdoPanel padding={0} frame>
+          <PanelHeader
+            title="Content Folio"
+            glyph="book"
+            sub={`${s.itemTypeCount} items \u00b7 ${s.classCount} classes \u00b7 ${s.skillCount} skills \u00b7 ${s.featCount} feats`}
+            right={
+              <button className="ao-btn ao-btn--primary ao-btn--sm" onClick={() => setAdding(!adding)}>
+                <Rune kind="plus" size={10} /> {adding ? 'Close' : 'Slot New Entry'}
+              </button>
+            }
+          />
 
+          {/* Add panel */}
           {adding && (
-            <div className="px-6 pb-4 border-b bg-muted/30">
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2">Slot a content reference</p>
-              <div className="grid grid-cols-[120px_1fr_auto] gap-2">
-                <Select value={addType} onValueChange={(v) => { setAddType(v as ContentType); setAddSearch(''); }}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="ITEM_TYPE">Item</SelectItem>
-                    <SelectItem value="CHARACTER_CLASS">Class</SelectItem>
-                    <SelectItem value="SKILL">Skill</SelectItem>
-                    <SelectItem value="FEAT">Feat</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Input
+            <div style={{
+              padding: '12px 16px',
+              borderBottom: '1px solid var(--rule)',
+              background: 'var(--abyss)',
+            }}>
+              <div className="ao-overline" style={{ marginBottom: 8 }}>Slot a content reference</div>
+              <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr auto auto', gap: 8, alignItems: 'center' }}>
+                <select
+                  className="ao-input"
+                  value={addType}
+                  onChange={(e) => { setAddType(e.target.value as ContentType); setAddSearch(''); }}
+                  style={{ padding: '6px 10px' }}
+                >
+                  <option value="ITEM_TYPE">Item</option>
+                  <option value="CHARACTER_CLASS">Class</option>
+                  <option value="SKILL">Skill</option>
+                  <option value="FEAT">Feat</option>
+                </select>
+                <input
+                  className="ao-input"
                   value={addSearch}
                   onChange={(e) => setAddSearch(e.target.value)}
                   placeholder="Search by name..."
                   onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddContent(); } }}
+                  style={{ padding: '6px 12px' }}
                 />
-                <Button variant="gold" onClick={handleAddContent} disabled={addContentMutation.isPending}>
-                  <Plus className="h-4 w-4 mr-1" /> Slot
-                </Button>
+                <button className="ao-btn ao-btn--ghost" onClick={() => setAddSearch('')}>
+                  <Rune kind="search" size={11} /> Browse
+                </button>
+                <button
+                  className="ao-btn ao-btn--primary"
+                  onClick={handleAddContent}
+                  disabled={addContentMutation.isPending}
+                >
+                  <Rune kind="plus" size={10} /> Slot
+                </button>
               </div>
               {addSearch && (
-                <div className="flex flex-wrap gap-1 mt-2">
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 8 }}>
                   {getAvailableContent().slice(0, 6).map((item) => (
                     <button
                       key={item.id}
@@ -299,7 +363,14 @@ export default function EditDoctrinePage() {
                           { onSuccess: () => setAddSearch('') },
                         );
                       }}
-                      className="px-2.5 py-1 bg-muted border rounded text-sm hover:bg-accent transition-colors"
+                      style={{
+                        padding: '4px 10px',
+                        background: 'var(--surface)',
+                        border: '1px solid var(--hairline)',
+                        color: 'var(--ink)',
+                        cursor: 'pointer',
+                        fontSize: 13,
+                      }}
                     >
                       {item.name}
                     </button>
@@ -309,64 +380,115 @@ export default function EditDoctrinePage() {
             </div>
           )}
 
-          <CardContent className="p-0">
-            {CONTENT_GROUPS.map((grp) => {
-              const rows = contentByType[grp.type] || [];
-              const Icon = grp.icon;
-              return (
-                <div key={grp.type}>
-                  <div className="flex items-center gap-2 px-4 py-3 bg-muted/50 border-t border-b">
-                    <Icon className="h-3.5 w-3.5 text-gold" />
-                    <span className="text-xs font-medium">{grp.title}</span>
-                    <span className="text-xs text-muted-foreground">· {rows.length}</span>
-                  </div>
-                  {rows.length === 0 ? (
-                    <div className="px-4 py-4 text-center text-sm text-muted-foreground italic">
-                      No {grp.title.toLowerCase()} slotted yet.
-                    </div>
-                  ) : (
-                    rows.map((r) => (
-                      <div key={r.id} className="flex items-center gap-3 px-4 py-3 border-b last:border-0">
-                        <div className="w-9 h-9 shrink-0 flex items-center justify-center bg-card rounded border border-gold/20">
-                          <Icon className="h-4 w-4 text-gold" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-heading font-medium text-[15px]">{r.name}</p>
-                          <p className="text-xs text-muted-foreground truncate">
-                            {r.description ? r.description.substring(0, 80) : '—'}
-                            {r.slot && ` · ${r.slot}`}
-                            {r.skillType && ` · ${r.skillType}`}
-                            {r.prerequisites && ` · req: ${r.prerequisites}`}
-                          </p>
-                        </div>
-                        <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => handleRemoveContent(r.id)} title="Remove">
-                          <X className="h-3.5 w-3.5" />
-                        </Button>
-                      </div>
-                    ))
-                  )}
+          {/* Content groups */}
+          {CONTENT_GROUPS.map((grp) => {
+            const rows = contentByType[grp.type] || [];
+            return (
+              <div key={grp.type}>
+                {/* Section header */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  padding: '10px 16px',
+                  background: 'var(--abyss)',
+                  borderTop: '1px solid var(--rule)',
+                  borderBottom: '1px solid var(--rule)',
+                }}>
+                  <Rune kind={grp.icon} size={13} color="var(--gold)" />
+                  <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--ink-bright)' }}>{grp.title}</span>
+                  <span className="ao-codex" style={{ color: 'var(--ink-faint)' }}>&middot; {rows.length}</span>
+                  <span style={{ flex: 1 }} />
+                  <span className="ao-codex" style={{ color: 'var(--ink-ghost)', fontSize: 9 }}>drag to reorder</span>
                 </div>
-              );
-            })}
-          </CardContent>
-        </Card>
+
+                {rows.length === 0 ? (
+                  <div className="ao-italic" style={{ padding: '16px', textAlign: 'center', color: 'var(--ink-faint)', fontSize: 13 }}>
+                    No {grp.title.toLowerCase()} slotted yet.
+                  </div>
+                ) : (
+                  rows.map((r) => (
+                    <div key={r.id} style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 12,
+                      padding: '10px 16px',
+                      borderBottom: '1px solid var(--hairline)',
+                    }}>
+                      {/* Drag handle */}
+                      <Rune kind="dots" size={14} color="var(--ink-ghost)" />
+
+                      {/* Icon slot */}
+                      <div className="ao-slot ao-slot--epic" style={{
+                        width: 36,
+                        height: 36,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0,
+                      }}>
+                        <Rune kind={grp.icon} size={16} color="var(--gold)" />
+                      </div>
+
+                      {/* Name + description */}
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontFamily: 'var(--font-serif)', fontWeight: 500, fontSize: 15, color: 'var(--ink-bright)' }}>
+                          {r.name}
+                        </div>
+                        <div className="ao-codex" style={{
+                          color: 'var(--ink-faint)',
+                          fontSize: 11,
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                        }}>
+                          {r.description ? r.description.substring(0, 80) : '\u2014'}
+                          {r.slot && ` \u00b7 ${r.slot}`}
+                          {r.skillType && ` \u00b7 ${r.skillType}`}
+                          {r.prerequisites && ` \u00b7 req: ${r.prerequisites}`}
+                        </div>
+                      </div>
+
+                      {/* Book button */}
+                      <button className="ao-iconbtn" style={{ width: 28, height: 28 }} title="View">
+                        <Rune kind="book" size={12} />
+                      </button>
+
+                      {/* Remove button */}
+                      <button
+                        className="ao-iconbtn"
+                        style={{ width: 28, height: 28, color: 'var(--ember)' }}
+                        onClick={() => handleRemoveContent(r.id)}
+                        title="Remove"
+                      >
+                        <Rune kind="x" size={12} />
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+            );
+          })}
+        </OrdoPanel>
       </div>
 
+      {/* Publish dialog */}
       <AlertDialog open={showPublish} onOpenChange={setShowPublish}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Seal & Publish Doctrine?</AlertDialogTitle>
+            <AlertDialogTitle>Seal &amp; Publish Doctrine?</AlertDialogTitle>
             <AlertDialogDescription>
-              Once sealed, "{pkg.title}" shall be entered into the Forbidden Catalogue and made visible to all. The version shall advance to v{pkg.version + 1}.
+              Once sealed, &ldquo;{pkg.title}&rdquo; shall be entered into the Forbidden Catalogue and made visible to all. The version shall advance to v{pkg.version + 1}.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Defer</AlertDialogCancel>
-            <AlertDialogAction onClick={handlePublish}>Seal & Publish</AlertDialogAction>
+            <AlertDialogAction onClick={handlePublish}>Seal &amp; Publish</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
+      {/* Delete dialog */}
       <AlertDialog open={showDelete} onOpenChange={setShowDelete}>
         <AlertDialogContent>
           <AlertDialogHeader>

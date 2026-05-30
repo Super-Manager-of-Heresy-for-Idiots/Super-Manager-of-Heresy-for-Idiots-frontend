@@ -1,23 +1,20 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Diamond, ScrollText, Sword, Shield, Eye, Star } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
+import { Rune, OrdoPanel, OrdoChip, OrdoDivider, Sigil } from '@/components/ordo';
+import { VersionSeal, StatusBadge, HBTag, ContentPills, Downloads, CodexID } from '@/components/homebrew';
 import {
   AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle,
   AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction,
 } from '@/components/ui/alert-dialog';
-import { VersionSeal, StatusBadge, HBTag, ContentPills, Downloads } from '@/components/homebrew';
 import { useMarketplacePackage, useInstallPackage } from '@/hooks/useHomebrew';
 import { formatDate } from '@/lib/utils';
 import type { ContentType } from '@/types';
 
-const CONTENT_TABS: { id: ContentType; label: string; icon: React.ElementType }[] = [
-  { id: 'ITEM_TYPE', label: 'Items', icon: Sword },
-  { id: 'CHARACTER_CLASS', label: 'Classes', icon: Shield },
-  { id: 'SKILL', label: 'Skills', icon: Eye },
-  { id: 'FEAT', label: 'Feats', icon: Star },
+const CONTENT_TABS: { id: ContentType; label: string; glyph: string }[] = [
+  { id: 'ITEM_TYPE', label: 'Items', glyph: 'sword' },
+  { id: 'CHARACTER_CLASS', label: 'Classes', glyph: 'helm' },
+  { id: 'SKILL', label: 'Skills', glyph: 'eye' },
+  { id: 'FEAT', label: 'Feats', glyph: 'sigil-3' },
 ];
 
 export default function MarketplaceDetailPage() {
@@ -30,9 +27,9 @@ export default function MarketplaceDetailPage() {
 
   if (isLoading || !pkg) {
     return (
-      <Card className="h-96 animate-pulse">
-        <div className="h-full bg-muted rounded-lg" />
-      </Card>
+      <OrdoPanel frame style={{ height: 480 }}>
+        <div className="ao-ph" style={{ height: '100%' }} />
+      </OrdoPanel>
     );
   }
 
@@ -47,192 +44,367 @@ export default function MarketplaceDetailPage() {
   };
 
   return (
-    <div className="space-y-4">
+    <div>
       {/* Top actions */}
-      <div className="flex items-center justify-between">
-        <Button variant="ghost" size="sm" onClick={() => navigate('/gm/homebrew/marketplace')}>
-          <ArrowLeft className="h-4 w-4 mr-1" /> Catalogue
-        </Button>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm">
-            <ScrollText className="h-4 w-4 mr-1" /> Report
-          </Button>
-          <Button variant="gold" size="sm" onClick={() => setShowConfirm(true)}>
-            <Diamond className="h-4 w-4 mr-1" /> Instate Doctrine
-          </Button>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
+        <button className="ao-btn ao-btn--ghost ao-btn--sm" onClick={() => navigate('/gm/homebrew/marketplace')}>
+          <Rune kind="arrow-l" size={11} /> Catalogue
+        </button>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button className="ao-btn ao-btn--ghost ao-btn--sm">
+            <Rune kind="scroll" size={11} /> Report
+          </button>
+          <button className="ao-btn ao-btn--primary ao-btn--sm" onClick={() => setShowConfirm(true)}>
+            <Rune kind="diamond-fill" size={9} /> Instate Doctrine
+          </button>
         </div>
       </div>
 
-      {/* Hero header */}
-      <Card>
-        <div className="grid grid-cols-1 lg:grid-cols-[1.6fr_1fr] border-b">
-          {/* Left: identity */}
-          <div className="p-6 lg:border-r">
-            <div className="flex items-center gap-3 mb-3">
-              <span className="text-xs font-mono text-muted-foreground">{pkg.id.substring(0, 8)}</span>
+      {/* Hero panel */}
+      <OrdoPanel padding={0} frame>
+        <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr', borderBottom: '1px solid var(--rule)' }}>
+          {/* LEFT column */}
+          <div style={{ padding: 24, borderRight: '1px solid var(--rule)' }}>
+            {/* Codex ID + status */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
+              <CodexID>{pkg.id.substring(0, 8)}</CodexID>
               <StatusBadge status="PUBLISHED" />
             </div>
 
-            <h1 className="text-3xl font-heading font-bold leading-tight">{pkg.title}</h1>
+            {/* Title */}
+            <div className="ao-h2" style={{ fontSize: 44, lineHeight: 1.1 }}>
+              {pkg.title}
+            </div>
 
-            <div className="flex items-center gap-3 mt-3">
-              <div className="w-8 h-8 border rounded flex items-center justify-center bg-muted">
-                <Star className="h-4 w-4 text-gold" />
-              </div>
+            {/* Author info + dates */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginTop: 16 }}>
+              <Sigil size={34} glyph="sigil-1" />
               <div>
-                <p className="text-sm font-medium">{pkg.authorUsername}</p>
-                <p className="text-xs text-muted-foreground">Game-Master</p>
+                <div style={{ fontSize: 14, color: 'var(--ink-bright)', fontFamily: 'var(--font-serif)' }}>
+                  {pkg.authorUsername}
+                </div>
+                <div className="ao-codex" style={{ fontSize: 10, color: 'var(--ink-faint)', marginTop: 2 }}>
+                  Game-Master
+                </div>
               </div>
+
               {pkg.createdAt && (
                 <>
-                  <Separator orientation="vertical" className="h-8 mx-2" />
+                  <span style={{ width: 1, height: 32, background: 'var(--rule)', flexShrink: 0 }} />
                   <div>
-                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">First Sealed</p>
-                    <p className="text-xs">{formatDate(pkg.createdAt)}</p>
+                    <div className="ao-overline" style={{ fontSize: 9 }}>First Sealed</div>
+                    <div className="ao-codex" style={{ fontSize: 12, marginTop: 2 }}>{formatDate(pkg.createdAt)}</div>
                   </div>
                 </>
               )}
+
               {pkg.publishedAt && (
                 <>
-                  <Separator orientation="vertical" className="h-8 mx-2" />
+                  <span style={{ width: 1, height: 32, background: 'var(--rule)', flexShrink: 0 }} />
                   <div>
-                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Last Re-Sealed</p>
-                    <p className="text-xs">{formatDate(pkg.publishedAt)}</p>
+                    <div className="ao-overline" style={{ fontSize: 9 }}>Last Re-Sealed</div>
+                    <div className="ao-codex" style={{ fontSize: 12, marginTop: 2 }}>{formatDate(pkg.publishedAt)}</div>
                   </div>
                 </>
               )}
             </div>
 
-            <Separator className="my-4" />
+            <OrdoDivider />
 
+            {/* Description */}
             {pkg.description && (
-              <p className="text-sm leading-relaxed">{pkg.description}</p>
+              <p className="ao-italic" style={{ fontSize: 14, color: 'var(--ink)', lineHeight: 1.6, marginTop: 16 }}>
+                "{pkg.description}"
+              </p>
             )}
 
+            {/* Author caveat */}
+            <div style={{
+              marginTop: 16,
+              padding: '10px 14px',
+              background: 'rgba(176, 141, 78, 0.05)',
+              border: '1px solid var(--hairline)',
+              borderLeft: '2px solid var(--brass)',
+            }}>
+              <div className="ao-overline" style={{ fontSize: 9, color: 'var(--gold)', marginBottom: 4 }}>
+                Author's Caveat
+              </div>
+              <div className="ao-italic" style={{ fontSize: 12, color: 'var(--ink-quiet)' }}>
+                Installation grants reference, not ownership. Should the author redact this doctrine, thy reference shall be marked but not erased.
+              </div>
+            </div>
+
+            {/* Tags */}
             {pkg.tags.length > 0 && (
-              <div className="flex flex-wrap gap-1.5 mt-4">
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 16 }}>
                 {pkg.tags.map((t) => <HBTag key={t}>{t}</HBTag>)}
               </div>
             )}
           </div>
 
-          {/* Right: side meta */}
-          <div className="p-6 space-y-4">
-            <div className="flex items-center gap-3">
-              <VersionSeal version={pkg.version} size={64} />
+          {/* RIGHT column */}
+          <div style={{ padding: 24 }}>
+            {/* Version seal + edition info */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+              <VersionSeal version={pkg.version} size={68} />
               <div>
-                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Edition</p>
-                <p className="font-heading font-semibold">Version {pkg.version}</p>
-                {pkg.publishedAt && <p className="text-xs text-muted-foreground">re-sealed {formatDate(pkg.publishedAt)}</p>}
+                <div className="ao-overline" style={{ fontSize: 9 }}>Edition</div>
+                <div className="ao-h5" style={{ marginTop: 2 }}>Version {pkg.version}</div>
+                {pkg.publishedAt && (
+                  <div className="ao-codex" style={{ fontSize: 11, color: 'var(--ink-faint)', marginTop: 4 }}>
+                    re-sealed {formatDate(pkg.publishedAt)}
+                  </div>
+                )}
               </div>
             </div>
 
-            <Separator />
+            <OrdoDivider />
 
-            <div className="grid grid-cols-2 gap-3">
-              <div className="p-3 bg-muted rounded-md border">
-                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Instated</p>
-                <p className="text-2xl font-heading text-foreground mt-1">{pkg.downloadCount.toLocaleString()}</p>
-                <p className="text-xs text-muted-foreground">times installed</p>
+            {/* Stats grid 2x2 */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 16 }}>
+              <div style={{
+                padding: 12,
+                background: 'var(--abyss)',
+                border: '1px solid var(--hairline)',
+              }}>
+                <div className="ao-overline" style={{ fontSize: 9 }}>Instated</div>
+                <div className="ao-h4" style={{ marginTop: 6, color: 'var(--ink-bright)' }}>
+                  {pkg.downloadCount.toLocaleString()}
+                </div>
+                <div className="ao-codex" style={{ fontSize: 10, color: 'var(--ink-faint)', marginTop: 2 }}>
+                  times installed
+                </div>
               </div>
-              <div className="p-3 bg-muted rounded-md border">
-                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Version</p>
-                <p className="text-2xl font-heading text-gold mt-1">v{pkg.version}</p>
-                <p className="text-xs text-muted-foreground">current edition</p>
+              <div style={{
+                padding: 12,
+                background: 'var(--abyss)',
+                border: '1px solid var(--hairline)',
+              }}>
+                <div className="ao-overline" style={{ fontSize: 9 }}>Version</div>
+                <div className="ao-h4" style={{ marginTop: 6, color: 'var(--gold)' }}>
+                  v{pkg.version}
+                </div>
+                <div className="ao-codex" style={{ fontSize: 10, color: 'var(--ink-faint)', marginTop: 2 }}>
+                  current edition
+                </div>
               </div>
             </div>
 
-            <ContentPills items={s.itemTypeCount} classes={s.classCount} skills={s.skillCount} feats={s.featCount} />
+            {/* Content pills */}
+            <div style={{ marginTop: 16 }}>
+              <ContentPills items={s.itemTypeCount} classes={s.classCount} skills={s.skillCount} feats={s.featCount} />
+            </div>
 
-            <Button variant="gold" size="lg" className="w-full" onClick={() => setShowConfirm(true)}>
-              <Diamond className="h-4 w-4 mr-2" /> Authorize Instatement
-            </Button>
-            <p className="text-xs text-center text-muted-foreground">installation grants reference, not ownership</p>
+            {/* Authorize button */}
+            <button
+              className="ao-btn ao-btn--primary ao-btn--lg ao-btn--block"
+              style={{ marginTop: 18 }}
+              onClick={() => setShowConfirm(true)}
+            >
+              <Rune kind="diamond-fill" size={12} /> Authorize Instatement
+            </button>
+
+            <div className="ao-codex" style={{ textAlign: 'center', fontSize: 10, color: 'var(--ink-faint)', marginTop: 8 }}>
+              installation grants reference, not ownership
+            </div>
           </div>
         </div>
 
         {/* Content tabs */}
-        <div className="flex border-b">
+        <div style={{ display: 'flex', borderBottom: '1px solid var(--rule)' }}>
           {CONTENT_TABS.map((t) => {
             const count = (contentByType[t.id] || []).length;
-            const Icon = t.icon;
             return (
               <button
                 key={t.id}
+                className={`ao-tab${tab === t.id ? ' is-active' : ''}`}
                 onClick={() => setTab(t.id)}
-                className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
-                  tab === t.id
-                    ? 'border-gold text-gold'
-                    : 'border-transparent text-muted-foreground hover:text-foreground'
-                }`}
+                style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 20px' }}
               >
-                <Icon className="h-4 w-4" /> {t.label} · {count}
+                <Rune kind={t.glyph} size={13} color={tab === t.id ? 'var(--gold)' : 'var(--ink-quiet)'} />
+                {t.label} <span className="ao-codex" style={{ fontSize: 10, color: 'var(--ink-faint)' }}>{count}</span>
               </button>
             );
           })}
         </div>
 
-        <CardContent className="p-5">
+        {/* Tab content */}
+        <div style={{ padding: 20 }}>
           {currentContent.length === 0 ? (
-            <div className="py-6 text-center text-muted-foreground italic">
-              No {CONTENT_TABS.find((t) => t.id === tab)?.label.toLowerCase()} in this doctrine.
+            <div style={{ textAlign: 'center', padding: '36px 0' }}>
+              <Rune kind="sigil-3" size={40} color="var(--ink-quiet)" />
+              <div className="ao-italic" style={{ marginTop: 12, color: 'var(--ink-faint)', fontSize: 14 }}>
+                No {CONTENT_TABS.find((t) => t.id === tab)?.label.toLowerCase()} in this doctrine.
+              </div>
             </div>
           ) : tab === 'FEAT' ? (
-            <table className="w-full text-sm">
+            /* Feats: ao-table */
+            <table className="ao-table" style={{ width: '100%' }}>
               <thead>
-                <tr className="border-b">
-                  <th className="text-left py-2 font-medium">Feat</th>
-                  <th className="text-left py-2 font-medium">Description</th>
-                  <th className="text-left py-2 font-medium">Prerequisites</th>
+                <tr>
+                  <th>Tier</th>
+                  <th>Feat</th>
+                  <th>Inscription</th>
                 </tr>
               </thead>
               <tbody>
                 {currentContent.map((f) => (
-                  <tr key={f.id} className="border-b last:border-0">
-                    <td className="py-2 font-medium">{f.name}</td>
-                    <td className="py-2 text-muted-foreground italic">{f.description || '—'}</td>
-                    <td className="py-2 text-xs text-muted-foreground">{f.prerequisites || '—'}</td>
+                  <tr key={f.id}>
+                    <td>
+                      <OrdoChip tone="gold" glyph="sigil-3">{f.tier || '—'}</OrdoChip>
+                    </td>
+                    <td style={{ fontFamily: 'var(--font-serif)', fontWeight: 600 }}>{f.name}</td>
+                    <td className="ao-italic" style={{ color: 'var(--ink-quiet)', fontSize: 13 }}>
+                      {f.description || '—'}
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-          ) : (
-            <div className={`grid gap-3 ${tab === 'SKILL' ? 'grid-cols-3' : 'grid-cols-2'}`}>
-              {currentContent.map((item) => {
-                const Icon = CONTENT_TABS.find((t) => t.id === tab)?.icon || Diamond;
-                return (
-                  <div key={item.id} className="flex gap-3 p-3 bg-muted rounded-md border">
-                    <div className="w-12 h-12 shrink-0 flex items-center justify-center bg-card rounded border border-gold/20">
-                      <Icon className="h-5 w-5 text-gold" />
+          ) : tab === 'ITEM_TYPE' ? (
+            /* Items: 2-column grid with icon slots */
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+              {currentContent.map((item) => (
+                <OrdoPanel key={item.id} padding={0} inset style={{ display: 'flex', gap: 12, padding: 12 }}>
+                  <div style={{
+                    width: 48,
+                    height: 48,
+                    flexShrink: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: 'var(--abyss)',
+                    border: '1px solid var(--hairline)',
+                  }}>
+                    <Rune kind="sword" size={20} color="var(--gold-pale)" />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                      <span className="ao-h6" style={{ fontSize: 14 }}>{item.name}</span>
+                      {item.slot && (
+                        <span className="ao-codex" style={{ fontSize: 10, color: 'var(--ink-faint)' }}>{item.slot}</span>
+                      )}
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex justify-between items-baseline">
-                        <span className="font-heading font-medium">{item.name}</span>
-                        {item.slot && <span className="text-xs text-muted-foreground">{item.slot}</span>}
-                        {item.skillType && <span className="text-xs text-muted-foreground">{item.skillType}</span>}
-                      </div>
-                      {item.description && <p className="text-xs text-muted-foreground italic mt-0.5">{item.description}</p>}
+                    {item.description && (
+                      <p className="ao-italic" style={{ fontSize: 12, color: 'var(--ink-quiet)', marginTop: 4 }}>
+                        {item.description}
+                      </p>
+                    )}
+                  </div>
+                </OrdoPanel>
+              ))}
+            </div>
+          ) : tab === 'CHARACTER_CLASS' ? (
+            /* Classes: single card per class */
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 10 }}>
+              {currentContent.map((cls) => (
+                <OrdoPanel key={cls.id} padding={16} inset>
+                  <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
+                    <div style={{
+                      width: 48,
+                      height: 48,
+                      flexShrink: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      background: 'var(--abyss)',
+                      border: '1px solid var(--hairline)',
+                    }}>
+                      <Rune kind="helm" size={22} color="var(--gold-pale)" />
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div className="ao-h5">{cls.name}</div>
+                      {cls.description && (
+                        <p className="ao-italic" style={{ fontSize: 13, color: 'var(--ink-quiet)', marginTop: 4 }}>
+                          {cls.description}
+                        </p>
+                      )}
                     </div>
                   </div>
-                );
-              })}
+                </OrdoPanel>
+              ))}
+            </div>
+          ) : (
+            /* Skills: 3-column grid */
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
+              {currentContent.map((skill) => (
+                <OrdoPanel key={skill.id} padding={12} inset>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                    <span className="ao-h6" style={{ fontSize: 14 }}>{skill.name}</span>
+                    {skill.skillType && (
+                      <span className="ao-codex" style={{ fontSize: 10, color: 'var(--ink-faint)' }}>{skill.skillType}</span>
+                    )}
+                  </div>
+                  {skill.description && (
+                    <p className="ao-italic" style={{ fontSize: 12, color: 'var(--ink-quiet)', marginTop: 4 }}>
+                      {skill.description}
+                    </p>
+                  )}
+                </OrdoPanel>
+              ))}
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </OrdoPanel>
 
-      {/* Install confirmation dialog */}
+      {/* Install confirmation modal */}
       <AlertDialog open={showConfirm} onOpenChange={setShowConfirm}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Authorize Instatement?</AlertDialogTitle>
-            <AlertDialogDescription>
-              By instatement, you may reference the contents of "{pkg.title}". The doctrine is not copied — should the author redact it, your reference shall be marked but not erased.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Withhold</AlertDialogCancel>
-            <AlertDialogAction onClick={handleInstall}>Seal Instatement</AlertDialogAction>
+        <AlertDialogContent style={{
+          background: 'var(--obsidian)',
+          border: '1px solid var(--rule-strong)',
+          padding: 0,
+          maxWidth: 520,
+        }}>
+          <div style={{ textAlign: 'center', padding: '28px 32px 0' }}>
+            <Sigil size={56} glyph="sigil-2" color="var(--gold)" />
+            <div className="ao-overline" style={{ marginTop: 14, color: 'var(--gold)', letterSpacing: '0.2em' }}>
+              RITE OF INSTATEMENT
+            </div>
+            <div className="ao-h4" style={{ marginTop: 8 }}>
+              Authorize this Doctrine?
+            </div>
+          </div>
+
+          <OrdoDivider />
+
+          <div style={{ padding: '0 32px' }}>
+            {/* Package info */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 0' }}>
+              <VersionSeal version={pkg.version} size={48} />
+              <div style={{ flex: 1 }}>
+                <div className="ao-h6" style={{ fontSize: 16 }}>{pkg.title}</div>
+                <div className="ao-codex" style={{ fontSize: 11, color: 'var(--ink-faint)', marginTop: 4 }}>
+                  by {pkg.authorUsername} <span style={{ margin: '0 4px' }}>|</span> {pkg.id.substring(0, 8)}
+                </div>
+              </div>
+            </div>
+
+            <ContentPills items={s.itemTypeCount} classes={s.classCount} skills={s.skillCount} feats={s.featCount} compact />
+
+            <AlertDialogHeader style={{ marginTop: 14 }}>
+              <AlertDialogTitle style={{ display: 'none' }}>Authorize Instatement</AlertDialogTitle>
+              <AlertDialogDescription style={{ fontSize: 13, lineHeight: 1.6, color: 'var(--ink-quiet)' }}>
+                By instatement, you may reference the contents of "{pkg.title}". The doctrine is not copied — should the author redact it, your reference shall be marked but not erased.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+          </div>
+
+          <AlertDialogFooter style={{
+            display: 'flex',
+            gap: 10,
+            padding: '18px 32px 24px',
+            justifyContent: 'flex-end',
+          }}>
+            <AlertDialogCancel asChild>
+              <button className="ao-btn ao-btn--ghost">
+                <Rune kind="x" size={10} /> Withhold
+              </button>
+            </AlertDialogCancel>
+            <AlertDialogAction asChild>
+              <button className="ao-btn ao-btn--primary" onClick={handleInstall}>
+                <Rune kind="diamond-fill" size={9} /> Seal Instatement
+              </button>
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

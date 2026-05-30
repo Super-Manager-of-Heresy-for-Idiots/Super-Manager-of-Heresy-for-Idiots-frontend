@@ -1,13 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, ScrollText, BookOpen, Flame, X } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Rune, OrdoPanel, OrdoChip } from '@/components/ordo';
+import { VersionSeal, StatusBadge, ContentPills, CodexID } from '@/components/homebrew';
 import {
   AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle,
   AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction,
 } from '@/components/ui/alert-dialog';
-import { VersionSeal, StatusBadge, ContentPills } from '@/components/homebrew';
 import { useInstalledPackages, useUninstallPackage } from '@/hooks/useHomebrew';
 import { formatDate } from '@/lib/utils';
 import type { InstalledHomebrewResponse } from '@/types';
@@ -26,6 +24,7 @@ export default function InstalledDoctrinesPage() {
 
   const activeCount = packages.filter((p) => !p.isDeleted).length;
   const redactedCount = packages.filter((p) => p.isDeleted).length;
+  const behindCount = 0; // placeholder: no field in type yet
 
   const handleRevoke = () => {
     if (revokeId) {
@@ -34,70 +33,92 @@ export default function InstalledDoctrinesPage() {
   };
 
   return (
-    <div className="space-y-4">
-      {/* Heading */}
-      <div className="flex items-end justify-between">
+    <div>
+      {/* ── Heading band ── */}
+      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 18 }}>
         <div>
-          <p className="text-xs uppercase tracking-wider text-muted-foreground">References · not copies</p>
-          <h1 className="text-2xl font-heading font-bold mt-1">Linked Doctrines</h1>
-          <p className="text-sm text-muted-foreground italic mt-1 max-w-xl">
+          <div className="ao-overline">References &middot; not copies</div>
+          <div className="ao-h3" style={{ marginTop: 4 }}>Linked Doctrines</div>
+          <div className="ao-italic" style={{ marginTop: 4, maxWidth: 620 }}>
             The Archive grants reference, not possession. Should an author redact a doctrine, thy link shall be marked but not severed.
-          </p>
-        </div>
-        <div className="flex gap-6 items-end">
-          <div className="text-right">
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Active</p>
-            <p className="text-2xl font-heading">{activeCount}</p>
           </div>
-          <div className="w-px h-9 bg-border" />
-          <div className="text-right">
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Redacted</p>
-            <p className="text-2xl font-heading text-destructive">{redactedCount}</p>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 20 }}>
+          <div style={{ textAlign: 'right' }}>
+            <div className="ao-overline">Active</div>
+            <div style={{ fontFamily: 'var(--font-serif)', fontSize: 28, color: 'var(--ink-bright)', lineHeight: 1 }}>
+              {activeCount}
+            </div>
+          </div>
+          <div style={{ width: 1, height: 36, background: 'var(--rule)' }} />
+          <div style={{ textAlign: 'right' }}>
+            <div className="ao-overline">Redacted</div>
+            <div style={{ fontFamily: 'var(--font-serif)', fontSize: 28, color: '#d8896a', lineHeight: 1 }}>
+              {redactedCount}
+            </div>
+          </div>
+          <div style={{ width: 1, height: 36, background: 'var(--rule)' }} />
+          <div style={{ textAlign: 'right' }}>
+            <div className="ao-overline">Behind</div>
+            <div style={{ fontFamily: 'var(--font-serif)', fontSize: 28, color: 'var(--gold-pale)', lineHeight: 1 }}>
+              {behindCount}
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Actions */}
-      <div className="flex gap-2">
-        <Button variant="outline" size="sm" onClick={() => navigate('/gm/homebrew/marketplace')}>
-          <ArrowRight className="h-4 w-4 mr-1" /> Catalogue
-        </Button>
-        <Button variant="outline" size="sm" onClick={() => navigate('/gm/homebrew/my')}>
-          <ScrollText className="h-4 w-4 mr-1" /> My Doctrines
-        </Button>
-      </div>
-
-      {/* Redacted warning */}
+      {/* ── Redacted warning band ── */}
       {redactedCount > 0 && (
-        <div className="flex items-start gap-3 p-4 bg-destructive/5 border-l-2 border-destructive border rounded-md">
-          <Flame className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
-          <div>
-            <p className="text-xs font-medium text-destructive">
-              {redactedCount} doctrine{redactedCount > 1 ? 's have' : ' has'} been redacted
-            </p>
-            <p className="text-xs text-muted-foreground italic mt-0.5">
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 12,
+          padding: '12px 18px',
+          marginBottom: 18,
+          background: 'linear-gradient(90deg, rgba(179,70,26,0.12) 0%, rgba(179,70,26,0.04) 100%)',
+          border: '1px solid rgba(179,70,26,0.25)',
+          borderLeft: '3px solid var(--ember)',
+        }}>
+          <Rune kind="flame" size={16} color="var(--ember)" />
+          <div style={{ flex: 1 }}>
+            <span style={{ fontSize: 13, color: '#d8896a', fontFamily: 'var(--font-display)', letterSpacing: '0.03em' }}>
+              {redactedCount} doctrine{redactedCount > 1 ? 's have' : ' has'} been redacted by{' '}
+              {redactedCount > 1 ? 'their authors' : 'its author'}.
+            </span>
+            <span className="ao-italic" style={{ fontSize: 12, color: 'var(--ink-quiet)', marginLeft: 8 }}>
               Reference persists; no further updates shall arrive.
-            </p>
+            </span>
           </div>
+          <button className="ao-btn ao-btn--ghost ao-btn--sm" onClick={() => { /* scroll to first redacted */ }}>
+            <Rune kind="eye" size={10} /> Audit
+          </button>
         </div>
       )}
 
-      {/* Content */}
+      {/* ── Content list ── */}
       {isLoading ? (
-        <Card className="h-96 animate-pulse">
-          <div className="h-full bg-muted rounded-lg" />
-        </Card>
+        <OrdoPanel padding={0} frame style={{ height: 320 }}>
+          <div className="ao-ph" style={{ height: '100%' }} />
+        </OrdoPanel>
       ) : packages.length === 0 ? (
-        <div className="text-center py-16">
-          <BookOpen className="h-16 w-16 text-muted-foreground/30 mx-auto mb-4" />
-          <h2 className="text-xl font-heading font-semibold mb-2">No Instated Doctrines</h2>
-          <p className="text-muted-foreground mb-6">Browse the catalogue and instate doctrines to gain reference.</p>
-          <Button variant="gold" onClick={() => navigate('/gm/homebrew/marketplace')}>
-            <ArrowRight className="h-4 w-4 mr-1" /> Browse Catalogue
-          </Button>
+        <div style={{ textAlign: 'center', padding: 60 }}>
+          <Rune kind="book" size={64} color="var(--ink-quiet)" />
+          <div className="ao-codex" style={{ marginTop: 14, color: 'var(--ink-faint)' }}>
+            — THE ARCHIVE IS EMPTY —
+          </div>
+          <div className="ao-h3" style={{ marginTop: 10, color: 'var(--ink)' }}>No Instated Doctrines</div>
+          <p className="ao-italic" style={{ fontSize: 16, color: 'var(--ink-quiet)', maxWidth: 480, margin: '8px auto 0' }}>
+            Browse the catalogue and instate doctrines to gain reference.
+          </p>
+          <div style={{ display: 'flex', gap: 10, marginTop: 22, justifyContent: 'center' }}>
+            <button className="ao-btn ao-btn--primary" onClick={() => navigate('/gm/homebrew/marketplace')}>
+              <Rune kind="arrow-r" size={11} /> Browse Catalogue
+            </button>
+          </div>
         </div>
       ) : (
-        <Card>
+        <OrdoPanel padding={0} frame>
           {packages.map((p, i) => (
             <InstalledRow
               key={p.installationId}
@@ -107,34 +128,68 @@ export default function InstalledDoctrinesPage() {
               onRevoke={() => setRevokeId(p.installationId)}
             />
           ))}
-          <div className="py-3 text-center bg-muted/50 border-t">
-            <span className="text-xs text-muted-foreground">{totalElements} instatement{totalElements !== 1 ? 's' : ''}</span>
+          <div style={{
+            textAlign: 'center',
+            padding: '10px 0',
+            borderTop: '1px solid var(--hairline)',
+            background: 'var(--abyss)',
+          }}>
+            <span className="ao-codex" style={{ fontSize: 11, color: 'var(--ink-faint)' }}>
+              {totalElements} instatement{totalElements !== 1 ? 's' : ''} &middot; only what thy charter permits
+            </span>
           </div>
-        </Card>
+        </OrdoPanel>
       )}
 
-      {/* Pagination */}
+      {/* ── Pagination ── */}
       {totalPages > 1 && (
-        <div className="flex justify-between items-center">
-          <span className="text-xs text-muted-foreground">Page {page + 1} of {totalPages}</span>
-          <div className="flex gap-1">
-            <Button variant="outline" size="sm" disabled={page === 0} onClick={() => setPage(page - 1)}>‹</Button>
-            <Button variant="outline" size="sm" disabled={page >= totalPages - 1} onClick={() => setPage(page + 1)}>›</Button>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginTop: 26,
+          paddingTop: 18,
+          borderTop: '1px solid var(--rule)',
+        }}>
+          <span className="ao-codex">
+            Page {page + 1} of {totalPages} &middot; displaying {packages.length} of {totalElements}
+          </span>
+          <div style={{ display: 'flex', gap: 4 }}>
+            <button
+              className="ao-iconbtn"
+              style={{ width: 30, height: 30 }}
+              disabled={page === 0}
+              onClick={() => setPage(page - 1)}
+            >
+              <Rune kind="arrow-l" size={11} />
+            </button>
+            <button
+              className="ao-iconbtn"
+              style={{ width: 30, height: 30 }}
+              disabled={page >= totalPages - 1}
+              onClick={() => setPage(page + 1)}
+            >
+              <Rune kind="arrow-r" size={11} />
+            </button>
           </div>
         </div>
       )}
 
+      {/* ── Revoke confirmation ── */}
       <AlertDialog open={!!revokeId} onOpenChange={(open) => !open && setRevokeId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Revoke Instatement?</AlertDialogTitle>
             <AlertDialogDescription>
-              The doctrine reference will be removed. Content from this doctrine will no longer be available in your sessions.
+              The doctrine reference will be removed. Content from this doctrine will no longer be available in thy sessions.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleRevoke} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+            <AlertDialogAction
+              onClick={handleRevoke}
+              style={{ background: 'var(--ember)', color: '#fff' }}
+            >
               Revoke
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -143,6 +198,8 @@ export default function InstalledDoctrinesPage() {
     </div>
   );
 }
+
+/* ─────────────────── Row component ─────────────────── */
 
 function InstalledRow({
   pkg,
@@ -158,47 +215,108 @@ function InstalledRow({
   const deleted = pkg.isDeleted;
   const s = pkg.contentSummary;
 
+  const rowBg = deleted ? 'rgba(179,70,26,0.03)' : 'transparent';
+
   return (
-    <div className={`grid grid-cols-[56px_1.2fr_140px_1fr_140px_180px] items-center gap-3 px-4 py-4 ${!isLast ? 'border-b' : ''} ${deleted ? 'bg-destructive/5' : ''}`}>
+    <div style={{
+      display: 'grid',
+      gridTemplateColumns: '56px 1.2fr 200px 1fr 200px 240px',
+      alignItems: 'center',
+      gap: 12,
+      padding: '14px 18px',
+      borderBottom: isLast ? 'none' : '1px solid var(--hairline)',
+      background: rowBg,
+      position: 'relative',
+      overflow: 'hidden',
+    }}>
+      {/* Diagonal stripe overlay for deleted rows */}
+      {deleted && (
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          pointerEvents: 'none',
+          backgroundImage:
+            'repeating-linear-gradient(135deg, transparent, transparent 10px, rgba(179,70,26,0.03) 10px, rgba(179,70,26,0.03) 11px)',
+        }} />
+      )}
+
+      {/* Col 1: VersionSeal */}
       <VersionSeal version={pkg.sourceVersion} size={42} />
 
-      <div>
-        <div className="flex items-center gap-2">
-          <span className={`font-heading font-medium text-[15px] ${deleted ? 'text-muted-foreground line-through decoration-destructive/60' : ''}`}>
+      {/* Col 2: Title + Author + CodexID */}
+      <div style={{ position: 'relative' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span
+            className="ao-h6"
+            style={{
+              fontSize: 15,
+              ...(deleted ? {
+                color: 'var(--ink-quiet)',
+                textDecoration: 'line-through',
+                textDecorationColor: 'rgba(179,70,26,0.6)',
+              } : {}),
+            }}
+          >
             {pkg.title}
           </span>
           {deleted && (
-            <span className="text-[9px] uppercase tracking-widest px-1.5 py-0.5 bg-destructive/20 text-destructive font-mono">
+            <span style={{
+              fontSize: 9,
+              letterSpacing: '0.14em',
+              textTransform: 'uppercase' as const,
+              padding: '2px 6px',
+              background: 'rgba(179,70,26,0.18)',
+              color: '#d8896a',
+              fontFamily: 'var(--font-mono)',
+            }}>
               [REDACTED]
             </span>
           )}
         </div>
-        <p className="text-xs text-muted-foreground mt-1">
-          by <span className="text-foreground">{pkg.authorUsername}</span> · {pkg.packageId.substring(0, 8)}
-        </p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
+          <span className="ao-codex" style={{ fontSize: 12, color: 'var(--ink-faint)' }}>
+            by <span style={{ color: 'var(--ink)' }}>{pkg.authorUsername}</span>
+          </span>
+          <span style={{ color: 'var(--ink-faint)', fontSize: 10 }}>&middot;</span>
+          <CodexID>{pkg.packageId.substring(0, 8)}</CodexID>
+        </div>
       </div>
 
+      {/* Col 3: StatusBadge + status text */}
       <div>
-        {deleted ? <StatusBadge status="DELETED" /> : <StatusBadge status="PUBLISHED" />}
-        <p className="text-xs text-muted-foreground mt-1">{deleted ? 'reference persists' : 'live link'}</p>
+        <StatusBadge status={deleted ? 'DELETED' : 'INSTALLED'} />
+        <div className="ao-codex" style={{ fontSize: 10, marginTop: 5, color: 'var(--ink-faint)' }}>
+          {deleted ? 'reference persists' : 'live link'}
+        </div>
       </div>
 
-      <ContentPills items={s.itemTypeCount} classes={s.classCount} skills={s.skillCount} feats={s.featCount} compact />
+      {/* Col 4: ContentPills */}
+      <ContentPills
+        items={s.itemTypeCount}
+        classes={s.classCount}
+        skills={s.skillCount}
+        feats={s.featCount}
+        compact
+      />
 
+      {/* Col 5: Instated date */}
       <div>
-        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Instated</p>
-        <p className="text-xs">{formatDate(pkg.installedAt)}</p>
+        <div className="ao-overline" style={{ fontSize: 9 }}>Instated</div>
+        <div className="ao-codex" style={{ fontSize: 12, marginTop: 3 }}>
+          {formatDate(pkg.installedAt)}
+        </div>
       </div>
 
-      <div className="flex gap-1.5 justify-end">
+      {/* Col 6: Actions */}
+      <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
         {!deleted && (
-          <Button variant="outline" size="sm" onClick={onView}>
-            <BookOpen className="h-3 w-3 mr-1" /> View
-          </Button>
+          <button className="ao-btn ao-btn--ghost ao-btn--sm" onClick={onView}>
+            <Rune kind="book" size={10} /> View
+          </button>
         )}
-        <Button variant="outline" size="sm" className="text-destructive border-destructive/30" onClick={onRevoke}>
-          <X className="h-3 w-3 mr-1" /> Revoke
-        </Button>
+        <button className="ao-btn ao-btn--danger ao-btn--sm" onClick={onRevoke}>
+          <Rune kind="x" size={10} /> Revoke
+        </button>
       </div>
     </div>
   );

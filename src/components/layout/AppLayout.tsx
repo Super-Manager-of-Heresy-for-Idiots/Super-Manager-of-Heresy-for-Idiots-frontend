@@ -147,16 +147,6 @@ export function AppLayout() {
                 }}
               >
                 <Rune kind={item.glyph} size={18} />
-                <span
-                  style={{
-                    fontFamily: 'var(--font-display)',
-                    fontSize: 8,
-                    letterSpacing: '0.12em',
-                    textTransform: 'uppercase',
-                  }}
-                >
-                  {item.label}
-                </span>
                 {/* Badge for admin Archive */}
                 {item.label === 'Archive' && user?.role === 'ADMIN' && (
                   <span
