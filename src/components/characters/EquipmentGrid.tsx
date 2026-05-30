@@ -1,6 +1,6 @@
 import {
   Crown, Shirt, Footprints, Sword, Shield,
-  CircleDot, Gem, Scroll
+  CircleDot, Gem, Scroll, Sparkles
 } from 'lucide-react';
 import { EQUIPMENT_SLOT_LABELS } from '@/types';
 import type { InventorySlotResponse, EquipmentSlot } from '@/types';
@@ -22,9 +22,10 @@ interface EquipmentGridProps {
   inventory: InventorySlotResponse[];
   onSlotClick?: (slot: InventorySlotResponse) => void;
   readOnly?: boolean;
+  onEnchantClick?: (slot: InventorySlotResponse) => void;
 }
 
-export function EquipmentGrid({ inventory, onSlotClick, readOnly = false }: EquipmentGridProps) {
+export function EquipmentGrid({ inventory, onSlotClick, readOnly = false, onEnchantClick }: EquipmentGridProps) {
   const getSlotData = (slotName: EquipmentSlot): InventorySlotResponse | undefined => {
     return inventory.find((s) => s.slot === slotName);
   };
@@ -35,41 +36,54 @@ export function EquipmentGrid({ inventory, onSlotClick, readOnly = false }: Equi
     const isClickable = !readOnly && onSlotClick && slotData;
 
     return (
-      <button
-        key={slotName}
-        onClick={() => isClickable && slotData && onSlotClick(slotData)}
-        disabled={readOnly || !onSlotClick}
-        className={`
-          flex flex-col items-center p-3 rounded-lg border transition-all min-h-[100px] w-full
-          ${hasItem
-            ? 'border-gold/40 bg-gold/10 text-foreground'
-            : 'border-border bg-card text-muted-foreground'
-          }
-          ${isClickable ? 'hover:border-gold/60 hover:bg-gold/15 cursor-pointer' : 'cursor-default'}
-        `}
-      >
-        <div className={`mb-1 ${hasItem ? 'text-gold' : 'text-muted-foreground'}`}>
-          {slotIcons[slotName]}
-        </div>
-        <span className="text-xs font-semibold uppercase tracking-wider mb-1">
-          {EQUIPMENT_SLOT_LABELS[slotName]}
-        </span>
-        {hasItem ? (
-          <>
-            <span className="text-sm font-medium text-center">
-              {slotData?.artifactName || slotData?.itemTypeName}
-            </span>
-            {slotData && slotData.quantity && slotData.quantity > 1 && (
-              <span className="text-xs text-muted-foreground">x{slotData.quantity}</span>
-            )}
-            {slotData?.notes && (
-              <span className="text-xs text-muted-foreground italic mt-1 truncate max-w-full">{slotData.notes}</span>
-            )}
-          </>
-        ) : (
-          <span className="text-xs italic">Empty</span>
+      <div key={slotName} style={{ position: 'relative' }}>
+        <button
+          onClick={() => isClickable && slotData && onSlotClick(slotData)}
+          disabled={readOnly || !onSlotClick}
+          className={`
+            flex flex-col items-center p-3 rounded-lg border transition-all min-h-[100px] w-full
+            ${hasItem
+              ? 'border-gold/40 bg-gold/10 text-foreground'
+              : 'border-border bg-card text-muted-foreground'
+            }
+            ${isClickable ? 'hover:border-gold/60 hover:bg-gold/15 cursor-pointer' : 'cursor-default'}
+          `}
+        >
+          <div className={`mb-1 ${hasItem ? 'text-gold' : 'text-muted-foreground'}`}>
+            {slotIcons[slotName]}
+          </div>
+          <span className="text-xs font-semibold uppercase tracking-wider mb-1">
+            {EQUIPMENT_SLOT_LABELS[slotName]}
+          </span>
+          {hasItem ? (
+            <>
+              <span className="text-sm font-medium text-center">
+                {slotData?.artifactName || slotData?.itemTypeName}
+              </span>
+              {slotData && slotData.quantity && slotData.quantity > 1 && (
+                <span className="text-xs text-muted-foreground">x{slotData.quantity}</span>
+              )}
+              {slotData?.notes && (
+                <span className="text-xs text-muted-foreground italic mt-1 truncate max-w-full">{slotData.notes}</span>
+              )}
+            </>
+          ) : (
+            <span className="text-xs italic">Empty</span>
+          )}
+        </button>
+        {onEnchantClick && hasItem && slotData && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onEnchantClick(slotData);
+            }}
+            className="absolute top-1 right-1 p-1 rounded hover:bg-gold/20 text-gold/70 hover:text-gold transition-colors"
+            title="Manage enchantments"
+          >
+            <Sparkles className="h-3.5 w-3.5" />
+          </button>
         )}
-      </button>
+      </div>
     );
   };
 

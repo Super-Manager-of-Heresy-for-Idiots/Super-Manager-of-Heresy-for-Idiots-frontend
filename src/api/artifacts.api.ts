@@ -3,6 +3,9 @@ import type {
   ApiResponse,
   ArtifactResponse,
   CreateArtifactRequest,
+  PlaceArtifactRequest,
+  InventorySlotResponse,
+  EquipmentSlot,
 } from '@/types';
 
 export const artifactsApi = {
@@ -28,6 +31,18 @@ export const artifactsApi = {
 
   delete: async (id: string): Promise<ApiResponse<null>> => {
     const response = await api.delete<ApiResponse<null>>(`/artifacts/${id}`);
+    return response.data;
+  },
+
+  place: async (
+    characterId: string,
+    slot: EquipmentSlot,
+    data: PlaceArtifactRequest
+  ): Promise<ApiResponse<InventorySlotResponse>> => {
+    const response = await api.put<ApiResponse<InventorySlotResponse>>(
+      `/artifacts/place/${characterId}/${slot}`,
+      data
+    );
     return response.data;
   },
 };

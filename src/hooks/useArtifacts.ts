@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { artifactsApi } from '@/api/artifacts.api';
-import type { CreateArtifactRequest, ApiError } from '@/types';
+import type { CreateArtifactRequest, EquipmentSlot, ApiError } from '@/types';
 import { AxiosError } from 'axios';
 
 export function useArtifacts() {
@@ -65,6 +65,29 @@ export function useDeleteArtifact() {
     },
     onError: (error: AxiosError<ApiError>) => {
       toast.error(error.response?.data?.message || 'Failed to delete artifact');
+    },
+  });
+}
+
+export function usePlaceArtifact() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      characterId,
+      slot,
+      artifactId,
+    }: {
+      characterId: string;
+      slot: EquipmentSlot;
+      artifactId: string;
+    }) => artifactsApi.place(characterId, slot, { artifactId }),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['characters', variables.characterId, 'inventory'] });
+      queryClient.invalidateQueries({ queryKey: ['characters', variables.characterId] });
+      toast.success('Artifact placed!');
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error.response?.data?.message || 'Failed to place artifact');
     },
   });
 }

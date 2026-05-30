@@ -1,9 +1,24 @@
 import { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Rune, Sigil, OrdoDivider, OrdoPanel, OrdoChip } from '@/components/ordo';
+import { Loader2 } from 'lucide-react';
+import { Rune, Sigil, OrdoDivider, OrdoPanel, OrdoChip, OrdoField } from '@/components/ordo';
 import { StatEditor } from '@/components/characters/StatEditor';
 import { EquipmentGrid } from '@/components/characters/EquipmentGrid';
 import { EquipmentSlotModal } from '@/components/characters/EquipmentSlotModal';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   useCharacter,
   useCharacterStats,
@@ -12,9 +27,11 @@ import {
   useUpdateInventorySlot,
 } from '@/hooks/useCharacters';
 import { useCharacterConditions } from '@/hooks/useConditions';
+import { useArtifacts, usePlaceArtifact } from '@/hooks/useArtifacts';
+import { useEnchantmentTypes, useSlotEnchantments, useAddEnchantment, useRemoveEnchantment } from '@/hooks/useEnchantments';
 import { useAuthStore } from '@/store/authStore';
 import { formatModifier } from '@/lib/utils';
-import type { CharacterStatResponse, InventorySlotResponse, CharacterConditionResponse, ConditionModifierResponse } from '@/types';
+import type { CharacterStatResponse, InventorySlotResponse, CharacterConditionResponse, ConditionModifierResponse, EquipmentSlot } from '@/types';
 
 interface CharacterDetailPageProps {
   isGmView?: boolean;
@@ -31,12 +48,31 @@ export default function CharacterDetailPage({ isGmView = false }: CharacterDetai
   const updateStat = useUpdateStat();
   const updateInventory = useUpdateInventorySlot();
 
+  // Artifact placement (GM)
+  const { data: artifacts } = useArtifacts();
+  const placeArtifact = usePlaceArtifact();
+  const [placeSlot, setPlaceSlot] = useState<InventorySlotResponse | null>(null);
+  const [selectedArtifactId, setSelectedArtifactId] = useState('');
+
+  // Enchantments (Player)
+  const { data: enchantmentTypes } = useEnchantmentTypes();
+  const [enchantmentSlot, setEnchantmentSlot] = useState<InventorySlotResponse | null>(null);
+  const [selectedEnchTypeId, setSelectedEnchTypeId] = useState('');
+  const [enchantmentNotes, setEnchantmentNotes] = useState('');
+  const addEnchantment = useAddEnchantment();
+  const removeEnchantment = useRemoveEnchantment();
+
+  // Load enchantments for the currently viewed slot
+  const { data: slotEnchantments } = useSlotEnchantments(id!, enchantmentSlot?.id || '');
+
   const [editingStatId, setEditingStatId] = useState<string | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<InventorySlotResponse | null>(null);
 
   const isOwner = user?.id === character?.ownerId;
   const canEditStats = isOwner || isGmView;
   const canEditInventory = isOwner && !isGmView;
+  const canPlaceArtifact = isGmView;
+  const canManageEnchantments = isOwner && !isGmView;
 
   const handleStatSave = (statId: string, value: number) => {
     updateStat.mutate(
@@ -51,6 +87,59 @@ export default function CharacterDetailPage({ isGmView = false }: CharacterDetai
       { characterId: id!, slot: selectedSlot.slot, data: { itemTypeId: data.itemTypeId, quantity: data.quantity, notes: data.notes || undefined } },
       { onSuccess: () => setSelectedSlot(null) }
     );
+  };
+
+  const handlePlaceArtifact = () => {
+    if (!placeSlot || !selectedArtifactId) return;
+    placeArtifact.mutate(
+      { characterId: id!, slot: placeSlot.slot, artifactId: selectedArtifactId },
+      {
+        onSuccess: () => {
+          setPlaceSlot(null);
+          setSelectedArtifactId('');
+        },
+      }
+    );
+  };
+
+  const handleAddEnchantment = () => {
+    if (!enchantmentSlot || !selectedEnchTypeId) return;
+    addEnchantment.mutate(
+      {
+        characterId: id!,
+        slotId: enchantmentSlot.id,
+        data: { enchantmentTypeId: selectedEnchTypeId, notes: enchantmentNotes || undefined },
+      },
+      {
+        onSuccess: () => {
+          setSelectedEnchTypeId('');
+          setEnchantmentNotes('');
+        },
+      }
+    );
+  };
+
+  const handleRemoveEnchantment = (enchantmentId: string) => {
+    if (!enchantmentSlot) return;
+    removeEnchantment.mutate({
+      characterId: id!,
+      slotId: enchantmentSlot.id,
+      enchantmentId,
+    });
+  };
+
+  const handleSlotClick = (slot: InventorySlotResponse) => {
+    if (canEditInventory) {
+      setSelectedSlot(slot);
+    } else if (canPlaceArtifact) {
+      setPlaceSlot(slot);
+      setSelectedArtifactId('');
+    }
+  };
+
+  // Filter artifacts that match the slot type
+  const getMatchingArtifacts = (slot: EquipmentSlot) => {
+    return (artifacts || []).filter((a) => a.itemTypeSlot === slot);
   };
 
   if (charLoading) {
@@ -232,6 +321,17 @@ export default function CharacterDetailPage({ isGmView = false }: CharacterDetai
       {/* Equipment Section */}
       <OrdoDivider glyph="helm">EQUIPMENT</OrdoDivider>
 
+      {isGmView && (
+        <p className="ao-codex" style={{ color: 'var(--ink-faint)', fontSize: 12, marginTop: -16 }}>
+          Click a slot to place an artifact
+        </p>
+      )}
+      {canManageEnchantments && (
+        <p className="ao-codex" style={{ color: 'var(--ink-faint)', fontSize: 12, marginTop: -16 }}>
+          Click a slot to manage equipment &middot; Use the enchant button to add enchantments
+        </p>
+      )}
+
       {invLoading ? (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 12 }}>
           {Array.from({ length: 10 }).map((_, i) => (
@@ -241,12 +341,17 @@ export default function CharacterDetailPage({ isGmView = false }: CharacterDetai
       ) : (
         <EquipmentGrid
           inventory={inventory || []}
-          onSlotClick={canEditInventory ? (slot) => setSelectedSlot(slot) : undefined}
-          readOnly={!canEditInventory}
+          onSlotClick={(canEditInventory || canPlaceArtifact) ? handleSlotClick : undefined}
+          readOnly={!canEditInventory && !canPlaceArtifact}
+          onEnchantClick={canManageEnchantments ? (slot) => {
+            setEnchantmentSlot(slot);
+            setSelectedEnchTypeId('');
+            setEnchantmentNotes('');
+          } : undefined}
         />
       )}
 
-      {/* Equipment Modal */}
+      {/* Equipment Modal (Player edits inventory) */}
       <EquipmentSlotModal
         slot={selectedSlot}
         characterId={id!}
@@ -255,6 +360,166 @@ export default function CharacterDetailPage({ isGmView = false }: CharacterDetai
         onSave={handleInventorySave}
         isSaving={updateInventory.isPending}
       />
+
+      {/* Place Artifact Modal (GM) */}
+      <Dialog open={!!placeSlot} onOpenChange={() => { setPlaceSlot(null); setSelectedArtifactId(''); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Place Artifact — {placeSlot?.slot && placeSlot.slot.replace(/_/g, ' ')}</DialogTitle>
+          </DialogHeader>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {placeSlot?.artifactName && (
+              <div style={{ padding: 12, background: 'var(--abyss)', border: '1px solid var(--rule)', borderRadius: 4 }}>
+                <span className="ao-overline" style={{ fontSize: 9 }}>Currently Equipped</span>
+                <div className="ao-h5" style={{ marginTop: 4 }}>{placeSlot.artifactName}</div>
+                {placeSlot.artifactRarity && (
+                  <span className="ao-codex" style={{ color: 'var(--ink-faint)', fontSize: 11 }}>{placeSlot.artifactRarity}</span>
+                )}
+              </div>
+            )}
+            <OrdoField label="Select Artifact" required>
+              <Select value={selectedArtifactId} onValueChange={setSelectedArtifactId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose an artifact" />
+                </SelectTrigger>
+                <SelectContent>
+                  {placeSlot && getMatchingArtifacts(placeSlot.slot).map((a) => (
+                    <SelectItem key={a.id} value={a.id}>
+                      {a.name} ({a.rarity || 'COMMON'})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </OrdoField>
+            {placeSlot && getMatchingArtifacts(placeSlot.slot).length === 0 && (
+              <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 13 }}>
+                No artifacts available for this slot. Create one in the Artifacts page first.
+              </p>
+            )}
+          </div>
+          <DialogFooter>
+            <button className="ao-btn ao-btn--ghost" onClick={() => { setPlaceSlot(null); setSelectedArtifactId(''); }} disabled={placeArtifact.isPending}>
+              Cancel
+            </button>
+            <button className="ao-btn ao-btn--primary" onClick={handlePlaceArtifact} disabled={!selectedArtifactId || placeArtifact.isPending}>
+              {placeArtifact.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Place Artifact
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Enchantments Modal (Player) */}
+      <Dialog open={!!enchantmentSlot} onOpenChange={() => setEnchantmentSlot(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              Enchantments — {enchantmentSlot?.itemTypeName || enchantmentSlot?.artifactName || enchantmentSlot?.slot?.replace(/_/g, ' ')}
+            </DialogTitle>
+          </DialogHeader>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {/* Current enchantments */}
+            {slotEnchantments && slotEnchantments.length > 0 ? (
+              <div>
+                <span className="ao-overline" style={{ fontSize: 10 }}>Active Enchantments</span>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 8 }}>
+                  {slotEnchantments.map((ench) => (
+                    <div
+                      key={ench.id}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '8px 12px',
+                        background: 'var(--abyss)',
+                        border: '1px solid var(--rule)',
+                        borderRadius: 4,
+                      }}
+                    >
+                      <div>
+                        <div style={{ fontWeight: 600, fontSize: 14 }}>{ench.enchantmentType.name}</div>
+                        {ench.enchantmentType.damageDice && (
+                          <span className="ao-codex" style={{ fontSize: 11, color: 'var(--ink-faint)' }}>
+                            {ench.enchantmentType.damageDice}
+                            {ench.enchantmentType.damageBonus ? `+${ench.enchantmentType.damageBonus}` : ''}{' '}
+                            {ench.enchantmentType.damageType}
+                          </span>
+                        )}
+                        {ench.enchantmentType.buffDebuff && (
+                          <span className="ao-codex" style={{ fontSize: 11, color: ench.enchantmentType.buffDebuff.isBuff ? '#6ee77a' : '#e76e6e', marginLeft: 8 }}>
+                            {ench.enchantmentType.buffDebuff.name}
+                          </span>
+                        )}
+                        {ench.notes && (
+                          <div className="ao-italic" style={{ fontSize: 11, color: 'var(--ink-faint)', marginTop: 2 }}>
+                            {ench.notes}
+                          </div>
+                        )}
+                      </div>
+                      <button
+                        className="ao-btn ao-btn--sm ao-btn--danger"
+                        onClick={() => handleRemoveEnchantment(ench.id)}
+                        disabled={removeEnchantment.isPending}
+                      >
+                        <Rune kind="x" size={10} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 13 }}>
+                No enchantments on this item.
+              </p>
+            )}
+
+            {/* Add new enchantment */}
+            {enchantmentSlot?.itemTypeId && (
+              <>
+                <OrdoDivider>ADD ENCHANTMENT</OrdoDivider>
+                <OrdoField label="Enchantment Type" required>
+                  <Select value={selectedEnchTypeId} onValueChange={setSelectedEnchTypeId}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Choose enchantment" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {(enchantmentTypes || []).map((et) => (
+                        <SelectItem key={et.id} value={et.id}>
+                          {et.name}
+                          {et.damageDice ? ` (${et.damageDice} ${et.damageType})` : ''}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </OrdoField>
+                <OrdoField label="Notes (optional)">
+                  <input
+                    className="ao-input"
+                    value={enchantmentNotes}
+                    onChange={(e) => setEnchantmentNotes(e.target.value)}
+                    placeholder="E.g., Found in dragon's lair"
+                    maxLength={255}
+                  />
+                </OrdoField>
+                <button
+                  className="ao-btn ao-btn--primary"
+                  onClick={handleAddEnchantment}
+                  disabled={!selectedEnchTypeId || addEnchantment.isPending}
+                  style={{ alignSelf: 'flex-end' }}
+                >
+                  {addEnchantment.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Enchant
+                </button>
+              </>
+            )}
+            {!enchantmentSlot?.itemTypeId && (
+              <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 13 }}>
+                Equip an item first to add enchantments.
+              </p>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
