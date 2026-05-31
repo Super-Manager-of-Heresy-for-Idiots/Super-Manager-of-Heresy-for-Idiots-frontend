@@ -1,6 +1,6 @@
 import { Rune } from '@/components/ordo';
 
-type BadgeStatus = 'DRAFT' | 'PUBLISHED' | 'UNPUBLISHED' | 'DELETED' | 'INSTALLED';
+type BadgeStatus = 'DRAFT' | 'PUBLISHED' | 'UNPUBLISHED' | 'DELETED' | 'INSTALLED' | 'ARCHIVED';
 
 interface StatusBadgeProps {
   status: BadgeStatus;
@@ -12,6 +12,7 @@ const STATUS_MAP: Record<BadgeStatus, { glyph: string; label: string; stripe: st
   UNPUBLISHED: { glyph: 'lock',         label: 'WITHHELD', stripe: 'var(--ink-quiet)',  text: 'var(--ink-quiet)' },
   DELETED:     { glyph: 'cross-pat',    label: 'REDACTED', stripe: 'var(--ember)',      text: '#d8896a' },
   INSTALLED:   { glyph: 'check',        label: 'INSTATED', stripe: 'var(--arcane)',     text: '#84c0c8' },
+  ARCHIVED:    { glyph: 'lock',         label: 'ARCHIVED', stripe: 'var(--ink-faint)',  text: 'var(--ink-faint)' },
 };
 
 export function StatusBadge({ status }: StatusBadgeProps) {

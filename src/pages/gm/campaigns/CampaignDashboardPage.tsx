@@ -196,12 +196,12 @@ export default function CampaignDashboardPage() {
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
                       <span className="ao-h5" style={{ fontSize: 13 }}>{ch.name}</span>
-                      <CharStatusBadge status={ch.status} />
+                      <CharStatusBadge status={ch.status ?? ''} />
                       <span className="ao-codex" style={{ fontSize: 10, color: 'var(--ink-faint)' }}>
                         {className} &middot; LVL {ch.totalLevel}
                       </span>
                     </div>
-                    <Bar value={ch.currentHp} max={ch.maxHp} tone="ember" height={5} />
+                    <Bar value={ch.currentHp ?? 0} max={ch.maxHp ?? 0} tone="ember" height={5} />
                   </div>
                   <span className="ao-codex" style={{ fontSize: 11, color: 'var(--ink-quiet)', flexShrink: 0 }}>
                     {ch.currentHp}/{ch.maxHp} HP

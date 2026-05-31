@@ -53,10 +53,17 @@ export function useUpdateHp() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ campaignId, characterId, data }: { campaignId: string; characterId: string; data: UpdateHpRequest }) =>
-      charactersV2Api.modifyHp(campaignId, characterId, data),
+    mutationFn: ({ campaignId, characterId, id, data }: { campaignId?: string; characterId?: string; id?: string; data: UpdateHpRequest }) => {
+      const cId = characterId || id || '';
+      const campId = campaignId || '_';
+      return charactersV2Api.modifyHp(campId, cId, data);
+    },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId] });
+      const cId = variables.characterId || variables.id || '';
+      if (variables.campaignId) {
+        queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', cId] });
+      }
+      queryClient.invalidateQueries({ queryKey: ['characters', cId] });
       toast.success('HP updated!');
     },
     onError: (error: AxiosError<ApiError>) => {
@@ -81,11 +88,22 @@ export function useModifyWallet() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ campaignId, characterId, data }: { campaignId: string; characterId: string; data: ModifyWalletRequest }) =>
-      charactersV2Api.modifyWallet(campaignId, characterId, data),
+    mutationFn: ({ campaignId, characterId, id, currencyTypeId, data }: {
+      campaignId?: string; characterId?: string; id?: string;
+      currencyTypeId?: string; data: ModifyWalletRequest;
+    }) => {
+      const cId = characterId || id || '';
+      const campId = campaignId || '_';
+      const finalData: ModifyWalletRequest = { ...data };
+      if (currencyTypeId && !finalData.currencyTypeId) finalData.currencyTypeId = currencyTypeId;
+      return charactersV2Api.modifyWallet(campId, cId, finalData);
+    },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId, 'wallet'] });
-      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId] });
+      const cId = variables.characterId || variables.id || '';
+      if (variables.campaignId) {
+        queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', cId, 'wallet'] });
+        queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', cId] });
+      }
       toast.success('Wallet updated!');
     },
     onError: (error: AxiosError<ApiError>) => {
@@ -110,11 +128,24 @@ export function useModifyResource() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ campaignId, characterId, data }: { campaignId: string; characterId: string; data: ModifyResourceRequest }) =>
-      charactersV2Api.modifyResource(campaignId, characterId, data),
+    mutationFn: ({ campaignId, characterId, id, resourceTypeId, data }: {
+      campaignId?: string; characterId?: string; id?: string;
+      resourceTypeId?: string; data: ModifyResourceRequest | { value: number };
+    }) => {
+      const cId = characterId || id || '';
+      const campId = campaignId || '_';
+      const finalData: ModifyResourceRequest = {
+        resourceTypeId: resourceTypeId || (data as ModifyResourceRequest).resourceTypeId || '',
+        currentValue: ('value' in data) ? (data as { value: number }).value : (data as ModifyResourceRequest).currentValue,
+      };
+      return charactersV2Api.modifyResource(campId, cId, finalData);
+    },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId, 'resources'] });
-      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId] });
+      const cId = variables.characterId || variables.id || '';
+      if (variables.campaignId) {
+        queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', cId, 'resources'] });
+        queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', cId] });
+      }
       toast.success('Resource updated!');
     },
     onError: (error: AxiosError<ApiError>) => {
@@ -134,3 +165,7 @@ export function useAbilityCheck() {
     },
   });
 }
+
+// Aliases for backward-compat
+export const useUpdateWallet = useModifyWallet;
+export const useUpdateResource = useModifyResource;

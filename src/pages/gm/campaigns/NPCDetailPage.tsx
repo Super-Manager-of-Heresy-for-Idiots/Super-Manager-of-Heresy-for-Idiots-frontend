@@ -28,7 +28,6 @@ export default function NPCDetailPage() {
     visibilityMutation.mutate({
       campaignId: campaignId!,
       npcId: npcId!,
-      data: { visible: !npc.visible },
     });
   };
 
@@ -107,7 +106,7 @@ export default function NPCDetailPage() {
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                 <CodexID>{npc.id.slice(0, 8).toUpperCase()}</CodexID>
-                <VisibilityToggle visible={npc.visible} onToggle={toggleVisibility} />
+                <VisibilityToggle visible={npc.visible ?? false} onToggle={toggleVisibility} />
               </div>
               <h3 className="ao-h3" style={{ marginTop: 6, color: 'var(--ink-bright)' }}>
                 {npc.name}

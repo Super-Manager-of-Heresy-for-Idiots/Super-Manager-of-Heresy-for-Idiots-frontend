@@ -160,3 +160,17 @@ export function useDeleteNpcNote() {
     },
   });
 }
+
+// Aliases
+export function useNpcNotes(campaignId: string, npcId: string) {
+  return useQuery({
+    queryKey: ['campaigns', campaignId, 'npcs', npcId, 'notes'],
+    queryFn: async () => {
+      const response = await npcsApi.listNotes(campaignId, npcId);
+      return response.data;
+    },
+    enabled: !!campaignId && !!npcId,
+  });
+}
+
+export const useSetNpcVisibility = useToggleNpcVisibility;

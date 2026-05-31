@@ -62,7 +62,7 @@ export default function LocationsPage() {
     setEditing(loc);
     setFormName(loc.name);
     setFormDescription(loc.description || '');
-    setFormVisible(loc.visible);
+    setFormVisible(loc.visible ?? false);
     setDialogOpen(true);
   };
 
@@ -201,7 +201,7 @@ export default function LocationsPage() {
                 {/* ID + Visibility */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 6 }}>
                   <CodexID>{loc.id.slice(0, 8).toUpperCase()}</CodexID>
-                  <VisibilityToggle visible={loc.visible} onToggle={() => toggleVisibility(loc)} />
+                  <VisibilityToggle visible={loc.visible ?? false} onToggle={() => toggleVisibility(loc)} />
                 </div>
 
                 {/* Name */}

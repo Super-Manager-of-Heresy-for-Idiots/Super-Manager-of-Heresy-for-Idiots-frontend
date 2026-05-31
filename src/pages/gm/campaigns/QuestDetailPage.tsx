@@ -109,7 +109,7 @@ export default function QuestDetailPage() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
             <CodexID>{quest.id.slice(0, 8).toUpperCase()}</CodexID>
             <QuestStatusBadge status={quest.status} />
-            <VisibilityToggle visible={quest.visible} onToggle={toggleVisibility} />
+            <VisibilityToggle visible={quest.visible ?? false} onToggle={toggleVisibility} />
           </div>
 
           <h3 className="ao-h3" style={{ marginTop: 10, color: 'var(--ink-bright)' }}>
@@ -166,17 +166,17 @@ export default function QuestDetailPage() {
                       border: '1px solid var(--rule)',
                     }}
                   >
-                    <Rune kind={rewardGlyph(reward.type)} size={14} color="var(--gold)" />
+                    <Rune kind={rewardGlyph(reward.type ?? '')} size={14} color="var(--gold)" />
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <span style={{ fontSize: 13, color: 'var(--ink-bright)' }}>
-                        {reward.name || reward.type}
+                        {reward.itemTemplateName || reward.type || 'Reward'}
                       </span>
-                      {reward.amount != null && (
+                      {reward.quantity != null && (
                         <span
                           className="ao-codex"
                           style={{ marginLeft: 8, color: 'var(--brass)' }}
                         >
-                          x{reward.amount}
+                          x{reward.quantity}
                         </span>
                       )}
                     </div>
@@ -184,7 +184,7 @@ export default function QuestDetailPage() {
                       className="ao-overline"
                       style={{ fontSize: 8, color: 'var(--ink-faint)' }}
                     >
-                      {reward.type}
+                      {reward.type ?? ''}
                     </span>
                   </div>
                 ))}

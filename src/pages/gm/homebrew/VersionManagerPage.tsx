@@ -15,16 +15,22 @@ export default function VersionManagerPage() {
   const [pinMode, setPinMode] = useState<PinMode>('latest');
   const [pinnedVersion, setPinnedVersion] = useState<number | null>(null);
 
-  const versionList = versions ?? [];
+  // The hook returns HomebrewDetailResponse (single object). Derive a versions array for display.
+  // If the response has a versions array at runtime, use it; otherwise wrap the single object.
+  const versionList: any[] = Array.isArray(versions)
+    ? versions
+    : versions
+      ? [versions]
+      : [];
   const latestVersion = versionList.length > 0 ? versionList[0].version : 1;
 
   const handleSavePin = () => {
-    // In a real flow, campaignId and activationId would come from context or params.
+    // In a real flow, campaignId would come from context or params.
     // For now we just trigger the mutation with the selected data.
     const pinValue = pinMode === 'latest' ? null : pinnedVersion;
     pinMutation.mutate({
       campaignId: '', // to be filled by parent context
-      activationId: '', // to be filled by parent context
+      packageId,
       data: { pinnedVersion: pinValue },
     });
   };
@@ -112,7 +118,7 @@ export default function VersionManagerPage() {
                       style={{ width: 100, padding: '4px 8px', fontSize: 13 }}
                     >
                       <option value="" disabled>Select</option>
-                      {versionList.map((v) => (
+                      {versionList.map((v: any) => (
                         <option key={v.version} value={v.version}>v{v.version}</option>
                       ))}
                     </select>
@@ -177,7 +183,7 @@ export default function VersionManagerPage() {
             </div>
           ) : (
             <div>
-              {versionList.map((v, idx) => {
+              {versionList.map((v: any, idx: number) => {
                 const isLatest = idx === 0;
 
                 return (
@@ -232,7 +238,7 @@ export default function VersionManagerPage() {
                       {/* Changes list */}
                       {v.changes && v.changes.length > 0 && (
                         <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 4 }}>
-                          {v.changes.map((change, ci) => {
+                          {v.changes.map((change: any, ci: number) => {
                             const isAddition = change.startsWith('+');
                             const isModification = change.startsWith('~');
                             const color = isAddition

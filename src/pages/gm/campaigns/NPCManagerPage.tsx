@@ -76,7 +76,6 @@ export default function NPCManagerPage() {
     visibilityMutation.mutate({
       campaignId: campaignId!,
       npcId: npc.id,
-      data: { visible: !npc.visible },
     });
   };
 
@@ -185,7 +184,7 @@ export default function NPCManagerPage() {
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                         <CodexID>{npc.id.slice(0, 8).toUpperCase()}</CodexID>
                         <VisibilityToggle
-                          visible={npc.visible}
+                          visible={npc.visible ?? false}
                           onToggle={() => toggleVisibility(npc)}
                         />
                       </div>

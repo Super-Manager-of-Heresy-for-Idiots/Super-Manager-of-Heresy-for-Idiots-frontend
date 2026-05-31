@@ -26,11 +26,14 @@ export function useGrantItem() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ campaignId, characterId, data }: { campaignId: string; characterId: string; data: GrantItemRequest }) =>
-      inventoryV2Api.grant(campaignId, characterId, data),
+    mutationFn: ({ campaignId, characterId, data }: { campaignId?: string; characterId: string; data: GrantItemRequest }) =>
+      inventoryV2Api.grant(campaignId || '_', characterId, data),
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId, 'inventory'] });
-      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId] });
+      if (variables.campaignId) {
+        queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId, 'inventory'] });
+        queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId] });
+      }
+      queryClient.invalidateQueries({ queryKey: ['characters', variables.characterId] });
       toast.success('Item granted!');
     },
     onError: (error: AxiosError<ApiError>) => {

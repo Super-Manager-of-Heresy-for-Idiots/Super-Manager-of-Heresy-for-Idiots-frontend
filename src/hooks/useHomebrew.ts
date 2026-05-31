@@ -152,7 +152,7 @@ export function useDeleteHomebrew() {
 export function useMarketplace(params: {
   search?: string;
   tags?: string;
-  sort?: 'downloads' | 'newest' | 'oldest';
+  sort?: 'downloads' | 'newest' | 'oldest' | 'rating';
   page?: number;
   size?: number;
 } = {}) {

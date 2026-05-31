@@ -18,7 +18,7 @@ export function useCampaigns() {
     queryKey: ['campaigns'],
     queryFn: async () => {
       const response = await campaignsApi.list();
-      return response.data;
+      return response.data?.content;
     },
   });
 }

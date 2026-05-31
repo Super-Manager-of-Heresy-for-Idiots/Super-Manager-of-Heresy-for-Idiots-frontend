@@ -5,9 +5,12 @@ import type {
   CreateNpcRequest,
   UpdateNpcRequest,
   SetNpcVisibilityRequest,
-  NpcNoteResponse,
-  CreateNpcNoteRequest,
+  NoteResponse,
+  CreateNoteRequest,
 } from '@/types';
+
+type NpcNoteResponse = NoteResponse;
+type CreateNpcNoteRequest = CreateNoteRequest;
 
 export const npcsApi = {
   list: async (campaignId: string): Promise<ApiResponse<NpcResponse[]>> => {
@@ -53,6 +56,11 @@ export const npcsApi = {
 
   deleteNote: async (campaignId: string, npcId: string, noteId: string): Promise<ApiResponse<void>> => {
     const response = await api.delete<ApiResponse<void>>(`/campaigns/${campaignId}/npcs/${npcId}/notes/${noteId}`);
+    return response.data;
+  },
+
+  toggleVisibility: async (campaignId: string, npcId: string): Promise<ApiResponse<NpcResponse>> => {
+    const response = await api.post<ApiResponse<NpcResponse>>(`/campaigns/${campaignId}/npcs/${npcId}/toggle-visibility`);
     return response.data;
   },
 };

@@ -1,9 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { homebrewV2Api } from '@/api/homebrew-v2.api';
+import { homebrewApi } from '@/api/homebrew.api';
 import type {
   AttachHomebrewRequest,
   PinHomebrewVersionRequest,
+  RateHomebrewRequest,
   ApiError,
 } from '@/types';
 import { AxiosError } from 'axios';
@@ -82,5 +84,57 @@ export function useAvailableContent(campaignId: string) {
       return response.data;
     },
     enabled: !!campaignId,
+  });
+}
+
+export function useHomebrewLibrary() {
+  return useQuery({
+    queryKey: ['homebrew-library'],
+    queryFn: async () => {
+      const response = await homebrewApi.getLibrary();
+      return response.data;
+    },
+  });
+}
+
+export function useRateHomebrew() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ packageId, data }: { packageId: string; data: RateHomebrewRequest }) =>
+      homebrewApi.rate(packageId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['homebrew-marketplace'] });
+      queryClient.invalidateQueries({ queryKey: ['homebrew-library'] });
+      toast.success('Rating submitted!');
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error.response?.data?.message || 'Failed to rate');
+    },
+  });
+}
+
+export function useCreateOverrideHomebrew() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ campaignId, data }: { campaignId: string; data: AttachHomebrewRequest }) =>
+      homebrewV2Api.attach(campaignId, data),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'homebrew'] });
+      toast.success('Override homebrew created!');
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error.response?.data?.message || 'Failed to create override');
+    },
+  });
+}
+
+export function useHomebrewVersions(packageId: string | undefined) {
+  return useQuery({
+    queryKey: ['homebrew-versions', packageId],
+    queryFn: async () => {
+      const response = await homebrewApi.getPackageDetail(packageId!);
+      return response.data;
+    },
+    enabled: !!packageId,
   });
 }

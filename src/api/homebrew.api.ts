@@ -61,12 +61,32 @@ export const homebrewApi = {
     return response.data;
   },
 
+  deleteMyPackage: async (id: string): Promise<ApiResponse<void>> => {
+    const response = await api.delete<ApiResponse<void>>(`/homebrew/${id}`);
+    return response.data;
+  },
+
+  getMyPackage: async (id: string): Promise<ApiResponse<HomebrewDetailResponse>> => {
+    const response = await api.get<ApiResponse<HomebrewDetailResponse>>(`/homebrew/${id}`);
+    return response.data;
+  },
+
+  updateMyPackage: async (id: string, data: UpdateHomebrewRequest): Promise<ApiResponse<HomebrewPackageResponse>> => {
+    const response = await api.put<ApiResponse<HomebrewPackageResponse>>(`/homebrew/${id}`, data);
+    return response.data;
+  },
+
+  removeContent: async (packageId: string, contentItemId: string): Promise<ApiResponse<void>> => {
+    const response = await api.delete<ApiResponse<void>>(`/homebrew/${packageId}/content/${contentItemId}`);
+    return response.data;
+  },
+
   // === Marketplace endpoints ===
 
   browseMarketplace: async (params: {
     search?: string;
     tags?: string;
-    sort?: 'downloads' | 'newest' | 'rating';
+    sort?: 'downloads' | 'newest' | 'rating' | 'oldest';
     page?: number;
     size?: number;
   } = {}): Promise<ApiResponse<Page<HomebrewPackageResponse>>> => {
@@ -86,8 +106,8 @@ export const homebrewApi = {
 
   // === Installed packages ===
 
-  getInstalledPackages: async (): Promise<ApiResponse<InstalledHomebrewResponse[]>> => {
-    const response = await api.get<ApiResponse<InstalledHomebrewResponse[]>>('/homebrew/installed');
+  getInstalledPackages: async (params: { page?: number; size?: number } = {}): Promise<ApiResponse<Page<InstalledHomebrewResponse>>> => {
+    const response = await api.get<ApiResponse<Page<InstalledHomebrewResponse>>>('/homebrew/installed', { params });
     return response.data;
   },
 
@@ -144,6 +164,11 @@ export const homebrewApi = {
 
   adminGetTags: async (): Promise<ApiResponse<HomebrewTagResponse[]>> => {
     const response = await api.get<ApiResponse<HomebrewTagResponse[]>>('/admin/homebrew/tags');
+    return response.data;
+  },
+
+  adminDeleteTag: async (id: string): Promise<ApiResponse<void>> => {
+    const response = await api.delete<ApiResponse<void>>(`/admin/homebrew/tags/${id}`);
     return response.data;
   },
 };
