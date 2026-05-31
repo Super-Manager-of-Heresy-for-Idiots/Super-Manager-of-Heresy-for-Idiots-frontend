@@ -6,9 +6,9 @@ import type {
   UpdateCampaignRequest,
   SetCampaignStatusRequest,
   JoinCampaignRequest,
+  KickMemberRequest,
   ReassignCharacterRequest,
   CreateStorageContainerRequest,
-  AddStorageItemRequest,
   ApiError,
 } from '@/types';
 import { AxiosError } from 'axios';
@@ -150,7 +150,7 @@ export function useRegenerateCampaignInvite() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => campaignsApi.regenerateInvite(id),
+    mutationFn: (id: string) => campaignsApi.regenerateInviteCode(id),
     onSuccess: (_, id) => {
       queryClient.invalidateQueries({ queryKey: ['campaigns', id] });
       queryClient.invalidateQueries({ queryKey: ['campaigns'] });
@@ -168,7 +168,7 @@ export function useKickMember() {
 
   return useMutation({
     mutationFn: ({ campaignId, userId }: { campaignId: string; userId: string }) =>
-      campaignsApi.kickMember(campaignId, userId),
+      campaignsApi.kick(campaignId, { userId }),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId] });
       queryClient.invalidateQueries({ queryKey: ['campaigns'] });
@@ -201,7 +201,7 @@ export function useReassignCharacter() {
 
 export function useCampaignStorage(id: string) {
   return useQuery({
-    queryKey: ['campaigns', id, 'storage'],
+    queryKey: ['campaigns', id, 'shared-storage'],
     queryFn: async () => {
       const response = await campaignsApi.getStorage(id);
       return response.data;
@@ -215,9 +215,9 @@ export function useCreateStorageContainer() {
 
   return useMutation({
     mutationFn: ({ campaignId, data }: { campaignId: string; data: CreateStorageContainerRequest }) =>
-      campaignsApi.createContainer(campaignId, data),
+      campaignsApi.createStorage(campaignId, data),
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'storage'] });
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'shared-storage'] });
       toast.success('Storage container created!');
     },
     onError: (error: AxiosError<ApiError>) => {
@@ -227,18 +227,35 @@ export function useCreateStorageContainer() {
   });
 }
 
-export function useAddStorageItem() {
+export function useDepositItem() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ campaignId, containerId, data }: { campaignId: string; containerId: string; data: AddStorageItemRequest }) =>
-      campaignsApi.addStorageItem(campaignId, containerId, data),
+    mutationFn: ({ campaignId, storageId, instanceId }: { campaignId: string; storageId: string; instanceId: string }) =>
+      campaignsApi.depositItem(campaignId, storageId, instanceId),
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'storage'] });
-      toast.success('Item added to storage!');
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'shared-storage'] });
+      toast.success('Item deposited to storage!');
     },
     onError: (error: AxiosError<ApiError>) => {
-      const message = error.response?.data?.message || 'Failed to add item to storage';
+      const message = error.response?.data?.message || 'Failed to deposit item';
+      toast.error(message);
+    },
+  });
+}
+
+export function useTakeItem() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ campaignId, storageId, instanceId, characterId }: { campaignId: string; storageId: string; instanceId: string; characterId: string }) =>
+      campaignsApi.takeItem(campaignId, storageId, instanceId, characterId),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'shared-storage'] });
+      toast.success('Item taken from storage!');
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      const message = error.response?.data?.message || 'Failed to take item';
       toast.error(message);
     },
   });

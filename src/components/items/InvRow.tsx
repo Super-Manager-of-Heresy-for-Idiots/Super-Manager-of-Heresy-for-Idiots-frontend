@@ -1,6 +1,6 @@
 import { Rune, OrdoChip } from '@/components/ordo';
 import { RarityBadge, RARITY_HUE } from './RarityBadge';
-import type { ItemInstance } from '@/types';
+import type { ItemInstanceResponse } from '@/types';
 
 /* ── Slot icon label mapping ───────────────────────────────────── */
 
@@ -33,7 +33,7 @@ const SLOT_LABEL: Record<string, string> = {
 /* ── Component ─────────────────────────────────────────────────── */
 
 interface InvRowProps {
-  item: ItemInstance;
+  item: ItemInstanceResponse;
   onRename?: () => void;
   onTransfer?: () => void;
   onMore?: () => void;
@@ -44,7 +44,7 @@ export function InvRow({ item, onRename, onTransfer, onMore }: InvRowProps) {
   const rarityColor = RARITY_HUE[rarity] ?? RARITY_HUE.COMMON;
   const slotGlyph = item.slot ? SLOT_ICON[item.slot] ?? 'square' : 'square';
   const slotLabel = item.slot ? SLOT_LABEL[item.slot] ?? item.slot : null;
-  const displayName = item.customName ?? item.name;
+  const displayName = item.displayName;
 
   return (
     <div
@@ -125,7 +125,7 @@ export function InvRow({ item, onRename, onTransfer, onMore }: InvRowProps) {
           )}
         </div>
 
-        {/* Meta line: rarity + slot + homebrew source */}
+        {/* Meta line: rarity + slot */}
         <div
           style={{
             display: 'flex',
@@ -144,48 +144,7 @@ export function InvRow({ item, onRename, onTransfer, onMore }: InvRowProps) {
               {slotLabel}
             </span>
           )}
-          {item.sourceHomebrewTitle && (
-            <span
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 4,
-                fontFamily: 'var(--font-mono)',
-                fontSize: 9,
-                color: 'var(--arcane)',
-                letterSpacing: '0.05em',
-                textTransform: 'uppercase',
-              }}
-            >
-              <Rune kind="book" size={8} color="var(--arcane)" />
-              {item.sourceHomebrewTitle}
-            </span>
-          )}
         </div>
-
-        {/* Damage line (if weapon) */}
-        {item.damageDice && (
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
-              marginTop: 4,
-              fontFamily: 'var(--font-mono)',
-              fontSize: 11,
-              color: 'var(--ink-quiet)',
-            }}
-          >
-            <Rune kind="sword" size={10} color="var(--ink-faint)" />
-            {item.damageDice}
-            {item.damageBonus ? `+${item.damageBonus}` : ''}
-            {item.damageType && (
-              <span style={{ color: 'var(--ink-faint)', textTransform: 'lowercase' }}>
-                {item.damageType}
-              </span>
-            )}
-          </div>
-        )}
 
         {/* Custom name note (show original name if renamed) */}
         {item.customName && (
@@ -193,7 +152,7 @@ export function InvRow({ item, onRename, onTransfer, onMore }: InvRowProps) {
             className="ao-italic"
             style={{ fontSize: 12, color: 'var(--ink-faint)', marginTop: 2 }}
           >
-            (originally {item.name})
+            (originally {item.templateName})
           </div>
         )}
       </div>

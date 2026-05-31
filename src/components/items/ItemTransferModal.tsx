@@ -2,14 +2,14 @@ import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { ModalScene, OrdoField, Rune, OrdoDivider } from '@/components/ordo';
 import { useTransferItem } from '@/hooks/useInventoryV2';
-import type { ItemInstance, CampaignMember } from '@/types';
+import type { ItemInstanceResponse, CampaignMember } from '@/types';
 
 /* ── Props ─────────────────────────────────────────────────────── */
 
 interface ItemTransferModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  item: ItemInstance;
+  item: ItemInstanceResponse;
   campaignId: string;
   fromCharId: string;
   campaignMembers: CampaignMember[];
@@ -61,7 +61,7 @@ export function ItemTransferModal({
     onOpenChange(next);
   };
 
-  const displayName = item.customName ?? item.name;
+  const displayName = item.displayName;
   const isStackable = item.quantity > 1;
 
   /* ── Recipient list (exclude self) ── */

@@ -37,12 +37,16 @@ export const adminApi = {
     const response = await api.post<ApiResponse<StatTypeResponse>>('/admin/stat-types', data);
     return response.data;
   },
+  getStatType: async (id: string): Promise<ApiResponse<StatTypeResponse>> => {
+    const response = await api.get<ApiResponse<StatTypeResponse>>(`/admin/stat-types/${id}`);
+    return response.data;
+  },
   updateStatType: async (id: string, data: CreateStatTypeRequest): Promise<ApiResponse<StatTypeResponse>> => {
     const response = await api.put<ApiResponse<StatTypeResponse>>(`/admin/stat-types/${id}`, data);
     return response.data;
   },
-  deleteStatType: async (id: string): Promise<ApiResponse<null>> => {
-    const response = await api.delete<ApiResponse<null>>(`/admin/stat-types/${id}`);
+  deleteStatType: async (id: string): Promise<ApiResponse<void>> => {
+    const response = await api.delete<ApiResponse<void>>(`/admin/stat-types/${id}`);
     return response.data;
   },
 
@@ -55,48 +59,56 @@ export const adminApi = {
     const response = await api.post<ApiResponse<ItemTypeResponse>>('/admin/item-types', data);
     return response.data;
   },
+  getItemType: async (id: string): Promise<ApiResponse<ItemTypeResponse>> => {
+    const response = await api.get<ApiResponse<ItemTypeResponse>>(`/admin/item-types/${id}`);
+    return response.data;
+  },
   updateItemType: async (id: string, data: CreateItemTypeRequest): Promise<ApiResponse<ItemTypeResponse>> => {
     const response = await api.put<ApiResponse<ItemTypeResponse>>(`/admin/item-types/${id}`, data);
     return response.data;
   },
-  deleteItemType: async (id: string): Promise<ApiResponse<null>> => {
-    const response = await api.delete<ApiResponse<null>>(`/admin/item-types/${id}`);
+  deleteItemType: async (id: string): Promise<ApiResponse<void>> => {
+    const response = await api.delete<ApiResponse<void>>(`/admin/item-types/${id}`);
     return response.data;
   },
 
   // === Character Classes ===
   getCharacterClasses: async (): Promise<ApiResponse<CharacterClassResponse[]>> => {
-    const response = await api.get<ApiResponse<CharacterClassResponse[]>>('/admin/character-classes');
+    const response = await api.get<ApiResponse<CharacterClassResponse[]>>('/admin/classes');
     return response.data;
   },
   createCharacterClass: async (data: CreateCharacterClassRequest): Promise<ApiResponse<CharacterClassResponse>> => {
-    const response = await api.post<ApiResponse<CharacterClassResponse>>('/admin/character-classes', data);
+    const response = await api.post<ApiResponse<CharacterClassResponse>>('/admin/classes', data);
+    return response.data;
+  },
+  getCharacterClass: async (id: string): Promise<ApiResponse<CharacterClassResponse>> => {
+    const response = await api.get<ApiResponse<CharacterClassResponse>>(`/admin/classes/${id}`);
     return response.data;
   },
   updateCharacterClass: async (id: string, data: CreateCharacterClassRequest): Promise<ApiResponse<CharacterClassResponse>> => {
-    const response = await api.put<ApiResponse<CharacterClassResponse>>(`/admin/character-classes/${id}`, data);
+    const response = await api.put<ApiResponse<CharacterClassResponse>>(`/admin/classes/${id}`, data);
     return response.data;
   },
-  deleteCharacterClass: async (id: string): Promise<ApiResponse<null>> => {
-    const response = await api.delete<ApiResponse<null>>(`/admin/character-classes/${id}`);
+  deleteCharacterClass: async (id: string): Promise<ApiResponse<void>> => {
+    const response = await api.delete<ApiResponse<void>>(`/admin/classes/${id}`);
     return response.data;
   },
 
   // === Character Races ===
   getCharacterRaces: async (): Promise<ApiResponse<CharacterRaceResponse[]>> => {
-    const response = await api.get<ApiResponse<CharacterRaceResponse[]>>('/admin/character-races');
+    const response = await api.get<ApiResponse<CharacterRaceResponse[]>>('/admin/races');
     return response.data;
   },
   createCharacterRace: async (data: CreateCharacterRaceRequest): Promise<ApiResponse<CharacterRaceResponse>> => {
-    const response = await api.post<ApiResponse<CharacterRaceResponse>>('/admin/character-races', data);
+    const response = await api.post<ApiResponse<CharacterRaceResponse>>('/admin/races', data);
     return response.data;
   },
   updateCharacterRace: async (id: string, data: CreateCharacterRaceRequest): Promise<ApiResponse<CharacterRaceResponse>> => {
-    const response = await api.put<ApiResponse<CharacterRaceResponse>>(`/admin/character-races/${id}`, data);
+    const response = await api.put<ApiResponse<CharacterRaceResponse>>(`/admin/races/${id}`, data);
     return response.data;
   },
-  deleteCharacterRace: async (id: string): Promise<ApiResponse<null>> => {
-    const response = await api.delete<ApiResponse<null>>(`/admin/character-races/${id}`);
+  deleteCharacterRace: async (id: string): Promise<ApiResponse<void>> => {
+    const response = await api.delete<ApiResponse<void>>(`/admin/races/${id}`);
     return response.data;
   },
 
@@ -117,8 +129,8 @@ export const adminApi = {
     const response = await api.put<ApiResponse<SkillResponse>>(`/admin/skills/${id}`, data);
     return response.data;
   },
-  deleteSkill: async (id: string): Promise<ApiResponse<null>> => {
-    const response = await api.delete<ApiResponse<null>>(`/admin/skills/${id}`);
+  deleteSkill: async (id: string): Promise<ApiResponse<void>> => {
+    const response = await api.delete<ApiResponse<void>>(`/admin/skills/${id}`);
     return response.data;
   },
 
@@ -149,8 +161,8 @@ export const adminApi = {
     const response = await api.put<ApiResponse<SubclassResponse>>(`/admin/subclasses/${id}`, data);
     return response.data;
   },
-  deleteSubclass: async (id: string): Promise<ApiResponse<null>> => {
-    const response = await api.delete<ApiResponse<null>>(`/admin/subclasses/${id}`);
+  deleteSubclass: async (id: string): Promise<ApiResponse<void>> => {
+    const response = await api.delete<ApiResponse<void>>(`/admin/subclasses/${id}`);
     return response.data;
   },
 
@@ -171,8 +183,8 @@ export const adminApi = {
     const response = await api.put<ApiResponse<FeatResponse>>(`/admin/feats/${id}`, data);
     return response.data;
   },
-  deleteFeat: async (id: string): Promise<ApiResponse<null>> => {
-    const response = await api.delete<ApiResponse<null>>(`/admin/feats/${id}`);
+  deleteFeat: async (id: string): Promise<ApiResponse<void>> => {
+    const response = await api.delete<ApiResponse<void>>(`/admin/feats/${id}`);
     return response.data;
   },
 
@@ -185,13 +197,13 @@ export const adminApi = {
     const response = await api.post<ApiResponse<ClassLevelRewardResponse>>(`/admin/classes/${classId}/level-rewards`, data);
     return response.data;
   },
-  deleteLevelReward: async (classId: string, rewardEntryId: string): Promise<ApiResponse<null>> => {
-    const response = await api.delete<ApiResponse<null>>(`/admin/classes/${classId}/level-rewards/${rewardEntryId}`);
+  deleteLevelReward: async (classId: string, rewardId: string): Promise<ApiResponse<void>> => {
+    const response = await api.delete<ApiResponse<void>>(`/admin/classes/${classId}/level-rewards/${rewardId}`);
     return response.data;
   },
 
   // === Buffs / Debuffs ===
-  getBuffsDebuffs: async (params?: { is_buff?: boolean; effect_type?: string }): Promise<ApiResponse<BuffDebuffResponse[]>> => {
+  getBuffsDebuffs: async (params?: { isBuff?: boolean; effectType?: string }): Promise<ApiResponse<BuffDebuffResponse[]>> => {
     const response = await api.get<ApiResponse<BuffDebuffResponse[]>>('/admin/buffs-debuffs', { params });
     return response.data;
   },
@@ -207,8 +219,8 @@ export const adminApi = {
     const response = await api.put<ApiResponse<BuffDebuffResponse>>(`/admin/buffs-debuffs/${id}`, data);
     return response.data;
   },
-  deleteBuffDebuff: async (id: string): Promise<ApiResponse<null>> => {
-    const response = await api.delete<ApiResponse<null>>(`/admin/buffs-debuffs/${id}`);
+  deleteBuffDebuff: async (id: string): Promise<ApiResponse<void>> => {
+    const response = await api.delete<ApiResponse<void>>(`/admin/buffs-debuffs/${id}`);
     return response.data;
   },
 
@@ -229,8 +241,8 @@ export const adminApi = {
     const response = await api.put<ApiResponse<EnchantmentTypeResponse>>(`/admin/enchantment-types/${id}`, data);
     return response.data;
   },
-  deleteEnchantmentType: async (id: string): Promise<ApiResponse<null>> => {
-    const response = await api.delete<ApiResponse<null>>(`/admin/enchantment-types/${id}`);
+  deleteEnchantmentType: async (id: string): Promise<ApiResponse<void>> => {
+    const response = await api.delete<ApiResponse<void>>(`/admin/enchantment-types/${id}`);
     return response.data;
   },
 

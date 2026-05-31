@@ -4,7 +4,7 @@ import { questsApi } from '@/api/quests.api';
 import type {
   CreateQuestRequest,
   UpdateQuestRequest,
-  CreateQuestNoteRequest,
+  CreateNoteRequest,
   ApiError,
 } from '@/types';
 import { AxiosError } from 'axios';
@@ -89,17 +89,6 @@ export function useDeleteQuest() {
 
 // Quest Notes
 
-export function useQuestNotes(campaignId: string, questId: string) {
-  return useQuery({
-    queryKey: ['campaigns', campaignId, 'quests', questId, 'notes'],
-    queryFn: async () => {
-      const response = await questsApi.listNotes(campaignId, questId);
-      return response.data;
-    },
-    enabled: !!campaignId && !!questId,
-  });
-}
-
 export function useAddQuestNote() {
   const queryClient = useQueryClient();
 
@@ -111,11 +100,11 @@ export function useAddQuestNote() {
     }: {
       campaignId: string;
       questId: string;
-      data: CreateQuestNoteRequest;
+      data: CreateNoteRequest;
     }) => questsApi.addNote(campaignId, questId, data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
-        queryKey: ['campaigns', variables.campaignId, 'quests', variables.questId, 'notes'],
+        queryKey: ['campaigns', variables.campaignId, 'quests', variables.questId],
       });
       toast.success('Note added!');
     },

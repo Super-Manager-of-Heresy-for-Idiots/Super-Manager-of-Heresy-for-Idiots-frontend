@@ -4,14 +4,14 @@ import { effectsApi } from '@/api/effects.api';
 import type { ApplyEffectRequest, ApiError } from '@/types';
 import { AxiosError } from 'axios';
 
-export function useCharacterEffects(characterId: string) {
+export function useCharacterEffects(campaignId: string, characterId: string) {
   return useQuery({
-    queryKey: ['characters', characterId, 'effects'],
+    queryKey: ['campaigns', campaignId, 'characters', characterId, 'effects'],
     queryFn: async () => {
-      const response = await effectsApi.list(characterId);
+      const response = await effectsApi.list(campaignId, characterId);
       return response.data;
     },
-    enabled: !!characterId,
+    enabled: !!campaignId && !!characterId,
   });
 }
 
@@ -19,11 +19,11 @@ export function useApplyEffect() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ characterId, data }: { characterId: string; data: ApplyEffectRequest }) =>
-      effectsApi.apply(characterId, data),
+    mutationFn: ({ campaignId, characterId, data }: { campaignId: string; characterId: string; data: ApplyEffectRequest }) =>
+      effectsApi.apply(campaignId, characterId, data),
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['characters', variables.characterId, 'effects'] });
-      queryClient.invalidateQueries({ queryKey: ['characters', variables.characterId] });
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId, 'effects'] });
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId] });
       toast.success('Effect applied!');
     },
     onError: (error: AxiosError<ApiError>) => {
@@ -37,32 +37,15 @@ export function useRemoveEffect() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ characterId, effectId }: { characterId: string; effectId: string }) =>
-      effectsApi.remove(characterId, effectId),
+    mutationFn: ({ campaignId, characterId, effectId }: { campaignId: string; characterId: string; effectId: string }) =>
+      effectsApi.remove(campaignId, characterId, effectId),
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['characters', variables.characterId, 'effects'] });
-      queryClient.invalidateQueries({ queryKey: ['characters', variables.characterId] });
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId, 'effects'] });
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId] });
       toast.success('Effect removed!');
     },
     onError: (error: AxiosError<ApiError>) => {
       const message = error.response?.data?.message || 'Failed to remove effect';
-      toast.error(message);
-    },
-  });
-}
-
-export function useAdvanceRound() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (characterId: string) => effectsApi.advanceRound(characterId),
-    onSuccess: (_, characterId) => {
-      queryClient.invalidateQueries({ queryKey: ['characters', characterId, 'effects'] });
-      queryClient.invalidateQueries({ queryKey: ['characters', characterId] });
-      toast.success('Round advanced!');
-    },
-    onError: (error: AxiosError<ApiError>) => {
-      const message = error.response?.data?.message || 'Failed to advance round';
       toast.error(message);
     },
   });

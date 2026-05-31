@@ -10,6 +10,12 @@ export type Rarity = 'COMMON' | 'UNCOMMON' | 'RARE' | 'VERY_RARE' | 'LEGENDARY';
 export type DamageType = 'SLASHING' | 'PIERCING' | 'BLUDGEONING' | 'FIRE' | 'COLD' |
   'LIGHTNING' | 'POISON' | 'NECROTIC' | 'RADIANT' | 'PSYCHIC' | 'FORCE' | 'THUNDER' | 'ACID';
 
+export type SkillActivation = 'PASSIVE' | 'ACTIVE';
+
+export type RewardType = 'SKILL' | 'SUBCLASS' | 'FEAT';
+
+export type CampaignRole = 'GM' | 'PLAYER';
+
 export const EQUIPMENT_SLOTS: EquipmentSlot[] = [
   'HEAD', 'CHEST', 'LEGS', 'FEET', 'MAIN_HAND',
   'OFF_HAND', 'RING_LEFT', 'RING_RIGHT', 'NECK', 'CLOAK'
@@ -35,6 +41,7 @@ export interface ApiResponse<T> {
   data?: T;
   message?: string;
   error?: string;
+  fields?: Record<string, string>;
 }
 
 export interface ValidationErrorResponse {
@@ -85,6 +92,7 @@ export interface CreateCharacterRequest {
   name: string;
   classId: string;
   raceId: string;
+  campaignId: string;
 }
 
 export interface UpdateCharacterRequest {
@@ -99,10 +107,12 @@ export interface CharacterResponse {
   experience: number;
   classLevels: ClassLevelResponse[];
   race: CharacterRaceResponse;
+  teamId: string;
+  teamName: string;
   ownerId: string;
   ownerUsername: string;
   stats: CharacterStatResponse[];
-  inventorySlots: InventorySlotResponse[];
+  inventorySlots: ItemInstanceResponse[];
   createdAt: string;
   updatedAt: string;
 }
@@ -127,26 +137,8 @@ export interface StatModifierDetail {
   modifierValue: number;
 }
 
-export interface InventorySlotResponse {
-  id: string;
-  slot: EquipmentSlot;
-  itemTypeId?: string;
-  itemTypeName?: string;
-  artifactId?: string;
-  artifactName?: string;
-  artifactRarity?: Rarity;
-  quantity?: number;
-  notes?: string;
-}
-
 export interface UpdateStatRequest {
   value: number;
-}
-
-export interface UpdateInventorySlotRequest {
-  itemTypeId?: string | null;
-  quantity?: number;
-  notes?: string;
 }
 
 // === Teams ===
@@ -328,7 +320,6 @@ export interface StatTypeResponse {
   id: string;
   name: string;
   description?: string;
-  isDefault: boolean;
 }
 
 export interface ItemTypeResponse {
@@ -341,7 +332,7 @@ export interface ItemTypeResponse {
   damageType?: string;
   skillId?: string;
   skillName?: string;
-  skillActivation?: 'PASSIVE' | 'ACTIVE';
+  skillActivation?: SkillActivation;
 }
 
 export interface CharacterClassResponse {
@@ -365,8 +356,6 @@ export interface SkillResponse {
   damageBonus?: number;
   damageType?: string;
   effects?: SkillEffectResponse[];
-  createdAt: string;
-  updatedAt: string;
 }
 
 export interface CreateSkillRequest {
@@ -384,8 +373,6 @@ export interface SubclassResponse {
   classId: string;
   className: string;
   description?: string;
-  createdAt: string;
-  updatedAt: string;
 }
 
 export interface CreateSubclassRequest {
@@ -399,8 +386,6 @@ export interface FeatResponse {
   name: string;
   description?: string;
   prerequisites?: string;
-  createdAt: string;
-  updatedAt: string;
 }
 
 export interface CreateFeatRequest {
@@ -421,7 +406,7 @@ export interface ClassLevelRewardResponse {
 
 export interface CreateClassLevelRewardRequest {
   requiredLevel: number;
-  rewardType: 'SKILL' | 'SUBCLASS' | 'FEAT';
+  rewardType: RewardType;
   rewardId: string;
   isChoice: boolean;
 }
@@ -439,7 +424,7 @@ export interface CreateItemTypeRequest {
   damageBonus?: number;
   damageType?: string;
   skillId?: string;
-  skillActivation?: 'PASSIVE' | 'ACTIVE';
+  skillActivation?: SkillActivation;
 }
 
 export interface CreateCharacterClassRequest {
@@ -529,9 +514,11 @@ export interface SetSkillEffectsRequest {
 
 // === Homebrew Marketplace ===
 
-export type HomebrewStatus = 'DRAFT' | 'PUBLISHED' | 'UNPUBLISHED';
+export type HomebrewStatus = 'DRAFT' | 'PUBLISHED' | 'UNPUBLISHED' | 'ARCHIVED';
 
-export type ContentType = 'ITEM_TYPE' | 'CHARACTER_CLASS' | 'SKILL' | 'FEAT';
+export type ContentType = 'ITEM_TYPE' | 'CHARACTER_CLASS' | 'SKILL' | 'FEAT' |
+  'SUBCLASS' | 'RACE' | 'STAT_TYPE' | 'BUFF_DEBUFF' | 'ENCHANTMENT_TYPE' |
+  'CURRENCY' | 'CUSTOM_RESOURCE' | 'ITEM_TEMPLATE';
 
 export interface CreateHomebrewRequest {
   title: string;
@@ -550,12 +537,7 @@ export interface AddContentRequest {
   contentId: string;
 }
 
-export interface HomebrewContentSummary {
-  itemTypeCount: number;
-  classCount: number;
-  skillCount: number;
-  featCount: number;
-}
+export type HomebrewContentSummary = Partial<Record<ContentType, number>>;
 
 export interface ContentSummaryDto {
   id: string;
@@ -597,12 +579,6 @@ export interface InstalledHomebrewResponse {
   contentSummary: HomebrewContentSummary;
 }
 
-export interface InstallResponse {
-  installedAt: string;
-  sourceVersion: number;
-  contentCount: number;
-}
-
 export interface SoftDeleteResponse {
   message: string;
   installationCount: number;
@@ -638,25 +614,37 @@ export interface Page<T> {
 
 export type CampaignStatus = 'ACTIVE' | 'PAUSED' | 'COMPLETED';
 
-export interface CampaignResponse {
+export interface CampaignDetailResponse {
   id: string;
   name: string;
   description?: string;
   status: CampaignStatus;
-  members: CampaignMember[];
-  gmCount: number;
-  isCreator: boolean;
   inviteCode?: string;
+  memberCount: number;
   createdAt: string;
   updatedAt: string;
+  members: CampaignMember[];
 }
 
 export interface CampaignMember {
   userId: string;
   username: string;
-  roleInCampaign: 'GM' | 'PLAYER';
+  roleInCampaign: CampaignRole;
   isCreator: boolean;
   joinedAt: string;
+  kicked: boolean;
+}
+
+export interface CampaignResponse {
+  id: string;
+  name: string;
+  description?: string;
+  status: CampaignStatus;
+  inviteCode?: string;
+  memberCount: number;
+  createdAt: string;
+  updatedAt: string;
+  members: CampaignMember[];
 }
 
 export interface CreateCampaignRequest {
@@ -677,59 +665,45 @@ export interface JoinCampaignRequest {
   inviteCode: string;
 }
 
+export interface KickMemberRequest {
+  userId: string;
+}
+
 export interface ReassignCharacterRequest {
-  newOwnerId: string;
+  newOwnerUserId: string;
 }
 
 // === Shared Storage ===
 
-export interface StorageContainerResponse {
+export interface SharedStorageResponse {
   id: string;
   name: string;
-  items: StorageItemResponse[];
+  campaignId: string;
+  items: ItemInstanceResponse[];
   createdAt: string;
-}
-
-export interface StorageItemResponse {
-  id: string;
-  templateId: string;
-  name: string;
-  quantity: number;
-  rarity?: Rarity;
-  isUnique: boolean;
 }
 
 export interface CreateStorageContainerRequest {
   name: string;
 }
 
-export interface AddStorageItemRequest {
-  templateId: string;
-  quantity: number;
-}
-
-// === Character v2 (extends existing CharacterResponse) ===
+// === Character v2 ===
 
 export type CharacterStatus = 'ACTIVE' | 'DEAD' | 'RESERVE';
 
 export interface CharacterV2Response {
   id: string;
   name: string;
-  campaignId: string;
-  status: CharacterStatus;
   totalLevel: number;
   experience: number;
-  currentHp: number;
-  maxHp: number;
   classLevels: ClassLevelResponse[];
   race: CharacterRaceResponse;
+  teamId: string;
+  teamName: string;
   ownerId: string;
   ownerUsername: string;
   stats: CharacterStatResponse[];
-  inventory: ItemInstance[];
-  wallet: WalletEntry[];
-  resources: ResourceEntry[];
-  activeEffects: ActiveEffect[];
+  inventorySlots: ItemInstanceResponse[];
   createdAt: string;
   updatedAt: string;
 }
@@ -738,95 +712,88 @@ export interface CreateCharacterInCampaignRequest {
   name: string;
   classId: string;
   raceId: string;
-}
-
-export interface SetCharacterStatusRequest {
-  status: CharacterStatus;
+  campaignId: string;
 }
 
 export interface UpdateHpRequest {
-  delta: number;
-}
-
-export interface UpdateWalletRequest {
-  delta: number;
-}
-
-export interface UpdateResourceRequest {
-  value: number;
+  amount: number;
 }
 
 // === Wallet & Resources ===
 
-export interface WalletEntry {
+export interface WalletEntryResponse {
   currencyTypeId: string;
-  name: string;
+  currencyName: string;
   amount: number;
-  goldRate?: number;
-  goldEquivalent?: number;
+  goldEquivalent: number;
 }
 
-export interface ResourceEntry {
+export interface ModifyWalletRequest {
+  currencyTypeId: string;
+  amount: number;
+}
+
+export interface ResourceResponse {
   resourceTypeId: string;
-  name: string;
+  resourceName: string;
   currentValue: number;
-  maxValue?: number;
+  maxValue: number;
+}
+
+export interface ModifyResourceRequest {
+  resourceTypeId: string;
+  currentValue: number;
 }
 
 // === Item Instances ===
 
-export interface ItemInstance {
+export interface ItemInstanceResponse {
   id: string;
   templateId: string;
-  name: string;
+  templateName: string;
+  displayName: string;
   customName?: string;
-  isUnique: boolean;
   quantity: number;
+  isUnique: boolean;
   slot?: EquipmentSlot;
+  notes?: string;
   rarity?: Rarity;
-  damageDice?: string;
-  damageBonus?: number;
-  damageType?: DamageType;
-  sourceHomebrewTitle?: string;
   enchantments: EnchantmentResponse[];
-}
-
-export type RenameMode = 'WHOLE_STACK' | 'SPLIT_ONE';
-
-export interface RenameItemRequest {
-  customName: string;
-  mode: RenameMode;
 }
 
 export interface GrantItemRequest {
   templateId: string;
   quantity: number;
-  isUnique?: boolean;
   customName?: string;
+  isUnique?: boolean;
+}
+
+export interface EquipItemRequest {
+  slot: EquipmentSlot;
+}
+
+export interface RenameItemRequest {
+  customName: string;
+  renameEntireStack: boolean;
 }
 
 export interface TransferItemRequest {
   toCharacterId: string;
 }
 
-export interface EquipItemRequest {
-  slot: EquipmentSlot | null;
-}
+// === Active Effects ===
 
-// === Active Effects (replace Conditions) ===
-
-export interface ActiveEffect {
+export interface CharacterActiveEffectResponse {
   id: string;
+  buffDebuffId: string;
+  buffDebuffName: string;
+  isBuff: boolean;
+  effectType: string;
+  modifierValue?: number;
+  targetStatName?: string;
   remainingRounds?: number;
   appliedAt: string;
-  buffDebuff: {
-    id: string;
-    name: string;
-    effectType: string;
-    targetStatName?: string;
-    modifierValue?: number;
-    isBuff: boolean;
-  };
+  appliedByUsername: string;
 }
 
 export interface ApplyEffectRequest {
@@ -836,10 +803,13 @@ export interface ApplyEffectRequest {
 
 // === Ability Check ===
 
-export interface AbilityCheckResult {
+export interface AbilityCheckResponse {
   statName: string;
-  total: number;
-  breakdown: { source: string; value: number }[];
+  baseValue: number;
+  modifier: number;
+  buffBonus: number;
+  equipmentBonus: number;
+  totalModifier: number;
 }
 
 // === XP Grant ===
@@ -857,45 +827,43 @@ export interface GrantXpRequest {
 export interface NpcResponse {
   id: string;
   name: string;
-  role?: string;
   publicDescription?: string;
   privateDescription?: string;
-  visible: boolean;
-  campaignId: string;
+  isVisibleToPlayers: boolean;
+  notes: NoteResponse[];
   createdAt: string;
   updatedAt: string;
 }
 
 export interface CreateNpcRequest {
   name: string;
-  role?: string;
   publicDescription?: string;
   privateDescription?: string;
-  visible?: boolean;
+  isVisibleToPlayers?: boolean;
 }
 
 export interface UpdateNpcRequest {
   name?: string;
-  role?: string;
   publicDescription?: string;
   privateDescription?: string;
+  isVisibleToPlayers?: boolean;
 }
 
-export interface SetNpcVisibilityRequest {
-  visible: boolean;
-}
-
-export interface NpcNoteResponse {
+export interface NoteResponse {
   id: string;
-  text: string;
   authorId: string;
   authorUsername: string;
-  isGmNote: boolean;
+  content: string;
   createdAt: string;
+  updatedAt: string;
 }
 
-export interface CreateNpcNoteRequest {
-  text: string;
+export interface CreateNoteRequest {
+  content: string;
+}
+
+export interface UpdateNoteRequest {
+  content: string;
 }
 
 // === Quests ===
@@ -904,54 +872,45 @@ export type QuestStatus = 'ACTIVE' | 'COMPLETED' | 'FAILED' | 'HIDDEN' | 'ARCHIV
 
 export interface QuestResponse {
   id: string;
-  name: string;
+  title: string;
   description?: string;
-  gmDescription?: string;
   status: QuestStatus;
-  visible: boolean;
-  campaignId: string;
-  linkedNpcs?: { id: string; name: string }[];
-  linkedLocations?: { id: string; name: string }[];
-  linkedItems?: { id: string; name: string }[];
-  rewards?: QuestReward[];
+  isVisibleToPlayers: boolean;
+  notes: NoteResponse[];
+  rewards: QuestRewardResponse[];
   createdAt: string;
   updatedAt: string;
 }
 
-export interface QuestReward {
-  type: 'ITEM' | 'GOLD' | 'XP';
-  name?: string;
-  templateId?: string;
-  amount?: number;
+export interface QuestRewardResponse {
+  id: string;
+  itemTemplateId?: string;
+  itemTemplateName?: string;
+  quantity?: number;
+  currencyTypeId?: string;
+  currencyTypeName?: string;
+  currencyAmount?: number;
 }
 
 export interface CreateQuestRequest {
-  name: string;
+  title: string;
   description?: string;
-  gmDescription?: string;
   status?: QuestStatus;
-  visible?: boolean;
+  isVisibleToPlayers?: boolean;
 }
 
 export interface UpdateQuestRequest {
-  name?: string;
+  title?: string;
   description?: string;
-  gmDescription?: string;
-  status?: QuestStatus;
-  visible?: boolean;
+  status?: string;
+  isVisibleToPlayers?: boolean;
 }
 
-export interface QuestNoteResponse {
-  id: string;
-  text: string;
-  authorId: string;
-  authorUsername: string;
-  isGmNote: boolean;
-  createdAt: string;
-}
-
-export interface CreateQuestNoteRequest {
-  text: string;
+export interface CreateQuestRewardRequest {
+  itemTemplateId?: string;
+  quantity?: number;
+  currencyTypeId?: string;
+  currencyAmount?: number;
 }
 
 // === Locations ===
@@ -960,8 +919,7 @@ export interface LocationResponse {
   id: string;
   name: string;
   description?: string;
-  visible: boolean;
-  campaignId: string;
+  isVisibleToPlayers: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -969,72 +927,108 @@ export interface LocationResponse {
 export interface CreateLocationRequest {
   name: string;
   description?: string;
-  visible?: boolean;
+  isVisibleToPlayers?: boolean;
 }
 
 export interface UpdateLocationRequest {
   name?: string;
   description?: string;
-  visible?: boolean;
+  isVisibleToPlayers?: boolean;
 }
 
 // === GM Session Notes ===
 
-export interface SessionNoteResponse {
+export interface GmSessionNoteResponse {
   id: string;
-  title: string;
-  body: string;
   campaignId: string;
-  authorId: string;
   authorUsername: string;
+  title: string;
+  content: string;
   createdAt: string;
   updatedAt: string;
 }
 
-export interface CreateSessionNoteRequest {
+export interface CreateGmNoteRequest {
   title: string;
-  body: string;
+  content: string;
 }
 
-export interface UpdateSessionNoteRequest {
+export interface UpdateGmNoteRequest {
   title?: string;
-  body?: string;
+  content?: string;
 }
 
-// === Homebrew v2 ===
+// === Item Templates ===
 
-export type HomebrewStatusV2 = 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
-
-export interface HomebrewRating {
-  net: number;
-  total: number;
-  myRating?: 1 | -1;
+export interface ItemTemplateResponse {
+  id: string;
+  name: string;
+  description?: string;
+  itemTypeName?: string;
+  rarity: Rarity;
+  damageDice?: string;
+  damageBonus?: number;
+  damageType?: DamageType;
+  isStackable: boolean;
+  skillName?: string;
+  skillActivation?: SkillActivation;
+  sourceHomebrewTitle?: string;
 }
 
-export interface RateHomebrewRequest {
-  rating: 1 | -1;
+export interface CreateItemTemplateRequest {
+  name: string;
+  description?: string;
+  itemTypeId?: string;
+  rarity: Rarity;
+  damageDice?: string;
+  damageBonus?: number;
+  damageType?: DamageType;
+  isStackable?: boolean;
+  skillId?: string;
+  skillActivation?: SkillActivation;
+}
+
+// === Homebrew v2 (Campaign attachment & ratings) ===
+
+export interface CampaignHomebrewResponse {
+  packageId: string;
+  title: string;
+  pinnedVersion?: number;
+  contentSummary: HomebrewContentSummary;
 }
 
 export interface AttachHomebrewRequest {
-  packageId: string;
-  pinnedVersion?: number;
+  homebrewPackageId: string;
 }
 
 export interface PinHomebrewVersionRequest {
   pinnedVersion: number | null;
 }
 
-export interface CreateOverrideHomebrewRequest extends CreateHomebrewRequest {
-  parentId: string;
+export interface HomebrewRatingResponse {
+  likes: number;
+  dislikes: number;
+  netRating: number;
+  userRating?: 1 | -1;
 }
 
-export interface TeamHomebrewActivationResponse {
+export interface RateHomebrewRequest {
+  rating: 1 | -1;
+}
+
+export interface TeamAvailableContentResponse {
+  classes: AvailableContentEntry[];
+  races: AvailableContentEntry[];
+  itemTypes: AvailableContentEntry[];
+  skills: AvailableContentEntry[];
+  feats: AvailableContentEntry[];
+}
+
+export interface AvailableContentEntry {
   id: string;
-  packageId: string;
-  packageTitle: string;
-  pinnedVersion?: number;
-  currentVersion: number;
-  activatedAt: string;
+  name: string;
+  source: string;
+  homebrewTitle?: string;
 }
 
 // === WebSocket ===

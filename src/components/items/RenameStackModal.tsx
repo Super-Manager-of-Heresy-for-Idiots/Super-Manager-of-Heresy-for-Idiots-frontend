@@ -2,28 +2,29 @@ import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { ModalScene, OrdoField, Rune } from '@/components/ordo';
 import { useRenameItem } from '@/hooks/useInventoryV2';
-import type { ItemInstance, RenameMode } from '@/types';
+import type { ItemInstanceResponse } from '@/types';
 
 /* ── Props ─────────────────────────────────────────────────────── */
 
 interface RenameStackModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  item: ItemInstance;
+  item: ItemInstanceResponse;
+  campaignId: string;
   characterId: string;
 }
 
 /* ── Mode option data ──────────────────────────────────────────── */
 
-const MODES: { value: RenameMode; label: string; desc: string; glyph: string }[] = [
+const MODES: { value: boolean; label: string; desc: string; glyph: string }[] = [
   {
-    value: 'WHOLE_STACK',
+    value: true,
     label: 'Rename whole stack',
     desc: 'Applies the new name to every item in the stack.',
     glyph: 'square',
   },
   {
-    value: 'SPLIT_ONE',
+    value: false,
     label: 'Split one away & name it',
     desc: 'Separates a single item from the stack and gives it a unique name.',
     glyph: 'diamond',
@@ -36,15 +37,16 @@ export function RenameStackModal({
   open,
   onOpenChange,
   item,
+  campaignId,
   characterId,
 }: RenameStackModalProps) {
   const renameMutation = useRenameItem();
 
-  const [mode, setMode] = useState<RenameMode>('WHOLE_STACK');
+  const [renameEntireStack, setRenameEntireStack] = useState(true);
   const [newName, setNewName] = useState('');
 
   const resetForm = () => {
-    setMode('WHOLE_STACK');
+    setRenameEntireStack(true);
     setNewName('');
   };
 
@@ -53,11 +55,12 @@ export function RenameStackModal({
 
     renameMutation.mutate(
       {
+        campaignId,
         characterId,
         instanceId: item.id,
         data: {
           customName: newName.trim(),
-          mode,
+          renameEntireStack,
         },
       },
       {
@@ -74,7 +77,7 @@ export function RenameStackModal({
     onOpenChange(next);
   };
 
-  const displayName = item.customName ?? item.name;
+  const displayName = item.customName ?? item.displayName;
 
   /* ── Footer ── */
 
@@ -117,10 +120,10 @@ export function RenameStackModal({
         <OrdoField label="Rename Mode">
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             {MODES.map((opt) => {
-              const selected = mode === opt.value;
+              const selected = renameEntireStack === opt.value;
               return (
                 <label
-                  key={opt.value}
+                  key={String(opt.value)}
                   style={{
                     display: 'flex',
                     alignItems: 'flex-start',
@@ -137,9 +140,9 @@ export function RenameStackModal({
                   <input
                     type="radio"
                     name="rename-mode"
-                    value={opt.value}
+                    value={String(opt.value)}
                     checked={selected}
-                    onChange={() => setMode(opt.value)}
+                    onChange={() => setRenameEntireStack(opt.value)}
                     style={{
                       marginTop: 2,
                       accentColor: 'var(--gold)',
@@ -216,7 +219,7 @@ export function RenameStackModal({
               className="ao-italic"
               style={{ fontSize: 11, color: 'var(--ink-faint)', marginTop: 2 }}
             >
-              (originally {item.name})
+              (originally {item.templateName})
             </div>
           )}
         </div>

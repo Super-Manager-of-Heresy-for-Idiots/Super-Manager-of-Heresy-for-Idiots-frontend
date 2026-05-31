@@ -1,15 +1,14 @@
 import { Rune, ModifierTag } from '@/components/ordo';
-import type { ActiveEffect } from '@/types';
+import type { CharacterActiveEffectResponse } from '@/types';
 
 interface EffectRowProps {
-  effect: ActiveEffect;
+  effect: CharacterActiveEffectResponse;
   onRemove: () => void;
 }
 
 export function EffectRow({ effect, onRemove }: EffectRowProps) {
-  const isBuff = effect.buffDebuff.isBuff;
-  const borderColor = isBuff ? '#7a9866' : '#c9803a';
-  const iconColor = isBuff ? '#7a9866' : '#c9803a';
+  const borderColor = effect.isBuff ? '#7a9866' : '#c9803a';
+  const iconColor = effect.isBuff ? '#7a9866' : '#c9803a';
 
   return (
     <div
@@ -19,7 +18,7 @@ export function EffectRow({ effect, onRemove }: EffectRowProps) {
         gap: 12,
         padding: '10px 14px',
         borderLeft: `3px solid ${borderColor}`,
-        background: isBuff
+        background: effect.isBuff
           ? 'rgba(122,152,102,0.04)'
           : 'rgba(201,128,58,0.04)',
         borderBottom: '1px solid var(--hairline)',
@@ -39,7 +38,7 @@ export function EffectRow({ effect, onRemove }: EffectRowProps) {
         }}
       >
         <Rune
-          kind={isBuff ? 'arrow-up' : 'minus'}
+          kind={effect.isBuff ? 'arrow-up' : 'minus'}
           size={14}
           color={iconColor}
         />
@@ -59,7 +58,7 @@ export function EffectRow({ effect, onRemove }: EffectRowProps) {
             className="ao-h5"
             style={{ fontSize: 13, color: 'var(--ink-bright)' }}
           >
-            {effect.buffDebuff.name}
+            {effect.buffDebuffName}
           </span>
           <span
             className="ao-overline"
@@ -69,16 +68,16 @@ export function EffectRow({ effect, onRemove }: EffectRowProps) {
               letterSpacing: '0.14em',
             }}
           >
-            {isBuff ? 'BUFF' : 'DEBUFF'}
+            {effect.isBuff ? 'BUFF' : 'DEBUFF'}
           </span>
         </div>
 
         {/* Modifier tags */}
-        {effect.buffDebuff.targetStatName && effect.buffDebuff.modifierValue != null && (
+        {effect.targetStatName && effect.modifierValue != null && (
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 4 }}>
             <ModifierTag
-              stat={effect.buffDebuff.targetStatName}
-              value={effect.buffDebuff.modifierValue}
+              stat={effect.targetStatName}
+              value={effect.modifierValue}
               size="sm"
             />
           </div>

@@ -11,14 +11,14 @@ import type {
 } from '@/types';
 import { AxiosError } from 'axios';
 
-export function useCharacterInventory(characterId: string) {
+export function useCharacterInventory(campaignId: string, characterId: string) {
   return useQuery({
-    queryKey: ['characters', characterId, 'inventory'],
+    queryKey: ['campaigns', campaignId, 'characters', characterId, 'inventory'],
     queryFn: async () => {
-      const response = await inventoryV2Api.list(characterId);
+      const response = await inventoryV2Api.list(campaignId, characterId);
       return response.data;
     },
-    enabled: !!characterId,
+    enabled: !!campaignId && !!characterId,
   });
 }
 
@@ -26,11 +26,11 @@ export function useGrantItem() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ characterId, data }: { characterId: string; data: GrantItemRequest }) =>
-      inventoryV2Api.grant(characterId, data),
+    mutationFn: ({ campaignId, characterId, data }: { campaignId: string; characterId: string; data: GrantItemRequest }) =>
+      inventoryV2Api.grant(campaignId, characterId, data),
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['characters', variables.characterId, 'inventory'] });
-      queryClient.invalidateQueries({ queryKey: ['characters', variables.characterId] });
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId, 'inventory'] });
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId] });
       toast.success('Item granted!');
     },
     onError: (error: AxiosError<ApiError>) => {
@@ -43,11 +43,11 @@ export function useRemoveItem() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ characterId, instanceId }: { characterId: string; instanceId: string }) =>
-      inventoryV2Api.remove(characterId, instanceId),
+    mutationFn: ({ campaignId, characterId, instanceId }: { campaignId: string; characterId: string; instanceId: string }) =>
+      inventoryV2Api.remove(campaignId, characterId, instanceId),
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['characters', variables.characterId, 'inventory'] });
-      queryClient.invalidateQueries({ queryKey: ['characters', variables.characterId] });
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId, 'inventory'] });
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId] });
       toast.success('Item removed!');
     },
     onError: (error: AxiosError<ApiError>) => {
@@ -61,21 +61,47 @@ export function useEquipItem() {
 
   return useMutation({
     mutationFn: ({
+      campaignId,
       characterId,
       instanceId,
       data,
     }: {
+      campaignId: string;
       characterId: string;
       instanceId: string;
       data: EquipItemRequest;
-    }) => inventoryV2Api.equip(characterId, instanceId, data),
+    }) => inventoryV2Api.equip(campaignId, characterId, instanceId, data),
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['characters', variables.characterId, 'inventory'] });
-      queryClient.invalidateQueries({ queryKey: ['characters', variables.characterId] });
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId, 'inventory'] });
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId] });
       toast.success('Equipment updated!');
     },
     onError: (error: AxiosError<ApiError>) => {
       toast.error(error.response?.data?.message || 'Failed to equip item');
+    },
+  });
+}
+
+export function useUnequipItem() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      campaignId,
+      characterId,
+      instanceId,
+    }: {
+      campaignId: string;
+      characterId: string;
+      instanceId: string;
+    }) => inventoryV2Api.unequip(campaignId, characterId, instanceId),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId, 'inventory'] });
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId] });
+      toast.success('Item unequipped!');
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error.response?.data?.message || 'Failed to unequip item');
     },
   });
 }
@@ -85,16 +111,18 @@ export function useRenameItem() {
 
   return useMutation({
     mutationFn: ({
+      campaignId,
       characterId,
       instanceId,
       data,
     }: {
+      campaignId: string;
       characterId: string;
       instanceId: string;
       data: RenameItemRequest;
-    }) => inventoryV2Api.rename(characterId, instanceId, data),
+    }) => inventoryV2Api.rename(campaignId, characterId, instanceId, data),
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['characters', variables.characterId, 'inventory'] });
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId, 'inventory'] });
       toast.success('Item renamed!');
     },
     onError: (error: AxiosError<ApiError>) => {
@@ -119,8 +147,8 @@ export function useTransferItem() {
       data: TransferItemRequest;
     }) => inventoryV2Api.transfer(campaignId, fromCharId, instanceId, data),
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['characters', variables.fromCharId, 'inventory'] });
-      queryClient.invalidateQueries({ queryKey: ['characters'] });
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.fromCharId, 'inventory'] });
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters'] });
       toast.success('Item transferred!');
     },
     onError: (error: AxiosError<ApiError>) => {
@@ -131,14 +159,14 @@ export function useTransferItem() {
 
 // Enchantments on item instances
 
-export function useInstanceEnchantments(characterId: string, instanceId: string) {
+export function useInstanceEnchantments(campaignId: string, characterId: string, instanceId: string) {
   return useQuery({
-    queryKey: ['characters', characterId, 'inventory', instanceId, 'enchantments'],
+    queryKey: ['campaigns', campaignId, 'characters', characterId, 'inventory', instanceId, 'enchantments'],
     queryFn: async () => {
-      const response = await inventoryV2Api.getEnchantments(characterId, instanceId);
+      const response = await inventoryV2Api.getEnchantments(campaignId, characterId, instanceId);
       return response.data;
     },
-    enabled: !!characterId && !!instanceId,
+    enabled: !!campaignId && !!characterId && !!instanceId,
   });
 }
 
@@ -147,20 +175,22 @@ export function useAddInstanceEnchantment() {
 
   return useMutation({
     mutationFn: ({
+      campaignId,
       characterId,
       instanceId,
       data,
     }: {
+      campaignId: string;
       characterId: string;
       instanceId: string;
       data: CreateEnchantmentRequest;
-    }) => inventoryV2Api.addEnchantment(characterId, instanceId, data),
+    }) => inventoryV2Api.addEnchantment(campaignId, characterId, instanceId, data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
-        queryKey: ['characters', variables.characterId, 'inventory', variables.instanceId, 'enchantments'],
+        queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId, 'inventory', variables.instanceId, 'enchantments'],
       });
       queryClient.invalidateQueries({
-        queryKey: ['characters', variables.characterId, 'inventory'],
+        queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId, 'inventory'],
       });
       toast.success('Enchantment applied!');
     },
@@ -175,20 +205,22 @@ export function useRemoveInstanceEnchantment() {
 
   return useMutation({
     mutationFn: ({
+      campaignId,
       characterId,
       instanceId,
       enchantmentId,
     }: {
+      campaignId: string;
       characterId: string;
       instanceId: string;
       enchantmentId: string;
-    }) => inventoryV2Api.removeEnchantment(characterId, instanceId, enchantmentId),
+    }) => inventoryV2Api.removeEnchantment(campaignId, characterId, instanceId, enchantmentId),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
-        queryKey: ['characters', variables.characterId, 'inventory', variables.instanceId, 'enchantments'],
+        queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId, 'inventory', variables.instanceId, 'enchantments'],
       });
       queryClient.invalidateQueries({
-        queryKey: ['characters', variables.characterId, 'inventory'],
+        queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId, 'inventory'],
       });
       toast.success('Enchantment removed!');
     },

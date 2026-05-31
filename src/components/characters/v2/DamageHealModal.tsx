@@ -7,6 +7,7 @@ type Mode = 'damage' | 'heal';
 interface DamageHealModalProps {
   open: boolean;
   onOpenChange: (v: boolean) => void;
+  campaignId: string;
   characterId: string;
   currentHp: number;
   maxHp: number;
@@ -15,6 +16,7 @@ interface DamageHealModalProps {
 export function DamageHealModal({
   open,
   onOpenChange,
+  campaignId,
   characterId,
   currentHp,
   maxHp,
@@ -29,7 +31,7 @@ export function DamageHealModal({
   function handleApply() {
     if (amount <= 0) return;
     updateHp.mutate(
-      { id: characterId, data: { delta } },
+      { campaignId, characterId, data: { amount: delta } },
       {
         onSuccess: () => {
           setAmount(0);

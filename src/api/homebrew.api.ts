@@ -5,7 +5,6 @@ import type {
   HomebrewPackageResponse,
   HomebrewDetailResponse,
   InstalledHomebrewResponse,
-  InstallResponse,
   SoftDeleteResponse,
   HardDeleteResponse,
   HomebrewTagResponse,
@@ -15,74 +14,59 @@ import type {
   HomebrewStatus,
 } from '@/types';
 
-// === Author endpoints (GAME_MASTER) ===
-
 export const homebrewApi = {
-  // Create a new DRAFT package
-  create: async (data: CreateHomebrewRequest): Promise<ApiResponse<HomebrewDetailResponse>> => {
-    const response = await api.post<ApiResponse<HomebrewDetailResponse>>('/homebrew', data);
+  // === Author endpoints (GAME_MASTER) ===
+
+  create: async (data: CreateHomebrewRequest): Promise<ApiResponse<HomebrewPackageResponse>> => {
+    const response = await api.post<ApiResponse<HomebrewPackageResponse>>('/homebrew', data);
     return response.data;
   },
 
-  // List my packages (paginated, optional status filter)
   getMyPackages: async (params: {
     status?: HomebrewStatus | 'DELETED';
     page?: number;
     size?: number;
   } = {}): Promise<ApiResponse<Page<HomebrewPackageResponse>>> => {
-    const response = await api.get<ApiResponse<Page<HomebrewPackageResponse>>>('/homebrew/my', { params });
+    const response = await api.get<ApiResponse<Page<HomebrewPackageResponse>>>('/homebrew/mine', { params });
     return response.data;
   },
 
-  // Get my package details
-  getMyPackage: async (id: string): Promise<ApiResponse<HomebrewDetailResponse>> => {
-    const response = await api.get<ApiResponse<HomebrewDetailResponse>>(`/homebrew/my/${id}`);
+  getPackageDetail: async (id: string): Promise<ApiResponse<HomebrewDetailResponse>> => {
+    const response = await api.get<ApiResponse<HomebrewDetailResponse>>(`/homebrew/${id}`);
     return response.data;
   },
 
-  // Update package (DRAFT only)
-  updateMyPackage: async (id: string, data: UpdateHomebrewRequest): Promise<ApiResponse<HomebrewDetailResponse>> => {
-    const response = await api.put<ApiResponse<HomebrewDetailResponse>>(`/homebrew/my/${id}`, data);
+  updatePackage: async (id: string, data: UpdateHomebrewRequest): Promise<ApiResponse<HomebrewPackageResponse>> => {
+    const response = await api.put<ApiResponse<HomebrewPackageResponse>>(`/homebrew/${id}`, data);
     return response.data;
   },
 
-  // Add content to package (DRAFT only)
   addContent: async (id: string, data: AddContentRequest): Promise<ApiResponse<HomebrewDetailResponse>> => {
-    const response = await api.post<ApiResponse<HomebrewDetailResponse>>(`/homebrew/my/${id}/content`, data);
+    const response = await api.post<ApiResponse<HomebrewDetailResponse>>(`/homebrew/${id}/content`, data);
     return response.data;
   },
 
-  // Remove content from package (DRAFT only)
-  removeContent: async (packageId: string, contentItemId: string): Promise<ApiResponse<HomebrewDetailResponse>> => {
-    const response = await api.delete<ApiResponse<HomebrewDetailResponse>>(`/homebrew/my/${packageId}/content/${contentItemId}`);
+  publish: async (id: string): Promise<ApiResponse<HomebrewPackageResponse>> => {
+    const response = await api.post<ApiResponse<HomebrewPackageResponse>>(`/homebrew/${id}/publish`);
     return response.data;
   },
 
-  // Publish package (DRAFT | UNPUBLISHED -> PUBLISHED)
-  publish: async (id: string): Promise<ApiResponse<HomebrewDetailResponse>> => {
-    const response = await api.post<ApiResponse<HomebrewDetailResponse>>(`/homebrew/my/${id}/publish`);
+  unpublish: async (id: string): Promise<ApiResponse<HomebrewPackageResponse>> => {
+    const response = await api.post<ApiResponse<HomebrewPackageResponse>>(`/homebrew/${id}/unpublish`);
     return response.data;
   },
 
-  // Unpublish package (PUBLISHED -> UNPUBLISHED)
-  unpublish: async (id: string): Promise<ApiResponse<HomebrewDetailResponse>> => {
-    const response = await api.post<ApiResponse<HomebrewDetailResponse>>(`/homebrew/my/${id}/unpublish`);
+  deletePackage: async (id: string): Promise<ApiResponse<void>> => {
+    const response = await api.delete<ApiResponse<void>>(`/homebrew/${id}`);
     return response.data;
   },
 
-  // Soft delete package
-  deleteMyPackage: async (id: string): Promise<ApiResponse<SoftDeleteResponse>> => {
-    const response = await api.delete<ApiResponse<SoftDeleteResponse>>(`/homebrew/my/${id}`);
-    return response.data;
-  },
+  // === Marketplace endpoints ===
 
-  // === Marketplace endpoints (GAME_MASTER) ===
-
-  // Browse marketplace
   browseMarketplace: async (params: {
     search?: string;
     tags?: string;
-    sort?: 'downloads' | 'newest' | 'oldest';
+    sort?: 'downloads' | 'newest' | 'rating';
     page?: number;
     size?: number;
   } = {}): Promise<ApiResponse<Page<HomebrewPackageResponse>>> => {
@@ -90,38 +74,59 @@ export const homebrewApi = {
     return response.data;
   },
 
-  // Get marketplace package details
   getMarketplacePackage: async (id: string): Promise<ApiResponse<HomebrewDetailResponse>> => {
     const response = await api.get<ApiResponse<HomebrewDetailResponse>>(`/homebrew/marketplace/${id}`);
     return response.data;
   },
 
-  // Install package
-  installPackage: async (id: string): Promise<ApiResponse<InstallResponse>> => {
-    const response = await api.post<ApiResponse<InstallResponse>>(`/homebrew/marketplace/${id}/install`);
+  installPackage: async (id: string): Promise<ApiResponse<InstalledHomebrewResponse>> => {
+    const response = await api.post<ApiResponse<InstalledHomebrewResponse>>(`/homebrew/marketplace/${id}/install`);
     return response.data;
   },
 
-  // === Installed packages (GAME_MASTER) ===
+  // === Installed packages ===
 
-  // List installed packages
-  getInstalledPackages: async (params: {
-    page?: number;
-    size?: number;
-  } = {}): Promise<ApiResponse<Page<InstalledHomebrewResponse>>> => {
-    const response = await api.get<ApiResponse<Page<InstalledHomebrewResponse>>>('/homebrew/installed', { params });
+  getInstalledPackages: async (): Promise<ApiResponse<InstalledHomebrewResponse[]>> => {
+    const response = await api.get<ApiResponse<InstalledHomebrewResponse[]>>('/homebrew/installed');
     return response.data;
   },
 
-  // Uninstall package
-  uninstallPackage: async (installationId: string): Promise<ApiResponse<null>> => {
-    const response = await api.delete<ApiResponse<null>>(`/homebrew/installed/${installationId}`);
+  uninstallPackage: async (installId: string): Promise<ApiResponse<void>> => {
+    const response = await api.delete<ApiResponse<void>>(`/homebrew/installed/${installId}`);
+    return response.data;
+  },
+
+  // === Ratings ===
+
+  getRatings: async (packageId: string): Promise<ApiResponse<import('@/types').HomebrewRatingResponse>> => {
+    const response = await api.get<ApiResponse<import('@/types').HomebrewRatingResponse>>(`/homebrew/ratings/${packageId}`);
+    return response.data;
+  },
+
+  rate: async (packageId: string, data: import('@/types').RateHomebrewRequest): Promise<ApiResponse<import('@/types').HomebrewRatingResponse>> => {
+    const response = await api.post<ApiResponse<import('@/types').HomebrewRatingResponse>>(`/homebrew/ratings/${packageId}`, data);
+    return response.data;
+  },
+
+  // === Library ===
+
+  getLibrary: async (): Promise<ApiResponse<HomebrewPackageResponse[]>> => {
+    const response = await api.get<ApiResponse<HomebrewPackageResponse[]>>('/homebrew/library');
+    return response.data;
+  },
+
+  addToLibrary: async (packageId: string): Promise<ApiResponse<void>> => {
+    const response = await api.post<ApiResponse<void>>(`/homebrew/library/${packageId}`);
+    return response.data;
+  },
+
+  removeFromLibrary: async (packageId: string): Promise<ApiResponse<void>> => {
+    const response = await api.delete<ApiResponse<void>>(`/homebrew/library/${packageId}`);
     return response.data;
   },
 
   // === Admin endpoints (ADMIN) ===
 
-  // List all packages (admin)
   adminGetAllPackages: async (params: {
     status?: HomebrewStatus;
     authorId?: string;
@@ -132,21 +137,13 @@ export const homebrewApi = {
     return response.data;
   },
 
-  // Hard delete package (admin)
-  adminHardDelete: async (id: string): Promise<ApiResponse<HardDeleteResponse>> => {
-    const response = await api.delete<ApiResponse<HardDeleteResponse>>(`/admin/homebrew/${id}`);
+  adminHardDelete: async (id: string): Promise<ApiResponse<void>> => {
+    const response = await api.delete<ApiResponse<void>>(`/admin/homebrew/${id}`);
     return response.data;
   },
 
-  // List tags with usage counts (admin)
   adminGetTags: async (): Promise<ApiResponse<HomebrewTagResponse[]>> => {
     const response = await api.get<ApiResponse<HomebrewTagResponse[]>>('/admin/homebrew/tags');
-    return response.data;
-  },
-
-  // Delete tag (admin)
-  adminDeleteTag: async (id: string): Promise<ApiResponse<null>> => {
-    const response = await api.delete<ApiResponse<null>>(`/admin/homebrew/tags/${id}`);
     return response.data;
   },
 };

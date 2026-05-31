@@ -2,26 +2,29 @@ import api from './axios';
 import type {
   ApiResponse,
   CampaignResponse,
+  CampaignDetailResponse,
   CreateCampaignRequest,
   UpdateCampaignRequest,
   SetCampaignStatusRequest,
   JoinCampaignRequest,
   InviteCodeResponse,
+  KickMemberRequest,
   ReassignCharacterRequest,
-  StorageContainerResponse,
+  CharacterResponse,
+  SharedStorageResponse,
   CreateStorageContainerRequest,
-  AddStorageItemRequest,
-  StorageItemResponse,
+  ItemInstanceResponse,
+  Page,
 } from '@/types';
 
 export const campaignsApi = {
-  list: async (): Promise<ApiResponse<CampaignResponse[]>> => {
-    const response = await api.get<ApiResponse<CampaignResponse[]>>('/campaigns');
+  list: async (params?: { page?: number; size?: number; sort?: string }): Promise<ApiResponse<Page<CampaignResponse>>> => {
+    const response = await api.get<ApiResponse<Page<CampaignResponse>>>('/campaigns', { params });
     return response.data;
   },
 
-  getById: async (id: string): Promise<ApiResponse<CampaignResponse>> => {
-    const response = await api.get<ApiResponse<CampaignResponse>>(`/campaigns/${id}`);
+  getById: async (id: string): Promise<ApiResponse<CampaignDetailResponse>> => {
+    const response = await api.get<ApiResponse<CampaignDetailResponse>>(`/campaigns/${id}`);
     return response.data;
   },
 
@@ -35,8 +38,8 @@ export const campaignsApi = {
     return response.data;
   },
 
-  setStatus: async (id: string, data: SetCampaignStatusRequest): Promise<ApiResponse<CampaignResponse>> => {
-    const response = await api.put<ApiResponse<CampaignResponse>>(`/campaigns/${id}/status`, data);
+  delete: async (id: string): Promise<ApiResponse<void>> => {
+    const response = await api.delete<ApiResponse<void>>(`/campaigns/${id}`);
     return response.data;
   },
 
@@ -50,44 +53,63 @@ export const campaignsApi = {
     return response.data;
   },
 
+  kick: async (id: string, data: KickMemberRequest): Promise<ApiResponse<void>> => {
+    const response = await api.post<ApiResponse<void>>(`/campaigns/${id}/kick`, data);
+    return response.data;
+  },
+
+  setStatus: async (id: string, data: SetCampaignStatusRequest): Promise<ApiResponse<CampaignResponse>> => {
+    const response = await api.put<ApiResponse<CampaignResponse>>(`/campaigns/${id}/status`, data);
+    return response.data;
+  },
+
   getInviteCode: async (id: string): Promise<ApiResponse<InviteCodeResponse>> => {
     const response = await api.get<ApiResponse<InviteCodeResponse>>(`/campaigns/${id}/invite-code`);
     return response.data;
   },
 
-  regenerateInvite: async (id: string): Promise<ApiResponse<InviteCodeResponse>> => {
-    const response = await api.post<ApiResponse<InviteCodeResponse>>(`/campaigns/${id}/regenerate-invite`);
+  regenerateInviteCode: async (id: string): Promise<ApiResponse<InviteCodeResponse>> => {
+    const response = await api.post<ApiResponse<InviteCodeResponse>>(`/campaigns/${id}/invite-code/regenerate`);
     return response.data;
   },
 
-  kickMember: async (id: string, userId: string): Promise<ApiResponse<void>> => {
-    const response = await api.delete<ApiResponse<void>>(`/campaigns/${id}/members/${userId}`);
-    return response.data;
-  },
-
-  reassignCharacter: async (id: string, charId: string, data: ReassignCharacterRequest): Promise<ApiResponse<void>> => {
-    const response = await api.post<ApiResponse<void>>(`/campaigns/${id}/characters/${charId}/reassign`, data);
+  reassignCharacter: async (id: string, characterId: string, data: ReassignCharacterRequest): Promise<ApiResponse<CharacterResponse>> => {
+    const response = await api.post<ApiResponse<CharacterResponse>>(`/campaigns/${id}/characters/${characterId}/reassign`, data);
     return response.data;
   },
 
   // Shared storage
-  getStorage: async (id: string): Promise<ApiResponse<StorageContainerResponse[]>> => {
-    const response = await api.get<ApiResponse<StorageContainerResponse[]>>(`/campaigns/${id}/storage`);
+  getStorage: async (id: string): Promise<ApiResponse<SharedStorageResponse[]>> => {
+    const response = await api.get<ApiResponse<SharedStorageResponse[]>>(`/campaigns/${id}/shared-storage`);
     return response.data;
   },
 
-  createContainer: async (id: string, data: CreateStorageContainerRequest): Promise<ApiResponse<StorageContainerResponse>> => {
-    const response = await api.post<ApiResponse<StorageContainerResponse>>(`/campaigns/${id}/storage`, data);
+  getStorageById: async (id: string, storageId: string): Promise<ApiResponse<SharedStorageResponse>> => {
+    const response = await api.get<ApiResponse<SharedStorageResponse>>(`/campaigns/${id}/shared-storage/${storageId}`);
     return response.data;
   },
 
-  addStorageItem: async (id: string, sid: string, data: AddStorageItemRequest): Promise<ApiResponse<StorageItemResponse>> => {
-    const response = await api.post<ApiResponse<StorageItemResponse>>(`/campaigns/${id}/storage/${sid}/items`, data);
+  createStorage: async (id: string, data: CreateStorageContainerRequest): Promise<ApiResponse<SharedStorageResponse>> => {
+    const response = await api.post<ApiResponse<SharedStorageResponse>>(`/campaigns/${id}/shared-storage`, data);
     return response.data;
   },
 
-  delete: async (id: string): Promise<ApiResponse<void>> => {
-    const response = await api.delete<ApiResponse<void>>(`/campaigns/${id}`);
+  deleteStorage: async (id: string, storageId: string): Promise<ApiResponse<void>> => {
+    const response = await api.delete<ApiResponse<void>>(`/campaigns/${id}/shared-storage/${storageId}`);
+    return response.data;
+  },
+
+  depositItem: async (id: string, storageId: string, instanceId: string): Promise<ApiResponse<ItemInstanceResponse>> => {
+    const response = await api.post<ApiResponse<ItemInstanceResponse>>(`/campaigns/${id}/shared-storage/${storageId}/deposit/${instanceId}`);
+    return response.data;
+  },
+
+  takeItem: async (id: string, storageId: string, instanceId: string, characterId: string): Promise<ApiResponse<ItemInstanceResponse>> => {
+    const response = await api.post<ApiResponse<ItemInstanceResponse>>(
+      `/campaigns/${id}/shared-storage/${storageId}/take/${instanceId}`,
+      null,
+      { params: { characterId } },
+    );
     return response.data;
   },
 };

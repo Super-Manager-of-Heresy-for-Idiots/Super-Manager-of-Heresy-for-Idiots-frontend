@@ -3,10 +3,9 @@ import toast from 'react-hot-toast';
 import { charactersV2Api } from '@/api/characters-v2.api';
 import type {
   CreateCharacterInCampaignRequest,
-  SetCharacterStatusRequest,
   UpdateHpRequest,
-  UpdateWalletRequest,
-  UpdateResourceRequest,
+  ModifyWalletRequest,
+  ModifyResourceRequest,
   ApiError,
 } from '@/types';
 import { AxiosError } from 'axios';
@@ -22,14 +21,14 @@ export function useCampaignCharacters(campaignId: string) {
   });
 }
 
-export function useCharacterV2(id: string) {
+export function useCharacterV2(campaignId: string, characterId: string) {
   return useQuery({
-    queryKey: ['characters', id],
+    queryKey: ['campaigns', campaignId, 'characters', characterId],
     queryFn: async () => {
-      const response = await charactersV2Api.getById(id);
+      const response = await charactersV2Api.getById(campaignId, characterId);
       return response.data;
     },
-    enabled: !!id,
+    enabled: !!campaignId && !!characterId,
   });
 }
 
@@ -50,32 +49,14 @@ export function useCreateCharacterInCampaign() {
   });
 }
 
-export function useSetCharacterStatus() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: SetCharacterStatusRequest }) =>
-      charactersV2Api.setStatus(id, data),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['characters', variables.id] });
-      queryClient.invalidateQueries({ queryKey: ['characters'] });
-      toast.success('Character status updated!');
-    },
-    onError: (error: AxiosError<ApiError>) => {
-      const message = error.response?.data?.message || 'Failed to update character status';
-      toast.error(message);
-    },
-  });
-}
-
 export function useUpdateHp() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: UpdateHpRequest }) =>
-      charactersV2Api.updateHp(id, data),
+    mutationFn: ({ campaignId, characterId, data }: { campaignId: string; characterId: string; data: UpdateHpRequest }) =>
+      charactersV2Api.modifyHp(campaignId, characterId, data),
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['characters', variables.id] });
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId] });
       toast.success('HP updated!');
     },
     onError: (error: AxiosError<ApiError>) => {
@@ -85,26 +66,26 @@ export function useUpdateHp() {
   });
 }
 
-export function useCharacterWallet(id: string) {
+export function useCharacterWallet(campaignId: string, characterId: string) {
   return useQuery({
-    queryKey: ['characters', id, 'wallet'],
+    queryKey: ['campaigns', campaignId, 'characters', characterId, 'wallet'],
     queryFn: async () => {
-      const response = await charactersV2Api.getWallet(id);
+      const response = await charactersV2Api.getWallet(campaignId, characterId);
       return response.data;
     },
-    enabled: !!id,
+    enabled: !!campaignId && !!characterId,
   });
 }
 
-export function useUpdateWallet() {
+export function useModifyWallet() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, currencyTypeId, data }: { id: string; currencyTypeId: string; data: UpdateWalletRequest }) =>
-      charactersV2Api.updateWallet(id, currencyTypeId, data),
+    mutationFn: ({ campaignId, characterId, data }: { campaignId: string; characterId: string; data: ModifyWalletRequest }) =>
+      charactersV2Api.modifyWallet(campaignId, characterId, data),
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['characters', variables.id, 'wallet'] });
-      queryClient.invalidateQueries({ queryKey: ['characters', variables.id] });
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId, 'wallet'] });
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId] });
       toast.success('Wallet updated!');
     },
     onError: (error: AxiosError<ApiError>) => {
@@ -114,26 +95,26 @@ export function useUpdateWallet() {
   });
 }
 
-export function useCharacterResources(id: string) {
+export function useCharacterResources(campaignId: string, characterId: string) {
   return useQuery({
-    queryKey: ['characters', id, 'resources'],
+    queryKey: ['campaigns', campaignId, 'characters', characterId, 'resources'],
     queryFn: async () => {
-      const response = await charactersV2Api.getResources(id);
+      const response = await charactersV2Api.getResources(campaignId, characterId);
       return response.data;
     },
-    enabled: !!id,
+    enabled: !!campaignId && !!characterId,
   });
 }
 
-export function useUpdateResource() {
+export function useModifyResource() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, resourceTypeId, data }: { id: string; resourceTypeId: string; data: UpdateResourceRequest }) =>
-      charactersV2Api.updateResource(id, resourceTypeId, data),
+    mutationFn: ({ campaignId, characterId, data }: { campaignId: string; characterId: string; data: ModifyResourceRequest }) =>
+      charactersV2Api.modifyResource(campaignId, characterId, data),
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['characters', variables.id, 'resources'] });
-      queryClient.invalidateQueries({ queryKey: ['characters', variables.id] });
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId, 'resources'] });
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId] });
       toast.success('Resource updated!');
     },
     onError: (error: AxiosError<ApiError>) => {
@@ -145,8 +126,8 @@ export function useUpdateResource() {
 
 export function useAbilityCheck() {
   return useMutation({
-    mutationFn: ({ id, statId }: { id: string; statId: string }) =>
-      charactersV2Api.abilityCheck(id, statId),
+    mutationFn: ({ campaignId, characterId, statId }: { campaignId: string; characterId: string; statId: string }) =>
+      charactersV2Api.abilityCheck(campaignId, characterId, statId),
     onError: (error: AxiosError<ApiError>) => {
       const message = error.response?.data?.message || 'Failed to perform ability check';
       toast.error(message);

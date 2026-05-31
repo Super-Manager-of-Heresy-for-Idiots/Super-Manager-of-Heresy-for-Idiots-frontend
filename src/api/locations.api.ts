@@ -31,4 +31,9 @@ export const locationsApi = {
     const response = await api.delete<ApiResponse<void>>(`/campaigns/${campaignId}/locations/${locationId}`);
     return response.data;
   },
+
+  toggleVisibility: async (campaignId: string, locationId: string): Promise<ApiResponse<LocationResponse>> => {
+    const response = await api.put<ApiResponse<LocationResponse>>(`/campaigns/${campaignId}/locations/${locationId}/visibility`);
+    return response.data;
+  },
 };

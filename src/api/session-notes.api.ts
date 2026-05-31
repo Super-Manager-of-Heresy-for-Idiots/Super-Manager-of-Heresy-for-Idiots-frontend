@@ -1,34 +1,34 @@
 import api from './axios';
 import type {
   ApiResponse,
-  SessionNoteResponse,
-  CreateSessionNoteRequest,
-  UpdateSessionNoteRequest,
+  GmSessionNoteResponse,
+  CreateGmNoteRequest,
+  UpdateGmNoteRequest,
 } from '@/types';
 
-export const sessionNotesApi = {
-  list: async (campaignId: string): Promise<ApiResponse<SessionNoteResponse[]>> => {
-    const response = await api.get<ApiResponse<SessionNoteResponse[]>>(`/campaigns/${campaignId}/session-notes`);
+export const gmNotesApi = {
+  list: async (campaignId: string): Promise<ApiResponse<GmSessionNoteResponse[]>> => {
+    const response = await api.get<ApiResponse<GmSessionNoteResponse[]>>(`/campaigns/${campaignId}/gm-notes`);
     return response.data;
   },
 
-  getById: async (campaignId: string, noteId: string): Promise<ApiResponse<SessionNoteResponse>> => {
-    const response = await api.get<ApiResponse<SessionNoteResponse>>(`/campaigns/${campaignId}/session-notes/${noteId}`);
+  getById: async (campaignId: string, noteId: string): Promise<ApiResponse<GmSessionNoteResponse>> => {
+    const response = await api.get<ApiResponse<GmSessionNoteResponse>>(`/campaigns/${campaignId}/gm-notes/${noteId}`);
     return response.data;
   },
 
-  create: async (campaignId: string, data: CreateSessionNoteRequest): Promise<ApiResponse<SessionNoteResponse>> => {
-    const response = await api.post<ApiResponse<SessionNoteResponse>>(`/campaigns/${campaignId}/session-notes`, data);
+  create: async (campaignId: string, data: CreateGmNoteRequest): Promise<ApiResponse<GmSessionNoteResponse>> => {
+    const response = await api.post<ApiResponse<GmSessionNoteResponse>>(`/campaigns/${campaignId}/gm-notes`, data);
     return response.data;
   },
 
-  update: async (campaignId: string, noteId: string, data: UpdateSessionNoteRequest): Promise<ApiResponse<SessionNoteResponse>> => {
-    const response = await api.put<ApiResponse<SessionNoteResponse>>(`/campaigns/${campaignId}/session-notes/${noteId}`, data);
+  update: async (campaignId: string, noteId: string, data: UpdateGmNoteRequest): Promise<ApiResponse<GmSessionNoteResponse>> => {
+    const response = await api.put<ApiResponse<GmSessionNoteResponse>>(`/campaigns/${campaignId}/gm-notes/${noteId}`, data);
     return response.data;
   },
 
   delete: async (campaignId: string, noteId: string): Promise<ApiResponse<void>> => {
-    const response = await api.delete<ApiResponse<void>>(`/campaigns/${campaignId}/session-notes/${noteId}`);
+    const response = await api.delete<ApiResponse<void>>(`/campaigns/${campaignId}/gm-notes/${noteId}`);
     return response.data;
   },
 };

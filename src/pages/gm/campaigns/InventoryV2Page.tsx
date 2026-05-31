@@ -17,7 +17,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { useCharacterInventory, useGrantItem, useTransferItem, useRenameItem } from '@/hooks/useInventoryV2';
-import type { ItemInstance, GrantItemRequest, RenameItemRequest } from '@/types';
+import type { ItemInstanceResponse, GrantItemRequest, RenameItemRequest } from '@/types';
 
 /* ── helpers ─────────────────────────────────────────────────── */
 
@@ -34,8 +34,8 @@ function rarityColor(rarity?: string): string {
 /* ── page ────────────────────────────────────────────────────── */
 
 export default function InventoryV2Page() {
-  const { characterId } = useParams<{ characterId: string }>();
-  const { data: inventory, isLoading, error, refetch } = useCharacterInventory(characterId!);
+  const { id: campaignId, characterId } = useParams<{ id: string; characterId: string }>();
+  const { data: inventory, isLoading, error, refetch } = useCharacterInventory(campaignId!, characterId!);
   const grantMutation = useGrantItem();
   const transferMutation = useTransferItem();
   const renameMutation = useRenameItem();
@@ -61,14 +61,15 @@ export default function InventoryV2Page() {
 
   /* ── derived ───────────────────────────────────────────────── */
 
-  const items: ItemInstance[] = inventory ?? [];
+  const items: ItemInstanceResponse[] = inventory ?? [];
 
   const filtered = useMemo(() => {
     if (!filterText) return items;
     const q = filterText.toLowerCase();
     return items.filter(
       (item) =>
-        item.name.toLowerCase().includes(q) ||
+        item.templateName.toLowerCase().includes(q) ||
+        (item.displayName?.toLowerCase() ?? '').includes(q) ||
         (item.customName?.toLowerCase() ?? '').includes(q),
     );
   }, [items, filterText]);
@@ -79,7 +80,7 @@ export default function InventoryV2Page() {
   /* ── handlers ──────────────────────────────────────────────── */
 
   const handleGrant = () => {
-    if (!characterId || !grantTemplateId) return;
+    if (!campaignId || !characterId || !grantTemplateId) return;
     const data: GrantItemRequest = {
       templateId: grantTemplateId,
       quantity: Number(grantQuantity) || 1,
@@ -87,7 +88,7 @@ export default function InventoryV2Page() {
       customName: grantCustomName || undefined,
     };
     grantMutation.mutate(
-      { characterId, data },
+      { campaignId, characterId, data },
       {
         onSuccess: () => {
           setGrantOpen(false);
@@ -101,10 +102,10 @@ export default function InventoryV2Page() {
   };
 
   const handleTransfer = () => {
-    if (!characterId || !transferInstanceId || !transferToCharId) return;
+    if (!campaignId || !characterId || !transferInstanceId || !transferToCharId) return;
     transferMutation.mutate(
       {
-        campaignId: '', // handled by API context
+        campaignId,
         fromCharId: characterId,
         instanceId: transferInstanceId,
         data: { toCharacterId: transferToCharId },
@@ -119,20 +120,20 @@ export default function InventoryV2Page() {
     );
   };
 
-  const openRename = (item: ItemInstance) => {
+  const openRename = (item: ItemInstanceResponse) => {
     setRenameInstanceId(item.id);
-    setRenameCustomName(item.customName ?? item.name);
+    setRenameCustomName(item.customName ?? item.displayName);
     setRenameOpen(true);
   };
 
   const handleRename = () => {
-    if (!characterId || !renameInstanceId) return;
+    if (!campaignId || !characterId || !renameInstanceId) return;
     const data: RenameItemRequest = {
       customName: renameCustomName,
-      mode: 'WHOLE_STACK',
+      renameEntireStack: true,
     };
     renameMutation.mutate(
-      { characterId, instanceId: renameInstanceId, data },
+      { campaignId, characterId, instanceId: renameInstanceId, data },
       {
         onSuccess: () => {
           setRenameOpen(false);
@@ -143,7 +144,7 @@ export default function InventoryV2Page() {
     );
   };
 
-  const openTransfer = (item: ItemInstance) => {
+  const openTransfer = (item: ItemInstanceResponse) => {
     setTransferInstanceId(item.id);
     setTransferToCharId('');
     setTransferOpen(true);
@@ -279,7 +280,7 @@ export default function InventoryV2Page() {
             sub={`${filtered.length} item${filtered.length !== 1 ? 's' : ''}`}
           />
 
-          {filtered.map((item: ItemInstance, idx: number) => (
+          {filtered.map((item: ItemInstanceResponse, idx: number) => (
             <div
               key={item.id}
               style={{
@@ -308,11 +309,11 @@ export default function InventoryV2Page() {
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
                   <span style={{ fontSize: 13, color: 'var(--ink-bright)', fontWeight: 500 }}>
-                    {item.customName || item.name}
+                    {item.displayName}
                   </span>
-                  {item.customName && item.customName !== item.name && (
+                  {item.customName && item.customName !== item.templateName && (
                     <span className="ao-codex" style={{ fontSize: 10, color: 'var(--ink-ghost)' }}>
-                      ({item.name})
+                      ({item.templateName})
                     </span>
                   )}
                   {item.rarity && (

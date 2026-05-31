@@ -4,8 +4,7 @@ import { npcsApi } from '@/api/npcs.api';
 import type {
   CreateNpcRequest,
   UpdateNpcRequest,
-  SetNpcVisibilityRequest,
-  CreateNpcNoteRequest,
+  CreateNoteRequest,
   ApiError,
 } from '@/types';
 import { AxiosError } from 'axios';
@@ -88,19 +87,17 @@ export function useDeleteNpc() {
   });
 }
 
-export function useSetNpcVisibility() {
+export function useToggleNpcVisibility() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: ({
       campaignId,
       npcId,
-      data,
     }: {
       campaignId: string;
       npcId: string;
-      data: SetNpcVisibilityRequest;
-    }) => npcsApi.setVisibility(campaignId, npcId, data),
+    }) => npcsApi.toggleVisibility(campaignId, npcId),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'npcs'] });
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'npcs', variables.npcId] });
@@ -114,17 +111,6 @@ export function useSetNpcVisibility() {
 
 // NPC Notes
 
-export function useNpcNotes(campaignId: string, npcId: string) {
-  return useQuery({
-    queryKey: ['campaigns', campaignId, 'npcs', npcId, 'notes'],
-    queryFn: async () => {
-      const response = await npcsApi.listNotes(campaignId, npcId);
-      return response.data;
-    },
-    enabled: !!campaignId && !!npcId,
-  });
-}
-
 export function useAddNpcNote() {
   const queryClient = useQueryClient();
 
@@ -136,11 +122,11 @@ export function useAddNpcNote() {
     }: {
       campaignId: string;
       npcId: string;
-      data: CreateNpcNoteRequest;
+      data: CreateNoteRequest;
     }) => npcsApi.addNote(campaignId, npcId, data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
-        queryKey: ['campaigns', variables.campaignId, 'npcs', variables.npcId, 'notes'],
+        queryKey: ['campaigns', variables.campaignId, 'npcs', variables.npcId],
       });
       toast.success('Note added!');
     },
@@ -165,7 +151,7 @@ export function useDeleteNpcNote() {
     }) => npcsApi.deleteNote(campaignId, npcId, noteId),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
-        queryKey: ['campaigns', variables.campaignId, 'npcs', variables.npcId, 'notes'],
+        queryKey: ['campaigns', variables.campaignId, 'npcs', variables.npcId],
       });
       toast.success('Note deleted!');
     },

@@ -47,10 +47,8 @@ class WebSocketService {
     const wsStore = useWsStore.getState();
 
     this.client = new Client({
-      // SockJS factory — connects to the backend /ws endpoint
-      webSocketFactory: () => new SockJS('/api/ws') as unknown as WebSocket,
-
-      connectHeaders: token ? { Authorization: `Bearer ${token}` } : {},
+      // SockJS factory — connects to the backend /ws endpoint with JWT as query param
+      webSocketFactory: () => new SockJS(`/ws?token=${token}`) as unknown as WebSocket,
 
       // Disable built-in reconnect; we handle it ourselves for back-off
       reconnectDelay: 0,
@@ -60,10 +58,10 @@ class WebSocketService {
         useWsStore.getState().setConnectionState('connected');
 
         // Campaign broadcast topic
-        this.subscribeTo(`/topic/campaign.${campaignId}`);
+        this.subscribeTo(`/topic/campaign/${campaignId}/updates`);
 
-        // Private user queue (Spring per-session)
-        this.subscribeTo('/user/queue/private');
+        // Private user notifications
+        this.subscribeTo('/user/queue/notifications');
       },
 
       onStompError: (frame) => {
@@ -110,6 +108,13 @@ class WebSocketService {
     this.currentCampaignId = null;
     this.reconnectAttempt = 0;
     useWsStore.getState().setConnectionState('offline');
+  }
+
+  /**
+   * Subscribe to a character-specific topic while connected.
+   */
+  subscribeCharacter(characterId: string, callback?: (event: WsEvent) => void): void {
+    this.subscribe(`/topic/character/${characterId}/updates`, callback);
   }
 
   /**

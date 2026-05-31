@@ -1,7 +1,7 @@
 import api from './axios';
 import type {
   ApiResponse,
-  ItemInstance,
+  ItemInstanceResponse,
   GrantItemRequest,
   RenameItemRequest,
   TransferItemRequest,
@@ -11,52 +11,74 @@ import type {
 } from '@/types';
 
 export const inventoryV2Api = {
-  list: async (characterId: string): Promise<ApiResponse<ItemInstance[]>> => {
-    const response = await api.get<ApiResponse<ItemInstance[]>>(`/characters/${characterId}/inventory`);
+  list: async (campaignId: string, characterId: string): Promise<ApiResponse<ItemInstanceResponse[]>> => {
+    const response = await api.get<ApiResponse<ItemInstanceResponse[]>>(`/campaigns/${campaignId}/characters/${characterId}/inventory`);
     return response.data;
   },
 
-  grant: async (characterId: string, data: GrantItemRequest): Promise<ApiResponse<ItemInstance>> => {
-    const response = await api.post<ApiResponse<ItemInstance>>(`/characters/${characterId}/inventory`, data);
+  listEquipped: async (campaignId: string, characterId: string): Promise<ApiResponse<ItemInstanceResponse[]>> => {
+    const response = await api.get<ApiResponse<ItemInstanceResponse[]>>(`/campaigns/${campaignId}/characters/${characterId}/inventory/equipped`);
     return response.data;
   },
 
-  remove: async (characterId: string, instanceId: string): Promise<ApiResponse<void>> => {
-    const response = await api.delete<ApiResponse<void>>(`/characters/${characterId}/inventory/${instanceId}`);
+  listBackpack: async (campaignId: string, characterId: string): Promise<ApiResponse<ItemInstanceResponse[]>> => {
+    const response = await api.get<ApiResponse<ItemInstanceResponse[]>>(`/campaigns/${campaignId}/characters/${characterId}/inventory/backpack`);
     return response.data;
   },
 
-  equip: async (characterId: string, instanceId: string, data: EquipItemRequest): Promise<ApiResponse<ItemInstance>> => {
-    const response = await api.put<ApiResponse<ItemInstance>>(`/characters/${characterId}/inventory/${instanceId}/equip`, data);
+  grant: async (campaignId: string, characterId: string, data: GrantItemRequest): Promise<ApiResponse<ItemInstanceResponse>> => {
+    const response = await api.post<ApiResponse<ItemInstanceResponse>>(`/campaigns/${campaignId}/characters/${characterId}/inventory/grant`, data);
     return response.data;
   },
 
-  rename: async (characterId: string, instanceId: string, data: RenameItemRequest): Promise<ApiResponse<ItemInstance>> => {
-    const response = await api.put<ApiResponse<ItemInstance>>(`/characters/${characterId}/inventory/${instanceId}/rename`, data);
+  remove: async (campaignId: string, characterId: string, instanceId: string): Promise<ApiResponse<void>> => {
+    const response = await api.delete<ApiResponse<void>>(`/campaigns/${campaignId}/characters/${characterId}/inventory/${instanceId}`);
     return response.data;
   },
 
-  transfer: async (campaignId: string, fromCharId: string, instanceId: string, data: TransferItemRequest): Promise<ApiResponse<void>> => {
-    const response = await api.post<ApiResponse<void>>(
-      `/campaigns/${campaignId}/characters/${fromCharId}/inventory/${instanceId}/transfer`,
+  equip: async (campaignId: string, characterId: string, instanceId: string, data: EquipItemRequest): Promise<ApiResponse<ItemInstanceResponse>> => {
+    const response = await api.put<ApiResponse<ItemInstanceResponse>>(`/campaigns/${campaignId}/characters/${characterId}/inventory/${instanceId}/equip`, data);
+    return response.data;
+  },
+
+  unequip: async (campaignId: string, characterId: string, instanceId: string): Promise<ApiResponse<ItemInstanceResponse>> => {
+    const response = await api.put<ApiResponse<ItemInstanceResponse>>(`/campaigns/${campaignId}/characters/${characterId}/inventory/${instanceId}/unequip`);
+    return response.data;
+  },
+
+  rename: async (campaignId: string, characterId: string, instanceId: string, data: RenameItemRequest): Promise<ApiResponse<ItemInstanceResponse>> => {
+    const response = await api.put<ApiResponse<ItemInstanceResponse>>(`/campaigns/${campaignId}/characters/${characterId}/inventory/${instanceId}/rename`, data);
+    return response.data;
+  },
+
+  transfer: async (campaignId: string, characterId: string, instanceId: string, data: TransferItemRequest): Promise<ApiResponse<ItemInstanceResponse>> => {
+    const response = await api.post<ApiResponse<ItemInstanceResponse>>(
+      `/campaigns/${campaignId}/characters/${characterId}/inventory/${instanceId}/transfer`,
       data,
     );
     return response.data;
   },
 
-  // Enchantments on instances
-  getEnchantments: async (characterId: string, instanceId: string): Promise<ApiResponse<EnchantmentResponse[]>> => {
-    const response = await api.get<ApiResponse<EnchantmentResponse[]>>(`/characters/${characterId}/inventory/${instanceId}/enchantments`);
+  // Enchantments on item instances
+  getEnchantments: async (campaignId: string, characterId: string, instanceId: string): Promise<ApiResponse<EnchantmentResponse[]>> => {
+    const response = await api.get<ApiResponse<EnchantmentResponse[]>>(
+      `/campaigns/${campaignId}/characters/${characterId}/inventory/${instanceId}/enchantments`,
+    );
     return response.data;
   },
 
-  addEnchantment: async (characterId: string, instanceId: string, data: CreateEnchantmentRequest): Promise<ApiResponse<EnchantmentResponse>> => {
-    const response = await api.post<ApiResponse<EnchantmentResponse>>(`/characters/${characterId}/inventory/${instanceId}/enchantments`, data);
+  addEnchantment: async (campaignId: string, characterId: string, instanceId: string, data: CreateEnchantmentRequest): Promise<ApiResponse<EnchantmentResponse>> => {
+    const response = await api.post<ApiResponse<EnchantmentResponse>>(
+      `/campaigns/${campaignId}/characters/${characterId}/inventory/${instanceId}/enchantments`,
+      data,
+    );
     return response.data;
   },
 
-  removeEnchantment: async (characterId: string, instanceId: string, enchId: string): Promise<ApiResponse<void>> => {
-    const response = await api.delete<ApiResponse<void>>(`/characters/${characterId}/inventory/${instanceId}/enchantments/${enchId}`);
+  removeEnchantment: async (campaignId: string, characterId: string, instanceId: string, enchantmentId: string): Promise<ApiResponse<void>> => {
+    const response = await api.delete<ApiResponse<void>>(
+      `/campaigns/${campaignId}/characters/${characterId}/inventory/${instanceId}/enchantments/${enchantmentId}`,
+    );
     return response.data;
   },
 };

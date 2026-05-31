@@ -2,64 +2,86 @@ import api from './axios';
 import type {
   ApiResponse,
   CharacterV2Response,
+  CharacterResponse,
   CreateCharacterInCampaignRequest,
-  SetCharacterStatusRequest,
+  UpdateCharacterRequest,
   UpdateHpRequest,
-  WalletEntry,
-  UpdateWalletRequest,
-  ResourceEntry,
-  UpdateResourceRequest,
-  AbilityCheckResult,
+  UpdateStatRequest,
+  WalletEntryResponse,
+  ModifyWalletRequest,
+  ResourceResponse,
+  ModifyResourceRequest,
+  AbilityCheckResponse,
+  CharacterStatResponse,
 } from '@/types';
 
 export const charactersV2Api = {
-  createInCampaign: async (campaignId: string, data: CreateCharacterInCampaignRequest): Promise<ApiResponse<CharacterV2Response>> => {
-    const response = await api.post<ApiResponse<CharacterV2Response>>(`/campaigns/${campaignId}/characters`, data);
+  createInCampaign: async (campaignId: string, data: CreateCharacterInCampaignRequest): Promise<ApiResponse<CharacterResponse>> => {
+    const response = await api.post<ApiResponse<CharacterResponse>>(`/campaigns/${campaignId}/characters`, data);
     return response.data;
   },
 
-  listInCampaign: async (campaignId: string): Promise<ApiResponse<CharacterV2Response[]>> => {
-    const response = await api.get<ApiResponse<CharacterV2Response[]>>(`/campaigns/${campaignId}/characters`);
+  listInCampaign: async (campaignId: string): Promise<ApiResponse<CharacterResponse[]>> => {
+    const response = await api.get<ApiResponse<CharacterResponse[]>>(`/campaigns/${campaignId}/characters`);
     return response.data;
   },
 
-  getById: async (id: string): Promise<ApiResponse<CharacterV2Response>> => {
-    const response = await api.get<ApiResponse<CharacterV2Response>>(`/characters/${id}`);
+  getById: async (campaignId: string, characterId: string): Promise<ApiResponse<CharacterResponse>> => {
+    const response = await api.get<ApiResponse<CharacterResponse>>(`/campaigns/${campaignId}/characters/${characterId}`);
     return response.data;
   },
 
-  setStatus: async (id: string, data: SetCharacterStatusRequest): Promise<ApiResponse<CharacterV2Response>> => {
-    const response = await api.put<ApiResponse<CharacterV2Response>>(`/characters/${id}/status`, data);
+  update: async (campaignId: string, characterId: string, data: UpdateCharacterRequest): Promise<ApiResponse<CharacterResponse>> => {
+    const response = await api.put<ApiResponse<CharacterResponse>>(`/campaigns/${campaignId}/characters/${characterId}`, data);
     return response.data;
   },
 
-  updateHp: async (id: string, data: UpdateHpRequest): Promise<ApiResponse<CharacterV2Response>> => {
-    const response = await api.put<ApiResponse<CharacterV2Response>>(`/characters/${id}/hp`, data);
+  delete: async (campaignId: string, characterId: string): Promise<ApiResponse<void>> => {
+    const response = await api.delete<ApiResponse<void>>(`/campaigns/${campaignId}/characters/${characterId}`);
     return response.data;
   },
 
-  getWallet: async (id: string): Promise<ApiResponse<WalletEntry[]>> => {
-    const response = await api.get<ApiResponse<WalletEntry[]>>(`/characters/${id}/wallet`);
+  // Stats
+  getStats: async (campaignId: string, characterId: string): Promise<ApiResponse<CharacterStatResponse[]>> => {
+    const response = await api.get<ApiResponse<CharacterStatResponse[]>>(`/campaigns/${campaignId}/characters/${characterId}/stats`);
     return response.data;
   },
 
-  updateWallet: async (id: string, currencyTypeId: string, data: UpdateWalletRequest): Promise<ApiResponse<WalletEntry>> => {
-    const response = await api.put<ApiResponse<WalletEntry>>(`/characters/${id}/wallet/${currencyTypeId}`, data);
+  updateStat: async (campaignId: string, characterId: string, statId: string, data: UpdateStatRequest): Promise<ApiResponse<CharacterStatResponse>> => {
+    const response = await api.put<ApiResponse<CharacterStatResponse>>(`/campaigns/${campaignId}/characters/${characterId}/stats/${statId}`, data);
     return response.data;
   },
 
-  getResources: async (id: string): Promise<ApiResponse<ResourceEntry[]>> => {
-    const response = await api.get<ApiResponse<ResourceEntry[]>>(`/characters/${id}/resources`);
+  abilityCheck: async (campaignId: string, characterId: string, statId: string): Promise<ApiResponse<AbilityCheckResponse>> => {
+    const response = await api.get<ApiResponse<AbilityCheckResponse>>(`/campaigns/${campaignId}/characters/${characterId}/ability-check/${statId}`);
     return response.data;
   },
 
-  updateResource: async (id: string, resourceTypeId: string, data: UpdateResourceRequest): Promise<ApiResponse<ResourceEntry>> => {
-    const response = await api.put<ApiResponse<ResourceEntry>>(`/characters/${id}/resources/${resourceTypeId}`, data);
+  // HP
+  modifyHp: async (campaignId: string, characterId: string, data: UpdateHpRequest): Promise<ApiResponse<CharacterResponse>> => {
+    const response = await api.post<ApiResponse<CharacterResponse>>(`/campaigns/${campaignId}/characters/${characterId}/hp`, data);
     return response.data;
   },
 
-  abilityCheck: async (id: string, statId: string): Promise<ApiResponse<AbilityCheckResult>> => {
-    const response = await api.post<ApiResponse<AbilityCheckResult>>(`/characters/${id}/stats/${statId}/check`);
+  // Wallet
+  getWallet: async (campaignId: string, characterId: string): Promise<ApiResponse<WalletEntryResponse[]>> => {
+    const response = await api.get<ApiResponse<WalletEntryResponse[]>>(`/campaigns/${campaignId}/characters/${characterId}/wallet`);
+    return response.data;
+  },
+
+  modifyWallet: async (campaignId: string, characterId: string, data: ModifyWalletRequest): Promise<ApiResponse<WalletEntryResponse>> => {
+    const response = await api.post<ApiResponse<WalletEntryResponse>>(`/campaigns/${campaignId}/characters/${characterId}/wallet`, data);
+    return response.data;
+  },
+
+  // Resources
+  getResources: async (campaignId: string, characterId: string): Promise<ApiResponse<ResourceResponse[]>> => {
+    const response = await api.get<ApiResponse<ResourceResponse[]>>(`/campaigns/${campaignId}/characters/${characterId}/resources`);
+    return response.data;
+  },
+
+  modifyResource: async (campaignId: string, characterId: string, data: ModifyResourceRequest): Promise<ApiResponse<ResourceResponse>> => {
+    const response = await api.post<ApiResponse<ResourceResponse>>(`/campaigns/${campaignId}/characters/${characterId}/resources`, data);
     return response.data;
   },
 };

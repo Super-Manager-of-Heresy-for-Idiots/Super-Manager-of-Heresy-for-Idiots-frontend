@@ -25,7 +25,7 @@ import {
   useUpdateSessionNote,
   useDeleteSessionNote,
 } from '@/hooks/useSessionNotes';
-import type { SessionNoteResponse } from '@/types';
+import type { GmSessionNoteResponse } from '@/types';
 
 /* ── page ────────────────────────────────────────────────────── */
 
@@ -38,15 +38,15 @@ export default function SessionNotesPage() {
   const deleteMutation = useDeleteSessionNote();
 
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [editing, setEditing] = useState<SessionNoteResponse | null>(null);
+  const [editing, setEditing] = useState<GmSessionNoteResponse | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const [formTitle, setFormTitle] = useState('');
-  const [formBody, setFormBody] = useState('');
+  const [formContent, setFormContent] = useState('');
 
   const resetForm = () => {
     setFormTitle('');
-    setFormBody('');
+    setFormContent('');
   };
 
   const handleOpenCreate = () => {
@@ -55,10 +55,10 @@ export default function SessionNotesPage() {
     setDialogOpen(true);
   };
 
-  const handleOpenEdit = (note: SessionNoteResponse) => {
+  const handleOpenEdit = (note: GmSessionNoteResponse) => {
     setEditing(note);
     setFormTitle(note.title);
-    setFormBody(note.body);
+    setFormContent(note.content);
     setDialogOpen(true);
   };
 
@@ -70,7 +70,7 @@ export default function SessionNotesPage() {
         {
           campaignId: id,
           noteId: editing.id,
-          data: { title: formTitle, body: formBody },
+          data: { title: formTitle, content: formContent },
         },
         { onSuccess: () => { setDialogOpen(false); setEditing(null); } },
       );
@@ -78,7 +78,7 @@ export default function SessionNotesPage() {
       createMutation.mutate(
         {
           campaignId: id,
-          data: { title: formTitle, body: formBody },
+          data: { title: formTitle, content: formContent },
         },
         { onSuccess: () => { setDialogOpen(false); resetForm(); } },
       );
@@ -129,7 +129,7 @@ export default function SessionNotesPage() {
     );
   }
 
-  const notesList: SessionNoteResponse[] = notes ?? [];
+  const notesList: GmSessionNoteResponse[] = notes ?? [];
 
   /* ── main ────────────────────────────────────────────────── */
 
@@ -202,7 +202,7 @@ export default function SessionNotesPage() {
         />
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-          {notesList.map((note: SessionNoteResponse) => (
+          {notesList.map((note: GmSessionNoteResponse) => (
             <OrdoPanel
               key={note.id}
               frame
@@ -243,7 +243,7 @@ export default function SessionNotesPage() {
                     overflow: 'hidden',
                   }}
                 >
-                  {note.body}
+                  {note.content}
                 </p>
               </div>
 
@@ -291,11 +291,11 @@ export default function SessionNotesPage() {
               />
             </OrdoField>
 
-            <OrdoField label="Body" required>
+            <OrdoField label="Content" required>
               <textarea
                 className="ao-input"
-                value={formBody}
-                onChange={(e) => setFormBody(e.target.value)}
+                value={formContent}
+                onChange={(e) => setFormContent(e.target.value)}
                 placeholder="Record the events, decisions, and consequences of the session..."
                 rows={8}
                 style={{ resize: 'vertical' }}
@@ -314,7 +314,7 @@ export default function SessionNotesPage() {
               type="button"
               className="ao-btn ao-btn--primary"
               onClick={handleSubmit}
-              disabled={!formTitle || !formBody || createMutation.isPending || updateMutation.isPending}
+              disabled={!formTitle || !formContent || createMutation.isPending || updateMutation.isPending}
             >
               {(createMutation.isPending || updateMutation.isPending) && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

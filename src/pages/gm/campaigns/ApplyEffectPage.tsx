@@ -15,7 +15,6 @@ import {
   useCharacterEffects,
   useApplyEffect,
   useRemoveEffect,
-  useAdvanceRound,
 } from '@/hooks/useEffects';
 import { useCharacterV2 } from '@/hooks/useCharacterV2';
 import { useBuffsDebuffs } from '@/hooks/useAdmin';
@@ -34,20 +33,19 @@ export default function ApplyEffectPage() {
     data: character,
     isLoading: charLoading,
     error: charError,
-  } = useCharacterV2(characterId!);
+  } = useCharacterV2(campaignId!, characterId!);
 
   const {
     data: effects,
     isLoading: effectsLoading,
     error: effectsError,
     refetch: refetchEffects,
-  } = useCharacterEffects(characterId!);
+  } = useCharacterEffects(campaignId!, characterId!);
 
   const { data: buffsDebuffs, isLoading: bdLoading } = useBuffsDebuffs();
 
   const applyMutation = useApplyEffect();
   const removeMutation = useRemoveEffect();
-  const advanceMutation = useAdvanceRound();
 
   /* ---- local state ---- */
   const [searchTerm, setSearchTerm] = useState('');
@@ -67,16 +65,17 @@ export default function ApplyEffectPage() {
 
   /* ---- derived counts ---- */
   const buffCount =
-    effects?.filter((e) => e.buffDebuff.isBuff).length ?? 0;
+    effects?.filter((e) => e.isBuff).length ?? 0;
   const debuffCount =
-    effects?.filter((e) => !e.buffDebuff.isBuff).length ?? 0;
+    effects?.filter((e) => !e.isBuff).length ?? 0;
 
   /* ---- handlers ---- */
   const handleApply = () => {
-    if (!characterId || !selectedBdId) return;
+    if (!campaignId || !characterId || !selectedBdId) return;
     const rounds = Number(durationRounds);
     applyMutation.mutate(
       {
+        campaignId,
         characterId,
         data: {
           buffDebuffId: selectedBdId,
@@ -93,13 +92,8 @@ export default function ApplyEffectPage() {
   };
 
   const handleRemove = (effectId: string) => {
-    if (!characterId) return;
-    removeMutation.mutate({ characterId, effectId });
-  };
-
-  const handleAdvanceRound = () => {
-    if (!characterId) return;
-    advanceMutation.mutate(characterId);
+    if (!campaignId || !characterId) return;
+    removeMutation.mutate({ campaignId, characterId, effectId });
   };
 
   /* ---- loading ---- */
@@ -428,35 +422,6 @@ export default function ApplyEffectPage() {
             title="ACTIVE EFFECTS"
             sub={`${buffCount} buffs, ${debuffCount} debuffs`}
             glyph="sigil-2"
-            right={
-              <button
-                className="ao-btn ao-btn--ghost ao-btn--sm"
-                onClick={handleAdvanceRound}
-                disabled={
-                  advanceMutation.isPending ||
-                  !effects ||
-                  effects.length === 0
-                }
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 4,
-                }}
-              >
-                {advanceMutation.isPending ? (
-                  <Loader2 className="h-3 w-3 animate-spin" />
-                ) : (
-                  <>
-                    <Rune
-                      kind="arrow-r"
-                      size={12}
-                      color="currentColor"
-                    />
-                    Advance Round
-                  </>
-                )}
-              </button>
-            }
           />
 
           {/* Effect Rows */}
@@ -501,7 +466,7 @@ export default function ApplyEffectPage() {
                     </span>
                   </div>
                   {effects
-                    .filter((e) => e.buffDebuff.isBuff)
+                    .filter((e) => e.isBuff)
                     .map((effect) => (
                       <EffectRow
                         key={effect.id}
@@ -535,7 +500,7 @@ export default function ApplyEffectPage() {
                     </span>
                   </div>
                   {effects
-                    .filter((e) => !e.buffDebuff.isBuff)
+                    .filter((e) => !e.isBuff)
                     .map((effect) => (
                       <EffectRow
                         key={effect.id}

@@ -2,40 +2,11 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { homebrewV2Api } from '@/api/homebrew-v2.api';
 import type {
-  RateHomebrewRequest,
   AttachHomebrewRequest,
   PinHomebrewVersionRequest,
-  CreateOverrideHomebrewRequest,
   ApiError,
 } from '@/types';
 import { AxiosError } from 'axios';
-
-export function useHomebrewLibrary() {
-  return useQuery({
-    queryKey: ['homebrew-library'],
-    queryFn: async () => {
-      const response = await homebrewV2Api.getLibrary();
-      return response.data;
-    },
-  });
-}
-
-export function useRateHomebrew() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({ packageId, data }: { packageId: string; data: RateHomebrewRequest }) =>
-      homebrewV2Api.rate(packageId, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['homebrew-library'] });
-      queryClient.invalidateQueries({ queryKey: ['homebrew-marketplace'] });
-      toast.success('Rating submitted!');
-    },
-    onError: (error: AxiosError<ApiError>) => {
-      toast.error(error.response?.data?.message || 'Failed to submit rating');
-    },
-  });
-}
 
 export function useAttachHomebrew() {
   const queryClient = useQueryClient();
@@ -57,8 +28,8 @@ export function useDetachHomebrew() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ campaignId, activationId }: { campaignId: string; activationId: string }) =>
-      homebrewV2Api.detach(campaignId, activationId),
+    mutationFn: ({ campaignId, packageId }: { campaignId: string; packageId: string }) =>
+      homebrewV2Api.detach(campaignId, packageId),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'homebrew'] });
       toast.success('Homebrew detached from campaign!');
@@ -86,13 +57,13 @@ export function usePinHomebrewVersion() {
   return useMutation({
     mutationFn: ({
       campaignId,
-      activationId,
+      packageId,
       data,
     }: {
       campaignId: string;
-      activationId: string;
+      packageId: string;
       data: PinHomebrewVersionRequest;
-    }) => homebrewV2Api.pinVersion(campaignId, activationId, data),
+    }) => homebrewV2Api.pinVersion(campaignId, packageId, data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'homebrew'] });
       toast.success('Version pinned!');
@@ -103,30 +74,13 @@ export function usePinHomebrewVersion() {
   });
 }
 
-export function useCreateOverrideHomebrew() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (data: CreateOverrideHomebrewRequest) =>
-      homebrewV2Api.createOverride(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['homebrew-library'] });
-      queryClient.invalidateQueries({ queryKey: ['homebrew-my'] });
-      toast.success('Override doctrine created!');
-    },
-    onError: (error: AxiosError<ApiError>) => {
-      toast.error(error.response?.data?.message || 'Failed to create override');
-    },
-  });
-}
-
-export function useHomebrewVersions(packageId: string) {
+export function useAvailableContent(campaignId: string) {
   return useQuery({
-    queryKey: ['homebrew', packageId, 'versions'],
+    queryKey: ['campaigns', campaignId, 'available-content'],
     queryFn: async () => {
-      const response = await homebrewV2Api.getVersions(packageId);
+      const response = await homebrewV2Api.getAvailableContent(campaignId);
       return response.data;
     },
-    enabled: !!packageId,
+    enabled: !!campaignId,
   });
 }
