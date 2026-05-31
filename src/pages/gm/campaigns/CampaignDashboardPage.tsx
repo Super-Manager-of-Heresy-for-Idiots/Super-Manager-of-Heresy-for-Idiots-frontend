@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   OrdoPanel,
@@ -14,38 +14,85 @@ import {
   DrillBlock,
   StatusSwitch,
 } from '@/components/campaigns';
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { useAuthStore } from '@/store/authStore';
 import { useCampaign, useSetCampaignStatus } from '@/hooks/useCampaigns';
-import { useCampaignCharacters } from '@/hooks/useCharacterV2';
+import { useCampaignCharacters, useCreateCharacterInCampaign } from '@/hooks/useCharacterV2';
+import { useAvailableContent } from '@/hooks/useHomebrewV2';
 import type { CampaignStatus, CharacterV2Response } from '@/types';
 
 /* ── page ────────────────────────────────────────────────────── */
 
 export default function CampaignDashboardPage() {
   const { campaignId } = useParams<{ campaignId: string }>();
+  const { user } = useAuthStore();
+  const isPlayer = user?.role === 'PLAYER';
   const { data: campaign, isLoading, error, refetch } = useCampaign(campaignId!);
   const { data: characters, isLoading: charsLoading } = useCampaignCharacters(campaignId!);
+  const { data: availableContent } = useAvailableContent(campaignId!);
   const statusMutation = useSetCampaignStatus();
+  const createCharacterMutation = useCreateCharacterInCampaign();
+  const [createOpen, setCreateOpen] = useState(false);
+  const [characterName, setCharacterName] = useState('');
+  const [classId, setClassId] = useState('');
+  const [raceId, setRaceId] = useState('');
 
   /* ── derived counts ────────────────────────────────────────── */
 
+  const rosterCharacters = useMemo(
+    () => {
+      const list = characters ?? [];
+      return isPlayer ? list.filter((c: CharacterV2Response) => c.ownerId === user?.id) : list;
+    },
+    [characters, isPlayer, user?.id],
+  );
+
   const charCounts = useMemo(() => {
-    const list = characters ?? [];
+    const list = rosterCharacters;
     return {
       total: list.length,
       active: list.filter((c: CharacterV2Response) => c.status === 'ACTIVE').length,
       dead: list.filter((c: CharacterV2Response) => c.status === 'DEAD').length,
       reserve: list.filter((c: CharacterV2Response) => c.status === 'RESERVE').length,
     };
-  }, [characters]);
-
-  const activeChars = useMemo(
-    () => (characters ?? []).filter((c: CharacterV2Response) => c.status === 'ACTIVE'),
-    [characters],
-  );
+  }, [rosterCharacters]);
 
   const handleStatusChange = (status: CampaignStatus) => {
     if (!campaignId) return;
     statusMutation.mutate({ id: campaignId, data: { status } });
+  };
+
+  const resetCreateCharacterForm = () => {
+    setCharacterName('');
+    setClassId('');
+    setRaceId('');
+  };
+
+  const handleCreateCharacter = () => {
+    if (!campaignId || !characterName.trim() || !classId || !raceId) return;
+    createCharacterMutation.mutate(
+      {
+        campaignId,
+        data: {
+          campaignId,
+          name: characterName.trim(),
+          classId,
+          raceId,
+        },
+      },
+      {
+        onSuccess: () => {
+          setCreateOpen(false);
+          resetCreateCharacterForm();
+        },
+      },
+    );
   };
 
   /* ── loading ─────────────────────────────────────────────── */
@@ -84,6 +131,10 @@ export default function CampaignDashboardPage() {
     );
   }
 
+  const classOptions = availableContent?.classes ?? [];
+  const raceOptions = availableContent?.races ?? [];
+  const canCreateCharacter = isPlayer && campaign.status === 'ACTIVE';
+
   /* ── main ────────────────────────────────────────────────── */
 
   return (
@@ -102,12 +153,23 @@ export default function CampaignDashboardPage() {
             </p>
           )}
         </div>
-        {campaign.isCreator && (
-          <StatusSwitch
-            current={campaign.status}
-            onChange={handleStatusChange}
-          />
-        )}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          {canCreateCharacter && (
+            <button
+              className="ao-btn ao-btn--primary"
+              onClick={() => setCreateOpen(true)}
+            >
+              <Rune kind="plus" size={14} color="currentColor" />
+              <span style={{ marginLeft: 6 }}>Create Character</span>
+            </button>
+          )}
+          {campaign.isCreator && (
+            <StatusSwitch
+              current={campaign.status}
+              onChange={handleStatusChange}
+            />
+          )}
+        </div>
       </div>
 
       {/* Stat blocks */}
@@ -161,7 +223,12 @@ export default function CampaignDashboardPage() {
 
       {/* Roster Summary */}
       <OrdoPanel frame padding={0} style={{ marginTop: 24 }}>
-        <PanelHeader title="ROSTER SUMMARY" glyph="helm" tone="gold" sub={`${charCounts.active} active sworn`} />
+        <PanelHeader
+          title="ROSTER SUMMARY"
+          glyph="helm"
+          tone="gold"
+          sub={isPlayer ? `${charCounts.total} of your characters` : `${charCounts.total} campaign characters`}
+        />
 
         {charsLoading ? (
           <div className="ao-breathe" style={{ padding: 20 }}>
@@ -173,15 +240,17 @@ export default function CampaignDashboardPage() {
               </div>
             ))}
           </div>
-        ) : activeChars.length === 0 ? (
+        ) : rosterCharacters.length === 0 ? (
           <div style={{ padding: '24px 20px', textAlign: 'center' }}>
             <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 13 }}>
-              No active characters have been sworn to this campaign.
+              {isPlayer
+                ? 'You have no characters in this campaign.'
+                : 'No characters have been sworn to this campaign.'}
             </p>
           </div>
         ) : (
           <div>
-            {activeChars.map((ch: CharacterV2Response) => {
+            {rosterCharacters.map((ch: CharacterV2Response) => {
               const className = ch.classLevels?.[0]?.className ?? 'Unknown';
               return (
                 <div
@@ -201,6 +270,11 @@ export default function CampaignDashboardPage() {
                       <span className="ao-codex" style={{ fontSize: 10, color: 'var(--ink-faint)' }}>
                         {className} &middot; LVL {ch.totalLevel}
                       </span>
+                      {!isPlayer && (
+                        <span className="ao-codex" style={{ fontSize: 10, color: 'var(--ink-faint)' }}>
+                          Owner: {ch.ownerUsername}
+                        </span>
+                      )}
                     </div>
                     <Bar value={ch.currentHp ?? 0} max={ch.maxHp ?? 0} tone="ember" height={5} />
                   </div>
@@ -213,6 +287,80 @@ export default function CampaignDashboardPage() {
           </div>
         )}
       </OrdoPanel>
+
+      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create Character</DialogTitle>
+          </DialogHeader>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <span className="ao-label">Name</span>
+              <input
+                className="ao-input"
+                value={characterName}
+                onChange={(event) => setCharacterName(event.target.value)}
+                placeholder="Character name"
+              />
+            </label>
+
+            <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <span className="ao-label">Class</span>
+              <select
+                className="ao-input"
+                value={classId}
+                onChange={(event) => setClassId(event.target.value)}
+              >
+                <option value="">Select class</option>
+                {classOptions.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.name}{item.homebrewTitle ? ` (${item.homebrewTitle})` : ''}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <span className="ao-label">Race</span>
+              <select
+                className="ao-input"
+                value={raceId}
+                onChange={(event) => setRaceId(event.target.value)}
+              >
+                <option value="">Select race</option>
+                {raceOptions.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.name}{item.homebrewTitle ? ` (${item.homebrewTitle})` : ''}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+          <DialogFooter>
+            <button
+              className="ao-btn ao-btn--ghost"
+              onClick={() => {
+                setCreateOpen(false);
+                resetCreateCharacterForm();
+              }}
+              disabled={createCharacterMutation.isPending}
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              className="ao-btn ao-btn--primary"
+              onClick={handleCreateCharacter}
+              disabled={!characterName.trim() || !classId || !raceId || createCharacterMutation.isPending}
+            >
+              {createCharacterMutation.isPending && (
+                <span style={{ marginRight: 6 }}>...</span>
+              )}
+              Create
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

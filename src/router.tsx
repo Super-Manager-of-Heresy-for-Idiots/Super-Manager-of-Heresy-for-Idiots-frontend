@@ -4,6 +4,7 @@ import { ProtectedRoute } from '@/components/layout/ProtectedRoute';
 
 import LoginPage from '@/pages/auth/LoginPage';
 import RegisterPage from '@/pages/auth/RegisterPage';
+import TodoPage from '@/pages/TodoPage';
 
 // Campaign v2 pages
 import CampaignListPage from '@/pages/gm/campaigns/CampaignListPage';
@@ -61,10 +62,24 @@ export const router = createBrowserRouter([
           { path: '/campaigns/:campaignId/members', element: <CampaignMembersPage /> },
           { path: '/campaigns/:campaignId/invite', element: <CampaignInvitePage /> },
           { path: '/campaigns/:campaignId/storage', element: <SharedStoragePage /> },
+          { path: '/campaigns/:campaignId/characters/:characterId/inventory', element: <InventoryV2Page /> },
+          { path: '/marketplace', element: <MarketplacePage /> },
+          { path: '/marketplace/:id', element: <MarketplaceDetailPage /> },
+        ],
+      },
+    ],
+  },
+
+  // Campaign management routes available only to GMs and admins.
+  {
+    element: <ProtectedRoute allowedRoles={['GAME_MASTER', 'ADMIN']} />,
+    children: [
+      {
+        element: <AppLayout />,
+        children: [
           { path: '/campaigns/:campaignId/notes', element: <SessionNotesPage /> },
           { path: '/campaigns/:campaignId/xp', element: <XPGrantPage /> },
           { path: '/campaigns/:campaignId/characters/:characterId/effects', element: <ApplyEffectPage /> },
-          { path: '/campaigns/:campaignId/characters/:characterId/inventory', element: <InventoryV2Page /> },
           { path: '/campaigns/:campaignId/npcs', element: <NPCManagerPage /> },
           { path: '/campaigns/:campaignId/npcs/:npcId', element: <NPCDetailPage /> },
           { path: '/campaigns/:campaignId/quests', element: <QuestManagerPage /> },
@@ -82,8 +97,10 @@ export const router = createBrowserRouter([
       {
         element: <AppLayout />,
         children: [
+          { path: '/gm', element: <Navigate to="/campaigns" replace /> },
           // Homebrew
-          { path: '/gm/homebrew/marketplace', element: <MarketplacePage /> },
+          { path: '/gm/homebrew', element: <Navigate to="/gm/homebrew/my" replace /> },
+          { path: '/gm/homebrew/marketplace', element: <Navigate to="/marketplace" replace /> },
           { path: '/gm/homebrew/marketplace/:id', element: <MarketplaceDetailPage /> },
           { path: '/gm/homebrew/my', element: <MyDoctrinesPage /> },
           { path: '/gm/homebrew/new', element: <CreateDoctrinePage /> },
@@ -104,6 +121,7 @@ export const router = createBrowserRouter([
         children: [
           { path: '/admin', element: <AdminDashboardPage /> },
           { path: '/admin/users', element: <UsersListPage /> },
+          { path: '/admin/characters', element: <TodoPage title="Characters" /> },
           { path: '/admin/stat-types', element: <StatTypesPage /> },
           { path: '/admin/item-types', element: <ItemTypesPage /> },
           { path: '/admin/character-classes', element: <CharacterClassesPage /> },

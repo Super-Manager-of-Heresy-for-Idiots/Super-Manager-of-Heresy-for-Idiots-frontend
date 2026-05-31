@@ -13,13 +13,14 @@ import type {
 } from '@/types';
 import { AxiosError } from 'axios';
 
-export function useCampaigns() {
+export function useCampaigns(enabled = true) {
   return useQuery({
     queryKey: ['campaigns'],
     queryFn: async () => {
       const response = await campaignsApi.list();
       return response.data?.content;
     },
+    enabled,
   });
 }
 

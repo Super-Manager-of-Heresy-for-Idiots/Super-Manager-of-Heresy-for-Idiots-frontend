@@ -9,21 +9,37 @@ interface NavEntry {
   label: string;
   path: string;
   glyph: string;
+  exact?: boolean;
 }
 
 const playerNav: NavEntry[] = [
   { label: 'Campaigns', path: '/campaigns', glyph: 'helm' },
+  { label: 'Marketplace', path: '/marketplace', glyph: 'book' },
 ];
 
 const gmNav: NavEntry[] = [
   { label: 'Campaigns', path: '/campaigns', glyph: 'helm' },
-  { label: 'Doctrines', path: '/gm/homebrew/marketplace', glyph: 'scroll' },
+  { label: 'Marketplace', path: '/marketplace', glyph: 'book' },
+  { label: 'My Doctrines', path: '/gm/homebrew/my', glyph: 'scroll' },
+  { label: 'Installed', path: '/gm/homebrew/installed', glyph: 'check' },
+  { label: 'Library', path: '/gm/homebrew/library', glyph: 'book' },
 ];
 
 const adminNav: NavEntry[] = [
   { label: 'Campaigns', path: '/campaigns', glyph: 'helm' },
-  { label: 'Doctrines', path: '/gm/homebrew/marketplace', glyph: 'scroll' },
-  { label: 'Archive', path: '/admin', glyph: 'book' },
+  { label: 'Admin', path: '/admin', glyph: 'book', exact: true },
+  { label: 'Users', path: '/admin/users', glyph: 'helm' },
+  { label: 'Characters', path: '/admin/characters', glyph: 'shield' },
+  { label: 'Stat Types', path: '/admin/stat-types', glyph: 'diamond' },
+  { label: 'Item Types', path: '/admin/item-types', glyph: 'sword' },
+  { label: 'Classes', path: '/admin/character-classes', glyph: 'shield' },
+  { label: 'Races', path: '/admin/character-races', glyph: 'sigil-3' },
+  { label: 'Skills', path: '/admin/skills', glyph: 'sigil-2' },
+  { label: 'Subclasses', path: '/admin/subclasses', glyph: 'cross-pat' },
+  { label: 'Feats', path: '/admin/feats', glyph: 'flame' },
+  { label: 'Buffs/Debuffs', path: '/admin/buffs-debuffs', glyph: 'hex' },
+  { label: 'Enchantments', path: '/admin/enchantment-types', glyph: 'eye' },
+  { label: 'Homebrew', path: '/admin/homebrew', glyph: 'scroll' },
 ];
 
 function getNavItems(role?: Role): NavEntry[] {
@@ -55,7 +71,8 @@ export function AppLayout() {
 
   const navItems = getNavItems(user?.role);
 
-  const isActive = (path: string) => location.pathname.startsWith(path);
+  const isActive = (item: NavEntry) =>
+    item.exact ? location.pathname === item.path : location.pathname.startsWith(item.path);
 
   const handleLogout = () => {
     logout();
@@ -100,10 +117,13 @@ export function AppLayout() {
             flexDirection: 'column',
             alignItems: 'center',
             gap: 4,
+            overflowY: 'auto',
+            scrollbarWidth: 'none',
+            paddingBottom: 8,
           }}
         >
           {navItems.map((item) => {
-            const active = isActive(item.path);
+            const active = isActive(item);
             return (
               <button
                 key={item.label}
@@ -143,7 +163,7 @@ export function AppLayout() {
               >
                 <Rune kind={item.glyph} size={18} />
                 {/* Badge for admin Archive */}
-                {item.label === 'Archive' && user?.role === 'ADMIN' && (
+                {item.label === 'Admin' && user?.role === 'ADMIN' && (
                   <span
                     style={{
                       position: 'absolute',
