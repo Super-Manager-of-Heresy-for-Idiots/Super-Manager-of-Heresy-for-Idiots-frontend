@@ -4,6 +4,7 @@ import { homebrewV2Api } from '@/api/homebrew-v2.api';
 import { homebrewApi } from '@/api/homebrew.api';
 import type {
   AttachHomebrewRequest,
+  CreateOverrideHomebrewRequest,
   PinHomebrewVersionRequest,
   RateHomebrewRequest,
   ApiError,
@@ -116,10 +117,11 @@ export function useRateHomebrew() {
 export function useCreateOverrideHomebrew() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ campaignId, data }: { campaignId: string; data: AttachHomebrewRequest }) =>
-      homebrewV2Api.attach(campaignId, data),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'homebrew'] });
+    mutationFn: (data: CreateOverrideHomebrewRequest) =>
+      homebrewV2Api.createOverride(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['homebrew-library'] });
+      queryClient.invalidateQueries({ queryKey: ['homebrew-my'] });
       toast.success('Override homebrew created!');
     },
     onError: (error: AxiosError<ApiError>) => {

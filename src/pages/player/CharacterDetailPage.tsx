@@ -82,7 +82,7 @@ export default function CharacterDetailPage({ isGmView = false }: CharacterDetai
   };
 
   const handleInventorySave = (data: { itemTypeId: string | null; quantity: number; notes: string | null }) => {
-    if (!selectedSlot) return;
+    if (!selectedSlot?.slot) return;
     updateInventory.mutate(
       { characterId: id!, slot: selectedSlot.slot, data: { itemTypeId: data.itemTypeId, quantity: data.quantity, notes: data.notes || undefined } },
       { onSuccess: () => setSelectedSlot(null) }
@@ -90,7 +90,7 @@ export default function CharacterDetailPage({ isGmView = false }: CharacterDetai
   };
 
   const handlePlaceArtifact = () => {
-    if (!placeSlot || !selectedArtifactId) return;
+    if (!placeSlot?.slot || !selectedArtifactId) return;
     placeArtifact.mutate(
       { characterId: id!, slot: placeSlot.slot, artifactId: selectedArtifactId },
       {
@@ -383,7 +383,7 @@ export default function CharacterDetailPage({ isGmView = false }: CharacterDetai
                   <SelectValue placeholder="Choose an artifact" />
                 </SelectTrigger>
                 <SelectContent>
-                  {placeSlot && getMatchingArtifacts(placeSlot.slot).map((a) => (
+                  {placeSlot?.slot && getMatchingArtifacts(placeSlot.slot).map((a) => (
                     <SelectItem key={a.id} value={a.id}>
                       {a.name} ({a.rarity || 'COMMON'})
                     </SelectItem>
@@ -391,7 +391,7 @@ export default function CharacterDetailPage({ isGmView = false }: CharacterDetai
                 </SelectContent>
               </Select>
             </OrdoField>
-            {placeSlot && getMatchingArtifacts(placeSlot.slot).length === 0 && (
+            {placeSlot?.slot && getMatchingArtifacts(placeSlot.slot).length === 0 && (
               <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 13 }}>
                 No artifacts available for this slot. Create one in the Artifacts page first.
               </p>

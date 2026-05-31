@@ -58,12 +58,13 @@ export function EquipmentSlotModal({ slot, open, onClose, onSave, isSaving }: Eq
   };
 
   if (!slot) return null;
+  const slotLabel = slot.slot ? EQUIPMENT_SLOT_LABELS[slot.slot] : 'Inventory';
 
   return (
     <Dialog open={open} onOpenChange={() => onClose()}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{EQUIPMENT_SLOT_LABELS[slot.slot]} Slot</DialogTitle>
+          <DialogTitle>{slotLabel} Slot</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           <div className="space-y-2">

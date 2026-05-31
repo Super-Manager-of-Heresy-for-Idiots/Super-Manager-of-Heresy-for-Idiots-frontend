@@ -1044,6 +1044,11 @@ export interface CampaignHomebrewResponse {
 
 export interface AttachHomebrewRequest {
   homebrewPackageId: string;
+  pinnedVersion?: number;
+}
+
+export interface CreateOverrideHomebrewRequest extends CreateHomebrewRequest {
+  parentId: string;
 }
 
 export interface PinHomebrewVersionRequest {
@@ -1119,7 +1124,9 @@ export interface SetNpcVisibilityRequest {
 export interface UpdateInventorySlotRequest {
   artifactId?: string;
   slot?: EquipmentSlot;
-  itemTypeId?: string;
+  itemTypeId?: string | null;
+  quantity?: number;
+  notes?: string;
 }
 
 export type BadgeStatus = HomebrewStatus | 'DELETED' | 'ARCHIVED';

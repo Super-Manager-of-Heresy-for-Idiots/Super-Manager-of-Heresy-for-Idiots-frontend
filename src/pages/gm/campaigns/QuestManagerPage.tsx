@@ -218,7 +218,7 @@ export default function QuestManagerPage() {
                 {/* Visibility */}
                 <div>
                   <VisibilityToggle
-                    visible={quest.visible}
+                    visible={quest.isVisibleToPlayers ?? quest.visible ?? false}
                     onToggle={() => {/* handled in detail page */}}
                   />
                 </div>

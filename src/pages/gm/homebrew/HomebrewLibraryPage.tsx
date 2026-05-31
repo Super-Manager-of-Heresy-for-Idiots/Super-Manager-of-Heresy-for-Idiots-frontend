@@ -47,7 +47,13 @@ export default function HomebrewLibraryPage() {
   const [attachCampaignId, setAttachCampaignId] = useState('');
   const [attachPinnedVersion, setAttachPinnedVersion] = useState('');
 
-  const libraryEntries: LibraryEntry[] = library ?? [];
+  const libraryEntries: LibraryEntry[] = (library ?? []).map((entry) => ({
+    id: entry.id,
+    packageId: entry.id,
+    title: entry.title,
+    authorUsername: entry.authorUsername,
+    version: entry.version,
+  }));
   const campaignList: CampaignResponse[] = campaigns ?? [];
 
   const handleAttach = () => {
@@ -56,7 +62,7 @@ export default function HomebrewLibraryPage() {
       {
         campaignId: attachCampaignId,
         data: {
-          packageId: attachPackageId,
+          homebrewPackageId: attachPackageId,
           pinnedVersion: attachPinnedVersion ? Number(attachPinnedVersion) : undefined,
         },
       },

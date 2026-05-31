@@ -366,7 +366,7 @@ export default function XPGrantPage() {
                       <span className="ao-h5" style={{ fontSize: 13 }}>
                         {ch.name}
                       </span>
-                      <CharStatusBadge status={ch.status} />
+                      <CharStatusBadge status={ch.status ?? 'ACTIVE'} />
                       <span
                         className="ao-codex"
                         style={{
@@ -381,8 +381,8 @@ export default function XPGrantPage() {
                     {/* HP bar */}
                     <div style={{ marginBottom: 3 }}>
                       <Bar
-                        value={ch.currentHp}
-                        max={ch.maxHp}
+                        value={ch.currentHp ?? 0}
+                        max={ch.maxHp ?? 1}
                         tone="ember"
                         height={5}
                       />

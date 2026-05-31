@@ -3,6 +3,8 @@ import type {
   ApiResponse,
   CampaignHomebrewResponse,
   AttachHomebrewRequest,
+  CreateOverrideHomebrewRequest,
+  HomebrewDetailResponse,
   PinHomebrewVersionRequest,
   TeamAvailableContentResponse,
 } from '@/types';
@@ -35,6 +37,11 @@ export const homebrewV2Api = {
   // Get available content (global + homebrew)
   getAvailableContent: async (campaignId: string): Promise<ApiResponse<TeamAvailableContentResponse>> => {
     const response = await api.get<ApiResponse<TeamAvailableContentResponse>>(`/campaigns/${campaignId}/available-content`);
+    return response.data;
+  },
+
+  createOverride: async (data: CreateOverrideHomebrewRequest): Promise<ApiResponse<HomebrewDetailResponse>> => {
+    const response = await api.post<ApiResponse<HomebrewDetailResponse>>('/homebrew/override', data);
     return response.data;
   },
 };
