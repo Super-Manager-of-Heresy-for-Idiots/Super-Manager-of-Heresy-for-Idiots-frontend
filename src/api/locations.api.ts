@@ -33,7 +33,7 @@ export const locationsApi = {
   },
 
   toggleVisibility: async (campaignId: string, locationId: string): Promise<ApiResponse<LocationResponse>> => {
-    const response = await api.put<ApiResponse<LocationResponse>>(`/campaigns/${campaignId}/locations/${locationId}/visibility`);
+    const response = await api.post<ApiResponse<LocationResponse>>(`/campaigns/${campaignId}/locations/${locationId}/toggle-visibility`);
     return response.data;
   },
 };

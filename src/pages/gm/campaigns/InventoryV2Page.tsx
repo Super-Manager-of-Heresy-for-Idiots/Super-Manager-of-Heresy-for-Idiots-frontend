@@ -34,7 +34,7 @@ function rarityColor(rarity?: string): string {
 /* ── page ────────────────────────────────────────────────────── */
 
 export default function InventoryV2Page() {
-  const { id: campaignId, characterId } = useParams<{ id: string; characterId: string }>();
+  const { campaignId, characterId } = useParams<{ campaignId: string; characterId: string }>();
   const { data: inventory, isLoading, error, refetch } = useCharacterInventory(campaignId!, characterId!);
   const grantMutation = useGrantItem();
   const transferMutation = useTransferItem();

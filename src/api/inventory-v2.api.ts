@@ -27,7 +27,7 @@ export const inventoryV2Api = {
   },
 
   grant: async (campaignId: string, characterId: string, data: GrantItemRequest): Promise<ApiResponse<ItemInstanceResponse>> => {
-    const response = await api.post<ApiResponse<ItemInstanceResponse>>(`/campaigns/${campaignId}/characters/${characterId}/inventory/grant`, data);
+    const response = await api.post<ApiResponse<ItemInstanceResponse>>(`/campaigns/${campaignId}/characters/${characterId}/inventory`, data);
     return response.data;
   },
 
@@ -37,12 +37,12 @@ export const inventoryV2Api = {
   },
 
   equip: async (campaignId: string, characterId: string, instanceId: string, data: EquipItemRequest): Promise<ApiResponse<ItemInstanceResponse>> => {
-    const response = await api.put<ApiResponse<ItemInstanceResponse>>(`/campaigns/${campaignId}/characters/${characterId}/inventory/${instanceId}/equip`, data);
+    const response = await api.post<ApiResponse<ItemInstanceResponse>>(`/campaigns/${campaignId}/characters/${characterId}/inventory/${instanceId}/equip`, data);
     return response.data;
   },
 
   unequip: async (campaignId: string, characterId: string, instanceId: string): Promise<ApiResponse<ItemInstanceResponse>> => {
-    const response = await api.put<ApiResponse<ItemInstanceResponse>>(`/campaigns/${campaignId}/characters/${characterId}/inventory/${instanceId}/unequip`);
+    const response = await api.post<ApiResponse<ItemInstanceResponse>>(`/campaigns/${campaignId}/characters/${characterId}/inventory/${instanceId}/unequip`);
     return response.data;
   },
 

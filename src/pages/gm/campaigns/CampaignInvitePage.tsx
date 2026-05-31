@@ -17,9 +17,9 @@ import { useCampaignInviteCode, useRegenerateCampaignInvite } from '@/hooks/useC
 /* ── page ────────────────────────────────────────────────────── */
 
 export default function CampaignInvitePage() {
-  const { id } = useParams<{ id: string }>();
+  const { campaignId } = useParams<{ campaignId: string }>();
   const navigate = useNavigate();
-  const { data: inviteData, isLoading, error, refetch } = useCampaignInviteCode(id!);
+  const { data: inviteData, isLoading, error, refetch } = useCampaignInviteCode(campaignId!);
   const regenerateMutation = useRegenerateCampaignInvite();
 
   const [copied, setCopied] = useState(false);
@@ -38,8 +38,8 @@ export default function CampaignInvitePage() {
   };
 
   const handleRegenerate = () => {
-    if (!id) return;
-    regenerateMutation.mutate(id, {
+    if (!campaignId) return;
+    regenerateMutation.mutate(campaignId, {
       onSuccess: () => setRegenOpen(false),
     });
   };
@@ -82,7 +82,7 @@ export default function CampaignInvitePage() {
       {/* Back button */}
       <button
         className="ao-btn ao-btn--ghost ao-btn--sm"
-        onClick={() => navigate(`/gm/campaigns/${id}`)}
+        onClick={() => navigate(`/campaigns/${campaignId}`)}
         style={{ marginBottom: 16 }}
       >
         <Rune kind="chev-l" size={12} color="currentColor" />

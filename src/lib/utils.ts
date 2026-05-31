@@ -35,9 +35,9 @@ export function formatDateTime(dateString: string): string {
 export function getRoleRedirectPath(role: string): string {
   switch (role) {
     case 'PLAYER':
-      return '/characters';
+      return '/campaigns';
     case 'GAME_MASTER':
-      return '/gm/campaigns';
+      return '/campaigns';
     case 'ADMIN':
       return '/admin';
     default:

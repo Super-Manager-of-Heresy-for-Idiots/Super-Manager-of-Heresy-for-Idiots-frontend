@@ -38,14 +38,12 @@ export default function NPCManagerPage() {
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [formName, setFormName] = useState('');
-  const [formRole, setFormRole] = useState('');
   const [formPublicDesc, setFormPublicDesc] = useState('');
   const [formPrivateDesc, setFormPrivateDesc] = useState('');
   const [formVisible, setFormVisible] = useState(true);
 
   const resetForm = () => {
     setFormName('');
-    setFormRole('');
     setFormPublicDesc('');
     setFormPrivateDesc('');
     setFormVisible(true);
@@ -57,10 +55,9 @@ export default function NPCManagerPage() {
         campaignId: campaignId!,
         data: {
           name: formName,
-          role: formRole || undefined,
           publicDescription: formPublicDesc || undefined,
           privateDescription: formPrivateDesc || undefined,
-          visible: formVisible,
+          isVisibleToPlayers: formVisible,
         },
       },
       {
@@ -172,8 +169,8 @@ export default function NPCManagerPage() {
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        filter: npc.visible ? 'none' : 'grayscale(1)',
-                        opacity: npc.visible ? 1 : 0.5,
+                        filter: npc.isVisibleToPlayers ? 'none' : 'grayscale(1)',
+                        opacity: npc.isVisibleToPlayers ? 1 : 0.5,
                       }}
                     >
                       <Rune kind={glyph} size={22} color="var(--gold)" />
@@ -184,18 +181,13 @@ export default function NPCManagerPage() {
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                         <CodexID>{npc.id.slice(0, 8).toUpperCase()}</CodexID>
                         <VisibilityToggle
-                          visible={npc.visible ?? false}
+                          visible={npc.isVisibleToPlayers}
                           onToggle={() => toggleVisibility(npc)}
                         />
                       </div>
                       <h5 className="ao-h5" style={{ marginTop: 4, color: 'var(--ink-bright)' }}>
                         {npc.name}
                       </h5>
-                      {npc.role && (
-                        <p className="ao-italic" style={{ fontSize: 13, color: 'var(--ink-faint)', marginTop: 2 }}>
-                          {npc.role}
-                        </p>
-                      )}
                     </div>
                   </div>
 
@@ -253,7 +245,7 @@ export default function NPCManagerPage() {
                 >
                   <button
                     className="ao-btn ao-btn--sm"
-                    onClick={() => navigate(`/gm/campaigns/${campaignId}/npcs/${npc.id}`)}
+                    onClick={() => navigate(`/campaigns/${campaignId}/npcs/${npc.id}`)}
                   >
                     <Rune kind="scroll" size={10} /> Open
                   </button>
@@ -262,8 +254,8 @@ export default function NPCManagerPage() {
                     onClick={() => toggleVisibility(npc)}
                     disabled={visibilityMutation.isPending}
                   >
-                    <Rune kind={npc.visible ? 'lock' : 'eye'} size={10} />
-                    {npc.visible ? ' Hide' : ' Reveal'}
+                    <Rune kind={npc.isVisibleToPlayers ? 'lock' : 'eye'} size={10} />
+                    {npc.isVisibleToPlayers ? ' Hide' : ' Reveal'}
                   </button>
                 </div>
               </OrdoPanel>
@@ -285,15 +277,6 @@ export default function NPCManagerPage() {
                 value={formName}
                 onChange={(e) => setFormName(e.target.value)}
                 placeholder="Name of the character"
-              />
-            </OrdoField>
-
-            <OrdoField label="Role">
-              <input
-                className="ao-input"
-                value={formRole}
-                onChange={(e) => setFormRole(e.target.value)}
-                placeholder="e.g. Merchant, Guard Captain, Spy"
               />
             </OrdoField>
 

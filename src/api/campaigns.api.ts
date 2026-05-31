@@ -13,7 +13,6 @@ import type {
   CharacterResponse,
   SharedStorageResponse,
   CreateStorageContainerRequest,
-  ItemInstanceResponse,
   Page,
 } from '@/types';
 
@@ -99,16 +98,14 @@ export const campaignsApi = {
     return response.data;
   },
 
-  depositItem: async (id: string, storageId: string, instanceId: string): Promise<ApiResponse<ItemInstanceResponse>> => {
-    const response = await api.post<ApiResponse<ItemInstanceResponse>>(`/campaigns/${id}/shared-storage/${storageId}/deposit/${instanceId}`);
+  depositItem: async (id: string, storageId: string, instanceId: string): Promise<ApiResponse<void>> => {
+    const response = await api.post<ApiResponse<void>>(`/campaigns/${id}/shared-storage/${storageId}/items/${instanceId}/deposit`);
     return response.data;
   },
 
-  takeItem: async (id: string, storageId: string, instanceId: string, characterId: string): Promise<ApiResponse<ItemInstanceResponse>> => {
-    const response = await api.post<ApiResponse<ItemInstanceResponse>>(
-      `/campaigns/${id}/shared-storage/${storageId}/take/${instanceId}`,
-      null,
-      { params: { characterId } },
+  takeItem: async (id: string, storageId: string, instanceId: string, characterId: string): Promise<ApiResponse<void>> => {
+    const response = await api.post<ApiResponse<void>>(
+      `/campaigns/${id}/shared-storage/${storageId}/items/${instanceId}/take/${characterId}`,
     );
     return response.data;
   },

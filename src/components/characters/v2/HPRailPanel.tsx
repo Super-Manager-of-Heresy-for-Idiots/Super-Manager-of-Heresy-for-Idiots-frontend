@@ -26,12 +26,12 @@ export function HPRailPanel({
 
   function handleDamage() {
     if (amount <= 0) return;
-    updateHp.mutate({ id: characterId, data: { delta: -amount } });
+    updateHp.mutate({ id: characterId, data: { amount: -amount } });
   }
 
   function handleHeal() {
     if (amount <= 0) return;
-    updateHp.mutate({ id: characterId, data: { delta: amount } });
+    updateHp.mutate({ id: characterId, data: { amount } });
   }
 
   return (

@@ -5,6 +5,7 @@ import type {
   CreateNpcRequest,
   UpdateNpcRequest,
   CreateNoteRequest,
+  UpdateNoteRequest,
   ApiError,
 } from '@/types';
 import { AxiosError } from 'axios';
@@ -136,6 +137,33 @@ export function useAddNpcNote() {
   });
 }
 
+export function useUpdateNpcNote() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      campaignId,
+      npcId,
+      noteId,
+      data,
+    }: {
+      campaignId: string;
+      npcId: string;
+      noteId: string;
+      data: UpdateNoteRequest;
+    }) => npcsApi.updateNote(campaignId, npcId, noteId, data),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ['campaigns', variables.campaignId, 'npcs', variables.npcId],
+      });
+      toast.success('Note updated!');
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error.response?.data?.message || 'Failed to update note');
+    },
+  });
+}
+
 export function useDeleteNpcNote() {
   const queryClient = useQueryClient();
 
@@ -166,8 +194,8 @@ export function useNpcNotes(campaignId: string, npcId: string) {
   return useQuery({
     queryKey: ['campaigns', campaignId, 'npcs', npcId, 'notes'],
     queryFn: async () => {
-      const response = await npcsApi.listNotes(campaignId, npcId);
-      return response.data;
+      const response = await npcsApi.getById(campaignId, npcId);
+      return response.data?.notes ?? [];
     },
     enabled: !!campaignId && !!npcId,
   });

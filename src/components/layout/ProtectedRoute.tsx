@@ -17,9 +17,9 @@ export function ProtectedRoute({ allowedRoles }: ProtectedRouteProps) {
     // Redirect to role-appropriate home
     switch (user.role) {
       case 'PLAYER':
-        return <Navigate to="/characters" replace />;
+        return <Navigate to="/campaigns" replace />;
       case 'GAME_MASTER':
-        return <Navigate to="/gm/campaigns" replace />;
+        return <Navigate to="/campaigns" replace />;
       case 'ADMIN':
         return <Navigate to="/admin" replace />;
       default:

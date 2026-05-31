@@ -12,21 +12,16 @@ interface NavEntry {
 }
 
 const playerNav: NavEntry[] = [
-  { label: 'Roster', path: '/characters', glyph: 'shield' },
-  { label: 'Conclave', path: '/teams', glyph: 'helm' },
+  { label: 'Campaigns', path: '/campaigns', glyph: 'helm' },
 ];
 
 const gmNav: NavEntry[] = [
-  { label: 'Conclave', path: '/gm/campaigns', glyph: 'helm' },
-  { label: 'Arsenal', path: '/gm/artifacts', glyph: 'sword' },
-  { label: 'Edicts', path: '/gm/conditions', glyph: 'shield' },
+  { label: 'Campaigns', path: '/campaigns', glyph: 'helm' },
   { label: 'Doctrines', path: '/gm/homebrew/marketplace', glyph: 'scroll' },
 ];
 
 const adminNav: NavEntry[] = [
-  { label: 'Conclave', path: '/gm/campaigns', glyph: 'helm' },
-  { label: 'Arsenal', path: '/gm/artifacts', glyph: 'sword' },
-  { label: 'Edicts', path: '/gm/conditions', glyph: 'shield' },
+  { label: 'Campaigns', path: '/campaigns', glyph: 'helm' },
   { label: 'Doctrines', path: '/gm/homebrew/marketplace', glyph: 'scroll' },
   { label: 'Archive', path: '/admin', glyph: 'book' },
 ];

@@ -26,6 +26,7 @@ import {
   useCreateLocation,
   useUpdateLocation,
   useDeleteLocation,
+  useToggleLocationVisibility,
 } from '@/hooks/useLocations';
 import type { LocationResponse } from '@/types';
 
@@ -37,6 +38,7 @@ export default function LocationsPage() {
   const createMutation = useCreateLocation();
   const updateMutation = useUpdateLocation();
   const deleteMutation = useDeleteLocation();
+  const visibilityMutation = useToggleLocationVisibility();
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<LocationResponse | null>(null);
@@ -62,7 +64,7 @@ export default function LocationsPage() {
     setEditing(loc);
     setFormName(loc.name);
     setFormDescription(loc.description || '');
-    setFormVisible(loc.visible ?? false);
+    setFormVisible(loc.isVisibleToPlayers);
     setDialogOpen(true);
   };
 
@@ -75,7 +77,7 @@ export default function LocationsPage() {
           data: {
             name: formName,
             description: formDescription || undefined,
-            visible: formVisible,
+            isVisibleToPlayers: formVisible,
           },
         },
         { onSuccess: () => { setDialogOpen(false); setEditing(null); } },
@@ -87,7 +89,7 @@ export default function LocationsPage() {
           data: {
             name: formName,
             description: formDescription || undefined,
-            visible: formVisible,
+            isVisibleToPlayers: formVisible,
           },
         },
         { onSuccess: () => { setDialogOpen(false); resetForm(); } },
@@ -104,10 +106,9 @@ export default function LocationsPage() {
   };
 
   const toggleVisibility = (loc: LocationResponse) => {
-    updateMutation.mutate({
+    visibilityMutation.mutate({
       campaignId: campaignId!,
       locationId: loc.id,
-      data: { visible: !loc.visible },
     });
   };
 
@@ -192,7 +193,7 @@ export default function LocationsPage() {
                     width: '100%',
                     height: 110,
                     marginBottom: 14,
-                    opacity: loc.visible ? 1 : 0.5,
+                    opacity: loc.isVisibleToPlayers ? 1 : 0.5,
                   }}
                 >
                   Map Vignette
@@ -201,7 +202,7 @@ export default function LocationsPage() {
                 {/* ID + Visibility */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 6 }}>
                   <CodexID>{loc.id.slice(0, 8).toUpperCase()}</CodexID>
-                  <VisibilityToggle visible={loc.visible ?? false} onToggle={() => toggleVisibility(loc)} />
+                  <VisibilityToggle visible={loc.isVisibleToPlayers} onToggle={() => toggleVisibility(loc)} />
                 </div>
 
                 {/* Name */}
@@ -210,7 +211,7 @@ export default function LocationsPage() {
                   style={{
                     color: 'var(--ink-bright)',
                     marginTop: 4,
-                    opacity: loc.visible ? 1 : 0.6,
+                    opacity: loc.isVisibleToPlayers ? 1 : 0.6,
                   }}
                 >
                   {loc.name}
@@ -252,10 +253,10 @@ export default function LocationsPage() {
                 <button
                   className="ao-btn ao-btn--sm"
                   onClick={() => toggleVisibility(loc)}
-                  disabled={updateMutation.isPending}
+                  disabled={visibilityMutation.isPending}
                 >
-                  <Rune kind={loc.visible ? 'lock' : 'eye'} size={10} />
-                  {loc.visible ? ' Hide' : ' Reveal'}
+                  <Rune kind={loc.isVisibleToPlayers ? 'lock' : 'eye'} size={10} />
+                  {loc.isVisibleToPlayers ? ' Hide' : ' Reveal'}
                 </button>
                 <button
                   className="ao-btn ao-btn--sm ao-btn--danger"

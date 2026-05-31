@@ -3,8 +3,6 @@ import type {
   ApiResponse,
   CampaignHomebrewResponse,
   AttachHomebrewRequest,
-  CreateOverrideHomebrewRequest,
-  HomebrewDetailResponse,
   PinHomebrewVersionRequest,
   TeamAvailableContentResponse,
 } from '@/types';
@@ -40,8 +38,4 @@ export const homebrewV2Api = {
     return response.data;
   },
 
-  createOverride: async (data: CreateOverrideHomebrewRequest): Promise<ApiResponse<HomebrewDetailResponse>> => {
-    const response = await api.post<ApiResponse<HomebrewDetailResponse>>('/homebrew/override', data);
-    return response.data;
-  },
 };

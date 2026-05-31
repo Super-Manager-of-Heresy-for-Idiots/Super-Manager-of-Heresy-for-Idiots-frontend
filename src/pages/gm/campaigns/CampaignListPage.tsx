@@ -209,7 +209,7 @@ export default function CampaignListPage() {
                 <button
                   className="ao-btn ao-btn--primary ao-btn--sm"
                   style={{ flex: 1 }}
-                  onClick={() => navigate(`/gm/campaigns/${campaign.id}`)}
+                  onClick={() => navigate(`/campaigns/${campaign.id}`)}
                 >
                   <Rune kind="eye" size={12} color="currentColor" />
                   <span style={{ marginLeft: 4 }}>View</span>

@@ -600,12 +600,3 @@ export function useUsers() {
 }
 
 // === Admin Teams (read-only) ===
-export function useAdminTeams() {
-  return useQuery({
-    queryKey: ['admin-teams'],
-    queryFn: async () => {
-      const response = await adminApi.getTeams();
-      return response.data;
-    },
-  });
-}

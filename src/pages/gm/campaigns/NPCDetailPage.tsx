@@ -37,7 +37,7 @@ export default function NPCDetailPage() {
       {
         campaignId: campaignId!,
         npcId: npcId!,
-        data: { text: noteText.trim() },
+        data: { content: noteText.trim() },
       },
       { onSuccess: () => setNoteText('') },
     );
@@ -106,29 +106,24 @@ export default function NPCDetailPage() {
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                 <CodexID>{npc.id.slice(0, 8).toUpperCase()}</CodexID>
-                <VisibilityToggle visible={npc.visible ?? false} onToggle={toggleVisibility} />
+                <VisibilityToggle visible={npc.isVisibleToPlayers} onToggle={toggleVisibility} />
               </div>
               <h3 className="ao-h3" style={{ marginTop: 6, color: 'var(--ink-bright)' }}>
                 {npc.name}
               </h3>
-              {npc.role && (
-                <p className="ao-italic" style={{ fontSize: 14, color: 'var(--ink-faint)', marginTop: 2 }}>
-                  {npc.role}
-                </p>
-              )}
             </div>
           </div>
 
           {/* Reveal button */}
           <div style={{ marginTop: 16 }}>
             <button
-              className={`ao-btn ${npc.visible ? 'ao-btn--ghost' : 'ao-btn--primary'}`}
+              className={`ao-btn ${npc.isVisibleToPlayers ? 'ao-btn--ghost' : 'ao-btn--primary'}`}
               onClick={toggleVisibility}
               disabled={visibilityMutation.isPending}
             >
               {visibilityMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              <Rune kind={npc.visible ? 'lock' : 'eye'} size={14} color="currentColor" />
-              <span style={{ marginLeft: 6 }}>{npc.visible ? 'Hide from Players' : 'Reveal to Players'}</span>
+              <Rune kind={npc.isVisibleToPlayers ? 'lock' : 'eye'} size={14} color="currentColor" />
+              <span style={{ marginLeft: 6 }}>{npc.isVisibleToPlayers ? 'Hide from Players' : 'Reveal to Players'}</span>
             </button>
           </div>
         </OrdoPanel>
@@ -187,32 +182,23 @@ export default function NPCDetailPage() {
                   key={note.id}
                   style={{
                     padding: 12,
-                    background: note.isGmNote ? 'rgba(100,20,30,0.08)' : 'transparent',
-                    border: note.isGmNote
-                      ? '1px solid rgba(140,40,50,0.25)'
-                      : '1px solid rgba(180,140,80,0.25)',
-                    borderLeft: note.isGmNote
-                      ? '3px solid rgba(140,40,50,0.4)'
-                      : '3px solid rgba(180,140,80,0.4)',
+                    background: 'transparent',
+                    border: '1px solid rgba(180,140,80,0.25)',
+                    borderLeft: '3px solid rgba(180,140,80,0.4)',
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
                     <Rune
-                      kind={note.isGmNote ? 'lock' : 'scroll'}
+                      kind="scroll"
                       size={10}
-                      color={note.isGmNote ? 'rgba(180,80,80,0.6)' : 'var(--brass)'}
+                      color="var(--brass)"
                     />
                     <span className="ao-overline" style={{ fontSize: 8 }}>
-                      {note.authorUsername} &mdash; {new Date(note.createdAt).toLocaleDateString()}
+                    {note.authorUsername} - {new Date(note.createdAt).toLocaleDateString()}
                     </span>
-                    {note.isGmNote && (
-                      <span className="ao-overline" style={{ fontSize: 8, color: 'rgba(180,80,80,0.6)' }}>
-                        GM
-                      </span>
-                    )}
                   </div>
                   <p style={{ fontSize: 13, color: 'var(--ink)', lineHeight: 1.5, margin: 0 }}>
-                    {note.text}
+                    {note.content}
                   </p>
                 </div>
               ))

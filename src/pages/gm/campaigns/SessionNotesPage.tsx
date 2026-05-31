@@ -30,9 +30,9 @@ import type { GmSessionNoteResponse } from '@/types';
 /* ── page ────────────────────────────────────────────────────── */
 
 export default function SessionNotesPage() {
-  const { id } = useParams<{ id: string }>();
+  const { campaignId } = useParams<{ campaignId: string }>();
   const navigate = useNavigate();
-  const { data: notes, isLoading, error, refetch } = useCampaignSessionNotes(id!);
+  const { data: notes, isLoading, error, refetch } = useCampaignSessionNotes(campaignId!);
   const createMutation = useCreateSessionNote();
   const updateMutation = useUpdateSessionNote();
   const deleteMutation = useDeleteSessionNote();
@@ -63,12 +63,12 @@ export default function SessionNotesPage() {
   };
 
   const handleSubmit = () => {
-    if (!id) return;
+    if (!campaignId) return;
 
     if (editing) {
       updateMutation.mutate(
         {
-          campaignId: id,
+          campaignId,
           noteId: editing.id,
           data: { title: formTitle, content: formContent },
         },
@@ -77,7 +77,7 @@ export default function SessionNotesPage() {
     } else {
       createMutation.mutate(
         {
-          campaignId: id,
+          campaignId,
           data: { title: formTitle, content: formContent },
         },
         { onSuccess: () => { setDialogOpen(false); resetForm(); } },
@@ -86,9 +86,9 @@ export default function SessionNotesPage() {
   };
 
   const handleDelete = () => {
-    if (!deleteId || !id) return;
+    if (!deleteId || !campaignId) return;
     deleteMutation.mutate(
-      { campaignId: id, noteId: deleteId },
+      { campaignId, noteId: deleteId },
       { onSuccess: () => setDeleteId(null) },
     );
   };
@@ -138,7 +138,7 @@ export default function SessionNotesPage() {
       {/* Back button */}
       <button
         className="ao-btn ao-btn--ghost ao-btn--sm"
-        onClick={() => navigate(`/gm/campaigns/${id}`)}
+        onClick={() => navigate(`/campaigns/${campaignId}`)}
         style={{ marginBottom: 16 }}
       >
         <Rune kind="chev-l" size={12} color="currentColor" />

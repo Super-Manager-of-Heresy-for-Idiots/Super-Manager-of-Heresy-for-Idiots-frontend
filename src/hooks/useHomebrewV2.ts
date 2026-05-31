@@ -4,7 +4,6 @@ import { homebrewV2Api } from '@/api/homebrew-v2.api';
 import { homebrewApi } from '@/api/homebrew.api';
 import type {
   AttachHomebrewRequest,
-  CreateOverrideHomebrewRequest,
   PinHomebrewVersionRequest,
   RateHomebrewRequest,
   ApiError,
@@ -110,22 +109,6 @@ export function useRateHomebrew() {
     },
     onError: (error: AxiosError<ApiError>) => {
       toast.error(error.response?.data?.message || 'Failed to rate');
-    },
-  });
-}
-
-export function useCreateOverrideHomebrew() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (data: CreateOverrideHomebrewRequest) =>
-      homebrewV2Api.createOverride(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['homebrew-library'] });
-      queryClient.invalidateQueries({ queryKey: ['homebrew-my'] });
-      toast.success('Override homebrew created!');
-    },
-    onError: (error: AxiosError<ApiError>) => {
-      toast.error(error.response?.data?.message || 'Failed to create override');
     },
   });
 }

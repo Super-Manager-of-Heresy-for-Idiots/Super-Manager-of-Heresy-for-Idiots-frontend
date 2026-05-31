@@ -80,7 +80,7 @@ export function ResourcesPanel({
                         letterSpacing: '0.04em',
                       }}
                     >
-                      {res.name}
+                      {res.resourceName}
                     </span>
                   </div>
 
@@ -103,7 +103,7 @@ export function ResourcesPanel({
                         opacity:
                           updateResource.isPending || res.currentValue <= 0 ? 0.4 : 1,
                       }}
-                      aria-label={`Decrease ${res.name}`}
+                      aria-label={`Decrease ${res.resourceName}`}
                     >
                       <Rune kind="minus" size={9} color="var(--ink-quiet)" />
                     </button>
@@ -143,7 +143,7 @@ export function ResourcesPanel({
                             ? 0.4
                             : 1,
                       }}
-                      aria-label={`Increase ${res.name}`}
+                      aria-label={`Increase ${res.resourceName}`}
                     >
                       <Rune kind="plus" size={9} color="var(--ink-quiet)" />
                     </button>

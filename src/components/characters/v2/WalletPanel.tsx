@@ -17,7 +17,12 @@ export function WalletPanel({ characterId, wallet, onAddCurrency }: WalletPanelP
   );
 
   function handleDelta(currencyTypeId: string, delta: number) {
-    updateWallet.mutate({ id: characterId, currencyTypeId, data: { delta } });
+    const entry = wallet.find((item) => item.currencyTypeId === currencyTypeId);
+    updateWallet.mutate({
+      id: characterId,
+      currencyTypeId,
+      data: { currencyTypeId, amount: Math.max(0, (entry?.amount ?? 0) + delta) },
+    });
   }
 
   return (
@@ -60,19 +65,8 @@ export function WalletPanel({ characterId, wallet, onAddCurrency }: WalletPanelP
                     letterSpacing: '0.04em',
                   }}
                 >
-                  {entry.name}
+                  {entry.currencyName}
                 </div>
-                {entry.goldRate != null && entry.goldRate !== 1 && (
-                  <div
-                    style={{
-                      fontSize: 10,
-                      color: 'var(--ink-faint)',
-                      marginTop: 2,
-                    }}
-                  >
-                    1 = {entry.goldRate} gp
-                  </div>
-                )}
               </div>
 
               {/* +/- buttons and amount */}
@@ -97,7 +91,7 @@ export function WalletPanel({ characterId, wallet, onAddCurrency }: WalletPanelP
                     cursor: 'pointer',
                     opacity: updateWallet.isPending ? 0.5 : 1,
                   }}
-                  aria-label={`Decrease ${entry.name}`}
+                  aria-label={`Decrease ${entry.currencyName}`}
                 >
                   <Rune kind="minus" size={10} color="var(--ink-quiet)" />
                 </button>
@@ -128,7 +122,7 @@ export function WalletPanel({ characterId, wallet, onAddCurrency }: WalletPanelP
                     cursor: 'pointer',
                     opacity: updateWallet.isPending ? 0.5 : 1,
                   }}
-                  aria-label={`Increase ${entry.name}`}
+                  aria-label={`Increase ${entry.currencyName}`}
                 >
                   <Rune kind="plus" size={10} color="var(--ink-quiet)" />
                 </button>

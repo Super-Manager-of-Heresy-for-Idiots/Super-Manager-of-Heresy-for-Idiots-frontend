@@ -33,16 +33,14 @@ export default function QuestManagerPage() {
   const createMutation = useCreateQuest();
 
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [formName, setFormName] = useState('');
+  const [formTitle, setFormTitle] = useState('');
   const [formDescription, setFormDescription] = useState('');
-  const [formGmDescription, setFormGmDescription] = useState('');
   const [formStatus, setFormStatus] = useState<QuestStatus>('ACTIVE');
   const [formVisible, setFormVisible] = useState(true);
 
   const resetForm = () => {
-    setFormName('');
+    setFormTitle('');
     setFormDescription('');
-    setFormGmDescription('');
     setFormStatus('ACTIVE');
     setFormVisible(true);
   };
@@ -52,11 +50,10 @@ export default function QuestManagerPage() {
       {
         campaignId: campaignId!,
         data: {
-          name: formName,
+          title: formTitle,
           description: formDescription || undefined,
-          gmDescription: formGmDescription || undefined,
           status: formStatus,
-          visible: formVisible,
+          isVisibleToPlayers: formVisible,
         },
       },
       {
@@ -190,7 +187,7 @@ export default function QuestManagerPage() {
                   <Rune kind="scroll" size={16} color="var(--brass)" />
                   <div style={{ minWidth: 0 }}>
                     <div style={{ fontSize: 14, color: 'var(--ink-bright)', fontWeight: 500 }}>
-                      {quest.name}
+                      {quest.title}
                     </div>
                     {quest.description && (
                       <div
@@ -218,7 +215,7 @@ export default function QuestManagerPage() {
                 {/* Visibility */}
                 <div>
                   <VisibilityToggle
-                    visible={quest.isVisibleToPlayers ?? quest.visible ?? false}
+                    visible={quest.isVisibleToPlayers}
                     onToggle={() => {/* handled in detail page */}}
                   />
                 </div>
@@ -227,7 +224,7 @@ export default function QuestManagerPage() {
                 <div>
                   <button
                     className="ao-btn ao-btn--sm"
-                    onClick={() => navigate(`/gm/campaigns/${campaignId}/quests/${quest.id}`)}
+                    onClick={() => navigate(`/campaigns/${campaignId}/quests/${quest.id}`)}
                   >
                     Open
                   </button>
@@ -248,8 +245,8 @@ export default function QuestManagerPage() {
             <OrdoField label="Name" required>
               <input
                 className="ao-input"
-                value={formName}
-                onChange={(e) => setFormName(e.target.value)}
+                value={formTitle}
+                onChange={(e) => setFormTitle(e.target.value)}
                 placeholder="Name of the quest"
               />
             </OrdoField>
@@ -260,17 +257,6 @@ export default function QuestManagerPage() {
                 value={formDescription}
                 onChange={(e) => setFormDescription(e.target.value)}
                 placeholder="What the players know..."
-                rows={3}
-                style={{ resize: 'vertical' }}
-              />
-            </OrdoField>
-
-            <OrdoField label="GM Description" hint="GM eyes only">
-              <textarea
-                className="ao-input"
-                value={formGmDescription}
-                onChange={(e) => setFormGmDescription(e.target.value)}
-                placeholder="Secret objectives, hidden twists..."
                 rows={3}
                 style={{ resize: 'vertical' }}
               />
@@ -312,7 +298,7 @@ export default function QuestManagerPage() {
               type="button"
               className="ao-btn ao-btn--primary"
               onClick={handleCreate}
-              disabled={!formName || createMutation.isPending}
+              disabled={!formTitle || createMutation.isPending}
             >
               {createMutation.isPending && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

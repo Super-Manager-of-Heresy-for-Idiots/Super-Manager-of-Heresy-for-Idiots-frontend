@@ -1,10 +1,9 @@
-import { Users, Sword, Shield, ScrollText, Package, Swords, Crown } from 'lucide-react';
+import { Users, ScrollText, Package, Swords, Crown } from 'lucide-react';
 import { DashboardCard } from '@/components/admin/DashboardCard';
-import { useUsers, useAdminTeams, useStatTypes, useItemTypes, useCharacterClasses, useCharacterRaces } from '@/hooks/useAdmin';
+import { useUsers, useStatTypes, useItemTypes, useCharacterClasses, useCharacterRaces } from '@/hooks/useAdmin';
 
 export default function AdminDashboardPage() {
   const { data: users, isLoading: usersLoading } = useUsers();
-  const { data: teams, isLoading: teamsLoading } = useAdminTeams();
   const { data: statTypes, isLoading: statTypesLoading } = useStatTypes();
   const { data: itemTypes, isLoading: itemTypesLoading } = useItemTypes();
   const { data: classes, isLoading: classesLoading } = useCharacterClasses();
@@ -20,13 +19,6 @@ export default function AdminDashboardPage() {
           icon={<Users className="h-6 w-6" />}
           href="/admin/users"
           isLoading={usersLoading}
-        />
-        <DashboardCard
-          title="Total Teams"
-          value={teams?.length}
-          icon={<Shield className="h-6 w-6" />}
-          href="/admin/teams"
-          isLoading={teamsLoading}
         />
         <DashboardCard
           title="Stat Types"

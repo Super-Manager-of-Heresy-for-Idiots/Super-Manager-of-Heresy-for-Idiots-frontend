@@ -107,12 +107,9 @@ export interface CharacterResponse {
   experience: number;
   classLevels: ClassLevelResponse[];
   race: CharacterRaceResponse;
-  teamId: string;
-  teamName: string;
   ownerId: string;
   ownerUsername: string;
   stats: CharacterStatResponse[];
-  inventorySlots: ItemInstanceResponse[];
   status?: CharacterStatus;
   currentHp?: number;
   maxHp?: number;
@@ -144,106 +141,8 @@ export interface UpdateStatRequest {
   value: number;
 }
 
-// === Teams ===
-
-export interface CreateTeamRequest {
-  name: string;
-}
-
-export interface JoinTeamRequest {
-  inviteCode: string;
-}
-
-export interface TeamResponse {
-  id: string;
-  name: string;
-  gameMasterId: string;
-  gameMasterUsername: string;
-  members: TeamMemberResponse[];
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface TeamMemberResponse {
-  playerId: string;
-  playerUsername: string;
-  joinedAt: string;
-}
-
 export interface InviteCodeResponse {
   inviteCode: string;
-}
-
-// === Artifacts ===
-
-export interface CreateArtifactRequest {
-  name: string;
-  description?: string;
-  itemTypeId: string;
-  rarity?: Rarity;
-  properties?: string;
-  specialAbilities?: string;
-}
-
-export interface PlaceArtifactRequest {
-  artifactId: string;
-}
-
-export interface ArtifactResponse {
-  id: string;
-  name: string;
-  description?: string;
-  itemTypeId: string;
-  itemTypeName: string;
-  itemTypeSlot: string;
-  rarity?: string;
-  properties?: string;
-  specialAbilities?: string;
-  createdById: string;
-  createdAt: string;
-}
-
-// === Conditions & Modifiers ===
-
-export interface CreateConditionRequest {
-  name: string;
-  description?: string;
-}
-
-export interface AddConditionModifierRequest {
-  statTypeId: string;
-  modifierValue: number;
-}
-
-export interface ApplyConditionRequest {
-  conditionId: string;
-}
-
-export interface ConditionResponse {
-  id: string;
-  name: string;
-  description?: string;
-  modifiers: ConditionModifierResponse[];
-  createdById: string;
-  createdAt: string;
-}
-
-export interface ConditionModifierResponse {
-  id: string;
-  statTypeId: string;
-  statTypeName: string;
-  modifierValue: number;
-}
-
-export interface CharacterConditionResponse {
-  id: string;
-  conditionId: string;
-  conditionName: string;
-  conditionDescription?: string;
-  modifiers: ConditionModifierResponse[];
-  appliedById: string;
-  appliedAt: string;
-  active: boolean;
 }
 
 // === Level-Up ===
@@ -595,7 +494,7 @@ export interface SoftDeleteResponse {
 
 export interface HardDeleteResponse {
   deletedPackageId: string;
-  affectedInstallations: number;
+  affectedLibraryEntries: number;
 }
 
 export interface HomebrewTagResponse {
@@ -701,25 +600,7 @@ export interface CreateStorageContainerRequest {
 
 export type CharacterStatus = 'ACTIVE' | 'DEAD' | 'RESERVE';
 
-export interface CharacterV2Response {
-  id: string;
-  name: string;
-  totalLevel: number;
-  experience: number;
-  classLevels: ClassLevelResponse[];
-  race: CharacterRaceResponse;
-  teamId: string;
-  teamName: string;
-  ownerId: string;
-  ownerUsername: string;
-  stats: CharacterStatResponse[];
-  inventorySlots: ItemInstanceResponse[];
-  status?: CharacterStatus;
-  currentHp?: number;
-  maxHp?: number;
-  createdAt: string;
-  updatedAt: string;
-}
+export interface CharacterV2Response extends CharacterResponse {}
 
 export interface CreateCharacterInCampaignRequest {
   name: string;
@@ -729,8 +610,7 @@ export interface CreateCharacterInCampaignRequest {
 }
 
 export interface UpdateHpRequest {
-  amount?: number;
-  delta?: number;
+  amount: number;
 }
 
 // === Wallet & Resources ===
@@ -738,22 +618,18 @@ export interface UpdateHpRequest {
 export interface WalletEntryResponse {
   currencyTypeId: string;
   currencyName: string;
-  name?: string;
   amount: number;
   goldEquivalent: number;
-  goldRate?: number;
 }
 
 export interface ModifyWalletRequest {
-  currencyTypeId?: string;
-  amount?: number;
-  delta?: number;
+  currencyTypeId: string;
+  amount: number;
 }
 
 export interface ResourceResponse {
   resourceTypeId: string;
   resourceName: string;
-  name?: string;
   currentValue: number;
   maxValue: number;
 }
@@ -853,8 +729,6 @@ export interface NpcResponse {
   publicDescription?: string;
   privateDescription?: string;
   isVisibleToPlayers: boolean;
-  visible?: boolean;
-  role?: string;
   notes: NoteResponse[];
   createdAt: string;
   updatedAt: string;
@@ -865,8 +739,6 @@ export interface CreateNpcRequest {
   publicDescription?: string;
   privateDescription?: string;
   isVisibleToPlayers?: boolean;
-  visible?: boolean;
-  role?: string;
 }
 
 export interface UpdateNpcRequest {
@@ -881,15 +753,12 @@ export interface NoteResponse {
   authorId: string;
   authorUsername: string;
   content: string;
-  text?: string;
-  isGmNote?: boolean;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface CreateNoteRequest {
-  content?: string;
-  text?: string;
+  content: string;
 }
 
 export interface UpdateNoteRequest {
@@ -903,17 +772,11 @@ export type QuestStatus = 'ACTIVE' | 'COMPLETED' | 'FAILED' | 'HIDDEN' | 'ARCHIV
 export interface QuestResponse {
   id: string;
   title: string;
-  name?: string;
   description?: string;
-  gmDescription?: string;
   status: QuestStatus;
   isVisibleToPlayers: boolean;
-  visible?: boolean;
   notes: NoteResponse[];
   rewards: QuestRewardResponse[];
-  linkedNpcs?: { id: string; name: string }[];
-  linkedLocations?: { id: string; name: string }[];
-  linkedItems?: { id: string; name: string }[];
   createdAt: string;
   updatedAt: string;
 }
@@ -930,22 +793,17 @@ export interface QuestRewardResponse {
 }
 
 export interface CreateQuestRequest {
-  title?: string;
-  name?: string;
+  title: string;
   description?: string;
-  gmDescription?: string;
   status?: QuestStatus;
   isVisibleToPlayers?: boolean;
-  visible?: boolean;
 }
 
 export interface UpdateQuestRequest {
   title?: string;
-  name?: string;
   description?: string;
   status?: string;
   isVisibleToPlayers?: boolean;
-  visible?: boolean;
 }
 
 export interface CreateQuestRewardRequest {
@@ -962,7 +820,6 @@ export interface LocationResponse {
   name: string;
   description?: string;
   isVisibleToPlayers: boolean;
-  visible?: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -971,14 +828,12 @@ export interface CreateLocationRequest {
   name: string;
   description?: string;
   isVisibleToPlayers?: boolean;
-  visible?: boolean;
 }
 
 export interface UpdateLocationRequest {
   name?: string;
   description?: string;
   isVisibleToPlayers?: boolean;
-  visible?: boolean;
 }
 
 // === GM Session Notes ===
@@ -1047,10 +902,6 @@ export interface AttachHomebrewRequest {
   pinnedVersion?: number;
 }
 
-export interface CreateOverrideHomebrewRequest extends CreateHomebrewRequest {
-  parentId: string;
-}
-
 export interface PinHomebrewVersionRequest {
   pinnedVersion: number | null;
 }
@@ -1116,17 +967,5 @@ export type CreateNpcNoteRequest = CreateNoteRequest;
 export type QuestReward = QuestRewardResponse;
 export type WalletEntry = WalletEntryResponse;
 export type ResourceEntry = ResourceResponse;
-
-export interface SetNpcVisibilityRequest {
-  isVisibleToPlayers: boolean;
-}
-
-export interface UpdateInventorySlotRequest {
-  artifactId?: string;
-  slot?: EquipmentSlot;
-  itemTypeId?: string | null;
-  quantity?: number;
-  notes?: string;
-}
 
 export type BadgeStatus = HomebrewStatus | 'DELETED' | 'ARCHIVED';

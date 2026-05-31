@@ -18,17 +18,17 @@ import type { CampaignMember } from '@/types';
 /* ── page ────────────────────────────────────────────────────── */
 
 export default function CampaignMembersPage() {
-  const { id } = useParams<{ id: string }>();
+  const { campaignId } = useParams<{ campaignId: string }>();
   const navigate = useNavigate();
-  const { data: campaign, isLoading, error, refetch } = useCampaign(id!);
+  const { data: campaign, isLoading, error, refetch } = useCampaign(campaignId!);
   const kickMutation = useKickMember();
 
   const [kickUserId, setKickUserId] = useState<string | null>(null);
 
   const handleKick = () => {
-    if (!kickUserId || !id) return;
+    if (!kickUserId || !campaignId) return;
     kickMutation.mutate(
-      { campaignId: id, userId: kickUserId },
+      { campaignId, userId: kickUserId },
       { onSuccess: () => setKickUserId(null) },
     );
   };
@@ -78,7 +78,7 @@ export default function CampaignMembersPage() {
       {/* Back button */}
       <button
         className="ao-btn ao-btn--ghost ao-btn--sm"
-        onClick={() => navigate(`/gm/campaigns/${id}`)}
+        onClick={() => navigate(`/campaigns/${campaignId}`)}
         style={{ marginBottom: 16 }}
       >
         <Rune kind="chev-l" size={12} color="currentColor" />

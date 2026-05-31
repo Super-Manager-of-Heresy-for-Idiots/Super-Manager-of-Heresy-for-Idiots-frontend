@@ -15,9 +15,9 @@ import type { StorageContainerResponse, StorageItemResponse } from '@/types';
 /* ── page ────────────────────────────────────────────────────── */
 
 export default function SharedStoragePage() {
-  const { id } = useParams<{ id: string }>();
+  const { campaignId } = useParams<{ campaignId: string }>();
   const navigate = useNavigate();
-  const { data: containers, isLoading, error, refetch } = useCampaignStorage(id!);
+  const { data: containers, isLoading, error, refetch } = useCampaignStorage(campaignId!);
   const createMutation = useCreateStorageContainer();
 
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -34,9 +34,9 @@ export default function SharedStoragePage() {
   };
 
   const handleCreate = () => {
-    if (!id || !formName) return;
+    if (!campaignId || !formName) return;
     createMutation.mutate(
-      { campaignId: id, data: { name: formName } },
+      { campaignId, data: { name: formName } },
       {
         onSuccess: () => {
           setDialogOpen(false);
@@ -90,7 +90,7 @@ export default function SharedStoragePage() {
       {/* Back button */}
       <button
         className="ao-btn ao-btn--ghost ao-btn--sm"
-        onClick={() => navigate(`/gm/campaigns/${id}`)}
+        onClick={() => navigate(`/campaigns/${campaignId}`)}
         style={{ marginBottom: 16 }}
       >
         <Rune kind="chev-l" size={12} color="currentColor" />

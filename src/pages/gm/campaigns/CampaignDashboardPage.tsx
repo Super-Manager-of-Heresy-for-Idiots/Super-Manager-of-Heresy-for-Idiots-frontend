@@ -21,9 +21,9 @@ import type { CampaignStatus, CharacterV2Response } from '@/types';
 /* ── page ────────────────────────────────────────────────────── */
 
 export default function CampaignDashboardPage() {
-  const { id } = useParams<{ id: string }>();
-  const { data: campaign, isLoading, error, refetch } = useCampaign(id!);
-  const { data: characters, isLoading: charsLoading } = useCampaignCharacters(id!);
+  const { campaignId } = useParams<{ campaignId: string }>();
+  const { data: campaign, isLoading, error, refetch } = useCampaign(campaignId!);
+  const { data: characters, isLoading: charsLoading } = useCampaignCharacters(campaignId!);
   const statusMutation = useSetCampaignStatus();
 
   /* ── derived counts ────────────────────────────────────────── */
@@ -44,8 +44,8 @@ export default function CampaignDashboardPage() {
   );
 
   const handleStatusChange = (status: CampaignStatus) => {
-    if (!id) return;
-    statusMutation.mutate({ id, data: { status } });
+    if (!campaignId) return;
+    statusMutation.mutate({ id: campaignId, data: { status } });
   };
 
   /* ── loading ─────────────────────────────────────────────── */
@@ -148,13 +148,13 @@ export default function CampaignDashboardPage() {
 
       {/* DrillBlock grid */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 24, marginBottom: 28 }}>
-        <DrillBlock label="Roster" glyph="helm" count={charCounts.total} to={`/gm/campaigns/${id}/roster`} />
-        <DrillBlock label="NPCs" glyph="sigil-1" to={`/gm/campaigns/${id}/npcs`} />
-        <DrillBlock label="Quests" glyph="scroll" to={`/gm/campaigns/${id}/quests`} />
-        <DrillBlock label="Locations" glyph="sigil-3" to={`/gm/campaigns/${id}/locations`} />
-        <DrillBlock label="Storage" glyph="sword" to={`/gm/campaigns/${id}/storage`} />
-        <DrillBlock label="Invite Code" glyph="cross-pat" to={`/gm/campaigns/${id}/invite`} />
-        <DrillBlock label="Session Notes" glyph="lock" to={`/gm/campaigns/${id}/notes`} />
+        <DrillBlock label="Roster" glyph="helm" count={charCounts.total} to={`/campaigns/${campaignId}/roster`} />
+        <DrillBlock label="NPCs" glyph="sigil-1" to={`/campaigns/${campaignId}/npcs`} />
+        <DrillBlock label="Quests" glyph="scroll" to={`/campaigns/${campaignId}/quests`} />
+        <DrillBlock label="Locations" glyph="sigil-3" to={`/campaigns/${campaignId}/locations`} />
+        <DrillBlock label="Storage" glyph="sword" to={`/campaigns/${campaignId}/storage`} />
+        <DrillBlock label="Invite Code" glyph="cross-pat" to={`/campaigns/${campaignId}/invite`} />
+        <DrillBlock label="Session Notes" glyph="lock" to={`/campaigns/${campaignId}/notes`} />
       </div>
 
       <OrdoDivider glyph="diamond" />

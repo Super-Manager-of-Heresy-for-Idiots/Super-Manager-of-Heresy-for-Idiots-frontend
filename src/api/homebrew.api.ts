@@ -14,11 +14,16 @@ import type {
   HomebrewStatus,
 } from '@/types';
 
+export interface InstallHomebrewResponse {
+  addedAt: string;
+  packageVersion: number;
+}
+
 export const homebrewApi = {
   // === Author endpoints (GAME_MASTER) ===
 
-  create: async (data: CreateHomebrewRequest): Promise<ApiResponse<HomebrewPackageResponse>> => {
-    const response = await api.post<ApiResponse<HomebrewPackageResponse>>('/homebrew', data);
+  create: async (data: CreateHomebrewRequest): Promise<ApiResponse<HomebrewDetailResponse>> => {
+    const response = await api.post<ApiResponse<HomebrewDetailResponse>>('/homebrew', data);
     return response.data;
   },
 
@@ -27,57 +32,57 @@ export const homebrewApi = {
     page?: number;
     size?: number;
   } = {}): Promise<ApiResponse<Page<HomebrewPackageResponse>>> => {
-    const response = await api.get<ApiResponse<Page<HomebrewPackageResponse>>>('/homebrew/mine', { params });
+    const response = await api.get<ApiResponse<Page<HomebrewPackageResponse>>>('/homebrew/my', { params });
     return response.data;
   },
 
   getPackageDetail: async (id: string): Promise<ApiResponse<HomebrewDetailResponse>> => {
-    const response = await api.get<ApiResponse<HomebrewDetailResponse>>(`/homebrew/${id}`);
+    const response = await api.get<ApiResponse<HomebrewDetailResponse>>(`/homebrew/my/${id}`);
     return response.data;
   },
 
-  updatePackage: async (id: string, data: UpdateHomebrewRequest): Promise<ApiResponse<HomebrewPackageResponse>> => {
-    const response = await api.put<ApiResponse<HomebrewPackageResponse>>(`/homebrew/${id}`, data);
+  updatePackage: async (id: string, data: UpdateHomebrewRequest): Promise<ApiResponse<HomebrewDetailResponse>> => {
+    const response = await api.put<ApiResponse<HomebrewDetailResponse>>(`/homebrew/my/${id}`, data);
     return response.data;
   },
 
   addContent: async (id: string, data: AddContentRequest): Promise<ApiResponse<HomebrewDetailResponse>> => {
-    const response = await api.post<ApiResponse<HomebrewDetailResponse>>(`/homebrew/${id}/content`, data);
+    const response = await api.post<ApiResponse<HomebrewDetailResponse>>(`/homebrew/my/${id}/content`, data);
     return response.data;
   },
 
-  publish: async (id: string): Promise<ApiResponse<HomebrewPackageResponse>> => {
-    const response = await api.post<ApiResponse<HomebrewPackageResponse>>(`/homebrew/${id}/publish`);
+  publish: async (id: string): Promise<ApiResponse<HomebrewDetailResponse>> => {
+    const response = await api.post<ApiResponse<HomebrewDetailResponse>>(`/homebrew/my/${id}/publish`);
     return response.data;
   },
 
-  unpublish: async (id: string): Promise<ApiResponse<HomebrewPackageResponse>> => {
-    const response = await api.post<ApiResponse<HomebrewPackageResponse>>(`/homebrew/${id}/unpublish`);
+  unpublish: async (id: string): Promise<ApiResponse<HomebrewDetailResponse>> => {
+    const response = await api.post<ApiResponse<HomebrewDetailResponse>>(`/homebrew/my/${id}/unpublish`);
     return response.data;
   },
 
-  deletePackage: async (id: string): Promise<ApiResponse<void>> => {
-    const response = await api.delete<ApiResponse<void>>(`/homebrew/${id}`);
+  deletePackage: async (id: string): Promise<ApiResponse<SoftDeleteResponse>> => {
+    const response = await api.delete<ApiResponse<SoftDeleteResponse>>(`/homebrew/my/${id}`);
     return response.data;
   },
 
-  deleteMyPackage: async (id: string): Promise<ApiResponse<void>> => {
-    const response = await api.delete<ApiResponse<void>>(`/homebrew/${id}`);
+  deleteMyPackage: async (id: string): Promise<ApiResponse<SoftDeleteResponse>> => {
+    const response = await api.delete<ApiResponse<SoftDeleteResponse>>(`/homebrew/my/${id}`);
     return response.data;
   },
 
   getMyPackage: async (id: string): Promise<ApiResponse<HomebrewDetailResponse>> => {
-    const response = await api.get<ApiResponse<HomebrewDetailResponse>>(`/homebrew/${id}`);
+    const response = await api.get<ApiResponse<HomebrewDetailResponse>>(`/homebrew/my/${id}`);
     return response.data;
   },
 
-  updateMyPackage: async (id: string, data: UpdateHomebrewRequest): Promise<ApiResponse<HomebrewPackageResponse>> => {
-    const response = await api.put<ApiResponse<HomebrewPackageResponse>>(`/homebrew/${id}`, data);
+  updateMyPackage: async (id: string, data: UpdateHomebrewRequest): Promise<ApiResponse<HomebrewDetailResponse>> => {
+    const response = await api.put<ApiResponse<HomebrewDetailResponse>>(`/homebrew/my/${id}`, data);
     return response.data;
   },
 
   removeContent: async (packageId: string, contentItemId: string): Promise<ApiResponse<void>> => {
-    const response = await api.delete<ApiResponse<void>>(`/homebrew/${packageId}/content/${contentItemId}`);
+    const response = await api.delete<ApiResponse<void>>(`/homebrew/my/${packageId}/content/${contentItemId}`);
     return response.data;
   },
 
@@ -99,8 +104,8 @@ export const homebrewApi = {
     return response.data;
   },
 
-  installPackage: async (id: string): Promise<ApiResponse<InstalledHomebrewResponse>> => {
-    const response = await api.post<ApiResponse<InstalledHomebrewResponse>>(`/homebrew/marketplace/${id}/install`);
+  installPackage: async (id: string): Promise<ApiResponse<InstallHomebrewResponse>> => {
+    const response = await api.post<ApiResponse<InstallHomebrewResponse>>(`/homebrew/marketplace/${id}/install`);
     return response.data;
   },
 
@@ -119,12 +124,12 @@ export const homebrewApi = {
   // === Ratings ===
 
   getRatings: async (packageId: string): Promise<ApiResponse<import('@/types').HomebrewRatingResponse>> => {
-    const response = await api.get<ApiResponse<import('@/types').HomebrewRatingResponse>>(`/homebrew/ratings/${packageId}`);
+    const response = await api.get<ApiResponse<import('@/types').HomebrewRatingResponse>>(`/homebrew/marketplace/${packageId}/rating`);
     return response.data;
   },
 
   rate: async (packageId: string, data: import('@/types').RateHomebrewRequest): Promise<ApiResponse<import('@/types').HomebrewRatingResponse>> => {
-    const response = await api.post<ApiResponse<import('@/types').HomebrewRatingResponse>>(`/homebrew/ratings/${packageId}`, data);
+    const response = await api.post<ApiResponse<import('@/types').HomebrewRatingResponse>>(`/homebrew/marketplace/${packageId}/rate`, data);
     return response.data;
   },
 
@@ -157,8 +162,8 @@ export const homebrewApi = {
     return response.data;
   },
 
-  adminHardDelete: async (id: string): Promise<ApiResponse<void>> => {
-    const response = await api.delete<ApiResponse<void>>(`/admin/homebrew/${id}`);
+  adminHardDelete: async (id: string): Promise<ApiResponse<HardDeleteResponse>> => {
+    const response = await api.delete<ApiResponse<HardDeleteResponse>>(`/admin/homebrew/${id}`);
     return response.data;
   },
 

@@ -4,9 +4,9 @@ import type {
   NpcResponse,
   CreateNpcRequest,
   UpdateNpcRequest,
-  SetNpcVisibilityRequest,
   NoteResponse,
   CreateNoteRequest,
+  UpdateNoteRequest,
 } from '@/types';
 
 type NpcNoteResponse = NoteResponse;
@@ -38,19 +38,14 @@ export const npcsApi = {
     return response.data;
   },
 
-  setVisibility: async (campaignId: string, npcId: string, data: SetNpcVisibilityRequest): Promise<ApiResponse<NpcResponse>> => {
-    const response = await api.put<ApiResponse<NpcResponse>>(`/campaigns/${campaignId}/npcs/${npcId}/visibility`, data);
-    return response.data;
-  },
-
   // Notes
-  listNotes: async (campaignId: string, npcId: string): Promise<ApiResponse<NpcNoteResponse[]>> => {
-    const response = await api.get<ApiResponse<NpcNoteResponse[]>>(`/campaigns/${campaignId}/npcs/${npcId}/notes`);
-    return response.data;
-  },
-
   addNote: async (campaignId: string, npcId: string, data: CreateNpcNoteRequest): Promise<ApiResponse<NpcNoteResponse>> => {
     const response = await api.post<ApiResponse<NpcNoteResponse>>(`/campaigns/${campaignId}/npcs/${npcId}/notes`, data);
+    return response.data;
+  },
+
+  updateNote: async (campaignId: string, npcId: string, noteId: string, data: UpdateNoteRequest): Promise<ApiResponse<NpcNoteResponse>> => {
+    const response = await api.put<ApiResponse<NpcNoteResponse>>(`/campaigns/${campaignId}/npcs/${npcId}/notes/${noteId}`, data);
     return response.data;
   },
 

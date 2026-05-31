@@ -73,3 +73,19 @@ export function useDeleteLocation() {
     },
   });
 }
+
+export function useToggleLocationVisibility() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ campaignId, locationId }: { campaignId: string; locationId: string }) =>
+      locationsApi.toggleVisibility(campaignId, locationId),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'locations'] });
+      toast.success('Location visibility updated!');
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error.response?.data?.message || 'Failed to update location visibility');
+    },
+  });
+}

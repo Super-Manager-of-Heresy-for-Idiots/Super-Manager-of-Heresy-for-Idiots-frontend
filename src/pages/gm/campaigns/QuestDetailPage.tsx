@@ -1,6 +1,6 @@
 import { useParams } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
-import { OrdoPanel, PanelHeader, Rune, OrdoDivider, EmptyVault } from '@/components/ordo';
+import { OrdoPanel, PanelHeader, Rune } from '@/components/ordo';
 import { CodexID } from '@/components/homebrew/CodexID';
 import { VisibilityToggle, QuestStatusBadge } from '@/components/narrative';
 import { useQuest, useUpdateQuest } from '@/hooks/useQuests';
@@ -41,7 +41,7 @@ export default function QuestDetailPage() {
     updateMutation.mutate({
       campaignId: campaignId!,
       questId: questId!,
-      data: { visible: !quest.visible },
+      data: { isVisibleToPlayers: !quest.isVisibleToPlayers },
     });
   };
 
@@ -93,9 +93,6 @@ export default function QuestDetailPage() {
 
   /* ── linked entities ─────────────────────────────────────── */
 
-  const linkedNpcs: { id: string; name: string }[] = quest.linkedNpcs ?? [];
-  const linkedLocations: { id: string; name: string }[] = quest.linkedLocations ?? [];
-  const linkedItems: { id: string; name: string }[] = quest.linkedItems ?? [];
   const rewards: QuestReward[] = quest.rewards ?? [];
 
   /* ── main ────────────────────────────────────────────────── */
@@ -109,11 +106,11 @@ export default function QuestDetailPage() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
             <CodexID>{quest.id.slice(0, 8).toUpperCase()}</CodexID>
             <QuestStatusBadge status={quest.status} />
-            <VisibilityToggle visible={quest.visible ?? false} onToggle={toggleVisibility} />
+            <VisibilityToggle visible={quest.isVisibleToPlayers} onToggle={toggleVisibility} />
           </div>
 
           <h3 className="ao-h3" style={{ marginTop: 10, color: 'var(--ink-bright)' }}>
-            {quest.name}
+            {quest.title}
           </h3>
 
           {quest.description && (
@@ -121,27 +118,6 @@ export default function QuestDetailPage() {
               {quest.description}
             </p>
           )}
-        </OrdoPanel>
-
-        {/* GM-only description */}
-        <OrdoPanel
-          frame
-          padding={0}
-          style={{
-            borderColor: 'rgba(140,40,50,0.3)',
-            background: 'rgba(100,20,30,0.06)',
-          }}
-        >
-          <PanelHeader title="GM-ONLY NOTES" glyph="lock" tone="ember" sub="Hidden from players" />
-          <div style={{ padding: 16 }}>
-            <p style={{ fontSize: 14, color: 'var(--ink)', lineHeight: 1.6, margin: 0 }}>
-              {quest.gmDescription || (
-                <span className="ao-italic" style={{ color: 'var(--ink-ghost)' }}>
-                  No private notes inscribed for this quest.
-                </span>
-              )}
-            </p>
-          </div>
         </OrdoPanel>
 
         {/* Rewards panel */}
@@ -196,73 +172,6 @@ export default function QuestDetailPage() {
 
       {/* ═══ Right column ═══ */}
       <div style={{ flex: '1 1 0', display: 'flex', flexDirection: 'column', gap: 20 }}>
-        {/* Linked entities */}
-        <OrdoPanel frame padding={0}>
-          <PanelHeader title="LINKED ENTITIES" glyph="sigil-1" tone="gold" />
-          <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 14 }}>
-            {/* NPCs */}
-            <div>
-              <span className="ao-overline" style={{ fontSize: 9, color: 'var(--brass)', marginBottom: 6, display: 'block' }}>
-                NPCs
-              </span>
-              {linkedNpcs.length === 0 ? (
-                <p className="ao-italic" style={{ color: 'var(--ink-ghost)', fontSize: 12, margin: 0 }}>None</p>
-              ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  {linkedNpcs.map((npc) => (
-                    <div key={npc.id} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 8px', background: 'rgba(0,0,0,0.15)', border: '1px solid var(--rule)' }}>
-                      <Rune kind="helm" size={11} color="var(--brass)" />
-                      <span style={{ fontSize: 12, color: 'var(--ink-bright)' }}>{npc.name}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <OrdoDivider glyph="diamond" />
-
-            {/* Locations */}
-            <div>
-              <span className="ao-overline" style={{ fontSize: 9, color: 'var(--arcane)', marginBottom: 6, display: 'block' }}>
-                Locations
-              </span>
-              {linkedLocations.length === 0 ? (
-                <p className="ao-italic" style={{ color: 'var(--ink-ghost)', fontSize: 12, margin: 0 }}>None</p>
-              ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  {linkedLocations.map((loc) => (
-                    <div key={loc.id} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 8px', background: 'rgba(0,0,0,0.15)', border: '1px solid var(--rule)' }}>
-                      <Rune kind="sigil-3" size={11} color="var(--arcane)" />
-                      <span style={{ fontSize: 12, color: 'var(--ink-bright)' }}>{loc.name}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <OrdoDivider glyph="diamond" />
-
-            {/* Items */}
-            <div>
-              <span className="ao-overline" style={{ fontSize: 9, color: 'var(--gold)', marginBottom: 6, display: 'block' }}>
-                Items
-              </span>
-              {linkedItems.length === 0 ? (
-                <p className="ao-italic" style={{ color: 'var(--ink-ghost)', fontSize: 12, margin: 0 }}>None</p>
-              ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  {linkedItems.map((item) => (
-                    <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 8px', background: 'rgba(0,0,0,0.15)', border: '1px solid var(--rule)' }}>
-                      <Rune kind="sword" size={11} color="var(--gold)" />
-                      <span style={{ fontSize: 12, color: 'var(--ink-bright)' }}>{item.name}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        </OrdoPanel>
-
         {/* Status setter */}
         <OrdoPanel frame padding={0}>
           <PanelHeader title="SET STATUS" glyph="diamond-fill" tone="gold" />
