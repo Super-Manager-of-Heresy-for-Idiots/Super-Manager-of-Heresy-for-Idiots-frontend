@@ -90,9 +90,6 @@ export const router = createBrowserRouter([
       {
         element: <AppLayout />,
         children: [
-          // Legacy redirects
-          { path: '/gm/teams', element: <Navigate to="/gm/campaigns" replace /> },
-          { path: '/gm/teams/*', element: <Navigate to="/gm/campaigns" replace /> },
           { path: '/gm/characters/:id', element: <GmCharacterViewPage /> },
           { path: '/gm/artifacts', element: <ArtifactsPage /> },
           { path: '/gm/conditions', element: <ConditionsPage /> },
