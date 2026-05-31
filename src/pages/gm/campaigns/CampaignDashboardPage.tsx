@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import {
   OrdoPanel,
   PanelHeader,
@@ -30,6 +30,7 @@ import type { CampaignStatus, CharacterV2Response } from '@/types';
 /* ── page ────────────────────────────────────────────────────── */
 
 export default function CampaignDashboardPage() {
+  const navigate = useNavigate();
   const { campaignId } = useParams<{ campaignId: string }>();
   const { user } = useAuthStore();
   const isPlayer = user?.role === 'PLAYER';
@@ -134,6 +135,7 @@ export default function CampaignDashboardPage() {
   const classOptions = availableContent?.classes ?? [];
   const raceOptions = availableContent?.races ?? [];
   const canCreateCharacter = isPlayer && campaign.status === 'ACTIVE';
+  const canManageCampaign = user?.role === 'GAME_MASTER' || user?.role === 'ADMIN';
 
   /* ── main ────────────────────────────────────────────────── */
 
@@ -211,12 +213,18 @@ export default function CampaignDashboardPage() {
       {/* DrillBlock grid */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 24, marginBottom: 28 }}>
         <DrillBlock label="Roster" glyph="helm" count={charCounts.total} to={`/campaigns/${campaignId}/roster`} />
-        <DrillBlock label="NPCs" glyph="sigil-1" to={`/campaigns/${campaignId}/npcs`} />
-        <DrillBlock label="Quests" glyph="scroll" to={`/campaigns/${campaignId}/quests`} />
-        <DrillBlock label="Locations" glyph="sigil-3" to={`/campaigns/${campaignId}/locations`} />
+        {canManageCampaign && (
+          <>
+            <DrillBlock label="NPCs" glyph="sigil-1" to={`/campaigns/${campaignId}/npcs`} />
+            <DrillBlock label="Quests" glyph="scroll" to={`/campaigns/${campaignId}/quests`} />
+            <DrillBlock label="Locations" glyph="sigil-3" to={`/campaigns/${campaignId}/locations`} />
+          </>
+        )}
         <DrillBlock label="Storage" glyph="sword" to={`/campaigns/${campaignId}/storage`} />
         <DrillBlock label="Invite Code" glyph="cross-pat" to={`/campaigns/${campaignId}/invite`} />
-        <DrillBlock label="Session Notes" glyph="lock" to={`/campaigns/${campaignId}/notes`} />
+        {canManageCampaign && (
+          <DrillBlock label="Session Notes" glyph="lock" to={`/campaigns/${campaignId}/notes`} />
+        )}
       </div>
 
       <OrdoDivider glyph="diamond" />
@@ -281,6 +289,14 @@ export default function CampaignDashboardPage() {
                   <span className="ao-codex" style={{ fontSize: 11, color: 'var(--ink-quiet)', flexShrink: 0 }}>
                     {ch.currentHp}/{ch.maxHp} HP
                   </span>
+                  <button
+                    className="ao-btn ao-btn--ghost ao-btn--sm"
+                    onClick={() => navigate(`/campaigns/${campaignId}/characters/${ch.id}`)}
+                    title="Open character management"
+                  >
+                    <Rune kind="menu" size={10} color="currentColor" />
+                    <span style={{ marginLeft: 4 }}>Manage</span>
+                  </button>
                 </div>
               );
             })}

@@ -16,6 +16,16 @@ import SessionNotesPage from '@/pages/gm/campaigns/SessionNotesPage';
 import XPGrantPage from '@/pages/gm/campaigns/XPGrantPage';
 import ApplyEffectPage from '@/pages/gm/campaigns/ApplyEffectPage';
 import InventoryV2Page from '@/pages/gm/campaigns/InventoryV2Page';
+import CharacterManagementPage from '@/pages/gm/campaigns/CharacterManagementPage';
+import {
+  AbilityCheckPage,
+  CampaignRosterPage,
+  CharacterEditPage,
+  CharacterHpPage,
+  CharacterResourcesPage,
+  CharacterStatsPage,
+  CharacterWalletPage,
+} from '@/pages/gm/campaigns/CharacterPlaceholderPages';
 import NPCManagerPage from '@/pages/gm/campaigns/NPCManagerPage';
 import NPCDetailPage from '@/pages/gm/campaigns/NPCDetailPage';
 import QuestManagerPage from '@/pages/gm/campaigns/QuestManagerPage';
@@ -59,10 +69,19 @@ export const router = createBrowserRouter([
         children: [
           { path: '/campaigns', element: <CampaignListPage /> },
           { path: '/campaigns/:campaignId', element: <CampaignDashboardPage /> },
+          { path: '/campaigns/:campaignId/roster', element: <CampaignRosterPage /> },
           { path: '/campaigns/:campaignId/members', element: <CampaignMembersPage /> },
           { path: '/campaigns/:campaignId/invite', element: <CampaignInvitePage /> },
           { path: '/campaigns/:campaignId/storage', element: <SharedStoragePage /> },
+          { path: '/campaigns/:campaignId/characters/:characterId', element: <CharacterManagementPage /> },
+          { path: '/campaigns/:campaignId/characters/:characterId/edit', element: <CharacterEditPage /> },
+          { path: '/campaigns/:campaignId/characters/:characterId/stats', element: <CharacterStatsPage /> },
+          { path: '/campaigns/:campaignId/characters/:characterId/ability-check/:statTypeId', element: <AbilityCheckPage /> },
           { path: '/campaigns/:campaignId/characters/:characterId/inventory', element: <InventoryV2Page /> },
+          { path: '/campaigns/:campaignId/characters/:characterId/effects', element: <ApplyEffectPage /> },
+          { path: '/campaigns/:campaignId/characters/:characterId/wallet', element: <CharacterWalletPage /> },
+          { path: '/campaigns/:campaignId/characters/:characterId/resources', element: <CharacterResourcesPage /> },
+          { path: '/campaigns/:campaignId/characters/:characterId/hp', element: <CharacterHpPage /> },
           { path: '/marketplace', element: <MarketplacePage /> },
           { path: '/marketplace/:id', element: <MarketplaceDetailPage /> },
         ],
@@ -79,7 +98,6 @@ export const router = createBrowserRouter([
         children: [
           { path: '/campaigns/:campaignId/notes', element: <SessionNotesPage /> },
           { path: '/campaigns/:campaignId/xp', element: <XPGrantPage /> },
-          { path: '/campaigns/:campaignId/characters/:characterId/effects', element: <ApplyEffectPage /> },
           { path: '/campaigns/:campaignId/npcs', element: <NPCManagerPage /> },
           { path: '/campaigns/:campaignId/npcs/:npcId', element: <NPCDetailPage /> },
           { path: '/campaigns/:campaignId/quests', element: <QuestManagerPage /> },

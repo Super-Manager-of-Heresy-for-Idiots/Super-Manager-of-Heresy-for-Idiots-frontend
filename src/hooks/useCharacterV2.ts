@@ -3,7 +3,9 @@ import toast from 'react-hot-toast';
 import { charactersV2Api } from '@/api/characters-v2.api';
 import type {
   CreateCharacterInCampaignRequest,
+  UpdateCharacterRequest,
   UpdateHpRequest,
+  UpdateStatRequest,
   ModifyWalletRequest,
   ModifyResourceRequest,
   ApiError,
@@ -44,6 +46,87 @@ export function useCreateCharacterInCampaign() {
     },
     onError: (error: AxiosError<ApiError>) => {
       const message = error.response?.data?.message || 'Failed to create character';
+      toast.error(message);
+    },
+  });
+}
+
+export function useUpdateCharacter() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      campaignId,
+      characterId,
+      data,
+    }: {
+      campaignId: string;
+      characterId: string;
+      data: UpdateCharacterRequest;
+    }) => charactersV2Api.update(campaignId, characterId, data),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters'] });
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId] });
+      toast.success('Character updated!');
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      const message = error.response?.data?.message || 'Failed to update character';
+      toast.error(message);
+    },
+  });
+}
+
+export function useDeleteCharacter() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ campaignId, characterId }: { campaignId: string; characterId: string }) =>
+      charactersV2Api.delete(campaignId, characterId),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters'] });
+      queryClient.removeQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId] });
+      toast.success('Character deleted!');
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      const message = error.response?.data?.message || 'Failed to delete character';
+      toast.error(message);
+    },
+  });
+}
+
+export function useCharacterStats(campaignId: string, characterId: string) {
+  return useQuery({
+    queryKey: ['campaigns', campaignId, 'characters', characterId, 'stats'],
+    queryFn: async () => {
+      const response = await charactersV2Api.getStats(campaignId, characterId);
+      return response.data;
+    },
+    enabled: !!campaignId && !!characterId,
+  });
+}
+
+export function useUpdateCharacterStat() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      campaignId,
+      characterId,
+      statId,
+      data,
+    }: {
+      campaignId: string;
+      characterId: string;
+      statId: string;
+      data: UpdateStatRequest;
+    }) => charactersV2Api.updateStat(campaignId, characterId, statId, data),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId, 'stats'] });
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId] });
+      toast.success('Stat updated!');
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      const message = error.response?.data?.message || 'Failed to update stat';
       toast.error(message);
     },
   });

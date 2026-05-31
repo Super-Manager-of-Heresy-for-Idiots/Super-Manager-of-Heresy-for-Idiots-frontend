@@ -17,6 +17,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { useCharacterInventory, useGrantItem, useTransferItem, useRenameItem } from '@/hooks/useInventoryV2';
+import { useAuthStore } from '@/store/authStore';
 import type { ItemInstanceResponse, GrantItemRequest, RenameItemRequest } from '@/types';
 
 /* ── helpers ─────────────────────────────────────────────────── */
@@ -35,6 +36,8 @@ function rarityColor(rarity?: string): string {
 
 export default function InventoryV2Page() {
   const { campaignId, characterId } = useParams<{ campaignId: string; characterId: string }>();
+  const { user } = useAuthStore();
+  const canGrantItem = user?.role === 'GAME_MASTER' || user?.role === 'ADMIN';
   const { data: inventory, isLoading, error, refetch } = useCharacterInventory(campaignId!, characterId!);
   const grantMutation = useGrantItem();
   const transferMutation = useTransferItem();
@@ -227,13 +230,15 @@ export default function InventoryV2Page() {
               onChange={(e) => setFilterText(e.target.value)}
             />
           </div>
-          <button
-            className="ao-btn ao-btn--primary"
-            onClick={() => setGrantOpen(true)}
-          >
-            <Rune kind="plus" size={14} color="currentColor" />
-            <span style={{ marginLeft: 6 }}>Grant Item</span>
-          </button>
+          {canGrantItem && (
+            <button
+              className="ao-btn ao-btn--primary"
+              onClick={() => setGrantOpen(true)}
+            >
+              <Rune kind="plus" size={14} color="currentColor" />
+              <span style={{ marginLeft: 6 }}>Grant Item</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -257,13 +262,13 @@ export default function InventoryV2Page() {
           <EmptyVault
             glyph="sword"
             title="Empty Arsenal"
-            body="No items have been granted. Use the Grant Item button to bestow equipment."
-            action={
+            body={canGrantItem ? 'No items have been granted. Use the Grant Item button to bestow equipment.' : 'No items have been granted.'}
+            action={canGrantItem ? (
               <button className="ao-btn ao-btn--primary" onClick={() => setGrantOpen(true)}>
                 <Rune kind="plus" size={14} color="currentColor" />
                 <span style={{ marginLeft: 6 }}>Grant Item</span>
               </button>
-            }
+            ) : undefined}
           />
         ) : (
           <div style={{ textAlign: 'center', padding: '32px 0' }}>

@@ -3,7 +3,7 @@ import type { CharacterActiveEffectResponse } from '@/types';
 
 interface EffectRowProps {
   effect: CharacterActiveEffectResponse;
-  onRemove: () => void;
+  onRemove?: () => void;
 }
 
 export function EffectRow({ effect, onRemove }: EffectRowProps) {
@@ -125,23 +125,24 @@ export function EffectRow({ effect, onRemove }: EffectRowProps) {
         )}
       </div>
 
-      {/* Lift button */}
-      <button
-        className="ao-btn ao-btn--ghost ao-btn--sm"
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: 4,
-          flexShrink: 0,
-          color: 'var(--ember)',
-          borderColor: 'var(--ember)',
-        }}
-        onClick={onRemove}
-        title="Lift this effect"
-      >
-        <Rune kind="x" size={10} color="currentColor" />
-        Lift
-      </button>
+      {onRemove && (
+        <button
+          className="ao-btn ao-btn--ghost ao-btn--sm"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 4,
+            flexShrink: 0,
+            color: 'var(--ember)',
+            borderColor: 'var(--ember)',
+          }}
+          onClick={onRemove}
+          title="Lift this effect"
+        >
+          <Rune kind="x" size={10} color="currentColor" />
+          Lift
+        </button>
+      )}
     </div>
   );
 }

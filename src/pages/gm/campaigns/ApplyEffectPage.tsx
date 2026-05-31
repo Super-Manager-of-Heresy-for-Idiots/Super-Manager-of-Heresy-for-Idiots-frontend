@@ -18,7 +18,7 @@ import {
 } from '@/hooks/useEffects';
 import { useCharacterV2 } from '@/hooks/useCharacterV2';
 import { useBuffsDebuffs } from '@/hooks/useAdmin';
-import type { BuffDebuffResponse } from '@/types';
+import { useAuthStore } from '@/store/authStore';
 
 /* ================================================================== */
 /*  ApplyEffectPage                                                   */
@@ -28,6 +28,8 @@ export default function ApplyEffectPage() {
     campaignId: string;
     characterId: string;
   }>();
+  const { user } = useAuthStore();
+  const canManageEffects = user?.role === 'GAME_MASTER' || user?.role === 'ADMIN';
 
   const {
     data: character,
@@ -42,7 +44,7 @@ export default function ApplyEffectPage() {
     refetch: refetchEffects,
   } = useCharacterEffects(campaignId!, characterId!);
 
-  const { data: buffsDebuffs, isLoading: bdLoading } = useBuffsDebuffs();
+  const { data: buffsDebuffs, isLoading: bdLoading } = useBuffsDebuffs(undefined, canManageEffects);
 
   const applyMutation = useApplyEffect();
   const removeMutation = useRemoveEffect();
@@ -103,10 +105,10 @@ export default function ApplyEffectPage() {
       <div>
         <div style={{ marginBottom: 32 }}>
           <p className="ao-overline" style={{ color: 'var(--gold)' }}>
-            GM Tools
+            Character Effects
           </p>
           <h3 className="ao-h3" style={{ marginTop: 4 }}>
-            Apply Effects
+            Active Effects
           </h3>
         </div>
         <div
@@ -190,27 +192,29 @@ export default function ApplyEffectPage() {
                 marginTop: 4,
               }}
             >
-              Managing buffs &amp; debuffs for{' '}
+              Effects for{' '}
               <strong>{character.name}</strong>
             </p>
           )}
         </div>
-        <OrdoChip tone="arcane" glyph="sigil-1">
-          Game-Master
-        </OrdoChip>
+        {canManageEffects && (
+          <OrdoChip tone="arcane" glyph="sigil-1">
+            Game-Master
+          </OrdoChip>
+        )}
       </div>
 
       {/* Main Grid: Picker + Active Ledger */}
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: '1fr 1.2fr',
+          gridTemplateColumns: canManageEffects ? '1fr 1.2fr' : '1fr',
           gap: 20,
           alignItems: 'start',
         }}
       >
         {/* ════════════ Picker Panel ════════════ */}
-        <OrdoPanel frame padding={0}>
+        <OrdoPanel frame padding={0} style={{ display: canManageEffects ? undefined : 'none' }}>
           <PanelHeader
             title="EFFECT PICKER"
             sub={`${filteredBd.length} available`}
@@ -471,9 +475,7 @@ export default function ApplyEffectPage() {
                       <EffectRow
                         key={effect.id}
                         effect={effect}
-                        onRemove={() =>
-                          handleRemove(effect.id)
-                        }
+                        onRemove={canManageEffects ? () => handleRemove(effect.id) : undefined}
                       />
                     ))}
                 </>
@@ -505,9 +507,7 @@ export default function ApplyEffectPage() {
                       <EffectRow
                         key={effect.id}
                         effect={effect}
-                        onRemove={() =>
-                          handleRemove(effect.id)
-                        }
+                        onRemove={canManageEffects ? () => handleRemove(effect.id) : undefined}
                       />
                     ))}
                 </>

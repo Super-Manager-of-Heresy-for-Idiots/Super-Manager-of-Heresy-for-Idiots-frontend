@@ -22,6 +22,28 @@ export function useCharacterInventory(campaignId: string, characterId: string) {
   });
 }
 
+export function useEquippedInventory(campaignId: string, characterId: string) {
+  return useQuery({
+    queryKey: ['campaigns', campaignId, 'characters', characterId, 'inventory', 'equipped'],
+    queryFn: async () => {
+      const response = await inventoryV2Api.listEquipped(campaignId, characterId);
+      return response.data;
+    },
+    enabled: !!campaignId && !!characterId,
+  });
+}
+
+export function useBackpackInventory(campaignId: string, characterId: string) {
+  return useQuery({
+    queryKey: ['campaigns', campaignId, 'characters', characterId, 'inventory', 'backpack'],
+    queryFn: async () => {
+      const response = await inventoryV2Api.listBackpack(campaignId, characterId);
+      return response.data;
+    },
+    enabled: !!campaignId && !!characterId,
+  });
+}
+
 export function useGrantItem() {
   const queryClient = useQueryClient();
 

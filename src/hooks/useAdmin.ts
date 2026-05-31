@@ -473,13 +473,14 @@ export function useDeleteLevelReward() {
 }
 
 // === Buffs / Debuffs ===
-export function useBuffsDebuffs(params?: { isBuff?: boolean; effectType?: string }) {
+export function useBuffsDebuffs(params?: { isBuff?: boolean; effectType?: string }, enabled = true) {
   return useQuery({
     queryKey: ['buffs-debuffs', params],
     queryFn: async () => {
       const response = await adminApi.getBuffsDebuffs(params);
       return response.data;
     },
+    enabled,
   });
 }
 
