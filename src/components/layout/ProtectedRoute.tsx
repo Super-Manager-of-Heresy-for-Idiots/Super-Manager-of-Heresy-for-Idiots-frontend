@@ -19,7 +19,7 @@ export function ProtectedRoute({ allowedRoles }: ProtectedRouteProps) {
       case 'PLAYER':
         return <Navigate to="/characters" replace />;
       case 'GAME_MASTER':
-        return <Navigate to="/gm/teams" replace />;
+        return <Navigate to="/gm/campaigns" replace />;
       case 'ADMIN':
         return <Navigate to="/admin" replace />;
       default:

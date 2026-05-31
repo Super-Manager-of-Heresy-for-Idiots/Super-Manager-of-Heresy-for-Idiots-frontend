@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   OrdoPanel,
   Rune,
@@ -17,11 +17,20 @@ import type { HomebrewPackageResponse } from '@/types';
 
 export default function MarketplaceV2Page() {
   const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [page, setPage] = useState(0);
   const [sort, setSort] = useState<'downloads' | 'newest' | 'oldest'>('downloads');
 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+      setPage(0);
+    }, 350);
+    return () => clearTimeout(timer);
+  }, [search]);
+
   const { data: marketplaceData, isLoading, error, refetch } = useMarketplace({
-    search: search || undefined,
+    search: debouncedSearch || undefined,
     sort,
     page,
     size: 12,
@@ -112,7 +121,7 @@ export default function MarketplaceV2Page() {
             }}
             placeholder="Search doctrines..."
             value={search}
-            onChange={(e) => { setSearch(e.target.value); setPage(0); }}
+            onChange={(e) => setSearch(e.target.value)}
           />
         </div>
 
@@ -151,7 +160,7 @@ export default function MarketplaceV2Page() {
         <EmptyVault
           glyph="scroll"
           title="No Doctrines Found"
-          body={search ? 'No doctrines match thy inquiry. Try different terms.' : 'The marketplace stands empty. No doctrines have been published yet.'}
+          body={debouncedSearch ? 'No doctrines match thy inquiry. Try different terms.' : 'The marketplace stands empty. No doctrines have been published yet.'}
         />
       ) : (
         <>

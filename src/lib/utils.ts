@@ -37,7 +37,7 @@ export function getRoleRedirectPath(role: string): string {
     case 'PLAYER':
       return '/characters';
     case 'GAME_MASTER':
-      return '/gm/teams';
+      return '/gm/campaigns';
     case 'ADMIN':
       return '/admin';
     default:

@@ -13,9 +13,6 @@ import LevelUpPage from '@/pages/player/LevelUpPage';
 import JoinTeamPage from '@/pages/player/JoinTeamPage';
 import MyTeamsPage from '@/pages/player/MyTeamsPage';
 
-import GmTeamsListPage from '@/pages/gm/GmTeamsListPage';
-import GmTeamCreatePage from '@/pages/gm/GmTeamCreatePage';
-import GmTeamDetailPage from '@/pages/gm/GmTeamDetailPage';
 import GmCharacterViewPage from '@/pages/gm/GmCharacterViewPage';
 import ArtifactsPage from '@/pages/gm/ArtifactsPage';
 import ConditionsPage from '@/pages/gm/ConditionsPage';
@@ -36,19 +33,16 @@ import QuestManagerPage from '@/pages/gm/campaigns/QuestManagerPage';
 import QuestDetailPage from '@/pages/gm/campaigns/QuestDetailPage';
 import LocationsPage from '@/pages/gm/campaigns/LocationsPage';
 
-// Homebrew pages (existing)
-import MarketplaceBrowsePage from '@/pages/gm/homebrew/MarketplaceBrowsePage';
+// Homebrew pages
+import MarketplacePage from '@/pages/gm/homebrew/MarketplaceV2Page';
 import MarketplaceDetailPage from '@/pages/gm/homebrew/MarketplaceDetailPage';
 import MyDoctrinesPage from '@/pages/gm/homebrew/MyDoctrinesPage';
 import CreateDoctrinePage from '@/pages/gm/homebrew/CreateDoctrinePage';
 import EditDoctrinePage from '@/pages/gm/homebrew/EditDoctrinePage';
 import InstalledDoctrinesPage from '@/pages/gm/homebrew/InstalledDoctrinesPage';
-
-// Homebrew v2 pages
 import VersionManagerPage from '@/pages/gm/homebrew/VersionManagerPage';
 import OverrideCreatorPage from '@/pages/gm/homebrew/OverrideCreatorPage';
 import HomebrewLibraryPage from '@/pages/gm/homebrew/HomebrewLibraryPage';
-import MarketplaceV2Page from '@/pages/gm/homebrew/MarketplaceV2Page';
 
 import AdminDashboardPage from '@/pages/admin/AdminDashboardPage';
 import UsersListPage from '@/pages/admin/UsersListPage';
@@ -96,10 +90,9 @@ export const router = createBrowserRouter([
       {
         element: <AppLayout />,
         children: [
-          // Legacy Teams
-          { path: '/gm/teams', element: <GmTeamsListPage /> },
-          { path: '/gm/teams/new', element: <GmTeamCreatePage /> },
-          { path: '/gm/teams/:id', element: <GmTeamDetailPage /> },
+          // Legacy redirects
+          { path: '/gm/teams', element: <Navigate to="/gm/campaigns" replace /> },
+          { path: '/gm/teams/*', element: <Navigate to="/gm/campaigns" replace /> },
           { path: '/gm/characters/:id', element: <GmCharacterViewPage /> },
           { path: '/gm/artifacts', element: <ArtifactsPage /> },
           { path: '/gm/conditions', element: <ConditionsPage /> },
@@ -120,17 +113,14 @@ export const router = createBrowserRouter([
           { path: '/gm/campaigns/:id/quests/:questId', element: <QuestDetailPage /> },
           { path: '/gm/campaigns/:id/locations', element: <LocationsPage /> },
 
-          // Homebrew (existing)
-          { path: '/gm/homebrew/marketplace', element: <MarketplaceBrowsePage /> },
+          // Homebrew
+          { path: '/gm/homebrew/marketplace', element: <MarketplacePage /> },
           { path: '/gm/homebrew/marketplace/:id', element: <MarketplaceDetailPage /> },
           { path: '/gm/homebrew/my', element: <MyDoctrinesPage /> },
           { path: '/gm/homebrew/new', element: <CreateDoctrinePage /> },
           { path: '/gm/homebrew/:id/edit', element: <EditDoctrinePage /> },
           { path: '/gm/homebrew/installed', element: <InstalledDoctrinesPage /> },
-
-          // Homebrew v2
           { path: '/gm/homebrew/library', element: <HomebrewLibraryPage /> },
-          { path: '/gm/homebrew/marketplace-v2', element: <MarketplaceV2Page /> },
           { path: '/gm/homebrew/versions/:packageId', element: <VersionManagerPage /> },
           { path: '/gm/homebrew/override/new', element: <OverrideCreatorPage /> },
         ],

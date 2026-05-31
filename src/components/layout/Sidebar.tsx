@@ -33,7 +33,7 @@ const playerNav: NavItem[] = [
 ];
 
 const gmNav: NavItem[] = [
-  { label: 'My Teams', path: '/gm/teams', icon: <Shield className="h-5 w-5" /> },
+  { label: 'Campaigns', path: '/gm/campaigns', icon: <Shield className="h-5 w-5" /> },
   { label: 'My Doctrines', path: '/gm/homebrew/my', icon: <BookOpen className="h-5 w-5" /> },
   { label: 'Catalogue', path: '/gm/homebrew/marketplace', icon: <Store className="h-5 w-5" /> },
   { label: 'Instated', path: '/gm/homebrew/installed', icon: <Download className="h-5 w-5" /> },

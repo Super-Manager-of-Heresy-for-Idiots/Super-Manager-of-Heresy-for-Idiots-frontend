@@ -153,7 +153,8 @@ export default function CampaignDashboardPage() {
         <DrillBlock label="Quests" glyph="scroll" to={`/gm/campaigns/${id}/quests`} />
         <DrillBlock label="Locations" glyph="sigil-3" to={`/gm/campaigns/${id}/locations`} />
         <DrillBlock label="Storage" glyph="sword" to={`/gm/campaigns/${id}/storage`} />
-        <DrillBlock label="Session Notes" glyph="lock" to={`/gm/campaigns/${id}/session-notes`} />
+        <DrillBlock label="Invite Code" glyph="cross-pat" to={`/gm/campaigns/${id}/invite`} />
+        <DrillBlock label="Session Notes" glyph="lock" to={`/gm/campaigns/${id}/notes`} />
       </div>
 
       <OrdoDivider glyph="diamond" />
