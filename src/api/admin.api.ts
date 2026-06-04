@@ -74,41 +74,41 @@ export const adminApi = {
 
   // === Character Classes ===
   getCharacterClasses: async (): Promise<ApiResponse<CharacterClassResponse[]>> => {
-    const response = await api.get<ApiResponse<CharacterClassResponse[]>>('/admin/classes');
+    const response = await api.get<ApiResponse<CharacterClassResponse[]>>('/admin/character-classes');
     return response.data;
   },
   createCharacterClass: async (data: CreateCharacterClassRequest): Promise<ApiResponse<CharacterClassResponse>> => {
-    const response = await api.post<ApiResponse<CharacterClassResponse>>('/admin/classes', data);
+    const response = await api.post<ApiResponse<CharacterClassResponse>>('/admin/character-classes', data);
     return response.data;
   },
   getCharacterClass: async (id: string): Promise<ApiResponse<CharacterClassResponse>> => {
-    const response = await api.get<ApiResponse<CharacterClassResponse>>(`/admin/classes/${id}`);
+    const response = await api.get<ApiResponse<CharacterClassResponse>>(`/admin/character-classes/${id}`);
     return response.data;
   },
   updateCharacterClass: async (id: string, data: CreateCharacterClassRequest): Promise<ApiResponse<CharacterClassResponse>> => {
-    const response = await api.put<ApiResponse<CharacterClassResponse>>(`/admin/classes/${id}`, data);
+    const response = await api.put<ApiResponse<CharacterClassResponse>>(`/admin/character-classes/${id}`, data);
     return response.data;
   },
   deleteCharacterClass: async (id: string): Promise<ApiResponse<void>> => {
-    const response = await api.delete<ApiResponse<void>>(`/admin/classes/${id}`);
+    const response = await api.delete<ApiResponse<void>>(`/admin/character-classes/${id}`);
     return response.data;
   },
 
   // === Character Races ===
   getCharacterRaces: async (): Promise<ApiResponse<CharacterRaceResponse[]>> => {
-    const response = await api.get<ApiResponse<CharacterRaceResponse[]>>('/admin/races');
+    const response = await api.get<ApiResponse<CharacterRaceResponse[]>>('/admin/character-races');
     return response.data;
   },
   createCharacterRace: async (data: CreateCharacterRaceRequest): Promise<ApiResponse<CharacterRaceResponse>> => {
-    const response = await api.post<ApiResponse<CharacterRaceResponse>>('/admin/races', data);
+    const response = await api.post<ApiResponse<CharacterRaceResponse>>('/admin/character-races', data);
     return response.data;
   },
   updateCharacterRace: async (id: string, data: CreateCharacterRaceRequest): Promise<ApiResponse<CharacterRaceResponse>> => {
-    const response = await api.put<ApiResponse<CharacterRaceResponse>>(`/admin/races/${id}`, data);
+    const response = await api.put<ApiResponse<CharacterRaceResponse>>(`/admin/character-races/${id}`, data);
     return response.data;
   },
   deleteCharacterRace: async (id: string): Promise<ApiResponse<void>> => {
-    const response = await api.delete<ApiResponse<void>>(`/admin/races/${id}`);
+    const response = await api.delete<ApiResponse<void>>(`/admin/character-races/${id}`);
     return response.data;
   },
 

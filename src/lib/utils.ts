@@ -36,7 +36,7 @@ export function getRoleRedirectPath(role: string): string {
   switch (role) {
     case 'PLAYER':
       return '/characters';
-    case 'GAME_MASTER':
+    case 'GM':
       return '/gm/campaigns';
     case 'ADMIN':
       return '/admin';

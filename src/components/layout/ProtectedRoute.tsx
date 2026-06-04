@@ -18,7 +18,7 @@ export function ProtectedRoute({ allowedRoles }: ProtectedRouteProps) {
     switch (user.role) {
       case 'PLAYER':
         return <Navigate to="/characters" replace />;
-      case 'GAME_MASTER':
+      case 'GM':
         return <Navigate to="/gm/campaigns" replace />;
       case 'ADMIN':
         return <Navigate to="/admin" replace />;

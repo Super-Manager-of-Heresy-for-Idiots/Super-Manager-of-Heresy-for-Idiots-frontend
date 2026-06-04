@@ -41,7 +41,7 @@ export const homebrewV2Api = {
   },
 
   createOverride: async (data: CreateOverrideHomebrewRequest): Promise<ApiResponse<HomebrewDetailResponse>> => {
-    const response = await api.post<ApiResponse<HomebrewDetailResponse>>('/homebrew/override', data);
+    const response = await api.post<ApiResponse<HomebrewDetailResponse>>('/homebrew', data);
     return response.data;
   },
 };

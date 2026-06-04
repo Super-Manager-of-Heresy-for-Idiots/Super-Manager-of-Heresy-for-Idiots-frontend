@@ -1,6 +1,6 @@
 // === Enums / Unions ===
 
-export type Role = 'PLAYER' | 'GAME_MASTER' | 'ADMIN';
+export type Role = 'PLAYER' | 'GM' | 'ADMIN';
 
 export type EquipmentSlot = 'HEAD' | 'CHEST' | 'LEGS' | 'FEET' | 'MAIN_HAND' |
   'OFF_HAND' | 'RING_LEFT' | 'RING_RIGHT' | 'NECK' | 'CLOAK';
@@ -64,7 +64,7 @@ export interface RegisterRequest {
   username: string;
   email: string;
   password: string;
-  role: 'PLAYER' | 'GAME_MASTER';
+  role: 'PLAYER' | 'GM';
 }
 
 export interface LoginRequest {
@@ -842,7 +842,7 @@ export type XpTarget = 'ALL' | 'SELECTED' | 'SINGLE';
 export interface GrantXpRequest {
   amount: number;
   target: XpTarget;
-  characterIds: string[];
+  characterIds?: string[];
 }
 
 // === NPC ===

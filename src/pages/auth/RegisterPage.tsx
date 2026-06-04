@@ -19,7 +19,7 @@ const registerSchema = z
     email: z.string().email('Invalid email address'),
     password: z.string().min(8, 'Password must be at least 8 characters'),
     confirmPassword: z.string(),
-    role: z.enum(['PLAYER', 'GAME_MASTER']),
+    role: z.enum(['PLAYER', 'GM']),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: 'Passwords do not match',
@@ -225,25 +225,25 @@ export default function RegisterPage() {
                 {/* Game Master */}
                 <button
                   type="button"
-                  onClick={() => setValue('role', 'GAME_MASTER', { shouldValidate: true })}
+                  onClick={() => setValue('role', 'GM', { shouldValidate: true })}
                   style={{
                     flex: 1, textAlign: 'left', cursor: 'pointer',
-                    background: selectedRole === 'GAME_MASTER' ? 'linear-gradient(180deg, rgba(90,142,148,0.08), var(--panel))' : 'linear-gradient(180deg, var(--panel-raised), var(--panel))',
-                    border: `1px solid ${selectedRole === 'GAME_MASTER' ? 'var(--arcane)' : 'var(--rule)'}`,
-                    boxShadow: selectedRole === 'GAME_MASTER' ? 'var(--shadow-inset), 0 0 16px rgba(90,142,148,0.13)' : 'var(--shadow-inset)',
+                    background: selectedRole === 'GM' ? 'linear-gradient(180deg, rgba(90,142,148,0.08), var(--panel))' : 'linear-gradient(180deg, var(--panel-raised), var(--panel))',
+                    border: `1px solid ${selectedRole === 'GM' ? 'var(--arcane)' : 'var(--rule)'}`,
+                    boxShadow: selectedRole === 'GM' ? 'var(--shadow-inset), 0 0 16px rgba(90,142,148,0.13)' : 'var(--shadow-inset)',
                     padding: 18, display: 'flex', flexDirection: 'column', gap: 10, transition: 'all 180ms',
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <span style={{ width: 44, height: 44, border: `1px solid ${selectedRole === 'GAME_MASTER' ? 'var(--arcane)' : 'var(--rule)'}`, background: 'var(--abyss)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: selectedRole === 'GAME_MASTER' ? 'inset 0 0 12px rgba(90,142,148,0.2)' : 'inset 0 0 10px rgba(0,0,0,0.5)' }}>
-                      <Rune kind="helm" size={22} color={selectedRole === 'GAME_MASTER' ? 'var(--arcane)' : 'var(--ink-quiet)'} />
+                    <span style={{ width: 44, height: 44, border: `1px solid ${selectedRole === 'GM' ? 'var(--arcane)' : 'var(--rule)'}`, background: 'var(--abyss)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: selectedRole === 'GM' ? 'inset 0 0 12px rgba(90,142,148,0.2)' : 'inset 0 0 10px rgba(0,0,0,0.5)' }}>
+                      <Rune kind="helm" size={22} color={selectedRole === 'GM' ? 'var(--arcane)' : 'var(--ink-quiet)'} />
                     </span>
-                    <span style={{ width: 18, height: 18, border: `1px solid ${selectedRole === 'GAME_MASTER' ? 'var(--arcane)' : 'var(--rule)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', background: selectedRole === 'GAME_MASTER' ? 'var(--arcane)' : 'var(--abyss)' }}>
-                      {selectedRole === 'GAME_MASTER' && <Rune kind="check" size={10} color="var(--abyss)" />}
+                    <span style={{ width: 18, height: 18, border: `1px solid ${selectedRole === 'GM' ? 'var(--arcane)' : 'var(--rule)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', background: selectedRole === 'GM' ? 'var(--arcane)' : 'var(--abyss)' }}>
+                      {selectedRole === 'GM' && <Rune kind="check" size={10} color="var(--abyss)" />}
                     </span>
                   </div>
                   <div>
-                    <div className="ao-h6" style={{ fontSize: 16, color: selectedRole === 'GAME_MASTER' ? 'var(--ink-bright)' : 'var(--ink)' }}>Game Master</div>
+                    <div className="ao-h6" style={{ fontSize: 16, color: selectedRole === 'GM' ? 'var(--ink-bright)' : 'var(--ink)' }}>Game Master</div>
                     <div className="ao-italic" style={{ fontSize: 13, marginTop: 3, color: 'var(--ink-quiet)' }}>The Chronicler &mdash; weave the tale, command the stage.</div>
                   </div>
                 </button>
