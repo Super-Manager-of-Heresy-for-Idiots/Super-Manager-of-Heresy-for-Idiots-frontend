@@ -25,7 +25,7 @@ import { useAuthStore } from '@/store/authStore';
 import { useCampaign, useSetCampaignStatus } from '@/hooks/useCampaigns';
 import { useCampaignCharacters, useCreateCharacterInCampaign } from '@/hooks/useCharacterV2';
 import { useAvailableContent } from '@/hooks/useHomebrewV2';
-import type { CampaignStatus, CharacterV2Response } from '@/types';
+import type { AvailableContentEntry, CampaignStatus, CharacterV2Response } from '@/types';
 
 /* ── page ────────────────────────────────────────────────────── */
 
@@ -132,8 +132,8 @@ export default function CampaignDashboardPage() {
     );
   }
 
-  const classOptions = availableContent?.classes ?? [];
-  const raceOptions = availableContent?.races ?? [];
+  const classOptions: AvailableContentEntry[] = availableContent?.classes ?? [];
+  const raceOptions: AvailableContentEntry[] = availableContent?.races ?? [];
   const canCreateCharacter = isPlayer && campaign.status === 'ACTIVE';
   const canManageCampaign = user?.role === 'GAME_MASTER' || user?.role === 'ADMIN';
 

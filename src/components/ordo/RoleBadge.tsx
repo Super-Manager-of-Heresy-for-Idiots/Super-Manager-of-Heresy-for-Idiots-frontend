@@ -1,11 +1,11 @@
 import { Rune } from './Rune';
 
 interface RoleBadgeProps {
-  role: 'GM' | 'PLAYER' | 'ADMIN';
+  role: 'GAME_MASTER' | 'PLAYER' | 'ADMIN';
 }
 
 const ROLE_MAP = {
-  GM: { label: 'Game-Master', glyph: 'eye' as const, color: 'var(--arcane)' },
+  GAME_MASTER: { label: 'Game-Master', glyph: 'eye' as const, color: 'var(--arcane)' },
   PLAYER: { label: 'Player', glyph: 'shield' as const, color: 'var(--gold)' },
   ADMIN: { label: 'Admin', glyph: 'sigil-1' as const, color: 'var(--ember)' },
 };

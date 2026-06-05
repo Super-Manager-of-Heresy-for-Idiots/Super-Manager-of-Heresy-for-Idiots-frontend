@@ -10,7 +10,7 @@ import type {
 } from '@/types';
 import { AxiosError } from 'axios';
 
-// === Author hooks (GM) ===
+// === Author hooks (GAME_MASTER) ===
 
 export function useMyPackages(params: { status?: HomebrewStatus | 'DELETED'; page?: number; size?: number } = {}) {
   return useQuery({
@@ -147,7 +147,7 @@ export function useDeleteHomebrew() {
   });
 }
 
-// === Marketplace hooks (GM) ===
+// === Marketplace hooks (GAME_MASTER) ===
 
 export function useMarketplace(params: {
   search?: string;
@@ -195,7 +195,7 @@ export function useInstallPackage() {
   });
 }
 
-// === Installed hooks (GM) ===
+// === Installed hooks (GAME_MASTER) ===
 
 export function useInstalledPackages(params: { page?: number; size?: number } = {}) {
   return useQuery({

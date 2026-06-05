@@ -178,7 +178,7 @@ export default function ApplyEffectPage() {
       >
         <div>
           <p className="ao-overline" style={{ color: 'var(--gold)' }}>
-            GM Tools
+            Game Master Tools
           </p>
           <h3 className="ao-h3" style={{ marginTop: 4 }}>
             Apply Effects

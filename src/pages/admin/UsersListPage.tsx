@@ -6,11 +6,11 @@ import { useUsers } from '@/hooks/useAdmin';
 /* ── role config ─────────────────────────────────────────────── */
 const ROLE_CFG: Record<string, { c: string; glyph: string; label: string }> = {
   PLAYER:      { c: '#7a9866', glyph: 'shield', label: 'Player' },
-  GM: { c: '#c9a84c', glyph: 'helm',   label: 'Game Master' },
+  GAME_MASTER: { c: '#c9a84c', glyph: 'helm',   label: 'Game Master' },
   ADMIN:       { c: '#c0584a', glyph: 'lock',    label: 'Admin' },
 };
 
-type RoleFilter = 'all' | 'PLAYER' | 'GM' | 'ADMIN';
+type RoleFilter = 'all' | 'PLAYER' | 'GAME_MASTER' | 'ADMIN';
 
 /* ── role badge ──────────────────────────────────────────────── */
 function RoleBadge({ role }: { role: string }) {
@@ -58,10 +58,10 @@ export default function UsersListPage() {
   }, [users, search, roleFilter]);
 
   const roleCounts = useMemo(() => {
-    if (!users) return { PLAYER: 0, GM: 0, ADMIN: 0, total: 0 };
+    if (!users) return { PLAYER: 0, GAME_MASTER: 0, ADMIN: 0, total: 0 };
     return {
       PLAYER: users.filter((u) => u.role === 'PLAYER').length,
-      GM: users.filter((u) => u.role === 'GM').length,
+      GAME_MASTER: users.filter((u) => u.role === 'GAME_MASTER').length,
       ADMIN: users.filter((u) => u.role === 'ADMIN').length,
       total: users.length,
     };
@@ -83,7 +83,7 @@ export default function UsersListPage() {
   const tabs: { key: RoleFilter; label: string; count: number }[] = [
     { key: 'all',         label: 'All',          count: roleCounts.total },
     { key: 'PLAYER',      label: 'Players',      count: roleCounts.PLAYER },
-    { key: 'GM', label: 'Chroniclers',  count: roleCounts.GM },
+    { key: 'GAME_MASTER', label: 'Chroniclers',  count: roleCounts.GAME_MASTER },
     { key: 'ADMIN',       label: 'Inquisitors',  count: roleCounts.ADMIN },
   ];
 
@@ -111,7 +111,7 @@ export default function UsersListPage() {
         <div style={{ display: 'flex', gap: 32 }}>
           {([
             { label: 'Players',      value: roleCounts.PLAYER,      color: '#7a9866' },
-            { label: 'Chroniclers',   value: roleCounts.GM, color: '#c9a84c' },
+            { label: 'Chroniclers',   value: roleCounts.GAME_MASTER, color: '#c9a84c' },
             { label: 'Inquisitors',   value: roleCounts.ADMIN,       color: '#c0584a' },
           ] as const).map((stat) => (
             <div key={stat.label} style={{ textAlign: 'center' }}>

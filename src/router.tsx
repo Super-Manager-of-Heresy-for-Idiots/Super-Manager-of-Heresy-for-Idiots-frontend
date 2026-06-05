@@ -110,7 +110,7 @@ export const router = createBrowserRouter([
 
   // Game Master routes
   {
-    element: <ProtectedRoute allowedRoles={['GM', 'ADMIN']} />,
+    element: <ProtectedRoute allowedRoles={['GAME_MASTER', 'ADMIN']} />,
     children: [
       {
         element: <AppLayout />,

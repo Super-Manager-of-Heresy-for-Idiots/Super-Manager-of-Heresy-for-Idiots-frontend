@@ -223,7 +223,7 @@ export default function NPCManagerPage() {
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
                         <Rune kind="lock" size={10} color="rgba(180,80,80,0.6)" />
                         <span className="ao-overline" style={{ fontSize: 8, color: 'rgba(180,80,80,0.6)' }}>
-                          Private &mdash; GM only
+                          Private &mdash; Game Master only
                         </span>
                       </div>
                       <p style={{ fontSize: 13, color: 'var(--ink)', lineHeight: 1.5, margin: 0 }}>
@@ -291,7 +291,7 @@ export default function NPCManagerPage() {
               />
             </OrdoField>
 
-            <OrdoField label="Private Description" hint="GM eyes only">
+            <OrdoField label="Private Description" hint="Game Master Eyes Only">
               <textarea
                 className="ao-input"
                 value={formPrivateDesc}

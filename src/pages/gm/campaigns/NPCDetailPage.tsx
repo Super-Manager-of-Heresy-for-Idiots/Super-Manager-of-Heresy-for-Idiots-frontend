@@ -151,7 +151,7 @@ export default function NPCDetailPage() {
             background: 'rgba(100,20,30,0.06)',
           }}
         >
-          <PanelHeader title="PRIVATE ACCOUNT" glyph="lock" tone="ember" sub="GM eyes only" />
+          <PanelHeader title="PRIVATE ACCOUNT" glyph="lock" tone="ember" sub="Game Master Eyes Only" />
           <div style={{ padding: 16 }}>
             <p style={{ fontSize: 14, color: 'var(--ink)', lineHeight: 1.6, margin: 0 }}>
               {npc.privateDescription || (

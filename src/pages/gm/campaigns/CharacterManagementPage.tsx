@@ -36,7 +36,7 @@ export default function CharacterManagementPage() {
       },
       {
         title: 'Active Effects',
-        body: 'Review current buffs and debuffs. GM can apply or remove effects.',
+        body: 'Review current buffs and debuffs. Game Master can apply or remove effects.',
         glyph: 'flame',
         to: `${base}/effects`,
         ready: true,

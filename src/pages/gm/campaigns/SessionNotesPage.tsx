@@ -99,7 +99,7 @@ export default function SessionNotesPage() {
     return (
       <div>
         <div style={{ marginBottom: 32 }}>
-          <p className="ao-overline" style={{ color: 'var(--gold)' }}>GM Chronicle</p>
+          <p className="ao-overline" style={{ color: 'var(--gold)' }}>Game Master Chronicle</p>
           <h3 className="ao-h3" style={{ marginTop: 4 }}>Session Notes</h3>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
@@ -161,7 +161,7 @@ export default function SessionNotesPage() {
         <Rune kind="lock" size={16} color="rgba(180,80,80,0.6)" />
         <div>
           <span style={{ fontSize: 12, fontFamily: 'var(--font-display)', color: 'rgba(220,120,120,0.9)' }}>
-            GM Eyes Only
+            Game Master Eyes Only
           </span>
           <span className="ao-italic" style={{ fontSize: 11, color: 'var(--ink-quiet)', marginLeft: 8 }}>
             Session notes are private to the Game-Master and are never shown to players.
@@ -172,7 +172,7 @@ export default function SessionNotesPage() {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 28 }}>
         <div>
-          <p className="ao-overline" style={{ color: 'var(--gold)' }}>GM Chronicle</p>
+          <p className="ao-overline" style={{ color: 'var(--gold)' }}>Game Master Chronicle</p>
           <h3 className="ao-h3" style={{ marginTop: 4 }}>Session Notes</h3>
           <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 13, marginTop: 4 }}>
             Private records of sessions past, inscribed for the Game-Master alone.

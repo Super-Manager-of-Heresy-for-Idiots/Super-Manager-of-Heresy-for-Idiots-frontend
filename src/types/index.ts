@@ -1,6 +1,6 @@
 // === Enums / Unions ===
 
-export type Role = 'PLAYER' | 'GM' | 'ADMIN';
+export type Role = 'PLAYER' | 'GAME_MASTER' | 'ADMIN';
 
 export type EquipmentSlot = 'HEAD' | 'CHEST' | 'LEGS' | 'FEET' | 'MAIN_HAND' |
   'OFF_HAND' | 'RING_LEFT' | 'RING_RIGHT' | 'NECK' | 'CLOAK';
@@ -14,7 +14,7 @@ export type SkillActivation = 'PASSIVE' | 'ACTIVE';
 
 export type RewardType = 'SKILL' | 'SUBCLASS' | 'FEAT';
 
-export type CampaignRole = 'GM' | 'PLAYER';
+export type CampaignRole = 'GAME_MASTER' | 'PLAYER';
 
 export const EQUIPMENT_SLOTS: EquipmentSlot[] = [
   'HEAD', 'CHEST', 'LEGS', 'FEET', 'MAIN_HAND',
@@ -64,7 +64,7 @@ export interface RegisterRequest {
   username: string;
   email: string;
   password: string;
-  role: 'PLAYER' | 'GM';
+  role: 'PLAYER' | 'GAME_MASTER';
 }
 
 export interface LoginRequest {
@@ -836,7 +836,7 @@ export interface UpdateLocationRequest {
   isVisibleToPlayers?: boolean;
 }
 
-// === GM Session Notes ===
+// === GAME_MASTER Session Notes ===
 
 export interface GmSessionNoteResponse {
   id: string;
