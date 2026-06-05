@@ -17,6 +17,7 @@ import XPGrantPage from '@/pages/gm/campaigns/XPGrantPage';
 import ApplyEffectPage from '@/pages/gm/campaigns/ApplyEffectPage';
 import InventoryV2Page from '@/pages/gm/campaigns/InventoryV2Page';
 import CharacterManagementPage from '@/pages/gm/campaigns/CharacterManagementPage';
+import FolioPage from '@/pages/gm/campaigns/FolioPage';
 import {
   AbilityCheckPage,
   CampaignRosterPage,
@@ -74,6 +75,7 @@ export const router = createBrowserRouter([
           { path: '/campaigns/:campaignId/invite', element: <CampaignInvitePage /> },
           { path: '/campaigns/:campaignId/storage', element: <SharedStoragePage /> },
           { path: '/campaigns/:campaignId/characters/:characterId', element: <CharacterManagementPage /> },
+          { path: '/campaigns/:campaignId/characters/:characterId/sheet', element: <FolioPage /> },
           { path: '/campaigns/:campaignId/characters/:characterId/edit', element: <CharacterEditPage /> },
           { path: '/campaigns/:campaignId/characters/:characterId/stats', element: <CharacterStatsPage /> },
           { path: '/campaigns/:campaignId/characters/:characterId/ability-check/:statTypeId', element: <AbilityCheckPage /> },

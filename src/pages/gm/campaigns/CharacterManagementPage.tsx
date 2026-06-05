@@ -21,8 +21,15 @@ export default function CharacterManagementPage() {
     const base = `/campaigns/${campaignId}/characters/${characterId}`;
     return [
       {
-        title: 'Inventory & Equipment',
-        body: 'Manage backpack items, equipped slots, renaming and transfers.',
+        title: 'Character Sheet (Folio)',
+        body: 'Full sheet: abilities, vitae, litanies, class features and sacred marks.',
+        glyph: 'book',
+        to: `${base}/sheet`,
+        ready: true,
+      },
+      {
+        title: 'Arsenal & Reliquary',
+        body: 'Loadout, coin & wealth, relic folio, the bag, renaming and transfers.',
         glyph: 'sword',
         to: `${base}/inventory`,
         ready: true,
