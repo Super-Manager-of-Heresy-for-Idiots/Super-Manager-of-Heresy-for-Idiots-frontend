@@ -46,7 +46,7 @@ function getNavItems(role?: Role): NavEntry[] {
   switch (role) {
     case 'ADMIN':
       return adminNav;
-    case 'GAME_MASTER':
+    case 'GM':
       return gmNav;
     case 'PLAYER':
     default:
@@ -58,7 +58,7 @@ function getNavItems(role?: Role): NavEntry[] {
 
 const roleLabels: Record<string, string> = {
   PLAYER: 'Hand of Fate',
-  GAME_MASTER: 'Chronicler',
+  GM: 'Chronicler',
   ADMIN: 'Archivist',
 };
 

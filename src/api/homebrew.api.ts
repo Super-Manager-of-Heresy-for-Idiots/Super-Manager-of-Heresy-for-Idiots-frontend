@@ -20,7 +20,7 @@ export interface InstallHomebrewResponse {
 }
 
 export const homebrewApi = {
-  // === Author endpoints (GAME_MASTER) ===
+  // === Author endpoints (GM) ===
 
   create: async (data: CreateHomebrewRequest): Promise<ApiResponse<HomebrewDetailResponse>> => {
     const response = await api.post<ApiResponse<HomebrewDetailResponse>>('/homebrew', data);
