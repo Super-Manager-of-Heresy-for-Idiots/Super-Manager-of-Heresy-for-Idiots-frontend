@@ -17,6 +17,7 @@ import XPGrantPage from '@/pages/gm/campaigns/XPGrantPage';
 import ApplyEffectPage from '@/pages/gm/campaigns/ApplyEffectPage';
 import InventoryV2Page from '@/pages/gm/campaigns/InventoryV2Page';
 import CharacterManagementPage from '@/pages/gm/campaigns/CharacterManagementPage';
+import CharacterCreationWizardPage from '@/pages/gm/campaigns/CharacterCreationWizardPage';
 import FolioPage from '@/pages/gm/campaigns/FolioPage';
 import {
   AbilityCheckPage,
@@ -70,6 +71,7 @@ export const router = createBrowserRouter([
         children: [
           { path: '/campaigns', element: <CampaignListPage /> },
           { path: '/campaigns/:campaignId', element: <CampaignDashboardPage /> },
+          { path: '/campaigns/:campaignId/characters/create', element: <CharacterCreationWizardPage /> },
           { path: '/campaigns/:campaignId/roster', element: <CampaignRosterPage /> },
           { path: '/campaigns/:campaignId/members', element: <CampaignMembersPage /> },
           { path: '/campaigns/:campaignId/invite', element: <CampaignInvitePage /> },

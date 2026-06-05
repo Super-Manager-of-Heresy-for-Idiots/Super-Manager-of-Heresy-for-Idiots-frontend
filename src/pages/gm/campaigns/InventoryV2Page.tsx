@@ -7,9 +7,8 @@ import {
   Rune,
   OrdoDivider,
   OrdoChip,
-  EmptyVault,
+  Placeholder,
 } from '@/components/ordo';
-import { WalletPanel } from '@/components/characters/v2';
 import {
   Dialog,
   DialogContent,
@@ -26,6 +25,7 @@ import {
   useRenameItem,
   useEquipItem,
   useUnequipItem,
+  useRemoveItem,
 } from '@/hooks/useInventoryV2';
 import { useCharacterV2, useCharacterWallet } from '@/hooks/useCharacterV2';
 import { useAuthStore } from '@/store/authStore';
@@ -40,35 +40,79 @@ import type {
 
 function rarityColor(rarity?: string): string {
   switch (rarity) {
-    case 'LEGENDARY': return '#ff8c00';
-    case 'VERY_RARE': return '#a855f7';
-    case 'RARE':      return '#3b82f6';
-    case 'UNCOMMON':  return '#22c55e';
-    default:          return 'var(--ink-faint)';
+    case 'LEGENDARY':
+    case 'VERY_RARE':
+      return 'var(--gold)';
+    case 'RARE':
+      return 'var(--arcane)';
+    case 'UNCOMMON':
+      return 'var(--ember)';
+    default:
+      return 'var(--ink-quiet)';
   }
 }
 
+function slotClass(rarity?: string): string {
+  switch (rarity) {
+    case 'LEGENDARY':
+    case 'VERY_RARE':
+      return 'ao-slot ao-slot--epic';
+    case 'RARE':
+      return 'ao-slot ao-slot--rare';
+    case 'UNCOMMON':
+      return 'ao-slot ao-slot--cursed';
+    default:
+      return 'ao-slot';
+  }
+}
+
+const SLOT_GLYPH: Record<string, string> = {
+  HEAD: 'helm',
+  NECK: 'cir-dot',
+  CLOAK: 'shield',
+  CHEST: 'shield',
+  MAIN_HAND: 'sword',
+  OFF_HAND: 'shield',
+  RING_LEFT: 'cir',
+  RING_RIGHT: 'cir',
+  LEGS: 'square',
+  FEET: 'tri-inv',
+};
+
+function itemGlyph(item: ItemInstanceResponse): string {
+  if (item.slot && SLOT_GLYPH[item.slot]) return SLOT_GLYPH[item.slot];
+  if (item.isUnique || item.artifactName) return 'diamond';
+  return 'scroll';
+}
+
 const SLOT_LAYOUT: { slot: EquipmentSlot; label: string; glyph: string }[] = [
-  { slot: 'HEAD',       label: 'Head',         glyph: 'helm' },
-  { slot: 'NECK',       label: 'Neck',         glyph: 'cir-dot' },
-  { slot: 'CLOAK',      label: 'Cloak',        glyph: 'shield' },
-  { slot: 'CHEST',      label: 'Chest',        glyph: 'shield' },
-  { slot: 'MAIN_HAND',  label: 'Main Hand',    glyph: 'sword' },
-  { slot: 'OFF_HAND',   label: 'Off Hand',     glyph: 'shield' },
-  { slot: 'RING_LEFT',  label: 'Ring · Left',  glyph: 'cir' },
+  { slot: 'HEAD', label: 'Head', glyph: 'helm' },
+  { slot: 'NECK', label: 'Neck', glyph: 'cir-dot' },
+  { slot: 'CLOAK', label: 'Cloak', glyph: 'shield' },
+  { slot: 'CHEST', label: 'Cuirass', glyph: 'shield' },
+  { slot: 'MAIN_HAND', label: 'Main Hand', glyph: 'sword' },
+  { slot: 'OFF_HAND', label: 'Off Hand', glyph: 'shield' },
+  { slot: 'RING_LEFT', label: 'Ring · Left', glyph: 'cir' },
   { slot: 'RING_RIGHT', label: 'Ring · Right', glyph: 'cir' },
-  { slot: 'LEGS',       label: 'Legs',         glyph: 'shield' },
-  { slot: 'FEET',       label: 'Feet',         glyph: 'shield' },
+  { slot: 'LEGS', label: 'Greaves', glyph: 'square' },
+  { slot: 'FEET', label: 'Boots', glyph: 'tri-inv' },
 ];
 
-const ALL_SLOTS: EquipmentSlot[] = SLOT_LAYOUT.map((s) => s.slot);
+const BAG_MIN_CELLS = 30;
+
+const COIN_COLOR: Record<string, string> = {
+  platinum: 'var(--ink-bright)',
+  gold: 'var(--gold-pale)',
+  silver: 'var(--ink)',
+  copper: '#a87858',
+};
 
 /* ── page ────────────────────────────────────────────────────── */
 
 export default function InventoryV2Page() {
   const { campaignId, characterId } = useParams<{ campaignId: string; characterId: string }>();
   const { user } = useAuthStore();
-  const canGrantItem = user?.role === 'GAME_MASTER' || user?.role === 'ADMIN';
+  const isGm = user?.role === 'GAME_MASTER' || user?.role === 'ADMIN';
 
   const { data: character } = useCharacterV2(campaignId!, characterId!);
   const { data: inventory, isLoading, error, refetch } = useCharacterInventory(campaignId!, characterId!);
@@ -81,9 +125,11 @@ export default function InventoryV2Page() {
   const renameMutation = useRenameItem();
   const equipMutation = useEquipItem();
   const unequipMutation = useUnequipItem();
+  const removeMutation = useRemoveItem();
 
   const [filterText, setFilterText] = useState('');
-  const [selected, setSelected] = useState<ItemInstanceResponse | null>(null);
+  const [showSearch, setShowSearch] = useState(false);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const [grantOpen, setGrantOpen] = useState(false);
   const [transferOpen, setTransferOpen] = useState(false);
@@ -116,8 +162,6 @@ export default function InventoryV2Page() {
     return map;
   }, [equippedItems]);
 
-  const relics = useMemo(() => items.filter((i) => i.isUnique || i.artifactName), [items]);
-
   const filteredBag = useMemo(() => {
     if (!filterText) return backpackItems;
     const q = filterText.toLowerCase();
@@ -129,7 +173,13 @@ export default function InventoryV2Page() {
     );
   }, [backpackItems, filterText]);
 
+  const selected = useMemo(
+    () => items.find((i) => i.id === selectedId) ?? null,
+    [items, selectedId],
+  );
+
   const slotsFilled = equippedItems.length;
+  const attunedCount = items.filter((i) => i.isUnique || i.artifactName).length;
 
   /* ── handlers ──────────────────────────────────────────────── */
 
@@ -164,7 +214,7 @@ export default function InventoryV2Page() {
           setTransferOpen(false);
           setTransferInstanceId('');
           setTransferToCharId('');
-          setSelected(null);
+          setSelectedId(null);
         },
       },
     );
@@ -193,7 +243,6 @@ export default function InventoryV2Page() {
         onSuccess: () => {
           setEquipOpen(false);
           setEquipInstanceId('');
-          setSelected(null);
         },
       },
     );
@@ -201,9 +250,14 @@ export default function InventoryV2Page() {
 
   const handleUnequip = (item: ItemInstanceResponse) => {
     if (!campaignId || !characterId) return;
-    unequipMutation.mutate(
+    unequipMutation.mutate({ campaignId, characterId, instanceId: item.id });
+  };
+
+  const handleRemove = (item: ItemInstanceResponse) => {
+    if (!campaignId || !characterId) return;
+    removeMutation.mutate(
       { campaignId, characterId, instanceId: item.id },
-      { onSuccess: () => setSelected(null) },
+      { onSuccess: () => setSelectedId(null) },
     );
   };
 
@@ -230,19 +284,14 @@ export default function InventoryV2Page() {
   if (isLoading) {
     return (
       <div>
-        <div style={{ marginBottom: 32 }}>
-          <p className="ao-overline" style={{ color: 'var(--gold)' }}>Armaments</p>
-          <h3 className="ao-h3" style={{ marginTop: 4 }}>Arsenal &amp; Reliquary</h3>
-        </div>
-        <div className="ao-panel ao-frame ao-breathe" style={{ padding: 24, minHeight: 300 }}>
+        <PageHeader name={character?.name} slotsFilled={0} held={0} />
+        <div className="ao-panel ao-frame ao-breathe" style={{ padding: 24, minHeight: 360 }}>
           <span className="ao-frame-c" />
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} style={{ display: 'flex', gap: 12, marginBottom: 14 }}>
-              <div className="ao-ph" style={{ width: '30%', height: 14 }} />
-              <div className="ao-ph" style={{ width: '15%', height: 14 }} />
-              <div className="ao-ph" style={{ width: '10%', height: 14 }} />
-            </div>
-          ))}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 6 }}>
+            {Array.from({ length: 18 }).map((_, i) => (
+              <div key={i} className="ao-ph" style={{ aspectRatio: '1' }} />
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -263,228 +312,255 @@ export default function InventoryV2Page() {
 
   return (
     <div>
-      {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16, marginBottom: 20 }}>
-        <div>
-          <p className="ao-overline" style={{ color: 'var(--gold)' }}>Armaments</p>
-          <h3 className="ao-h3" style={{ marginTop: 4 }}>Arsenal &amp; Reliquary</h3>
-          <p className="ao-italic" style={{ color: 'var(--ink-quiet)', fontSize: 13, marginTop: 4 }}>
-            {character?.name ?? 'Loadout'} · {slotsFilled} slot{slotsFilled !== 1 ? 's' : ''} bound · {items.length} held
-          </p>
-        </div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 10px', border: '1px solid var(--rule)', background: 'var(--abyss)' }}>
-            <Rune kind="search" size={14} color="var(--ink-faint)" />
-            <input
-              style={{ background: 'transparent', border: 'none', outline: 'none', color: 'var(--ink)', fontFamily: 'var(--font-body)', fontSize: 13, width: 140 }}
-              placeholder="Filter the bag..."
-              value={filterText}
-              onChange={(e) => setFilterText(e.target.value)}
-            />
-          </div>
-          {canGrantItem && (
-            <button className="ao-btn ao-btn--primary" onClick={() => setGrantOpen(true)}>
-              <Rune kind="plus" size={14} color="currentColor" />
-              <span style={{ marginLeft: 6 }}>Grant Item</span>
+      <PageHeader
+        name={character?.name}
+        slotsFilled={slotsFilled}
+        held={items.length}
+        right={
+          <div style={{ display: 'flex', gap: 10 }}>
+            <button
+              className="ao-btn ao-btn--ghost"
+              onClick={() => setShowSearch((s) => !s)}
+            >
+              <Rune kind="filter" size={11} /> Filter
             </button>
-          )}
-        </div>
-      </div>
+            <button
+              className="ao-btn ao-btn--ghost"
+              onClick={() => selected && openTransfer(selected)}
+              disabled={!selected}
+            >
+              <Rune kind="arrow-r" size={11} /> Transfer
+            </button>
+            {isGm && (
+              <button className="ao-btn ao-btn--primary" onClick={() => setGrantOpen(true)}>
+                <Rune kind="plus" size={11} /> Inscribe Relic
+              </button>
+            )}
+          </div>
+        }
+      />
 
-      <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'flex-start' }}>
-        {/* ── Left column: Loadout + Coin ── */}
-        <div style={{ flex: '1 1 320px', minWidth: 300, display: 'flex', flexDirection: 'column', gap: 16 }}>
-          {/* Loadout */}
-          <OrdoPanel frame padding={0}>
-            <PanelHeader
-              title="Loadout"
-              glyph="helm"
-              tone="gold"
-              right={<span className="ao-codex" style={{ fontSize: 11, color: 'var(--ink-quiet)' }}>{slotsFilled} / {ALL_SLOTS.length} · — attuned</span>}
-            />
-            <div style={{ padding: 16, display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.3fr 1fr', gap: 18, alignItems: 'start' }}>
+        {/* ── LEFT: equipped slots (paper-doll) ──────────── */}
+        <OrdoPanel frame padding={0}>
+          <PanelHeader
+            title="Bound to the Body"
+            sub={`${SLOT_LAYOUT.length} slots · ${attunedCount} attuned`}
+            glyph="shield"
+          />
+          <div style={{ padding: 16 }}>
+            <div style={{ position: 'relative', height: 320, marginBottom: 12 }}>
+              <Placeholder style={{ position: 'absolute', inset: 0 }}>
+                silhouette · {character?.name ?? 'vellan'}
+              </Placeholder>
+              {[
+                { t: 14, l: '50%' }, { t: 64, l: 14 }, { t: 64, r: 14 },
+                { t: 130, l: '50%' }, { t: 200, l: 14 }, { t: 200, r: 14 },
+                { t: 260, l: '50%' },
+              ].map((p, i) => (
+                <div
+                  key={i}
+                  style={{
+                    position: 'absolute', width: 36, height: 36,
+                    transform: 'translate(-50%, 0)', top: p.t, left: p.l, right: p.r,
+                    border: '1px solid var(--brass)', background: 'rgba(20,17,15,0.85)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    boxShadow: '0 0 10px rgba(0,0,0,0.6)',
+                  }}
+                >
+                  <Rune
+                    kind={['helm', 'shield', 'sword', 'flame', 'square', 'tri-inv', 'cir-dot'][i] || 'square'}
+                    size={14}
+                    color="var(--gold-pale)"
+                  />
+                </div>
+              ))}
+            </div>
+
+            <OrdoDivider glyph="diamond-fill" color="var(--rule)">Loadout</OrdoDivider>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
               {SLOT_LAYOUT.map(({ slot, label, glyph }) => {
                 const it = equippedBySlot.get(slot);
+                const isSel = it != null && it.id === selectedId;
                 return (
                   <button
                     key={slot}
-                    onClick={() => it && setSelected(it)}
-                    className="ao-panel"
+                    title={it ? `${label}: ${it.displayName}` : label}
+                    onClick={() => (it ? setSelectedId(it.id) : null)}
+                    className={it ? slotClass(it.rarity) : 'ao-slot'}
                     style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 8,
-                      padding: '8px 10px',
-                      textAlign: 'left',
+                      aspectRatio: '1', padding: 0, position: 'relative',
                       cursor: it ? 'pointer' : 'default',
-                      border: `1px solid ${it ? `${rarityColor(it.rarity)}55` : 'var(--hairline)'}`,
-                      background: 'var(--abyss)',
-                      opacity: it ? 1 : 0.55,
+                      outline: isSel ? '1px solid var(--brass)' : 'none', outlineOffset: 1,
                     }}
                   >
-                    <Rune kind={glyph} size={14} color={it ? rarityColor(it.rarity) : 'var(--ink-faint)'} />
-                    <span style={{ flex: 1, minWidth: 0 }}>
-                      <span className="ao-overline" style={{ fontSize: 7, color: 'var(--ink-faint)', display: 'block' }}>{label}</span>
-                      <span style={{ fontSize: 11, color: it ? 'var(--ink-bright)' : 'var(--ink-ghost)', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {it ? it.displayName : 'empty'}
-                      </span>
-                    </span>
+                    {it ? (
+                      <Rune kind={glyph} size={20} color={rarityColor(it.rarity)} />
+                    ) : (
+                      <span style={{ color: 'var(--ink-ghost)', fontSize: 16 }}>+</span>
+                    )}
                   </button>
                 );
               })}
             </div>
-          </OrdoPanel>
+          </div>
+        </OrdoPanel>
 
-          {/* Coin & Wealth */}
-          <WalletPanel characterId={characterId!} wallet={wallet ?? []} />
-        </div>
-
-        {/* ── Middle column: Relic Folio + The Bag ── */}
-        <div style={{ flex: '1.4 1 360px', minWidth: 320, display: 'flex', flexDirection: 'column', gap: 16 }}>
-          {/* Relic Folio */}
-          <OrdoPanel frame padding={0}>
-            <PanelHeader title="Relic Folio" glyph="diamond" tone="arcane" right={<OrdoChip tone="arcane" glyph="diamond">{relics.length}</OrdoChip>} />
-            {relics.length === 0 ? (
-              <div style={{ padding: '24px 0', textAlign: 'center' }}>
-                <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 12 }}>No relics are sealed in this folio.</p>
-              </div>
-            ) : (
-              relics.map((item, idx) => (
+        {/* ── MIDDLE: bag grid + coin ────────────────────── */}
+        <OrdoPanel frame padding={0}>
+          <PanelHeader
+            title="The Bag"
+            sub={`${backpackItems.length} of ${BAG_MIN_CELLS} held`}
+            glyph="scroll"
+            right={
+              <div style={{ display: 'flex', gap: 4 }}>
                 <button
-                  key={item.id}
-                  onClick={() => setSelected(item)}
-                  style={{
-                    display: 'flex', alignItems: 'center', gap: 12, width: '100%', textAlign: 'left',
-                    padding: '12px 18px', cursor: 'pointer', background: 'none',
-                    border: 'none', borderBottom: idx < relics.length - 1 ? '1px solid var(--hairline)' : 'none',
-                  }}
+                  className="ao-iconbtn"
+                  style={{ width: 28, height: 28 }}
+                  onClick={() => setShowSearch((s) => !s)}
+                  title="Search"
                 >
-                  <Rune kind="diamond" size={14} color={rarityColor(item.artifactRarity ?? item.rarity)} />
-                  <span style={{ flex: 1, minWidth: 0 }}>
-                    <span style={{ fontSize: 13, color: 'var(--ink-bright)', display: 'block' }}>{item.artifactName ?? item.displayName}</span>
-                    {item.rarity && (
-                      <span className="ao-overline" style={{ fontSize: 8, color: rarityColor(item.rarity) }}>{item.rarity.replace('_', ' ')}</span>
-                    )}
-                  </span>
-                  <Rune kind="chev-r" size={12} color="var(--ink-faint)" />
+                  <Rune kind="search" size={12} />
                 </button>
-              ))
-            )}
-          </OrdoPanel>
-
-          {/* The Bag */}
-          <OrdoPanel frame padding={0}>
-            <PanelHeader
-              title="The Bag"
-              glyph="sword"
-              right={<span className="ao-codex" style={{ fontSize: 11, color: 'var(--ink-quiet)' }}>{filteredBag.length} · weight —</span>}
-            />
-            {backpackItems.length === 0 ? (
-              <EmptyVault
-                glyph="sword"
-                title="Empty Bag"
-                body={canGrantItem ? 'No items rest in the bag. Grant equipment to fill it.' : 'No items rest in the bag.'}
-                action={canGrantItem ? (
-                  <button className="ao-btn ao-btn--primary" onClick={() => setGrantOpen(true)}>
-                    <Rune kind="plus" size={14} color="currentColor" />
-                    <span style={{ marginLeft: 6 }}>Grant Item</span>
-                  </button>
-                ) : undefined}
-              />
-            ) : filteredBag.length === 0 ? (
-              <div style={{ padding: '24px 0', textAlign: 'center' }}>
-                <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 12 }}>No items match thy inquiry.</p>
-              </div>
-            ) : (
-              filteredBag.map((item, idx) => (
-                <div
-                  key={item.id}
-                  style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 18px', borderBottom: idx < filteredBag.length - 1 ? '1px solid var(--hairline)' : 'none' }}
-                >
+                {isGm && (
                   <button
-                    onClick={() => setSelected(item)}
-                    style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1, minWidth: 0, background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer' }}
+                    className="ao-iconbtn"
+                    style={{ width: 28, height: 28 }}
+                    onClick={() => setGrantOpen(true)}
+                    title="Grant item"
                   >
-                    <div style={{ width: 30, height: 30, border: `1px solid ${rarityColor(item.rarity)}44`, background: 'var(--abyss)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      <Rune kind="sword" size={13} color={rarityColor(item.rarity)} />
-                    </div>
-                    <span style={{ flex: 1, minWidth: 0 }}>
-                      <span style={{ fontSize: 13, color: 'var(--ink-bright)', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.displayName}</span>
-                      {item.itemTypeName && (
-                        <span className="ao-codex" style={{ fontSize: 10, color: 'var(--ink-faint)' }}>{item.itemTypeName}</span>
-                      )}
-                    </span>
-                    {item.isUnique && <OrdoChip tone="arcane" glyph="diamond">UNIQUE</OrdoChip>}
+                    <Rune kind="plus" size={12} />
                   </button>
-                  <span className="ao-codex" style={{ fontSize: 12, color: 'var(--ink-quiet)', fontFamily: 'var(--font-mono)', minWidth: 34, textAlign: 'right' }}>x{item.quantity}</span>
-                  <div style={{ display: 'flex', gap: 4 }}>
-                    <button className="ao-btn ao-btn--ghost ao-btn--sm" onClick={() => openEquip(item)} title="Equip"><Rune kind="shield" size={10} /></button>
-                    <button className="ao-btn ao-btn--ghost ao-btn--sm" onClick={() => openRename(item)} title="Rename"><Rune kind="scroll" size={10} /></button>
-                    <button className="ao-btn ao-btn--ghost ao-btn--sm" onClick={() => openTransfer(item)} title="Transfer"><Rune kind="arrow-r" size={10} /></button>
-                  </div>
-                </div>
-              ))
+                )}
+              </div>
+            }
+          />
+          <div style={{ padding: 16 }}>
+            {showSearch && (
+              <div
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12,
+                  padding: '6px 10px', border: '1px solid var(--rule)', background: 'var(--abyss)',
+                }}
+              >
+                <Rune kind="search" size={13} color="var(--ink-faint)" />
+                <input
+                  autoFocus
+                  style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', color: 'var(--ink)', fontFamily: 'var(--font-body)', fontSize: 13 }}
+                  placeholder="Search the bag..."
+                  value={filterText}
+                  onChange={(e) => setFilterText(e.target.value)}
+                />
+                {filterText && (
+                  <button
+                    onClick={() => setFilterText('')}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex' }}
+                    title="Clear"
+                  >
+                    <Rune kind="x" size={11} color="var(--ink-faint)" />
+                  </button>
+                )}
+              </div>
             )}
-          </OrdoPanel>
-        </div>
 
-        {/* ── Right column: Item detail / Provenance ── */}
-        <div style={{ flex: '1 1 280px', minWidth: 260 }}>
-          <OrdoPanel frame padding={0}>
-            <PanelHeader title="Provenance" glyph="eye" tone="gold" />
-            {!selected ? (
-              <div style={{ padding: '32px 20px', textAlign: 'center' }}>
-                <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 12 }}>
-                  Select an item to inspect its lineage.
-                </p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 6 }}>
+              {Array.from({ length: Math.max(BAG_MIN_CELLS, filteredBag.length) }).map((_, i) => {
+                const item = filteredBag[i];
+                if (!item) return <div key={i} className="ao-slot" style={{ aspectRatio: '1' }} />;
+                const isSel = item.id === selectedId;
+                return (
+                  <button
+                    key={item.id}
+                    className={slotClass(item.rarity)}
+                    onClick={() => setSelectedId(item.id)}
+                    title={item.displayName}
+                    style={{
+                      aspectRatio: '1', position: 'relative', padding: 0, cursor: 'pointer',
+                      outline: isSel ? '1px solid var(--brass)' : 'none', outlineOffset: 1,
+                    }}
+                  >
+                    <Rune kind={itemGlyph(item)} size={18} color={rarityColor(item.rarity)} />
+                    {item.quantity > 1 && (
+                      <span
+                        className="ao-num"
+                        style={{ position: 'absolute', bottom: 2, right: 4, fontSize: 10, color: 'var(--ink-bright)', textShadow: '0 1px 2px #000' }}
+                      >
+                        {item.quantity}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            {backpackItems.length === 0 && (
+              <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 12, textAlign: 'center', marginTop: 14 }}>
+                No items rest in the bag.
+              </p>
+            )}
+            {backpackItems.length > 0 && filteredBag.length === 0 && (
+              <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 12, textAlign: 'center', marginTop: 14 }}>
+                No items match thy inquiry.
+              </p>
+            )}
+
+            <OrdoDivider glyph="diamond-fill" color="var(--rule)">Coin &amp; Wealth</OrdoDivider>
+
+            {wallet && wallet.length > 0 ? (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
+                {wallet.map((c) => {
+                  const color = COIN_COLOR[c.currencyName.toLowerCase()] ?? 'var(--gold-pale)';
+                  return (
+                    <div
+                      key={c.currencyTypeId}
+                      style={{ padding: 10, background: 'var(--abyss)', border: '1px solid var(--rule)', display: 'flex', alignItems: 'center', gap: 10 }}
+                    >
+                      <Rune kind="coin" size={16} color={color} />
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div className="ao-overline" style={{ fontSize: 9 }}>{c.currencyName}</div>
+                        <div className="ao-num" style={{ color, fontSize: 18, fontFamily: 'var(--font-serif)' }}>{c.amount}</div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             ) : (
-              <div style={{ padding: 18 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
-                  <Rune kind={selected.isUnique ? 'diamond' : 'sword'} size={18} color={rarityColor(selected.artifactRarity ?? selected.rarity)} />
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 15, color: 'var(--ink-bright)', fontFamily: 'var(--font-display)' }}>{selected.artifactName ?? selected.displayName}</div>
-                    {selected.customName && selected.customName !== selected.templateName && (
-                      <div className="ao-codex" style={{ fontSize: 10, color: 'var(--ink-ghost)' }}>({selected.templateName})</div>
-                    )}
-                  </div>
-                </div>
-
-                <OrdoDivider glyph="diamond" color="var(--rule)" />
-
-                <DetailRow label="Type" value={selected.itemTypeName ?? '—'} />
-                <DetailRow label="Rarity" value={(selected.rarity ?? 'COMMON').replace('_', ' ')} color={rarityColor(selected.rarity)} />
-                <DetailRow label="Slot" value={selected.slot ? selected.slot.replace('_', ' ') : 'Unbound'} />
-                <DetailRow label="Quantity" value={`x${selected.quantity}`} />
-                <DetailRow label="Enchantments" value={selected.enchantments?.length ? `${selected.enchantments.length}` : 'None'} color={selected.enchantments?.length ? 'var(--arcane)' : undefined} />
-
-                {/* Fields not provided by the API */}
-                <DetailRow label="Weight" value="—" muted />
-                <DetailRow label="Charges" value="—" muted />
-                <DetailRow label="Inscription" value="—" muted />
-
-                {selected.notes && (
-                  <p className="ao-italic" style={{ fontSize: 12, color: 'var(--ink-quiet)', marginTop: 12, lineHeight: 1.5 }}>
-                    {selected.notes}
-                  </p>
-                )}
-
-                <div style={{ display: 'flex', gap: 6, marginTop: 16 }}>
-                  {selected.slot ? (
-                    <button className="ao-btn ao-btn--ghost" style={{ flex: 1 }} onClick={() => handleUnequip(selected)} disabled={unequipMutation.isPending}>
-                      Unequip
-                    </button>
-                  ) : (
-                    <button className="ao-btn ao-btn--ghost" style={{ flex: 1 }} onClick={() => openEquip(selected)}>
-                      Equip
-                    </button>
-                  )}
-                  <button className="ao-btn ao-btn--ghost" style={{ flex: 1 }} onClick={() => openRename(selected)}>Rename</button>
-                </div>
-              </div>
+              <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 12, textAlign: 'center', padding: '8px 0' }}>
+                No coin recorded.
+              </p>
             )}
-          </OrdoPanel>
-        </div>
+          </div>
+        </OrdoPanel>
+
+        {/* ── RIGHT: selected item detail (Relic Folio) ──── */}
+        <OrdoPanel frame padding={0}>
+          <PanelHeader
+            title="Relic Folio"
+            sub={selected ? selected.displayName : 'no relic chosen'}
+            glyph="sword"
+            tone="ember"
+          />
+          {!selected ? (
+            <div style={{ padding: '40px 20px', textAlign: 'center' }}>
+              <Rune kind="diamond" size={26} color="var(--ink-faint)" />
+              <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 12, marginTop: 12 }}>
+                Select an item from the loadout or bag to inspect its lineage.
+              </p>
+            </div>
+          ) : (
+            <RelicDetail
+              item={selected}
+              isGm={isGm}
+              busy={equipMutation.isPending || unequipMutation.isPending || removeMutation.isPending}
+              onEquip={() => openEquip(selected)}
+              onUnequip={() => handleUnequip(selected)}
+              onRename={() => openRename(selected)}
+              onTransfer={() => openTransfer(selected)}
+              onRemove={() => handleRemove(selected)}
+            />
+          )}
+        </OrdoPanel>
       </div>
 
       {/* Grant Item Dialog */}
@@ -586,15 +662,166 @@ export default function InventoryV2Page() {
   );
 }
 
-/* ── small detail row ────────────────────────────────────────── */
+/* ── page header ─────────────────────────────────────────────── */
 
-function DetailRow({ label, value, color, muted }: { label: string; value: string; color?: string; muted?: boolean }) {
+function PageHeader({
+  name,
+  slotsFilled,
+  held,
+  right,
+}: {
+  name?: string;
+  slotsFilled: number;
+  held: number;
+  right?: React.ReactNode;
+}) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--hairline)' }}>
-      <span className="ao-overline" style={{ fontSize: 8, color: 'var(--ink-faint)' }}>{label}</span>
-      <span style={{ fontSize: 12, color: muted ? 'var(--ink-ghost)' : (color ?? 'var(--ink-bright)'), fontFamily: muted ? 'var(--font-mono)' : undefined }}>
-        {value}
-      </span>
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16, marginBottom: 20 }}>
+      <div>
+        <p className="ao-overline" style={{ color: 'var(--gold)' }}>Armaments</p>
+        <h3 className="ao-h3" style={{ marginTop: 4 }}>Arsenal &amp; Reliquary</h3>
+        <p className="ao-italic" style={{ color: 'var(--ink-quiet)', fontSize: 13, marginTop: 4 }}>
+          {name ?? 'Loadout'} · {slotsFilled} bound · {held} held
+        </p>
+      </div>
+      {right}
+    </div>
+  );
+}
+
+/* ── relic detail ────────────────────────────────────────────── */
+
+function RelicDetail({
+  item,
+  isGm,
+  busy,
+  onEquip,
+  onUnequip,
+  onRename,
+  onTransfer,
+  onRemove,
+}: {
+  item: ItemInstanceResponse;
+  isGm: boolean;
+  busy: boolean;
+  onEquip: () => void;
+  onUnequip: () => void;
+  onRename: () => void;
+  onTransfer: () => void;
+  onRemove: () => void;
+}) {
+  const rarity = item.artifactRarity ?? item.rarity;
+  const dmgEnchant = item.enchantments?.find((e) => e.enchantmentType.damageDice);
+  const NA = '—';
+
+  const stats: { label: string; value: string; color?: string }[] = [
+    {
+      label: 'Damage',
+      value: dmgEnchant?.enchantmentType.damageDice
+        ? `${dmgEnchant.enchantmentType.damageDice}${dmgEnchant.enchantmentType.damageBonus ? ` + ${dmgEnchant.enchantmentType.damageBonus}` : ''}`
+        : NA,
+      color: dmgEnchant ? 'var(--ink-bright)' : undefined,
+    },
+    { label: 'Type', value: item.itemTypeName ?? NA },
+    { label: 'Rarity', value: (rarity ?? 'COMMON').replace('_', ' '), color: rarityColor(rarity) },
+    { label: 'Slot', value: item.slot ? item.slot.replace('_', ' ') : 'Unbound' },
+    { label: 'Quantity', value: `x${item.quantity}` },
+    { label: 'Charges', value: NA },
+  ];
+
+  return (
+    <div style={{ padding: 18 }}>
+      <Placeholder style={{ width: '100%', height: 180, border: '1px solid var(--rule)' }}>
+        {item.displayName}
+      </Placeholder>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 14, flexWrap: 'wrap' }}>
+        {rarity && (
+          <OrdoChip tone={rarity === 'RARE' ? 'arcane' : 'gold'} glyph="diamond-fill">
+            {rarity.replace('_', ' ')}
+          </OrdoChip>
+        )}
+        {item.slot && <OrdoChip tone="ember" glyph="flame">Equipped</OrdoChip>}
+        {item.isUnique && <OrdoChip tone="arcane" glyph="diamond">Unique</OrdoChip>}
+      </div>
+
+      <div className="ao-h5" style={{ marginTop: 12 }}>{item.artifactName ?? item.displayName}</div>
+      <div className="ao-italic" style={{ marginTop: 2 }}>
+        {item.itemTypeName ?? item.templateName}
+      </div>
+
+      <OrdoDivider glyph="diamond-fill" color="var(--rule)" />
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
+        {stats.map((s) => (
+          <div key={s.label}>
+            <div className="ao-overline">{s.label}</div>
+            <div className="ao-num" style={{ color: s.color ?? 'var(--ink-quiet)', fontSize: 15 }}>{s.value}</div>
+          </div>
+        ))}
+      </div>
+
+      <OrdoDivider glyph="cross-pat" color="var(--rule)">Inscription</OrdoDivider>
+
+      {item.enchantments && item.enchantments.length > 0 ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {item.enchantments.map((e) => (
+            <div key={e.id} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+              <Rune kind="diamond" size={8} color="var(--arcane)" />
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 13, color: 'var(--ink-bright)' }}>{e.enchantmentType.name}</div>
+                {(e.notes ?? e.enchantmentType.description) && (
+                  <div className="ao-italic" style={{ fontSize: 12, color: 'var(--ink-quiet)' }}>
+                    {e.notes ?? e.enchantmentType.description}
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="ao-italic" style={{ fontSize: 13, color: 'var(--ink-faint)' }}>
+          No inscriptions mark this item.
+        </p>
+      )}
+
+      <OrdoDivider glyph="diamond-fill" color="var(--rule)">Provenance</OrdoDivider>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 12, color: 'var(--ink-quiet)' }}>
+        <div style={{ display: 'flex', gap: 10 }}>
+          <Rune kind="diamond" size={8} color="var(--bronze)" />
+          <span>Template · {item.templateName}</span>
+        </div>
+        {item.customName && item.customName !== item.templateName && (
+          <div style={{ display: 'flex', gap: 10 }}>
+            <Rune kind="diamond" size={8} color="var(--bronze)" />
+            <span>Renamed · {item.customName}</span>
+          </div>
+        )}
+        {item.notes && (
+          <div style={{ display: 'flex', gap: 10 }}>
+            <Rune kind="diamond" size={8} color="var(--bronze)" />
+            <span>{item.notes}</span>
+          </div>
+        )}
+      </div>
+
+      <div style={{ display: 'flex', gap: 8, marginTop: 18 }}>
+        {item.slot ? (
+          <button className="ao-btn ao-btn--primary" style={{ flex: 1 }} onClick={onUnequip} disabled={busy}>
+            <Rune kind="x" size={10} /> Unequip
+          </button>
+        ) : (
+          <button className="ao-btn ao-btn--primary" style={{ flex: 1 }} onClick={onEquip} disabled={busy}>
+            <Rune kind="check" size={10} /> Equip
+          </button>
+        )}
+        <button className="ao-btn ao-btn--ghost" onClick={onRename} title="Rename"><Rune kind="scroll" size={10} /></button>
+        <button className="ao-btn ao-btn--ghost" onClick={onTransfer} title="Transfer"><Rune kind="arrow-r" size={10} /></button>
+        {isGm && (
+          <button className="ao-btn ao-btn--danger" onClick={onRemove} disabled={busy} title="Remove"><Rune kind="x" size={10} /></button>
+        )}
+      </div>
     </div>
   );
 }

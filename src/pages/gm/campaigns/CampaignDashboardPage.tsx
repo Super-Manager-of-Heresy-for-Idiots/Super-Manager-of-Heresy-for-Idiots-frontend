@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   OrdoPanel,
@@ -6,7 +6,6 @@ import {
   Rune,
   OrdoDivider,
   Bar,
-  EmptyVault,
 } from '@/components/ordo';
 import {
   CampaignStatusPill,
@@ -14,18 +13,10 @@ import {
   DrillBlock,
   StatusSwitch,
 } from '@/components/campaigns';
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 import { useAuthStore } from '@/store/authStore';
 import { useCampaign, useSetCampaignStatus } from '@/hooks/useCampaigns';
-import { useCampaignCharacters, useCreateCharacterInCampaign } from '@/hooks/useCharacterV2';
-import { useAvailableContent } from '@/hooks/useHomebrewV2';
-import type { AvailableContentEntry, CampaignStatus, CharacterV2Response } from '@/types';
+import { useCampaignCharacters } from '@/hooks/useCharacterV2';
+import type { CampaignStatus, CharacterV2Response } from '@/types';
 
 /* ── page ────────────────────────────────────────────────────── */
 
@@ -36,13 +27,7 @@ export default function CampaignDashboardPage() {
   const isPlayer = user?.role === 'PLAYER';
   const { data: campaign, isLoading, error, refetch } = useCampaign(campaignId!);
   const { data: characters, isLoading: charsLoading } = useCampaignCharacters(campaignId!);
-  const { data: availableContent } = useAvailableContent(campaignId!);
   const statusMutation = useSetCampaignStatus();
-  const createCharacterMutation = useCreateCharacterInCampaign();
-  const [createOpen, setCreateOpen] = useState(false);
-  const [characterName, setCharacterName] = useState('');
-  const [classId, setClassId] = useState('');
-  const [raceId, setRaceId] = useState('');
 
   /* ── derived counts ────────────────────────────────────────── */
 
@@ -69,31 +54,8 @@ export default function CampaignDashboardPage() {
     statusMutation.mutate({ id: campaignId, data: { status } });
   };
 
-  const resetCreateCharacterForm = () => {
-    setCharacterName('');
-    setClassId('');
-    setRaceId('');
-  };
-
-  const handleCreateCharacter = () => {
-    if (!campaignId || !characterName.trim() || !classId || !raceId) return;
-    createCharacterMutation.mutate(
-      {
-        campaignId,
-        data: {
-          campaignId,
-          name: characterName.trim(),
-          classId,
-          raceId,
-        },
-      },
-      {
-        onSuccess: () => {
-          setCreateOpen(false);
-          resetCreateCharacterForm();
-        },
-      },
-    );
+  const openCharacterWizard = () => {
+    navigate(`/campaigns/${campaignId}/characters/create`);
   };
 
   /* ── loading ─────────────────────────────────────────────── */
@@ -132,8 +94,6 @@ export default function CampaignDashboardPage() {
     );
   }
 
-  const classOptions: AvailableContentEntry[] = availableContent?.classes ?? [];
-  const raceOptions: AvailableContentEntry[] = availableContent?.races ?? [];
   const canCreateCharacter = isPlayer && campaign.status === 'ACTIVE';
   const canManageCampaign = user?.role === 'GAME_MASTER' || user?.role === 'ADMIN';
 
@@ -159,7 +119,7 @@ export default function CampaignDashboardPage() {
           {canCreateCharacter && (
             <button
               className="ao-btn ao-btn--primary"
-              onClick={() => setCreateOpen(true)}
+              onClick={openCharacterWizard}
             >
               <Rune kind="plus" size={14} color="currentColor" />
               <span style={{ marginLeft: 6 }}>Create Character</span>
@@ -303,80 +263,6 @@ export default function CampaignDashboardPage() {
           </div>
         )}
       </OrdoPanel>
-
-      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Create Character</DialogTitle>
-          </DialogHeader>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              <span className="ao-label">Name</span>
-              <input
-                className="ao-input"
-                value={characterName}
-                onChange={(event) => setCharacterName(event.target.value)}
-                placeholder="Character name"
-              />
-            </label>
-
-            <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              <span className="ao-label">Class</span>
-              <select
-                className="ao-input"
-                value={classId}
-                onChange={(event) => setClassId(event.target.value)}
-              >
-                <option value="">Select class</option>
-                {classOptions.map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {item.name}{item.homebrewTitle ? ` (${item.homebrewTitle})` : ''}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              <span className="ao-label">Race</span>
-              <select
-                className="ao-input"
-                value={raceId}
-                onChange={(event) => setRaceId(event.target.value)}
-              >
-                <option value="">Select race</option>
-                {raceOptions.map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {item.name}{item.homebrewTitle ? ` (${item.homebrewTitle})` : ''}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
-          <DialogFooter>
-            <button
-              className="ao-btn ao-btn--ghost"
-              onClick={() => {
-                setCreateOpen(false);
-                resetCreateCharacterForm();
-              }}
-              disabled={createCharacterMutation.isPending}
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              className="ao-btn ao-btn--primary"
-              onClick={handleCreateCharacter}
-              disabled={!characterName.trim() || !classId || !raceId || createCharacterMutation.isPending}
-            >
-              {createCharacterMutation.isPending && (
-                <span style={{ marginRight: 6 }}>...</span>
-              )}
-              Create
-            </button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

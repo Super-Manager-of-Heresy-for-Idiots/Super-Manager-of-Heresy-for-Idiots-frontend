@@ -1,0 +1,112 @@
+import type { ReactNode } from 'react';
+import { Rune } from '@/components/ordo';
+import type { ASI } from '@/data/wizard5e';
+import { ABILITIES } from '@/data/wizard5e';
+
+// ── Shared availability + step props ───────────────────────
+export interface WizardAvailability {
+  classIdByKey: Record<string, string>;
+  raceIdByKey: Record<string, string>;
+}
+
+// ── Selectable card ────────────────────────────────────────
+interface WizCardProps {
+  active: boolean;
+  onClick: () => void;
+  glyph: string;
+  title: string;
+  sub?: string;
+  disabled?: boolean;
+  children?: ReactNode;
+}
+
+export function WizCard({ active, onClick, glyph, title, sub, disabled, children }: WizCardProps) {
+  return (
+    <button
+      type="button"
+      className={'wiz-card' + (active ? ' is-active' : '')}
+      onClick={onClick}
+      disabled={disabled}
+    >
+      <div className="wiz-card-top">
+        <Rune kind={glyph} size={18} color={active ? 'var(--gold)' : 'var(--ink-quiet)'} />
+        <span className="ao-engraved" style={{ fontSize: 13 }}>{title}</span>
+        {active && (
+          <span className="wiz-card-check">
+            <Rune kind="check" size={11} color="var(--gold-pale)" />
+          </span>
+        )}
+      </div>
+      {sub && <div className="ao-codex" style={{ fontSize: 10 }}>{sub}</div>}
+      {children}
+    </button>
+  );
+}
+
+interface StepHeadProps {
+  n: number;
+  total: number;
+  title: string;
+  sub?: string;
+}
+
+export function StepHead({ n, total, title, sub }: StepHeadProps) {
+  return (
+    <div className="wiz-step-head">
+      <div className="wiz-step-eyebrow">
+        <Rune kind="diamond-fill" size={8} color="var(--gold)" /> Step {n} of {total}
+      </div>
+      <div className="ao-h4" style={{ fontSize: 26 }}>{title}</div>
+      {sub && <div className="ao-italic" style={{ fontSize: 15, marginTop: 2 }}>{sub}</div>}
+    </div>
+  );
+}
+
+export function DetailLine({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div className="wiz-detail-line">
+      <span className="ao-overline">{label}</span>
+      <span className="wiz-detail-val">{children}</span>
+    </div>
+  );
+}
+
+export function asiText(asi: ASI): string {
+  const parts = (Object.keys(asi || {}) as (keyof ASI)[]).map((k) => {
+    const a = ABILITIES.find((x) => x.key === k);
+    return (a ? a.abbr : String(k).toUpperCase()) + ' +' + asi[k];
+  });
+  return parts.length ? parts.join(' \u00b7 ') : '\u2014';
+}
+
+// ── Portrait placeholder generator (data-URI SVG) ──────────
+const PORTRAIT_GLYPHS: Record<string, string> = {
+  diamond: '<path d="M60 28 92 60 60 92 28 60Z"/>',
+  hex: '<path d="M60 26 89 43v34L60 94 31 77V43Z"/>',
+  shield: '<path d="M60 28l26 10v22c0 16-10 26-26 30-16-4-26-14-26-30V38z"/>',
+  flame: '<path d="M60 28c8 14 22 20 22 38a22 22 0 11-44 0c0-10 6-14 8-24 6 6 14 6 14-14z"/>',
+  eye: '<path d="M24 60c14-20 58-20 72 0-14 20-58 20-72 0z"/><circle cx="60" cy="60" r="10"/>',
+  cross: '<path d="M60 30v60M30 60h60"/>',
+};
+
+export function makePortrait(hue: number, glyph: string): string {
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'>
+    <defs><radialGradient id='g' cx='40%' cy='32%' r='80%'>
+      <stop offset='0%' stop-color='hsl(${hue},32%,26%)'/><stop offset='100%' stop-color='hsl(${hue},38%,8%)'/>
+    </radialGradient></defs>
+    <rect width='120' height='120' fill='url(%23g)'/>
+    <g fill='none' stroke='hsl(${hue},45%,62%)' stroke-width='2' opacity='0.85'>${PORTRAIT_GLYPHS[glyph]}</g>
+  </svg>`;
+  return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg.replace(/%23/g, '#'));
+}
+
+export const PORTRAIT_GALLERY: { hue: number; glyph: string }[] = [
+  { hue: 28, glyph: 'flame' }, { hue: 0, glyph: 'shield' }, { hue: 190, glyph: 'eye' },
+  { hue: 150, glyph: 'hex' }, { hue: 268, glyph: 'diamond' }, { hue: 45, glyph: 'cross' },
+];
+
+export const CLASS_GLYPH: Record<string, string> = {
+  barbarian: 'sword', bard: 'scroll', cleric: 'cross-pat', druid: 'flame', fighter: 'shield',
+  monk: 'cir-dot', paladin: 'shield', ranger: 'tri', rogue: 'diamond', sorcerer: 'sigil-1',
+  warlock: 'eye', wizard: 'book',
+};
