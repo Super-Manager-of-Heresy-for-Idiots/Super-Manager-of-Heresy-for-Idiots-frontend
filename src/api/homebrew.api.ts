@@ -16,6 +16,9 @@ import type {
   CreateCharacterClassRequest,
   CreateSkillRequest,
   CreateFeatRequest,
+  CreateBuffDebuffRequest,
+  CreateRichCharacterClassRequest,
+  RichCharacterClassResponse,
 } from '@/types';
 
 export interface InstallHomebrewResponse {
@@ -65,6 +68,40 @@ export const homebrewApi = {
     return response.data;
   },
 
+  createRichPackageCharacterClass: async (
+    id: string,
+    data: CreateRichCharacterClassRequest,
+  ): Promise<ApiResponse<RichCharacterClassResponse>> => {
+    const response = await api.post<ApiResponse<RichCharacterClassResponse>>(
+      `/homebrew/my/${id}/content/classes/rich`,
+      data,
+    );
+    return response.data;
+  },
+
+  importRichPackageCharacterClassJson: async (
+    id: string,
+    data: CreateRichCharacterClassRequest,
+  ): Promise<ApiResponse<RichCharacterClassResponse>> => {
+    const response = await api.post<ApiResponse<RichCharacterClassResponse>>(
+      `/homebrew/my/${id}/content/classes/import-json`,
+      data,
+    );
+    return response.data;
+  },
+
+  updateRichPackageCharacterClass: async (
+    packageId: string,
+    classId: string,
+    data: CreateRichCharacterClassRequest,
+  ): Promise<ApiResponse<RichCharacterClassResponse>> => {
+    const response = await api.put<ApiResponse<RichCharacterClassResponse>>(
+      `/homebrew/my/${packageId}/content/classes/${classId}/rich`,
+      data,
+    );
+    return response.data;
+  },
+
   createPackageSkill: async (id: string, data: CreateSkillRequest): Promise<ApiResponse<HomebrewDetailResponse>> => {
     const response = await api.post<ApiResponse<HomebrewDetailResponse>>(`/homebrew/my/${id}/content/skills`, data);
     return response.data;
@@ -72,6 +109,11 @@ export const homebrewApi = {
 
   createPackageFeat: async (id: string, data: CreateFeatRequest): Promise<ApiResponse<HomebrewDetailResponse>> => {
     const response = await api.post<ApiResponse<HomebrewDetailResponse>>(`/homebrew/my/${id}/content/feats`, data);
+    return response.data;
+  },
+
+  createPackageBuffDebuff: async (id: string, data: CreateBuffDebuffRequest): Promise<ApiResponse<HomebrewDetailResponse>> => {
+    const response = await api.post<ApiResponse<HomebrewDetailResponse>>(`/homebrew/my/${id}/content/buffs-debuffs`, data);
     return response.data;
   },
 

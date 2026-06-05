@@ -12,7 +12,9 @@ export type DamageType = 'SLASHING' | 'PIERCING' | 'BLUDGEONING' | 'FIRE' | 'COL
 
 export type SkillActivation = 'PASSIVE' | 'ACTIVE';
 
-export type RewardType = 'SKILL' | 'SUBCLASS' | 'FEAT';
+export type RewardType = 'SKILL' | 'SUBCLASS' | 'FEAT' | 'BUFF_DEBUFF';
+export type RichClassRewardType = 'SKILL' | 'FEAT' | 'SUBCLASS' | 'BUFF_DEBUFF';
+export type SkillEffectRole = 'BUFF' | 'DEBUFF';
 
 export type CampaignRole = 'GAME_MASTER' | 'PLAYER';
 
@@ -363,6 +365,50 @@ export interface CreateBuffDebuffRequest {
   modifierValue?: number;
   durationRounds?: number;
   isBuff: boolean;
+}
+
+export interface RichClassSkillEffectRequest {
+  effectRole: SkillEffectRole;
+  chancePercent: number;
+  buffDebuffId?: string;
+  buffDebuff?: CreateBuffDebuffRequest;
+}
+
+export interface RichClassSkillRequest extends CreateSkillRequest {
+  effects?: RichClassSkillEffectRequest[];
+}
+
+export interface RichClassSubclassRequest {
+  name: string;
+  description?: string;
+}
+
+export interface RichClassRewardRequest {
+  rewardType: RichClassRewardType;
+  isChoice: boolean;
+  rewardId?: string;
+  skill?: RichClassSkillRequest;
+  feat?: CreateFeatRequest;
+  subclass?: RichClassSubclassRequest;
+  buffDebuff?: CreateBuffDebuffRequest;
+}
+
+export interface RichClassLevelRequest {
+  level: number;
+  rewards: RichClassRewardRequest[];
+}
+
+export interface CreateRichCharacterClassRequest {
+  name: string;
+  description?: string;
+  levels: RichClassLevelRequest[];
+}
+
+export interface RichCharacterClassResponse {
+  characterClass: CharacterClassResponse;
+  rewards: ClassLevelRewardResponse[];
+  createdContent: Partial<Record<ContentType, ContentSummaryDto[]>>;
+  packageDetail?: HomebrewDetailResponse | null;
 }
 
 // === Enchantments ===

@@ -4,6 +4,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { Rune, OrdoPanel, OrdoChip, PanelHeader } from '@/components/ordo';
 import { ContentPills } from '@/components/homebrew';
+import { RichClassWizard } from '@/components/homebrew/RichClassWizard';
 import {
   AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle,
   AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction,
@@ -16,15 +17,18 @@ import {
   usePublishHomebrew,
   useDeleteHomebrew,
 } from '@/hooks/useHomebrew';
+import { useStatTypes } from '@/hooks/useAdmin';
 import { homebrewApi } from '@/api/homebrew.api';
 import { EQUIPMENT_SLOT_LABELS, EQUIPMENT_SLOTS } from '@/types';
-import type { ContentType, EquipmentSlot } from '@/types';
+import type { ContentSummaryDto, ContentType, EquipmentSlot } from '@/types';
 
 const CONTENT_GROUPS: { title: string; icon: string; type: ContentType }[] = [
   { title: 'Items', icon: 'sword', type: 'ITEM_TYPE' },
   { title: 'Classes', icon: 'helm', type: 'CHARACTER_CLASS' },
   { title: 'Skills', icon: 'eye', type: 'SKILL' },
   { title: 'Feats', icon: 'sigil-3', type: 'FEAT' },
+  { title: 'Subclasses', icon: 'cross-pat', type: 'SUBCLASS' },
+  { title: 'Buffs / Debuffs', icon: 'hex', type: 'BUFF_DEBUFF' },
 ];
 
 export default function EditDoctrinePage() {
@@ -38,6 +42,7 @@ export default function EditDoctrinePage() {
   const removeContentMutation = useRemoveContent();
   const publishMutation = usePublishHomebrew();
   const deleteMutation = useDeleteHomebrew();
+  const { data: statTypes } = useStatTypes();
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -54,7 +59,14 @@ export default function EditDoctrinePage() {
   const [newItemSlot, setNewItemSlot] = useState<EquipmentSlot>('MAIN_HAND');
   const [newSkillType, setNewSkillType] = useState('');
   const [newFeatPrerequisites, setNewFeatPrerequisites] = useState('');
+  const [newBuffEffectType, setNewBuffEffectType] = useState('STAT_MODIFIER');
+  const [newBuffTargetStatId, setNewBuffTargetStatId] = useState('');
+  const [newBuffModifierValue, setNewBuffModifierValue] = useState('');
+  const [newBuffDurationRounds, setNewBuffDurationRounds] = useState('');
+  const [newBuffIsBuff, setNewBuffIsBuff] = useState('true');
   const [creatingContent, setCreatingContent] = useState(false);
+  const [showRichClassWizard, setShowRichClassWizard] = useState(false);
+  const [editingRichClass, setEditingRichClass] = useState<ContentSummaryDto | null>(null);
   const [showPublish, setShowPublish] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
 
@@ -123,6 +135,11 @@ export default function EditDoctrinePage() {
     setNewItemSlot('MAIN_HAND');
     setNewSkillType('');
     setNewFeatPrerequisites('');
+    setNewBuffEffectType('STAT_MODIFIER');
+    setNewBuffTargetStatId('');
+    setNewBuffModifierValue('');
+    setNewBuffDurationRounds('');
+    setNewBuffIsBuff('true');
   };
 
   const handleCreateAndAddContent = async () => {
@@ -139,8 +156,6 @@ export default function EditDoctrinePage() {
           description,
           slot: newItemSlot,
         });
-      } else if (addType === 'CHARACTER_CLASS') {
-        await homebrewApi.createPackageCharacterClass(pkg.id, { name, description });
       } else if (addType === 'SKILL') {
         await homebrewApi.createPackageSkill(pkg.id, {
           name,
@@ -152,6 +167,16 @@ export default function EditDoctrinePage() {
           name,
           description,
           prerequisites: newFeatPrerequisites.trim() || undefined,
+        });
+      } else if (addType === 'BUFF_DEBUFF') {
+        await homebrewApi.createPackageBuffDebuff(pkg.id, {
+          name,
+          description,
+          effectType: newBuffEffectType,
+          targetStatId: newBuffEffectType === 'STAT_MODIFIER' ? newBuffTargetStatId || undefined : undefined,
+          modifierValue: newBuffModifierValue ? Number(newBuffModifierValue) : undefined,
+          durationRounds: newBuffDurationRounds ? Number(newBuffDurationRounds) : undefined,
+          isBuff: newBuffIsBuff === 'true',
         });
       }
 
@@ -325,9 +350,20 @@ export default function EditDoctrinePage() {
             glyph="book"
             sub={`${s.itemTypeCount} items \u00b7 ${s.classCount} classes \u00b7 ${s.skillCount} skills \u00b7 ${s.featCount} feats`}
             right={
-              <button className="ao-btn ao-btn--primary ao-btn--sm" onClick={() => setAdding(!adding)}>
-                <Rune kind="plus" size={10} /> {adding ? 'Close' : 'Slot New Entry'}
-              </button>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button
+                  className="ao-btn ao-btn--ghost ao-btn--sm"
+                  onClick={() => {
+                    setEditingRichClass(null);
+                    setShowRichClassWizard(true);
+                  }}
+                >
+                  <Rune kind="helm" size={10} /> Rich Class
+                </button>
+                <button className="ao-btn ao-btn--primary ao-btn--sm" onClick={() => setAdding(!adding)}>
+                  <Rune kind="plus" size={10} /> {adding ? 'Close' : 'Slot New Entry'}
+                </button>
+              </div>
             }
           />
 
@@ -351,9 +387,9 @@ export default function EditDoctrinePage() {
                   style={{ padding: '6px 10px' }}
                 >
                   <option value="ITEM_TYPE">Item</option>
-                  <option value="CHARACTER_CLASS">Class</option>
                   <option value="SKILL">Skill</option>
                   <option value="FEAT">Feat</option>
+                  <option value="BUFF_DEBUFF">Buff/Debuff</option>
                 </select>
                 <div style={{ display: 'flex', gap: 6 }}>
                   <button
@@ -454,6 +490,66 @@ export default function EditDoctrinePage() {
                     />
                   )}
 
+                  {addType === 'BUFF_DEBUFF' && (
+                    <div style={{ display: 'grid', gap: 8 }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                        <select
+                          className="ao-input"
+                          value={newBuffEffectType}
+                          onChange={(e) => setNewBuffEffectType(e.target.value)}
+                          style={{ padding: '6px 10px' }}
+                        >
+                          <option value="STAT_MODIFIER">Stat modifier</option>
+                          <option value="CONDITION">Condition</option>
+                          <option value="DAMAGE_OVER_TIME">Damage over time</option>
+                          <option value="HEAL_OVER_TIME">Heal over time</option>
+                          <option value="IMMUNITY">Immunity</option>
+                          <option value="VULNERABILITY">Vulnerability</option>
+                        </select>
+                        <select
+                          className="ao-input"
+                          value={newBuffIsBuff}
+                          onChange={(e) => setNewBuffIsBuff(e.target.value)}
+                          style={{ padding: '6px 10px' }}
+                        >
+                          <option value="true">Buff</option>
+                          <option value="false">Debuff</option>
+                        </select>
+                      </div>
+                      {newBuffEffectType === 'STAT_MODIFIER' && (
+                        <select
+                          className="ao-input"
+                          value={newBuffTargetStatId}
+                          onChange={(e) => setNewBuffTargetStatId(e.target.value)}
+                          style={{ padding: '6px 10px' }}
+                        >
+                          <option value="">Target stat...</option>
+                          {(statTypes || []).map((stat) => (
+                            <option key={stat.id} value={stat.id}>{stat.name}</option>
+                          ))}
+                        </select>
+                      )}
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                        <input
+                          className="ao-input"
+                          type="number"
+                          value={newBuffModifierValue}
+                          onChange={(e) => setNewBuffModifierValue(e.target.value)}
+                          placeholder="Modifier"
+                          style={{ padding: '6px 12px' }}
+                        />
+                        <input
+                          className="ao-input"
+                          type="number"
+                          value={newBuffDurationRounds}
+                          onChange={(e) => setNewBuffDurationRounds(e.target.value)}
+                          placeholder="Duration rounds"
+                          style={{ padding: '6px 12px' }}
+                        />
+                      </div>
+                    </div>
+                  )}
+
                   <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center' }}>
                     <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 12 }}>
                       Creates the missing {addType.toLowerCase().replace('_', ' ')} and immediately slots it into this doctrine.
@@ -541,7 +637,17 @@ export default function EditDoctrinePage() {
                       </div>
 
                       {/* Book button */}
-                      <button className="ao-iconbtn" style={{ width: 28, height: 28 }} title="View">
+                      <button
+                        className="ao-iconbtn"
+                        style={{ width: 28, height: 28 }}
+                        title={grp.type === 'CHARACTER_CLASS' ? 'Edit rich class' : 'View'}
+                        onClick={() => {
+                          if (grp.type === 'CHARACTER_CLASS') {
+                            setEditingRichClass(r);
+                            setShowRichClassWizard(true);
+                          }
+                        }}
+                      >
                         <Rune kind="book" size={12} />
                       </button>
 
@@ -562,6 +668,16 @@ export default function EditDoctrinePage() {
           })}
         </OrdoPanel>
       </div>
+
+      <RichClassWizard
+        open={showRichClassWizard}
+        onOpenChange={(nextOpen) => {
+          setShowRichClassWizard(nextOpen);
+          if (!nextOpen) setEditingRichClass(null);
+        }}
+        packageDetail={pkg}
+        editingClass={editingRichClass}
+      />
 
       {/* Publish dialog */}
       <AlertDialog open={showPublish} onOpenChange={setShowPublish}>
