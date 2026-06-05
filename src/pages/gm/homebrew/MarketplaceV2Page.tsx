@@ -10,7 +10,7 @@ import { RatingControl } from '@/components/homebrew/RatingControl';
 import { ContentPills } from '@/components/homebrew/ContentPills';
 import { HBTag } from '@/components/homebrew/HBTag';
 import { useMarketplace } from '@/hooks/useHomebrew';
-import { useRateHomebrew } from '@/hooks/useHomebrewV2';
+import { useRateHomebrew } from '@/hooks/useHomebrewCampaign';
 import type { HomebrewPackageResponse } from '@/types';
 
 /* ── page ────────────────────────────────────────────────────── */

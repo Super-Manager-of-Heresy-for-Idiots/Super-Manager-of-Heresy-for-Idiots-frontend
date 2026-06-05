@@ -227,6 +227,66 @@ export interface StatTypeResponse {
   isDefault?: boolean;
 }
 
+export interface ProficiencySkillResponse {
+  id: string;
+  name: string;
+  governingStatId?: string;
+  governingStatName?: string;
+}
+
+export interface BackgroundResponse {
+  id: string;
+  name: string;
+  description?: string;
+  skillProficiencyNames?: string[];
+  grantedExtras?: string;
+}
+
+export interface SpellReferenceResponse {
+  id: string;
+  name: string;
+  level: number;
+  school?: string;
+  description?: string;
+  availableToClassIds?: string[];
+}
+
+export interface CharacterClassDetailResponse {
+  id: string;
+  name: string;
+  description?: string;
+  hitDie?: number;
+  primaryAbilityStatId?: string;
+  savingThrowStatNames?: string[];
+  skillChoiceCount?: number;
+  skillChoiceOptions?: ProficiencySkillResponse[];
+  armorWeaponProficiencies?: string;
+  spellcasting?: {
+    isSpellcaster?: boolean;
+    spellcastingStatId?: string;
+    spellcastingStatName?: string;
+    hasCantrips?: boolean;
+    isHalfCaster?: boolean;
+  };
+}
+
+export interface CharacterRaceDetailResponse {
+  id: string;
+  name: string;
+  description?: string;
+  speed?: number;
+  abilityScoreIncreases?: { statName: string; bonus: number }[];
+  traits?: string[];
+  subraces?: {
+    id: string;
+    name: string;
+    description?: string;
+    abilityScoreIncreases?: { statName: string; bonus: number }[];
+    speedOverride?: number;
+    traits?: string[];
+  }[];
+}
+
 export interface ItemTypeResponse {
   id: string;
   name: string;

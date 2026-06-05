@@ -10,6 +10,11 @@ export interface CreateFullCharacterAbility {
   base: number;
 }
 
+export interface CreateFullCharacterAbilityScore {
+  statId: string;
+  baseValue: number;
+}
+
 export interface CreateFullCharacterRequest {
   campaignId: string;
   name: string;
@@ -22,15 +27,21 @@ export interface CreateFullCharacterRequest {
   // rich 5e selections, keyed by SRD keys (graceful no-op if backend ignores)
   raceKey?: string;
   subraceKey?: string;
+  subraceId?: string;
   classKey?: string;
   backgroundKey?: string;
+  backgroundId?: string;
   abilities?: CreateFullCharacterAbility[];
+  abilityScores?: CreateFullCharacterAbilityScore[];
   scoreMethod?: string;
   skills?: string[];
   classSkills?: string[];
+  chosenSkillProficiencyIds?: string[];
   backgroundSkills?: string[];
   cantrips?: string[];
+  cantripIds?: string[];
   spells?: string[];
+  spellIds?: string[];
   speed?: number;
   armorClass?: number;
   maxHp?: number;

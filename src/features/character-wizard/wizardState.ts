@@ -117,7 +117,8 @@ export function recompute(c: WizardChar): WizardChar {
     next.race = race.label + (sub ? ' (' + sub.label + ')' : '');
     next.speed = (sub && sub.speed) || race.speed;
   } else {
-    next.race = '';
+    next.race = c.race;
+    next.speed = c.speed || 30;
   }
 
   if (cls) {
@@ -134,8 +135,17 @@ export function recompute(c: WizardChar): WizardChar {
     next.hp = { max: maxHp, cur: maxHp, temp: 0 };
     next.ac = 10 + abilityMod(next.scores.dex);
   } else {
-    next.cls = '';
+    next.cls = c.cls;
+    next.hitDiceType = c.hitDiceType || 'd8';
+    next.hitDiceTotal = c.level + (next.hitDiceType || 'd8');
     next.isSpellcaster = false;
+    next.saves = c.saves || {};
+    const hitDie = Number((next.hitDiceType || 'd8').replace('d', '')) || 8;
+    const conMod = abilityMod(next.scores.con);
+    const perLvl = Math.floor(hitDie / 2) + 1;
+    const maxHp = Math.max(1, hitDie + conMod + (c.level - 1) * (perLvl + conMod));
+    next.hp = { max: maxHp, cur: maxHp, temp: 0 };
+    next.ac = 10 + abilityMod(next.scores.dex);
   }
 
   const skillSet: Record<string, boolean> = {};
@@ -151,6 +161,8 @@ export function recompute(c: WizardChar): WizardChar {
   const feat: string[] = [];
   if (cls) feat.push(cls.label + ' \u2014 ' + cls.desc);
   if (race) feat.push(next.race + ' traits: ' + race.traits.join(', '));
+  if (!cls && next.cls) feat.push(next.cls + ' \u2014 campaign database class');
+  if (!race && next.race) feat.push(next.race + ' traits are defined by campaign content');
   if (bg) feat.push(bg.label + ' \u2014 ' + bg.desc);
   const cantrips = c.spells.cantrips || [];
   const known = c.spells.known || [];
@@ -171,7 +183,7 @@ export function validate(id: StepId, c: WizardChar): boolean {
       return c.name.trim().length > 0;
     case 'race': {
       const r = raceByKey(c.raceKey);
-      if (!r) return false;
+      if (!r) return !!c.raceKey;
       if (r.subraces.length && !c.subraceKey) return false;
       return true;
     }
@@ -259,13 +271,13 @@ export function reducer(st: WizardState, ac: WizardAction): WizardState {
 export interface WizardActions {
   patch: (patch: Partial<WizardChar>) => void;
   setLevel: (n: number) => void;
-  setRace: (key: string) => void;
+  setRace: (key: string, label?: string) => void;
   setSubrace: (key: string) => void;
-  setClass: (key: string) => void;
+  setClass: (key: string, label?: string) => void;
   setMethod: (m: ScoreMethod) => void;
   setBaseScore: (abil: AbilityKey, val: number) => void;
   rollPool: () => void;
-  setBackground: (key: string) => void;
+  setBackground: (key: string, label?: string, bgSkills?: string[]) => void;
   toggleClassSkill: (key: string) => void;
   toggleSpell: (kind: 'cantrips' | 'known', name: string) => void;
   setAvatar: (data: string | null) => void;
@@ -277,9 +289,22 @@ export function makeActions(c: WizardChar, setC: (c: WizardChar) => void): Wizar
   return {
     patch: rawPatch,
     setLevel: (n) => derivePatch({ level: n }),
-    setRace: (key) => setC(recompute({ ...c, raceKey: key, subraceKey: '' })),
+    setRace: (key, label) => {
+      const local = raceByKey(key);
+      setC(recompute({ ...c, raceKey: key, subraceKey: '', race: local?.label ?? label ?? c.race }));
+    },
     setSubrace: (key) => derivePatch({ subraceKey: key }),
-    setClass: (key) => setC(recompute({ ...c, classKey: key, classSkills: [], spells: { cantrips: [], known: [] } })),
+    setClass: (key, label) => {
+      const local = classByKey(key);
+      setC(recompute({
+        ...c,
+        classKey: key,
+        cls: local?.label ?? label ?? c.cls,
+        hitDiceType: local ? c.hitDiceType : 'd8',
+        classSkills: [],
+        spells: { cantrips: [], known: [] },
+      }));
+    },
     setMethod: (m) => setC(recompute({
       ...c,
       scoreMethod: m,
@@ -288,11 +313,11 @@ export function makeActions(c: WizardChar, setC: (c: WizardChar) => void): Wizar
     })),
     setBaseScore: (abil, val) => derivePatch({ baseScores: { ...c.baseScores, [abil]: val } }),
     rollPool: () => setC(recompute({ ...c, rolledPool: rollStats(), baseScores: zeroScores() })),
-    setBackground: (key) => {
+    setBackground: (key, label, dbBgSkills) => {
       const bg = bgByKey(key);
-      const bgSkills = bg ? bg.skills : [];
+      const bgSkills = bg ? bg.skills : (dbBgSkills || []);
       const classSkills = (c.classSkills || []).filter((s) => !bgSkills.includes(s));
-      setC(recompute({ ...c, backgroundKey: key, bgSkills, classSkills }));
+      setC(recompute({ ...c, backgroundKey: key, background: bg?.label ?? label ?? c.background, bgSkills, classSkills }));
     },
     toggleClassSkill: (key) => {
       const arr = c.classSkills || [];

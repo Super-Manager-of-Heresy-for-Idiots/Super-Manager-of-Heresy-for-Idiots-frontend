@@ -17,7 +17,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { useHomebrewLibrary, useAttachHomebrew, useRateHomebrew } from '@/hooks/useHomebrewV2';
+import { useHomebrewLibrary, useAttachHomebrew, useRateHomebrew } from '@/hooks/useHomebrewCampaign';
 import { useCampaigns } from '@/hooks/useCampaigns';
 import type { CampaignResponse } from '@/types';
 

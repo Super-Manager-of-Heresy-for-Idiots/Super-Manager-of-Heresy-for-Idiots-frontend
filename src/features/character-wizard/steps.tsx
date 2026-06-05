@@ -9,10 +9,8 @@ import {
 import {
   ABILITIES,
   BACKGROUNDS,
-  CLASSES,
   POINT_BUY_BUDGET,
   POINT_BUY_COST,
-  RACES,
   SCHOOLS,
   SKILLS,
   STANDARD_ARRAY,
@@ -49,6 +47,9 @@ export interface StepProps {
   total: number;
   availability: WizardAvailability;
 }
+
+const norm = (value: string | undefined): string => (value || '').trim().toLowerCase();
+const skillKeyForLabel = (label: string): string | undefined => SKILLS.find((skill) => norm(skill.label) === norm(label))?.key;
 
 // ════════════════════════════════════════════════════════════
 // STEP 1 — BASICS
@@ -106,6 +107,7 @@ export function StepBasics({ c, A, n, total }: StepProps) {
 // ════════════════════════════════════════════════════════════
 export function StepRace({ c, A, n, total, availability }: StepProps) {
   const race = raceByKey(c.raceKey);
+  const selectedRace = availability.raceOptions.find((r) => r.key === c.raceKey);
   const onFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files && e.target.files[0];
     if (!f) return;
@@ -119,26 +121,29 @@ export function StepRace({ c, A, n, total, availability }: StepProps) {
       <div className="wiz-split">
         <div>
           <div className="wiz-grid">
-            {RACES.map((r) => {
-              const unavailable = !availability.raceIdByKey[r.key];
+            {availability.raceOptions.map((option) => {
+              const r = option.local;
+              const source = option.entry.homebrewTitle || option.entry.source;
               return (
                 <WizCard
-                  key={r.key}
-                  active={c.raceKey === r.key}
-                  disabled={unavailable}
-                  onClick={() => A.setRace(r.key)}
+                  key={option.key}
+                  active={c.raceKey === option.key}
+                  onClick={() => A.setRace(option.key, option.entry.name)}
                   glyph="hex"
-                  title={r.label}
-                  sub={unavailable ? 'Not in this campaign' : asiText(r.asi) + ' \u00b7 ' + r.speed + ' ft'}
+                  title={option.entry.name}
+                  sub={r ? asiText(r.asi) + ' \u00b7 ' + r.speed + ' ft' : source}
                 />
               );
             })}
+            {!availability.raceOptions.length && (
+              <div className="ao-codex">No races are available for this campaign.</div>
+            )}
           </div>
         </div>
 
         <div className="wiz-side">
           <OrdoPanel frame padding={0}>
-            <PanelHeader title={race ? race.label : 'Select a race'} glyph="hex" />
+            <PanelHeader title={race ? race.label : selectedRace?.entry.name || 'Select a race'} glyph="hex" />
             <div style={{ padding: 16 }}>
               {race ? (
                 <>
@@ -167,6 +172,15 @@ export function StepRace({ c, A, n, total, availability }: StepProps) {
                       )}
                     </div>
                   )}
+                </>
+              ) : selectedRace ? (
+                <>
+                  <div className="ao-italic" style={{ fontSize: 14, marginBottom: 12 }}>
+                    This race is loaded from campaign database content.
+                  </div>
+                  <DetailLine label="Source">{selectedRace.entry.homebrewTitle || selectedRace.entry.source}</DetailLine>
+                  <DetailLine label="Ability Bonus">Defined by campaign content</DetailLine>
+                  <DetailLine label="Speed">{c.speed || 30} ft</DetailLine>
                 </>
               ) : (
                 <div className="ao-codex">Pick a card to read its lore and bonuses.</div>
@@ -221,6 +235,7 @@ export function StepRace({ c, A, n, total, availability }: StepProps) {
 // ════════════════════════════════════════════════════════════
 export function StepClass({ c, A, n, total, availability }: StepProps) {
   const cls = classByKey(c.classKey);
+  const selectedClass = availability.classOptions.find((cl) => cl.key === c.classKey);
   const prof = profByLevel(c.level);
   return (
     <div>
@@ -228,25 +243,28 @@ export function StepClass({ c, A, n, total, availability }: StepProps) {
       <div className="wiz-split">
         <div>
           <div className="wiz-grid">
-            {CLASSES.map((cl) => {
-              const unavailable = !availability.classIdByKey[cl.key];
+            {availability.classOptions.map((option) => {
+              const cl = option.local;
+              const source = option.entry.homebrewTitle || option.entry.source;
               return (
                 <WizCard
-                  key={cl.key}
-                  active={c.classKey === cl.key}
-                  disabled={unavailable}
-                  onClick={() => A.setClass(cl.key)}
-                  glyph={CLASS_GLYPH[cl.key]}
-                  title={cl.label}
-                  sub={unavailable ? 'Not in this campaign' : 'd' + cl.hitDie + ' \u00b7 ' + cl.primary.toUpperCase() + (cl.spellcaster ? ' \u00b7 caster' : '')}
+                  key={option.key}
+                  active={c.classKey === option.key}
+                  onClick={() => A.setClass(option.key, option.entry.name)}
+                  glyph={cl ? CLASS_GLYPH[cl.key] : 'book'}
+                  title={option.entry.name}
+                  sub={cl ? 'd' + cl.hitDie + ' \u00b7 ' + cl.primary.toUpperCase() + (cl.spellcaster ? ' \u00b7 caster' : '') : source}
                 />
               );
             })}
+            {!availability.classOptions.length && (
+              <div className="ao-codex">No classes are available for this campaign.</div>
+            )}
           </div>
         </div>
         <div className="wiz-side">
           <OrdoPanel frame padding={0}>
-            <PanelHeader title={cls ? cls.label : 'Select a class'} glyph={cls ? CLASS_GLYPH[cls.key] : 'sword'} />
+            <PanelHeader title={cls ? cls.label : selectedClass?.entry.name || 'Select a class'} glyph={cls ? CLASS_GLYPH[cls.key] : 'sword'} />
             <div style={{ padding: 16 }}>
               {cls ? (
                 <>
@@ -262,6 +280,38 @@ export function StepClass({ c, A, n, total, availability }: StepProps) {
                       </OrdoChip>
                     </div>
                   )}
+                  <OrdoDivider glyph="diamond-fill" />
+                  <div className="wiz-level">
+                    <div>
+                      <label className="ao-label" style={{ margin: 0 }}>Level</label>
+                      <div className="ao-codex" style={{ fontSize: 10 }}>Proficiency bonus {fmtMod(prof)}</div>
+                    </div>
+                    <div className="wiz-level-ctrl">
+                      <button className="ao-iconbtn" onClick={() => A.setLevel(clamp(c.level - 1, 1, 20))}>
+                        <Rune kind="minus" size={12} />
+                      </button>
+                      <input
+                        className="ao-input"
+                        type="number"
+                        min={1}
+                        max={20}
+                        value={c.level}
+                        onChange={(e) => A.setLevel(clamp(Number(e.target.value || 1), 1, 20))}
+                        style={{ width: 64, textAlign: 'center', fontFamily: 'var(--font-serif)', fontSize: 22, color: 'var(--gold-pale)' }}
+                      />
+                      <button className="ao-iconbtn" onClick={() => A.setLevel(clamp(c.level + 1, 1, 20))}>
+                        <Rune kind="plus" size={12} />
+                      </button>
+                    </div>
+                  </div>
+                </>
+              ) : selectedClass ? (
+                <>
+                  <div className="ao-italic" style={{ fontSize: 14, marginBottom: 12 }}>
+                    This class is loaded from campaign database content. Level rewards are handled by the backend class definition.
+                  </div>
+                  <DetailLine label="Source">{selectedClass.entry.homebrewTitle || selectedClass.entry.source}</DetailLine>
+                  <DetailLine label="Hit Die">{c.hitDiceType || 'd8'}</DetailLine>
                   <OrdoDivider glyph="diamond-fill" />
                   <div className="wiz-level">
                     <div>
@@ -440,13 +490,28 @@ export function StepAbilities({ c, A, n, total }: StepProps) {
 // ════════════════════════════════════════════════════════════
 // STEP 5 — BACKGROUND & SKILLS
 // ════════════════════════════════════════════════════════════
-export function StepBackground({ c, A, n, total }: StepProps) {
+export function StepBackground({ c, A, n, total, availability }: StepProps) {
   const cls = classByKey(c.classKey);
+  const selectedClass = availability.classOptions.find((option) => option.key === c.classKey);
   const bg = BACKGROUNDS.find((b) => b.key === c.backgroundKey);
-  const classSkillKeys = cls ? cls.skills : [];
+  const dbBackground = availability.backgrounds.find((b) => c.backgroundKey === `db-background:${b.id}` || norm(b.name) === norm(c.background));
+  const backgroundOptions = availability.backgrounds.length
+    ? availability.backgrounds.map((entry) => {
+      const local = BACKGROUNDS.find((b) => norm(b.label) === norm(entry.name));
+      return { key: local?.key ?? `db-background:${entry.id}`, entry, local };
+    })
+    : BACKGROUNDS.map((local) => ({ key: local.key, entry: null, local }));
+  const classSkillOptions = selectedClass?.detail?.skillChoiceOptions?.length
+    ? selectedClass.detail.skillChoiceOptions
+    : cls?.skills.map((key) => {
+      const local = SKILLS.find((skill) => skill.key === key);
+      const ref = availability.proficiencySkills.find((skill) => norm(skill.name) === norm(local?.label));
+      return ref || (local ? { id: key, name: local.label } : null);
+    }).filter((skill): skill is { id: string; name: string } => !!skill) || [];
+  const classSkillKeys = classSkillOptions.map((skill) => skillKeyForLabel(skill.name) || skill.id);
   const chosen = c.classSkills || [];
-  const limit = cls ? cls.skillCount : 0;
-  const bgSkills = bg ? bg.skills : [];
+  const limit = selectedClass?.detail?.skillChoiceCount ?? cls?.skillCount ?? 0;
+  const bgSkills = bg ? bg.skills : (dbBackground?.skillProficiencyNames || []).map((name) => skillKeyForLabel(name) || name);
 
   return (
     <div>
@@ -455,27 +520,38 @@ export function StepBackground({ c, A, n, total }: StepProps) {
         <div>
           <div className="ao-overline" style={{ marginBottom: 10 }}>Background</div>
           <div className="wiz-grid wiz-grid--bg">
-            {BACKGROUNDS.map((b) => (
-              <WizCard
-                key={b.key}
-                active={c.backgroundKey === b.key}
-                onClick={() => A.setBackground(b.key)}
-                glyph="scroll"
-                title={b.label}
-                sub={b.skills.map((s) => SKILLS.find((x) => x.key === s)?.label).join(' \u00b7 ')}
-              />
-            ))}
+            {backgroundOptions.map((option) => {
+              const grantedSkillKeys = option.local
+                ? option.local.skills
+                : (option.entry?.skillProficiencyNames || []).map((name) => skillKeyForLabel(name) || name);
+              return (
+                <WizCard
+                  key={option.key}
+                  active={c.backgroundKey === option.key}
+                  onClick={() => A.setBackground(option.key, option.entry?.name || option.local?.label, grantedSkillKeys)}
+                  glyph="scroll"
+                  title={option.entry?.name || option.local?.label || 'Background'}
+                  sub={option.local
+                    ? option.local.skills.map((s) => SKILLS.find((x) => x.key === s)?.label).join(' \u00b7 ')
+                    : (option.entry?.skillProficiencyNames || []).join(' \u00b7 ')}
+                />
+              );
+            })}
           </div>
         </div>
         <div className="wiz-side">
           <OrdoPanel frame padding={0}>
             <PanelHeader title="Background grants" glyph="scroll" />
             <div style={{ padding: 16 }}>
-              {bg ? (
+              {bg || dbBackground ? (
                 <>
-                  <div className="ao-italic" style={{ fontSize: 14, marginBottom: 12 }}>{bg.desc}</div>
-                  <DetailLine label="Skill Proficiencies">{bg.skills.map((s) => SKILLS.find((x) => x.key === s)?.label).join(' \u00b7 ')}</DetailLine>
-                  <DetailLine label="Also grants">{bg.extra}</DetailLine>
+                  <div className="ao-italic" style={{ fontSize: 14, marginBottom: 12 }}>{bg?.desc || dbBackground?.description}</div>
+                  <DetailLine label="Skill Proficiencies">
+                    {bg
+                      ? bg.skills.map((s) => SKILLS.find((x) => x.key === s)?.label).join(' \u00b7 ')
+                      : (dbBackground?.skillProficiencyNames || []).join(' \u00b7 ')}
+                  </DetailLine>
+                  <DetailLine label="Also grants">{bg?.extra || dbBackground?.grantedExtras || '\u2014'}</DetailLine>
                 </>
               ) : (
                 <div className="ao-codex">Choose a background.</div>
@@ -486,12 +562,12 @@ export function StepBackground({ c, A, n, total }: StepProps) {
           <OrdoPanel frame padding={0}>
             <PanelHeader
               title="Class skills"
-              sub={cls ? ('Choose ' + limit + ' from ' + cls.label) : 'Select a class first'}
+              sub={selectedClass ? ('Choose ' + limit + ' from ' + selectedClass.entry.name) : 'Select a class first'}
               glyph="diamond-fill"
               right={<span className="ao-codex" style={{ color: chosen.length === limit ? 'var(--gold-pale)' : 'var(--ink-quiet)' }}>{chosen.length} / {limit}</span>}
             />
             <div style={{ padding: 12 }}>
-              {!cls ? (
+              {!selectedClass ? (
                 <div className="ao-codex" style={{ padding: 8 }}>No class chosen.</div>
               ) : (
                 <div className="wiz-skill-grid">
@@ -499,6 +575,7 @@ export function StepBackground({ c, A, n, total }: StepProps) {
                     const granted = bgSkills.includes(sk);
                     const on = chosen.includes(sk) || granted;
                     const atLimit = chosen.length >= limit && !chosen.includes(sk);
+                    const label = SKILLS.find((x) => x.key === sk)?.label || classSkillOptions.find((skill) => skill.id === sk)?.name || sk;
                     return (
                       <button
                         key={sk}
@@ -508,7 +585,7 @@ export function StepBackground({ c, A, n, total }: StepProps) {
                         onClick={() => A.toggleClassSkill(sk)}
                       >
                         <span style={{ width: 12, height: 12, flexShrink: 0, transform: 'rotate(45deg)', border: '1px solid ' + (on ? 'var(--brass)' : 'var(--rule)'), background: on ? 'var(--gold)' : 'transparent' }} />
-                        <span style={{ flex: 1, textAlign: 'left' }}>{SKILLS.find((x) => x.key === sk)?.label}</span>
+                        <span style={{ flex: 1, textAlign: 'left' }}>{label}</span>
                         {granted && <span className="ao-codex" style={{ fontSize: 9 }}>bg</span>}
                       </button>
                     );

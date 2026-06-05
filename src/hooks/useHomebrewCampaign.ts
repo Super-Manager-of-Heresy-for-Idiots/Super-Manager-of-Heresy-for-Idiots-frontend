@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
-import { homebrewV2Api } from '@/api/homebrew-v2.api';
+import { homebrewCampaignApi } from '@/api/homebrew-campaign.api';
 import { homebrewApi } from '@/api/homebrew.api';
 import type {
   AttachHomebrewRequest,
@@ -15,7 +15,7 @@ export function useAttachHomebrew() {
 
   return useMutation({
     mutationFn: ({ campaignId, data }: { campaignId: string; data: AttachHomebrewRequest }) =>
-      homebrewV2Api.attach(campaignId, data),
+      homebrewCampaignApi.attach(campaignId, data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'homebrew'] });
       toast.success('Homebrew attached to campaign!');
@@ -31,7 +31,7 @@ export function useDetachHomebrew() {
 
   return useMutation({
     mutationFn: ({ campaignId, packageId }: { campaignId: string; packageId: string }) =>
-      homebrewV2Api.detach(campaignId, packageId),
+      homebrewCampaignApi.detach(campaignId, packageId),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'homebrew'] });
       toast.success('Homebrew detached from campaign!');
@@ -46,7 +46,7 @@ export function useAttachedHomebrew(campaignId: string) {
   return useQuery({
     queryKey: ['campaigns', campaignId, 'homebrew'],
     queryFn: async () => {
-      const response = await homebrewV2Api.listAttached(campaignId);
+      const response = await homebrewCampaignApi.listAttached(campaignId);
       return response.data;
     },
     enabled: !!campaignId,
@@ -65,7 +65,7 @@ export function usePinHomebrewVersion() {
       campaignId: string;
       packageId: string;
       data: PinHomebrewVersionRequest;
-    }) => homebrewV2Api.pinVersion(campaignId, packageId, data),
+    }) => homebrewCampaignApi.pinVersion(campaignId, packageId, data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'homebrew'] });
       toast.success('Version pinned!');
@@ -80,8 +80,32 @@ export function useAvailableContent(campaignId: string) {
   return useQuery({
     queryKey: ['campaigns', campaignId, 'available-content'],
     queryFn: async () => {
-      const response = await homebrewV2Api.getAvailableContent(campaignId);
+      const response = await homebrewCampaignApi.getAvailableContent(campaignId);
       return response.data;
+    },
+    enabled: !!campaignId,
+  });
+}
+
+export function useCampaignReferenceContent(campaignId: string) {
+  return useQuery({
+    queryKey: ['campaigns', campaignId, 'reference-content'],
+    queryFn: async () => {
+      const [classes, races, backgrounds, skills, statTypes] = await Promise.all([
+        homebrewCampaignApi.getReferenceClasses(campaignId),
+        homebrewCampaignApi.getReferenceRaces(campaignId),
+        homebrewCampaignApi.getReferenceBackgrounds(campaignId),
+        homebrewCampaignApi.getReferenceSkills(campaignId),
+        homebrewCampaignApi.getReferenceStatTypes(campaignId),
+      ]);
+
+      return {
+        classes: classes.data ?? [],
+        races: races.data ?? [],
+        backgrounds: backgrounds.data ?? [],
+        skills: skills.data ?? [],
+        statTypes: statTypes.data ?? [],
+      };
     },
     enabled: !!campaignId,
   });

@@ -1,12 +1,42 @@
 import type { ReactNode } from 'react';
 import { Rune } from '@/components/ordo';
-import type { ASI } from '@/data/wizard5e';
+import type { ASI, CharClass, Race } from '@/data/wizard5e';
 import { ABILITIES } from '@/data/wizard5e';
+import type {
+  AvailableContentEntry,
+  BackgroundResponse,
+  CharacterClassDetailResponse,
+  CharacterRaceDetailResponse,
+  ProficiencySkillResponse,
+  StatTypeResponse,
+} from '@/types';
 
 // ── Shared availability + step props ───────────────────────
+export interface WizardClassOption {
+  key: string;
+  entry: AvailableContentEntry;
+  local?: CharClass;
+  detail?: CharacterClassDetailResponse;
+}
+
+export interface WizardRaceOption {
+  key: string;
+  entry: AvailableContentEntry;
+  local?: Race;
+  detail?: CharacterRaceDetailResponse;
+}
+
 export interface WizardAvailability {
   classIdByKey: Record<string, string>;
   raceIdByKey: Record<string, string>;
+  classOptions: WizardClassOption[];
+  raceOptions: WizardRaceOption[];
+  skills: AvailableContentEntry[];
+  feats: AvailableContentEntry[];
+  itemTypes: AvailableContentEntry[];
+  backgrounds: BackgroundResponse[];
+  proficiencySkills: ProficiencySkillResponse[];
+  statTypes: StatTypeResponse[];
 }
 
 // ── Selectable card ────────────────────────────────────────

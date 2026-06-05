@@ -1,7 +1,7 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 import { useCampaign } from '@/hooks/useCampaigns';
-import { useAvailableContent } from '@/hooks/useHomebrewV2';
+import { useAvailableContent, useCampaignReferenceContent } from '@/hooks/useHomebrewCampaign';
 import { useCreateFullCharacter } from '@/hooks/useCreateFullCharacter';
 import { CharacterCreationWizard } from '@/features/character-wizard/CharacterCreationWizard';
 import type { CreateFullCharacterRequest } from '@/api/characters-full.api';
@@ -12,11 +12,12 @@ export default function CharacterCreationWizardPage() {
   const { user } = useAuthStore();
   const { data: campaign, isLoading, error } = useCampaign(campaignId!);
   const { data: availableContent, isLoading: contentLoading } = useAvailableContent(campaignId!);
+  const { data: referenceContent, isLoading: referenceLoading } = useCampaignReferenceContent(campaignId!);
   const createMutation = useCreateFullCharacter();
 
   const backToDashboard = () => navigate(`/campaigns/${campaignId}`);
 
-  if (isLoading || contentLoading) {
+  if (isLoading || contentLoading || referenceLoading) {
     return (
       <div className="ao-panel ao-frame ao-breathe" style={{ padding: 24, minHeight: 160 }}>
         <span className="ao-frame-c" />
@@ -61,6 +62,14 @@ export default function CharacterCreationWizardPage() {
       campaignId={campaignId!}
       availableClasses={availableContent?.classes ?? []}
       availableRaces={availableContent?.races ?? []}
+      availableSkills={availableContent?.skills ?? []}
+      availableFeats={availableContent?.feats ?? []}
+      availableItemTypes={availableContent?.itemTypes ?? []}
+      referenceClasses={referenceContent?.classes ?? []}
+      referenceRaces={referenceContent?.races ?? []}
+      referenceBackgrounds={referenceContent?.backgrounds ?? []}
+      referenceProficiencySkills={referenceContent?.skills ?? []}
+      referenceStatTypes={referenceContent?.statTypes ?? []}
       submitting={createMutation.isPending}
       onSubmit={handleSubmit}
       onCancel={backToDashboard}
