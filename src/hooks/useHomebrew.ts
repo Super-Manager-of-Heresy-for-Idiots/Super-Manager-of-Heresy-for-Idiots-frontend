@@ -7,6 +7,7 @@ import type {
   UpdateHomebrewRequest,
   AddContentRequest,
   HomebrewStatus,
+  CreateRichCharacterClassRequest,
 } from '@/types';
 import { AxiosError } from 'axios';
 
@@ -77,6 +78,70 @@ export function useAddContent() {
         ? 'This content is already in the package or the package is not in DRAFT'
         : error.response?.data?.message || 'Failed to add content';
       toast.error(message);
+    },
+  });
+}
+
+export function useCreateRichHomebrewClass() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ packageId, data }: { packageId: string; data: CreateRichCharacterClassRequest }) =>
+      homebrewApi.createRichPackageCharacterClass(packageId, data),
+    onSuccess: (response, variables) => {
+      if (response.data?.packageDetail) {
+        queryClient.setQueryData(['homebrew-my', variables.packageId], response.data.packageDetail);
+      }
+      queryClient.invalidateQueries({ queryKey: ['homebrew-my'] });
+      queryClient.invalidateQueries({ queryKey: ['homebrew-my', variables.packageId] });
+      toast.success('Rich class created!');
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error.response?.data?.message || 'Failed to create rich class');
+    },
+  });
+}
+
+export function useImportRichHomebrewClassJson() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ packageId, data }: { packageId: string; data: CreateRichCharacterClassRequest }) =>
+      homebrewApi.importRichPackageCharacterClassJson(packageId, data),
+    onSuccess: (response, variables) => {
+      if (response.data?.packageDetail) {
+        queryClient.setQueryData(['homebrew-my', variables.packageId], response.data.packageDetail);
+      }
+      queryClient.invalidateQueries({ queryKey: ['homebrew-my'] });
+      queryClient.invalidateQueries({ queryKey: ['homebrew-my', variables.packageId] });
+      toast.success('Rich class imported!');
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error.response?.data?.message || 'Failed to import rich class');
+    },
+  });
+}
+
+export function useUpdateRichHomebrewClass() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      packageId,
+      classId,
+      data,
+    }: {
+      packageId: string;
+      classId: string;
+      data: CreateRichCharacterClassRequest;
+    }) => homebrewApi.updateRichPackageCharacterClass(packageId, classId, data),
+    onSuccess: (response, variables) => {
+      if (response.data?.packageDetail) {
+        queryClient.setQueryData(['homebrew-my', variables.packageId], response.data.packageDetail);
+      }
+      queryClient.invalidateQueries({ queryKey: ['homebrew-my'] });
+      queryClient.invalidateQueries({ queryKey: ['homebrew-my', variables.packageId] });
+      toast.success('Rich class updated!');
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error.response?.data?.message || 'Failed to update rich class');
     },
   });
 }

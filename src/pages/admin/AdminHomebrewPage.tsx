@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Rune, OrdoPanel, OrdoChip, Sigil } from '@/components/ordo';
 import { StatusBadge, CodexID } from '@/components/homebrew';
 import {
@@ -15,6 +16,16 @@ import { formatDate } from '@/lib/utils';
 import type { HomebrewStatus, HomebrewPackageResponse, HomebrewTagResponse } from '@/types';
 
 type AdminTab = 'moderation' | 'tags';
+
+function formatContentSummary(pkg: HomebrewPackageResponse) {
+  const summary = pkg.contentSummary || {};
+  return [
+    `${summary.itemTypeCount ?? summary.ITEM_TYPE ?? 0} items`,
+    `${summary.classCount ?? summary.CHARACTER_CLASS ?? 0} classes`,
+    `${summary.skillCount ?? summary.SKILL ?? 0} skills`,
+    `${summary.featCount ?? summary.FEAT ?? 0} feats`,
+  ].join(' · ');
+}
 
 export default function AdminHomebrewPage() {
   const [tab, setTab] = useState<AdminTab>('moderation');
@@ -84,10 +95,13 @@ export default function AdminHomebrewPage() {
    ══════════════════════════════════════════════════════════════ */
 
 function ModerationPanel() {
+  const navigate = useNavigate();
   const [statusFilter, setStatusFilter] = useState<HomebrewStatus | 'all'>('all');
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(0);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [viewPkg, setViewPkg] = useState<HomebrewPackageResponse | null>(null);
+  const [auditPkg, setAuditPkg] = useState<HomebrewPackageResponse | null>(null);
 
   const statusParam = statusFilter === 'all' ? undefined : statusFilter;
   const { data: pageData, isLoading } = useAdminHomebrewPackages({ status: statusParam, page, size: 20 });
@@ -296,7 +310,13 @@ function ModerationPanel() {
             </thead>
             <tbody>
               {filtered.map((r) => (
-                <AdminDoctrineRow key={r.id} pkg={r} onHardDelete={() => setDeleteId(r.id)} />
+                <AdminDoctrineRow
+                  key={r.id}
+                  pkg={r}
+                  onView={() => setViewPkg(r)}
+                  onAudit={() => setAuditPkg(r)}
+                  onHardDelete={() => setDeleteId(r.id)}
+                />
               ))}
               {filtered.length === 0 && (
                 <tr>
@@ -349,6 +369,76 @@ function ModerationPanel() {
       )}
 
       {/* ── hard delete confirmation ──────────────────────────── */}
+      <AlertDialog open={!!viewPkg} onOpenChange={(open) => !open && setViewPkg(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{viewPkg?.title ?? 'Doctrine'}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {viewPkg?.description || 'No description provided.'}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          {viewPkg && (
+            <div style={{ display: 'grid', gap: 10, fontSize: 13, color: 'var(--ink-quiet)' }}>
+              <div><strong>Codex:</strong> {viewPkg.id}</div>
+              <div><strong>Author:</strong> {viewPkg.authorUsername}</div>
+              <div><strong>Status:</strong> {viewPkg.isDeleted ? 'DELETED' : viewPkg.status}</div>
+              <div><strong>Version:</strong> {viewPkg.version}</div>
+              <div><strong>Content:</strong> {formatContentSummary(viewPkg)}</div>
+              <div><strong>Tags:</strong> {viewPkg.tags.length > 0 ? viewPkg.tags.join(', ') : 'none'}</div>
+            </div>
+          )}
+          <AlertDialogFooter>
+            <AlertDialogCancel>Close</AlertDialogCancel>
+            {viewPkg && viewPkg.status === 'PUBLISHED' && !viewPkg.isDeleted && (
+              <AlertDialogAction
+                onClick={() => {
+                  navigate(`/gm/homebrew/marketplace/${viewPkg.id}`);
+                  setViewPkg(null);
+                }}
+              >
+                Open Marketplace Preview
+              </AlertDialogAction>
+            )}
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={!!auditPkg} onOpenChange={(open) => !open && setAuditPkg(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Audit Doctrine</AlertDialogTitle>
+            <AlertDialogDescription>
+              Current moderation snapshot for {auditPkg?.title ?? 'selected doctrine'}.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          {auditPkg && (
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, fontSize: 13 }}>
+              <div><span className="ao-overline">Package ID</span><br />{auditPkg.id}</div>
+              <div><span className="ao-overline">Author</span><br />{auditPkg.authorUsername}</div>
+              <div><span className="ao-overline">Status</span><br />{auditPkg.isDeleted ? 'DELETED' : auditPkg.status}</div>
+              <div><span className="ao-overline">Version</span><br />v{auditPkg.version}</div>
+              <div><span className="ao-overline">Created</span><br />{formatDate(auditPkg.createdAt)}</div>
+              <div><span className="ao-overline">Published</span><br />{auditPkg.publishedAt ? formatDate(auditPkg.publishedAt) : '—'}</div>
+              <div><span className="ao-overline">Downloads</span><br />{auditPkg.downloadCount.toLocaleString()}</div>
+              <div><span className="ao-overline">Content</span><br />{formatContentSummary(auditPkg)}</div>
+            </div>
+          )}
+          <AlertDialogFooter>
+            <AlertDialogCancel>Close</AlertDialogCancel>
+            {auditPkg && (
+              <AlertDialogAction
+                onClick={() => {
+                  setDeleteId(auditPkg.id);
+                  setAuditPkg(null);
+                }}
+              >
+                Prepare Hard Delete
+              </AlertDialogAction>
+            )}
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -371,7 +461,17 @@ function ModerationPanel() {
 
 /* ── moderation row ──────────────────────────────────────────── */
 
-function AdminDoctrineRow({ pkg, onHardDelete }: { pkg: HomebrewPackageResponse; onHardDelete: () => void }) {
+function AdminDoctrineRow({
+  pkg,
+  onView,
+  onAudit,
+  onHardDelete,
+}: {
+  pkg: HomebrewPackageResponse;
+  onView: () => void;
+  onAudit: () => void;
+  onHardDelete: () => void;
+}) {
   const isDeleted = pkg.isDeleted;
 
   const rowBg = isDeleted
@@ -455,11 +555,11 @@ function AdminDoctrineRow({ pkg, onHardDelete }: { pkg: HomebrewPackageResponse;
       <td style={{ padding: '10px 16px 10px 12px' }}>
         <div style={{ display: 'inline-flex', gap: 4 }}>
           {/* view */}
-          <button className="ao-iconbtn" style={{ width: 26, height: 26 }} title="View doctrine">
+          <button className="ao-iconbtn" style={{ width: 26, height: 26 }} title="View doctrine" onClick={onView}>
             <Rune kind="book" size={12} />
           </button>
           {/* audit */}
-          <button className="ao-iconbtn" style={{ width: 26, height: 26 }} title="Audit">
+          <button className="ao-iconbtn" style={{ width: 26, height: 26 }} title="Audit" onClick={onAudit}>
             <Rune kind="eye" size={12} />
           </button>
           {/* hard delete */}

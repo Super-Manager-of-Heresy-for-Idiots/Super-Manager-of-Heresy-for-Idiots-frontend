@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
 import { Rune, OrdoPanel, OrdoChip, PanelHeader } from '@/components/ordo';
 import { ContentPills } from '@/components/homebrew';
+import { RichClassWizard } from '@/components/homebrew/RichClassWizard';
 import {
   AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle,
   AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction,
@@ -15,19 +17,24 @@ import {
   usePublishHomebrew,
   useDeleteHomebrew,
 } from '@/hooks/useHomebrew';
-import { adminApi } from '@/api/admin.api';
-import type { ContentType } from '@/types';
+import { useStatTypes } from '@/hooks/useAdmin';
+import { homebrewApi } from '@/api/homebrew.api';
+import { EQUIPMENT_SLOT_LABELS, EQUIPMENT_SLOTS } from '@/types';
+import type { ContentSummaryDto, ContentType, EquipmentSlot } from '@/types';
 
 const CONTENT_GROUPS: { title: string; icon: string; type: ContentType }[] = [
   { title: 'Items', icon: 'sword', type: 'ITEM_TYPE' },
   { title: 'Classes', icon: 'helm', type: 'CHARACTER_CLASS' },
   { title: 'Skills', icon: 'eye', type: 'SKILL' },
   { title: 'Feats', icon: 'sigil-3', type: 'FEAT' },
+  { title: 'Subclasses', icon: 'cross-pat', type: 'SUBCLASS' },
+  { title: 'Buffs / Debuffs', icon: 'hex', type: 'BUFF_DEBUFF' },
 ];
 
 export default function EditDoctrinePage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const { data: pkg, isLoading } = useMyPackage(id);
   const updateMutation = useUpdateHomebrew();
@@ -35,6 +42,7 @@ export default function EditDoctrinePage() {
   const removeContentMutation = useRemoveContent();
   const publishMutation = usePublishHomebrew();
   const deleteMutation = useDeleteHomebrew();
+  const { data: statTypes } = useStatTypes();
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -43,27 +51,24 @@ export default function EditDoctrinePage() {
   const [metaLoaded, setMetaLoaded] = useState(false);
 
   const [adding, setAdding] = useState(false);
+  const [addMode, setAddMode] = useState<'existing' | 'new'>('new');
   const [addType, setAddType] = useState<ContentType>('ITEM_TYPE');
   const [addSearch, setAddSearch] = useState('');
+  const [newName, setNewName] = useState('');
+  const [newDescription, setNewDescription] = useState('');
+  const [newItemSlot, setNewItemSlot] = useState<EquipmentSlot>('MAIN_HAND');
+  const [newSkillType, setNewSkillType] = useState('');
+  const [newFeatPrerequisites, setNewFeatPrerequisites] = useState('');
+  const [newBuffEffectType, setNewBuffEffectType] = useState('STAT_MODIFIER');
+  const [newBuffTargetStatId, setNewBuffTargetStatId] = useState('');
+  const [newBuffModifierValue, setNewBuffModifierValue] = useState('');
+  const [newBuffDurationRounds, setNewBuffDurationRounds] = useState('');
+  const [newBuffIsBuff, setNewBuffIsBuff] = useState('true');
+  const [creatingContent, setCreatingContent] = useState(false);
+  const [showRichClassWizard, setShowRichClassWizard] = useState(false);
+  const [editingRichClass, setEditingRichClass] = useState<ContentSummaryDto | null>(null);
   const [showPublish, setShowPublish] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
-
-  const { data: itemTypes } = useQuery({
-    queryKey: ['item-types'],
-    queryFn: async () => (await adminApi.getItemTypes()).data,
-  });
-  const { data: charClasses } = useQuery({
-    queryKey: ['character-classes'],
-    queryFn: async () => (await adminApi.getCharacterClasses()).data,
-  });
-  const { data: skills } = useQuery({
-    queryKey: ['skills'],
-    queryFn: async () => (await adminApi.getSkills()).data,
-  });
-  const { data: feats } = useQuery({
-    queryKey: ['feats'],
-    queryFn: async () => (await adminApi.getFeats()).data,
-  });
 
   if (pkg && !metaLoaded) {
     setTitle(pkg.title);
@@ -118,24 +123,71 @@ export default function EditDoctrinePage() {
 
   const handleAddContent = () => {
     if (!addSearch.trim()) return;
-    const searchLower = addSearch.toLowerCase();
-    let contentId: string | undefined;
+    addContentMutation.mutate(
+      { packageId: pkg.id, data: { contentType: addType, contentId: addSearch.trim() } },
+      { onSuccess: () => setAddSearch('') },
+    );
+  };
 
-    if (addType === 'ITEM_TYPE') {
-      contentId = itemTypes?.find((i) => i.name.toLowerCase().includes(searchLower))?.id;
-    } else if (addType === 'CHARACTER_CLASS') {
-      contentId = charClasses?.find((c) => c.name.toLowerCase().includes(searchLower))?.id;
-    } else if (addType === 'SKILL') {
-      contentId = skills?.find((s) => s.name.toLowerCase().includes(searchLower))?.id;
-    } else if (addType === 'FEAT') {
-      contentId = feats?.find((f) => f.name.toLowerCase().includes(searchLower))?.id;
-    }
+  const resetNewContentForm = () => {
+    setNewName('');
+    setNewDescription('');
+    setNewItemSlot('MAIN_HAND');
+    setNewSkillType('');
+    setNewFeatPrerequisites('');
+    setNewBuffEffectType('STAT_MODIFIER');
+    setNewBuffTargetStatId('');
+    setNewBuffModifierValue('');
+    setNewBuffDurationRounds('');
+    setNewBuffIsBuff('true');
+  };
 
-    if (contentId) {
-      addContentMutation.mutate(
-        { packageId: pkg.id, data: { contentType: addType, contentId } },
-        { onSuccess: () => setAddSearch('') },
-      );
+  const handleCreateAndAddContent = async () => {
+    const name = newName.trim();
+    if (!name) return;
+
+    setCreatingContent(true);
+    try {
+      const description = newDescription.trim() || undefined;
+
+      if (addType === 'ITEM_TYPE') {
+        await homebrewApi.createPackageItemType(pkg.id, {
+          name,
+          description,
+          slot: newItemSlot,
+        });
+      } else if (addType === 'SKILL') {
+        await homebrewApi.createPackageSkill(pkg.id, {
+          name,
+          description,
+          skillType: newSkillType.trim() || undefined,
+        });
+      } else if (addType === 'FEAT') {
+        await homebrewApi.createPackageFeat(pkg.id, {
+          name,
+          description,
+          prerequisites: newFeatPrerequisites.trim() || undefined,
+        });
+      } else if (addType === 'BUFF_DEBUFF') {
+        await homebrewApi.createPackageBuffDebuff(pkg.id, {
+          name,
+          description,
+          effectType: newBuffEffectType,
+          targetStatId: newBuffEffectType === 'STAT_MODIFIER' ? newBuffTargetStatId || undefined : undefined,
+          modifierValue: newBuffModifierValue ? Number(newBuffModifierValue) : undefined,
+          durationRounds: newBuffDurationRounds ? Number(newBuffDurationRounds) : undefined,
+          isBuff: newBuffIsBuff === 'true',
+        });
+      }
+
+      queryClient.invalidateQueries({ queryKey: ['homebrew-my'] });
+      queryClient.invalidateQueries({ queryKey: ['homebrew-my', pkg.id] });
+      resetNewContentForm();
+      toast.success('Homebrew content created and slotted');
+    } catch {
+      toast.error('Failed to create homebrew-scoped content');
+    } finally {
+      setCreatingContent(false);
     }
   };
 
@@ -154,15 +206,6 @@ export default function EditDoctrinePage() {
         navigate('/gm/homebrew/my');
       },
     });
-  };
-
-  const getAvailableContent = () => {
-    const searchLower = addSearch.toLowerCase();
-    if (addType === 'ITEM_TYPE') return (itemTypes || []).filter((i) => i.name.toLowerCase().includes(searchLower));
-    if (addType === 'CHARACTER_CLASS') return (charClasses || []).filter((c) => c.name.toLowerCase().includes(searchLower));
-    if (addType === 'SKILL') return (skills || []).filter((s) => s.name.toLowerCase().includes(searchLower));
-    if (addType === 'FEAT') return (feats || []).filter((f) => f.name.toLowerCase().includes(searchLower));
-    return [];
   };
 
   return (
@@ -307,9 +350,20 @@ export default function EditDoctrinePage() {
             glyph="book"
             sub={`${s.itemTypeCount} items \u00b7 ${s.classCount} classes \u00b7 ${s.skillCount} skills \u00b7 ${s.featCount} feats`}
             right={
-              <button className="ao-btn ao-btn--primary ao-btn--sm" onClick={() => setAdding(!adding)}>
-                <Rune kind="plus" size={10} /> {adding ? 'Close' : 'Slot New Entry'}
-              </button>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button
+                  className="ao-btn ao-btn--ghost ao-btn--sm"
+                  onClick={() => {
+                    setEditingRichClass(null);
+                    setShowRichClassWizard(true);
+                  }}
+                >
+                  <Rune kind="helm" size={10} /> Rich Class
+                </button>
+                <button className="ao-btn ao-btn--primary ao-btn--sm" onClick={() => setAdding(!adding)}>
+                  <Rune kind="plus" size={10} /> {adding ? 'Close' : 'Slot New Entry'}
+                </button>
+              </div>
             }
           />
 
@@ -321,60 +375,193 @@ export default function EditDoctrinePage() {
               background: 'var(--abyss)',
             }}>
               <div className="ao-overline" style={{ marginBottom: 8 }}>Slot a content reference</div>
-              <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr auto auto', gap: 8, alignItems: 'center' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr', gap: 8, alignItems: 'center', marginBottom: 10 }}>
                 <select
                   className="ao-input"
                   value={addType}
-                  onChange={(e) => { setAddType(e.target.value as ContentType); setAddSearch(''); }}
+                  onChange={(e) => {
+                    setAddType(e.target.value as ContentType);
+                    setAddSearch('');
+                    resetNewContentForm();
+                  }}
                   style={{ padding: '6px 10px' }}
                 >
                   <option value="ITEM_TYPE">Item</option>
-                  <option value="CHARACTER_CLASS">Class</option>
                   <option value="SKILL">Skill</option>
                   <option value="FEAT">Feat</option>
+                  <option value="BUFF_DEBUFF">Buff/Debuff</option>
                 </select>
-                <input
-                  className="ao-input"
-                  value={addSearch}
-                  onChange={(e) => setAddSearch(e.target.value)}
-                  placeholder="Search by name..."
-                  onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddContent(); } }}
-                  style={{ padding: '6px 12px' }}
-                />
-                <button className="ao-btn ao-btn--ghost" onClick={() => setAddSearch('')}>
-                  <Rune kind="search" size={11} /> Browse
-                </button>
-                <button
-                  className="ao-btn ao-btn--primary"
-                  onClick={handleAddContent}
-                  disabled={addContentMutation.isPending}
-                >
-                  <Rune kind="plus" size={10} /> Slot
-                </button>
+                <div style={{ display: 'flex', gap: 6 }}>
+                  <button
+                    className={`ao-btn ${addMode === 'existing' ? 'ao-btn--primary' : 'ao-btn--ghost'}`}
+                    onClick={() => setAddMode('existing')}
+                    style={{ flex: 1 }}
+                  >
+                    Existing
+                  </button>
+                  <button
+                    className={`ao-btn ${addMode === 'new' ? 'ao-btn--primary' : 'ao-btn--ghost'}`}
+                    onClick={() => setAddMode('new')}
+                    style={{ flex: 1 }}
+                  >
+                    Create New
+                  </button>
+                </div>
               </div>
-              {addSearch && (
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 8 }}>
-                  {getAvailableContent().slice(0, 6).map((item) => (
-                    <button
-                      key={item.id}
-                      onClick={() => {
-                        addContentMutation.mutate(
-                          { packageId: pkg.id, data: { contentType: addType, contentId: item.id } },
-                          { onSuccess: () => setAddSearch('') },
-                        );
-                      }}
-                      style={{
-                        padding: '4px 10px',
-                        background: 'var(--surface)',
-                        border: '1px solid var(--hairline)',
-                        color: 'var(--ink)',
-                        cursor: 'pointer',
-                        fontSize: 13,
-                      }}
-                    >
-                      {item.name}
+
+              {addMode === 'existing' ? (
+                <>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr auto auto', gap: 8, alignItems: 'center' }}>
+                    <input
+                      className="ao-input"
+                      value={addSearch}
+                      onChange={(e) => setAddSearch(e.target.value)}
+                      placeholder="Existing content id..."
+                      onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddContent(); } }}
+                      style={{ padding: '6px 12px' }}
+                    />
+                    <button className="ao-btn ao-btn--ghost" onClick={() => setAddSearch('')}>
+                      <Rune kind="x" size={11} /> Clear
                     </button>
-                  ))}
+                    <button
+                      className="ao-btn ao-btn--primary"
+                      onClick={handleAddContent}
+                      disabled={!addSearch.trim() || addContentMutation.isPending}
+                    >
+                      <Rune kind="plus" size={10} /> Slot
+                    </button>
+                  </div>
+                  <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 12, marginTop: 8 }}>
+                    This does not call admin catalogs. Use it only when the backend allows attaching an existing owned or vanilla content id.
+                  </p>
+                </>
+              ) : (
+                <div style={{ display: 'grid', gap: 10 }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: addType === 'ITEM_TYPE' ? '1fr 180px' : '1fr', gap: 8 }}>
+                    <input
+                      className="ao-input"
+                      value={newName}
+                      onChange={(e) => setNewName(e.target.value)}
+                      placeholder="New content name..."
+                      style={{ padding: '6px 12px' }}
+                    />
+                    {addType === 'ITEM_TYPE' && (
+                      <select
+                        className="ao-input"
+                        value={newItemSlot}
+                        onChange={(e) => setNewItemSlot(e.target.value as EquipmentSlot)}
+                        style={{ padding: '6px 10px' }}
+                      >
+                        {EQUIPMENT_SLOTS.map((slot) => (
+                          <option key={slot} value={slot}>
+                            {EQUIPMENT_SLOT_LABELS[slot]}
+                          </option>
+                        ))}
+                      </select>
+                    )}
+                  </div>
+
+                  <textarea
+                    className="ao-input"
+                    value={newDescription}
+                    onChange={(e) => setNewDescription(e.target.value)}
+                    placeholder="Description..."
+                    rows={3}
+                    style={{ width: '100%', resize: 'vertical' }}
+                  />
+
+                  {addType === 'SKILL' && (
+                    <input
+                      className="ao-input"
+                      value={newSkillType}
+                      onChange={(e) => setNewSkillType(e.target.value)}
+                      placeholder="Skill type (optional)"
+                      style={{ padding: '6px 12px' }}
+                    />
+                  )}
+
+                  {addType === 'FEAT' && (
+                    <input
+                      className="ao-input"
+                      value={newFeatPrerequisites}
+                      onChange={(e) => setNewFeatPrerequisites(e.target.value)}
+                      placeholder="Prerequisites (optional)"
+                      style={{ padding: '6px 12px' }}
+                    />
+                  )}
+
+                  {addType === 'BUFF_DEBUFF' && (
+                    <div style={{ display: 'grid', gap: 8 }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                        <select
+                          className="ao-input"
+                          value={newBuffEffectType}
+                          onChange={(e) => setNewBuffEffectType(e.target.value)}
+                          style={{ padding: '6px 10px' }}
+                        >
+                          <option value="STAT_MODIFIER">Stat modifier</option>
+                          <option value="CONDITION">Condition</option>
+                          <option value="DAMAGE_OVER_TIME">Damage over time</option>
+                          <option value="HEAL_OVER_TIME">Heal over time</option>
+                          <option value="IMMUNITY">Immunity</option>
+                          <option value="VULNERABILITY">Vulnerability</option>
+                        </select>
+                        <select
+                          className="ao-input"
+                          value={newBuffIsBuff}
+                          onChange={(e) => setNewBuffIsBuff(e.target.value)}
+                          style={{ padding: '6px 10px' }}
+                        >
+                          <option value="true">Buff</option>
+                          <option value="false">Debuff</option>
+                        </select>
+                      </div>
+                      {newBuffEffectType === 'STAT_MODIFIER' && (
+                        <select
+                          className="ao-input"
+                          value={newBuffTargetStatId}
+                          onChange={(e) => setNewBuffTargetStatId(e.target.value)}
+                          style={{ padding: '6px 10px' }}
+                        >
+                          <option value="">Target stat...</option>
+                          {(statTypes || []).map((stat) => (
+                            <option key={stat.id} value={stat.id}>{stat.name}</option>
+                          ))}
+                        </select>
+                      )}
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                        <input
+                          className="ao-input"
+                          type="number"
+                          value={newBuffModifierValue}
+                          onChange={(e) => setNewBuffModifierValue(e.target.value)}
+                          placeholder="Modifier"
+                          style={{ padding: '6px 12px' }}
+                        />
+                        <input
+                          className="ao-input"
+                          type="number"
+                          value={newBuffDurationRounds}
+                          onChange={(e) => setNewBuffDurationRounds(e.target.value)}
+                          placeholder="Duration rounds"
+                          style={{ padding: '6px 12px' }}
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center' }}>
+                    <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 12 }}>
+                      Creates the missing {addType.toLowerCase().replace('_', ' ')} and immediately slots it into this doctrine.
+                    </p>
+                    <button
+                      className="ao-btn ao-btn--primary"
+                      onClick={handleCreateAndAddContent}
+                      disabled={!newName.trim() || creatingContent || addContentMutation.isPending}
+                    >
+                      <Rune kind="plus" size={10} /> Create &amp; Slot
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
@@ -450,7 +637,17 @@ export default function EditDoctrinePage() {
                       </div>
 
                       {/* Book button */}
-                      <button className="ao-iconbtn" style={{ width: 28, height: 28 }} title="View">
+                      <button
+                        className="ao-iconbtn"
+                        style={{ width: 28, height: 28 }}
+                        title={grp.type === 'CHARACTER_CLASS' ? 'Edit rich class' : 'View'}
+                        onClick={() => {
+                          if (grp.type === 'CHARACTER_CLASS') {
+                            setEditingRichClass(r);
+                            setShowRichClassWizard(true);
+                          }
+                        }}
+                      >
                         <Rune kind="book" size={12} />
                       </button>
 
@@ -471,6 +668,16 @@ export default function EditDoctrinePage() {
           })}
         </OrdoPanel>
       </div>
+
+      <RichClassWizard
+        open={showRichClassWizard}
+        onOpenChange={(nextOpen) => {
+          setShowRichClassWizard(nextOpen);
+          if (!nextOpen) setEditingRichClass(null);
+        }}
+        packageDetail={pkg}
+        editingClass={editingRichClass}
+      />
 
       {/* Publish dialog */}
       <AlertDialog open={showPublish} onOpenChange={setShowPublish}>

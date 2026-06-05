@@ -1,45 +1,27 @@
 import { useState } from 'react';
 import { CrudTable } from '@/components/admin/CrudTable';
-import { CrudFormModal } from '@/components/admin/CrudFormModal';
+import { AdminClassRichWizard } from '@/components/admin/AdminClassRichWizard';
 import {
   useCharacterClasses,
-  useCreateCharacterClass,
-  useUpdateCharacterClass,
   useDeleteCharacterClass,
 } from '@/hooks/useAdmin';
 import type { CharacterClassResponse } from '@/types';
 
 export default function CharacterClassesPage() {
   const { data, isLoading } = useCharacterClasses();
-  const createMutation = useCreateCharacterClass();
-  const updateMutation = useUpdateCharacterClass();
   const deleteMutation = useDeleteCharacterClass();
 
-  const [modalOpen, setModalOpen] = useState(false);
+  const [wizardOpen, setWizardOpen] = useState(false);
   const [editing, setEditing] = useState<CharacterClassResponse | null>(null);
 
   const handleAdd = () => {
     setEditing(null);
-    setModalOpen(true);
+    setWizardOpen(true);
   };
 
   const handleEdit = (item: CharacterClassResponse) => {
     setEditing(item);
-    setModalOpen(true);
-  };
-
-  const handleSubmit = (formData: Record<string, string>) => {
-    if (editing) {
-      updateMutation.mutate(
-        { id: editing.id, data: { name: formData.name, description: formData.description } },
-        { onSuccess: () => setModalOpen(false) }
-      );
-    } else {
-      createMutation.mutate(
-        { name: formData.name, description: formData.description },
-        { onSuccess: () => setModalOpen(false) }
-      );
-    }
+    setWizardOpen(true);
   };
 
   return (
@@ -51,25 +33,16 @@ export default function CharacterClassesPage() {
         onAdd={handleAdd}
         onEdit={handleEdit}
         onDelete={(id) => deleteMutation.mutate(id)}
-        addLabel="Add Class"
+        addLabel="Rich Class"
         columns={[
           { header: 'Name', accessor: 'name' },
           { header: 'Description', accessor: 'description' },
         ]}
       />
-      <CrudFormModal
-        open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        onSubmit={handleSubmit}
-        isSubmitting={createMutation.isPending || updateMutation.isPending}
-        title={editing ? 'Edit Character Class' : 'Add Character Class'}
-        fields={[
-          { name: 'name', label: 'Name', type: 'text' },
-          { name: 'description', label: 'Description', type: 'textarea' },
-        ]}
-        defaultValues={
-          editing ? { name: editing.name, description: editing.description || '' } : undefined
-        }
+      <AdminClassRichWizard
+        open={wizardOpen}
+        onOpenChange={setWizardOpen}
+        editingClass={editing}
       />
     </>
   );
