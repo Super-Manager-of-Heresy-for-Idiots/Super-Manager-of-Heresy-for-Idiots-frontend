@@ -12,6 +12,10 @@ import type {
   UpdateHomebrewRequest,
   AddContentRequest,
   HomebrewStatus,
+  CreateItemTypeRequest,
+  CreateCharacterClassRequest,
+  CreateSkillRequest,
+  CreateFeatRequest,
 } from '@/types';
 
 export interface InstallHomebrewResponse {
@@ -48,6 +52,26 @@ export const homebrewApi = {
 
   addContent: async (id: string, data: AddContentRequest): Promise<ApiResponse<HomebrewDetailResponse>> => {
     const response = await api.post<ApiResponse<HomebrewDetailResponse>>(`/homebrew/my/${id}/content`, data);
+    return response.data;
+  },
+
+  createPackageItemType: async (id: string, data: CreateItemTypeRequest): Promise<ApiResponse<HomebrewDetailResponse>> => {
+    const response = await api.post<ApiResponse<HomebrewDetailResponse>>(`/homebrew/my/${id}/content/item-types`, data);
+    return response.data;
+  },
+
+  createPackageCharacterClass: async (id: string, data: CreateCharacterClassRequest): Promise<ApiResponse<HomebrewDetailResponse>> => {
+    const response = await api.post<ApiResponse<HomebrewDetailResponse>>(`/homebrew/my/${id}/content/classes`, data);
+    return response.data;
+  },
+
+  createPackageSkill: async (id: string, data: CreateSkillRequest): Promise<ApiResponse<HomebrewDetailResponse>> => {
+    const response = await api.post<ApiResponse<HomebrewDetailResponse>>(`/homebrew/my/${id}/content/skills`, data);
+    return response.data;
+  },
+
+  createPackageFeat: async (id: string, data: CreateFeatRequest): Promise<ApiResponse<HomebrewDetailResponse>> => {
+    const response = await api.post<ApiResponse<HomebrewDetailResponse>>(`/homebrew/my/${id}/content/feats`, data);
     return response.data;
   },
 
