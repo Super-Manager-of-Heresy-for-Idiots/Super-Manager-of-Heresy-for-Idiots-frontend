@@ -1,4 +1,5 @@
 import { OrdoPanel, OrdoDivider } from '@/components/ordo';
+import { useT } from '@/i18n/I18nContext';
 
 interface BreakdownEntry {
   source: string;
@@ -16,6 +17,7 @@ interface AbilityCheckPanelProps {
 }
 
 export function AbilityCheckPanel({ result }: AbilityCheckPanelProps) {
+  const t = useT();
   if (!result) {
     return (
       <OrdoPanel frame style={{ width: 380 }}>
@@ -28,7 +30,7 @@ export function AbilityCheckPanel({ result }: AbilityCheckPanelProps) {
             fontStyle: 'italic',
           }}
         >
-          Select an ability to see its check breakdown
+          {t('cmp.ability.empty')}
         </div>
       </OrdoPanel>
     );
@@ -118,7 +120,7 @@ export function AbilityCheckPanel({ result }: AbilityCheckPanelProps) {
               letterSpacing: '0.16em',
             }}
           >
-            Total
+            {t('cmp.ability.total')}
           </span>
           <span
             style={{

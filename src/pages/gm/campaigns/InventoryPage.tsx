@@ -31,6 +31,7 @@ import {
 } from '@/hooks/useInventory';
 import { useCharacter, useCharacterWallet } from '@/hooks/useCharacter';
 import { useAuthStore } from '@/store/authStore';
+import { useT } from '@/i18n/I18nContext';
 import type {
   ItemInstanceResponse,
   GrantItemRequest,
@@ -88,17 +89,17 @@ function itemGlyph(item: ItemInstanceResponse): string {
   return 'scroll';
 }
 
-const SLOT_LAYOUT: { slot: EquipmentSlot; label: string; glyph: string }[] = [
-  { slot: 'HEAD', label: 'Head', glyph: 'helm' },
-  { slot: 'NECK', label: 'Neck', glyph: 'cir-dot' },
-  { slot: 'CLOAK', label: 'Cloak', glyph: 'shield' },
-  { slot: 'CHEST', label: 'Cuirass', glyph: 'shield' },
-  { slot: 'MAIN_HAND', label: 'Main Hand', glyph: 'sword' },
-  { slot: 'OFF_HAND', label: 'Off Hand', glyph: 'shield' },
-  { slot: 'RING_LEFT', label: 'Ring · Left', glyph: 'cir' },
-  { slot: 'RING_RIGHT', label: 'Ring · Right', glyph: 'cir' },
-  { slot: 'LEGS', label: 'Greaves', glyph: 'square' },
-  { slot: 'FEET', label: 'Boots', glyph: 'tri-inv' },
+const SLOT_LAYOUT: { slot: EquipmentSlot; glyph: string }[] = [
+  { slot: 'HEAD', glyph: 'helm' },
+  { slot: 'NECK', glyph: 'cir-dot' },
+  { slot: 'CLOAK', glyph: 'shield' },
+  { slot: 'CHEST', glyph: 'shield' },
+  { slot: 'MAIN_HAND', glyph: 'sword' },
+  { slot: 'OFF_HAND', glyph: 'shield' },
+  { slot: 'RING_LEFT', glyph: 'cir' },
+  { slot: 'RING_RIGHT', glyph: 'cir' },
+  { slot: 'LEGS', glyph: 'square' },
+  { slot: 'FEET', glyph: 'tri-inv' },
 ];
 
 const BAG_MIN_CELLS = 30;
@@ -113,6 +114,7 @@ const COIN_COLOR: Record<string, string> = {
 /* ── page ────────────────────────────────────────────────────── */
 
 export default function InventoryPage() {
+  const t = useT();
   const { campaignId, characterId } = useParams<{ campaignId: string; characterId: string }>();
   const { user } = useAuthStore();
   const isGm = user?.role === 'GAME_MASTER' || user?.role === 'ADMIN';
@@ -324,7 +326,7 @@ export default function InventoryPage() {
   if (isLoading) {
     return (
       <div>
-        <BackLink to={backTo} label="К персонажу" style={{ marginBottom: 12 }} />
+        <BackLink to={backTo} label={t('camp2.back.character')} style={{ marginBottom: 12 }} />
         <PageHeader name={character?.name} slotsFilled={0} held={0} />
         <div className="ao-panel ao-frame ao-breathe" style={{ padding: 24, minHeight: 360 }}>
           <span className="ao-frame-c" />
@@ -341,12 +343,12 @@ export default function InventoryPage() {
   if (error) {
     return (
       <div>
-        <BackLink to={backTo} label="К персонажу" style={{ marginBottom: 12 }} />
+        <BackLink to={backTo} label={t('camp2.back.character')} style={{ marginBottom: 12 }} />
         <div style={{ textAlign: 'center', padding: '48px 0' }}>
           <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginBottom: 16 }}>
-            The arsenal could not be inspected. Its wards remain unbroken.
+            {t('camp2.inv.loadError')}
           </p>
-          <button className="ao-btn" onClick={() => refetch()}>Retry</button>
+          <button className="ao-btn" onClick={() => refetch()}>{t('common.retry')}</button>
         </div>
       </div>
     );
@@ -356,7 +358,7 @@ export default function InventoryPage() {
 
   return (
     <div>
-      <BackLink to={backTo} label="К персонажу" style={{ marginBottom: 12 }} />
+      <BackLink to={backTo} label={t('camp2.back.character')} style={{ marginBottom: 12 }} />
       <PageHeader
         name={character?.name}
         slotsFilled={slotsFilled}
@@ -367,18 +369,18 @@ export default function InventoryPage() {
               className="ao-btn ao-btn--ghost"
               onClick={() => setShowSearch((s) => !s)}
             >
-              <Rune kind="filter" size={11} /> Filter
+              <Rune kind="filter" size={11} /> {t('camp2.inv.filter')}
             </button>
             <button
               className="ao-btn ao-btn--ghost"
               onClick={() => selected && openTransfer(selected)}
               disabled={!selected}
             >
-              <Rune kind="arrow-r" size={11} /> Transfer
+              <Rune kind="arrow-r" size={11} /> {t('camp2.inv.transfer')}
             </button>
             {isGm && (
               <button className="ao-btn ao-btn--primary" onClick={() => setGrantOpen(true)}>
-                <Rune kind="plus" size={11} /> Inscribe Relic
+                <Rune kind="plus" size={11} /> {t('camp2.inv.inscribeRelic')}
               </button>
             )}
           </div>
@@ -389,14 +391,14 @@ export default function InventoryPage() {
         {/* ── LEFT: equipped slots (paper-doll) ──────────── */}
         <OrdoPanel frame padding={0}>
           <PanelHeader
-            title="Bound to the Body"
-            sub={`${SLOT_LAYOUT.length} slots · ${attunedCount} attuned`}
+            title={t('camp2.inv.boundToBody')}
+            sub={t('camp2.inv.boundSub', { slots: SLOT_LAYOUT.length, attuned: attunedCount })}
             glyph="shield"
           />
           <div style={{ padding: 16 }}>
             <div style={{ position: 'relative', height: 320, marginBottom: 12 }}>
               <Placeholder style={{ position: 'absolute', inset: 0 }}>
-                silhouette · {character?.name ?? 'vellan'}
+                {t('camp2.inv.silhouette')} · {character?.name ?? t('camp2.inv.vellan')}
               </Placeholder>
               {[
                 { t: 14, l: '50%' }, { t: 64, l: 14 }, { t: 64, r: 14 },
@@ -422,12 +424,13 @@ export default function InventoryPage() {
               ))}
             </div>
 
-            <OrdoDivider glyph="diamond-fill" color="var(--rule)">Loadout</OrdoDivider>
+            <OrdoDivider glyph="diamond-fill" color="var(--rule)">{t('camp2.inv.loadout')}</OrdoDivider>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
-              {SLOT_LAYOUT.map(({ slot, label, glyph }) => {
+              {SLOT_LAYOUT.map(({ slot, glyph }) => {
                 const it = equippedBySlot.get(slot);
                 const isSel = it != null && it.id === selectedId;
+                const label = t(`camp2.inv.slotLabel.${slot}`);
                 return (
                   <button
                     key={slot}
@@ -455,8 +458,8 @@ export default function InventoryPage() {
         {/* ── MIDDLE: bag grid + coin ────────────────────── */}
         <OrdoPanel frame padding={0}>
           <PanelHeader
-            title="The Bag"
-            sub={`${backpackItems.length} of ${BAG_MIN_CELLS} held`}
+            title={t('camp2.inv.theBag')}
+            sub={t('camp2.inv.bagSub', { held: backpackItems.length, max: BAG_MIN_CELLS })}
             glyph="scroll"
             right={
               <div style={{ display: 'flex', gap: 4 }}>
@@ -464,7 +467,7 @@ export default function InventoryPage() {
                   className="ao-iconbtn"
                   style={{ width: 28, height: 28 }}
                   onClick={() => setShowSearch((s) => !s)}
-                  title="Search"
+                  title={t('camp2.inv.search')}
                 >
                   <Rune kind="search" size={12} />
                 </button>
@@ -473,7 +476,7 @@ export default function InventoryPage() {
                     className="ao-iconbtn"
                     style={{ width: 28, height: 28 }}
                     onClick={() => setGrantOpen(true)}
-                    title="Grant item"
+                    title={t('camp2.inv.grantItem')}
                   >
                     <Rune kind="plus" size={12} />
                   </button>
@@ -493,7 +496,7 @@ export default function InventoryPage() {
                 <input
                   autoFocus
                   style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', color: 'var(--ink)', fontFamily: 'var(--font-body)', fontSize: 13 }}
-                  placeholder="Search the bag..."
+                  placeholder={t('camp2.inv.searchBag')}
                   value={filterText}
                   onChange={(e) => setFilterText(e.target.value)}
                 />
@@ -501,7 +504,7 @@ export default function InventoryPage() {
                   <button
                     onClick={() => setFilterText('')}
                     style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex' }}
-                    title="Clear"
+                    title={t('camp2.inv.clear')}
                   >
                     <Rune kind="x" size={11} color="var(--ink-faint)" />
                   </button>
@@ -541,16 +544,16 @@ export default function InventoryPage() {
 
             {backpackItems.length === 0 && (
               <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 12, textAlign: 'center', marginTop: 14 }}>
-                No items rest in the bag.
+                {t('camp2.inv.bagEmpty')}
               </p>
             )}
             {backpackItems.length > 0 && filteredBag.length === 0 && (
               <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 12, textAlign: 'center', marginTop: 14 }}>
-                No items match thy inquiry.
+                {t('camp2.inv.noMatch')}
               </p>
             )}
 
-            <OrdoDivider glyph="diamond-fill" color="var(--rule)">Coin &amp; Wealth</OrdoDivider>
+            <OrdoDivider glyph="diamond-fill" color="var(--rule)">{t('camp2.inv.coinWealth')}</OrdoDivider>
 
             {wallet && wallet.length > 0 ? (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
@@ -572,7 +575,7 @@ export default function InventoryPage() {
               </div>
             ) : (
               <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 12, textAlign: 'center', padding: '8px 0' }}>
-                No coin recorded.
+                {t('camp2.inv.noCoin')}
               </p>
             )}
           </div>
@@ -581,8 +584,8 @@ export default function InventoryPage() {
         {/* ── RIGHT: selected item detail (Relic Folio) ──── */}
         <OrdoPanel frame padding={0}>
           <PanelHeader
-            title="Relic Folio"
-            sub={selected ? selected.displayName : 'no relic chosen'}
+            title={t('camp2.inv.relicFolio')}
+            sub={selected ? selected.displayName : t('camp2.inv.noRelicChosen')}
             glyph="sword"
             tone="ember"
           />
@@ -590,7 +593,7 @@ export default function InventoryPage() {
             <div style={{ padding: '40px 20px', textAlign: 'center' }}>
               <Rune kind="diamond" size={26} color="var(--ink-faint)" />
               <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 12, marginTop: 12 }}>
-                Select an item from the loadout or bag to inspect its lineage.
+                {t('camp2.inv.selectToInspect')}
               </p>
             </div>
           ) : (
@@ -617,15 +620,15 @@ export default function InventoryPage() {
         }}
       >
         <DialogContent>
-          <DialogHeader><DialogTitle>Grant Item</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{t('camp2.inv.dialog.grantTitle')}</DialogTitle></DialogHeader>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             <div>
-              <label className="ao-label">Item Template</label>
+              <label className="ao-label">{t('camp2.inv.field.itemTemplate')}</label>
               <input
                 className="ao-input"
                 value={grantTemplateSearch}
                 onChange={(e) => setGrantTemplateSearch(e.target.value)}
-                placeholder="Search by name, type, rarity, or source"
+                placeholder={t('camp2.inv.field.templateSearch')}
                 disabled={itemTemplatesLoading}
                 style={{ marginBottom: 8 }}
               />
@@ -637,44 +640,44 @@ export default function InventoryPage() {
               >
                 <option value="">
                   {itemTemplatesLoading
-                    ? 'Loading item templates...'
+                    ? t('camp2.inv.loadingTemplates')
                     : grantTemplates.length
-                      ? 'Choose item template'
-                      : 'No item templates available'}
+                      ? t('camp2.inv.chooseTemplate')
+                      : t('camp2.inv.noTemplatesAvailable')}
                 </option>
                 {!itemTemplatesLoading && grantTemplateOptions.length === 0 && (
-                  <option value="" disabled>No templates match the search</option>
+                  <option value="" disabled>{t('camp2.inv.noTemplatesMatch')}</option>
                 )}
                 {grantTemplateOptions.map((template) => (
                   <option key={template.id} value={template.id}>
-                    {template.name} · {template.itemTypeName || 'Item'} · {template.rarity}
+                    {template.name} · {template.itemTypeName || t('camp2.inv.item')} · {template.rarity}
                   </option>
                 ))}
               </select>
               {selectedGrantTemplate && (
                 <div className="ao-codex" style={{ marginTop: 8 }}>
-                  {selectedGrantTemplate.description || selectedGrantTemplate.sourceHomebrewTitle || 'Campaign item template'}
+                  {selectedGrantTemplate.description || selectedGrantTemplate.sourceHomebrewTitle || t('camp2.inv.campaignTemplate')}
                 </div>
               )}
             </div>
             <div>
-              <label className="ao-label">Quantity</label>
+              <label className="ao-label">{t('camp2.inv.field.quantity')}</label>
               <input className="ao-input" type="number" min="1" value={grantQuantity} onChange={(e) => setGrantQuantity(e.target.value)} />
             </div>
             <div>
-              <label className="ao-label">Custom Name (optional)</label>
-              <input className="ao-input" value={grantCustomName} onChange={(e) => setGrantCustomName(e.target.value)} placeholder="Override name" />
+              <label className="ao-label">{t('camp2.inv.field.customName')}</label>
+              <input className="ao-input" value={grantCustomName} onChange={(e) => setGrantCustomName(e.target.value)} placeholder={t('camp2.inv.field.overrideName')} />
             </div>
             <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
               <input type="checkbox" checked={grantUnique} onChange={(e) => setGrantUnique(e.target.checked)} />
-              <span className="ao-label" style={{ marginBottom: 0 }}>Unique item</span>
+              <span className="ao-label" style={{ marginBottom: 0 }}>{t('camp2.inv.field.uniqueItem')}</span>
             </label>
           </div>
           <DialogFooter>
-            <button className="ao-btn ao-btn--ghost" onClick={() => setGrantOpen(false)} disabled={grantMutation.isPending}>Withhold</button>
+            <button className="ao-btn ao-btn--ghost" onClick={() => setGrantOpen(false)} disabled={grantMutation.isPending}>{t('camp2.inv.withhold')}</button>
             <button className="ao-btn ao-btn--primary" onClick={handleGrant} disabled={!grantTemplateId || itemTemplatesLoading || grantMutation.isPending}>
               {grantMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Grant
+              {t('camp2.inv.grant')}
             </button>
           </DialogFooter>
         </DialogContent>
@@ -683,22 +686,22 @@ export default function InventoryPage() {
       {/* Equip Dialog */}
       <Dialog open={equipOpen} onOpenChange={setEquipOpen}>
         <DialogContent>
-          <DialogHeader><DialogTitle>Equip Item</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{t('camp2.inv.dialog.equipTitle')}</DialogTitle></DialogHeader>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             <div>
-              <label className="ao-label">Slot</label>
+              <label className="ao-label">{t('camp2.inv.field.slot')}</label>
               <select className="ao-input" value={equipSlot} onChange={(e) => setEquipSlot(e.target.value as EquipmentSlot)}>
                 {SLOT_LAYOUT.map((s) => (
-                  <option key={s.slot} value={s.slot}>{s.label}</option>
+                  <option key={s.slot} value={s.slot}>{t(`camp2.inv.slotLabel.${s.slot}`)}</option>
                 ))}
               </select>
             </div>
           </div>
           <DialogFooter>
-            <button className="ao-btn ao-btn--ghost" onClick={() => setEquipOpen(false)} disabled={equipMutation.isPending}>Withhold</button>
+            <button className="ao-btn ao-btn--ghost" onClick={() => setEquipOpen(false)} disabled={equipMutation.isPending}>{t('camp2.inv.withhold')}</button>
             <button className="ao-btn ao-btn--primary" onClick={handleEquip} disabled={equipMutation.isPending}>
               {equipMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Equip
+              {t('camp2.inv.equip')}
             </button>
           </DialogFooter>
         </DialogContent>
@@ -707,18 +710,18 @@ export default function InventoryPage() {
       {/* Transfer Dialog */}
       <Dialog open={transferOpen} onOpenChange={setTransferOpen}>
         <DialogContent>
-          <DialogHeader><DialogTitle>Transfer Item</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{t('camp2.inv.dialog.transferTitle')}</DialogTitle></DialogHeader>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             <div>
-              <label className="ao-label">Destination Character ID</label>
-              <input className="ao-input" value={transferToCharId} onChange={(e) => setTransferToCharId(e.target.value)} placeholder="Target character ID" />
+              <label className="ao-label">{t('camp2.inv.field.destCharId')}</label>
+              <input className="ao-input" value={transferToCharId} onChange={(e) => setTransferToCharId(e.target.value)} placeholder={t('camp2.inv.field.targetCharId')} />
             </div>
           </div>
           <DialogFooter>
-            <button className="ao-btn ao-btn--ghost" onClick={() => setTransferOpen(false)} disabled={transferMutation.isPending}>Withhold</button>
+            <button className="ao-btn ao-btn--ghost" onClick={() => setTransferOpen(false)} disabled={transferMutation.isPending}>{t('camp2.inv.withhold')}</button>
             <button className="ao-btn ao-btn--primary" onClick={handleTransfer} disabled={!transferToCharId || transferMutation.isPending}>
               {transferMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Transfer
+              {t('camp2.inv.transfer')}
             </button>
           </DialogFooter>
         </DialogContent>
@@ -727,18 +730,18 @@ export default function InventoryPage() {
       {/* Rename Dialog */}
       <Dialog open={renameOpen} onOpenChange={setRenameOpen}>
         <DialogContent>
-          <DialogHeader><DialogTitle>Rename Item Stack</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{t('camp2.inv.dialog.renameTitle')}</DialogTitle></DialogHeader>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             <div>
-              <label className="ao-label">Custom Name</label>
-              <input className="ao-input" value={renameCustomName} onChange={(e) => setRenameCustomName(e.target.value)} placeholder="New name" />
+              <label className="ao-label">{t('camp2.inv.field.customName')}</label>
+              <input className="ao-input" value={renameCustomName} onChange={(e) => setRenameCustomName(e.target.value)} placeholder={t('camp2.inv.field.newName')} />
             </div>
           </div>
           <DialogFooter>
-            <button className="ao-btn ao-btn--ghost" onClick={() => setRenameOpen(false)} disabled={renameMutation.isPending}>Withhold</button>
+            <button className="ao-btn ao-btn--ghost" onClick={() => setRenameOpen(false)} disabled={renameMutation.isPending}>{t('camp2.inv.withhold')}</button>
             <button className="ao-btn ao-btn--primary" onClick={handleRename} disabled={!renameCustomName || renameMutation.isPending}>
               {renameMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Rename
+              {t('camp2.inv.rename')}
             </button>
           </DialogFooter>
         </DialogContent>
@@ -760,13 +763,14 @@ function PageHeader({
   held: number;
   right?: React.ReactNode;
 }) {
+  const t = useT();
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16, marginBottom: 20 }}>
       <div>
-        <p className="ao-overline" style={{ color: 'var(--gold)' }}>Armaments</p>
-        <h3 className="ao-h3" style={{ marginTop: 4 }}>Arsenal &amp; Reliquary</h3>
+        <p className="ao-overline" style={{ color: 'var(--gold)' }}>{t('camp2.inv.armaments')}</p>
+        <h3 className="ao-h3" style={{ marginTop: 4 }}>{t('camp2.inv.arsenalReliquary')}</h3>
         <p className="ao-italic" style={{ color: 'var(--ink-quiet)', fontSize: 13, marginTop: 4 }}>
-          {name ?? 'Loadout'} · {slotsFilled} bound · {held} held
+          {t('camp2.inv.headerSub', { name: name ?? t('camp2.inv.headerLoadout'), slots: slotsFilled, held })}
         </p>
       </div>
       {right}
@@ -795,23 +799,24 @@ function RelicDetail({
   onTransfer: () => void;
   onRemove: () => void;
 }) {
+  const t = useT();
   const rarity = item.artifactRarity ?? item.rarity;
   const dmgEnchant = item.enchantments?.find((e) => e.enchantmentType.damageDice);
   const NA = '—';
 
   const stats: { label: string; value: string; color?: string }[] = [
     {
-      label: 'Damage',
+      label: t('camp2.inv.relic.damage'),
       value: dmgEnchant?.enchantmentType.damageDice
         ? `${dmgEnchant.enchantmentType.damageDice}${dmgEnchant.enchantmentType.damageBonus ? ` + ${dmgEnchant.enchantmentType.damageBonus}` : ''}`
         : NA,
       color: dmgEnchant ? 'var(--ink-bright)' : undefined,
     },
-    { label: 'Type', value: item.itemTypeName ?? NA },
-    { label: 'Rarity', value: (rarity ?? 'COMMON').replace('_', ' '), color: rarityColor(rarity) },
-    { label: 'Slot', value: item.slot ? item.slot.replace('_', ' ') : 'Unbound' },
-    { label: 'Quantity', value: `x${item.quantity}` },
-    { label: 'Charges', value: NA },
+    { label: t('camp2.inv.relic.type'), value: item.itemTypeName ?? NA },
+    { label: t('camp2.inv.relic.rarity'), value: (rarity ?? 'COMMON').replace('_', ' '), color: rarityColor(rarity) },
+    { label: t('camp2.inv.relic.slot'), value: item.slot ? item.slot.replace('_', ' ') : t('camp2.inv.relic.unbound') },
+    { label: t('camp2.inv.relic.quantity'), value: `x${item.quantity}` },
+    { label: t('camp2.inv.relic.charges'), value: NA },
   ];
 
   return (
@@ -826,8 +831,8 @@ function RelicDetail({
             {rarity.replace('_', ' ')}
           </OrdoChip>
         )}
-        {item.slot && <OrdoChip tone="ember" glyph="flame">Equipped</OrdoChip>}
-        {item.isUnique && <OrdoChip tone="arcane" glyph="diamond">Unique</OrdoChip>}
+        {item.slot && <OrdoChip tone="ember" glyph="flame">{t('camp2.inv.relic.equipped')}</OrdoChip>}
+        {item.isUnique && <OrdoChip tone="arcane" glyph="diamond">{t('camp2.inv.relic.unique')}</OrdoChip>}
       </div>
 
       <div className="ao-h5" style={{ marginTop: 12 }}>{item.artifactName ?? item.displayName}</div>
@@ -846,7 +851,7 @@ function RelicDetail({
         ))}
       </div>
 
-      <OrdoDivider glyph="cross-pat" color="var(--rule)">Inscription</OrdoDivider>
+      <OrdoDivider glyph="cross-pat" color="var(--rule)">{t('camp2.inv.relic.inscription')}</OrdoDivider>
 
       {item.enchantments && item.enchantments.length > 0 ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -866,21 +871,21 @@ function RelicDetail({
         </div>
       ) : (
         <p className="ao-italic" style={{ fontSize: 13, color: 'var(--ink-faint)' }}>
-          No inscriptions mark this item.
+          {t('camp2.inv.relic.noInscriptions')}
         </p>
       )}
 
-      <OrdoDivider glyph="diamond-fill" color="var(--rule)">Provenance</OrdoDivider>
+      <OrdoDivider glyph="diamond-fill" color="var(--rule)">{t('camp2.inv.relic.provenance')}</OrdoDivider>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 12, color: 'var(--ink-quiet)' }}>
         <div style={{ display: 'flex', gap: 10 }}>
           <Rune kind="diamond" size={8} color="var(--bronze)" />
-          <span>Template · {item.templateName}</span>
+          <span>{t('camp2.inv.relic.template')} · {item.templateName}</span>
         </div>
         {item.customName && item.customName !== item.templateName && (
           <div style={{ display: 'flex', gap: 10 }}>
             <Rune kind="diamond" size={8} color="var(--bronze)" />
-            <span>Renamed · {item.customName}</span>
+            <span>{t('camp2.inv.relic.renamed')} · {item.customName}</span>
           </div>
         )}
         {item.notes && (
@@ -894,17 +899,17 @@ function RelicDetail({
       <div style={{ display: 'flex', gap: 8, marginTop: 18 }}>
         {item.slot ? (
           <button className="ao-btn ao-btn--primary" style={{ flex: 1 }} onClick={onUnequip} disabled={busy}>
-            <Rune kind="x" size={10} /> Unequip
+            <Rune kind="x" size={10} /> {t('camp2.inv.relic.unequip')}
           </button>
         ) : (
           <button className="ao-btn ao-btn--primary" style={{ flex: 1 }} onClick={onEquip} disabled={busy}>
-            <Rune kind="check" size={10} /> Equip
+            <Rune kind="check" size={10} /> {t('camp2.inv.relic.equip')}
           </button>
         )}
-        <button className="ao-btn ao-btn--ghost" onClick={onRename} title="Rename"><Rune kind="scroll" size={10} /></button>
-        <button className="ao-btn ao-btn--ghost" onClick={onTransfer} title="Transfer"><Rune kind="arrow-r" size={10} /></button>
+        <button className="ao-btn ao-btn--ghost" onClick={onRename} title={t('camp2.inv.relic.renameTitle')}><Rune kind="scroll" size={10} /></button>
+        <button className="ao-btn ao-btn--ghost" onClick={onTransfer} title={t('camp2.inv.relic.transferTitle')}><Rune kind="arrow-r" size={10} /></button>
         {isGm && (
-          <button className="ao-btn ao-btn--danger" onClick={onRemove} disabled={busy} title="Remove"><Rune kind="x" size={10} /></button>
+          <button className="ao-btn ao-btn--danger" onClick={onRemove} disabled={busy} title={t('camp2.inv.relic.removeTitle')}><Rune kind="x" size={10} /></button>
         )}
       </div>
     </div>

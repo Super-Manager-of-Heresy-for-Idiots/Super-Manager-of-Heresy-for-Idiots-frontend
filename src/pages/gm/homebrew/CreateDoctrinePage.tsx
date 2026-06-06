@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Rune, OrdoPanel, OrdoChip, Sigil, PanelHeader } from '@/components/ordo';
 import { useCreateHomebrew } from '@/hooks/useHomebrew';
+import { useT } from '@/i18n/I18nContext';
 
 export default function CreateDoctrinePage() {
+  const t = useT();
   const navigate = useNavigate();
   const createMutation = useCreateHomebrew();
 
@@ -53,22 +55,22 @@ export default function CreateDoctrinePage() {
           className="ao-codex"
           style={{ marginTop: 16, color: 'var(--gold-pale)', fontSize: 12 }}
         >
-          &mdash; RITE OF REGISTRATION &mdash;
+          {t('hb.create.riteLabel')}
         </div>
         <div className="ao-h2" style={{ fontSize: 40, marginTop: 8 }}>
-          A New Doctrine
+          {t('hb.create.title')}
         </div>
         <p
           className="ao-italic"
           style={{ fontSize: 14, marginTop: 10, color: 'var(--ink-quiet)', maxWidth: 500, margin: '10px auto 0' }}
         >
-          Inscribe its outer form. Content shall be added once it is laid into the Workshop.
+          {t('hb.create.subtitle')}
         </p>
       </div>
 
       {/* ── Form panel ───────────────────────────────── */}
       <OrdoPanel padding={0} frame>
-        <PanelHeader title="Outer Inscription" sub="metadata &middot; tags &middot; description" glyph="scroll" />
+        <PanelHeader title={t('hb.create.panelTitle')} sub={t('hb.create.panelSub')} glyph="scroll" />
 
         <div style={{ padding: '24px 24px 28px', display: 'flex', flexDirection: 'column', gap: 24 }}>
 
@@ -76,7 +78,7 @@ export default function CreateDoctrinePage() {
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8 }}>
               <label className="ao-label">
-                Title <span style={{ color: 'var(--ember)' }}>&middot; required</span>
+                {t('hb.create.titleLabel')} <span style={{ color: 'var(--ember)' }}>{t('hb.create.required')}</span>
               </label>
               <span className="ao-codex" style={{ fontSize: 11, color: 'var(--ink-faint)' }}>
                 {title.length} / 120
@@ -86,7 +88,7 @@ export default function CreateDoctrinePage() {
               className="ao-input"
               value={title}
               onChange={(e) => setTitle(e.target.value.slice(0, 120))}
-              placeholder="Enter doctrine title..."
+              placeholder={t('hb.create.titlePlaceholder')}
               style={{ fontFamily: 'var(--font-heading)', fontSize: 18, width: '100%' }}
             />
           </div>
@@ -94,7 +96,7 @@ export default function CreateDoctrinePage() {
           {/* ── Description field ───────────────────── */}
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8 }}>
-              <label className="ao-label">Description</label>
+              <label className="ao-label">{t('hb.create.descriptionLabel')}</label>
               <span className="ao-codex" style={{ fontSize: 11, color: 'var(--ink-faint)' }}>
                 {description.length} / 2000
               </span>
@@ -104,20 +106,20 @@ export default function CreateDoctrinePage() {
               value={description}
               onChange={(e) => setDescription(e.target.value.slice(0, 2000))}
               rows={5}
-              placeholder="Describe the contents of your doctrine..."
+              placeholder={t('hb.create.descriptionPlaceholder')}
               style={{ width: '100%', resize: 'vertical' }}
             />
             <p className="ao-italic" style={{ fontSize: 12, marginTop: 8, color: 'var(--ink-faint)' }}>
-              The first 240 characters appear on the catalogue card.
+              {t('hb.create.descriptionHint')}
             </p>
           </div>
 
           {/* ── Tags (Classification Marks) ─────────── */}
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8 }}>
-              <label className="ao-label">Classification Marks</label>
+              <label className="ao-label">{t('hb.create.classificationLabel')}</label>
               <span className="ao-codex" style={{ fontSize: 11, color: 'var(--ink-faint)' }}>
-                {tags.length} / 10 &middot; lowercase, hyphenated
+                {tags.length} / 10 {t('hb.create.classificationHint')}
               </span>
             </div>
 
@@ -133,7 +135,7 @@ export default function CreateDoctrinePage() {
                 alignItems: 'center',
               }}
             >
-              {tags.map((t, i) => (
+              {tags.map((tag, i) => (
                 <span
                   key={i}
                   style={{
@@ -157,7 +159,7 @@ export default function CreateDoctrinePage() {
                       flexShrink: 0,
                     }}
                   />
-                  {t}
+                  {tag}
                   <button
                     onClick={() => setTags(tags.filter((_, j) => j !== i))}
                     style={{
@@ -185,7 +187,7 @@ export default function CreateDoctrinePage() {
                     handleAddTag();
                   }
                 }}
-                placeholder="add mark and press Enter"
+                placeholder={t('hb.create.tagPlaceholder')}
                 style={{
                   flex: 1,
                   minWidth: 140,
@@ -203,14 +205,14 @@ export default function CreateDoctrinePage() {
             {/* Normalization preview */}
             {tagText && (
               <p style={{ fontSize: 12, marginTop: 8, color: 'var(--gold)' }}>
-                will be sealed as &middot;{' '}
+                {t('hb.create.tagSealedAs')}{' '}
                 <span style={{ fontFamily: 'var(--font-mono)' }}>{normalizeTag(tagText)}</span>
               </p>
             )}
 
             {/* Examples */}
             <p className="ao-italic" style={{ fontSize: 12, marginTop: 6, color: 'var(--ink-faint)' }}>
-              Examples:{' '}
+              {t('hb.create.examples')}{' '}
               <span style={{ fontFamily: 'var(--font-mono)' }}>dark-fantasy</span> &middot;{' '}
               <span style={{ fontFamily: 'var(--font-mono)' }}>necromancy</span> &middot;{' '}
               <span style={{ fontFamily: 'var(--font-mono)' }}>imperial</span>
@@ -236,28 +238,28 @@ export default function CreateDoctrinePage() {
             />
             <div style={{ flex: 1 }}>
               <p style={{ fontSize: 13, fontWeight: 600, color: isValid ? 'var(--gold)' : 'var(--ember)' }}>
-                {isValid ? 'Inscription valid' : 'Title required'}
+                {isValid ? t('hb.create.validTitle') : t('hb.create.invalidTitle')}
               </p>
               <p className="ao-italic" style={{ fontSize: 12, marginTop: 2, color: 'var(--ink-faint)' }}>
                 {isValid
-                  ? 'Doctrine may now be registered as a draft. Content can be added afterwards.'
-                  : 'Please provide a title to continue.'}
+                  ? t('hb.create.validBody')
+                  : t('hb.create.invalidBody')}
               </p>
             </div>
-            <OrdoChip tone="gold">DRAFT</OrdoChip>
+            <OrdoChip tone="gold">{t('hb.create.draft')}</OrdoChip>
           </div>
 
           {/* ── Bottom actions ──────────────────────── */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 4 }}>
             <span className="ao-codex" style={{ fontSize: 11, color: 'var(--ink-faint)' }}>
-              By registering, thou agree to the Archive Charter &mdash; Article XIV.
+              {t('hb.create.charter')}
             </span>
             <div style={{ display: 'flex', gap: 10 }}>
               <button
                 className="ao-btn ao-btn--ghost"
                 onClick={() => navigate('/gm/homebrew/my')}
               >
-                Cancel
+                {t('hb.create.cancel')}
               </button>
               <button
                 className="ao-btn ao-btn--primary ao-btn--lg"
@@ -265,7 +267,7 @@ export default function CreateDoctrinePage() {
                 disabled={!isValid || createMutation.isPending}
               >
                 <Rune kind="diamond-fill" size={9} />
-                {createMutation.isPending ? 'Registering...' : 'Register Draft'}
+                {createMutation.isPending ? t('hb.create.registering') : t('hb.create.registerDraft')}
               </button>
             </div>
           </div>

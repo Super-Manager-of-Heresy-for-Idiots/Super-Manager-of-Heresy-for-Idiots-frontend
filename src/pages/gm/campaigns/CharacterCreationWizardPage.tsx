@@ -1,4 +1,5 @@
 import { useNavigate, useParams } from 'react-router-dom';
+import { useT } from '@/i18n/I18nContext';
 import { useAuthStore } from '@/store/authStore';
 import { useCampaign } from '@/hooks/useCampaigns';
 import { useAvailableContent, useCampaignReferenceContent } from '@/hooks/useHomebrewCampaign';
@@ -8,6 +9,7 @@ import { CharacterCreationWizard } from '@/features/character-wizard/CharacterCr
 import type { CreateFullCharacterRequest } from '@/api/characters-full.api';
 
 export default function CharacterCreationWizardPage() {
+  const t = useT();
   const navigate = useNavigate();
   const { campaignId } = useParams<{ campaignId: string }>();
   const { user } = useAuthStore();
@@ -33,9 +35,9 @@ export default function CharacterCreationWizardPage() {
     return (
       <div style={{ textAlign: 'center', padding: '48px 0' }}>
         <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginBottom: 16 }}>
-          The campaign chronicle could not be unfurled.
+          {t('camp.create.loadError')}
         </p>
-        <button className="ao-btn" onClick={backToDashboard}>Return</button>
+        <button className="ao-btn" onClick={backToDashboard}>{t('camp.create.return')}</button>
       </div>
     );
   }
@@ -46,9 +48,9 @@ export default function CharacterCreationWizardPage() {
     return (
       <div style={{ textAlign: 'center', padding: '48px 0' }}>
         <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginBottom: 16 }}>
-          Character creation is available to players while the campaign is active.
+          {t('camp.create.notAvailable')}
         </p>
-        <button className="ao-btn" onClick={backToDashboard}>Return to campaign</button>
+        <button className="ao-btn" onClick={backToDashboard}>{t('camp.create.returnToCampaign')}</button>
       </div>
     );
   }

@@ -2,20 +2,23 @@ import { useState, useMemo } from 'react';
 import { Rune, OrdoPanel, OrdoChip, PanelHeader } from '@/components/ordo';
 import { formatDate } from '@/lib/utils';
 import { useUsers } from '@/hooks/useAdmin';
+import { useT } from '@/i18n/I18nContext';
 
 /* ── role config ─────────────────────────────────────────────── */
-const ROLE_CFG: Record<string, { c: string; glyph: string; label: string }> = {
-  PLAYER:      { c: '#7a9866', glyph: 'shield', label: 'Player' },
-  GAME_MASTER: { c: '#c9a84c', glyph: 'helm',   label: 'Game Master' },
-  ADMIN:       { c: '#c0584a', glyph: 'lock',    label: 'Admin' },
+const ROLE_CFG: Record<string, { c: string; glyph: string; labelKey: string }> = {
+  PLAYER:      { c: '#7a9866', glyph: 'shield', labelKey: 'adm.users.rolePlayer' },
+  GAME_MASTER: { c: '#c9a84c', glyph: 'helm',   labelKey: 'adm.users.roleGameMaster' },
+  ADMIN:       { c: '#c0584a', glyph: 'lock',    labelKey: 'adm.users.roleAdmin' },
 };
 
 type RoleFilter = 'all' | 'PLAYER' | 'GAME_MASTER' | 'ADMIN';
 
 /* ── role badge ──────────────────────────────────────────────── */
 function RoleBadge({ role }: { role: string }) {
-  const cfg = ROLE_CFG[role] ?? { c: 'var(--ink-quiet)', glyph: 'cir', label: role };
+  const t = useT();
+  const cfg = ROLE_CFG[role] ?? { c: 'var(--ink-quiet)', glyph: 'cir', labelKey: '' };
   const color = cfg.c;
+  const label = cfg.labelKey ? t(cfg.labelKey) : role;
 
   return (
     <span
@@ -35,13 +38,14 @@ function RoleBadge({ role }: { role: string }) {
       }}
     >
       <Rune kind={cfg.glyph} size={10} color={color} />
-      {cfg.label}
+      {label}
     </span>
   );
 }
 
 /* ── main page ───────────────────────────────────────────────── */
 export default function UsersListPage() {
+  const t = useT();
   const { data: users, isLoading, error, refetch } = useUsers();
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState<RoleFilter>('all');
@@ -72,19 +76,19 @@ export default function UsersListPage() {
     return (
       <div style={{ textAlign: 'center', padding: '48px 0' }}>
         <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginBottom: 16 }}>
-          The census could not be consulted. The ledger remains closed.
+          {t('adm.users.errorBody')}
         </p>
-        <button className="ao-btn" onClick={() => refetch()}>Retry</button>
+        <button className="ao-btn" onClick={() => refetch()}>{t('common.retry')}</button>
       </div>
     );
   }
 
   /* ── filter tab definitions ─────────────────────────────────── */
   const tabs: { key: RoleFilter; label: string; count: number }[] = [
-    { key: 'all',         label: 'All',          count: roleCounts.total },
-    { key: 'PLAYER',      label: 'Players',      count: roleCounts.PLAYER },
-    { key: 'GAME_MASTER', label: 'Chroniclers',  count: roleCounts.GAME_MASTER },
-    { key: 'ADMIN',       label: 'Inquisitors',  count: roleCounts.ADMIN },
+    { key: 'all',         label: t('adm.users.tabAll'),          count: roleCounts.total },
+    { key: 'PLAYER',      label: t('adm.users.tabPlayers'),      count: roleCounts.PLAYER },
+    { key: 'GAME_MASTER', label: t('adm.users.tabChroniclers'),  count: roleCounts.GAME_MASTER },
+    { key: 'ADMIN',       label: t('adm.users.tabInquisitors'),  count: roleCounts.ADMIN },
   ];
 
   /* ── render ─────────────────────────────────────────────────── */
@@ -102,17 +106,17 @@ export default function UsersListPage() {
         {/* left: overline + title */}
         <div>
           <p className="ao-overline" style={{ color: 'var(--gold)', marginBottom: 2 }}>
-            Every name on the rolls
+            {t('adm.users.overline')}
           </p>
-          <h3 className="ao-h3" style={{ margin: 0 }}>The Census</h3>
+          <h3 className="ao-h3" style={{ margin: 0 }}>{t('adm.users.title')}</h3>
         </div>
 
         {/* right: stat counters */}
         <div style={{ display: 'flex', gap: 32 }}>
           {([
-            { label: 'Players',      value: roleCounts.PLAYER,      color: '#7a9866' },
-            { label: 'Chroniclers',   value: roleCounts.GAME_MASTER, color: '#c9a84c' },
-            { label: 'Inquisitors',   value: roleCounts.ADMIN,       color: '#c0584a' },
+            { label: t('adm.users.statPlayers'),      value: roleCounts.PLAYER,      color: '#7a9866' },
+            { label: t('adm.users.statChroniclers'),   value: roleCounts.GAME_MASTER, color: '#c9a84c' },
+            { label: t('adm.users.statInquisitors'),   value: roleCounts.ADMIN,       color: '#c0584a' },
           ] as const).map((stat) => (
             <div key={stat.label} style={{ textAlign: 'center' }}>
               <div
@@ -140,7 +144,7 @@ export default function UsersListPage() {
       <OrdoPanel frame padding={0}>
         {/* panel header with search */}
         <PanelHeader
-          title="Roll of Souls"
+          title={t('adm.users.panelTitle')}
           glyph="scroll"
           right={
             <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
@@ -161,7 +165,7 @@ export default function UsersListPage() {
                   borderBottom: '1px solid var(--rule)',
                   borderRadius: 0,
                 }}
-                placeholder="Search by name or sigil..."
+                placeholder={t('adm.users.searchPlaceholder')}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
@@ -209,10 +213,10 @@ export default function UsersListPage() {
           <table className="ao-table" style={{ width: '100%' }}>
             <thead>
               <tr>
-                <th style={{ textAlign: 'left', padding: '12px 16px' }}>Username</th>
-                <th style={{ textAlign: 'left', padding: '12px 16px' }}>Sigil Address</th>
-                <th style={{ textAlign: 'left', padding: '12px 16px' }}>Office</th>
-                <th style={{ textAlign: 'left', padding: '12px 16px' }}>Inscribed</th>
+                <th style={{ textAlign: 'left', padding: '12px 16px' }}>{t('adm.users.colUsername')}</th>
+                <th style={{ textAlign: 'left', padding: '12px 16px' }}>{t('adm.users.colSigilAddress')}</th>
+                <th style={{ textAlign: 'left', padding: '12px 16px' }}>{t('adm.users.colOffice')}</th>
+                <th style={{ textAlign: 'left', padding: '12px 16px' }}>{t('adm.users.colInscribed')}</th>
                 <th style={{ width: 40, padding: '12px 8px' }} />
               </tr>
             </thead>
@@ -276,7 +280,7 @@ export default function UsersListPage() {
                     <button
                       className="ao-btn ao-btn--ghost"
                       style={{ padding: 4, lineHeight: 1, minWidth: 0 }}
-                      aria-label="Actions"
+                      aria-label={t('adm.users.actions')}
                     >
                       <Rune kind="dots" size={16} color="var(--ink-quiet)" />
                     </button>
@@ -288,7 +292,7 @@ export default function UsersListPage() {
                 <tr>
                   <td colSpan={5} style={{ padding: '32px 16px', textAlign: 'center' }}>
                     <span className="ao-italic" style={{ color: 'var(--ink-faint)' }}>
-                      No souls match thy inquiry
+                      {t('adm.users.noSouls')}
                     </span>
                   </td>
                 </tr>
@@ -314,9 +318,9 @@ export default function UsersListPage() {
           <span>
             {isLoading
               ? '\u2014'
-              : `${filteredUsers?.length ?? 0} of ${roleCounts.total} souls`}
+              : t('adm.users.soulsCount', { filtered: filteredUsers?.length ?? 0, total: roleCounts.total })}
           </span>
-          <span style={{ opacity: 0.6 }}>sorted by &middot; most recent</span>
+          <span style={{ opacity: 0.6 }}>{t('adm.users.sortedRecent')}</span>
         </div>
       </OrdoPanel>
     </div>

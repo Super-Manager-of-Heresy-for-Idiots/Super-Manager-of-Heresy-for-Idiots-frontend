@@ -3,6 +3,7 @@ import { AxiosError } from 'axios';
 import toast from 'react-hot-toast';
 import { charactersFullApi, type CreateFullCharacterRequest } from '@/api/characters-full.api';
 import { referenceApi } from '@/api/reference.api';
+import { useT } from '@/i18n/I18nContext';
 import type { ApiError, AvailableContentEntry, CharacterResponse } from '@/types';
 
 const myKey = ['characters', 'my'];
@@ -31,34 +32,37 @@ export function useTemplate(templateId: string | undefined) {
 
 export function useCreateTemplate() {
   const qc = useQueryClient();
+  const t = useT();
   return useMutation({
     mutationFn: (data: CreateFullCharacterRequest) => charactersFullApi.createTemplate(data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: myKey });
-      toast.success('Шаблон создан!');
+      toast.success(t('hk.template.created'));
     },
     onError: (error: AxiosError<ApiError>) => {
-      toast.error(error.response?.data?.message || 'Не удалось создать шаблон');
+      toast.error(error.response?.data?.message || t('hk.template.createFailed'));
     },
   });
 }
 
 export function useDeleteTemplate() {
   const qc = useQueryClient();
+  const t = useT();
   return useMutation({
     mutationFn: (templateId: string) => charactersFullApi.deleteTemplate(templateId),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: myKey });
-      toast.success('Шаблон удалён');
+      toast.success(t('hk.template.deleted'));
     },
     onError: (error: AxiosError<ApiError>) => {
-      toast.error(error.response?.data?.message || 'Не удалось удалить шаблон');
+      toast.error(error.response?.data?.message || t('hk.template.deleteFailed'));
     },
   });
 }
 
 export function useCloneTemplateToCampaign() {
   const qc = useQueryClient();
+  const t = useT();
   return useMutation({
     mutationFn: ({
       campaignId,
@@ -72,12 +76,12 @@ export function useCloneTemplateToCampaign() {
     onSuccess: (data, vars) => {
       qc.invalidateQueries({ queryKey: ['campaigns', vars.campaignId, 'characters'] });
       qc.invalidateQueries({ queryKey: myKey });
-      const action = vars.mode === 'move' ? 'Персонаж перенесён в кампанию' : 'Копия добавлена в кампанию';
+      const action = vars.mode === 'move' ? t('hk.template.moved') : t('hk.template.cloned');
       toast.success(action);
       return data;
     },
     onError: (error: AxiosError<ApiError>) => {
-      toast.error(error.response?.data?.message || 'Не удалось загрузить персонажа в кампанию');
+      toast.error(error.response?.data?.message || t('hk.template.loadFailed'));
     },
   });
 }

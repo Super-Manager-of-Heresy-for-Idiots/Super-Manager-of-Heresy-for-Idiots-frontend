@@ -10,8 +10,10 @@ import {
   useDeleteItemType,
 } from '@/hooks/useAdmin';
 import type { ItemTypeResponse } from '@/types';
+import { useT } from '@/i18n/I18nContext';
 
 export default function ItemTypesPage() {
+  const t = useT();
   const { data, isLoading } = useItemTypes();
   const createMutation = useCreateItemType();
   const updateMutation = useUpdateItemType();
@@ -47,18 +49,18 @@ export default function ItemTypesPage() {
   return (
     <>
       <CrudTable
-        title="Item Types"
+        title={t('adm.itemTypes.title')}
         data={data}
         isLoading={isLoading}
         onAdd={handleAdd}
         onEdit={handleEdit}
         onDelete={(id) => deleteMutation.mutate(id)}
-        addLabel="Add Item Type"
+        addLabel={t('adm.itemTypes.add')}
         columns={[
-          { header: 'Name', accessor: 'name' },
-          { header: 'Description', accessor: 'description' },
+          { header: t('adm.shared.colName'), accessor: 'name' },
+          { header: t('adm.shared.colDescription'), accessor: 'description' },
           {
-            header: 'Slot',
+            header: t('adm.itemTypes.colSlot'),
             accessor: (item) => (
               <Badge variant="outline">
                 {EQUIPMENT_SLOT_LABELS[item.slot as import('@/types').EquipmentSlot] || item.slot}
@@ -72,11 +74,11 @@ export default function ItemTypesPage() {
         onClose={() => setModalOpen(false)}
         onSubmit={handleSubmit}
         isSubmitting={createMutation.isPending || updateMutation.isPending}
-        title={editing ? 'Edit Item Type' : 'Add Item Type'}
+        title={editing ? t('adm.itemTypes.editTitle') : t('adm.itemTypes.addTitle')}
         fields={[
-          { name: 'name', label: 'Name', type: 'text' },
-          { name: 'description', label: 'Description', type: 'textarea' },
-          { name: 'slot', label: 'Slot', type: 'slot-select' },
+          { name: 'name', label: t('adm.shared.fieldName'), type: 'text' },
+          { name: 'description', label: t('adm.shared.fieldDescription'), type: 'textarea' },
+          { name: 'slot', label: t('adm.itemTypes.fieldSlot'), type: 'slot-select' },
         ]}
         defaultValues={
           editing

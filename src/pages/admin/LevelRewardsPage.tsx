@@ -36,6 +36,7 @@ import {
   useFeats,
 } from '@/hooks/useAdmin';
 import type { ClassLevelRewardResponse } from '@/types';
+import { useT } from '@/i18n/I18nContext';
 
 const LEVELS = Array.from({ length: 20 }, (_, i) => i + 1);
 const REWARD_TYPES = ['SKILL', 'SUBCLASS', 'FEAT'] as const;
@@ -89,6 +90,7 @@ function RewardChip({ reward }: { reward: ClassLevelRewardResponse }) {
 }
 
 function ChoiceFlag({ isChoice }: { isChoice: boolean }) {
+  const t = useT();
   if (isChoice) {
     return (
       <span style={{
@@ -100,7 +102,7 @@ function ChoiceFlag({ isChoice }: { isChoice: boolean }) {
         fontSize: 10,
         letterSpacing: '0.08em',
       }}>
-        <Rune kind="sword" size={11} color="var(--gold-pale)" /> CHOOSE ONE
+        <Rune kind="sword" size={11} color="var(--gold-pale)" /> {t('adm.rewards.chooseOne')}
       </span>
     );
   }
@@ -114,7 +116,7 @@ function ChoiceFlag({ isChoice }: { isChoice: boolean }) {
       fontSize: 10,
       letterSpacing: '0.08em',
     }}>
-      <Rune kind="diamond-fill" size={9} color="var(--arcane)" /> AUTO-GRANTED
+      <Rune kind="diamond-fill" size={9} color="var(--arcane)" /> {t('adm.rewards.autoGranted')}
     </span>
   );
 }
@@ -124,6 +126,7 @@ function ChoiceFlag({ isChoice }: { isChoice: boolean }) {
 /* ------------------------------------------------------------------ */
 
 export default function LevelRewardsPage() {
+  const t = useT();
   const { classId } = useParams<{ classId: string }>();
   const navigate = useNavigate();
 
@@ -142,7 +145,7 @@ export default function LevelRewardsPage() {
   const [formRewardId, setFormRewardId] = useState('');
   const [formIsChoice, setFormIsChoice] = useState('false');
 
-  const className = classes?.find((c) => c.id === classId)?.name || 'Unknown Class';
+  const className = classes?.find((c) => c.id === classId)?.name || t('adm.rewards.unknownClass');
 
   const rewardOptions = useMemo(() => {
     if (formRewardType === 'SKILL') return (skills || []).map((s) => ({ value: s.id, label: s.name }));
@@ -189,8 +192,8 @@ export default function LevelRewardsPage() {
     return (
       <div>
         <div style={{ textAlign: 'center', marginBottom: 32 }}>
-          <p className="ao-overline" style={{ color: 'var(--gold)' }}>Tome of Ascension</p>
-          <h3 className="ao-h3" style={{ marginTop: 4 }}>Rites of Advancement</h3>
+          <p className="ao-overline" style={{ color: 'var(--gold)' }}>{t('adm.rewards.loadingOverline')}</p>
+          <h3 className="ao-h3" style={{ marginTop: 4 }}>{t('adm.rewards.loadingTitle')}</h3>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {Array.from({ length: 5 }).map((_, i) => (
@@ -206,9 +209,9 @@ export default function LevelRewardsPage() {
     return (
       <div style={{ textAlign: 'center', padding: '48px 0' }}>
         <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginBottom: 16 }}>
-          The tome could not be opened. Its wards remain intact.
+          {t('adm.rewards.errorBody')}
         </p>
-        <button className="ao-btn" onClick={() => refetch()}>Retry</button>
+        <button className="ao-btn" onClick={() => refetch()}>{t('common.retry')}</button>
       </div>
     );
   }
@@ -223,7 +226,7 @@ export default function LevelRewardsPage() {
           onClick={() => navigate('/admin')}
           style={{ padding: '2px 0', fontSize: 12, color: 'var(--ink-quiet)' }}
         >
-          Admin
+          {t('adm.rewards.breadcrumbAdmin')}
         </button>
         <Rune kind="chev-r" size={10} color="var(--ink-ghost)" />
         <button
@@ -231,13 +234,13 @@ export default function LevelRewardsPage() {
           onClick={() => navigate('/admin/homebrew')}
           style={{ padding: '2px 0', fontSize: 12, color: 'var(--ink-quiet)' }}
         >
-          Classes
+          {t('adm.rewards.breadcrumbClasses')}
         </button>
         <Rune kind="chev-r" size={10} color="var(--ink-ghost)" />
         <span style={{ fontSize: 12, color: 'var(--ink-quiet)' }}>{className}</span>
         <Rune kind="chev-r" size={10} color="var(--ink-ghost)" />
         <span style={{ fontSize: 12, color: 'var(--gold-pale)', fontFamily: 'var(--font-display)', letterSpacing: '0.06em' }}>
-          Level Rewards
+          {t('adm.rewards.breadcrumbLevelRewards')}
         </span>
       </nav>
 
@@ -249,13 +252,13 @@ export default function LevelRewardsPage() {
           <Sigil size={52} glyph="sigil-3" />
           <div>
             <p className="ao-overline" style={{ color: 'var(--gold)', marginBottom: 2 }}>
-              Class &middot; {className}
+              {t('adm.rewards.classLabel', { name: className })}
             </p>
             <h3 className="ao-h3" style={{ margin: 0 }}>
-              Tome of Ascension &mdash; {className}
+              {t('adm.rewards.headerTitle', { name: className })}
             </h3>
             <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 13, marginTop: 4 }}>
-              The rites each acolyte must master as they ascend through the ranks
+              {t('adm.rewards.headerSubtitle')}
             </p>
           </div>
         </div>
@@ -263,10 +266,10 @@ export default function LevelRewardsPage() {
         {/* Right: legend */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'flex-end' }}>
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, color: 'var(--gold-pale)', fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.08em' }}>
-            <Rune kind="sword" size={11} color="var(--gold-pale)" /> CHOOSE ONE
+            <Rune kind="sword" size={11} color="var(--gold-pale)" /> {t('adm.rewards.chooseOne')}
           </span>
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, color: 'var(--arcane)', fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.08em' }}>
-            <Rune kind="diamond-fill" size={9} color="var(--arcane)" /> AUTO-GRANTED
+            <Rune kind="diamond-fill" size={9} color="var(--arcane)" /> {t('adm.rewards.autoGranted')}
           </span>
         </div>
       </div>
@@ -277,10 +280,10 @@ export default function LevelRewardsPage() {
           className="ao-btn ao-btn--ghost"
           onClick={() => navigate(`/admin/homebrew`)}
         >
-          Preview Class
+          {t('adm.rewards.previewClass')}
         </button>
         <OrdoChip tone="ember" glyph="shield">
-          Inquisitor privileges
+          {t('adm.shared.inquisitorPrivileges')}
         </OrdoChip>
       </div>
 
@@ -313,7 +316,7 @@ export default function LevelRewardsPage() {
                 gap: 2,
               }}>
                 <span className="ao-overline" style={{ fontSize: 8, letterSpacing: '0.14em', color: 'var(--ink-faint)' }}>
-                  LVL
+                  {t('adm.rewards.levelAbbr')}
                 </span>
                 <span style={{
                   fontFamily: 'var(--font-display)',
@@ -341,24 +344,24 @@ export default function LevelRewardsPage() {
                       {/* Delete trigger */}
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
-                          <button className="ao-iconbtn" title="Remove reward" style={{ marginLeft: 2 }}>
+                          <button className="ao-iconbtn" title={t('adm.rewards.remove')} style={{ marginLeft: 2 }}>
                             <Rune kind="x" size={12} color="var(--ember)" />
                           </button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>
-                            <AlertDialogTitle>Remove this Rite?</AlertDialogTitle>
+                            <AlertDialogTitle>{t('adm.rewards.removeRewardTitle')}</AlertDialogTitle>
                             <AlertDialogDescription>
-                              This reward shall be unbound from level {ROMAN_NUMERALS[level]}.
+                              {t('adm.rewards.removeRewardDescription', { level: ROMAN_NUMERALS[level] })}
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
-                            <AlertDialogCancel>Withhold</AlertDialogCancel>
+                            <AlertDialogCancel>{t('adm.shared.withhold')}</AlertDialogCancel>
                             <AlertDialogAction
                               onClick={() => handleDelete(reward.id)}
                               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                             >
-                              Remove
+                              {t('adm.rewards.remove')}
                             </AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>
@@ -373,7 +376,7 @@ export default function LevelRewardsPage() {
                     textAlign: 'center',
                   }}>
                     <span className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 13 }}>
-                      No rites bound to this level
+                      {t('adm.rewards.emptyLevel')}
                     </span>
                   </div>
                 )}
@@ -394,7 +397,7 @@ export default function LevelRewardsPage() {
                   }}
                 >
                   <Rune kind="plus" size={12} color="var(--gold)" />
-                  <span style={{ marginLeft: 4 }}>Add Reward</span>
+                  <span style={{ marginLeft: 4 }}>{t('adm.rewards.addReward')}</span>
                 </button>
               </div>
             </div>
@@ -406,25 +409,25 @@ export default function LevelRewardsPage() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Bind Rite of Ascension</DialogTitle>
+            <DialogTitle>{t('adm.rewards.dialogTitle')}</DialogTitle>
           </DialogHeader>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <OrdoField label="Level" required>
+            <OrdoField label={t('adm.rewards.fieldLevel')} required>
               <Select value={formLevel} onValueChange={setFormLevel}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select level" />
+                  <SelectValue placeholder={t('adm.rewards.selectLevel')} />
                 </SelectTrigger>
                 <SelectContent>
                   {LEVELS.map((l) => (
                     <SelectItem key={l} value={String(l)}>
-                      Level {ROMAN_NUMERALS[l]} ({l})
+                      {t('adm.rewards.levelOption', { roman: ROMAN_NUMERALS[l], num: l })}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </OrdoField>
 
-            <OrdoField label="Reward Type" required>
+            <OrdoField label={t('adm.rewards.fieldRewardType')} required>
               <Select
                 value={formRewardType}
                 onValueChange={(v) => {
@@ -433,22 +436,22 @@ export default function LevelRewardsPage() {
                 }}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select type" />
+                  <SelectValue placeholder={t('adm.rewards.selectType')} />
                 </SelectTrigger>
                 <SelectContent>
-                  {REWARD_TYPES.map((t) => (
-                    <SelectItem key={t} value={t}>
-                      {t}
+                  {REWARD_TYPES.map((rt) => (
+                    <SelectItem key={rt} value={rt}>
+                      {rt}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </OrdoField>
 
-            <OrdoField label="Reward" required>
+            <OrdoField label={t('adm.rewards.fieldReward')} required>
               <Select value={formRewardId} onValueChange={setFormRewardId}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select reward" />
+                  <SelectValue placeholder={t('adm.rewards.selectReward')} />
                 </SelectTrigger>
                 <SelectContent>
                   {rewardOptions.map((opt) => (
@@ -460,14 +463,14 @@ export default function LevelRewardsPage() {
               </Select>
             </OrdoField>
 
-            <OrdoField label="Grant Method">
+            <OrdoField label={t('adm.rewards.fieldGrantMethod')}>
               <Select value={formIsChoice} onValueChange={setFormIsChoice}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="false">Auto-Granted</SelectItem>
-                  <SelectItem value="true">Player Chooses</SelectItem>
+                  <SelectItem value="false">{t('adm.rewards.grantAuto')}</SelectItem>
+                  <SelectItem value="true">{t('adm.rewards.grantPlayer')}</SelectItem>
                 </SelectContent>
               </Select>
             </OrdoField>
@@ -478,14 +481,14 @@ export default function LevelRewardsPage() {
               onClick={() => setDialogOpen(false)}
               disabled={createMutation.isPending}
             >
-              Withhold
+              {t('adm.shared.withhold')}
             </button>
             <button
               className="ao-btn ao-btn--primary"
               onClick={handleCreate}
               disabled={!formRewardId || createMutation.isPending}
             >
-              Bind Rite
+              {t('adm.rewards.bindRite')}
             </button>
           </DialogFooter>
         </DialogContent>

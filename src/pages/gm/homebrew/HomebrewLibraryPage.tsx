@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/dialog';
 import { useHomebrewLibrary, useAttachHomebrew, useRateHomebrew } from '@/hooks/useHomebrewCampaign';
 import { useCampaigns } from '@/hooks/useCampaigns';
+import { useT } from '@/i18n/I18nContext';
 import type { CampaignResponse } from '@/types';
 
 /* ── types for library entries ────────────────────────────────── */
@@ -37,6 +38,7 @@ interface LibraryEntry {
 /* ── page ────────────────────────────────────────────────────── */
 
 export default function HomebrewLibraryPage() {
+  const t = useT();
   const { data: library, isLoading, error, refetch } = useHomebrewLibrary();
   const { data: campaigns } = useCampaigns();
   const attachMutation = useAttachHomebrew();
@@ -94,8 +96,8 @@ export default function HomebrewLibraryPage() {
     return (
       <div>
         <div style={{ marginBottom: 32 }}>
-          <p className="ao-overline" style={{ color: 'var(--gold)' }}>Doctrine Archive</p>
-          <h3 className="ao-h3" style={{ marginTop: 4 }}>My Homebrew Library</h3>
+          <p className="ao-overline" style={{ color: 'var(--gold)' }}>{t('hb.library.overline')}</p>
+          <h3 className="ao-h3" style={{ marginTop: 4 }}>{t('hb.library.heading')}</h3>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 18 }}>
           {[0, 1].map((i) => (
@@ -117,9 +119,9 @@ export default function HomebrewLibraryPage() {
     return (
       <div style={{ textAlign: 'center', padding: '48px 0' }}>
         <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginBottom: 16 }}>
-          The doctrine archive could not be consulted. Its bindings remain sealed.
+          {t('hb.library.error')}
         </p>
-        <button className="ao-btn" onClick={() => refetch()}>Retry</button>
+        <button className="ao-btn" onClick={() => refetch()}>{t('common.retry')}</button>
       </div>
     );
   }
@@ -130,10 +132,10 @@ export default function HomebrewLibraryPage() {
     <div>
       {/* Header */}
       <div style={{ marginBottom: 28 }}>
-        <p className="ao-overline" style={{ color: 'var(--gold)' }}>Doctrine Archive</p>
-        <h3 className="ao-h3" style={{ marginTop: 4 }}>My Homebrew Library</h3>
+        <p className="ao-overline" style={{ color: 'var(--gold)' }}>{t('hb.library.overline')}</p>
+        <h3 className="ao-h3" style={{ marginTop: 4 }}>{t('hb.library.heading')}</h3>
         <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 13, marginTop: 4 }}>
-          Doctrines acquired from the marketplace. Attach them to campaigns to activate their content.
+          {t('hb.library.subtitle')}
         </p>
       </div>
 
@@ -141,14 +143,14 @@ export default function HomebrewLibraryPage() {
       <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 18, alignItems: 'start' }}>
         {/* Library List */}
         <OrdoPanel frame padding={0}>
-          <PanelHeader title="LIBRARY" glyph="scroll" tone="gold" sub={`${libraryEntries.length} doctrines`} />
+          <PanelHeader title={t('hb.library.libraryTitle')} glyph="scroll" tone="gold" sub={t('hb.library.doctrinesCount', { count: libraryEntries.length })} />
 
           {libraryEntries.length === 0 ? (
             <div style={{ padding: '36px 20px', textAlign: 'center' }}>
               <EmptyVault
                 glyph="scroll"
-                title="Library Empty"
-                body="Browse the marketplace to acquire doctrines for your library."
+                title={t('hb.library.emptyTitle')}
+                body={t('hb.library.emptyBody')}
               />
             </div>
           ) : (
@@ -183,13 +185,13 @@ export default function HomebrewLibraryPage() {
                             fontFamily: 'var(--font-mono)',
                           }}
                         >
-                          ATTACHED
+                          {t('hb.library.attached')}
                         </span>
                       )}
                     </div>
 
                     <div className="ao-codex" style={{ fontSize: 11, color: 'var(--ink-faint)', marginTop: 3 }}>
-                      by {entry.authorUsername} &middot; v{entry.version}
+                      {t('hb.library.byVersion', { author: entry.authorUsername, version: entry.version })}
                     </div>
 
                     {/* Rating */}
@@ -210,7 +212,7 @@ export default function HomebrewLibraryPage() {
                   <button
                     className="ao-btn ao-btn--ghost ao-btn--sm"
                     onClick={() => openAttach(entry.packageId)}
-                    title="Attach to campaign"
+                    title={t('hb.library.attachToCampaign')}
                   >
                     <Rune kind="plus" size={12} color="var(--arcane)" />
                   </button>
@@ -222,21 +224,21 @@ export default function HomebrewLibraryPage() {
 
         {/* Attach Panel */}
         <OrdoPanel frame padding={0}>
-          <PanelHeader title="ATTACH TO CAMPAIGN" glyph="sigil-1" tone="arcane" sub="Activate a doctrine" />
+          <PanelHeader title={t('hb.library.attachHeading')} glyph="sigil-1" tone="arcane" sub={t('hb.library.attachSub')} />
 
           <div style={{ padding: 18 }}>
             <p className="ao-italic" style={{ color: 'var(--ink-quiet)', fontSize: 13, marginBottom: 16 }}>
-              Select a doctrine from the library and attach it to a campaign. The doctrine's content will become available to characters in that campaign.
+              {t('hb.library.attachBody')}
             </p>
 
-            <OrdoField label="Campaign" hint="Target campaign">
+            <OrdoField label={t('hb.library.campaign')} hint={t('hb.library.targetCampaign')}>
               <select
                 className="ao-input"
                 value={attachCampaignId}
                 onChange={(e) => setAttachCampaignId(e.target.value)}
                 style={{ width: '100%' }}
               >
-                <option value="">-- Select campaign --</option>
+                <option value="">{t('hb.library.selectCampaign')}</option>
                 {campaignList.map((c) => (
                   <option key={c.id} value={c.id}>{c.name}</option>
                 ))}
@@ -244,14 +246,14 @@ export default function HomebrewLibraryPage() {
             </OrdoField>
 
             <div style={{ marginTop: 12 }}>
-              <OrdoField label="Package" hint="Doctrine to attach">
+              <OrdoField label={t('hb.library.package')} hint={t('hb.library.doctrineToAttach')}>
                 <select
                   className="ao-input"
                   value={attachPackageId}
                   onChange={(e) => setAttachPackageId(e.target.value)}
                   style={{ width: '100%' }}
                 >
-                  <option value="">-- Select doctrine --</option>
+                  <option value="">{t('hb.library.selectDoctrine')}</option>
                   {libraryEntries.map((entry) => (
                     <option key={entry.id} value={entry.packageId}>
                       {entry.title} (v{entry.version})
@@ -262,14 +264,14 @@ export default function HomebrewLibraryPage() {
             </div>
 
             <div style={{ marginTop: 12 }}>
-              <OrdoField label="Pinned Version" hint="Leave empty for latest">
+              <OrdoField label={t('hb.library.pinnedVersion')} hint={t('hb.library.leaveEmptyLatest')}>
                 <input
                   className="ao-input"
                   type="number"
                   min="1"
                   value={attachPinnedVersion}
                   onChange={(e) => setAttachPinnedVersion(e.target.value)}
-                  placeholder="Latest"
+                  placeholder={t('hb.library.latest')}
                 />
               </OrdoField>
             </div>
@@ -287,7 +289,7 @@ export default function HomebrewLibraryPage() {
                 ) : (
                   <>
                     <Rune kind="sigil-1" size={14} color="currentColor" />
-                    <span style={{ marginLeft: 6 }}>Attach</span>
+                    <span style={{ marginLeft: 6 }}>{t('hb.library.attach')}</span>
                   </>
                 )}
               </button>
@@ -300,37 +302,37 @@ export default function HomebrewLibraryPage() {
       <Dialog open={attachOpen} onOpenChange={setAttachOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Attach Doctrine to Campaign</DialogTitle>
+            <DialogTitle>{t('hb.library.dialogTitle')}</DialogTitle>
           </DialogHeader>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <OrdoField label="Campaign" required>
+            <OrdoField label={t('hb.library.campaign')} required>
               <select
                 className="ao-input"
                 value={attachCampaignId}
                 onChange={(e) => setAttachCampaignId(e.target.value)}
                 style={{ width: '100%' }}
               >
-                <option value="">-- Select campaign --</option>
+                <option value="">{t('hb.library.selectCampaign')}</option>
                 {campaignList.map((c) => (
                   <option key={c.id} value={c.id}>{c.name}</option>
                 ))}
               </select>
             </OrdoField>
 
-            <OrdoField label="Pinned Version" hint="Leave empty for latest">
+            <OrdoField label={t('hb.library.pinnedVersion')} hint={t('hb.library.leaveEmptyLatest')}>
               <input
                 className="ao-input"
                 type="number"
                 min="1"
                 value={attachPinnedVersion}
                 onChange={(e) => setAttachPinnedVersion(e.target.value)}
-                placeholder="Latest"
+                placeholder={t('hb.library.latest')}
               />
             </OrdoField>
           </div>
           <DialogFooter>
             <button className="ao-btn ao-btn--ghost" onClick={() => setAttachOpen(false)} disabled={attachMutation.isPending}>
-              Withhold
+              {t('hb.library.withhold')}
             </button>
             <button
               className="ao-btn ao-btn--primary"
@@ -338,7 +340,7 @@ export default function HomebrewLibraryPage() {
               disabled={!attachCampaignId || attachMutation.isPending}
             >
               {attachMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Attach
+              {t('hb.library.attach')}
             </button>
           </DialogFooter>
         </DialogContent>

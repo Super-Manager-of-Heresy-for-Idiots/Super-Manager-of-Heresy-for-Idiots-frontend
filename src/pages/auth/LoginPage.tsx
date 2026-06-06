@@ -7,10 +7,11 @@ import { useLogin } from '@/hooks/useAuth';
 import { useAuthStore } from '@/store/authStore';
 import { getRoleRedirectPath } from '@/lib/utils';
 import { Rune, Sigil, OrdoDivider, OrdoPanel, OrdoField } from '@/components/ordo';
+import { useT } from '@/i18n/I18nContext';
 
 const loginSchema = z.object({
-  username: z.string().min(1, 'Username is required'),
-  password: z.string().min(1, 'Password is required'),
+  username: z.string().min(1, 'auth.login.errUsername'),
+  password: z.string().min(1, 'auth.login.errPassword'),
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
@@ -19,6 +20,7 @@ export default function LoginPage() {
   const [remember, setRemember] = useState(false);
   const loginMutation = useLogin();
   const { isAuthenticated, user } = useAuthStore();
+  const t = useT();
 
   const {
     register,
@@ -59,26 +61,26 @@ export default function LoginPage() {
         <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 14 }}>
           <Sigil size={48} glyph="sigil-3" />
           <div>
-            <div className="ao-engraved" style={{ fontSize: 12, color: 'var(--gold-pale)' }}>Ordo Arcanum</div>
-            <div className="ao-codex">Imperial Archive &middot; MMDXLIV</div>
+            <div className="ao-engraved" style={{ fontSize: 12, color: 'var(--gold-pale)' }}>{t('app.name')}</div>
+            <div className="ao-codex">{t('auth.brandSub')}</div>
           </div>
         </div>
 
         {/* Middle — hero text */}
         <div style={{ position: 'relative' }}>
-          <div className="ao-codex" style={{ marginBottom: 16, color: 'var(--ink-faint)' }}>&mdash; SACRAMENTUM &mdash;</div>
-          <div className="ao-h2" style={{ fontSize: 56, lineHeight: 1.05, maxWidth: 520 }}>The Chronicler&rsquo;s Vigil</div>
+          <div className="ao-codex" style={{ marginBottom: 16, color: 'var(--ink-faint)' }}>{t('auth.login.sacramentum')}</div>
+          <div className="ao-h2" style={{ fontSize: 56, lineHeight: 1.05, maxWidth: 520 }}>{t('auth.login.heroTitle')}</div>
           <p className="ao-italic" style={{ fontSize: 20, marginTop: 18, maxWidth: 480, color: 'var(--ink-quiet)' }}>
-            Every blade, every wound, every covenant &mdash; recorded in the Hand of the Ordo, sealed against time and ash.
+            {t('auth.login.heroText')}
           </p>
 
-          <OrdoDivider glyph="diamond-fill">SEAL OF ENTRY</OrdoDivider>
+          <OrdoDivider glyph="diamond-fill">{t('auth.login.sealOfEntry')}</OrdoDivider>
 
           <div style={{ display: 'flex', gap: 28, marginTop: 28 }}>
             {[
-              { label: 'Chapters', value: '148' },
-              { label: 'Souls Recorded', value: '3,402' },
-              { label: 'Vigil Continues', value: '912 d' },
+              { label: t('auth.login.statChapters'), value: '148' },
+              { label: t('auth.login.statSouls'), value: '3,402' },
+              { label: t('auth.login.statVigil'), value: '912 d' },
             ].map((stat) => (
               <div key={stat.label}>
                 <div className="ao-overline">{stat.label}</div>
@@ -90,8 +92,8 @@ export default function LoginPage() {
 
         {/* Bottom — version */}
         <div style={{ position: 'relative', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', color: 'var(--ink-faint)' }}>
-          <div className="ao-codex">Cohort VII &mdash; Vault of Ash and Brass</div>
-          <div className="ao-codex">v &middot; 4.21.3 &mdash; gilded</div>
+          <div className="ao-codex">{t('auth.cohort')}</div>
+          <div className="ao-codex">{t('auth.version')}</div>
         </div>
       </div>
 
@@ -110,8 +112,8 @@ export default function LoginPage() {
             {/* Top rune */}
             <div style={{ textAlign: 'center', marginBottom: 28 }}>
               <Rune kind="diamond" size={18} color="var(--gold)" />
-              <div className="ao-engraved ao-flicker" style={{ fontSize: 16, marginTop: 14 }}>Present Thy Seal</div>
-              <div className="ao-italic" style={{ fontSize: 14, marginTop: 6 }}>The Archive awaits authorisation</div>
+              <div className="ao-engraved ao-flicker" style={{ fontSize: 16, marginTop: 14 }}>{t('auth.login.presentSeal')}</div>
+              <div className="ao-italic" style={{ fontSize: 14, marginTop: 6 }}>{t('auth.login.awaits')}</div>
             </div>
 
             <OrdoDivider glyph="diamond-fill" />
@@ -122,25 +124,25 @@ export default function LoginPage() {
               style={{ display: 'flex', flexDirection: 'column', gap: 18, marginTop: 22 }}
             >
               <div>
-                <label className="ao-label">Sigil Address</label>
+                <label className="ao-label">{t('auth.login.sigilAddress')}</label>
                 <input
                   className="ao-input"
                   {...register('username')}
-                  placeholder="Thy chosen name..."
+                  placeholder={t('auth.login.sigilPlaceholder')}
                   autoComplete="username"
                 />
                 {errors.username && (
                   <span style={{ fontSize: 12, color: 'var(--ember)', display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
                     <Rune kind="flame" size={11} color="var(--ember)" />
-                    {errors.username.message}
+                    {t(errors.username.message ?? '')}
                   </span>
                 )}
               </div>
 
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                  <label className="ao-label">Cipher Word</label>
-                  <a className="ao-codex" style={{ cursor: 'pointer', color: 'var(--gold-pale)' }}>recover</a>
+                  <label className="ao-label">{t('auth.login.cipherWord')}</label>
+                  <a className="ao-codex" style={{ cursor: 'pointer', color: 'var(--gold-pale)' }}>{t('auth.login.recover')}</a>
                 </div>
                 <div style={{ position: 'relative' }}>
                   <input
@@ -158,7 +160,7 @@ export default function LoginPage() {
                 {errors.password && (
                   <span style={{ fontSize: 12, color: 'var(--ember)', display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
                     <Rune kind="flame" size={11} color="var(--ember)" />
-                    {errors.password.message}
+                    {t(errors.password.message ?? '')}
                   </span>
                 )}
               </div>
@@ -178,7 +180,7 @@ export default function LoginPage() {
                   {remember && <Rune kind="check" size={10} color="var(--abyss)" />}
                 </span>
                 <span className="ao-italic" style={{ cursor: 'pointer' }} onClick={() => setRemember(!remember)}>
-                  Bind this Hand to my Sigil
+                  {t('auth.login.remember')}
                 </span>
               </div>
 
@@ -190,12 +192,12 @@ export default function LoginPage() {
                 style={{ marginTop: 4 }}
               >
                 <Rune kind="diamond-fill" size={9} />
-                {loginMutation.isPending ? 'Unsealing...' : 'Enter the Archive'}
+                {loginMutation.isPending ? t('auth.login.submitting') : t('auth.login.submit')}
               </button>
             </form>
 
             {/* OR divider */}
-            <OrdoDivider>OR</OrdoDivider>
+            <OrdoDivider>{t('auth.login.or')}</OrdoDivider>
 
             {/* Accept Invitation */}
             <Link
@@ -204,12 +206,12 @@ export default function LoginPage() {
               style={{ textDecoration: 'none', textAlign: 'center', marginTop: 8 }}
             >
               <Rune kind="scroll" size={12} />
-              Accept Invitation
+              {t('auth.login.acceptInvite')}
             </Link>
           </OrdoPanel>
 
           <div style={{ textAlign: 'center', marginTop: 20, color: 'var(--ink-faint)' }}>
-            <span className="ao-codex">Inscribed by the Ordo &middot; Bound by oath</span>
+            <span className="ao-codex">{t('auth.login.footer')}</span>
           </div>
         </div>
       </div>

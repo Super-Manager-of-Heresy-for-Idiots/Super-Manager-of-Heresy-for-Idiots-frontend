@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { ModalScene, OrdoField, Rune, OrdoDivider } from '@/components/ordo';
 import { useTransferItem } from '@/hooks/useInventory';
+import { useT } from '@/i18n/I18nContext';
 import type { ItemInstanceResponse, CampaignMember } from '@/types';
 
 /* ── Props ─────────────────────────────────────────────────────── */
@@ -25,6 +26,7 @@ export function ItemTransferModal({
   fromCharId,
   campaignMembers,
 }: ItemTransferModalProps) {
+  const t = useT();
   const transferMutation = useTransferItem();
 
   const [selectedRecipient, setSelectedRecipient] = useState('');
@@ -79,7 +81,7 @@ export function ItemTransferModal({
         onClick={() => handleOpenChange(false)}
         disabled={transferMutation.isPending}
       >
-        Cancel
+        {t('common.cancel')}
       </button>
       <button
         className="ao-btn ao-btn--primary"
@@ -89,7 +91,7 @@ export function ItemTransferModal({
         {transferMutation.isPending && (
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
         )}
-        Transfer
+        {t('cmp.transfer.transfer')}
       </button>
     </div>
   );
@@ -100,15 +102,15 @@ export function ItemTransferModal({
     <ModalScene
       open={open}
       onOpenChange={handleOpenChange}
-      overline="Conveyance"
-      title="Transfer Item"
+      overline={t('cmp.transfer.overline')}
+      title={t('cmp.transfer.title')}
       sub={displayName}
       rune="arrow-r"
       footer={footer}
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         {/* Recipient selection */}
-        <OrdoField label="Recipient" required>
+        <OrdoField label={t('cmp.transfer.recipient')} required>
           <div
             style={{
               display: 'flex',
@@ -131,7 +133,7 @@ export function ItemTransferModal({
                   fontSize: 13,
                 }}
               >
-                No other members in this campaign.
+                {t('cmp.transfer.noMembers')}
               </div>
             ) : (
               recipients.map((member) => {
@@ -179,8 +181,8 @@ export function ItemTransferModal({
         {/* Quantity input (only if stackable) */}
         {isStackable && (
           <OrdoField
-            label="Quantity"
-            hint={`Available: ${item.quantity}`}
+            label={t('cmp.transfer.quantity')}
+            hint={t('cmp.transfer.available', { count: item.quantity })}
           >
             <input
               className="ao-input"
@@ -221,14 +223,13 @@ export function ItemTransferModal({
                     color: 'var(--ember)',
                   }}
                 >
-                  Equipped Item
+                  {t('cmp.transfer.equippedItem')}
                 </div>
                 <div
                   className="ao-italic"
                   style={{ fontSize: 12, color: 'var(--ink-faint)' }}
                 >
-                  This item is currently equipped. Transferring it will
-                  automatically unequip it from the current holder.
+                  {t('cmp.transfer.equippedWarning')}
                 </div>
               </div>
             </div>

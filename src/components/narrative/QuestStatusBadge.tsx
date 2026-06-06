@@ -1,12 +1,13 @@
 import { Rune } from '@/components/ordo';
+import { useT } from '@/i18n/I18nContext';
 import type { QuestStatus } from '@/types';
 
-const STATUS_MAP: Record<QuestStatus, { label: string; color: string; glyph: string }> = {
-  ACTIVE:    { label: 'Active',    color: '#d4b478', glyph: 'diamond-fill' },
-  COMPLETED: { label: 'Completed', color: '#6db86a', glyph: 'check' },
-  FAILED:    { label: 'Failed',    color: '#c87a3a', glyph: 'x' },
-  HIDDEN:    { label: 'Hidden',    color: 'var(--ink-ghost)', glyph: 'lock' },
-  ARCHIVED:  { label: 'Archived',  color: 'var(--ink-faint)', glyph: 'book' },
+const STATUS_MAP: Record<QuestStatus, { labelKey: string; color: string; glyph: string }> = {
+  ACTIVE:    { labelKey: 'cmp.quest.ACTIVE',    color: '#d4b478', glyph: 'diamond-fill' },
+  COMPLETED: { labelKey: 'cmp.quest.COMPLETED', color: '#6db86a', glyph: 'check' },
+  FAILED:    { labelKey: 'cmp.quest.FAILED',    color: '#c87a3a', glyph: 'x' },
+  HIDDEN:    { labelKey: 'cmp.quest.HIDDEN',    color: 'var(--ink-ghost)', glyph: 'lock' },
+  ARCHIVED:  { labelKey: 'cmp.quest.ARCHIVED',  color: 'var(--ink-faint)', glyph: 'book' },
 };
 
 interface QuestStatusBadgeProps {
@@ -14,6 +15,7 @@ interface QuestStatusBadgeProps {
 }
 
 export function QuestStatusBadge({ status }: QuestStatusBadgeProps) {
+  const t = useT();
   const meta = STATUS_MAP[status] ?? STATUS_MAP.ACTIVE;
 
   return (
@@ -34,7 +36,7 @@ export function QuestStatusBadge({ status }: QuestStatusBadgeProps) {
       }}
     >
       <Rune kind={meta.glyph} size={8} color={meta.color} />
-      {meta.label}
+      {t(meta.labelKey)}
     </span>
   );
 }

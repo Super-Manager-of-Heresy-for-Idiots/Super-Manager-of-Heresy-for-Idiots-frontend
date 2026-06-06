@@ -12,8 +12,10 @@ import {
   useDisableAdminRace,
 } from '@/hooks/useRaces';
 import type { RaceRequest, RaceResponse } from '@/types';
+import { useT } from '@/i18n/I18nContext';
 
 export default function CharacterRacesPage() {
+  const t = useT();
   const { data, isLoading } = useAdminRaces();
   const createMutation = useCreateAdminRace();
   const updateMutation = useUpdateAdminRace();
@@ -56,11 +58,11 @@ export default function CharacterRacesPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-heading font-bold">Species / Races</h1>
-          <p className="text-sm text-muted-foreground">System (PHB 2024) reference species. Homebrew species live inside doctrines.</p>
+          <h1 className="text-2xl font-heading font-bold">{t('adm.races.title')}</h1>
+          <p className="text-sm text-muted-foreground">{t('adm.races.subtitle')}</p>
         </div>
         <Button variant="gold" onClick={handleAdd}>
-          <Plus className="h-4 w-4 mr-2" /> Add Species
+          <Plus className="h-4 w-4 mr-2" /> {t('adm.races.addSpecies')}
         </Button>
       </div>
 
@@ -72,21 +74,21 @@ export default function CharacterRacesPage() {
         </div>
       ) : !data || data.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground">
-          <p className="text-lg">No species found</p>
-          <p className="text-sm mt-1">Click "Add Species" to seed your D&amp;D 2024 races.</p>
+          <p className="text-lg">{t('adm.races.emptyTitle')}</p>
+          <p className="text-sm mt-1">{t('adm.races.emptyHint')}</p>
         </div>
       ) : (
         <div className="border border-border rounded-lg overflow-hidden">
           <table className="w-full">
             <thead>
               <tr className="border-b border-border bg-muted/50">
-                <th className="px-4 py-3 text-left text-sm font-semibold">Name</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold">Source</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold">Size</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold">Speed</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold">Lineages</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold">Status</th>
-                <th className="px-4 py-3 text-right text-sm font-semibold w-32">Actions</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold">{t('adm.races.colName')}</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold">{t('adm.races.colSource')}</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold">{t('adm.races.colSize')}</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold">{t('adm.races.colSpeed')}</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold">{t('adm.races.colLineages')}</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold">{t('adm.races.colStatus')}</th>
+                <th className="px-4 py-3 text-right text-sm font-semibold w-32">{t('adm.races.colActions')}</th>
               </tr>
             </thead>
             <tbody>
@@ -102,17 +104,17 @@ export default function CharacterRacesPage() {
                     </td>
                     <td className="px-4 py-3 text-sm">
                       <Badge variant={race.sourceType === 'SYSTEM' ? 'default' : 'secondary'}>
-                        {race.sourceType === 'SYSTEM' ? 'System' : (race.homebrewPackageTitle ? `Homebrew: ${race.homebrewPackageTitle}` : 'Homebrew')}
+                        {race.sourceType === 'SYSTEM' ? t('adm.races.sourceSystem') : (race.homebrewPackageTitle ? t('adm.races.sourceHomebrewNamed', { title: race.homebrewPackageTitle }) : t('adm.races.sourceHomebrew'))}
                       </Badge>
                     </td>
                     <td className="px-4 py-3 text-sm">{race.defaultSize}</td>
-                    <td className="px-4 py-3 text-sm">{race.speed?.walk ?? '—'} ft</td>
+                    <td className="px-4 py-3 text-sm">{race.speed?.walk ?? '—'} {t('adm.races.speedUnit')}</td>
                     <td className="px-4 py-3 text-sm">
                       {race.lineageOptions?.length ?? 0}
-                      {race.lineageRequired && <span className="text-xs text-dnd-red ml-1">required</span>}
+                      {race.lineageRequired && <span className="text-xs text-dnd-red ml-1">{t('adm.races.lineageRequired')}</span>}
                     </td>
                     <td className="px-4 py-3 text-sm">
-                      <Badge variant={race.active ? 'default' : 'outline'}>{race.active ? 'Active' : 'Disabled'}</Badge>
+                      <Badge variant={race.active ? 'default' : 'outline'}>{race.active ? t('adm.races.statusActive') : t('adm.races.statusDisabled')}</Badge>
                     </td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex justify-end gap-1">
@@ -124,7 +126,7 @@ export default function CharacterRacesPage() {
                             variant="ghost"
                             size="icon"
                             className="h-8 w-8"
-                            title="Disable"
+                            title={t('adm.races.disable')}
                             disabled={toggling}
                             onClick={() => disableMutation.mutate(race.id)}
                           >
@@ -135,7 +137,7 @@ export default function CharacterRacesPage() {
                             variant="ghost"
                             size="icon"
                             className="h-8 w-8"
-                            title="Enable"
+                            title={t('adm.races.enable')}
                             disabled={toggling}
                             onClick={() => enableMutation.mutate(race.id)}
                           >

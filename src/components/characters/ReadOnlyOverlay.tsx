@@ -1,21 +1,24 @@
 import { Rune } from '@/components/ordo';
 import { CharStatusBadge } from '@/components/campaigns';
+import { useT } from '@/i18n/I18nContext';
 
 interface ReadOnlyOverlayProps {
   status: string;
   characterName?: string;
 }
 
-const STATUS_DESCRIPTIONS: Record<string, string> = {
-  DEAD: 'This character has fallen and their sheet is sealed.',
-  RESERVE: 'This character is on reserve and their sheet is locked.',
+const STATUS_DESCRIPTION_KEYS: Record<string, string> = {
+  DEAD: 'cmp.readonly.dead',
+  RESERVE: 'cmp.readonly.reserve',
 };
 
 export function ReadOnlyOverlay({ status, characterName }: ReadOnlyOverlayProps) {
+  const t = useT();
   const isDead = status === 'DEAD';
   const gradientColor = isDead ? 'rgba(176,106,106,0.12)' : 'rgba(90,90,90,0.10)';
-  const description =
-    STATUS_DESCRIPTIONS[status] ?? 'This character sheet is read-only.';
+  const description = t(
+    STATUS_DESCRIPTION_KEYS[status] ?? 'cmp.readonly.default',
+  );
 
   return (
     <div

@@ -4,6 +4,7 @@ import { OrdoPanel, PanelHeader, Rune } from '@/components/ordo';
 import { CodexID } from '@/components/homebrew/CodexID';
 import { VisibilityToggle, QuestStatusBadge } from '@/components/narrative';
 import { BackLink } from '@/components/campaigns';
+import { useT } from '@/i18n/I18nContext';
 import { useQuest, useUpdateQuest } from '@/hooks/useQuests';
 import type { QuestStatus, QuestReward } from '@/types';
 
@@ -33,6 +34,7 @@ function rewardGlyph(type: string): string {
 /* ── page ────────────────────────────────────────────────────── */
 
 export default function QuestDetailPage() {
+  const t = useT();
   const { campaignId, questId } = useParams<{ campaignId: string; questId: string }>();
   const backTo = `/campaigns/${campaignId}/quests`;
   const { data: quest, isLoading, error, refetch } = useQuest(campaignId!, questId!);
@@ -60,7 +62,7 @@ export default function QuestDetailPage() {
   if (isLoading) {
     return (
       <div>
-        <BackLink to={backTo} label="К квестам" style={{ marginBottom: 12 }} />
+        <BackLink to={backTo} label={t('camp2.back.quests')} style={{ marginBottom: 12 }} />
         <div style={{ display: 'flex', gap: 24 }}>
         <div style={{ flex: '1.5 1 0' }}>
           <div className="ao-panel ao-frame ao-breathe" style={{ padding: 24, minHeight: 300 }}>
@@ -88,12 +90,12 @@ export default function QuestDetailPage() {
   if (error || !quest) {
     return (
       <div>
-        <BackLink to={backTo} label="К квестам" style={{ marginBottom: 12 }} />
+        <BackLink to={backTo} label={t('camp2.back.quests')} style={{ marginBottom: 12 }} />
         <div style={{ textAlign: 'center', padding: '48px 0' }}>
           <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginBottom: 16 }}>
-            This quest could not be found within the chronicle.
+            {t('camp2.questDetail.notFound')}
           </p>
-          <button className="ao-btn" onClick={() => refetch()}>Retry</button>
+          <button className="ao-btn" onClick={() => refetch()}>{t('common.retry')}</button>
         </div>
       </div>
     );
@@ -107,7 +109,7 @@ export default function QuestDetailPage() {
 
   return (
     <div>
-      <BackLink to={backTo} label="К квестам" style={{ marginBottom: 12 }} />
+      <BackLink to={backTo} label={t('camp2.back.quests')} style={{ marginBottom: 12 }} />
       <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start' }}>
       {/* ═══ Left column ═══ */}
       <div style={{ flex: '1.5 1 0', display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -132,11 +134,11 @@ export default function QuestDetailPage() {
 
         {/* Rewards panel */}
         <OrdoPanel frame padding={0}>
-          <PanelHeader title="REWARDS" glyph="coin" tone="gold" />
+          <PanelHeader title={t('camp2.questDetail.rewards')} glyph="coin" tone="gold" />
           <div style={{ padding: 16 }}>
             {rewards.length === 0 ? (
               <p className="ao-italic" style={{ color: 'var(--ink-ghost)', fontSize: 13 }}>
-                No rewards have been decreed for this quest.
+                {t('camp2.questDetail.noRewards')}
               </p>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -155,7 +157,7 @@ export default function QuestDetailPage() {
                     <Rune kind={rewardGlyph(reward.type ?? '')} size={14} color="var(--gold)" />
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <span style={{ fontSize: 13, color: 'var(--ink-bright)' }}>
-                        {reward.itemTemplateName || reward.type || 'Reward'}
+                        {reward.itemTemplateName || reward.type || t('camp2.questDetail.reward')}
                       </span>
                       {reward.quantity != null && (
                         <span
@@ -184,7 +186,7 @@ export default function QuestDetailPage() {
       <div style={{ flex: '1 1 0', display: 'flex', flexDirection: 'column', gap: 20 }}>
         {/* Status setter */}
         <OrdoPanel frame padding={0}>
-          <PanelHeader title="SET STATUS" glyph="diamond-fill" tone="gold" />
+          <PanelHeader title={t('camp2.questDetail.setStatus')} glyph="diamond-fill" tone="gold" />
           <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
             {QUEST_STATUSES.map((status) => {
               const isActive = quest.status === status;
@@ -224,7 +226,7 @@ export default function QuestDetailPage() {
                       }}
                     />
                   )}
-                  {status.charAt(0) + status.slice(1).toLowerCase()}
+                  {t(`camp2.questStatus.${status}`)}
                 </button>
               );
             })}

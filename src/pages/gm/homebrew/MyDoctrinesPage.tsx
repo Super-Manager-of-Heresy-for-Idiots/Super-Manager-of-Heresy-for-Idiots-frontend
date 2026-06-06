@@ -8,12 +8,14 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useMyPackages, useDeleteHomebrew, usePublishHomebrew, useUnpublishHomebrew } from '@/hooks/useHomebrew';
 import { useAuthStore } from '@/store/authStore';
+import { useT } from '@/i18n/I18nContext';
 import { formatTimeAgo } from '@/lib/utils';
 import type { HomebrewPackageResponse, HomebrewStatus } from '@/types';
 
 type FilterStatus = 'all' | HomebrewStatus | 'DELETED';
 
 export default function MyDoctrinesPage() {
+  const t = useT();
   const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
   const [filter, setFilter] = useState<FilterStatus>('all');
@@ -44,11 +46,11 @@ export default function MyDoctrinesPage() {
   };
 
   const tabs: { id: FilterStatus; label: string }[] = [
-    { id: 'all', label: `All \u00b7 ${totalElements}` },
-    { id: 'DRAFT', label: `Draft \u00b7 ${statusCounts.draft}` },
-    { id: 'PUBLISHED', label: `Sealed \u00b7 ${statusCounts.published}` },
-    { id: 'UNPUBLISHED', label: `Withheld \u00b7 ${statusCounts.unpublished}` },
-    { id: 'DELETED', label: `Redacted \u00b7 ${statusCounts.deleted}` },
+    { id: 'all', label: t('hb.my.tabAll', { count: totalElements }) },
+    { id: 'DRAFT', label: t('hb.my.tabDraft', { count: statusCounts.draft }) },
+    { id: 'PUBLISHED', label: t('hb.my.tabSealed', { count: statusCounts.published }) },
+    { id: 'UNPUBLISHED', label: t('hb.my.tabWithheld', { count: statusCounts.unpublished }) },
+    { id: 'DELETED', label: t('hb.my.tabRedacted', { count: statusCounts.deleted }) },
   ];
 
   return (
@@ -70,21 +72,21 @@ export default function MyDoctrinesPage() {
             <Sigil size={52} glyph="sigil-2" color="var(--gold)" />
             <div>
               <div className="ao-overline" style={{ color: 'var(--ink-faint)' }}>
-                Game-Master &middot; {user?.username}
+                {t('hb.my.gameMaster')} &middot; {user?.username}
               </div>
-              <div className="ao-h5" style={{ marginTop: 4 }}>Private Archive</div>
+              <div className="ao-h5" style={{ marginTop: 4 }}>{t('hb.my.privateArchive')}</div>
               <div className="ao-italic" style={{ fontSize: 12, color: 'var(--ink-quiet)', marginTop: 2 }}>
-                restricted workshop
+                {t('hb.my.restrictedWorkshop')}
               </div>
             </div>
           </div>
 
           {/* Stat columns */}
           {[
-            { label: 'Drafts', value: statusCounts.draft, color: 'var(--ink-quiet)' },
-            { label: 'Sealed', value: statusCounts.published, color: 'var(--gold)' },
-            { label: 'Withheld', value: statusCounts.unpublished, color: 'var(--ink-quiet)' },
-            { label: 'Redacted', value: statusCounts.deleted, color: 'var(--ember)' },
+            { label: t('hb.my.drafts'), value: statusCounts.draft, color: 'var(--ink-quiet)' },
+            { label: t('hb.my.sealed'), value: statusCounts.published, color: 'var(--gold)' },
+            { label: t('hb.my.withheld'), value: statusCounts.unpublished, color: 'var(--ink-quiet)' },
+            { label: t('hb.my.redacted'), value: statusCounts.deleted, color: 'var(--ember)' },
           ].map((s, i) => (
             <div key={i} style={{
               padding: '20px 24px',
@@ -117,7 +119,7 @@ export default function MyDoctrinesPage() {
           <div style={{ position: 'relative' }}>
             <input
               className="ao-input"
-              placeholder="Search doctrines..."
+              placeholder={t('hb.my.searchPlaceholder')}
               value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(0); }}
               style={{ paddingLeft: 34, width: 260 }}
@@ -126,12 +128,12 @@ export default function MyDoctrinesPage() {
               <Rune kind="search" size={13} />
             </span>
           </div>
-          <button className="ao-iconbtn" title="Filter">
+          <button className="ao-iconbtn" title={t('hb.my.filter')}>
             <Rune kind="filter" size={13} />
           </button>
         </div>
         <button className="ao-btn ao-btn--primary" onClick={() => navigate('/gm/homebrew/new')}>
-          <Rune kind="plus" size={11} /> Author New Doctrine
+          <Rune kind="plus" size={11} /> {t('hb.my.authorNew')}
         </button>
       </div>
 
@@ -141,13 +143,13 @@ export default function MyDoctrinesPage() {
         borderBottom: '1px solid var(--rule)',
         marginBottom: 18,
       }}>
-        {tabs.map((t) => (
+        {tabs.map((tab) => (
           <button
-            key={t.id}
-            className={`ao-tab${filter === t.id ? ' is-active' : ''}`}
-            onClick={() => { setFilter(t.id); setPage(0); }}
+            key={tab.id}
+            className={`ao-tab${filter === tab.id ? ' is-active' : ''}`}
+            onClick={() => { setFilter(tab.id); setPage(0); }}
           >
-            {t.label}
+            {tab.label}
           </button>
         ))}
       </div>
@@ -161,15 +163,15 @@ export default function MyDoctrinesPage() {
         <div style={{ textAlign: 'center', padding: 60 }}>
           <Rune kind="scroll" size={64} color="var(--ink-quiet)" />
           <div className="ao-codex" style={{ marginTop: 14, color: 'var(--ink-faint)' }}>
-            &mdash; THE ARCHIVE IS EMPTY &mdash;
+            {t('hb.my.emptyOverline')}
           </div>
-          <div className="ao-h5" style={{ marginTop: 10, color: 'var(--ink)' }}>No Doctrines Yet</div>
+          <div className="ao-h5" style={{ marginTop: 10, color: 'var(--ink)' }}>{t('hb.my.emptyTitle')}</div>
           <p className="ao-italic" style={{ fontSize: 14, color: 'var(--ink-quiet)', maxWidth: 440, margin: '8px auto 0' }}>
-            Author your first doctrine and publish it to the marketplace.
+            {t('hb.my.emptyBody')}
           </p>
           <div style={{ marginTop: 22, display: 'flex', justifyContent: 'center' }}>
             <button className="ao-btn ao-btn--primary" onClick={() => navigate('/gm/homebrew/new')}>
-              <Rune kind="plus" size={11} /> Author Your First Doctrine
+              <Rune kind="plus" size={11} /> {t('hb.my.authorFirst')}
             </button>
           </div>
         </div>
@@ -184,11 +186,11 @@ export default function MyDoctrinesPage() {
             background: 'rgba(0,0,0,0.25)',
             alignItems: 'center',
           }}>
-            <span className="ao-overline">Ver</span>
-            <span className="ao-overline">Doctrine</span>
-            <span className="ao-overline">State</span>
-            <span className="ao-overline">Content</span>
-            <span className="ao-overline">Last Inscription</span>
+            <span className="ao-overline">{t('hb.my.colVer')}</span>
+            <span className="ao-overline">{t('hb.my.colDoctrine')}</span>
+            <span className="ao-overline">{t('hb.my.colState')}</span>
+            <span className="ao-overline">{t('hb.my.colContent')}</span>
+            <span className="ao-overline">{t('hb.my.colLastInscription')}</span>
             <span />
           </div>
 
@@ -212,15 +214,15 @@ export default function MyDoctrinesPage() {
       <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Redact Doctrine?</AlertDialogTitle>
+            <AlertDialogTitle>{t('hb.my.deleteTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              The doctrine will be marked as deleted. GMs who already instated it will retain their reference. This cannot be undone.
+              {t('hb.my.deleteDescription')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Withhold</AlertDialogCancel>
+            <AlertDialogCancel>{t('hb.my.withhold')}</AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              Redact
+              {t('hb.my.redactAction')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -251,6 +253,7 @@ function PackageRow({
   onDelete: () => void;
   onView: () => void;
 }) {
+  const t = useT();
   const isDeleted = pkg.isDeleted;
   const isPublished = pkg.status === 'PUBLISHED';
   const isUnpub = pkg.status === 'UNPUBLISHED';
@@ -308,7 +311,7 @@ function PackageRow({
               color: 'var(--ember)',
               fontFamily: 'var(--font-mono)',
             }}>
-              [REDACTED]
+              {t('hb.my.redactedBadge')}
             </span>
           )}
         </div>
@@ -316,7 +319,7 @@ function PackageRow({
           <CodexID>{pkg.id.substring(0, 8)}</CodexID>
           <span style={{ color: 'var(--ink-faint)', fontSize: 11 }}>&middot;</span>
           <div style={{ display: 'flex', gap: 4 }}>
-            {pkg.tags.slice(0, 3).map((t) => <HBTag key={t}>{t}</HBTag>)}
+            {pkg.tags.slice(0, 3).map((tag) => <HBTag key={tag}>{tag}</HBTag>)}
             {pkg.tags.length > 3 && (
               <span style={{ fontSize: 11, color: 'var(--ink-faint)' }}>+{pkg.tags.length - 3}</span>
             )}
@@ -334,7 +337,7 @@ function PackageRow({
         )}
         {isDeleted && (
           <div style={{ fontSize: 11, color: 'rgba(179,70,26,0.7)', marginTop: 4 }}>
-            {pkg.downloadCount} installs persist
+            {t('hb.my.installsPersist', { count: pkg.downloadCount })}
           </div>
         )}
       </div>
@@ -353,27 +356,27 @@ function PackageRow({
       <div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end', alignItems: 'center' }}>
         {isDraft && (
           <button className="ao-btn ao-btn--primary ao-btn--sm" onClick={onEdit}>
-            <Rune kind="diamond" size={9} /> Edit
+            <Rune kind="diamond" size={9} /> {t('hb.my.edit')}
           </button>
         )}
         {isPublished && (
           <button className="ao-btn ao-btn--ghost ao-btn--sm" onClick={onUnpublish}>
-            <Rune kind="lock" size={9} /> Withhold
+            <Rune kind="lock" size={9} /> {t('hb.my.withholdBtn')}
           </button>
         )}
         {isUnpub && (
           <button className="ao-btn ao-btn--primary ao-btn--sm" onClick={onPublish}>
-            <Rune kind="diamond-fill" size={9} /> Re-Seal
+            <Rune kind="diamond-fill" size={9} /> {t('hb.my.reSeal')}
           </button>
         )}
         {!isDeleted && (
-          <button className="ao-iconbtn" onClick={onDelete} title="More actions" style={{ width: 28, height: 28 }}>
+          <button className="ao-iconbtn" onClick={onDelete} title={t('hb.my.moreActions')} style={{ width: 28, height: 28 }}>
             <Rune kind="dots" size={13} color="var(--ink-quiet)" />
           </button>
         )}
         {isDeleted && (
           <button className="ao-btn ao-btn--ghost ao-btn--sm" onClick={onView}>
-            Audit
+            {t('hb.my.auditBtn')}
           </button>
         )}
       </div>

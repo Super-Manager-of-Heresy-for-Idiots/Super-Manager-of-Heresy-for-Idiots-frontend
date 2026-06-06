@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { questsApi } from '@/api/quests.api';
+import { useT } from '@/i18n/I18nContext';
 import type {
   CreateQuestRequest,
   UpdateQuestRequest,
@@ -33,22 +34,24 @@ export function useQuest(campaignId: string, questId: string) {
 
 export function useCreateQuest() {
   const queryClient = useQueryClient();
+  const t = useT();
 
   return useMutation({
     mutationFn: ({ campaignId, data }: { campaignId: string; data: CreateQuestRequest }) =>
       questsApi.create(campaignId, data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'quests'] });
-      toast.success('Quest created!');
+      toast.success(t('hk.quest.created'));
     },
     onError: (error: AxiosError<ApiError>) => {
-      toast.error(error.response?.data?.message || 'Failed to create quest');
+      toast.error(error.response?.data?.message || t('hk.quest.createFailed'));
     },
   });
 }
 
 export function useUpdateQuest() {
   const queryClient = useQueryClient();
+  const t = useT();
 
   return useMutation({
     mutationFn: ({
@@ -63,26 +66,27 @@ export function useUpdateQuest() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'quests'] });
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'quests', variables.questId] });
-      toast.success('Quest updated!');
+      toast.success(t('hk.quest.updated'));
     },
     onError: (error: AxiosError<ApiError>) => {
-      toast.error(error.response?.data?.message || 'Failed to update quest');
+      toast.error(error.response?.data?.message || t('hk.quest.updateFailed'));
     },
   });
 }
 
 export function useDeleteQuest() {
   const queryClient = useQueryClient();
+  const t = useT();
 
   return useMutation({
     mutationFn: ({ campaignId, questId }: { campaignId: string; questId: string }) =>
       questsApi.delete(campaignId, questId),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'quests'] });
-      toast.success('Quest deleted!');
+      toast.success(t('hk.quest.deleted'));
     },
     onError: (error: AxiosError<ApiError>) => {
-      toast.error(error.response?.data?.message || 'Failed to delete quest');
+      toast.error(error.response?.data?.message || t('hk.quest.deleteFailed'));
     },
   });
 }
@@ -91,6 +95,7 @@ export function useDeleteQuest() {
 
 export function useAddQuestNote() {
   const queryClient = useQueryClient();
+  const t = useT();
 
   return useMutation({
     mutationFn: ({
@@ -106,10 +111,10 @@ export function useAddQuestNote() {
       queryClient.invalidateQueries({
         queryKey: ['campaigns', variables.campaignId, 'quests', variables.questId],
       });
-      toast.success('Note added!');
+      toast.success(t('hk.quest.noteAdded'));
     },
     onError: (error: AxiosError<ApiError>) => {
-      toast.error(error.response?.data?.message || 'Failed to add note');
+      toast.error(error.response?.data?.message || t('hk.quest.noteAddFailed'));
     },
   });
 }

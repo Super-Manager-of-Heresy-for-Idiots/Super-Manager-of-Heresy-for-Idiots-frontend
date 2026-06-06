@@ -1,4 +1,5 @@
 import { Rune } from '@/components/ordo';
+import { useT } from '@/i18n/I18nContext';
 
 interface RatingControlProps {
   likes: number;
@@ -15,6 +16,7 @@ export function RatingControl({
   size = 'md',
   onRate,
 }: RatingControlProps) {
+  const t = useT();
   const net = likes - dislikes;
   const isSm = size === 'sm';
   const iconSize = isSm ? 10 : 13;
@@ -47,7 +49,7 @@ export function RatingControl({
           color: mine === 'like' ? '#8fbc8f' : 'var(--ink-quiet)',
           transition: 'background 0.15s',
         }}
-        title="Like"
+        title={t('cmp2.rating.like')}
       >
         <Rune kind="arrow-up" size={iconSize} color={mine === 'like' ? '#8fbc8f' : 'var(--ink-quiet)'} />
         <span className="ao-num" style={{ fontSize, color: mine === 'like' ? '#8fbc8f' : 'var(--ink-quiet)' }}>
@@ -92,7 +94,7 @@ export function RatingControl({
           color: mine === 'dislike' ? '#d8896a' : 'var(--ink-quiet)',
           transition: 'background 0.15s',
         }}
-        title="Dislike"
+        title={t('cmp2.rating.dislike')}
       >
         <span className="ao-num" style={{ fontSize, color: mine === 'dislike' ? '#d8896a' : 'var(--ink-quiet)' }}>
           {dislikes}

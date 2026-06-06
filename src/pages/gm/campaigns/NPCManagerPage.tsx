@@ -17,6 +17,7 @@ import {
   useSetNpcVisibility,
 } from '@/hooks/useNpcs';
 import { BackLink } from '@/components/campaigns';
+import { useT } from '@/i18n/I18nContext';
 import type { NpcResponse } from '@/types';
 
 /* ── helpers ─────────────────────────────────────────────────── */
@@ -31,6 +32,7 @@ function glyphForNpc(id: string): string {
 /* ── page ────────────────────────────────────────────────────── */
 
 export default function NPCManagerPage() {
+  const t = useT();
   const { campaignId } = useParams<{ campaignId: string }>();
   const navigate = useNavigate();
   const { data: npcs, isLoading, error, refetch } = useCampaignNpcs(campaignId!);
@@ -83,11 +85,11 @@ export default function NPCManagerPage() {
   if (isLoading) {
     return (
       <div>
-        <BackLink to={backTo} label="К кампании" style={{ marginBottom: 12 }} />
+        <BackLink to={backTo} label={t('camp2.back.campaign')} style={{ marginBottom: 12 }} />
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 32 }}>
           <div>
-            <p className="ao-overline" style={{ color: 'var(--gold)' }}>Dramatis Personae</p>
-            <h3 className="ao-h3" style={{ marginTop: 4 }}>Non-Player Characters</h3>
+            <p className="ao-overline" style={{ color: 'var(--gold)' }}>{t('camp2.npcMgr.overline')}</p>
+            <h3 className="ao-h3" style={{ marginTop: 4 }}>{t('camp2.npcMgr.title')}</h3>
           </div>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -109,12 +111,12 @@ export default function NPCManagerPage() {
   if (error) {
     return (
       <div>
-        <BackLink to={backTo} label="К кампании" style={{ marginBottom: 12 }} />
+        <BackLink to={backTo} label={t('camp2.back.campaign')} style={{ marginBottom: 12 }} />
         <div style={{ textAlign: 'center', padding: '48px 0' }}>
           <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginBottom: 16 }}>
-            The chronicle could not be read. Its pages remain sealed.
+            {t('camp2.npcMgr.loadError')}
           </p>
-          <button className="ao-btn" onClick={() => refetch()}>Retry</button>
+          <button className="ao-btn" onClick={() => refetch()}>{t('common.retry')}</button>
         </div>
       </div>
     );
@@ -124,14 +126,14 @@ export default function NPCManagerPage() {
 
   return (
     <div>
-      <BackLink to={backTo} label="К кампании" style={{ marginBottom: 12 }} />
+      <BackLink to={backTo} label={t('camp2.back.campaign')} style={{ marginBottom: 12 }} />
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 32 }}>
         <div>
-          <p className="ao-overline" style={{ color: 'var(--gold)' }}>Dramatis Personae</p>
-          <h3 className="ao-h3" style={{ marginTop: 4 }}>Non-Player Characters</h3>
+          <p className="ao-overline" style={{ color: 'var(--gold)' }}>{t('camp2.npcMgr.overline')}</p>
+          <h3 className="ao-h3" style={{ marginTop: 4 }}>{t('camp2.npcMgr.title')}</h3>
           <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 13, marginTop: 4 }}>
-            Souls that dwell within your campaign, shaped by the Game-Master's will.
+            {t('camp2.npcMgr.subtitle')}
           </p>
         </div>
         <button
@@ -139,7 +141,7 @@ export default function NPCManagerPage() {
           onClick={() => { resetForm(); setDialogOpen(true); }}
         >
           <Rune kind="plus" size={14} color="currentColor" />
-          <span style={{ marginLeft: 6 }}>New NPC</span>
+          <span style={{ marginLeft: 6 }}>{t('camp2.npcMgr.newNpc')}</span>
         </button>
       </div>
 
@@ -147,12 +149,12 @@ export default function NPCManagerPage() {
       {!npcs || npcs.length === 0 ? (
         <EmptyVault
           glyph="helm"
-          title="No Characters Inscribed"
-          body="The stage is empty. Create your first NPC to populate this realm."
+          title={t('camp2.npcMgr.empty.title')}
+          body={t('camp2.npcMgr.empty.body')}
           action={
             <button className="ao-btn ao-btn--primary" onClick={() => { resetForm(); setDialogOpen(true); }}>
               <Rune kind="plus" size={14} color="currentColor" />
-              <span style={{ marginLeft: 6 }}>New NPC</span>
+              <span style={{ marginLeft: 6 }}>{t('camp2.npcMgr.newNpc')}</span>
             </button>
           }
         />
@@ -211,11 +213,11 @@ export default function NPCManagerPage() {
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
                         <Rune kind="eye" size={10} color="var(--ink-faint)" />
                         <span className="ao-overline" style={{ fontSize: 8, color: 'var(--ink-faint)' }}>
-                          Public &mdash; seen when revealed
+                          {t('camp2.npcMgr.publicLabel')}
                         </span>
                       </div>
                       <p style={{ fontSize: 13, color: 'var(--ink)', lineHeight: 1.5, margin: 0 }}>
-                        {npc.publicDescription || <span className="ao-italic" style={{ color: 'var(--ink-ghost)' }}>No public description</span>}
+                        {npc.publicDescription || <span className="ao-italic" style={{ color: 'var(--ink-ghost)' }}>{t('camp2.npcMgr.noPublicDescription')}</span>}
                       </p>
                     </div>
 
@@ -230,11 +232,11 @@ export default function NPCManagerPage() {
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
                         <Rune kind="lock" size={10} color="rgba(180,80,80,0.6)" />
                         <span className="ao-overline" style={{ fontSize: 8, color: 'rgba(180,80,80,0.6)' }}>
-                          Private &mdash; Game Master only
+                          {t('camp2.npcMgr.privateLabel')}
                         </span>
                       </div>
                       <p style={{ fontSize: 13, color: 'var(--ink)', lineHeight: 1.5, margin: 0 }}>
-                        {npc.privateDescription || <span className="ao-italic" style={{ color: 'var(--ink-ghost)' }}>No private notes</span>}
+                        {npc.privateDescription || <span className="ao-italic" style={{ color: 'var(--ink-ghost)' }}>{t('camp2.npcMgr.noPrivateNotes')}</span>}
                       </p>
                     </div>
                   </div>
@@ -254,7 +256,7 @@ export default function NPCManagerPage() {
                     className="ao-btn ao-btn--sm"
                     onClick={() => navigate(`/campaigns/${campaignId}/npcs/${npc.id}`)}
                   >
-                    <Rune kind="scroll" size={10} /> Open
+                    <Rune kind="scroll" size={10} /> {t('camp2.npcMgr.open')}
                   </button>
                   <button
                     className="ao-btn ao-btn--sm"
@@ -262,7 +264,7 @@ export default function NPCManagerPage() {
                     disabled={visibilityMutation.isPending}
                   >
                     <Rune kind={npc.isVisibleToPlayers ? 'lock' : 'eye'} size={10} />
-                    {npc.isVisibleToPlayers ? ' Hide' : ' Reveal'}
+                    {npc.isVisibleToPlayers ? ` ${t('camp2.npcMgr.hide')}` : ` ${t('camp2.npcMgr.reveal')}`}
                   </button>
                 </div>
               </OrdoPanel>
@@ -275,35 +277,35 @@ export default function NPCManagerPage() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Inscribe New NPC</DialogTitle>
+            <DialogTitle>{t('camp2.npcMgr.dialog.title')}</DialogTitle>
           </DialogHeader>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <OrdoField label="Name" required>
+            <OrdoField label={t('camp2.npcMgr.field.name')} required>
               <input
                 className="ao-input"
                 value={formName}
                 onChange={(e) => setFormName(e.target.value)}
-                placeholder="Name of the character"
+                placeholder={t('camp2.npcMgr.field.namePlaceholder')}
               />
             </OrdoField>
 
-            <OrdoField label="Public Description" hint="Visible to players when NPC is revealed">
+            <OrdoField label={t('camp2.npcMgr.field.publicDesc')} hint={t('camp2.npcMgr.field.publicDescHint')}>
               <textarea
                 className="ao-input"
                 value={formPublicDesc}
                 onChange={(e) => setFormPublicDesc(e.target.value)}
-                placeholder="What the players see..."
+                placeholder={t('camp2.npcMgr.field.publicDescPlaceholder')}
                 rows={3}
                 style={{ resize: 'vertical' }}
               />
             </OrdoField>
 
-            <OrdoField label="Private Description" hint="Game Master Eyes Only">
+            <OrdoField label={t('camp2.npcMgr.field.privateDesc')} hint={t('camp2.npcMgr.field.privateDescHint')}>
               <textarea
                 className="ao-input"
                 value={formPrivateDesc}
                 onChange={(e) => setFormPrivateDesc(e.target.value)}
-                placeholder="Secret notes, motivations, hidden agendas..."
+                placeholder={t('camp2.npcMgr.field.privateDescPlaceholder')}
                 rows={3}
                 style={{ resize: 'vertical' }}
               />
@@ -315,7 +317,7 @@ export default function NPCManagerPage() {
                 checked={formVisible}
                 onChange={(e) => setFormVisible(e.target.checked)}
               />
-              <span className="ao-label" style={{ marginBottom: 0 }}>Visible to players</span>
+              <span className="ao-label" style={{ marginBottom: 0 }}>{t('camp2.npcMgr.field.visible')}</span>
             </label>
           </div>
           <DialogFooter>
@@ -324,7 +326,7 @@ export default function NPCManagerPage() {
               onClick={() => setDialogOpen(false)}
               disabled={createMutation.isPending}
             >
-              Withhold
+              {t('camp2.npcMgr.withhold')}
             </button>
             <button
               type="button"
@@ -335,7 +337,7 @@ export default function NPCManagerPage() {
               {createMutation.isPending && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
-              Inscribe
+              {t('camp2.npcMgr.inscribe')}
             </button>
           </DialogFooter>
         </DialogContent>

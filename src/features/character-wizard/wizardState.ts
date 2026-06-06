@@ -90,19 +90,19 @@ export type StepId = 'basics' | 'race' | 'class' | 'abilities' | 'background' | 
 
 export interface StepDef {
   id: StepId;
-  label: string;
+  labelKey: string;
   glyph: string;
   spellOnly?: boolean;
 }
 
 export const ALL_STEPS: StepDef[] = [
-  { id: 'basics', label: 'Basics', glyph: 'diamond-fill' },
-  { id: 'race', label: 'Race', glyph: 'hex' },
-  { id: 'class', label: 'Class', glyph: 'sword' },
-  { id: 'abilities', label: 'Abilities', glyph: 'cir-dot' },
-  { id: 'background', label: 'Origin', glyph: 'scroll' },
-  { id: 'spells', label: 'Spells', glyph: 'sigil-1', spellOnly: true },
-  { id: 'summary', label: 'Summary', glyph: 'book' },
+  { id: 'basics', labelKey: 'wiz.step.basics', glyph: 'diamond-fill' },
+  { id: 'race', labelKey: 'wiz.step.race', glyph: 'hex' },
+  { id: 'class', labelKey: 'wiz.step.class', glyph: 'sword' },
+  { id: 'abilities', labelKey: 'wiz.step.abilities', glyph: 'cir-dot' },
+  { id: 'background', labelKey: 'wiz.step.background', glyph: 'scroll' },
+  { id: 'spells', labelKey: 'wiz.step.spells', glyph: 'sigil-1', spellOnly: true },
+  { id: 'summary', labelKey: 'wiz.step.summary', glyph: 'book' },
 ];
 
 export const zeroScores = (): ScoreMap => ({ str: 0, dex: 0, con: 0, int: 0, wis: 0, cha: 0 });
@@ -236,35 +236,44 @@ export function validate(id: StepId, c: WizardChar): boolean {
   }
 }
 
-export function requirementHint(id: StepId, c: WizardChar): string {
+/**
+ * A localisable hint: `key` is a translation key (empty string = no hint),
+ * `vars` carries interpolation values for the dictionary placeholders.
+ */
+export interface RequirementHint {
+  key: string;
+  vars?: Record<string, string | number>;
+}
+
+export function requirementHint(id: StepId, c: WizardChar): RequirementHint {
   switch (id) {
     case 'basics':
-      return 'Enter a character name to continue';
+      return { key: 'wiz.hint.enterName' };
     case 'race': {
       const r = raceByKey(c.raceKey);
-      if (!r) return 'Choose a race';
-      if (r.subraces.length && !c.subraceKey) return 'Choose a subrace';
-      return '';
+      if (!r) return { key: 'wiz.hint.chooseRace' };
+      if (r.subraces.length && !c.subraceKey) return { key: 'wiz.hint.chooseSubrace' };
+      return { key: '' };
     }
     case 'class':
-      return 'Choose a class';
+      return { key: 'wiz.hint.chooseClass' };
     case 'abilities': {
-      if (!ABILITIES.every((a) => (c.baseScores[a.key] || 0) > 0)) return 'Assign all six ability scores';
-      if (c.scoreMethod === 'pointbuy' && pointBuySpent(c.baseScores) > POINT_BUY_BUDGET) return 'You are over the 27-point budget';
-      return '';
+      if (!ABILITIES.every((a) => (c.baseScores[a.key] || 0) > 0)) return { key: 'wiz.hint.assignAbilities' };
+      if (c.scoreMethod === 'pointbuy' && pointBuySpent(c.baseScores) > POINT_BUY_BUDGET) return { key: 'wiz.hint.overBudget' };
+      return { key: '' };
     }
     case 'background': {
       const cls = classByKey(c.classKey);
-      if (!c.backgroundKey) return 'Choose a background';
-      if (cls) return 'Choose ' + cls.skillCount + ' class skills (' + (c.classSkills || []).length + '/' + cls.skillCount + ')';
-      return '';
+      if (!c.backgroundKey) return { key: 'wiz.hint.chooseBackground' };
+      if (cls) return { key: 'wiz.hint.classSkills', vars: { count: cls.skillCount, chosen: (c.classSkills || []).length } };
+      return { key: '' };
     }
     case 'spells': {
       const lim = spellLimits(classByKey(c.classKey), c.level);
-      return 'Choose ' + lim.cantrips + ' cantrips & ' + lim.spells + ' spells';
+      return { key: 'wiz.hint.chooseSpells', vars: { cantrips: lim.cantrips, spells: lim.spells } };
     }
     default:
-      return '';
+      return { key: '' };
   }
 }
 

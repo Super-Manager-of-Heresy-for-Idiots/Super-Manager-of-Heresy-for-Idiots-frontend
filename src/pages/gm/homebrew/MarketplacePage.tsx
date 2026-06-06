@@ -11,11 +11,13 @@ import { ContentPills } from '@/components/homebrew/ContentPills';
 import { HBTag } from '@/components/homebrew/HBTag';
 import { useMarketplace } from '@/hooks/useHomebrew';
 import { useRateHomebrew } from '@/hooks/useHomebrewCampaign';
+import { useT } from '@/i18n/I18nContext';
 import type { HomebrewPackageResponse } from '@/types';
 
 /* ── page ────────────────────────────────────────────────────── */
 
 export default function MarketplacePage() {
+  const t = useT();
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [page, setPage] = useState(0);
@@ -51,8 +53,8 @@ export default function MarketplacePage() {
     return (
       <div>
         <div style={{ marginBottom: 32 }}>
-          <p className="ao-overline" style={{ color: 'var(--gold)' }}>Doctrine Exchange</p>
-          <h3 className="ao-h3" style={{ marginTop: 4 }}>Marketplace</h3>
+          <p className="ao-overline" style={{ color: 'var(--gold)' }}>{t('hb.market.overline')}</p>
+          <h3 className="ao-h3" style={{ marginTop: 4 }}>{t('hb.market.heading')}</h3>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
           {Array.from({ length: 6 }).map((_, i) => (
@@ -74,9 +76,9 @@ export default function MarketplacePage() {
     return (
       <div style={{ textAlign: 'center', padding: '48px 0' }}>
         <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginBottom: 16 }}>
-          The marketplace could not be reached. The trade routes remain severed.
+          {t('hb.market.error')}
         </p>
-        <button className="ao-btn" onClick={() => refetch()}>Retry</button>
+        <button className="ao-btn" onClick={() => refetch()}>{t('common.retry')}</button>
       </div>
     );
   }
@@ -87,10 +89,10 @@ export default function MarketplacePage() {
     <div>
       {/* Header */}
       <div style={{ marginBottom: 24 }}>
-        <p className="ao-overline" style={{ color: 'var(--gold)' }}>Doctrine Exchange</p>
-        <h3 className="ao-h3" style={{ marginTop: 4 }}>Marketplace</h3>
+        <p className="ao-overline" style={{ color: 'var(--gold)' }}>{t('hb.market.overline')}</p>
+        <h3 className="ao-h3" style={{ marginTop: 4 }}>{t('hb.market.heading')}</h3>
         <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 13, marginTop: 4 }}>
-          Browse community-published doctrines with ratings, content details, and version seals.
+          {t('hb.market.subtitle')}
         </p>
       </div>
 
@@ -119,7 +121,7 @@ export default function MarketplacePage() {
               fontFamily: 'var(--font-body)',
               fontSize: 13,
             }}
-            placeholder="Search doctrines..."
+            placeholder={t('hb.market.searchPlaceholder')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -146,7 +148,7 @@ export default function MarketplacePage() {
                   cursor: 'pointer',
                 }}
               >
-                {s === 'downloads' ? 'Popular' : s.charAt(0).toUpperCase() + s.slice(1)}
+                {s === 'downloads' ? t('hb.market.sortPopular') : s === 'newest' ? t('hb.market.sortNewest') : t('hb.market.sortOldest')}
               </button>
             );
           })}
@@ -159,8 +161,8 @@ export default function MarketplacePage() {
       {packages.length === 0 ? (
         <EmptyVault
           glyph="scroll"
-          title="No Doctrines Found"
-          body={debouncedSearch ? 'No doctrines match thy inquiry. Try different terms.' : 'The marketplace stands empty. No doctrines have been published yet.'}
+          title={t('hb.market.emptyTitle')}
+          body={debouncedSearch ? t('hb.market.emptySearch') : t('hb.market.emptyAll')}
         />
       ) : (
         <>
@@ -187,7 +189,7 @@ export default function MarketplacePage() {
                           {pkg.title}
                         </h5>
                         <div className="ao-codex" style={{ fontSize: 11, color: 'var(--ink-faint)', marginTop: 3 }}>
-                          by {pkg.authorUsername}
+                          {t('hb.market.by', { author: pkg.authorUsername })}
                         </div>
                       </div>
                     </div>
@@ -254,7 +256,7 @@ export default function MarketplacePage() {
                       >
                         <Rune kind="lock" size={9} color="var(--ink-faint)" />
                         <span className="ao-overline" style={{ fontSize: 8, color: 'var(--ink-faint)' }}>
-                          {pkg.isDeleted ? 'DELETED' : 'UNPUBLISHED'}
+                          {pkg.isDeleted ? t('hb.market.deleted') : t('hb.market.unpublished')}
                         </span>
                       </div>
                     )}
@@ -272,7 +274,7 @@ export default function MarketplacePage() {
                     }}
                   >
                     <span className="ao-codex" style={{ fontSize: 11, color: 'var(--ink-faint)' }}>
-                      <Rune kind="arrow-d" size={9} color="var(--ink-faint)" /> {pkg.downloadCount} downloads
+                      <Rune kind="arrow-d" size={9} color="var(--ink-faint)" /> {t('hb.market.downloads', { count: pkg.downloadCount })}
                     </span>
                     <span className="ao-codex" style={{ fontSize: 10, color: 'var(--ink-ghost)' }}>
                       v{pkg.version}
@@ -292,11 +294,11 @@ export default function MarketplacePage() {
                 disabled={page === 0}
               >
                 <Rune kind="chev-l" size={12} color="currentColor" />
-                <span style={{ marginLeft: 4 }}>Previous</span>
+                <span style={{ marginLeft: 4 }}>{t('hb.market.previous')}</span>
               </button>
 
               <span className="ao-codex" style={{ display: 'flex', alignItems: 'center', fontSize: 12, color: 'var(--ink-quiet)', padding: '0 12px' }}>
-                Page {page + 1} of {totalPages}
+                {t('hb.market.pageOf', { page: page + 1, total: totalPages })}
               </span>
 
               <button
@@ -304,7 +306,7 @@ export default function MarketplacePage() {
                 onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
                 disabled={page >= totalPages - 1}
               >
-                <span style={{ marginRight: 4 }}>Next</span>
+                <span style={{ marginRight: 4 }}>{t('hb.market.next')}</span>
                 <Rune kind="chev-r" size={12} color="currentColor" />
               </button>
             </div>

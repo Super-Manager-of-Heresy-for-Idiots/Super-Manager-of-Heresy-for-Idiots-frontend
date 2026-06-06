@@ -1,5 +1,6 @@
 import { Rune, OrdoChip } from '@/components/ordo';
 import { RarityBadge, RARITY_HUE } from './RarityBadge';
+import { useT } from '@/i18n/I18nContext';
 import type { ItemInstanceResponse } from '@/types';
 
 /* ── Slot icon label mapping ───────────────────────────────────── */
@@ -17,17 +18,17 @@ const SLOT_ICON: Record<string, string> = {
   CLOAK: 'tri-inv',
 };
 
-const SLOT_LABEL: Record<string, string> = {
-  HEAD: 'Head',
-  CHEST: 'Chest',
-  LEGS: 'Legs',
-  FEET: 'Feet',
-  MAIN_HAND: 'Main Hand',
-  OFF_HAND: 'Off Hand',
-  RING_LEFT: 'Ring (L)',
-  RING_RIGHT: 'Ring (R)',
-  NECK: 'Neck',
-  CLOAK: 'Cloak',
+const SLOT_LABEL_KEY: Record<string, string> = {
+  HEAD: 'cmp.slot.HEAD',
+  CHEST: 'cmp.slot.CHEST',
+  LEGS: 'cmp.slot.LEGS',
+  FEET: 'cmp.slot.FEET',
+  MAIN_HAND: 'cmp.slot.MAIN_HAND',
+  OFF_HAND: 'cmp.slot.OFF_HAND',
+  RING_LEFT: 'cmp.slot.RING_LEFT',
+  RING_RIGHT: 'cmp.slot.RING_RIGHT',
+  NECK: 'cmp.slot.NECK',
+  CLOAK: 'cmp.slot.CLOAK',
 };
 
 /* ── Component ─────────────────────────────────────────────────── */
@@ -40,10 +41,13 @@ interface InvRowProps {
 }
 
 export function InvRow({ item, onRename, onTransfer, onMore }: InvRowProps) {
+  const t = useT();
   const rarity = item.rarity ?? 'COMMON';
   const rarityColor = RARITY_HUE[rarity] ?? RARITY_HUE.COMMON;
   const slotGlyph = item.slot ? SLOT_ICON[item.slot] ?? 'square' : 'square';
-  const slotLabel = item.slot ? SLOT_LABEL[item.slot] ?? item.slot : null;
+  const slotLabel = item.slot
+    ? (SLOT_LABEL_KEY[item.slot] ? t(SLOT_LABEL_KEY[item.slot]) : item.slot)
+    : null;
   const displayName = item.displayName;
 
   return (
@@ -118,10 +122,10 @@ export function InvRow({ item, onRename, onTransfer, onMore }: InvRowProps) {
           </span>
 
           {item.isUnique && (
-            <OrdoChip tone="arcane" glyph="sigil-1">Unique</OrdoChip>
+            <OrdoChip tone="arcane" glyph="sigil-1">{t('cmp.inv.unique')}</OrdoChip>
           )}
           {item.slot && (
-            <OrdoChip tone="rune">Equipped</OrdoChip>
+            <OrdoChip tone="rune">{t('cmp.inv.equipped')}</OrdoChip>
           )}
         </div>
 
@@ -152,7 +156,7 @@ export function InvRow({ item, onRename, onTransfer, onMore }: InvRowProps) {
             className="ao-italic"
             style={{ fontSize: 12, color: 'var(--ink-faint)', marginTop: 2 }}
           >
-            (originally {item.templateName})
+            {t('cmp.inv.originally', { name: item.templateName })}
           </div>
         )}
       </div>
@@ -163,7 +167,7 @@ export function InvRow({ item, onRename, onTransfer, onMore }: InvRowProps) {
           <button
             className="ao-btn ao-btn--sm"
             onClick={onRename}
-            title="Rename"
+            title={t('cmp.inv.rename')}
           >
             <Rune kind="scroll" size={10} />
           </button>
@@ -172,7 +176,7 @@ export function InvRow({ item, onRename, onTransfer, onMore }: InvRowProps) {
           <button
             className="ao-btn ao-btn--sm"
             onClick={onTransfer}
-            title="Transfer"
+            title={t('cmp.inv.transfer')}
           >
             <Rune kind="arrow-r" size={10} />
           </button>
@@ -181,7 +185,7 @@ export function InvRow({ item, onRename, onTransfer, onMore }: InvRowProps) {
           <button
             className="ao-btn ao-btn--sm"
             onClick={onMore}
-            title="More"
+            title={t('cmp.inv.more')}
           >
             <Rune kind="dots" size={10} />
           </button>

@@ -13,10 +13,12 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { useCampaignInviteCode, useRegenerateCampaignInvite } from '@/hooks/useCampaigns';
+import { useT } from '@/i18n/I18nContext';
 
 /* ── page ────────────────────────────────────────────────────── */
 
 export default function CampaignInvitePage() {
+  const t = useT();
   const { campaignId } = useParams<{ campaignId: string }>();
   const navigate = useNavigate();
   const { data: inviteData, isLoading, error, refetch } = useCampaignInviteCode(campaignId!);
@@ -50,8 +52,8 @@ export default function CampaignInvitePage() {
     return (
       <div>
         <div style={{ marginBottom: 32 }}>
-          <p className="ao-overline" style={{ color: 'var(--gold)' }}>Campaign Access</p>
-          <h3 className="ao-h3" style={{ marginTop: 4 }}>Invite Code</h3>
+          <p className="ao-overline" style={{ color: 'var(--gold)' }}>{t('camp.invite.overline')}</p>
+          <h3 className="ao-h3" style={{ marginTop: 4 }}>{t('camp.invite.title')}</h3>
         </div>
         <div className="ao-panel ao-frame ao-breathe" style={{ padding: 40, minHeight: 200, textAlign: 'center' }}>
           <span className="ao-frame-c" />
@@ -68,9 +70,9 @@ export default function CampaignInvitePage() {
     return (
       <div style={{ textAlign: 'center', padding: '48px 0' }}>
         <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginBottom: 16 }}>
-          The invite sigil could not be conjured. The wards remain sealed.
+          {t('camp.invite.loadError')}
         </p>
-        <button className="ao-btn" onClick={() => refetch()}>Retry</button>
+        <button className="ao-btn" onClick={() => refetch()}>{t('camp.retry')}</button>
       </div>
     );
   }
@@ -86,20 +88,20 @@ export default function CampaignInvitePage() {
         style={{ marginBottom: 16 }}
       >
         <Rune kind="chev-l" size={12} color="currentColor" />
-        <span style={{ marginLeft: 4 }}>Back to Dashboard</span>
+        <span style={{ marginLeft: 4 }}>{t('camp.backToDashboard')}</span>
       </button>
 
       {/* Header */}
       <div style={{ marginBottom: 28 }}>
-        <p className="ao-overline" style={{ color: 'var(--gold)' }}>Campaign Access</p>
-        <h3 className="ao-h3" style={{ marginTop: 4 }}>Invite Code</h3>
+        <p className="ao-overline" style={{ color: 'var(--gold)' }}>{t('camp.invite.overline')}</p>
+        <h3 className="ao-h3" style={{ marginTop: 4 }}>{t('camp.invite.title')}</h3>
         <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 13, marginTop: 4 }}>
-          Share this cipher with those worthy of joining thy campaign.
+          {t('camp.invite.sub')}
         </p>
       </div>
 
       <OrdoPanel frame padding={0}>
-        <PanelHeader title="INVITE SIGIL" glyph="cross-pat" tone="arcane" sub="Share to grant passage" />
+        <PanelHeader title={t('camp.invite.sigilTitle')} glyph="cross-pat" tone="arcane" sub={t('camp.invite.sigilSub')} />
 
         <div style={{ padding: '32px 24px', textAlign: 'center' }}>
           {/* Code display box */}
@@ -136,7 +138,7 @@ export default function CampaignInvitePage() {
               onClick={handleCopy}
             >
               <Rune kind={copied ? 'check' : 'scroll'} size={14} color="currentColor" />
-              <span style={{ marginLeft: 6 }}>{copied ? 'Copied!' : 'Copy to Clipboard'}</span>
+              <span style={{ marginLeft: 6 }}>{copied ? t('camp.invite.copied') : t('camp.invite.copy')}</span>
             </button>
 
             <button
@@ -144,7 +146,7 @@ export default function CampaignInvitePage() {
               onClick={() => setRegenOpen(true)}
             >
               <Rune kind="cross-pat" size={14} color="var(--arcane)" />
-              <span style={{ marginLeft: 6 }}>Regenerate</span>
+              <span style={{ marginLeft: 6 }}>{t('camp.invite.regenerate')}</span>
             </button>
           </div>
 
@@ -165,10 +167,10 @@ export default function CampaignInvitePage() {
             <Rune kind="eye" size={14} color="var(--gold)" />
             <div style={{ flex: 1 }}>
               <div style={{ fontSize: 12, color: 'var(--gold-pale)', fontFamily: 'var(--font-display)' }}>
-                Invite Advisory
+                {t('camp.invite.advisory')}
               </div>
               <div className="ao-italic" style={{ fontSize: 11, marginTop: 3, color: 'var(--ink-quiet)' }}>
-                Anyone with this code can join the campaign. Regenerating will void the current code and create a new one.
+                {t('camp.invite.advisoryBody')}
               </div>
             </div>
           </div>
@@ -179,16 +181,16 @@ export default function CampaignInvitePage() {
       <AlertDialog open={regenOpen} onOpenChange={setRegenOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Re-forge Invite Sigil?</AlertDialogTitle>
+            <AlertDialogTitle>{t('camp.invite.reforge.title')}</AlertDialogTitle>
             <AlertDialogDescription>
-              The current invite sigil shall be voided. A new cipher shall be conjured in its place. Outstanding invitations using the old code will cease to function.
+              {t('camp.invite.reforge.body')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Withhold</AlertDialogCancel>
+            <AlertDialogCancel>{t('camp.list.withhold')}</AlertDialogCancel>
             <AlertDialogAction onClick={handleRegenerate}>
               {regenerateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Re-forge
+              {t('camp.invite.reforge')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

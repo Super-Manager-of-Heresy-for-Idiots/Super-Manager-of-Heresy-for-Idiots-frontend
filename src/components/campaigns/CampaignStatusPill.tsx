@@ -1,16 +1,18 @@
 import { Rune } from '@/components/ordo';
+import { useT } from '@/i18n/I18nContext';
 
 interface CampaignStatusPillProps {
   status: 'ACTIVE' | 'PAUSED' | 'COMPLETED';
 }
 
 const STATUS_MAP = {
-  ACTIVE:    { label: 'Active',    color: '#7a9866', glyph: 'cir-dot' },
-  PAUSED:    { label: 'Paused',    color: '#c9803a', glyph: 'cir' },
-  COMPLETED: { label: 'Completed', color: 'var(--ink-faint)', glyph: 'check' },
+  ACTIVE:    { labelKey: 'cmp2.campaignStatus.ACTIVE',    color: '#7a9866', glyph: 'cir-dot' },
+  PAUSED:    { labelKey: 'cmp2.campaignStatus.PAUSED',    color: '#c9803a', glyph: 'cir' },
+  COMPLETED: { labelKey: 'cmp2.campaignStatus.COMPLETED', color: 'var(--ink-faint)', glyph: 'check' },
 };
 
 export function CampaignStatusPill({ status }: CampaignStatusPillProps) {
+  const t = useT();
   const m = STATUS_MAP[status] || STATUS_MAP.ACTIVE;
   return (
     <span style={{
@@ -20,7 +22,7 @@ export function CampaignStatusPill({ status }: CampaignStatusPillProps) {
       fontFamily: 'var(--font-display)', fontSize: 10, letterSpacing: '0.16em',
       color: m.color, textTransform: 'uppercase',
     }}>
-      <Rune kind={m.glyph} size={9} color={m.color} />{m.label}
+      <Rune kind={m.glyph} size={9} color={m.color} />{t(m.labelKey)}
     </span>
   );
 }

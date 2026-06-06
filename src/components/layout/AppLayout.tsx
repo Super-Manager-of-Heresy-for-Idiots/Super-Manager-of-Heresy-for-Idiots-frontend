@@ -1,48 +1,50 @@
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 import { Rune, Sigil } from '@/components/ordo';
+import { useT } from '@/i18n/I18nContext';
+import { LanguageSwitcher } from './LanguageSwitcher';
 import type { Role } from '@/types';
 
 /* ── Nav definition ─────────────────────────────────────── */
 
 interface NavEntry {
-  label: string;
+  labelKey: string;
   path: string;
   glyph: string;
   exact?: boolean;
 }
 
 const playerNav: NavEntry[] = [
-  { label: 'Campaigns', path: '/campaigns', glyph: 'helm' },
-  { label: 'My Characters', path: '/characters/templates', glyph: 'shield' },
-  { label: 'Marketplace', path: '/marketplace', glyph: 'book' },
+  { labelKey: 'nav.campaigns', path: '/campaigns', glyph: 'helm' },
+  { labelKey: 'nav.myCharacters', path: '/characters/templates', glyph: 'shield' },
+  { labelKey: 'nav.marketplace', path: '/marketplace', glyph: 'book' },
 ];
 
 const gmNav: NavEntry[] = [
-  { label: 'Campaigns', path: '/campaigns', glyph: 'helm' },
-  { label: 'My Characters', path: '/characters/templates', glyph: 'shield' },
-  { label: 'Marketplace', path: '/marketplace', glyph: 'book' },
-  { label: 'My Doctrines', path: '/gm/homebrew/my', glyph: 'scroll' },
-  { label: 'Installed', path: '/gm/homebrew/installed', glyph: 'check' },
-  { label: 'Library', path: '/gm/homebrew/library', glyph: 'book' },
+  { labelKey: 'nav.campaigns', path: '/campaigns', glyph: 'helm' },
+  { labelKey: 'nav.myCharacters', path: '/characters/templates', glyph: 'shield' },
+  { labelKey: 'nav.marketplace', path: '/marketplace', glyph: 'book' },
+  { labelKey: 'nav.myDoctrines', path: '/gm/homebrew/my', glyph: 'scroll' },
+  { labelKey: 'nav.installed', path: '/gm/homebrew/installed', glyph: 'check' },
+  { labelKey: 'nav.library', path: '/gm/homebrew/library', glyph: 'book' },
 ];
 
 const adminNav: NavEntry[] = [
-  { label: 'Campaigns', path: '/campaigns', glyph: 'helm' },
-  { label: 'My Characters', path: '/characters/templates', glyph: 'shield' },
-  { label: 'Admin', path: '/admin', glyph: 'book', exact: true },
-  { label: 'Users', path: '/admin/users', glyph: 'helm' },
-  { label: 'Characters', path: '/admin/characters', glyph: 'shield' },
-  { label: 'Stat Types', path: '/admin/stat-types', glyph: 'diamond' },
-  { label: 'Item Types', path: '/admin/item-types', glyph: 'sword' },
-  { label: 'Classes', path: '/admin/character-classes', glyph: 'shield' },
-  { label: 'Races', path: '/admin/character-races', glyph: 'sigil-3' },
-  { label: 'Skills', path: '/admin/skills', glyph: 'sigil-2' },
-  { label: 'Subclasses', path: '/admin/subclasses', glyph: 'cross-pat' },
-  { label: 'Feats', path: '/admin/feats', glyph: 'flame' },
-  { label: 'Buffs/Debuffs', path: '/admin/buffs-debuffs', glyph: 'hex' },
-  { label: 'Enchantments', path: '/admin/enchantment-types', glyph: 'eye' },
-  { label: 'Homebrew', path: '/admin/homebrew', glyph: 'scroll' },
+  { labelKey: 'nav.campaigns', path: '/campaigns', glyph: 'helm' },
+  { labelKey: 'nav.myCharacters', path: '/characters/templates', glyph: 'shield' },
+  { labelKey: 'nav.admin', path: '/admin', glyph: 'book', exact: true },
+  { labelKey: 'nav.users', path: '/admin/users', glyph: 'helm' },
+  { labelKey: 'nav.characters', path: '/admin/characters', glyph: 'shield' },
+  { labelKey: 'nav.statTypes', path: '/admin/stat-types', glyph: 'diamond' },
+  { labelKey: 'nav.itemTypes', path: '/admin/item-types', glyph: 'sword' },
+  { labelKey: 'nav.classes', path: '/admin/character-classes', glyph: 'shield' },
+  { labelKey: 'nav.races', path: '/admin/character-races', glyph: 'sigil-3' },
+  { labelKey: 'nav.skills', path: '/admin/skills', glyph: 'sigil-2' },
+  { labelKey: 'nav.subclasses', path: '/admin/subclasses', glyph: 'cross-pat' },
+  { labelKey: 'nav.feats', path: '/admin/feats', glyph: 'flame' },
+  { labelKey: 'nav.buffsDebuffs', path: '/admin/buffs-debuffs', glyph: 'hex' },
+  { labelKey: 'nav.enchantments', path: '/admin/enchantment-types', glyph: 'eye' },
+  { labelKey: 'nav.homebrew', path: '/admin/homebrew', glyph: 'scroll' },
 ];
 
 function getNavItems(role?: Role): NavEntry[] {
@@ -57,20 +59,13 @@ function getNavItems(role?: Role): NavEntry[] {
   }
 }
 
-/* ── Role labels for topbar ─────────────────────────────── */
-
-const roleLabels: Record<string, string> = {
-  PLAYER: 'Hand of Fate',
-  GAME_MASTER: 'Chronicler',
-  ADMIN: 'Archivist',
-};
-
 /* ── Layout ─────────────────────────────────────────────── */
 
 export function AppLayout() {
   const { user, logout } = useAuthStore();
   const location = useLocation();
   const navigate = useNavigate();
+  const t = useT();
 
   const navItems = getNavItems(user?.role);
 
@@ -129,9 +124,9 @@ export function AppLayout() {
             const active = isActive(item);
             return (
               <button
-                key={item.label}
+                key={item.labelKey}
                 onClick={() => navigate(item.path)}
-                title={item.label}
+                title={t(item.labelKey)}
                 style={{
                   width: 44,
                   height: 44,
@@ -166,7 +161,7 @@ export function AppLayout() {
               >
                 <Rune kind={item.glyph} size={18} />
                 {/* Badge for admin Archive */}
-                {item.label === 'Admin' && user?.role === 'ADMIN' && (
+                {item.labelKey === 'nav.admin' && user?.role === 'ADMIN' && (
                   <span
                     style={{
                       position: 'absolute',
@@ -187,7 +182,7 @@ export function AppLayout() {
         {/* Bottom: settings / logout */}
         <button
           onClick={handleLogout}
-          title="Leave the Archive"
+          title={t('topbar.logout')}
           style={{
             width: 44,
             height: 44,
@@ -233,7 +228,7 @@ export function AppLayout() {
               className="ao-engraved"
               style={{ fontSize: 'var(--t-body-lg)', color: 'var(--ink-bright)' }}
             >
-              Ordo Arcanum
+              {t('app.name')}
             </span>
             <span style={{ color: 'var(--rule)' }}>|</span>
             <span className="ao-codex" style={{ color: 'var(--ink-faint)' }}>
@@ -253,10 +248,11 @@ export function AppLayout() {
                   className="ao-chip ao-chip--gold"
                   style={{ fontSize: 9 }}
                 >
-                  {roleLabels[user.role] || user.role}
+                  {t(`role.${user.role}`)}
                 </span>
               </>
             )}
+            <LanguageSwitcher />
           </div>
         </header>
 

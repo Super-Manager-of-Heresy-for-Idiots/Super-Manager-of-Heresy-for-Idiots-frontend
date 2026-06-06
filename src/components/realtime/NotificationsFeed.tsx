@@ -1,6 +1,7 @@
 import { Rune, OrdoPanel, PanelHeader } from '@/components/ordo';
 import { useWsStore, type Notification } from '@/store/wsStore';
 import { formatTimeAgo } from '@/lib/utils';
+import { useT } from '@/i18n/I18nContext';
 import type { WsEventType } from '@/types';
 
 /* ── visual config per event type ────────────────────────── */
@@ -25,35 +26,37 @@ const EVENT_VISUAL: Record<WsEventType, EventVisual> = {
   MEMBER_KICKED:           { glyph: 'lock',    color: 'var(--ember)' },
 };
 
-/* human-readable labels */
-const EVENT_LABEL: Record<WsEventType, string> = {
-  ITEM_GRANTED:            'Item Granted',
-  ITEM_REMOVED:            'Item Removed',
-  BUFF_APPLIED:            'Buff Applied',
-  BUFF_REMOVED:            'Buff Removed',
-  XP_GRANTED:              'XP Granted',
-  HP_CHANGED:              'HP Changed',
-  CHARACTER_UPDATED:       'Character Updated',
-  NPC_REVEALED:            'NPC Revealed',
-  NPC_HIDDEN:              'NPC Hidden',
-  QUEST_UPDATED:           'Quest Updated',
-  CAMPAIGN_STATUS_CHANGED: 'Campaign Status',
-  MEMBER_KICKED:           'Member Kicked',
+/* human-readable label keys */
+const EVENT_LABEL_KEY: Record<WsEventType, string> = {
+  ITEM_GRANTED:            'cmp2.event.ITEM_GRANTED',
+  ITEM_REMOVED:            'cmp2.event.ITEM_REMOVED',
+  BUFF_APPLIED:            'cmp2.event.BUFF_APPLIED',
+  BUFF_REMOVED:            'cmp2.event.BUFF_REMOVED',
+  XP_GRANTED:              'cmp2.event.XP_GRANTED',
+  HP_CHANGED:              'cmp2.event.HP_CHANGED',
+  CHARACTER_UPDATED:       'cmp2.event.CHARACTER_UPDATED',
+  NPC_REVEALED:            'cmp2.event.NPC_REVEALED',
+  NPC_HIDDEN:              'cmp2.event.NPC_HIDDEN',
+  QUEST_UPDATED:           'cmp2.event.QUEST_UPDATED',
+  CAMPAIGN_STATUS_CHANGED: 'cmp2.event.CAMPAIGN_STATUS_CHANGED',
+  MEMBER_KICKED:           'cmp2.event.MEMBER_KICKED',
 };
 
 /* ── single notification row ─────────────────────────────── */
 
 function NotificationRow({ notif }: { notif: Notification }) {
+  const t = useT();
   const { markRead } = useWsStore();
   const visual = EVENT_VISUAL[notif.event.type] ?? { glyph: 'cir', color: 'var(--ink-quiet)' };
-  const label = EVENT_LABEL[notif.event.type] ?? notif.event.type;
+  const labelKey = EVENT_LABEL_KEY[notif.event.type];
+  const label = labelKey ? t(labelKey) : notif.event.type;
 
   const body =
     typeof notif.event.data === 'object' &&
     notif.event.data !== null &&
     'message' in notif.event.data
       ? String((notif.event.data as { message: string }).message)
-      : `By ${notif.event.triggeredBy}`;
+      : t('cmp2.notif.by', { name: notif.event.triggeredBy });
 
   return (
     <div
@@ -135,13 +138,14 @@ function NotificationRow({ notif }: { notif: Notification }) {
 /* ── feed panel ──────────────────────────────────────────── */
 
 export function NotificationsFeed() {
+  const t = useT();
   const { notifications, unreadCount, markAllRead, clearNotifications } =
     useWsStore();
 
   return (
     <OrdoPanel padding={0}>
       <PanelHeader
-        title="Heralds & Tidings"
+        title={t('cmp2.notif.title')}
         glyph="scroll"
         tone="gold"
         right={
@@ -151,7 +155,7 @@ export function NotificationsFeed() {
                 className="ao-btn ao-btn--sm ao-btn--ghost"
                 onClick={markAllRead}
               >
-                Mark all read
+                {t('cmp2.notif.markAllRead')}
               </button>
             )}
             {notifications.length > 0 && (
@@ -159,7 +163,7 @@ export function NotificationsFeed() {
                 className="ao-btn ao-btn--sm ao-btn--ghost"
                 onClick={clearNotifications}
               >
-                Clear
+                {t('cmp2.notif.clear')}
               </button>
             )}
           </div>
@@ -186,7 +190,7 @@ export function NotificationsFeed() {
                 color: 'var(--ink-faint)',
               }}
             >
-              No tidings yet. The realm is quiet.
+              {t('cmp2.notif.empty')}
             </div>
           </div>
         ) : (

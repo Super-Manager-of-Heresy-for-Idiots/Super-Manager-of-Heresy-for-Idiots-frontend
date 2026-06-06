@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { FileUp, Loader2, Plus, Save, Trash2 } from 'lucide-react';
 import { Rune, OrdoChip } from '@/components/ordo';
+import { useT } from '@/i18n/I18nContext';
 import {
   Dialog,
   DialogContent,
@@ -24,12 +25,14 @@ import type {
   SkillEffectRole,
 } from '@/types';
 
+type TFn = (key: string, vars?: Record<string, string | number>) => string;
+
 const LEVELS = Array.from({ length: 20 }, (_, index) => index + 1);
-const REWARD_TYPES: { value: RichClassRewardType; label: string }[] = [
-  { value: 'SKILL', label: 'Spell/Skill' },
-  { value: 'FEAT', label: 'Feat' },
-  { value: 'SUBCLASS', label: 'Subclass' },
-  { value: 'BUFF_DEBUFF', label: 'Buff/Debuff' },
+const REWARD_TYPES: { value: RichClassRewardType; labelKey: string }[] = [
+  { value: 'SKILL', labelKey: 'cmp2.rich.reward.SKILL' },
+  { value: 'FEAT', labelKey: 'cmp2.rich.reward.FEAT' },
+  { value: 'SUBCLASS', labelKey: 'cmp2.rich.reward.SUBCLASS' },
+  { value: 'BUFF_DEBUFF', labelKey: 'cmp2.rich.reward.BUFF_DEBUFF' },
 ];
 const DAMAGE_TYPES = [
   'SLASHING',
@@ -190,22 +193,24 @@ function cleanBuffDebuff(value: DraftBuffDebuff): CreateBuffDebuffRequest {
   };
 }
 
-function rewardName(reward: DraftReward, existing?: ExistingContent) {
-  if (reward.sourceMode === 'existing') return existing?.name || 'Existing content';
-  if (reward.rewardType === 'SKILL') return reward.skill.name || 'New skill';
-  if (reward.rewardType === 'FEAT') return reward.feat.name || 'New feat';
-  if (reward.rewardType === 'SUBCLASS') return reward.subclass.name || 'New subclass';
-  return reward.buffDebuff.name || 'New buff/debuff';
+function rewardName(reward: DraftReward, t: TFn, existing?: ExistingContent) {
+  if (reward.sourceMode === 'existing') return existing?.name || t('cmp2.rich.existingContent');
+  if (reward.rewardType === 'SKILL') return reward.skill.name || t('cmp2.rich.newSkill');
+  if (reward.rewardType === 'FEAT') return reward.feat.name || t('cmp2.rich.newFeat');
+  if (reward.rewardType === 'SUBCLASS') return reward.subclass.name || t('cmp2.rich.newSubclass');
+  return reward.buffDebuff.name || t('cmp2.rich.newBuff');
 }
 
-function typeLabel(type: RichClassRewardType) {
-  return REWARD_TYPES.find((item) => item.value === type)?.label || type;
+function typeLabel(type: RichClassRewardType, t: TFn) {
+  const found = REWARD_TYPES.find((item) => item.value === type);
+  return found ? t(found.labelKey) : type;
 }
 
 function validate(
   className: string,
   levelsByNumber: Record<number, DraftReward[]>,
   getExistingById: (type: RichClassRewardType, id: string) => ExistingContent | undefined,
+  t: TFn,
 ): ValidationResult {
   const errors: string[] = [];
   const levelErrors: Record<number, number> = {};
@@ -216,12 +221,12 @@ function validate(
     levelErrors[level] = (levelErrors[level] || 0) + 1;
   };
 
-  if (!className.trim()) errors.push('Class name is required.');
-  if (className.trim().length > 50) errors.push('Class name must be 50 characters or less.');
+  if (!className.trim()) errors.push(t('cmp2.rich.err.classNameRequired'));
+  if (className.trim().length > 50) errors.push(t('cmp2.rich.err.classNameMax'));
 
   Object.entries(levelsByNumber).forEach(([rawLevel, rewards]) => {
     const level = Number(rawLevel);
-    if (level < 1 || level > 20) errors.push(`Invalid level ${rawLevel}.`);
+    if (level < 1 || level > 20) errors.push(t('cmp2.rich.err.invalidLevel', { level: rawLevel }));
 
     const seen = new Map<string, string>();
     rewards.forEach((reward) => {
@@ -230,14 +235,14 @@ function validate(
         (reward.sourceMode === 'new' ? 1 : 0);
 
       if (sourceCount !== 1) {
-        addRewardError(level, reward.localId, 'Reward must have exactly one source.');
+        addRewardError(level, reward.localId, t('cmp2.rich.err.sourceExactlyOne'));
       }
 
       if (reward.sourceMode === 'existing') {
-        if (!reward.rewardId) addRewardError(level, reward.localId, 'Select existing package content.');
+        if (!reward.rewardId) addRewardError(level, reward.localId, t('cmp2.rich.err.selectExistingPackage'));
         const duplicateKey = `${reward.rewardType}:existing:${reward.rewardId}`;
         if (reward.rewardId && seen.has(duplicateKey)) {
-          addRewardError(level, reward.localId, 'Duplicate reward in this level.');
+          addRewardError(level, reward.localId, t('cmp2.rich.err.duplicateReward'));
         }
         seen.set(duplicateKey, reward.localId);
       } else {
@@ -250,18 +255,18 @@ function validate(
                 ? reward.subclass.name
                 : reward.buffDebuff.name;
 
-        if (!name.trim()) addRewardError(level, reward.localId, `${typeLabel(reward.rewardType)} name is required.`);
+        if (!name.trim()) addRewardError(level, reward.localId, t('cmp2.rich.err.nameRequired', { type: typeLabel(reward.rewardType, t) }));
 
         const duplicateKey = `${reward.rewardType}:new:${name.trim().toLowerCase()}`;
         if (name.trim() && seen.has(duplicateKey)) {
-          addRewardError(level, reward.localId, 'Duplicate reward in this level.');
+          addRewardError(level, reward.localId, t('cmp2.rich.err.duplicateReward'));
         }
         seen.set(duplicateKey, reward.localId);
 
         if (reward.rewardType === 'BUFF_DEBUFF') {
           const bd = reward.buffDebuff;
           if (bd.effectType === 'STAT_MODIFIER' && !bd.targetStatId) {
-            addRewardError(level, reward.localId, 'STAT_MODIFIER requires a target stat.');
+            addRewardError(level, reward.localId, t('cmp2.rich.err.statModifierTarget'));
           }
         }
 
@@ -269,23 +274,23 @@ function validate(
           reward.skill.effects.forEach((effect, index) => {
             const chance = Number(effect.chancePercent);
             if (Number.isNaN(chance) || chance < 0 || chance > 100) {
-              addRewardError(level, reward.localId, `Effect ${index + 1} chance must be 0-100.`);
+              addRewardError(level, reward.localId, t('cmp2.rich.err.effectChance', { n: index + 1 }));
             }
 
             if (effect.sourceMode === 'existing') {
-              if (!effect.buffDebuffId) addRewardError(level, reward.localId, `Effect ${index + 1} needs an existing buff/debuff.`);
+              if (!effect.buffDebuffId) addRewardError(level, reward.localId, t('cmp2.rich.err.effectNeedsExistingBuff', { n: index + 1 }));
               const existing = getExistingById('BUFF_DEBUFF', effect.buffDebuffId);
               if (existing && typeof existing.isBuff === 'boolean' && existing.isBuff !== (effect.effectRole === 'BUFF')) {
-                addRewardError(level, reward.localId, `Effect ${index + 1} role does not match selected buff/debuff.`);
+                addRewardError(level, reward.localId, t('cmp2.rich.err.effectRoleMismatch', { n: index + 1 }));
               }
             } else {
               const bd = effect.buffDebuff;
-              if (!bd.name.trim()) addRewardError(level, reward.localId, `Effect ${index + 1} buff/debuff name is required.`);
+              if (!bd.name.trim()) addRewardError(level, reward.localId, t('cmp2.rich.err.effectBuffNameRequired', { n: index + 1 }));
               if (bd.effectType === 'STAT_MODIFIER' && !bd.targetStatId) {
-                addRewardError(level, reward.localId, `Effect ${index + 1} STAT_MODIFIER requires a target stat.`);
+                addRewardError(level, reward.localId, t('cmp2.rich.err.effectStatModifierTarget', { n: index + 1 }));
               }
               if (bd.isBuff !== (effect.effectRole === 'BUFF')) {
-                addRewardError(level, reward.localId, `Effect ${index + 1} role must match buff/debuff nature.`);
+                addRewardError(level, reward.localId, t('cmp2.rich.err.effectRoleMustMatch', { n: index + 1 }));
               }
             }
           });
@@ -298,23 +303,24 @@ function validate(
   return { errors, levelErrors, rewardErrors };
 }
 
-function validateImportPayload(value: unknown): string[] {
+function validateImportPayload(value: unknown, t: TFn): string[] {
   const errors: string[] = [];
   const data = value as Partial<CreateRichCharacterClassRequest> | null;
-  if (!data || typeof data !== 'object') return ['JSON root must be an object.'];
-  if (!data.name || typeof data.name !== 'string') errors.push('Class name is required.');
-  if (typeof data.name === 'string' && data.name.length > 50) errors.push('Class name must be 50 characters or less.');
-  if (data.levels != null && !Array.isArray(data.levels)) errors.push('levels must be an array.');
+  if (!data || typeof data !== 'object') return [t('cmp2.rich.err.jsonRootObject')];
+  if (!data.name || typeof data.name !== 'string') errors.push(t('cmp2.rich.err.classNameRequired'));
+  if (typeof data.name === 'string' && data.name.length > 50) errors.push(t('cmp2.rich.err.classNameMax'));
+  if (data.levels != null && !Array.isArray(data.levels)) errors.push(t('cmp2.rich.err.levelsArray'));
   if (Array.isArray(data.levels)) {
     data.levels.forEach((level, index) => {
-      if (level.level < 1 || level.level > 20) errors.push(`levels[${index}].level must be 1-20.`);
-      if (!Array.isArray(level.rewards)) errors.push(`levels[${index}].rewards must be an array.`);
+      if (level.level < 1 || level.level > 20) errors.push(t('cmp2.rich.err.levelRange', { i: index }));
+      if (!Array.isArray(level.rewards)) errors.push(t('cmp2.rich.err.rewardsArray', { i: index }));
     });
   }
   return errors;
 }
 
 export function RichClassWizard({ open, onOpenChange, packageDetail, editingClass }: RichClassWizardProps) {
+  const t = useT();
   const createMutation = useCreateRichHomebrewClass();
   const updateMutation = useUpdateRichHomebrewClass();
   const importMutation = useImportRichHomebrewClassJson();
@@ -350,8 +356,8 @@ export function RichClassWizard({ open, onOpenChange, packageDetail, editingClas
   const selectedReward = currentRewards.find((reward) => reward.localId === selectedRewardId) || currentRewards[0] || null;
 
   const validation = useMemo(
-    () => validate(className, levelsByNumber, getExistingById),
-    [className, levelsByNumber, packageDetail],
+    () => validate(className, levelsByNumber, getExistingById, t),
+    [className, levelsByNumber, packageDetail, t],
   );
   const isSaving = createMutation.isPending || updateMutation.isPending || importMutation.isPending;
   const canSave = validation.errors.length === 0 && className.trim().length > 0 && !isSaving;
@@ -490,7 +496,7 @@ export function RichClassWizard({ open, onOpenChange, packageDetail, editingClas
     setImportError('');
     try {
       const parsed = JSON.parse(await file.text()) as unknown;
-      const errors = validateImportPayload(parsed);
+      const errors = validateImportPayload(parsed, t);
       if (errors.length > 0) {
         setImportError(errors.join(' '));
         return;
@@ -504,7 +510,7 @@ export function RichClassWizard({ open, onOpenChange, packageDetail, editingClas
         },
       );
     } catch (error) {
-      setImportError(error instanceof Error ? error.message : 'Failed to import JSON');
+      setImportError(error instanceof Error ? error.message : t('cmp2.rich.toastImportFailed'));
     }
   };
 
@@ -523,14 +529,14 @@ export function RichClassWizard({ open, onOpenChange, packageDetail, editingClas
         className="ao-input"
         value={value.name}
         onChange={(event) => onChange({ ...value, name: event.target.value })}
-        placeholder="Buff/debuff name"
+        placeholder={t('cmp2.rich.buffName')}
       />
       <textarea
         className="ao-input"
         value={value.description}
         onChange={(event) => onChange({ ...value, description: event.target.value })}
         rows={3}
-        placeholder="Description"
+        placeholder={t('cmp2.rich.description')}
       />
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
         <select
@@ -548,8 +554,8 @@ export function RichClassWizard({ open, onOpenChange, packageDetail, editingClas
           disabled={!!lockNature}
           onChange={(event) => onChange({ ...value, isBuff: event.target.value === 'true' })}
         >
-          <option value="true">Buff</option>
-          <option value="false">Debuff</option>
+          <option value="true">{t('cmp2.rich.buff')}</option>
+          <option value="false">{t('cmp2.rich.debuff')}</option>
         </select>
       </div>
       {value.effectType === 'STAT_MODIFIER' && (
@@ -558,7 +564,7 @@ export function RichClassWizard({ open, onOpenChange, packageDetail, editingClas
           value={value.targetStatId}
           onChange={(event) => onChange({ ...value, targetStatId: event.target.value })}
         >
-          <option value="">Select target stat...</option>
+          <option value="">{t('cmp2.rich.selectTargetStat')}</option>
           {(statTypes || []).map((stat) => (
             <option key={stat.id} value={stat.id}>{stat.name}</option>
           ))}
@@ -570,14 +576,14 @@ export function RichClassWizard({ open, onOpenChange, packageDetail, editingClas
           type="number"
           value={value.modifierValue}
           onChange={(event) => onChange({ ...value, modifierValue: event.target.value })}
-          placeholder="Modifier"
+          placeholder={t('cmp2.rich.modifier')}
         />
         <input
           className="ao-input"
           type="number"
           value={value.durationRounds}
           onChange={(event) => onChange({ ...value, durationRounds: event.target.value })}
-          placeholder="Duration rounds"
+          placeholder={t('cmp2.rich.durationRounds')}
         />
       </div>
     </div>
@@ -591,28 +597,28 @@ export function RichClassWizard({ open, onOpenChange, packageDetail, editingClas
             className="ao-input"
             value={reward.skill.name}
             onChange={(event) => updateSelectedReward((item) => ({ ...item, skill: { ...item.skill, name: event.target.value } }))}
-            placeholder="Skill name"
+            placeholder={t('cmp2.rich.skillName')}
           />
           <textarea
             className="ao-input"
             value={reward.skill.description}
             onChange={(event) => updateSelectedReward((item) => ({ ...item, skill: { ...item.skill, description: event.target.value } }))}
             rows={3}
-            placeholder="Skill description"
+            placeholder={t('cmp2.rich.skillDescription')}
           />
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
             <input
               className="ao-input"
               value={reward.skill.skillType}
               onChange={(event) => updateSelectedReward((item) => ({ ...item, skill: { ...item.skill, skillType: event.target.value } }))}
-              placeholder="Skill type"
+              placeholder={t('cmp2.rich.skillType')}
             />
             <select
               className="ao-input"
               value={reward.skill.damageType}
               onChange={(event) => updateSelectedReward((item) => ({ ...item, skill: { ...item.skill, damageType: event.target.value } }))}
             >
-              <option value="">No damage type</option>
+              <option value="">{t('cmp2.rich.noDamageType')}</option>
               {DAMAGE_TYPES.map((type) => (
                 <option key={type} value={type}>{type}</option>
               ))}
@@ -623,21 +629,21 @@ export function RichClassWizard({ open, onOpenChange, packageDetail, editingClas
               className="ao-input"
               value={reward.skill.damageDice}
               onChange={(event) => updateSelectedReward((item) => ({ ...item, skill: { ...item.skill, damageDice: event.target.value } }))}
-              placeholder="Damage dice, e.g. 1d8"
+              placeholder={t('cmp2.rich.damageDiceEg')}
             />
             <input
               className="ao-input"
               type="number"
               value={reward.skill.damageBonus}
               onChange={(event) => updateSelectedReward((item) => ({ ...item, skill: { ...item.skill, damageBonus: event.target.value } }))}
-              placeholder="Damage bonus"
+              placeholder={t('cmp2.rich.damageBonus')}
             />
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
-              <div className="ao-label" style={{ marginBottom: 0 }}>Effects</div>
-              <div className="ao-codex">Use package buff/debuff content or create one inline.</div>
+              <div className="ao-label" style={{ marginBottom: 0 }}>{t('cmp2.rich.effects')}</div>
+              <div className="ao-codex">{t('cmp2.rich.effectsHintPackage')}</div>
             </div>
             <button
               className="ao-btn ao-btn--sm"
@@ -648,7 +654,7 @@ export function RichClassWizard({ open, onOpenChange, packageDetail, editingClas
                 }))
               }
             >
-              <Plus size={13} /> Add
+              <Plus size={13} /> {t('cmp2.rich.add')}
             </button>
           </div>
 
@@ -679,8 +685,8 @@ export function RichClassWizard({ open, onOpenChange, packageDetail, editingClas
                     }))
                   }
                 >
-                  <option value="BUFF">Buff</option>
-                  <option value="DEBUFF">Debuff</option>
+                  <option value="BUFF">{t('cmp2.rich.buff')}</option>
+                  <option value="DEBUFF">{t('cmp2.rich.debuff')}</option>
                 </select>
                 <input
                   className="ao-input"
@@ -699,7 +705,7 @@ export function RichClassWizard({ open, onOpenChange, packageDetail, editingClas
                       },
                     }))
                   }
-                  placeholder="Chance %"
+                  placeholder={t('cmp2.rich.chancePercent')}
                 />
                 <button
                   className="ao-iconbtn"
@@ -713,7 +719,7 @@ export function RichClassWizard({ open, onOpenChange, packageDetail, editingClas
                       },
                     }))
                   }
-                  title="Remove effect"
+                  title={t('cmp2.rich.removeEffect')}
                 >
                   <Trash2 size={15} />
                 </button>
@@ -736,7 +742,7 @@ export function RichClassWizard({ open, onOpenChange, packageDetail, editingClas
                       }))
                     }
                   >
-                    {mode === 'existing' ? 'Existing' : 'New'}
+                    {mode === 'existing' ? t('cmp2.rich.existing') : t('cmp2.rich.new')}
                   </button>
                 ))}
               </div>
@@ -756,7 +762,7 @@ export function RichClassWizard({ open, onOpenChange, packageDetail, editingClas
                     }))
                   }
                 >
-                  <option value="">Package buff/debuff...</option>
+                  <option value="">{t('cmp2.rich.selectPackageBuff')}</option>
                   {getContent('BUFF_DEBUFF').map((content) => (
                     <option key={content.id} value={content.id}>{content.name}</option>
                   ))}
@@ -777,7 +783,7 @@ export function RichClassWizard({ open, onOpenChange, packageDetail, editingClas
                   effect.effectRole,
                 )
               )}
-              <div className="ao-codex">Effect {index + 1}</div>
+              <div className="ao-codex">{t('cmp2.rich.effect', { n: index + 1 })}</div>
             </div>
           ))}
         </div>
@@ -787,9 +793,9 @@ export function RichClassWizard({ open, onOpenChange, packageDetail, editingClas
     if (reward.rewardType === 'FEAT') {
       return (
         <div style={{ display: 'grid', gap: 10 }}>
-          <input className="ao-input" value={reward.feat.name} onChange={(event) => updateSelectedReward((item) => ({ ...item, feat: { ...item.feat, name: event.target.value } }))} placeholder="Feat name" />
-          <textarea className="ao-input" value={reward.feat.description} onChange={(event) => updateSelectedReward((item) => ({ ...item, feat: { ...item.feat, description: event.target.value } }))} rows={3} placeholder="Description" />
-          <input className="ao-input" value={reward.feat.prerequisites} onChange={(event) => updateSelectedReward((item) => ({ ...item, feat: { ...item.feat, prerequisites: event.target.value } }))} placeholder="Prerequisites" />
+          <input className="ao-input" value={reward.feat.name} onChange={(event) => updateSelectedReward((item) => ({ ...item, feat: { ...item.feat, name: event.target.value } }))} placeholder={t('cmp2.rich.featName')} />
+          <textarea className="ao-input" value={reward.feat.description} onChange={(event) => updateSelectedReward((item) => ({ ...item, feat: { ...item.feat, description: event.target.value } }))} rows={3} placeholder={t('cmp2.rich.description')} />
+          <input className="ao-input" value={reward.feat.prerequisites} onChange={(event) => updateSelectedReward((item) => ({ ...item, feat: { ...item.feat, prerequisites: event.target.value } }))} placeholder={t('cmp2.rich.prerequisites')} />
         </div>
       );
     }
@@ -797,8 +803,8 @@ export function RichClassWizard({ open, onOpenChange, packageDetail, editingClas
     if (reward.rewardType === 'SUBCLASS') {
       return (
         <div style={{ display: 'grid', gap: 10 }}>
-          <input className="ao-input" value={reward.subclass.name} onChange={(event) => updateSelectedReward((item) => ({ ...item, subclass: { ...item.subclass, name: event.target.value } }))} placeholder="Subclass name" />
-          <textarea className="ao-input" value={reward.subclass.description} onChange={(event) => updateSelectedReward((item) => ({ ...item, subclass: { ...item.subclass, description: event.target.value } }))} rows={4} placeholder="Description" />
+          <input className="ao-input" value={reward.subclass.name} onChange={(event) => updateSelectedReward((item) => ({ ...item, subclass: { ...item.subclass, name: event.target.value } }))} placeholder={t('cmp2.rich.subclassName')} />
+          <textarea className="ao-input" value={reward.subclass.description} onChange={(event) => updateSelectedReward((item) => ({ ...item, subclass: { ...item.subclass, description: event.target.value } }))} rows={4} placeholder={t('cmp2.rich.description')} />
         </div>
       );
     }
@@ -812,12 +818,12 @@ export function RichClassWizard({ open, onOpenChange, packageDetail, editingClas
       <Dialog open={open} onOpenChange={handleClose}>
         <DialogContent className="max-w-[920px]">
           <DialogHeader>
-            <DialogTitle>Class Created</DialogTitle>
+            <DialogTitle>{t('cmp2.rich.createdTitle')}</DialogTitle>
           </DialogHeader>
           <div style={{ display: 'grid', gap: 16 }}>
             <div className="ao-panel" style={{ padding: 16 }}>
               <div className="ao-h5">{result.characterClass.name}</div>
-              <div className="ao-codex" style={{ marginTop: 4 }}>{result.rewards.length} level rewards created</div>
+              <div className="ao-codex" style={{ marginTop: 4 }}>{t('cmp2.rich.rewardsCreated', { count: result.rewards.length })}</div>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: 8 }}>
               {(['CHARACTER_CLASS', 'SKILL', 'FEAT', 'SUBCLASS', 'BUFF_DEBUFF'] as ContentType[]).map((type) => (
@@ -833,7 +839,7 @@ export function RichClassWizard({ open, onOpenChange, packageDetail, editingClas
               ))}
             </div>
             <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-              <button className="ao-btn ao-btn--primary" onClick={() => handleClose(false)}>Done</button>
+              <button className="ao-btn ao-btn--primary" onClick={() => handleClose(false)}>{t('cmp2.rich.done')}</button>
             </div>
           </div>
         </DialogContent>
@@ -847,13 +853,13 @@ export function RichClassWizard({ open, onOpenChange, packageDetail, editingClas
         <DialogHeader className="px-5 py-4 border-b border-border">
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, paddingRight: 36 }}>
             <div style={{ minWidth: 0, flex: 1 }}>
-              <DialogTitle>{editingClass ? 'Edit Rich Homebrew Class' : 'Rich Homebrew Class'}</DialogTitle>
-              <div className="ao-codex" style={{ marginTop: 5 }}>{packageDetail.title} / package-scoped content only</div>
+              <DialogTitle>{editingClass ? t('cmp2.rich.editTitleHb') : t('cmp2.rich.createTitleHb')}</DialogTitle>
+              <div className="ao-codex" style={{ marginTop: 5 }}>{t('cmp2.rich.hbSubtitle', { title: packageDetail.title })}</div>
             </div>
             <div style={{ display: 'flex', gap: 8 }}>
               <label className="ao-btn ao-btn--ghost" style={{ cursor: isSaving ? 'not-allowed' : 'pointer' }}>
                 <FileUp size={14} />
-                Import JSON
+                {t('cmp2.rich.importJson')}
                 <input
                   type="file"
                   accept="application/json,.json"
@@ -865,10 +871,10 @@ export function RichClassWizard({ open, onOpenChange, packageDetail, editingClas
                   style={{ display: 'none' }}
                 />
               </label>
-              <button className="ao-btn ao-btn--ghost" onClick={() => handleClose(false)}>Cancel</button>
+              <button className="ao-btn ao-btn--ghost" onClick={() => handleClose(false)}>{t('common.cancel')}</button>
               <button className="ao-btn ao-btn--primary" onClick={handleSave} disabled={!canSave}>
                 {isSaving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
-                Save Class
+                {t('cmp2.rich.saveClass')}
               </button>
             </div>
           </div>
@@ -891,7 +897,7 @@ export function RichClassWizard({ open, onOpenChange, packageDetail, editingClas
                       setSelectedRewardId((levelsByNumber[level] || [])[0]?.localId || null);
                     }}
                   >
-                    <span>Level {level}</span>
+                    <span>{t('cmp2.rich.level', { level })}</span>
                     <span className="ao-codex">{hasError ? '!' : count}</span>
                   </button>
                 );
@@ -903,22 +909,22 @@ export function RichClassWizard({ open, onOpenChange, packageDetail, editingClas
             <div className="ao-panel" style={{ padding: 16, display: 'grid', gap: 12 }}>
               <div style={{ display: 'grid', gridTemplateColumns: 'minmax(220px, 360px) 1fr', gap: 10 }}>
                 <div>
-                  <label className="ao-label">Class Name</label>
+                  <label className="ao-label">{t('cmp2.rich.className')}</label>
                   <input
                     className="ao-input"
                     value={className}
                     maxLength={50}
                     onChange={(event) => setClassName(event.target.value.slice(0, 50))}
-                    placeholder="Chronomancer"
+                    placeholder={t('cmp2.rich.classNamePlaceholder')}
                   />
                 </div>
                 <div>
-                  <label className="ao-label">Description</label>
+                  <label className="ao-label">{t('cmp2.rich.description')}</label>
                   <input
                     className="ao-input"
                     value={classDescription}
                     onChange={(event) => setClassDescription(event.target.value)}
-                    placeholder="A class focused on time magic."
+                    placeholder={t('cmp2.rich.classDescriptionHbPlaceholder')}
                   />
                 </div>
               </div>
@@ -927,12 +933,12 @@ export function RichClassWizard({ open, onOpenChange, packageDetail, editingClas
                   {validation.errors.slice(0, 5).map((error, index) => (
                     <div key={`${error}-${index}`} className="ao-codex" style={{ color: 'var(--ember)' }}>{error}</div>
                   ))}
-                  {validation.errors.length > 5 && <div className="ao-codex">{validation.errors.length - 5} more validation issues</div>}
+                  {validation.errors.length > 5 && <div className="ao-codex">{t('cmp2.rich.moreIssues', { count: validation.errors.length - 5 })}</div>}
                 </div>
               )}
               {editingClass && (
                 <div className="ao-codex" style={{ color: 'var(--gold-pale)' }}>
-                  Saving replaces the class level rewards with the plan currently shown in this editor.
+                  {t('cmp2.rich.editReplaceWarning')}
                 </div>
               )}
               {importError && <div className="ao-codex" style={{ color: 'var(--ember)' }}>{importError}</div>}
@@ -940,17 +946,17 @@ export function RichClassWizard({ open, onOpenChange, packageDetail, editingClas
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
-                <div className="ao-h5">Level {selectedLevel} Rewards</div>
-                <div className="ao-codex">Add fixed rewards or player choice entries for this level.</div>
+                <div className="ao-h5">{t('cmp2.rich.levelRewards', { level: selectedLevel })}</div>
+                <div className="ao-codex">{t('cmp2.rich.levelRewardsHintHb')}</div>
               </div>
               <button className="ao-btn ao-btn--primary" onClick={addReward}>
-                <Plus size={14} /> Add Reward
+                <Plus size={14} /> {t('cmp2.rich.addReward')}
               </button>
             </div>
 
             {currentRewards.length === 0 ? (
               <div className="ao-panel--inset" style={{ padding: 28, textAlign: 'center' }}>
-                <div className="ao-italic">No rewards for this level.</div>
+                <div className="ao-italic">{t('cmp2.rich.noRewards')}</div>
               </div>
             ) : (
               <div style={{ display: 'grid', gap: 8 }}>
@@ -976,15 +982,15 @@ export function RichClassWizard({ open, onOpenChange, packageDetail, editingClas
                         </div>
                         <div style={{ minWidth: 0 }}>
                           <div style={{ fontFamily: 'var(--font-serif)', fontSize: 16, color: 'var(--ink-bright)' }}>
-                            {index + 1}. {rewardName(reward, existing)}
+                            {index + 1}. {rewardName(reward, t, existing)}
                           </div>
                           <div className="ao-codex" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                            {typeLabel(reward.rewardType)} / {reward.sourceMode === 'existing' ? 'existing package content' : 'inline creation'}
+                            {typeLabel(reward.rewardType, t)} / {reward.sourceMode === 'existing' ? t('cmp2.rich.sourceExisting') : t('cmp2.rich.sourceInline')}
                           </div>
                         </div>
                         <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                          {reward.isChoice && <OrdoChip tone="arcane">Choice</OrdoChip>}
-                          {rowErrors.length > 0 && <OrdoChip tone="ember">{rowErrors.length} issue</OrdoChip>}
+                          {reward.isChoice && <OrdoChip tone="arcane">{t('cmp2.rich.choice')}</OrdoChip>}
+                          {rowErrors.length > 0 && <OrdoChip tone="ember">{t('cmp2.rich.issue', { count: rowErrors.length })}</OrdoChip>}
                           <span
                             className="ao-iconbtn"
                             role="button"
@@ -1001,7 +1007,7 @@ export function RichClassWizard({ open, onOpenChange, packageDetail, editingClas
                               }
                             }}
                             style={{ color: 'var(--ember)' }}
-                            title="Remove reward"
+                            title={t('cmp2.rich.removeReward')}
                           >
                             <Trash2 size={14} />
                           </span>
@@ -1017,12 +1023,12 @@ export function RichClassWizard({ open, onOpenChange, packageDetail, editingClas
           <aside className="ao-scroll" style={{ borderLeft: '1px solid var(--rule)', overflow: 'auto', padding: 16, background: 'var(--stone)' }}>
             {!selectedReward ? (
               <div className="ao-panel--inset" style={{ padding: 18 }}>
-                <div className="ao-italic">Select or add a reward to edit it.</div>
+                <div className="ao-italic">{t('cmp2.rich.selectOrAdd')}</div>
               </div>
             ) : (
               <div style={{ display: 'grid', gap: 14 }}>
                 <div>
-                  <div className="ao-overline">Reward Type</div>
+                  <div className="ao-overline">{t('cmp2.rich.rewardType')}</div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, marginTop: 8 }}>
                     {REWARD_TYPES.map((type) => (
                       <button
@@ -1036,7 +1042,7 @@ export function RichClassWizard({ open, onOpenChange, packageDetail, editingClas
                           }))
                         }
                       >
-                        {type.label}
+                        {t(type.labelKey)}
                       </button>
                     ))}
                   </div>
@@ -1048,11 +1054,11 @@ export function RichClassWizard({ open, onOpenChange, packageDetail, editingClas
                     checked={selectedReward.isChoice}
                     onChange={(event) => updateSelectedReward((reward) => ({ ...reward, isChoice: event.target.checked }))}
                   />
-                  <span>Player chooses one of this reward group</span>
+                  <span>{t('cmp2.rich.playerChooses')}</span>
                 </label>
 
                 <div>
-                  <div className="ao-overline">Source</div>
+                  <div className="ao-overline">{t('cmp2.rich.source')}</div>
                   <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
                     {(['existing', 'new'] as SourceMode[]).map((mode) => (
                       <button
@@ -1061,7 +1067,7 @@ export function RichClassWizard({ open, onOpenChange, packageDetail, editingClas
                         style={{ flex: 1 }}
                         onClick={() => updateSelectedReward((reward) => ({ ...reward, sourceMode: mode }))}
                       >
-                        {mode === 'existing' ? 'Existing' : 'New'}
+                        {mode === 'existing' ? t('cmp2.rich.existing') : t('cmp2.rich.new')}
                       </button>
                     ))}
                   </div>
@@ -1069,24 +1075,24 @@ export function RichClassWizard({ open, onOpenChange, packageDetail, editingClas
 
                 {selectedReward.sourceMode === 'existing' ? (
                   <div>
-                    <label className="ao-label">Package Content</label>
+                    <label className="ao-label">{t('cmp2.rich.packageContent')}</label>
                     <select
                       className="ao-input"
                       value={selectedReward.rewardId}
                       onChange={(event) => updateSelectedReward((reward) => ({ ...reward, rewardId: event.target.value }))}
                     >
-                      <option value="">Select existing content...</option>
+                      <option value="">{t('cmp2.rich.selectExistingContent')}</option>
                       {getContent(selectedReward.rewardType).map((content) => (
                         <option key={content.id} value={content.id}>{content.name}</option>
                       ))}
                     </select>
                     <div className="ao-codex" style={{ marginTop: 6 }}>
-                      Only content already attached to this package is listed.
+                      {t('cmp2.rich.onlyPackageContent')}
                     </div>
                   </div>
                 ) : (
                   <div>
-                    <div className="ao-overline" style={{ marginBottom: 8 }}>Inline {typeLabel(selectedReward.rewardType)}</div>
+                    <div className="ao-overline" style={{ marginBottom: 8 }}>{t('cmp2.rich.inline', { type: typeLabel(selectedReward.rewardType, t) })}</div>
                     {renderInlineForm(selectedReward)}
                   </div>
                 )}

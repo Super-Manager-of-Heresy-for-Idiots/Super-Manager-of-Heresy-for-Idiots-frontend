@@ -1,4 +1,5 @@
 import { Rune } from '@/components/ordo';
+import { useT } from '@/i18n/I18nContext';
 
 interface VisibilityToggleProps {
   visible: boolean;
@@ -6,6 +7,7 @@ interface VisibilityToggleProps {
 }
 
 export function VisibilityToggle({ visible, onToggle }: VisibilityToggleProps) {
+  const t = useT();
   return (
     <button
       onClick={onToggle}
@@ -26,7 +28,7 @@ export function VisibilityToggle({ visible, onToggle }: VisibilityToggleProps) {
       }}
     >
       <Rune kind={visible ? 'eye' : 'lock'} size={12} color={visible ? '#6db86a' : 'var(--ink-ghost)'} />
-      {visible ? 'Revealed' : 'Hidden'}
+      {visible ? t('cmp.visibility.revealed') : t('cmp.visibility.hidden')}
     </button>
   );
 }

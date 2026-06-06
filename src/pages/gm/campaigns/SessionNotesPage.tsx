@@ -25,11 +25,13 @@ import {
   useUpdateSessionNote,
   useDeleteSessionNote,
 } from '@/hooks/useSessionNotes';
+import { useT } from '@/i18n/I18nContext';
 import type { GmSessionNoteResponse } from '@/types';
 
 /* ── page ────────────────────────────────────────────────────── */
 
 export default function SessionNotesPage() {
+  const t = useT();
   const { campaignId } = useParams<{ campaignId: string }>();
   const navigate = useNavigate();
   const { data: notes, isLoading, error, refetch } = useCampaignSessionNotes(campaignId!);
@@ -99,8 +101,8 @@ export default function SessionNotesPage() {
     return (
       <div>
         <div style={{ marginBottom: 32 }}>
-          <p className="ao-overline" style={{ color: 'var(--gold)' }}>Game Master Chronicle</p>
-          <h3 className="ao-h3" style={{ marginTop: 4 }}>Session Notes</h3>
+          <p className="ao-overline" style={{ color: 'var(--gold)' }}>{t('camp2.session.overline')}</p>
+          <h3 className="ao-h3" style={{ marginTop: 4 }}>{t('camp2.session.title')}</h3>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
           {Array.from({ length: 4 }).map((_, i) => (
@@ -122,9 +124,9 @@ export default function SessionNotesPage() {
     return (
       <div style={{ textAlign: 'center', padding: '48px 0' }}>
         <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginBottom: 16 }}>
-          The session chronicle could not be read. Its bindings remain sealed.
+          {t('camp2.session.loadError')}
         </p>
-        <button className="ao-btn" onClick={() => refetch()}>Retry</button>
+        <button className="ao-btn" onClick={() => refetch()}>{t('common.retry')}</button>
       </div>
     );
   }
@@ -142,7 +144,7 @@ export default function SessionNotesPage() {
         style={{ marginBottom: 16 }}
       >
         <Rune kind="chev-l" size={12} color="currentColor" />
-        <span style={{ marginLeft: 4 }}>Back to Dashboard</span>
+        <span style={{ marginLeft: 4 }}>{t('camp2.session.backToDashboard')}</span>
       </button>
 
       {/* Privacy banner */}
@@ -161,10 +163,10 @@ export default function SessionNotesPage() {
         <Rune kind="lock" size={16} color="rgba(180,80,80,0.6)" />
         <div>
           <span style={{ fontSize: 12, fontFamily: 'var(--font-display)', color: 'rgba(220,120,120,0.9)' }}>
-            Game Master Eyes Only
+            {t('camp2.session.gmEyesOnly')}
           </span>
           <span className="ao-italic" style={{ fontSize: 11, color: 'var(--ink-quiet)', marginLeft: 8 }}>
-            Session notes are private to the Game-Master and are never shown to players.
+            {t('camp2.session.privacyNote')}
           </span>
         </div>
       </div>
@@ -172,10 +174,10 @@ export default function SessionNotesPage() {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 28 }}>
         <div>
-          <p className="ao-overline" style={{ color: 'var(--gold)' }}>Game Master Chronicle</p>
-          <h3 className="ao-h3" style={{ marginTop: 4 }}>Session Notes</h3>
+          <p className="ao-overline" style={{ color: 'var(--gold)' }}>{t('camp2.session.overline')}</p>
+          <h3 className="ao-h3" style={{ marginTop: 4 }}>{t('camp2.session.title')}</h3>
           <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 13, marginTop: 4 }}>
-            Private records of sessions past, inscribed for the Game-Master alone.
+            {t('camp2.session.subtitle')}
           </p>
         </div>
         <button
@@ -183,7 +185,7 @@ export default function SessionNotesPage() {
           onClick={handleOpenCreate}
         >
           <Rune kind="plus" size={14} color="currentColor" />
-          <span style={{ marginLeft: 6 }}>New Note</span>
+          <span style={{ marginLeft: 6 }}>{t('camp2.session.newNote')}</span>
         </button>
       </div>
 
@@ -191,12 +193,12 @@ export default function SessionNotesPage() {
       {notesList.length === 0 ? (
         <EmptyVault
           glyph="scroll"
-          title="No Session Notes"
-          body="The chronicle is blank. Record your first session to begin building the saga."
+          title={t('camp2.session.empty.title')}
+          body={t('camp2.session.empty.body')}
           action={
             <button className="ao-btn ao-btn--primary" onClick={handleOpenCreate}>
               <Rune kind="plus" size={14} color="currentColor" />
-              <span style={{ marginLeft: 6 }}>New Note</span>
+              <span style={{ marginLeft: 6 }}>{t('camp2.session.newNote')}</span>
             </button>
           }
         />
@@ -225,7 +227,7 @@ export default function SessionNotesPage() {
                   </span>
                   {note.updatedAt !== note.createdAt && (
                     <span className="ao-overline" style={{ fontSize: 8, color: 'var(--ink-ghost)' }}>
-                      (edited)
+                      {t('camp2.session.edited')}
                     </span>
                   )}
                 </div>
@@ -261,7 +263,7 @@ export default function SessionNotesPage() {
                   className="ao-btn ao-btn--sm"
                   onClick={() => handleOpenEdit(note)}
                 >
-                  <Rune kind="scroll" size={10} /> Edit
+                  <Rune kind="scroll" size={10} /> {t('camp2.session.edit')}
                 </button>
                 <button
                   className="ao-btn ao-btn--sm ao-btn--danger"
@@ -279,24 +281,24 @@ export default function SessionNotesPage() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editing ? 'Edit Session Note' : 'Record Session Note'}</DialogTitle>
+            <DialogTitle>{editing ? t('camp2.session.dialog.editTitle') : t('camp2.session.dialog.createTitle')}</DialogTitle>
           </DialogHeader>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <OrdoField label="Title" required>
+            <OrdoField label={t('camp2.session.field.title')} required>
               <input
                 className="ao-input"
                 value={formTitle}
                 onChange={(e) => setFormTitle(e.target.value)}
-                placeholder="e.g. Session 12 - The Siege of Blackwall"
+                placeholder={t('camp2.session.field.titlePlaceholder')}
               />
             </OrdoField>
 
-            <OrdoField label="Content" required>
+            <OrdoField label={t('camp2.session.field.content')} required>
               <textarea
                 className="ao-input"
                 value={formContent}
                 onChange={(e) => setFormContent(e.target.value)}
-                placeholder="Record the events, decisions, and consequences of the session..."
+                placeholder={t('camp2.session.field.contentPlaceholder')}
                 rows={8}
                 style={{ resize: 'vertical' }}
               />
@@ -308,7 +310,7 @@ export default function SessionNotesPage() {
               onClick={() => setDialogOpen(false)}
               disabled={createMutation.isPending || updateMutation.isPending}
             >
-              Withhold
+              {t('camp2.session.withhold')}
             </button>
             <button
               type="button"
@@ -319,7 +321,7 @@ export default function SessionNotesPage() {
               {(createMutation.isPending || updateMutation.isPending) && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
-              {editing ? 'Seal' : 'Record'}
+              {editing ? t('camp2.session.seal') : t('camp2.session.record')}
             </button>
           </DialogFooter>
         </DialogContent>
@@ -329,19 +331,19 @@ export default function SessionNotesPage() {
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Erase this Note?</AlertDialogTitle>
+            <AlertDialogTitle>{t('camp2.session.delete.title')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This rite cannot be undone. The session record shall be stricken from the chronicle for all eternity.
+              {t('camp2.session.delete.body')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Withhold</AlertDialogCancel>
+            <AlertDialogCancel>{t('camp2.session.withhold')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               {deleteMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Erase
+              {t('camp2.session.delete.confirm')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

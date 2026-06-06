@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ModalScene, Bar } from '@/components/ordo';
 import { useUpdateHp } from '@/hooks/useCharacter';
+import { useT } from '@/i18n/I18nContext';
 
 type Mode = 'damage' | 'heal';
 
@@ -21,6 +22,7 @@ export function DamageHealModal({
   currentHp,
   maxHp,
 }: DamageHealModalProps) {
+  const t = useT();
   const [mode, setMode] = useState<Mode>('damage');
   const [amount, setAmount] = useState(0);
   const updateHp = useUpdateHp();
@@ -48,7 +50,7 @@ export function DamageHealModal({
     <ModalScene
       open={open}
       onOpenChange={onOpenChange}
-      title={isDamage ? 'Apply Damage' : 'Apply Healing'}
+      title={isDamage ? t('cmp.dmgHeal.applyDamage') : t('cmp.dmgHeal.applyHealing')}
       rune={isDamage ? 'minus' : 'plus'}
       tone={accentColor}
       danger={isDamage}
@@ -70,7 +72,7 @@ export function DamageHealModal({
               cursor: 'pointer',
             }}
           >
-            Cancel
+            {t('common.cancel')}
           </button>
           <button
             onClick={handleApply}
@@ -89,7 +91,7 @@ export function DamageHealModal({
               opacity: amount > 0 && !updateHp.isPending ? 1 : 0.5,
             }}
           >
-            {updateHp.isPending ? 'Applying...' : 'Apply'}
+            {updateHp.isPending ? t('cmp.dmgHeal.applying') : t('cmp.dmgHeal.apply')}
           </button>
         </div>
       }
@@ -119,7 +121,7 @@ export function DamageHealModal({
             cursor: 'pointer',
           }}
         >
-          Damage
+          {t('cmp.dmgHeal.damage')}
         </button>
         <button
           onClick={() => setMode('heal')}
@@ -136,7 +138,7 @@ export function DamageHealModal({
             cursor: 'pointer',
           }}
         >
-          Heal
+          {t('cmp.dmgHeal.heal')}
         </button>
       </div>
 
@@ -151,7 +153,7 @@ export function DamageHealModal({
             marginBottom: 10,
           }}
         >
-          Amount
+          {t('cmp.dmgHeal.amount')}
         </label>
         <input
           type="number"
@@ -189,7 +191,7 @@ export function DamageHealModal({
             marginBottom: 12,
           }}
         >
-          Preview
+          {t('cmp.dmgHeal.preview')}
         </div>
 
         {/* Current -> Projected */}

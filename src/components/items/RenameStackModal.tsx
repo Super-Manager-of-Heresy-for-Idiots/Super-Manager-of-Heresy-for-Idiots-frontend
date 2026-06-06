@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { ModalScene, OrdoField, Rune } from '@/components/ordo';
 import { useRenameItem } from '@/hooks/useInventory';
+import { useT } from '@/i18n/I18nContext';
 import type { ItemInstanceResponse } from '@/types';
 
 /* ── Props ─────────────────────────────────────────────────────── */
@@ -16,17 +17,17 @@ interface RenameStackModalProps {
 
 /* ── Mode option data ──────────────────────────────────────────── */
 
-const MODES: { value: boolean; label: string; desc: string; glyph: string }[] = [
+const MODES: { value: boolean; labelKey: string; descKey: string; glyph: string }[] = [
   {
     value: true,
-    label: 'Rename whole stack',
-    desc: 'Applies the new name to every item in the stack.',
+    labelKey: 'cmp.rename.modeWholeLabel',
+    descKey: 'cmp.rename.modeWholeDesc',
     glyph: 'square',
   },
   {
     value: false,
-    label: 'Split one away & name it',
-    desc: 'Separates a single item from the stack and gives it a unique name.',
+    labelKey: 'cmp.rename.modeSplitLabel',
+    descKey: 'cmp.rename.modeSplitDesc',
     glyph: 'diamond',
   },
 ];
@@ -40,6 +41,7 @@ export function RenameStackModal({
   campaignId,
   characterId,
 }: RenameStackModalProps) {
+  const t = useT();
   const renameMutation = useRenameItem();
 
   const [renameEntireStack, setRenameEntireStack] = useState(true);
@@ -88,7 +90,7 @@ export function RenameStackModal({
         onClick={() => handleOpenChange(false)}
         disabled={renameMutation.isPending}
       >
-        Cancel
+        {t('common.cancel')}
       </button>
       <button
         className="ao-btn ao-btn--primary"
@@ -98,7 +100,7 @@ export function RenameStackModal({
         {renameMutation.isPending && (
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
         )}
-        Rename
+        {t('cmp.rename.rename')}
       </button>
     </div>
   );
@@ -109,15 +111,15 @@ export function RenameStackModal({
     <ModalScene
       open={open}
       onOpenChange={handleOpenChange}
-      overline="Inscription"
-      title="Rename Stack"
+      overline={t('cmp.rename.overline')}
+      title={t('cmp.rename.title')}
       sub={displayName}
       rune="scroll"
       footer={footer}
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         {/* Mode selection */}
-        <OrdoField label="Rename Mode">
+        <OrdoField label={t('cmp.rename.mode')}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             {MODES.map((opt) => {
               const selected = renameEntireStack === opt.value;
@@ -158,7 +160,7 @@ export function RenameStackModal({
                           fontWeight: selected ? 600 : 400,
                         }}
                       >
-                        {opt.label}
+                        {t(opt.labelKey)}
                       </span>
                     </div>
                     <div
@@ -170,7 +172,7 @@ export function RenameStackModal({
                         lineHeight: 1.4,
                       }}
                     >
-                      {opt.desc}
+                      {t(opt.descKey)}
                     </div>
                   </div>
                 </label>
@@ -180,12 +182,12 @@ export function RenameStackModal({
         </OrdoField>
 
         {/* New name input */}
-        <OrdoField label="New Name" required>
+        <OrdoField label={t('cmp.rename.newName')} required>
           <input
             className="ao-input"
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
-            placeholder="Enter a new name..."
+            placeholder={t('cmp.rename.placeholder')}
             autoFocus
           />
         </OrdoField>
@@ -202,7 +204,7 @@ export function RenameStackModal({
             className="ao-codex"
             style={{ fontSize: 9, color: 'var(--ink-faint)' }}
           >
-            Preview
+            {t('cmp.rename.preview')}
           </span>
           <div
             style={{
@@ -219,7 +221,7 @@ export function RenameStackModal({
               className="ao-italic"
               style={{ fontSize: 11, color: 'var(--ink-faint)', marginTop: 2 }}
             >
-              (originally {item.templateName})
+              {t('cmp.rename.originally', { name: item.templateName })}
             </div>
           )}
         </div>

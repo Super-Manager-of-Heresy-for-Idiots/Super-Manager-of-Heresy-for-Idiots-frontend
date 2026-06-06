@@ -29,11 +29,13 @@ import {
   useToggleLocationVisibility,
 } from '@/hooks/useLocations';
 import { BackLink } from '@/components/campaigns';
+import { useT } from '@/i18n/I18nContext';
 import type { LocationResponse } from '@/types';
 
 /* ── page ────────────────────────────────────────────────────── */
 
 export default function LocationsPage() {
+  const t = useT();
   const { campaignId } = useParams<{ campaignId: string }>();
   const { data: locations, isLoading, error, refetch } = useCampaignLocations(campaignId!);
   const createMutation = useCreateLocation();
@@ -119,11 +121,11 @@ export default function LocationsPage() {
   if (isLoading) {
     return (
       <div>
-        <BackLink to={backTo} label="К кампании" style={{ marginBottom: 12 }} />
+        <BackLink to={backTo} label={t('camp2.back.campaign')} style={{ marginBottom: 12 }} />
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 32 }}>
           <div>
-            <p className="ao-overline" style={{ color: 'var(--gold)' }}>Cartography</p>
-            <h3 className="ao-h3" style={{ marginTop: 4 }}>Locations</h3>
+            <p className="ao-overline" style={{ color: 'var(--gold)' }}>{t('camp2.loc.overline')}</p>
+            <h3 className="ao-h3" style={{ marginTop: 4 }}>{t('camp2.loc.title')}</h3>
           </div>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
@@ -145,12 +147,12 @@ export default function LocationsPage() {
   if (error) {
     return (
       <div>
-        <BackLink to={backTo} label="К кампании" style={{ marginBottom: 12 }} />
+        <BackLink to={backTo} label={t('camp2.back.campaign')} style={{ marginBottom: 12 }} />
         <div style={{ textAlign: 'center', padding: '48px 0' }}>
           <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginBottom: 16 }}>
-            The atlas could not be unfurled. Its bindings remain sealed.
+            {t('camp2.loc.loadError')}
           </p>
-          <button className="ao-btn" onClick={() => refetch()}>Retry</button>
+          <button className="ao-btn" onClick={() => refetch()}>{t('common.retry')}</button>
         </div>
       </div>
     );
@@ -160,19 +162,19 @@ export default function LocationsPage() {
 
   return (
     <div>
-      <BackLink to={backTo} label="К кампании" style={{ marginBottom: 12 }} />
+      <BackLink to={backTo} label={t('camp2.back.campaign')} style={{ marginBottom: 12 }} />
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 32 }}>
         <div>
-          <p className="ao-overline" style={{ color: 'var(--gold)' }}>Cartography</p>
-          <h3 className="ao-h3" style={{ marginTop: 4 }}>Locations</h3>
+          <p className="ao-overline" style={{ color: 'var(--gold)' }}>{t('camp2.loc.overline')}</p>
+          <h3 className="ao-h3" style={{ marginTop: 4 }}>{t('camp2.loc.title')}</h3>
           <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 13, marginTop: 4 }}>
-            Realms, ruins, and waypoints mapped by the Game-Master's hand.
+            {t('camp2.loc.subtitle')}
           </p>
         </div>
         <button className="ao-btn ao-btn--primary" onClick={handleOpenCreate}>
           <Rune kind="plus" size={14} color="currentColor" />
-          <span style={{ marginLeft: 6 }}>New Location</span>
+          <span style={{ marginLeft: 6 }}>{t('camp2.loc.newLocation')}</span>
         </button>
       </div>
 
@@ -180,12 +182,12 @@ export default function LocationsPage() {
       {!locations || locations.length === 0 ? (
         <EmptyVault
           glyph="sigil-3"
-          title="No Locations Charted"
-          body="The map lies blank. Create your first location to begin charting the realm."
+          title={t('camp2.loc.empty.title')}
+          body={t('camp2.loc.empty.body')}
           action={
             <button className="ao-btn ao-btn--primary" onClick={handleOpenCreate}>
               <Rune kind="plus" size={14} color="currentColor" />
-              <span style={{ marginLeft: 6 }}>New Location</span>
+              <span style={{ marginLeft: 6 }}>{t('camp2.loc.newLocation')}</span>
             </button>
           }
         />
@@ -203,7 +205,7 @@ export default function LocationsPage() {
                     opacity: loc.isVisibleToPlayers ? 1 : 0.5,
                   }}
                 >
-                  Map Vignette
+                  {t('camp2.loc.mapVignette')}
                 </Placeholder>
 
                 {/* ID + Visibility */}
@@ -255,7 +257,7 @@ export default function LocationsPage() {
                 }}
               >
                 <button className="ao-btn ao-btn--sm" onClick={() => handleOpenEdit(loc)}>
-                  <Rune kind="scroll" size={10} /> Edit
+                  <Rune kind="scroll" size={10} /> {t('camp2.loc.edit')}
                 </button>
                 <button
                   className="ao-btn ao-btn--sm"
@@ -263,7 +265,7 @@ export default function LocationsPage() {
                   disabled={visibilityMutation.isPending}
                 >
                   <Rune kind={loc.isVisibleToPlayers ? 'lock' : 'eye'} size={10} />
-                  {loc.isVisibleToPlayers ? ' Hide' : ' Reveal'}
+                  {loc.isVisibleToPlayers ? ` ${t('camp2.loc.hide')}` : ` ${t('camp2.loc.reveal')}`}
                 </button>
                 <button
                   className="ao-btn ao-btn--sm ao-btn--danger"
@@ -281,24 +283,24 @@ export default function LocationsPage() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editing ? 'Alter Location' : 'Chart New Location'}</DialogTitle>
+            <DialogTitle>{editing ? t('camp2.loc.dialog.editTitle') : t('camp2.loc.dialog.createTitle')}</DialogTitle>
           </DialogHeader>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <OrdoField label="Name" required>
+            <OrdoField label={t('camp2.loc.field.name')} required>
               <input
                 className="ao-input"
                 value={formName}
                 onChange={(e) => setFormName(e.target.value)}
-                placeholder="Name of the location"
+                placeholder={t('camp2.loc.field.namePlaceholder')}
               />
             </OrdoField>
 
-            <OrdoField label="Description">
+            <OrdoField label={t('camp2.loc.field.description')}>
               <textarea
                 className="ao-input"
                 value={formDescription}
                 onChange={(e) => setFormDescription(e.target.value)}
-                placeholder="Describe the location..."
+                placeholder={t('camp2.loc.field.descriptionPlaceholder')}
                 rows={4}
                 style={{ resize: 'vertical' }}
               />
@@ -310,7 +312,7 @@ export default function LocationsPage() {
                 checked={formVisible}
                 onChange={(e) => setFormVisible(e.target.checked)}
               />
-              <span className="ao-label" style={{ marginBottom: 0 }}>Visible to players</span>
+              <span className="ao-label" style={{ marginBottom: 0 }}>{t('camp2.loc.field.visible')}</span>
             </label>
           </div>
           <DialogFooter>
@@ -319,7 +321,7 @@ export default function LocationsPage() {
               onClick={() => setDialogOpen(false)}
               disabled={createMutation.isPending || updateMutation.isPending}
             >
-              Withhold
+              {t('camp2.loc.withhold')}
             </button>
             <button
               type="button"
@@ -330,7 +332,7 @@ export default function LocationsPage() {
               {(createMutation.isPending || updateMutation.isPending) && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
-              {editing ? 'Seal' : 'Chart'}
+              {editing ? t('camp2.loc.seal') : t('camp2.loc.chart')}
             </button>
           </DialogFooter>
         </DialogContent>
@@ -340,19 +342,19 @@ export default function LocationsPage() {
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Erase this Location?</AlertDialogTitle>
+            <AlertDialogTitle>{t('camp2.loc.delete.title')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This rite cannot be undone. The location shall be stricken from the atlas for all eternity.
+              {t('camp2.loc.delete.body')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Withhold</AlertDialogCancel>
+            <AlertDialogCancel>{t('camp2.loc.withhold')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               {deleteMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Erase
+              {t('camp2.loc.delete.confirm')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

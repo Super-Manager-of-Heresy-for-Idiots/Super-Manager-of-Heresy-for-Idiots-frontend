@@ -1,4 +1,5 @@
 import type { CampaignStatus } from '@/types';
+import { useT } from '@/i18n/I18nContext';
 
 interface StatusSwitchProps {
   current: CampaignStatus;
@@ -8,6 +9,7 @@ interface StatusSwitchProps {
 const STATUSES: CampaignStatus[] = ['ACTIVE', 'PAUSED', 'COMPLETED'];
 
 export function StatusSwitch({ current, onChange }: StatusSwitchProps) {
+  const t = useT();
   return (
     <div style={{ display: 'flex', gap: 0, border: '1px solid var(--rule-strong)' }}>
       {STATUSES.map((s, i) => {
@@ -26,7 +28,7 @@ export function StatusSwitch({ current, onChange }: StatusSwitchProps) {
               cursor: 'pointer',
             }}
           >
-            {s}
+            {t(`cmp2.statusSwitch.${s}`)}
           </button>
         );
       })}

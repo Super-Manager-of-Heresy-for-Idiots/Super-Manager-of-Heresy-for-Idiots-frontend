@@ -1,4 +1,5 @@
 import { Rune } from '@/components/ordo';
+import { useT } from '@/i18n/I18nContext';
 
 interface ContentPillsProps {
   items?: number;
@@ -9,11 +10,12 @@ interface ContentPillsProps {
 }
 
 export function ContentPills({ items = 0, classes = 0, skills = 0, feats = 0, compact = false }: ContentPillsProps) {
+  const t = useT();
   const data = [
-    { label: 'Items',   v: items,   g: 'sword' },
-    { label: 'Classes', v: classes, g: 'helm' },
-    { label: 'Skills',  v: skills,  g: 'eye' },
-    { label: 'Feats',   v: feats,   g: 'sigil-3' },
+    { label: t('cmp2.pills.items'),   v: items,   g: 'sword' },
+    { label: t('cmp2.pills.classes'), v: classes, g: 'helm' },
+    { label: t('cmp2.pills.skills'),  v: skills,  g: 'eye' },
+    { label: t('cmp2.pills.feats'),   v: feats,   g: 'sigil-3' },
   ];
 
   return (

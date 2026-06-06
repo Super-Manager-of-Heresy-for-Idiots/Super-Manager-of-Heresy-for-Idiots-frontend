@@ -1,5 +1,6 @@
 import { OrdoPanel, PanelHeader, Rune } from '@/components/ordo';
 import { CharStatusBadge } from '@/components/campaigns';
+import { useT } from '@/i18n/I18nContext';
 
 type StatusOption = 'ACTIVE' | 'DEAD' | 'RESERVE';
 
@@ -11,24 +12,24 @@ interface StatusControlPanelProps {
 
 interface StatusDef {
   status: StatusOption;
-  description: string;
+  descriptionKey: string;
   color: string;
 }
 
 const STATUS_OPTIONS: StatusDef[] = [
   {
     status: 'ACTIVE',
-    description: 'Character is alive and adventuring in the current campaign.',
+    descriptionKey: 'cmp.status.active',
     color: '#7a9866',
   },
   {
     status: 'DEAD',
-    description: 'Character has fallen. Sheet becomes read-only.',
+    descriptionKey: 'cmp.status.dead',
     color: '#b06a6a',
   },
   {
     status: 'RESERVE',
-    description: 'Character is benched. Sheet becomes read-only.',
+    descriptionKey: 'cmp.status.reserve',
     color: 'var(--ink-faint)',
   },
 ];
@@ -37,9 +38,10 @@ export function StatusControlPanel({
   currentStatus,
   onStatusChange,
 }: StatusControlPanelProps) {
+  const t = useT();
   return (
     <OrdoPanel frame>
-      <PanelHeader title="Soul Status" glyph="sigil-1" />
+      <PanelHeader title={t('cmp.status.title')} glyph="sigil-1" />
 
       <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
         {STATUS_OPTIONS.map((opt) => {
@@ -78,7 +80,7 @@ export function StatusControlPanel({
                     lineHeight: 1.4,
                   }}
                 >
-                  {opt.description}
+                  {t(opt.descriptionKey)}
                 </div>
               </div>
 

@@ -2,6 +2,7 @@ import { useParams } from 'react-router-dom';
 import { OrdoPanel, PanelHeader, Rune } from '@/components/ordo';
 import { BackLink } from '@/components/campaigns';
 import { useCharacter } from '@/hooks/useCharacter';
+import { useT } from '@/i18n/I18nContext';
 
 interface PlaceholderSpec {
   overline: string;
@@ -12,6 +13,7 @@ interface PlaceholderSpec {
 }
 
 function CharacterFeaturePlaceholder({ overline, title, glyph, todo, details }: PlaceholderSpec) {
+  const t = useT();
   const { campaignId, characterId } = useParams<{ campaignId: string; characterId: string }>();
   const { data: character } = useCharacter(campaignId!, characterId!);
   const backTo = characterId
@@ -20,20 +22,20 @@ function CharacterFeaturePlaceholder({ overline, title, glyph, todo, details }: 
 
   return (
     <div>
-      <BackLink to={backTo} label="К персонажу" style={{ marginBottom: 12 }} />
+      <BackLink to={backTo} label={t('camp.backToCharacter')} style={{ marginBottom: 12 }} />
       <OrdoPanel frame padding={0}>
         <PanelHeader
           title={title}
           glyph={glyph}
           tone="gold"
-          sub={character ? character.name : 'Character scoped screen'}
+          sub={character ? character.name : t('camp.ph.scopedCharacter')}
         />
       <div style={{ padding: 24 }}>
         <p className="ao-overline" style={{ color: 'var(--gold)', marginBottom: 8 }}>
           {overline}
         </p>
         <h3 className="ao-h3" style={{ marginBottom: 12 }}>
-          TODO: {todo}
+          {t('camp.ph.todoPrefix')}{todo}
         </h3>
         <div style={{ display: 'grid', gap: 10, maxWidth: 760 }}>
           {details.map((detail) => (
@@ -61,15 +63,16 @@ function CharacterFeaturePlaceholder({ overline, title, glyph, todo, details }: 
 
 // Roster page links to dashboard, not character.
 function CampaignFeaturePlaceholder({ overline, title, glyph, todo, details }: PlaceholderSpec) {
+  const t = useT();
   const { campaignId } = useParams<{ campaignId: string }>();
   return (
     <div>
-      <BackLink to={`/campaigns/${campaignId}`} label="К кампании" style={{ marginBottom: 12 }} />
+      <BackLink to={`/campaigns/${campaignId}`} label={t('camp.backToCampaign')} style={{ marginBottom: 12 }} />
       <OrdoPanel frame padding={0}>
-        <PanelHeader title={title} glyph={glyph} tone="gold" sub="Campaign scoped screen" />
+        <PanelHeader title={title} glyph={glyph} tone="gold" sub={t('camp.ph.scopedCampaign')} />
         <div style={{ padding: 24 }}>
           <p className="ao-overline" style={{ color: 'var(--gold)', marginBottom: 8 }}>{overline}</p>
-          <h3 className="ao-h3" style={{ marginBottom: 12 }}>TODO: {todo}</h3>
+          <h3 className="ao-h3" style={{ marginBottom: 12 }}>{t('camp.ph.todoPrefix')}{todo}</h3>
           <div style={{ display: 'grid', gap: 10, maxWidth: 760 }}>
             {details.map((detail) => (
               <div key={detail} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', color: 'var(--ink-quiet)', fontSize: 13, lineHeight: 1.45 }}>
@@ -85,112 +88,119 @@ function CampaignFeaturePlaceholder({ overline, title, glyph, todo, details }: P
 }
 
 export function CampaignRosterPage() {
+  const t = useT();
   return (
     <CampaignFeaturePlaceholder
-      overline="Campaign roster"
-      title="CAMPAIGN ROSTER"
+      overline={t('camp.ph.roster.overline')}
+      title={t('camp.ph.roster.title')}
       glyph="helm"
-      todo="сделать полноценный список персонажей кампании"
+      todo={t('camp.ph.roster.todo')}
       details={[
-        'Для игрока здесь должен быть список только его персонажей в этой кампании.',
-        'Для GAME_MASTER/admin здесь должен быть общий список персонажей кампании с владельцами, статусами, HP и быстрым переходом в управление.',
-        'Нужны фильтры по статусу, владельцу и классу, а также массовые GAME_MASTER-действия, если они появятся в контракте.',
+        t('camp.ph.roster.d1'),
+        t('camp.ph.roster.d2'),
+        t('camp.ph.roster.d3'),
       ]}
     />
   );
 }
 
 export function CharacterEditPage() {
+  const t = useT();
   return (
     <CharacterFeaturePlaceholder
-      overline="Character profile"
-      title="EDIT CHARACTER"
+      overline={t('camp.ph.edit.overline')}
+      title={t('camp.ph.edit.title')}
       glyph="scroll"
-      todo="сделать форму редактирования профиля персонажа"
+      todo={t('camp.ph.edit.todo')}
       details={[
-        'Экран должен использовать PUT /campaigns/{campaignId}/characters/{characterId} для имени и расы.',
-        'Для владельца и GAME_MASTER нужно показать доступные поля редактирования, для остальных оставить только просмотр.',
-        'Здесь же нужен опасный блок удаления через DELETE персонажа с подтверждением.',
+        t('camp.ph.edit.d1'),
+        t('camp.ph.edit.d2'),
+        t('camp.ph.edit.d3'),
       ]}
     />
   );
 }
 
 export function CharacterStatsPage() {
+  const t = useT();
   return (
     <CharacterFeaturePlaceholder
-      overline="Character stats"
-      title="CHARACTER STATS"
+      overline={t('camp.ph.stats.overline')}
+      title={t('camp.ph.stats.title')}
       glyph="sigil-2"
-      todo="сделать экран характеристик и проверок"
+      todo={t('camp.ph.stats.todo')}
       details={[
-        'Нужно вывести base value, effective value и список active modifiers по GET /stats.',
-        'Владелец и GAME_MASTER должны иметь форму изменения значения через PUT /stats/{statId}.',
-        'Для каждого стата нужен запуск ability-check и отображение base modifier, buffs, equipment и total modifier.',
+        t('camp.ph.stats.d1'),
+        t('camp.ph.stats.d2'),
+        t('camp.ph.stats.d3'),
       ]}
     />
   );
 }
 
 export function AbilityCheckPage() {
+  const t = useT();
   return (
     <CharacterFeaturePlaceholder
-      overline="Ability check"
-      title="ABILITY CHECK"
+      overline={t('camp.ph.check.overline')}
+      title={t('camp.ph.check.title')}
       glyph="eye"
-      todo="сделать экран расчета модификатора проверки"
+      todo={t('camp.ph.check.todo')}
       details={[
-        'Экран должен читать statTypeId из URL и вызывать GET /ability-check/{statTypeId}.',
-        'Нужно показать базовое значение, стандартный модификатор, бонус эффектов, бонус экипировки и итог.',
-        'Позже сюда можно добавить бросок d20, историю проверок и отправку результата GAME_MASTER.',
+        t('camp.ph.check.d1'),
+        t('camp.ph.check.d2'),
+        t('camp.ph.check.d3'),
       ]}
     />
   );
 }
 
 export function CharacterWalletPage() {
+  const t = useT();
   return (
     <CharacterFeaturePlaceholder
-      overline="Character wallet"
-      title="CHARACTER WALLET"
+      overline={t('camp.ph.wallet.overline')}
+      title={t('camp.ph.wallet.title')}
       glyph="coin"
-      todo="сделать кошелек персонажа"
+      todo={t('camp.ph.wallet.todo')}
       details={[
-        'Экран должен показывать все валюты персонажа через GET /wallet, включая goldEquivalent.',
-        'Владелец и GAME_MASTER должны иметь форму начисления и списания валюты через POST /wallet.',
-        'Нужен компактный журнал последних операций, если backend позже отдаст историю.',
+        t('camp.ph.wallet.d1'),
+        t('camp.ph.wallet.d2'),
+        t('camp.ph.wallet.d3'),
       ]}
     />
   );
 }
 
 export function CharacterResourcesPage() {
+  const t = useT();
   return (
     <CharacterFeaturePlaceholder
-      overline="Character resources"
-      title="CHARACTER RESOURCES"
+      overline={t('camp.ph.resources.overline')}
+      title={t('camp.ph.resources.title')}
       glyph="hex"
-      todo="сделать управление расходуемыми ресурсами"
+      todo={t('camp.ph.resources.todo')}
       details={[
-        'Экран должен показывать currentValue/maxValue для каждого ресурса через GET /resources.',
-        'Владелец и GAME_MASTER должны менять currentValue через POST /resources.',
-        'Нужно предусмотреть быстрые кнопки spend/restore и визуальное заполнение ресурса.',
+        t('camp.ph.resources.d1'),
+        t('camp.ph.resources.d2'),
+        t('camp.ph.resources.d3'),
       ]}
     />
   );
 }
 
 export function CharacterHpPage() {
+  const t = useT();
   return (
     <CharacterFeaturePlaceholder
-      overline="Character HP"
-      title="CHARACTER HP"
+      overline={t('camp.ph.hp.overline')}
+      title={t('camp.ph.hp.title')}
       glyph="cross"
-      todo="сделать экран урона и лечения"
+      todo={t('camp.ph.hp.todo')}
       details={[
-        'Экран должен использовать POST /hp, где отрицательное amount наносит урон, а положительное лечит.',
-        'Нужно показывать текущие HP, максимальные HP, статус персонажа и результат последнего изменения.',
-        'Для будущего дизайна стоит добавить быстрые пресеты урона/лечения и подтверждение критичных изменений.',
+        t('camp.ph.hp.d1'),
+        t('camp.ph.hp.d2'),
+        t('camp.ph.hp.d3'),
       ]}
     />
   );

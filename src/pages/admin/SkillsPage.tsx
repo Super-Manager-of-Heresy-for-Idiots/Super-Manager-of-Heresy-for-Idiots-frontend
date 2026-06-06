@@ -26,8 +26,10 @@ import {
   useDeleteSkill,
 } from '@/hooks/useAdmin';
 import type { SkillResponse } from '@/types';
+import { useT } from '@/i18n/I18nContext';
 
 export default function SkillsPage() {
+  const t = useT();
   const { data, isLoading, error, refetch } = useSkills();
   const createMutation = useCreateSkill();
   const updateMutation = useUpdateSkill();
@@ -87,8 +89,8 @@ export default function SkillsPage() {
       <div>
         <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 18 }}>
           <div>
-            <div className="ao-overline">Reference · disciplines</div>
-            <div className="ao-h3" style={{ marginTop: 4 }}>Tome of Skills</div>
+            <div className="ao-overline">{t('adm.skills.overline')}</div>
+            <div className="ao-h3" style={{ marginTop: 4 }}>{t('adm.skills.title')}</div>
           </div>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -104,9 +106,9 @@ export default function SkillsPage() {
     return (
       <div style={{ textAlign: 'center', padding: '48px 0' }}>
         <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginBottom: 16 }}>
-          The tome could not be consulted.
+          {t('adm.shared.tomeUnavailable')}
         </p>
-        <button className="ao-btn" onClick={() => refetch()}>Retry</button>
+        <button className="ao-btn" onClick={() => refetch()}>{t('common.retry')}</button>
       </div>
     );
   }
@@ -116,13 +118,13 @@ export default function SkillsPage() {
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 18 }}>
         <div>
-          <div className="ao-overline">Reference · disciplines</div>
-          <div className="ao-h3" style={{ marginTop: 4 }}>Tome of Skills</div>
+          <div className="ao-overline">{t('adm.skills.overline')}</div>
+          <div className="ao-h3" style={{ marginTop: 4 }}>{t('adm.skills.title')}</div>
         </div>
         <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-          <OrdoChip tone="ember" glyph="lock">Inquisitor privileges</OrdoChip>
+          <OrdoChip tone="ember" glyph="lock">{t('adm.shared.inquisitorPrivileges')}</OrdoChip>
           <button className="ao-btn ao-btn--primary" onClick={handleAdd}>
-            <Rune kind="plus" size={11} /> New Entry
+            <Rune kind="plus" size={11} /> {t('adm.shared.newEntry')}
           </button>
         </div>
       </div>
@@ -130,14 +132,14 @@ export default function SkillsPage() {
       {/* Table */}
       <OrdoPanel frame padding={0}>
         <PanelHeader
-          title="Tome of Skills"
-          sub={`${data?.length || 0} entries`}
+          title={t('adm.skills.title')}
+          sub={t('adm.skills.entries', { count: data?.length || 0 })}
           glyph="eye"
           right={
             <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
               <input
                 className="ao-input"
-                placeholder="Search skills…"
+                placeholder={t('adm.skills.searchPlaceholder')}
                 style={{ width: 220, padding: '6px 12px' }}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -149,9 +151,9 @@ export default function SkillsPage() {
         <table className="ao-table">
           <thead>
             <tr>
-              <th>Name</th>
-              <th>Skill Type</th>
-              <th>Description</th>
+              <th>{t('adm.shared.colName')}</th>
+              <th>{t('adm.skills.colSkillType')}</th>
+              <th>{t('adm.shared.colDescription')}</th>
               <th style={{ width: 80 }}></th>
             </tr>
           </thead>
@@ -173,25 +175,25 @@ export default function SkillsPage() {
                 </td>
                 <td>
                   <div style={{ display: 'inline-flex', gap: 4 }}>
-                    <button className="ao-iconbtn" style={{ width: 26, height: 26 }} onClick={() => handleEdit(s)} title="Edit">
+                    <button className="ao-iconbtn" style={{ width: 26, height: 26 }} onClick={() => handleEdit(s)} title={t('adm.shared.edit')}>
                       <Rune kind="scroll" size={11} />
                     </button>
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <button className="ao-iconbtn" style={{ width: 26, height: 26, color: '#d8896a' }} title="Delete">
+                        <button className="ao-iconbtn" style={{ width: 26, height: 26, color: '#d8896a' }} title={t('adm.shared.delete')}>
                           <Rune kind="x" size={11} />
                         </button>
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
-                          <AlertDialogTitle>Unmake this Skill?</AlertDialogTitle>
+                          <AlertDialogTitle>{t('adm.skills.unmakeTitle')}</AlertDialogTitle>
                           <AlertDialogDescription>
-                            This rite cannot be undone. The skill shall be purged from the tome.
+                            {t('adm.skills.unmakeDescription')}
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                          <AlertDialogCancel>Withhold</AlertDialogCancel>
-                          <AlertDialogAction onClick={() => deleteMutation.mutate(s.id)}>Unmake</AlertDialogAction>
+                          <AlertDialogCancel>{t('adm.shared.withhold')}</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => deleteMutation.mutate(s.id)}>{t('adm.shared.unmake')}</AlertDialogAction>
                         </AlertDialogFooter>
                       </AlertDialogContent>
                     </AlertDialog>
@@ -202,7 +204,7 @@ export default function SkillsPage() {
             {filtered.length === 0 && (
               <tr>
                 <td colSpan={4} style={{ textAlign: 'center', padding: '32px 16px' }}>
-                  <span className="ao-italic" style={{ color: 'var(--ink-faint)' }}>No skills inscribed</span>
+                  <span className="ao-italic" style={{ color: 'var(--ink-faint)' }}>{t('adm.skills.emptyTable')}</span>
                 </td>
               </tr>
             )}
@@ -210,8 +212,8 @@ export default function SkillsPage() {
         </table>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 18px', borderTop: '1px solid var(--rule)', background: 'var(--abyss)' }}>
-          <span className="ao-codex">{filtered.length} of {data?.length || 0} entries</span>
-          <span className="ao-codex">sorted by · name</span>
+          <span className="ao-codex">{t('adm.skills.countOf', { filtered: filtered.length, total: data?.length || 0 })}</span>
+          <span className="ao-codex">{t('adm.shared.sortedByName')}</span>
         </div>
       </OrdoPanel>
 
@@ -219,45 +221,45 @@ export default function SkillsPage() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editing ? 'Amend Skill' : 'Inscribe New Skill'}</DialogTitle>
+            <DialogTitle>{editing ? t('adm.skills.dialogEdit') : t('adm.skills.dialogCreate')}</DialogTitle>
           </DialogHeader>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <OrdoField label="Name" required>
+            <OrdoField label={t('adm.shared.fieldName')} required>
               <input
                 className="ao-input"
                 value={formName}
                 onChange={(e) => setFormName(e.target.value)}
-                placeholder="Skill name"
+                placeholder={t('adm.skills.namePlaceholder')}
                 style={{ fontFamily: 'var(--font-serif)', fontSize: 17 }}
               />
             </OrdoField>
-            <OrdoField label="Skill Type" hint="e.g. WIS based, investigation">
+            <OrdoField label={t('adm.skills.typeLabel')} hint={t('adm.skills.typeHint')}>
               <input
                 className="ao-input"
                 value={formSkillType}
                 onChange={(e) => setFormSkillType(e.target.value)}
-                placeholder="Skill type"
+                placeholder={t('adm.skills.typePlaceholder')}
               />
             </OrdoField>
-            <OrdoField label="Description">
+            <OrdoField label={t('adm.shared.fieldDescription')}>
               <textarea
                 className="ao-input"
                 value={formDescription}
                 onChange={(e) => setFormDescription(e.target.value)}
-                placeholder="Describe the skill"
+                placeholder={t('adm.skills.descriptionPlaceholder')}
                 rows={3}
                 style={{ resize: 'vertical', fontSize: 14 }}
               />
             </OrdoField>
           </div>
           <DialogFooter>
-            <button className="ao-btn ao-btn--ghost" onClick={() => setDialogOpen(false)}>Cancel</button>
+            <button className="ao-btn ao-btn--ghost" onClick={() => setDialogOpen(false)}>{t('common.cancel')}</button>
             <button
               className="ao-btn ao-btn--primary"
               onClick={handleSubmit}
               disabled={!formName || createMutation.isPending || updateMutation.isPending}
             >
-              <Rune kind="diamond-fill" size={9} /> {editing ? 'Amend' : 'Inscribe'}
+              <Rune kind="diamond-fill" size={9} /> {editing ? t('adm.shared.amend') : t('adm.shared.inscribe')}
             </button>
           </DialogFooter>
         </DialogContent>

@@ -2,8 +2,10 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Trash2, Loader2 } from 'lucide-react';
 import { OrdoPanel, PanelHeader, Bar, OrdoDivider } from '@/components/ordo';
 import { useTemplate, useDeleteTemplate } from '@/hooks/useTemplates';
+import { useT } from '@/i18n/I18nContext';
 
 export default function TemplateDetailPage() {
+  const t = useT();
   const { templateId } = useParams<{ templateId: string }>();
   const navigate = useNavigate();
   const { data: tpl, isLoading, error } = useTemplate(templateId);
@@ -25,31 +27,31 @@ export default function TemplateDetailPage() {
     return (
       <div style={{ textAlign: 'center', padding: '48px 0' }}>
         <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginBottom: 16 }}>
-          Шаблон не найден.
+          {t('player.template.notFound')}
         </p>
-        <button className="ao-btn" onClick={back}>← К списку</button>
+        <button className="ao-btn" onClick={back}>{t('player.template.backToList')}</button>
       </div>
     );
   }
 
   const handleDelete = () => {
-    if (!confirm(`Удалить «${tpl.name}»? Действие нельзя отменить.`)) return;
+    if (!confirm(t('player.template.deleteConfirm', { name: tpl.name }))) return;
     deleteMutation.mutate(tpl.id, { onSuccess: back });
   };
 
   const classLabel = tpl.classLevels?.length
     ? tpl.classLevels.map((c) => `${c.className} ${c.classLevel}`).join(' / ')
-    : `LVL ${tpl.totalLevel}`;
+    : t('player.template.levelShort', { level: tpl.totalLevel });
 
   return (
     <div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
         <button className="ao-btn ao-btn--ghost" onClick={back}>
-          <ArrowLeft className="h-3 w-3" /> К списку
+          <ArrowLeft className="h-3 w-3" /> {t('player.template.backToListShort')}
         </button>
         <button className="ao-btn ao-btn--ghost" onClick={handleDelete} disabled={deleteMutation.isPending}>
           {deleteMutation.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Trash2 className="h-3 w-3" style={{ color: 'var(--ember)' }} />}
-          <span style={{ marginLeft: 6 }}>Удалить</span>
+          <span style={{ marginLeft: 6 }}>{t('player.template.delete')}</span>
         </button>
       </div>
 
@@ -57,7 +59,7 @@ export default function TemplateDetailPage() {
         <PanelHeader title={tpl.name} glyph="helm" tone="gold" sub={classLabel} />
         <div style={{ padding: 16, display: 'grid', gap: 14 }}>
           <div className="ao-codex" style={{ fontSize: 13 }}>
-            Раса: <strong>{tpl.race?.name ?? '—'}</strong>
+            {t('player.template.race')}: <strong>{tpl.race?.name ?? t('player.template.dash')}</strong>
           </div>
           {tpl.race?.description && (
             <div className="ao-italic" style={{ fontSize: 12, color: 'var(--ink-quiet)' }}>
@@ -68,7 +70,7 @@ export default function TemplateDetailPage() {
           <OrdoDivider glyph="diamond" />
 
           <div>
-            <div className="ao-overline" style={{ marginBottom: 6 }}>Здоровье</div>
+            <div className="ao-overline" style={{ marginBottom: 6 }}>{t('player.template.health')}</div>
             <Bar value={tpl.currentHp ?? 0} max={Math.max(1, tpl.maxHp ?? 0)} tone="ember" height={6} />
             <div className="ao-codex" style={{ fontSize: 11, color: 'var(--ink-faint)', marginTop: 4 }}>
               HP {tpl.currentHp ?? 0}/{tpl.maxHp ?? 0} · XP {tpl.experience.toLocaleString()}
@@ -77,7 +79,7 @@ export default function TemplateDetailPage() {
 
           {tpl.stats?.length ? (
             <div>
-              <div className="ao-overline" style={{ marginBottom: 6 }}>Характеристики</div>
+              <div className="ao-overline" style={{ marginBottom: 6 }}>{t('player.template.stats')}</div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 8 }}>
                 {tpl.stats.map((s) => (
                   <div key={s.id} style={{ padding: '6px 10px', border: '1px solid var(--hairline)' }}>

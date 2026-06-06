@@ -17,11 +17,13 @@ import {
 import { useAuthStore } from '@/store/authStore';
 import { useCampaign, useSetCampaignStatus } from '@/hooks/useCampaigns';
 import { useCampaignCharacters } from '@/hooks/useCharacter';
+import { useT } from '@/i18n/I18nContext';
 import type { CampaignStatus, CharacterV2Response } from '@/types';
 
 /* ── page ────────────────────────────────────────────────────── */
 
 export default function CampaignDashboardPage() {
+  const t = useT();
   const navigate = useNavigate();
   const { campaignId } = useParams<{ campaignId: string }>();
   const { user } = useAuthStore();
@@ -64,7 +66,7 @@ export default function CampaignDashboardPage() {
   if (isLoading) {
     return (
       <div>
-        <BackLink to="/campaigns" label="К кампаниям" style={{ marginBottom: 12 }} />
+        <BackLink to="/campaigns" label={t('camp.backToCampaigns')} style={{ marginBottom: 12 }} />
         <div className="ao-panel ao-frame ao-breathe" style={{ padding: 24, minHeight: 120, marginBottom: 20 }}>
           <span className="ao-frame-c" />
           <div className="ao-ph" style={{ width: '40%', height: 24, marginBottom: 12 }} />
@@ -88,12 +90,12 @@ export default function CampaignDashboardPage() {
   if (error || !campaign) {
     return (
       <div>
-        <BackLink to="/campaigns" label="К кампаниям" style={{ marginBottom: 12 }} />
+        <BackLink to="/campaigns" label={t('camp.backToCampaigns')} style={{ marginBottom: 12 }} />
         <div style={{ textAlign: 'center', padding: '48px 0' }}>
           <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginBottom: 16 }}>
-            The campaign chronicle could not be unfurled. Its wards remain unbroken.
+            {t('camp.dash.loadError')}
           </p>
-          <button className="ao-btn" onClick={() => refetch()}>Retry</button>
+          <button className="ao-btn" onClick={() => refetch()}>{t('camp.retry')}</button>
         </div>
       </div>
     );
@@ -106,11 +108,11 @@ export default function CampaignDashboardPage() {
 
   return (
     <div>
-      <BackLink to="/campaigns" label="К кампаниям" style={{ marginBottom: 12 }} />
+      <BackLink to="/campaigns" label={t('camp.backToCampaigns')} style={{ marginBottom: 12 }} />
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16, marginBottom: 28 }}>
         <div>
-          <p className="ao-overline" style={{ color: 'var(--gold)' }}>Campaign</p>
+          <p className="ao-overline" style={{ color: 'var(--gold)' }}>{t('camp.dash.overline')}</p>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 4 }}>
             <h3 className="ao-h3">{campaign.name}</h3>
             <CampaignStatusPill status={campaign.status} />
@@ -128,7 +130,7 @@ export default function CampaignDashboardPage() {
               onClick={openCharacterWizard}
             >
               <Rune kind="plus" size={14} color="currentColor" />
-              <span style={{ marginLeft: 6 }}>Add Character</span>
+              <span style={{ marginLeft: 6 }}>{t('camp.dash.addCharacter')}</span>
             </button>
           )}
           {campaign.isCreator && (
@@ -146,31 +148,31 @@ export default function CampaignDashboardPage() {
           <span className="ao-stat-value" style={{ color: 'var(--gold)' }}>
             {campaign.members?.length || 0}
           </span>
-          <span className="ao-stat-label">Members</span>
+          <span className="ao-stat-label">{t('camp.dash.stat.members')}</span>
         </div>
         <div className="ao-stat" style={{ textAlign: 'center' }}>
           <span className="ao-stat-value" style={{ color: 'var(--arcane)' }}>
             {charsLoading ? '\u2014' : charCounts.total}
           </span>
-          <span className="ao-stat-label">Characters</span>
+          <span className="ao-stat-label">{t('camp.dash.stat.characters')}</span>
         </div>
         <div className="ao-stat" style={{ textAlign: 'center' }}>
           <span className="ao-stat-value" style={{ color: '#7a9866' }}>
             {charsLoading ? '\u2014' : charCounts.active}
           </span>
-          <span className="ao-stat-label">Active</span>
+          <span className="ao-stat-label">{t('camp.dash.stat.active')}</span>
         </div>
         <div className="ao-stat" style={{ textAlign: 'center' }}>
           <span className="ao-stat-value" style={{ color: '#b06a6a' }}>
             {charsLoading ? '\u2014' : charCounts.dead}
           </span>
-          <span className="ao-stat-label">Dead</span>
+          <span className="ao-stat-label">{t('camp.dash.stat.dead')}</span>
         </div>
         <div className="ao-stat" style={{ textAlign: 'center' }}>
           <span className="ao-stat-value" style={{ color: 'var(--ink-faint)' }}>
             {charsLoading ? '\u2014' : charCounts.reserve}
           </span>
-          <span className="ao-stat-label">Reserve</span>
+          <span className="ao-stat-label">{t('camp.dash.stat.reserve')}</span>
         </div>
       </div>
 
@@ -178,21 +180,21 @@ export default function CampaignDashboardPage() {
 
       {/* DrillBlock grid */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 24, marginBottom: 28 }}>
-        <DrillBlock label="Roster" glyph="helm" count={charCounts.total} to={`/campaigns/${campaignId}/roster`} />
+        <DrillBlock label={t('camp.dash.drill.roster')} glyph="helm" count={charCounts.total} to={`/campaigns/${campaignId}/roster`} />
         {canManageCampaign && (
           <>
-            <DrillBlock label="NPCs" glyph="sigil-1" to={`/campaigns/${campaignId}/npcs`} />
-            <DrillBlock label="Quests" glyph="scroll" to={`/campaigns/${campaignId}/quests`} />
-            <DrillBlock label="Locations" glyph="sigil-3" to={`/campaigns/${campaignId}/locations`} />
+            <DrillBlock label={t('camp.dash.drill.npcs')} glyph="sigil-1" to={`/campaigns/${campaignId}/npcs`} />
+            <DrillBlock label={t('camp.dash.drill.quests')} glyph="scroll" to={`/campaigns/${campaignId}/quests`} />
+            <DrillBlock label={t('camp.dash.drill.locations')} glyph="sigil-3" to={`/campaigns/${campaignId}/locations`} />
           </>
         )}
-        <DrillBlock label="Storage" glyph="sword" to={`/campaigns/${campaignId}/storage`} />
-        <DrillBlock label="Invite Code" glyph="cross-pat" to={`/campaigns/${campaignId}/invite`} />
+        <DrillBlock label={t('camp.dash.drill.storage')} glyph="sword" to={`/campaigns/${campaignId}/storage`} />
+        <DrillBlock label={t('camp.dash.drill.invite')} glyph="cross-pat" to={`/campaigns/${campaignId}/invite`} />
         {canManageCampaign && (
-          <DrillBlock label="Session Notes" glyph="lock" to={`/campaigns/${campaignId}/notes`} />
+          <DrillBlock label={t('camp.dash.drill.notes')} glyph="lock" to={`/campaigns/${campaignId}/notes`} />
         )}
         {canManageCampaign && (
-          <DrillBlock label="Grant XP" glyph="flame" to={`/campaigns/${campaignId}/xp`} />
+          <DrillBlock label={t('camp.dash.drill.grantXp')} glyph="flame" to={`/campaigns/${campaignId}/xp`} />
         )}
       </div>
 
@@ -201,10 +203,10 @@ export default function CampaignDashboardPage() {
       {/* Roster Summary */}
       <OrdoPanel frame padding={0} style={{ marginTop: 24 }}>
         <PanelHeader
-          title="ROSTER SUMMARY"
+          title={t('camp.dash.roster.title')}
           glyph="helm"
           tone="gold"
-          sub={isPlayer ? `${charCounts.total} of your characters` : `${charCounts.total} campaign characters`}
+          sub={isPlayer ? t('camp.dash.roster.subPlayer', { count: charCounts.total }) : t('camp.dash.roster.subGm', { count: charCounts.total })}
         />
 
         {charsLoading ? (
@@ -221,8 +223,8 @@ export default function CampaignDashboardPage() {
           <div style={{ padding: '24px 20px', textAlign: 'center' }}>
             <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 13 }}>
               {isPlayer
-                ? 'You have no characters in this campaign.'
-                : 'No characters have been sworn to this campaign.'}
+                ? t('camp.dash.roster.emptyPlayer')
+                : t('camp.dash.roster.emptyGm')}
             </p>
             {canCreateCharacter && (
               <button
@@ -231,14 +233,14 @@ export default function CampaignDashboardPage() {
                 style={{ marginTop: 14 }}
               >
                 <Rune kind="plus" size={14} color="currentColor" />
-                <span style={{ marginLeft: 6 }}>Create Character</span>
+                <span style={{ marginLeft: 6 }}>{t('camp.dash.createCharacter')}</span>
               </button>
             )}
           </div>
         ) : (
           <div>
             {rosterCharacters.map((ch: CharacterV2Response) => {
-              const className = ch.classLevels?.[0]?.className ?? 'Unknown';
+              const className = ch.classLevels?.[0]?.className ?? t('camp.dash.unknownClass');
               return (
                 <div
                   key={ch.id}
@@ -259,7 +261,7 @@ export default function CampaignDashboardPage() {
                       </span>
                       {!isPlayer && (
                         <span className="ao-codex" style={{ fontSize: 10, color: 'var(--ink-faint)' }}>
-                          Owner: {ch.ownerUsername}
+                          {t('camp.dash.owner', { name: ch.ownerUsername })}
                         </span>
                       )}
                     </div>
@@ -271,10 +273,10 @@ export default function CampaignDashboardPage() {
                   <button
                     className="ao-btn ao-btn--ghost ao-btn--sm"
                     onClick={() => navigate(`/campaigns/${campaignId}/characters/${ch.id}`)}
-                    title="Open character management"
+                    title={t('camp.dash.openManagement')}
                   >
                     <Rune kind="menu" size={10} color="currentColor" />
-                    <span style={{ marginLeft: 4 }}>Manage</span>
+                    <span style={{ marginLeft: 4 }}>{t('camp.dash.manage')}</span>
                   </button>
                 </div>
               );

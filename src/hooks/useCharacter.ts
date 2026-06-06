@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { charactersApi } from '@/api/characters.api';
+import { useT } from '@/i18n/I18nContext';
 import type {
   CreateCharacterInCampaignRequest,
   UpdateCharacterRequest,
@@ -36,16 +37,17 @@ export function useCharacter(campaignId: string, characterId: string) {
 
 export function useCreateCharacterInCampaign() {
   const queryClient = useQueryClient();
+  const t = useT();
 
   return useMutation({
     mutationFn: ({ campaignId, data }: { campaignId: string; data: CreateCharacterInCampaignRequest }) =>
       charactersApi.createInCampaign(campaignId, data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters'] });
-      toast.success('Character created successfully!');
+      toast.success(t('hk.character.created'));
     },
     onError: (error: AxiosError<ApiError>) => {
-      const message = error.response?.data?.message || 'Failed to create character';
+      const message = error.response?.data?.message || t('hk.character.createFailed');
       toast.error(message);
     },
   });
@@ -53,6 +55,7 @@ export function useCreateCharacterInCampaign() {
 
 export function useUpdateCharacter() {
   const queryClient = useQueryClient();
+  const t = useT();
 
   return useMutation({
     mutationFn: ({
@@ -67,10 +70,10 @@ export function useUpdateCharacter() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters'] });
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId] });
-      toast.success('Character updated!');
+      toast.success(t('hk.character.updated'));
     },
     onError: (error: AxiosError<ApiError>) => {
-      const message = error.response?.data?.message || 'Failed to update character';
+      const message = error.response?.data?.message || t('hk.character.updateFailed');
       toast.error(message);
     },
   });
@@ -78,6 +81,7 @@ export function useUpdateCharacter() {
 
 export function useDeleteCharacter() {
   const queryClient = useQueryClient();
+  const t = useT();
 
   return useMutation({
     mutationFn: ({ campaignId, characterId }: { campaignId: string; characterId: string }) =>
@@ -85,10 +89,10 @@ export function useDeleteCharacter() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters'] });
       queryClient.removeQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId] });
-      toast.success('Character deleted!');
+      toast.success(t('hk.character.deleted'));
     },
     onError: (error: AxiosError<ApiError>) => {
-      const message = error.response?.data?.message || 'Failed to delete character';
+      const message = error.response?.data?.message || t('hk.character.deleteFailed');
       toast.error(message);
     },
   });
@@ -107,6 +111,7 @@ export function useCharacterStats(campaignId: string, characterId: string) {
 
 export function useUpdateCharacterStat() {
   const queryClient = useQueryClient();
+  const t = useT();
 
   return useMutation({
     mutationFn: ({
@@ -123,10 +128,10 @@ export function useUpdateCharacterStat() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId, 'stats'] });
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId] });
-      toast.success('Stat updated!');
+      toast.success(t('hk.character.statUpdated'));
     },
     onError: (error: AxiosError<ApiError>) => {
-      const message = error.response?.data?.message || 'Failed to update stat';
+      const message = error.response?.data?.message || t('hk.character.statUpdateFailed');
       toast.error(message);
     },
   });
@@ -134,6 +139,7 @@ export function useUpdateCharacterStat() {
 
 export function useUpdateHp() {
   const queryClient = useQueryClient();
+  const t = useT();
 
   return useMutation({
     mutationFn: ({ campaignId, characterId, id, data }: { campaignId?: string; characterId?: string; id?: string; data: UpdateHpRequest }) => {
@@ -147,10 +153,10 @@ export function useUpdateHp() {
         queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', cId] });
       }
       queryClient.invalidateQueries({ queryKey: ['characters', cId] });
-      toast.success('HP updated!');
+      toast.success(t('hk.character.hpUpdated'));
     },
     onError: (error: AxiosError<ApiError>) => {
-      const message = error.response?.data?.message || 'Failed to update HP';
+      const message = error.response?.data?.message || t('hk.character.hpUpdateFailed');
       toast.error(message);
     },
   });
@@ -169,6 +175,7 @@ export function useCharacterWallet(campaignId: string, characterId: string) {
 
 export function useModifyWallet() {
   const queryClient = useQueryClient();
+  const t = useT();
 
   return useMutation({
     mutationFn: ({ campaignId, characterId, id, currencyTypeId, data }: {
@@ -187,10 +194,10 @@ export function useModifyWallet() {
         queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', cId, 'wallet'] });
         queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', cId] });
       }
-      toast.success('Wallet updated!');
+      toast.success(t('hk.character.walletUpdated'));
     },
     onError: (error: AxiosError<ApiError>) => {
-      const message = error.response?.data?.message || 'Failed to update wallet';
+      const message = error.response?.data?.message || t('hk.character.walletUpdateFailed');
       toast.error(message);
     },
   });
@@ -209,6 +216,7 @@ export function useCharacterResources(campaignId: string, characterId: string) {
 
 export function useModifyResource() {
   const queryClient = useQueryClient();
+  const t = useT();
 
   return useMutation({
     mutationFn: ({ campaignId, characterId, id, resourceTypeId, data }: {
@@ -229,21 +237,22 @@ export function useModifyResource() {
         queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', cId, 'resources'] });
         queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', cId] });
       }
-      toast.success('Resource updated!');
+      toast.success(t('hk.character.resourceUpdated'));
     },
     onError: (error: AxiosError<ApiError>) => {
-      const message = error.response?.data?.message || 'Failed to update resource';
+      const message = error.response?.data?.message || t('hk.character.resourceUpdateFailed');
       toast.error(message);
     },
   });
 }
 
 export function useAbilityCheck() {
+  const t = useT();
   return useMutation({
     mutationFn: ({ campaignId, characterId, statId }: { campaignId: string; characterId: string; statId: string }) =>
       charactersApi.abilityCheck(campaignId, characterId, statId),
     onError: (error: AxiosError<ApiError>) => {
-      const message = error.response?.data?.message || 'Failed to perform ability check';
+      const message = error.response?.data?.message || t('hk.character.abilityCheckFailed');
       toast.error(message);
     },
   });

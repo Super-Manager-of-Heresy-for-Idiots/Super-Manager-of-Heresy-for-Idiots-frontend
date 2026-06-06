@@ -34,6 +34,7 @@ import {
   useStatTypes,
 } from '@/hooks/useAdmin';
 import type { BuffDebuffResponse, CreateBuffDebuffRequest } from '@/types';
+import { useT } from '@/i18n/I18nContext';
 
 const EFFECT_TYPES = [
   'STAT_MODIFIER',
@@ -51,6 +52,7 @@ const GRID_COLS = '1.4fr 120px 1fr 1fr 150px 90px';
 /* ---------- inline sub-components ---------- */
 
 function BuffBadge({ isBuff }: { isBuff: boolean }) {
+  const t = useT();
   const c = isBuff ? '#7a9866' : '#c0584a';
   return (
     <span
@@ -70,7 +72,7 @@ function BuffBadge({ isBuff }: { isBuff: boolean }) {
       }}
     >
       <Rune kind={isBuff ? 'arrow-up' : 'tri-inv'} size={9} color={c} />
-      {isBuff ? 'Buff' : 'Debuff'}
+      {isBuff ? t('adm.buffs.buff') : t('adm.buffs.debuff')}
     </span>
   );
 }
@@ -106,6 +108,7 @@ function EffectTypeBadge({ type }: { type: string }) {
 }
 
 function DurationDisplay({ rounds }: { rounds?: number | null }) {
+  const t = useT();
   const isPermanent = rounds == null;
   return (
     <span
@@ -123,7 +126,7 @@ function DurationDisplay({ rounds }: { rounds?: number | null }) {
         size={11}
         color={isPermanent ? 'var(--gold-pale)' : 'var(--bronze)'}
       />
-      {isPermanent ? '\u221E Permanent' : `${rounds} rounds`}
+      {isPermanent ? t('adm.buffs.permanent') : t('adm.buffs.rounds', { rounds: rounds as number })}
     </span>
   );
 }
@@ -169,6 +172,7 @@ function ModifierTag({
 /* ---------- page component ---------- */
 
 export default function BuffsDebuffsPage() {
+  const t = useT();
   const { data, isLoading, error, refetch } = useBuffsDebuffs();
   const { data: statTypes } = useStatTypes();
   const createMutation = useCreateBuffDebuff();
@@ -261,8 +265,8 @@ export default function BuffsDebuffsPage() {
       <div>
         <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 18 }}>
           <div>
-            <div className="ao-overline">Reference &middot; effects</div>
-            <div className="ao-h3" style={{ marginTop: 4 }}>Afflictions &amp; Blessings</div>
+            <div className="ao-overline">{t('adm.buffs.overline')}</div>
+            <div className="ao-h3" style={{ marginTop: 4 }}>{t('adm.buffs.title')}</div>
           </div>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -279,18 +283,18 @@ export default function BuffsDebuffsPage() {
     return (
       <div style={{ textAlign: 'center', padding: '48px 0' }}>
         <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginBottom: 16 }}>
-          The codex could not be consulted. Its pages remain sealed.
+          {t('adm.buffs.errorBody')}
         </p>
-        <button className="ao-btn" onClick={() => refetch()}>Retry</button>
+        <button className="ao-btn" onClick={() => refetch()}>{t('common.retry')}</button>
       </div>
     );
   }
 
   /* ---------- tab config ---------- */
   const tabs: { key: FilterTab; label: string; count: number; accent: string }[] = [
-    { key: 'ALL', label: 'All', count: counts.all, accent: 'var(--gold)' },
-    { key: 'BUFF', label: 'Buffs', count: counts.buff, accent: '#7a9866' },
-    { key: 'DEBUFF', label: 'Debuffs', count: counts.debuff, accent: '#c0584a' },
+    { key: 'ALL', label: t('adm.buffs.tabAll'), count: counts.all, accent: 'var(--gold)' },
+    { key: 'BUFF', label: t('adm.buffs.tabBuffs'), count: counts.buff, accent: '#7a9866' },
+    { key: 'DEBUFF', label: t('adm.buffs.tabDebuffs'), count: counts.debuff, accent: '#c0584a' },
   ];
 
   return (
@@ -299,8 +303,8 @@ export default function BuffsDebuffsPage() {
       <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 18 }}>
         {/* Left: overline + title */}
         <div>
-          <div className="ao-overline">Reference &middot; effects</div>
-          <div className="ao-h3" style={{ marginTop: 4 }}>Afflictions &amp; Blessings</div>
+          <div className="ao-overline">{t('adm.buffs.overline')}</div>
+          <div className="ao-h3" style={{ marginTop: 4 }}>{t('adm.buffs.title')}</div>
         </div>
 
         {/* Right: tabs */}
@@ -353,9 +357,9 @@ export default function BuffsDebuffsPage() {
 
       {/* Action row */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 10, marginBottom: 18 }}>
-        <OrdoChip tone="ember" glyph="lock">Inquisitor privileges</OrdoChip>
+        <OrdoChip tone="ember" glyph="lock">{t('adm.shared.inquisitorPrivileges')}</OrdoChip>
         <button className="ao-btn ao-btn--primary" onClick={handleAdd}>
-          <Rune kind="plus" size={11} /> Inscribe New Effect
+          <Rune kind="plus" size={11} /> {t('adm.buffs.inscribeNew')}
         </button>
       </div>
 
@@ -363,7 +367,7 @@ export default function BuffsDebuffsPage() {
       {filteredData.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '48px 0' }}>
           <p className="ao-italic" style={{ color: 'var(--ink-faint)' }}>
-            No effects inscribed. The codex awaits thy quill.
+            {t('adm.buffs.emptyBody')}
           </p>
         </div>
       ) : (
@@ -378,11 +382,11 @@ export default function BuffsDebuffsPage() {
               background: 'var(--abyss)',
             }}
           >
-            <span className="ao-overline" style={{ fontSize: 9 }}>Effect</span>
-            <span className="ao-overline" style={{ fontSize: 9 }}>Nature</span>
-            <span className="ao-overline" style={{ fontSize: 9 }}>Type</span>
-            <span className="ao-overline" style={{ fontSize: 9 }}>Modifier</span>
-            <span className="ao-overline" style={{ fontSize: 9 }}>Duration</span>
+            <span className="ao-overline" style={{ fontSize: 9 }}>{t('adm.buffs.colEffect')}</span>
+            <span className="ao-overline" style={{ fontSize: 9 }}>{t('adm.buffs.colNature')}</span>
+            <span className="ao-overline" style={{ fontSize: 9 }}>{t('adm.buffs.colType')}</span>
+            <span className="ao-overline" style={{ fontSize: 9 }}>{t('adm.buffs.colModifier')}</span>
+            <span className="ao-overline" style={{ fontSize: 9 }}>{t('adm.buffs.colDuration')}</span>
             <span />
           </div>
 
@@ -475,7 +479,7 @@ export default function BuffsDebuffsPage() {
                   className="ao-iconbtn"
                   style={{ width: 26, height: 26 }}
                   onClick={() => handleEdit(item)}
-                  title="Edit effect"
+                  title={t('adm.buffs.editTooltip')}
                 >
                   <Rune kind="scroll" size={11} color="var(--gold)" />
                 </button>
@@ -484,25 +488,25 @@ export default function BuffsDebuffsPage() {
                     <button
                       className="ao-iconbtn"
                       style={{ width: 26, height: 26, color: '#d8896a' }}
-                      title="Unmake effect"
+                      title={t('adm.buffs.unmakeTooltip')}
                     >
                       <Rune kind="x" size={11} color="var(--ember)" />
                     </button>
                   </AlertDialogTrigger>
                   <AlertDialogContent>
                     <AlertDialogHeader>
-                      <AlertDialogTitle>Unmake this Effect?</AlertDialogTitle>
+                      <AlertDialogTitle>{t('adm.buffs.unmakeTitle')}</AlertDialogTitle>
                       <AlertDialogDescription>
-                        This rite cannot be undone. The effect shall be purged from the codex.
+                        {t('adm.buffs.unmakeDescription')}
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                      <AlertDialogCancel>Withhold</AlertDialogCancel>
+                      <AlertDialogCancel>{t('adm.shared.withhold')}</AlertDialogCancel>
                       <AlertDialogAction
                         onClick={() => deleteMutation.mutate(item.id)}
                         className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                       >
-                        Unmake
+                        {t('adm.shared.unmake')}
                       </AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>
@@ -522,9 +526,9 @@ export default function BuffsDebuffsPage() {
             }}
           >
             <span className="ao-codex">
-              {filteredData.length} of {data?.length || 0} effects
+              {t('adm.buffs.countOf', { filtered: filteredData.length, total: data?.length || 0 })}
             </span>
-            <span className="ao-codex">sorted by &middot; name</span>
+            <span className="ao-codex">{t('adm.shared.sortedByName')}</span>
           </div>
         </OrdoPanel>
       )}
@@ -533,38 +537,38 @@ export default function BuffsDebuffsPage() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editing ? 'Amend Effect' : 'Inscribe New Effect'}</DialogTitle>
+            <DialogTitle>{editing ? t('adm.buffs.dialogEdit') : t('adm.buffs.dialogCreate')}</DialogTitle>
           </DialogHeader>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <OrdoField label="Name" required>
+            <OrdoField label={t('adm.shared.fieldName')} required>
               <input
                 className="ao-input"
                 value={formName}
                 onChange={(e) => setFormName(e.target.value)}
-                placeholder="Effect name"
+                placeholder={t('adm.buffs.namePlaceholder')}
               />
             </OrdoField>
 
-            <OrdoField label="Description">
+            <OrdoField label={t('adm.shared.fieldDescription')}>
               <textarea
                 className="ao-input"
                 value={formDescription}
                 onChange={(e) => setFormDescription(e.target.value)}
-                placeholder="Describe the effect"
+                placeholder={t('adm.buffs.descriptionPlaceholder')}
                 rows={3}
                 style={{ resize: 'vertical' }}
               />
             </OrdoField>
 
-            <OrdoField label="Effect Type" required>
+            <OrdoField label={t('adm.buffs.effectTypeLabel')} required>
               <Select value={formEffectType} onValueChange={setFormEffectType}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select effect type" />
+                  <SelectValue placeholder={t('adm.buffs.selectEffectType')} />
                 </SelectTrigger>
                 <SelectContent>
-                  {EFFECT_TYPES.map((t) => (
-                    <SelectItem key={t} value={t}>
-                      {t.replace(/_/g, ' ')}
+                  {EFFECT_TYPES.map((et) => (
+                    <SelectItem key={et} value={et}>
+                      {et.replace(/_/g, ' ')}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -572,10 +576,10 @@ export default function BuffsDebuffsPage() {
             </OrdoField>
 
             {formEffectType === 'STAT_MODIFIER' && (
-              <OrdoField label="Target Stat">
+              <OrdoField label={t('adm.buffs.targetStatLabel')}>
                 <Select value={formTargetStatId} onValueChange={setFormTargetStatId}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select stat type" />
+                    <SelectValue placeholder={t('adm.buffs.selectStatType')} />
                   </SelectTrigger>
                   <SelectContent>
                     {(statTypes || []).map((st) => (
@@ -588,34 +592,34 @@ export default function BuffsDebuffsPage() {
               </OrdoField>
             )}
 
-            <OrdoField label="Modifier Value">
+            <OrdoField label={t('adm.buffs.modifierValueLabel')}>
               <input
                 className="ao-input"
                 type="number"
                 value={formModifierValue}
                 onChange={(e) => setFormModifierValue(e.target.value)}
-                placeholder="e.g. -2 or +3"
+                placeholder={t('adm.buffs.modifierValuePlaceholder')}
               />
             </OrdoField>
 
-            <OrdoField label="Duration" hint="Leave empty for permanent">
+            <OrdoField label={t('adm.buffs.durationLabel')} hint={t('adm.buffs.durationHint')}>
               <input
                 className="ao-input"
                 type="number"
                 value={formDurationRounds}
                 onChange={(e) => setFormDurationRounds(e.target.value)}
-                placeholder="Rounds"
+                placeholder={t('adm.buffs.durationPlaceholder')}
               />
             </OrdoField>
 
-            <OrdoField label="Nature" required>
+            <OrdoField label={t('adm.buffs.natureLabel')} required>
               <Select value={formIsBuff} onValueChange={setFormIsBuff}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="true">Blessing (Buff)</SelectItem>
-                  <SelectItem value="false">Curse (Debuff)</SelectItem>
+                  <SelectItem value="true">{t('adm.buffs.natureBuff')}</SelectItem>
+                  <SelectItem value="false">{t('adm.buffs.natureDebuff')}</SelectItem>
                 </SelectContent>
               </Select>
             </OrdoField>
@@ -626,7 +630,7 @@ export default function BuffsDebuffsPage() {
               onClick={() => setDialogOpen(false)}
               disabled={createMutation.isPending || updateMutation.isPending}
             >
-              Withhold
+              {t('adm.shared.withhold')}
             </button>
             <button
               className="ao-btn ao-btn--primary"
@@ -636,7 +640,7 @@ export default function BuffsDebuffsPage() {
               {(createMutation.isPending || updateMutation.isPending) && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
-              Seal
+              {t('adm.shared.seal')}
             </button>
           </DialogFooter>
         </DialogContent>

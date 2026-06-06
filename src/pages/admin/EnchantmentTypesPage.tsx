@@ -34,6 +34,7 @@ import {
   useBuffsDebuffs,
 } from '@/hooks/useAdmin';
 import type { EnchantmentTypeResponse, CreateEnchantmentTypeRequest, DamageType } from '@/types';
+import { useT } from '@/i18n/I18nContext';
 
 /* ------------------------------------------------------------------ */
 /*  Constants                                                          */
@@ -113,10 +114,11 @@ function LinkedEffectBadge({
 }: {
   link?: { name: string; isBuff: boolean } | null;
 }) {
+  const t = useT();
   if (!link) {
     return (
       <span className="ao-codex" style={{ color: 'var(--ink-faint)' }}>
-        — no linked effect
+        {t('adm.ench.noLinkedEffect')}
       </span>
     );
   }
@@ -143,7 +145,7 @@ function LinkedEffectBadge({
           letterSpacing: '0.1em',
         }}
       >
-        {link.isBuff ? 'BUFF' : 'DEBUFF'}
+        {link.isBuff ? t('adm.ench.buff') : t('adm.ench.debuff')}
       </span>
     </span>
   );
@@ -154,6 +156,7 @@ function LinkedEffectBadge({
 /* ------------------------------------------------------------------ */
 
 export default function EnchantmentTypesPage() {
+  const t = useT();
   const { data, isLoading, error, refetch } = useAdminEnchantmentTypes();
   const { data: buffsDebuffs } = useBuffsDebuffs();
   const createMutation = useCreateEnchantmentType();
@@ -231,17 +234,17 @@ export default function EnchantmentTypesPage() {
       }}
     >
       <div>
-        <div className="ao-overline">Reference · weavings</div>
-        <h3 className="ao-h3" style={{ marginTop: 4 }}>The Grimoire</h3>
+        <div className="ao-overline">{t('adm.ench.overline')}</div>
+        <h3 className="ao-h3" style={{ marginTop: 4 }}>{t('adm.ench.title')}</h3>
         <p className="ao-italic" style={{ color: 'var(--ink-quiet)', fontSize: 13, marginTop: 4 }}>
-          Arcane inscriptions that bind power unto steel and soul.
+          {t('adm.ench.subtitle')}
         </p>
       </div>
       <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
         <button className="ao-btn ao-btn--primary" onClick={handleAdd}>
-          <Rune kind="plus" size={11} /> Inscribe New Enchantment
+          <Rune kind="plus" size={11} /> {t('adm.ench.inscribeNew')}
         </button>
-        <OrdoChip tone="ember" glyph="lock">Inquisitor privileges</OrdoChip>
+        <OrdoChip tone="ember" glyph="lock">{t('adm.shared.inquisitorPrivileges')}</OrdoChip>
       </div>nr
     </div>
   );
@@ -278,9 +281,9 @@ export default function EnchantmentTypesPage() {
         {header}
         <div style={{ textAlign: 'center', padding: '48px 0' }}>
           <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginBottom: 16 }}>
-            The grimoire could not be opened. Its wards persist.
+            {t('adm.ench.errorBody')}
           </p>
-          <button className="ao-btn" onClick={() => refetch()}>Retry</button>
+          <button className="ao-btn" onClick={() => refetch()}>{t('common.retry')}</button>
         </div>
       </div>
     );
@@ -296,7 +299,7 @@ export default function EnchantmentTypesPage() {
       {!data || data.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '48px 0' }}>
           <p className="ao-italic" style={{ color: 'var(--ink-faint)' }}>
-            The grimoire holds no enchantments. Inscribe the first incantation.
+            {t('adm.ench.emptyBody')}
           </p>
         </div>
       ) : (
@@ -394,7 +397,7 @@ export default function EnchantmentTypesPage() {
                       className="ao-overline"
                       style={{ fontSize: 9, color: 'var(--brass)', display: 'block', marginBottom: 4 }}
                     >
-                      Linked Effect
+                      {t('adm.ench.linkedEffect')}
                     </span>
                     <LinkedEffectBadge
                       link={
@@ -421,32 +424,32 @@ export default function EnchantmentTypesPage() {
                     style={{ flex: 1 }}
                     onClick={() => handleEdit(item)}
                   >
-                    <Rune kind="scroll" size={10} /> Edit
+                    <Rune kind="scroll" size={10} /> {t('adm.shared.edit')}
                   </button>
 
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <button
                         className="ao-btn ao-btn--sm ao-btn--danger"
-                        title="Unmake enchantment"
+                        title={t('adm.ench.unmakeTooltip')}
                       >
                         <Rune kind="x" size={10} />
                       </button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
-                        <AlertDialogTitle>Unmake this Enchantment?</AlertDialogTitle>
+                        <AlertDialogTitle>{t('adm.ench.unmakeTitle')}</AlertDialogTitle>
                         <AlertDialogDescription>
-                          This rite cannot be undone. The enchantment shall be erased from the grimoire.
+                          {t('adm.ench.unmakeDescription')}
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
-                        <AlertDialogCancel>Withhold</AlertDialogCancel>
+                        <AlertDialogCancel>{t('adm.shared.withhold')}</AlertDialogCancel>
                         <AlertDialogAction
                           onClick={() => deleteMutation.mutate(item.id)}
                           className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                         >
-                          Unmake
+                          {t('adm.shared.unmake')}
                         </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
@@ -462,73 +465,73 @@ export default function EnchantmentTypesPage() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editing ? 'Amend Enchantment' : 'Inscribe New Enchantment'}</DialogTitle>
+            <DialogTitle>{editing ? t('adm.ench.dialogEdit') : t('adm.ench.dialogCreate')}</DialogTitle>
           </DialogHeader>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <OrdoField label="Name" required>
+            <OrdoField label={t('adm.shared.fieldName')} required>
               <input
                 className="ao-input"
                 value={formName}
                 onChange={(e) => setFormName(e.target.value)}
-                placeholder="Enchantment name"
+                placeholder={t('adm.ench.namePlaceholder')}
               />
             </OrdoField>
 
-            <OrdoField label="Description">
+            <OrdoField label={t('adm.shared.fieldDescription')}>
               <textarea
                 className="ao-input"
                 value={formDescription}
                 onChange={(e) => setFormDescription(e.target.value)}
-                placeholder="Describe the enchantment"
+                placeholder={t('adm.ench.descriptionPlaceholder')}
                 rows={3}
                 style={{ resize: 'vertical' }}
               />
             </OrdoField>
 
-            <OrdoField label="Damage Dice" hint="e.g. 2d6">
+            <OrdoField label={t('adm.ench.damageDiceLabel')} hint={t('adm.ench.damageDiceHint')}>
               <input
                 className="ao-input"
                 value={formDamageDice}
                 onChange={(e) => setFormDamageDice(e.target.value)}
-                placeholder="e.g. 2d6"
+                placeholder={t('adm.ench.damageDicePlaceholder')}
               />
             </OrdoField>
 
-            <OrdoField label="Damage Bonus">
+            <OrdoField label={t('adm.ench.damageBonusLabel')}>
               <input
                 className="ao-input"
                 type="number"
                 value={formDamageBonus}
                 onChange={(e) => setFormDamageBonus(e.target.value)}
-                placeholder="Bonus damage"
+                placeholder={t('adm.ench.damageBonusPlaceholder')}
               />
             </OrdoField>
 
-            <OrdoField label="Damage Type">
+            <OrdoField label={t('adm.ench.damageTypeLabel')}>
               <Select value={formDamageType} onValueChange={setFormDamageType}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select damage type" />
+                  <SelectValue placeholder={t('adm.ench.selectDamageType')} />
                 </SelectTrigger>
                 <SelectContent>
-                  {DAMAGE_TYPES.map((t) => (
-                    <SelectItem key={t} value={t}>
-                      {t}
+                  {DAMAGE_TYPES.map((dt) => (
+                    <SelectItem key={dt} value={dt}>
+                      {dt}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </OrdoField>
 
-            <OrdoField label="Linked Blessing/Curse" hint="Optional">
+            <OrdoField label={t('adm.ench.linkedLabel')} hint={t('adm.ench.linkedHint')}>
               <Select value={formBuffDebuffId} onValueChange={setFormBuffDebuffId}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select effect" />
+                  <SelectValue placeholder={t('adm.ench.selectEffect')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="__none__">None</SelectItem>
+                  <SelectItem value="__none__">{t('adm.ench.none')}</SelectItem>
                   {(buffsDebuffs || []).map((bd) => (
                     <SelectItem key={bd.id} value={bd.id}>
-                      {bd.name} ({bd.isBuff ? 'Blessing' : 'Curse'})
+                      {t('adm.ench.optionNamed', { name: bd.name, kind: bd.isBuff ? t('adm.ench.blessing') : t('adm.ench.curse') })}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -541,7 +544,7 @@ export default function EnchantmentTypesPage() {
               onClick={() => setDialogOpen(false)}
               disabled={createMutation.isPending || updateMutation.isPending}
             >
-              Withhold
+              {t('adm.shared.withhold')}
             </button>
             <button
               className="ao-btn ao-btn--primary"
@@ -551,7 +554,7 @@ export default function EnchantmentTypesPage() {
               {(createMutation.isPending || updateMutation.isPending) && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
-              Seal
+              {t('adm.shared.seal')}
             </button>
           </DialogFooter>
         </DialogContent>

@@ -1,4 +1,5 @@
 import { Rune, ModifierTag } from '@/components/ordo';
+import { useT } from '@/i18n/I18nContext';
 import type { CharacterActiveEffectResponse } from '@/types';
 
 interface EffectRowProps {
@@ -7,6 +8,7 @@ interface EffectRowProps {
 }
 
 export function EffectRow({ effect, onRemove }: EffectRowProps) {
+  const t = useT();
   const borderColor = effect.isBuff ? '#7a9866' : '#c9803a';
   const iconColor = effect.isBuff ? '#7a9866' : '#c9803a';
 
@@ -68,7 +70,7 @@ export function EffectRow({ effect, onRemove }: EffectRowProps) {
               letterSpacing: '0.14em',
             }}
           >
-            {effect.isBuff ? 'BUFF' : 'DEBUFF'}
+            {effect.isBuff ? t('cmp.effect.buff') : t('cmp.effect.debuff')}
           </span>
         </div>
 
@@ -108,7 +110,7 @@ export function EffectRow({ effect, onRemove }: EffectRowProps) {
               className="ao-overline"
               style={{ fontSize: 8, color: 'var(--ink-faint)', marginTop: 1 }}
             >
-              {effect.remainingRounds === 1 ? 'ROUND' : 'ROUNDS'}
+              {effect.remainingRounds === 1 ? t('cmp.effect.round') : t('cmp.effect.rounds')}
             </div>
           </div>
         ) : (
@@ -120,7 +122,7 @@ export function EffectRow({ effect, onRemove }: EffectRowProps) {
               letterSpacing: '0.12em',
             }}
           >
-            PERMANENT
+            {t('cmp.effect.permanent')}
           </span>
         )}
       </div>
@@ -137,10 +139,10 @@ export function EffectRow({ effect, onRemove }: EffectRowProps) {
             borderColor: 'var(--ember)',
           }}
           onClick={onRemove}
-          title="Lift this effect"
+          title={t('cmp.effect.liftTitle')}
         >
           <Rune kind="x" size={10} color="currentColor" />
-          Lift
+          {t('cmp.effect.lift')}
         </button>
       )}
     </div>

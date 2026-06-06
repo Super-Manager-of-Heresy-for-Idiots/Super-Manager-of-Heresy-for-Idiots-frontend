@@ -15,11 +15,13 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useCampaign } from '@/hooks/useCampaigns';
 import { useMyTemplates, useCloneTemplateToCampaign } from '@/hooks/useTemplates';
+import { useT } from '@/i18n/I18nContext';
 import type { CharacterResponse } from '@/types';
 
 type Mode = 'choice' | 'pick-template';
 
 export default function AddCharacterPage() {
+  const t = useT();
   const { campaignId } = useParams<{ campaignId: string }>();
   const navigate = useNavigate();
 
@@ -59,14 +61,14 @@ export default function AddCharacterPage() {
 
   return (
     <div>
-      <BackLink to={`/campaigns/${campaignId}`} label="К кампании" style={{ marginBottom: 12 }} />
+      <BackLink to={`/campaigns/${campaignId}`} label={t('camp.backToCampaign')} style={{ marginBottom: 12 }} />
 
       <div style={{ marginBottom: 24 }}>
-        <p className="ao-overline" style={{ color: 'var(--gold)' }}>Add Character</p>
-        <h3 className="ao-h3" style={{ marginTop: 4 }}>Добавить персонажа</h3>
+        <p className="ao-overline" style={{ color: 'var(--gold)' }}>{t('camp.add.overline')}</p>
+        <h3 className="ao-h3" style={{ marginTop: 4 }}>{t('camp.add.title')}</h3>
         {campaign && (
           <p className="ao-italic" style={{ color: 'var(--ink-quiet)', fontSize: 13, marginTop: 4 }}>
-            Кампания: {campaign.name}
+            {t('camp.add.campaign', { name: campaign.name })}
           </p>
         )}
       </div>
@@ -75,14 +77,14 @@ export default function AddCharacterPage() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 14 }}>
           <ChoiceCard
             glyph={<Sparkles className="h-5 w-5" style={{ color: 'var(--gold)' }} />}
-            title="Создать нового"
-            body="Запустить мастер создания персонажа для этой кампании. Доступен homebrew-контент, подключённый к кампании."
+            title={t('camp.add.createNew.title')}
+            body={t('camp.add.createNew.body')}
             onClick={() => navigate(`/campaigns/${campaignId}/characters/create`)}
           />
           <ChoiceCard
             glyph={<BookOpen className="h-5 w-5" style={{ color: 'var(--arcane)' }} />}
-            title="Загрузить из шаблона"
-            body="Использовать одного из ваших ванильных персонажей. Можно сделать копию или войти оригиналом."
+            title={t('camp.add.fromTemplate.title')}
+            body={t('camp.add.fromTemplate.body')}
             onClick={() => setMode('pick-template')}
           />
         </div>
@@ -92,10 +94,10 @@ export default function AddCharacterPage() {
         <div>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
             <div>
-              <p className="ao-overline" style={{ color: 'var(--gold)' }}>Vault</p>
-              <h4 className="ao-h4">Выберите шаблон</h4>
+              <p className="ao-overline" style={{ color: 'var(--gold)' }}>{t('camp.add.vault')}</p>
+              <h4 className="ao-h4">{t('camp.add.chooseTemplate')}</h4>
             </div>
-            <button className="ao-btn ao-btn--ghost" onClick={() => setMode('choice')}>← Назад к выбору</button>
+            <button className="ao-btn ao-btn--ghost" onClick={() => setMode('choice')}>{t('camp.add.backToChoice')}</button>
           </div>
 
           <label
@@ -117,11 +119,10 @@ export default function AddCharacterPage() {
             />
             <span style={{ flex: 1 }}>
               <span style={{ color: 'var(--ink-bright)', fontSize: 13 }}>
-                Войти оригиналом (не клонировать)
+                {t('camp.add.moveOriginal')}
               </span>
               <span className="ao-italic" style={{ display: 'block', fontSize: 11, color: 'var(--ink-quiet)' }}>
-                По умолчанию создаётся копия — оригинал остаётся в шаблонах. С включённой галкой оригинальный
-                персонаж будет привязан к этой кампании и пропадёт из шаблонов.
+                {t('camp.add.moveOriginal.hint')}
               </span>
             </span>
           </label>
@@ -134,13 +135,13 @@ export default function AddCharacterPage() {
             </div>
           ) : availableTemplates.length === 0 ? (
             <OrdoPanel frame padding={0}>
-              <PanelHeader title="Нет доступных шаблонов" glyph="scroll" />
+              <PanelHeader title={t('camp.add.noTemplates.title')} glyph="scroll" />
               <div style={{ padding: 18, display: 'flex', flexDirection: 'column', gap: 12 }}>
                 <p className="ao-italic" style={{ color: 'var(--ink-faint)' }}>
-                  Все ваши шаблоны уже привязаны к кампаниям, или вы их ещё не создавали.
+                  {t('camp.add.noTemplates.body')}
                 </p>
                 <button className="ao-btn ao-btn--primary" onClick={() => navigate('/characters/templates/new')}>
-                  <Plus className="h-3 w-3" /> <span style={{ marginLeft: 6 }}>Создать шаблон</span>
+                  <Plus className="h-3 w-3" /> <span style={{ marginLeft: 6 }}>{t('camp.add.createTemplate')}</span>
                 </button>
               </div>
             </OrdoPanel>
@@ -162,19 +163,19 @@ export default function AddCharacterPage() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {moveOriginal ? 'Перенести оригинал?' : `Использовать «${selected?.name ?? ''}»?`}
+              {moveOriginal ? t('camp.add.moveTitle') : t('camp.add.useTitle', { name: selected?.name ?? '' })}
             </AlertDialogTitle>
             <AlertDialogDescription>
               {moveOriginal
-                ? 'Оригинальный шаблон будет привязан к этой кампании. Использовать его повторно в других кампаниях уже не получится.'
-                : 'Будет создана копия персонажа для этой кампании. Оригинальный шаблон останется для использования в других кампаниях.'}
+                ? t('camp.add.moveBody')
+                : t('camp.add.cloneBody')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Отмена</AlertDialogCancel>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction onClick={handleClone} disabled={cloneMutation.isPending}>
               {cloneMutation.isPending ? <Loader2 className="h-3 w-3 animate-spin mr-2" /> : null}
-              Подтвердить
+              {t('common.confirm')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -228,6 +229,7 @@ function TemplateChooserCard({
   character: CharacterResponse;
   onPick: () => void;
 }) {
+  const t = useT();
   const classLabel = character.classLevels?.length
     ? character.classLevels.map((c) => `${c.className} ${c.classLevel}`).join(' / ')
     : `LVL ${character.totalLevel}`;
@@ -240,7 +242,7 @@ function TemplateChooserCard({
           HP {character.currentHp ?? 0}/{character.maxHp ?? 0} · XP {character.experience.toLocaleString()}
         </div>
         <button className="ao-btn ao-btn--primary ao-btn--sm" onClick={onPick}>
-          Использовать шаблон
+          {t('camp.add.useTemplate')}
         </button>
       </div>
     </OrdoPanel>

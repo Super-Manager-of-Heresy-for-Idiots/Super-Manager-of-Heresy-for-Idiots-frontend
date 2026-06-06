@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Rune } from '@/components/ordo';
+import { useT } from '@/i18n/I18nContext';
 import type { ASI, CharClass, Race } from '@/data/wizard5e';
 import { ABILITIES } from '@/data/wizard5e';
 import type {
@@ -83,10 +84,11 @@ interface StepHeadProps {
 }
 
 export function StepHead({ n, total, title, sub }: StepHeadProps) {
+  const t = useT();
   return (
     <div className="wiz-step-head">
       <div className="wiz-step-eyebrow">
-        <Rune kind="diamond-fill" size={8} color="var(--gold)" /> Step {n} of {total}
+        <Rune kind="diamond-fill" size={8} color="var(--gold)" /> {t('wiz.parts.stepOf', { n, total })}
       </div>
       <div className="ao-h4" style={{ fontSize: 26 }}>{title}</div>
       {sub && <div className="ao-italic" style={{ fontSize: 15, marginTop: 2 }}>{sub}</div>}
@@ -103,10 +105,10 @@ export function DetailLine({ label, children }: { label: string; children: React
   );
 }
 
-export function asiText(asi: ASI): string {
+export function asiText(asi: ASI, fmtAbbr: (s: string) => string = (s) => s): string {
   const parts = (Object.keys(asi || {}) as (keyof ASI)[]).map((k) => {
     const a = ABILITIES.find((x) => x.key === k);
-    return (a ? a.abbr : String(k).toUpperCase()) + ' +' + asi[k];
+    return fmtAbbr(a ? a.abbr : String(k).toUpperCase()) + ' +' + asi[k];
   });
   return parts.length ? parts.join(' \u00b7 ') : '\u2014';
 }

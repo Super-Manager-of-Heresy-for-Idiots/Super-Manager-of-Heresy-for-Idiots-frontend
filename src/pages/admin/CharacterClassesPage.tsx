@@ -6,8 +6,10 @@ import {
   useDeleteCharacterClass,
 } from '@/hooks/useAdmin';
 import type { CharacterClassResponse } from '@/types';
+import { useT } from '@/i18n/I18nContext';
 
 export default function CharacterClassesPage() {
+  const t = useT();
   const { data, isLoading } = useCharacterClasses();
   const deleteMutation = useDeleteCharacterClass();
 
@@ -27,16 +29,16 @@ export default function CharacterClassesPage() {
   return (
     <>
       <CrudTable
-        title="Character Classes"
+        title={t('adm.classes.title')}
         data={data}
         isLoading={isLoading}
         onAdd={handleAdd}
         onEdit={handleEdit}
         onDelete={(id) => deleteMutation.mutate(id)}
-        addLabel="Rich Class"
+        addLabel={t('adm.classes.add')}
         columns={[
-          { header: 'Name', accessor: 'name' },
-          { header: 'Description', accessor: 'description' },
+          { header: t('adm.shared.colName'), accessor: 'name' },
+          { header: t('adm.shared.colDescription'), accessor: 'description' },
         ]}
       />
       <AdminClassRichWizard

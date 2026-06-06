@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { inventoryApi } from '@/api/inventory.api';
 import { itemTemplatesApi } from '@/api/item-templates.api';
+import { useT } from '@/i18n/I18nContext';
 import type {
   GrantItemRequest,
   RenameItemRequest,
@@ -58,6 +59,7 @@ export function useBackpackInventory(campaignId: string, characterId: string) {
 
 export function useGrantItem() {
   const queryClient = useQueryClient();
+  const t = useT();
 
   return useMutation({
     mutationFn: ({ campaignId, characterId, data }: { campaignId?: string; characterId: string; data: GrantItemRequest }) =>
@@ -68,16 +70,17 @@ export function useGrantItem() {
         queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId] });
       }
       queryClient.invalidateQueries({ queryKey: ['characters', variables.characterId] });
-      toast.success('Item granted!');
+      toast.success(t('hk.inventory.itemGranted'));
     },
     onError: (error: AxiosError<ApiError>) => {
-      toast.error(error.response?.data?.message || 'Failed to grant item');
+      toast.error(error.response?.data?.message || t('hk.inventory.grantFailed'));
     },
   });
 }
 
 export function useRemoveItem() {
   const queryClient = useQueryClient();
+  const t = useT();
 
   return useMutation({
     mutationFn: ({ campaignId, characterId, instanceId }: { campaignId: string; characterId: string; instanceId: string }) =>
@@ -85,16 +88,17 @@ export function useRemoveItem() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId, 'inventory'] });
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId] });
-      toast.success('Item removed!');
+      toast.success(t('hk.inventory.itemRemoved'));
     },
     onError: (error: AxiosError<ApiError>) => {
-      toast.error(error.response?.data?.message || 'Failed to remove item');
+      toast.error(error.response?.data?.message || t('hk.inventory.removeFailed'));
     },
   });
 }
 
 export function useEquipItem() {
   const queryClient = useQueryClient();
+  const t = useT();
 
   return useMutation({
     mutationFn: ({
@@ -111,16 +115,17 @@ export function useEquipItem() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId, 'inventory'] });
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId] });
-      toast.success('Equipment updated!');
+      toast.success(t('hk.inventory.equipUpdated'));
     },
     onError: (error: AxiosError<ApiError>) => {
-      toast.error(error.response?.data?.message || 'Failed to equip item');
+      toast.error(error.response?.data?.message || t('hk.inventory.equipFailed'));
     },
   });
 }
 
 export function useUnequipItem() {
   const queryClient = useQueryClient();
+  const t = useT();
 
   return useMutation({
     mutationFn: ({
@@ -135,16 +140,17 @@ export function useUnequipItem() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId, 'inventory'] });
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId] });
-      toast.success('Item unequipped!');
+      toast.success(t('hk.inventory.unequipped'));
     },
     onError: (error: AxiosError<ApiError>) => {
-      toast.error(error.response?.data?.message || 'Failed to unequip item');
+      toast.error(error.response?.data?.message || t('hk.inventory.unequipFailed'));
     },
   });
 }
 
 export function useRenameItem() {
   const queryClient = useQueryClient();
+  const t = useT();
 
   return useMutation({
     mutationFn: ({
@@ -160,16 +166,17 @@ export function useRenameItem() {
     }) => inventoryApi.rename(campaignId, characterId, instanceId, data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId, 'inventory'] });
-      toast.success('Item renamed!');
+      toast.success(t('hk.inventory.renamed'));
     },
     onError: (error: AxiosError<ApiError>) => {
-      toast.error(error.response?.data?.message || 'Failed to rename item');
+      toast.error(error.response?.data?.message || t('hk.inventory.renameFailed'));
     },
   });
 }
 
 export function useTransferItem() {
   const queryClient = useQueryClient();
+  const t = useT();
 
   return useMutation({
     mutationFn: ({
@@ -186,10 +193,10 @@ export function useTransferItem() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.fromCharId, 'inventory'] });
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters'] });
-      toast.success('Item transferred!');
+      toast.success(t('hk.inventory.transferred'));
     },
     onError: (error: AxiosError<ApiError>) => {
-      toast.error(error.response?.data?.message || 'Failed to transfer item');
+      toast.error(error.response?.data?.message || t('hk.inventory.transferFailed'));
     },
   });
 }
@@ -209,6 +216,7 @@ export function useInstanceEnchantments(campaignId: string, characterId: string,
 
 export function useAddInstanceEnchantment() {
   const queryClient = useQueryClient();
+  const t = useT();
 
   return useMutation({
     mutationFn: ({
@@ -229,16 +237,17 @@ export function useAddInstanceEnchantment() {
       queryClient.invalidateQueries({
         queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId, 'inventory'],
       });
-      toast.success('Enchantment applied!');
+      toast.success(t('hk.inventory.enchantApplied'));
     },
     onError: (error: AxiosError<ApiError>) => {
-      toast.error(error.response?.data?.message || 'Failed to apply enchantment');
+      toast.error(error.response?.data?.message || t('hk.inventory.enchantApplyFailed'));
     },
   });
 }
 
 export function useRemoveInstanceEnchantment() {
   const queryClient = useQueryClient();
+  const t = useT();
 
   return useMutation({
     mutationFn: ({
@@ -259,10 +268,10 @@ export function useRemoveInstanceEnchantment() {
       queryClient.invalidateQueries({
         queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId, 'inventory'],
       });
-      toast.success('Enchantment removed!');
+      toast.success(t('hk.inventory.enchantRemoved'));
     },
     onError: (error: AxiosError<ApiError>) => {
-      toast.error(error.response?.data?.message || 'Failed to remove enchantment');
+      toast.error(error.response?.data?.message || t('hk.inventory.enchantRemoveFailed'));
     },
   });
 }

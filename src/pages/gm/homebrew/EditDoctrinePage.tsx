@@ -27,20 +27,22 @@ import {
 } from '@/hooks/useHomebrew';
 import { useStatTypes } from '@/hooks/useAdmin';
 import { homebrewApi } from '@/api/homebrew.api';
+import { useT } from '@/i18n/I18nContext';
 import { EQUIPMENT_SLOT_LABELS, EQUIPMENT_SLOTS } from '@/types';
 import type { ContentSummaryDto, ContentType, EquipmentSlot } from '@/types';
 
-const CONTENT_GROUPS: { title: string; icon: string; type: ContentType }[] = [
-  { title: 'Items', icon: 'sword', type: 'ITEM_TYPE' },
-  { title: 'Classes', icon: 'helm', type: 'CHARACTER_CLASS' },
-  { title: 'Species', icon: 'hex', type: 'RACE' },
-  { title: 'Skills', icon: 'eye', type: 'SKILL' },
-  { title: 'Feats', icon: 'sigil-3', type: 'FEAT' },
-  { title: 'Subclasses', icon: 'cross-pat', type: 'SUBCLASS' },
-  { title: 'Buffs / Debuffs', icon: 'hex', type: 'BUFF_DEBUFF' },
+const CONTENT_GROUPS: { titleKey: string; icon: string; type: ContentType }[] = [
+  { titleKey: 'hb.edit.groupItems', icon: 'sword', type: 'ITEM_TYPE' },
+  { titleKey: 'hb.edit.groupClasses', icon: 'helm', type: 'CHARACTER_CLASS' },
+  { titleKey: 'hb.edit.groupSpecies', icon: 'hex', type: 'RACE' },
+  { titleKey: 'hb.edit.groupSkills', icon: 'eye', type: 'SKILL' },
+  { titleKey: 'hb.edit.groupFeats', icon: 'sigil-3', type: 'FEAT' },
+  { titleKey: 'hb.edit.groupSubclasses', icon: 'cross-pat', type: 'SUBCLASS' },
+  { titleKey: 'hb.edit.groupBuffs', icon: 'hex', type: 'BUFF_DEBUFF' },
 ];
 
 export default function EditDoctrinePage() {
+  const t = useT();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -99,8 +101,8 @@ export default function EditDoctrinePage() {
       <div>
         <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 18 }}>
           <div>
-            <div className="ao-overline">Homebrew editor</div>
-            <div className="ao-h3" style={{ marginTop: 4 }}>Loading doctrine...</div>
+            <div className="ao-overline">{t('hb.edit.editorOverline')}</div>
+            <div className="ao-h3" style={{ marginTop: 4 }}>{t('hb.edit.loading')}</div>
           </div>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -200,9 +202,9 @@ export default function EditDoctrinePage() {
       queryClient.invalidateQueries({ queryKey: ['homebrew-my'] });
       queryClient.invalidateQueries({ queryKey: ['homebrew-my', pkg.id] });
       resetNewContentForm();
-      toast.success('Homebrew content created and slotted');
+      toast.success(t('hb.edit.toastCreated'));
     } catch {
-      toast.error('Failed to create homebrew-scoped content');
+      toast.error(t('hb.edit.toastFailed'));
     } finally {
       setCreatingContent(false);
     }
@@ -256,7 +258,7 @@ export default function EditDoctrinePage() {
       {/* Top bar */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
         <button className="ao-btn ao-btn--ghost ao-btn--sm" onClick={() => navigate('/gm/homebrew/my')}>
-          <Rune kind="arrow-l" size={11} /> Workshop
+          <Rune kind="arrow-l" size={11} /> {t('hb.edit.workshop')}
         </button>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <OrdoChip tone={isDraft ? 'rune' : 'gold'}>{pkg.status}</OrdoChip>
@@ -273,10 +275,10 @@ export default function EditDoctrinePage() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           {/* Outer Inscription */}
           <OrdoPanel padding={0} frame>
-            <PanelHeader title="Outer Inscription" glyph="scroll" sub="editable &middot; draft state" />
+            <PanelHeader title={t('hb.edit.outerInscription')} glyph="scroll" sub={t('hb.edit.outerSub')} />
             <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 16 }}>
               <div>
-                <label className="ao-label">Title</label>
+                <label className="ao-label">{t('hb.edit.titleLabel')}</label>
                 <input
                   className="ao-input"
                   value={title}
@@ -285,7 +287,7 @@ export default function EditDoctrinePage() {
                 />
               </div>
               <div>
-                <label className="ao-label">Description</label>
+                <label className="ao-label">{t('hb.edit.descriptionLabel')}</label>
                 <textarea
                   className="ao-input"
                   value={description}
@@ -295,7 +297,7 @@ export default function EditDoctrinePage() {
                 />
               </div>
               <div>
-                <label className="ao-label">Marks</label>
+                <label className="ao-label">{t('hb.edit.marksLabel')}</label>
                 <div style={{
                   padding: 8,
                   background: 'var(--abyss)',
@@ -305,7 +307,7 @@ export default function EditDoctrinePage() {
                   gap: 6,
                   alignItems: 'center',
                 }}>
-                  {tags.map((t, i) => (
+                  {tags.map((tag, i) => (
                     <span key={i} style={{
                       display: 'inline-flex',
                       alignItems: 'center',
@@ -318,7 +320,7 @@ export default function EditDoctrinePage() {
                       color: 'var(--gold)',
                     }}>
                       <Rune kind="diamond-fill" size={5} color="var(--gold)" />
-                      {t}
+                      {tag}
                       <button
                         onClick={() => setTags(tags.filter((_, j) => j !== i))}
                         style={{ marginLeft: 2, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ink-faint)', padding: 0, display: 'flex' }}
@@ -331,7 +333,7 @@ export default function EditDoctrinePage() {
                     value={tagText}
                     onChange={(e) => setTagText(e.target.value)}
                     onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddTag(); } }}
-                    placeholder="+ add"
+                    placeholder={t('hb.edit.addPlaceholder')}
                     style={{
                       flex: 1,
                       minWidth: 60,
@@ -351,7 +353,7 @@ export default function EditDoctrinePage() {
 
           {/* Lifecycle */}
           <OrdoPanel padding={0} frame>
-            <PanelHeader title="Lifecycle" glyph="sigil-1" sub={`actions available in ${pkg.status}`} />
+            <PanelHeader title={t('hb.edit.lifecycle')} glyph="sigil-1" sub={t('hb.edit.actionsIn', { status: pkg.status })} />
             <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
               {isDraft && (
                 <button
@@ -359,7 +361,7 @@ export default function EditDoctrinePage() {
                   onClick={() => setShowPublish(true)}
                   disabled={publishMutation.isPending}
                 >
-                  <Rune kind="diamond-fill" size={10} /> Seal &amp; Publish (v {pkg.version + 1})
+                  <Rune kind="diamond-fill" size={10} /> {t('hb.edit.sealPublish', { version: pkg.version + 1 })}
                 </button>
               )}
               <button
@@ -367,20 +369,20 @@ export default function EditDoctrinePage() {
                 onClick={handleSave}
                 disabled={updateMutation.isPending}
               >
-                <Rune kind="diamond" size={10} /> Save as Draft
+                <Rune kind="diamond" size={10} /> {t('hb.edit.saveDraft')}
               </button>
               <button
                 className="ao-btn ao-btn--ghost ao-btn--block"
                 onClick={() => navigate(`/gm/homebrew/marketplace/${pkg.id}`)}
               >
-                <Rune kind="book" size={10} /> Preview as Reader
+                <Rune kind="book" size={10} /> {t('hb.edit.previewReader')}
               </button>
               <button
                 className="ao-btn ao-btn--danger ao-btn--block"
                 onClick={() => setShowDelete(true)}
                 disabled={deleteMutation.isPending}
               >
-                <Rune kind="flame" size={10} /> Redact (Soft Delete)
+                <Rune kind="flame" size={10} /> {t('hb.edit.redactSoft')}
               </button>
             </div>
           </OrdoPanel>
@@ -389,9 +391,9 @@ export default function EditDoctrinePage() {
         {/* RIGHT column: Content Folio */}
         <OrdoPanel padding={0} frame>
           <PanelHeader
-            title="Content Folio"
+            title={t('hb.edit.contentFolio')}
             glyph="book"
-            sub={`${s.itemTypeCount} items \u00b7 ${s.classCount} classes \u00b7 ${s.skillCount} skills \u00b7 ${s.featCount} feats`}
+            sub={t('hb.edit.folioSub', { items: s.itemTypeCount ?? 0, classes: s.classCount ?? 0, skills: s.skillCount ?? 0, feats: s.featCount ?? 0 })}
             right={
               <div style={{ display: 'flex', gap: 8 }}>
                 <button
@@ -401,13 +403,13 @@ export default function EditDoctrinePage() {
                     setShowRichClassWizard(true);
                   }}
                 >
-                  <Rune kind="helm" size={10} /> Rich Class
+                  <Rune kind="helm" size={10} /> {t('hb.edit.richClass')}
                 </button>
                 <button className="ao-btn ao-btn--ghost ao-btn--sm" onClick={handleOpenNewRace}>
-                  <Rune kind="hex" size={10} /> Species
+                  <Rune kind="hex" size={10} /> {t('hb.edit.species')}
                 </button>
                 <button className="ao-btn ao-btn--primary ao-btn--sm" onClick={() => setAdding(!adding)}>
-                  <Rune kind="plus" size={10} /> {adding ? 'Close' : 'Slot New Entry'}
+                  <Rune kind="plus" size={10} /> {adding ? t('hb.edit.close') : t('hb.edit.slotNewEntry')}
                 </button>
               </div>
             }
@@ -420,7 +422,7 @@ export default function EditDoctrinePage() {
               borderBottom: '1px solid var(--rule)',
               background: 'var(--abyss)',
             }}>
-              <div className="ao-overline" style={{ marginBottom: 8 }}>Slot a content reference</div>
+              <div className="ao-overline" style={{ marginBottom: 8 }}>{t('hb.edit.slotContentReference')}</div>
               <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr', gap: 8, alignItems: 'center', marginBottom: 10 }}>
                 <select
                   className="ao-input"
@@ -432,10 +434,10 @@ export default function EditDoctrinePage() {
                   }}
                   style={{ padding: '6px 10px' }}
                 >
-                  <option value="ITEM_TYPE">Item</option>
-                  <option value="SKILL">Skill</option>
-                  <option value="FEAT">Feat</option>
-                  <option value="BUFF_DEBUFF">Buff/Debuff</option>
+                  <option value="ITEM_TYPE">{t('hb.edit.optItem')}</option>
+                  <option value="SKILL">{t('hb.edit.optSkill')}</option>
+                  <option value="FEAT">{t('hb.edit.optFeat')}</option>
+                  <option value="BUFF_DEBUFF">{t('hb.edit.optBuffDebuff')}</option>
                 </select>
                 <div style={{ display: 'flex', gap: 6 }}>
                   <button
@@ -443,14 +445,14 @@ export default function EditDoctrinePage() {
                     onClick={() => setAddMode('existing')}
                     style={{ flex: 1 }}
                   >
-                    Existing
+                    {t('hb.edit.existing')}
                   </button>
                   <button
                     className={`ao-btn ${addMode === 'new' ? 'ao-btn--primary' : 'ao-btn--ghost'}`}
                     onClick={() => setAddMode('new')}
                     style={{ flex: 1 }}
                   >
-                    Create New
+                    {t('hb.edit.createNew')}
                   </button>
                 </div>
               </div>
@@ -462,23 +464,23 @@ export default function EditDoctrinePage() {
                       className="ao-input"
                       value={addSearch}
                       onChange={(e) => setAddSearch(e.target.value)}
-                      placeholder="Existing content id..."
+                      placeholder={t('hb.edit.existingIdPlaceholder')}
                       onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddContent(); } }}
                       style={{ padding: '6px 12px' }}
                     />
                     <button className="ao-btn ao-btn--ghost" onClick={() => setAddSearch('')}>
-                      <Rune kind="x" size={11} /> Clear
+                      <Rune kind="x" size={11} /> {t('hb.edit.clear')}
                     </button>
                     <button
                       className="ao-btn ao-btn--primary"
                       onClick={handleAddContent}
                       disabled={!addSearch.trim() || addContentMutation.isPending}
                     >
-                      <Rune kind="plus" size={10} /> Slot
+                      <Rune kind="plus" size={10} /> {t('hb.edit.slot')}
                     </button>
                   </div>
                   <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 12, marginTop: 8 }}>
-                    This does not call admin catalogs. Use it only when the backend allows attaching an existing owned or vanilla content id.
+                    {t('hb.edit.existingHint')}
                   </p>
                 </>
               ) : (
@@ -488,7 +490,7 @@ export default function EditDoctrinePage() {
                       className="ao-input"
                       value={newName}
                       onChange={(e) => setNewName(e.target.value)}
-                      placeholder="New content name..."
+                      placeholder={t('hb.edit.newNamePlaceholder')}
                       style={{ padding: '6px 12px' }}
                     />
                     {addType === 'ITEM_TYPE' && (
@@ -511,7 +513,7 @@ export default function EditDoctrinePage() {
                     className="ao-input"
                     value={newDescription}
                     onChange={(e) => setNewDescription(e.target.value)}
-                    placeholder="Description..."
+                    placeholder={t('hb.edit.descriptionPlaceholder')}
                     rows={3}
                     style={{ width: '100%', resize: 'vertical' }}
                   />
@@ -521,7 +523,7 @@ export default function EditDoctrinePage() {
                       className="ao-input"
                       value={newSkillType}
                       onChange={(e) => setNewSkillType(e.target.value)}
-                      placeholder="Skill type (optional)"
+                      placeholder={t('hb.edit.skillTypePlaceholder')}
                       style={{ padding: '6px 12px' }}
                     />
                   )}
@@ -531,7 +533,7 @@ export default function EditDoctrinePage() {
                       className="ao-input"
                       value={newFeatPrerequisites}
                       onChange={(e) => setNewFeatPrerequisites(e.target.value)}
-                      placeholder="Prerequisites (optional)"
+                      placeholder={t('hb.edit.prerequisitesPlaceholder')}
                       style={{ padding: '6px 12px' }}
                     />
                   )}
@@ -545,12 +547,12 @@ export default function EditDoctrinePage() {
                           onChange={(e) => setNewBuffEffectType(e.target.value)}
                           style={{ padding: '6px 10px' }}
                         >
-                          <option value="STAT_MODIFIER">Stat modifier</option>
-                          <option value="CONDITION">Condition</option>
-                          <option value="DAMAGE_OVER_TIME">Damage over time</option>
-                          <option value="HEAL_OVER_TIME">Heal over time</option>
-                          <option value="IMMUNITY">Immunity</option>
-                          <option value="VULNERABILITY">Vulnerability</option>
+                          <option value="STAT_MODIFIER">{t('hb.edit.effStatModifier')}</option>
+                          <option value="CONDITION">{t('hb.edit.effCondition')}</option>
+                          <option value="DAMAGE_OVER_TIME">{t('hb.edit.effDamageOverTime')}</option>
+                          <option value="HEAL_OVER_TIME">{t('hb.edit.effHealOverTime')}</option>
+                          <option value="IMMUNITY">{t('hb.edit.effImmunity')}</option>
+                          <option value="VULNERABILITY">{t('hb.edit.effVulnerability')}</option>
                         </select>
                         <select
                           className="ao-input"
@@ -558,8 +560,8 @@ export default function EditDoctrinePage() {
                           onChange={(e) => setNewBuffIsBuff(e.target.value)}
                           style={{ padding: '6px 10px' }}
                         >
-                          <option value="true">Buff</option>
-                          <option value="false">Debuff</option>
+                          <option value="true">{t('hb.edit.buff')}</option>
+                          <option value="false">{t('hb.edit.debuff')}</option>
                         </select>
                       </div>
                       {newBuffEffectType === 'STAT_MODIFIER' && (
@@ -569,7 +571,7 @@ export default function EditDoctrinePage() {
                           onChange={(e) => setNewBuffTargetStatId(e.target.value)}
                           style={{ padding: '6px 10px' }}
                         >
-                          <option value="">Target stat...</option>
+                          <option value="">{t('hb.edit.targetStatPlaceholder')}</option>
                           {(statTypes || []).map((stat) => (
                             <option key={stat.id} value={stat.id}>{stat.name}</option>
                           ))}
@@ -581,7 +583,7 @@ export default function EditDoctrinePage() {
                           type="number"
                           value={newBuffModifierValue}
                           onChange={(e) => setNewBuffModifierValue(e.target.value)}
-                          placeholder="Modifier"
+                          placeholder={t('hb.edit.modifierPlaceholder')}
                           style={{ padding: '6px 12px' }}
                         />
                         <input
@@ -589,7 +591,7 @@ export default function EditDoctrinePage() {
                           type="number"
                           value={newBuffDurationRounds}
                           onChange={(e) => setNewBuffDurationRounds(e.target.value)}
-                          placeholder="Duration rounds"
+                          placeholder={t('hb.edit.durationPlaceholder')}
                           style={{ padding: '6px 12px' }}
                         />
                       </div>
@@ -598,14 +600,14 @@ export default function EditDoctrinePage() {
 
                   <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center' }}>
                     <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 12 }}>
-                      Creates the missing {addType.toLowerCase().replace('_', ' ')} and immediately slots it into this doctrine.
+                      {t('hb.edit.createsMissing', { type: addType.toLowerCase().replace('_', ' ') })}
                     </p>
                     <button
                       className="ao-btn ao-btn--primary"
                       onClick={handleCreateAndAddContent}
                       disabled={!newName.trim() || creatingContent || addContentMutation.isPending}
                     >
-                      <Rune kind="plus" size={10} /> Create &amp; Slot
+                      <Rune kind="plus" size={10} /> {t('hb.edit.createSlot')}
                     </button>
                   </div>
                 </div>
@@ -629,15 +631,15 @@ export default function EditDoctrinePage() {
                   borderBottom: '1px solid var(--rule)',
                 }}>
                   <Rune kind={grp.icon} size={13} color="var(--gold)" />
-                  <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--ink-bright)' }}>{grp.title}</span>
+                  <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--ink-bright)' }}>{t(grp.titleKey)}</span>
                   <span className="ao-codex" style={{ color: 'var(--ink-faint)' }}>&middot; {rows.length}</span>
                   <span style={{ flex: 1 }} />
-                  <span className="ao-codex" style={{ color: 'var(--ink-ghost)', fontSize: 9 }}>drag to reorder</span>
+                  <span className="ao-codex" style={{ color: 'var(--ink-ghost)', fontSize: 9 }}>{t('hb.edit.dragToReorder')}</span>
                 </div>
 
                 {rows.length === 0 ? (
                   <div className="ao-italic" style={{ padding: '16px', textAlign: 'center', color: 'var(--ink-faint)', fontSize: 13 }}>
-                    No {grp.title.toLowerCase()} slotted yet.
+                    {t('hb.edit.noneSlotted', { label: t(grp.titleKey).toLowerCase() })}
                   </div>
                 ) : (
                   rows.map((r) => (
@@ -678,7 +680,7 @@ export default function EditDoctrinePage() {
                           {r.description ? r.description.substring(0, 80) : '\u2014'}
                           {r.slot && ` \u00b7 ${r.slot}`}
                           {r.skillType && ` \u00b7 ${r.skillType}`}
-                          {r.prerequisites && ` \u00b7 req: ${r.prerequisites}`}
+                          {r.prerequisites && ` \u00b7 ${t('hb.edit.req')}: ${r.prerequisites}`}
                         </div>
                       </div>
 
@@ -686,7 +688,7 @@ export default function EditDoctrinePage() {
                       <button
                         className="ao-iconbtn"
                         style={{ width: 28, height: 28 }}
-                        title={grp.type === 'CHARACTER_CLASS' ? 'Edit rich class' : grp.type === 'RACE' ? 'Edit species' : 'View'}
+                        title={grp.type === 'CHARACTER_CLASS' ? t('hb.edit.editRichClass') : grp.type === 'RACE' ? t('hb.edit.editSpecies') : t('hb.edit.view')}
                         onClick={() => {
                           if (grp.type === 'CHARACTER_CLASS') {
                             setEditingRichClass(r);
@@ -702,7 +704,7 @@ export default function EditDoctrinePage() {
                         <button
                           className="ao-iconbtn"
                           style={{ width: 28, height: 28 }}
-                          title="Toggle active"
+                          title={t('hb.edit.toggleActive')}
                           onClick={() => {
                             const active = (r as { active?: boolean }).active !== false;
                             if (active) {
@@ -721,7 +723,7 @@ export default function EditDoctrinePage() {
                         className="ao-iconbtn"
                         style={{ width: 28, height: 28, color: 'var(--ember)' }}
                         onClick={() => handleRemoveContent(r.id)}
-                        title="Remove"
+                        title={t('hb.edit.remove')}
                       >
                         <Rune kind="x" size={12} />
                       </button>
@@ -783,14 +785,14 @@ export default function EditDoctrinePage() {
       <AlertDialog open={showPublish} onOpenChange={setShowPublish}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Seal &amp; Publish Doctrine?</AlertDialogTitle>
+            <AlertDialogTitle>{t('hb.edit.publishTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Once sealed, &ldquo;{pkg.title}&rdquo; shall be entered into the Forbidden Catalogue and made visible to all. The version shall advance to v{pkg.version + 1}.
+              {t('hb.edit.publishDescription', { title: pkg.title, version: pkg.version + 1 })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Defer</AlertDialogCancel>
-            <AlertDialogAction onClick={handlePublish}>Seal &amp; Publish</AlertDialogAction>
+            <AlertDialogCancel>{t('hb.edit.defer')}</AlertDialogCancel>
+            <AlertDialogAction onClick={handlePublish}>{t('hb.edit.sealPublishAction')}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -799,15 +801,15 @@ export default function EditDoctrinePage() {
       <AlertDialog open={showDelete} onOpenChange={setShowDelete}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Redact Doctrine?</AlertDialogTitle>
+            <AlertDialogTitle>{t('hb.edit.deleteTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              The doctrine will be marked as deleted. GMs who already instated it will retain their reference. This cannot be undone.
+              {t('hb.edit.deleteDescription')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              Redact
+              {t('hb.edit.redactAction')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

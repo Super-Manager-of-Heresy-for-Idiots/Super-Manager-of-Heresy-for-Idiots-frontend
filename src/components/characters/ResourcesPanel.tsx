@@ -1,5 +1,6 @@
 import { OrdoPanel, PanelHeader, Rune, OrdoDivider, Bar } from '@/components/ordo';
 import { useUpdateResource } from '@/hooks/useCharacter';
+import { useT } from '@/i18n/I18nContext';
 import type { ResourceEntry } from '@/types';
 
 interface ResourcesPanelProps {
@@ -13,6 +14,7 @@ export function ResourcesPanel({
   resources,
   onAddResource,
 }: ResourcesPanelProps) {
+  const t = useT();
   const updateResource = useUpdateResource();
 
   function handleChange(resourceTypeId: string, currentValue: number, delta: number) {
@@ -27,7 +29,7 @@ export function ResourcesPanel({
   return (
     <OrdoPanel frame>
       <PanelHeader
-        title="Reserves & Founts"
+        title={t('cmp.resources.title')}
         glyph="hex"
         tone="arcane"
         right={
@@ -50,7 +52,7 @@ export function ResourcesPanel({
               }}
             >
               <Rune kind="plus" size={10} color="var(--ink-quiet)" />
-              Add
+              {t('cmp.resources.add')}
             </button>
           ) : undefined
         }
@@ -103,7 +105,7 @@ export function ResourcesPanel({
                         opacity:
                           updateResource.isPending || res.currentValue <= 0 ? 0.4 : 1,
                       }}
-                      aria-label={`Decrease ${res.resourceName}`}
+                      aria-label={t('cmp.resources.decrease', { name: res.resourceName })}
                     >
                       <Rune kind="minus" size={9} color="var(--ink-quiet)" />
                     </button>
@@ -143,7 +145,7 @@ export function ResourcesPanel({
                             ? 0.4
                             : 1,
                       }}
-                      aria-label={`Increase ${res.resourceName}`}
+                      aria-label={t('cmp.resources.increase', { name: res.resourceName })}
                     >
                       <Rune kind="plus" size={9} color="var(--ink-quiet)" />
                     </button>
@@ -169,7 +171,7 @@ export function ResourcesPanel({
                       fontFamily: 'var(--font-mono, monospace)',
                     }}
                   >
-                    {res.currentValue} (no max)
+                    {t('cmp.resources.noMax', { value: res.currentValue })}
                   </div>
                 )}
               </div>
@@ -191,7 +193,7 @@ export function ResourcesPanel({
               fontStyle: 'italic',
             }}
           >
-            No resources tracked
+            {t('cmp.resources.empty')}
           </div>
         )}
       </div>

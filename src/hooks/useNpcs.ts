@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { npcsApi } from '@/api/npcs.api';
+import { useT } from '@/i18n/I18nContext';
 import type {
   CreateNpcRequest,
   UpdateNpcRequest,
@@ -34,22 +35,24 @@ export function useNpc(campaignId: string, npcId: string) {
 
 export function useCreateNpc() {
   const queryClient = useQueryClient();
+  const t = useT();
 
   return useMutation({
     mutationFn: ({ campaignId, data }: { campaignId: string; data: CreateNpcRequest }) =>
       npcsApi.create(campaignId, data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'npcs'] });
-      toast.success('NPC created!');
+      toast.success(t('hk.npc.created'));
     },
     onError: (error: AxiosError<ApiError>) => {
-      toast.error(error.response?.data?.message || 'Failed to create NPC');
+      toast.error(error.response?.data?.message || t('hk.npc.createFailed'));
     },
   });
 }
 
 export function useUpdateNpc() {
   const queryClient = useQueryClient();
+  const t = useT();
 
   return useMutation({
     mutationFn: ({
@@ -64,32 +67,34 @@ export function useUpdateNpc() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'npcs'] });
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'npcs', variables.npcId] });
-      toast.success('NPC updated!');
+      toast.success(t('hk.npc.updated'));
     },
     onError: (error: AxiosError<ApiError>) => {
-      toast.error(error.response?.data?.message || 'Failed to update NPC');
+      toast.error(error.response?.data?.message || t('hk.npc.updateFailed'));
     },
   });
 }
 
 export function useDeleteNpc() {
   const queryClient = useQueryClient();
+  const t = useT();
 
   return useMutation({
     mutationFn: ({ campaignId, npcId }: { campaignId: string; npcId: string }) =>
       npcsApi.delete(campaignId, npcId),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'npcs'] });
-      toast.success('NPC deleted!');
+      toast.success(t('hk.npc.deleted'));
     },
     onError: (error: AxiosError<ApiError>) => {
-      toast.error(error.response?.data?.message || 'Failed to delete NPC');
+      toast.error(error.response?.data?.message || t('hk.npc.deleteFailed'));
     },
   });
 }
 
 export function useToggleNpcVisibility() {
   const queryClient = useQueryClient();
+  const t = useT();
 
   return useMutation({
     mutationFn: ({
@@ -102,10 +107,10 @@ export function useToggleNpcVisibility() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'npcs'] });
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'npcs', variables.npcId] });
-      toast.success('NPC visibility updated!');
+      toast.success(t('hk.npc.visibilityUpdated'));
     },
     onError: (error: AxiosError<ApiError>) => {
-      toast.error(error.response?.data?.message || 'Failed to update NPC visibility');
+      toast.error(error.response?.data?.message || t('hk.npc.visibilityUpdateFailed'));
     },
   });
 }
@@ -114,6 +119,7 @@ export function useToggleNpcVisibility() {
 
 export function useAddNpcNote() {
   const queryClient = useQueryClient();
+  const t = useT();
 
   return useMutation({
     mutationFn: ({
@@ -129,16 +135,17 @@ export function useAddNpcNote() {
       queryClient.invalidateQueries({
         queryKey: ['campaigns', variables.campaignId, 'npcs', variables.npcId],
       });
-      toast.success('Note added!');
+      toast.success(t('hk.npc.noteAdded'));
     },
     onError: (error: AxiosError<ApiError>) => {
-      toast.error(error.response?.data?.message || 'Failed to add note');
+      toast.error(error.response?.data?.message || t('hk.npc.noteAddFailed'));
     },
   });
 }
 
 export function useUpdateNpcNote() {
   const queryClient = useQueryClient();
+  const t = useT();
 
   return useMutation({
     mutationFn: ({
@@ -156,16 +163,17 @@ export function useUpdateNpcNote() {
       queryClient.invalidateQueries({
         queryKey: ['campaigns', variables.campaignId, 'npcs', variables.npcId],
       });
-      toast.success('Note updated!');
+      toast.success(t('hk.npc.noteUpdated'));
     },
     onError: (error: AxiosError<ApiError>) => {
-      toast.error(error.response?.data?.message || 'Failed to update note');
+      toast.error(error.response?.data?.message || t('hk.npc.noteUpdateFailed'));
     },
   });
 }
 
 export function useDeleteNpcNote() {
   const queryClient = useQueryClient();
+  const t = useT();
 
   return useMutation({
     mutationFn: ({
@@ -181,10 +189,10 @@ export function useDeleteNpcNote() {
       queryClient.invalidateQueries({
         queryKey: ['campaigns', variables.campaignId, 'npcs', variables.npcId],
       });
-      toast.success('Note deleted!');
+      toast.success(t('hk.npc.noteDeleted'));
     },
     onError: (error: AxiosError<ApiError>) => {
-      toast.error(error.response?.data?.message || 'Failed to delete note');
+      toast.error(error.response?.data?.message || t('hk.npc.noteDeleteFailed'));
     },
   });
 }

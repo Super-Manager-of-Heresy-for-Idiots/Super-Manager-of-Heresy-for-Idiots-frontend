@@ -13,6 +13,7 @@ import {
 import { BackLink, CharStatusBadge } from '@/components/campaigns';
 import { useCampaignCharacters } from '@/hooks/useCharacter';
 import { useGrantXp } from '@/hooks/useXp';
+import { useT } from '@/i18n/I18nContext';
 import type { CharacterV2Response, XpTarget } from '@/types';
 
 /* ── D&D 5e-style XP thresholds (level -> cumulative XP needed) ── */
@@ -33,6 +34,7 @@ type TargetMode = 'ALL' | 'SELECTED' | 'SINGLE';
 /*  XPGrantPage                                                       */
 /* ================================================================== */
 export default function XPGrantPage() {
+  const t = useT();
   const { campaignId } = useParams<{ campaignId: string }>();
   const { data: characters, isLoading, error, refetch } = useCampaignCharacters(campaignId!);
   const grantMutation = useGrantXp();
@@ -105,13 +107,13 @@ export default function XPGrantPage() {
   if (isLoading) {
     return (
       <div>
-        <BackLink to={`/campaigns/${campaignId}`} label="К кампании" style={{ marginBottom: 12 }} />
+        <BackLink to={`/campaigns/${campaignId}`} label={t('camp2.back.campaign')} style={{ marginBottom: 12 }} />
         <div style={{ marginBottom: 32 }}>
           <p className="ao-overline" style={{ color: 'var(--gold)' }}>
-            Game Master Tools
+            {t('camp2.xp.gmTools')}
           </p>
           <h3 className="ao-h3" style={{ marginTop: 4 }}>
-            Grant Experience
+            {t('camp2.xp.title')}
           </h3>
         </div>
         <div
@@ -151,16 +153,16 @@ export default function XPGrantPage() {
   if (error) {
     return (
       <div>
-        <BackLink to={`/campaigns/${campaignId}`} label="К кампании" style={{ marginBottom: 12 }} />
+        <BackLink to={`/campaigns/${campaignId}`} label={t('camp2.back.campaign')} style={{ marginBottom: 12 }} />
         <div style={{ textAlign: 'center', padding: '48px 0' }}>
           <p
             className="ao-italic"
             style={{ color: 'var(--ink-faint)', marginBottom: 16 }}
           >
-            The roster could not be retrieved. The XP coffers remain sealed.
+            {t('camp2.xp.loadError')}
           </p>
           <button className="ao-btn" onClick={() => refetch()}>
-            Retry
+            {t('common.retry')}
           </button>
         </div>
       </div>
@@ -170,20 +172,20 @@ export default function XPGrantPage() {
   if (!activeCharacters.length) {
     return (
       <div>
-        <BackLink to={`/campaigns/${campaignId}`} label="К кампании" style={{ marginBottom: 12 }} />
+        <BackLink to={`/campaigns/${campaignId}`} label={t('camp2.back.campaign')} style={{ marginBottom: 12 }} />
         <div style={{ marginBottom: 32 }}>
           <p className="ao-overline" style={{ color: 'var(--gold)' }}>
-            Game Master Tools
+            {t('camp2.xp.gmTools')}
           </p>
           <h3 className="ao-h3" style={{ marginTop: 4 }}>
-            Grant Experience
+            {t('camp2.xp.title')}
           </h3>
         </div>
         <EmptyVault
           glyph="sigil-3"
-          overline="No Active Characters"
-          title="There are no sworn to receive experience"
-          body="Create characters in this campaign before granting XP."
+          overline={t('camp2.xp.empty.overline')}
+          title={t('camp2.xp.empty.title')}
+          body={t('camp2.xp.empty.body')}
         />
       </div>
     );
@@ -192,7 +194,7 @@ export default function XPGrantPage() {
   /* ---- render ---- */
   return (
     <div>
-      <BackLink to={`/campaigns/${campaignId}`} label="К кампании" style={{ marginBottom: 12 }} />
+      <BackLink to={`/campaigns/${campaignId}`} label={t('camp2.back.campaign')} style={{ marginBottom: 12 }} />
 
       {/* Header */}
       <div
@@ -207,20 +209,20 @@ export default function XPGrantPage() {
       >
         <div>
           <p className="ao-overline" style={{ color: 'var(--gold)' }}>
-            Game Master Tools
+            {t('camp2.xp.gmTools')}
           </p>
           <h3 className="ao-h3" style={{ marginTop: 4 }}>
-            Grant Experience
+            {t('camp2.xp.title')}
           </h3>
           <p
             className="ao-italic"
             style={{ color: 'var(--ink-quiet)', fontSize: 13, marginTop: 4 }}
           >
-            Bestow the fruits of labour upon the sworn
+            {t('camp2.xp.subtitle')}
           </p>
         </div>
         <OrdoChip tone="arcane" glyph="sigil-1">
-          Game-Master
+          {t('camp2.xp.gmChip')}
         </OrdoChip>
       </div>
 
@@ -236,8 +238,8 @@ export default function XPGrantPage() {
         {/* ════════════ Recipients Panel ════════════ */}
         <OrdoPanel frame padding={0}>
           <PanelHeader
-            title="RECIPIENTS"
-            sub={`${recipients.length} of ${activeCharacters.length} sworn`}
+            title={t('camp2.xp.recipients')}
+            sub={t('camp2.xp.recipientsSub', { selected: recipients.length, total: activeCharacters.length })}
             glyph="helm"
             right={
               targetMode === 'SELECTED' ? (
@@ -246,13 +248,13 @@ export default function XPGrantPage() {
                     className="ao-btn ao-btn--ghost ao-btn--sm"
                     onClick={selectAll}
                   >
-                    All
+                    {t('camp2.xp.all')}
                   </button>
                   <button
                     className="ao-btn ao-btn--ghost ao-btn--sm"
                     onClick={selectNone}
                   >
-                    None
+                    {t('camp2.xp.none')}
                   </button>
                 </div>
               ) : undefined
@@ -294,7 +296,7 @@ export default function XPGrantPage() {
                     if (mode === 'SINGLE') selectNone();
                   }}
                 >
-                  {mode}
+                  {t(`camp2.xp.mode.${mode}`)}
                 </button>
               );
             })}
@@ -381,7 +383,7 @@ export default function XPGrantPage() {
                           color: 'var(--ink-faint)',
                         }}
                       >
-                        LVL {ch.totalLevel}
+                        {t('camp2.xp.lvl')} {ch.totalLevel}
                       </span>
                     </div>
 
@@ -413,7 +415,7 @@ export default function XPGrantPage() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <OrdoPanel frame padding={0}>
             <PanelHeader
-              title="GRANT XP"
+              title={t('camp2.xp.grantXp')}
               glyph="flame"
               tone="ember"
             />
@@ -425,7 +427,7 @@ export default function XPGrantPage() {
                   className="ao-label"
                   style={{ display: 'block', marginBottom: 8 }}
                 >
-                  Experience Amount
+                  {t('camp2.xp.amountLabel')}
                 </label>
                 <input
                   className="ao-input"
@@ -500,7 +502,7 @@ export default function XPGrantPage() {
                       color="currentColor"
                     />
                     <span style={{ marginLeft: 8 }}>
-                      Grant to {recipients.length} Sworn
+                      {t('camp2.xp.grantTo', { count: recipients.length })}
                     </span>
                   </>
                 )}
@@ -511,11 +513,11 @@ export default function XPGrantPage() {
           {/* ════════════ Threshold Preview ════════════ */}
           <OrdoPanel frame padding={0}>
             <PanelHeader
-              title="THRESHOLD PREVIEW"
+              title={t('camp2.xp.thresholdPreview')}
               sub={
                 amount > 0
-                  ? `${levelUps.length} will level up`
-                  : 'Enter XP to preview'
+                  ? t('camp2.xp.willLevelUp', { count: levelUps.length })
+                  : t('camp2.xp.enterToPreview')
               }
               glyph="arrow-up"
               tone="arcane"
@@ -536,7 +538,7 @@ export default function XPGrantPage() {
                       fontSize: 13,
                     }}
                   >
-                    Specify an XP amount to see who crosses the threshold
+                    {t('camp2.xp.specifyAmount')}
                   </p>
                 </div>
               ) : levelUps.length === 0 ? (
@@ -553,8 +555,7 @@ export default function XPGrantPage() {
                       fontSize: 13,
                     }}
                   >
-                    No character will cross a level threshold with this
-                    amount
+                    {t('camp2.xp.noneCross')}
                   </p>
                 </div>
               ) : (
@@ -595,7 +596,7 @@ export default function XPGrantPage() {
                             color: '#7a9866',
                           }}
                         >
-                          LVL {ch.totalLevel} {'\u2192'}{' '}
+                          {t('camp2.xp.lvl')} {ch.totalLevel} {'\u2192'}{' '}
                           {ch.totalLevel + 1}
                         </span>
                         <span
@@ -608,7 +609,7 @@ export default function XPGrantPage() {
                           ({ch.experience.toLocaleString()} +{' '}
                           {amount.toLocaleString()} /{' '}
                           {nextXp === Infinity
-                            ? 'MAX'
+                            ? t('camp2.xp.max')
                             : nextXp.toLocaleString()}
                           )
                         </span>

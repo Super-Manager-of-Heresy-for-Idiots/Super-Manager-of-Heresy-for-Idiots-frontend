@@ -34,8 +34,10 @@ import {
   useCharacterClasses,
 } from '@/hooks/useAdmin';
 import type { SubclassResponse } from '@/types';
+import { useT } from '@/i18n/I18nContext';
 
 export default function SubclassesPage() {
+  const t = useT();
   const { data, isLoading, error, refetch } = useSubclasses();
   const { data: classes } = useCharacterClasses();
   const createMutation = useCreateSubclass();
@@ -96,8 +98,8 @@ export default function SubclassesPage() {
       <div>
         <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 18 }}>
           <div>
-            <div className="ao-overline">Reference · oaths</div>
-            <div className="ao-h3" style={{ marginTop: 4 }}>Tome of Subclasses</div>
+            <div className="ao-overline">{t('adm.subclasses.overline')}</div>
+            <div className="ao-h3" style={{ marginTop: 4 }}>{t('adm.subclasses.title')}</div>
           </div>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -113,9 +115,9 @@ export default function SubclassesPage() {
     return (
       <div style={{ textAlign: 'center', padding: '48px 0' }}>
         <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginBottom: 16 }}>
-          The tome could not be consulted.
+          {t('adm.shared.tomeUnavailable')}
         </p>
-        <button className="ao-btn" onClick={() => refetch()}>Retry</button>
+        <button className="ao-btn" onClick={() => refetch()}>{t('common.retry')}</button>
       </div>
     );
   }
@@ -125,13 +127,13 @@ export default function SubclassesPage() {
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 18 }}>
         <div>
-          <div className="ao-overline">Reference · oaths</div>
-          <div className="ao-h3" style={{ marginTop: 4 }}>Tome of Subclasses</div>
+          <div className="ao-overline">{t('adm.subclasses.overline')}</div>
+          <div className="ao-h3" style={{ marginTop: 4 }}>{t('adm.subclasses.title')}</div>
         </div>
         <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-          <OrdoChip tone="ember" glyph="lock">Inquisitor privileges</OrdoChip>
+          <OrdoChip tone="ember" glyph="lock">{t('adm.shared.inquisitorPrivileges')}</OrdoChip>
           <button className="ao-btn ao-btn--primary" onClick={handleAdd}>
-            <Rune kind="plus" size={11} /> New Entry
+            <Rune kind="plus" size={11} /> {t('adm.shared.newEntry')}
           </button>
         </div>
       </div>
@@ -139,14 +141,14 @@ export default function SubclassesPage() {
       {/* Table */}
       <OrdoPanel frame padding={0}>
         <PanelHeader
-          title="Tome of Subclasses"
-          sub={`${data?.length || 0} entries`}
+          title={t('adm.subclasses.title')}
+          sub={t('adm.subclasses.entries', { count: data?.length || 0 })}
           glyph="hex"
           right={
             <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
               <input
                 className="ao-input"
-                placeholder="Search subclasses…"
+                placeholder={t('adm.subclasses.searchPlaceholder')}
                 style={{ width: 220, padding: '6px 12px' }}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -158,9 +160,9 @@ export default function SubclassesPage() {
         <table className="ao-table">
           <thead>
             <tr>
-              <th>Name</th>
-              <th>Class</th>
-              <th>Description</th>
+              <th>{t('adm.shared.colName')}</th>
+              <th>{t('adm.subclasses.colClass')}</th>
+              <th>{t('adm.shared.colDescription')}</th>
               <th style={{ width: 80 }}></th>
             </tr>
           </thead>
@@ -192,25 +194,25 @@ export default function SubclassesPage() {
                 </td>
                 <td>
                   <div style={{ display: 'inline-flex', gap: 4 }}>
-                    <button className="ao-iconbtn" style={{ width: 26, height: 26 }} onClick={() => handleEdit(s)} title="Edit">
+                    <button className="ao-iconbtn" style={{ width: 26, height: 26 }} onClick={() => handleEdit(s)} title={t('adm.shared.edit')}>
                       <Rune kind="scroll" size={11} />
                     </button>
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <button className="ao-iconbtn" style={{ width: 26, height: 26, color: '#d8896a' }} title="Delete">
+                        <button className="ao-iconbtn" style={{ width: 26, height: 26, color: '#d8896a' }} title={t('adm.shared.delete')}>
                           <Rune kind="x" size={11} />
                         </button>
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
-                          <AlertDialogTitle>Unmake this Subclass?</AlertDialogTitle>
+                          <AlertDialogTitle>{t('adm.subclasses.unmakeTitle')}</AlertDialogTitle>
                           <AlertDialogDescription>
-                            This rite cannot be undone. The subclass shall be purged from the tome.
+                            {t('adm.subclasses.unmakeDescription')}
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                          <AlertDialogCancel>Withhold</AlertDialogCancel>
-                          <AlertDialogAction onClick={() => deleteMutation.mutate(s.id)}>Unmake</AlertDialogAction>
+                          <AlertDialogCancel>{t('adm.shared.withhold')}</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => deleteMutation.mutate(s.id)}>{t('adm.shared.unmake')}</AlertDialogAction>
                         </AlertDialogFooter>
                       </AlertDialogContent>
                     </AlertDialog>
@@ -221,7 +223,7 @@ export default function SubclassesPage() {
             {filtered.length === 0 && (
               <tr>
                 <td colSpan={4} style={{ textAlign: 'center', padding: '32px 16px' }}>
-                  <span className="ao-italic" style={{ color: 'var(--ink-faint)' }}>No subclasses inscribed</span>
+                  <span className="ao-italic" style={{ color: 'var(--ink-faint)' }}>{t('adm.subclasses.emptyTable')}</span>
                 </td>
               </tr>
             )}
@@ -229,8 +231,8 @@ export default function SubclassesPage() {
         </table>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 18px', borderTop: '1px solid var(--rule)', background: 'var(--abyss)' }}>
-          <span className="ao-codex">{filtered.length} of {data?.length || 0} entries</span>
-          <span className="ao-codex">sorted by · class</span>
+          <span className="ao-codex">{t('adm.subclasses.countOf', { filtered: filtered.length, total: data?.length || 0 })}</span>
+          <span className="ao-codex">{t('adm.subclasses.sortedByClass')}</span>
         </div>
       </OrdoPanel>
 
@@ -238,22 +240,22 @@ export default function SubclassesPage() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editing ? 'Amend Subclass' : 'Inscribe New Subclass'}</DialogTitle>
+            <DialogTitle>{editing ? t('adm.subclasses.dialogEdit') : t('adm.subclasses.dialogCreate')}</DialogTitle>
           </DialogHeader>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <OrdoField label="Name" required>
+            <OrdoField label={t('adm.shared.fieldName')} required>
               <input
                 className="ao-input"
                 value={formName}
                 onChange={(e) => setFormName(e.target.value)}
-                placeholder="Subclass name"
+                placeholder={t('adm.subclasses.namePlaceholder')}
                 style={{ fontFamily: 'var(--font-serif)', fontSize: 17 }}
               />
             </OrdoField>
-            <OrdoField label="Parent Class" required>
+            <OrdoField label={t('adm.subclasses.parentClassLabel')} required>
               <Select value={formClassId} onValueChange={setFormClassId}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select class" />
+                  <SelectValue placeholder={t('adm.subclasses.selectClass')} />
                 </SelectTrigger>
                 <SelectContent>
                   {(classes || []).map((c) => (
@@ -262,25 +264,25 @@ export default function SubclassesPage() {
                 </SelectContent>
               </Select>
             </OrdoField>
-            <OrdoField label="Description">
+            <OrdoField label={t('adm.shared.fieldDescription')}>
               <textarea
                 className="ao-input"
                 value={formDescription}
                 onChange={(e) => setFormDescription(e.target.value)}
-                placeholder="Describe the oath or path"
+                placeholder={t('adm.subclasses.descriptionPlaceholder')}
                 rows={3}
                 style={{ resize: 'vertical', fontSize: 14 }}
               />
             </OrdoField>
           </div>
           <DialogFooter>
-            <button className="ao-btn ao-btn--ghost" onClick={() => setDialogOpen(false)}>Cancel</button>
+            <button className="ao-btn ao-btn--ghost" onClick={() => setDialogOpen(false)}>{t('common.cancel')}</button>
             <button
               className="ao-btn ao-btn--primary"
               onClick={handleSubmit}
               disabled={!formName || !formClassId || createMutation.isPending || updateMutation.isPending}
             >
-              <Rune kind="diamond-fill" size={9} /> {editing ? 'Amend' : 'Inscribe'}
+              <Rune kind="diamond-fill" size={9} /> {editing ? t('adm.shared.amend') : t('adm.shared.inscribe')}
             </button>
           </DialogFooter>
         </DialogContent>

@@ -7,10 +7,12 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction,
 } from '@/components/ui/alert-dialog';
 import { useInstalledPackages, useUninstallPackage } from '@/hooks/useHomebrew';
+import { useT } from '@/i18n/I18nContext';
 import { formatDate } from '@/lib/utils';
 import type { InstalledHomebrewResponse } from '@/types';
 
 export default function InstalledDoctrinesPage() {
+  const t = useT();
   const navigate = useNavigate();
   const [page, setPage] = useState(0);
   const [revokeId, setRevokeId] = useState<string | null>(null);
@@ -37,30 +39,30 @@ export default function InstalledDoctrinesPage() {
       {/* ── Heading band ── */}
       <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 18 }}>
         <div>
-          <div className="ao-overline">References &middot; not copies</div>
-          <div className="ao-h3" style={{ marginTop: 4 }}>Linked Doctrines</div>
+          <div className="ao-overline">{t('hb.installed.overline')}</div>
+          <div className="ao-h3" style={{ marginTop: 4 }}>{t('hb.installed.heading')}</div>
           <div className="ao-italic" style={{ marginTop: 4, maxWidth: 620 }}>
-            The Archive grants reference, not possession. Should an author redact a doctrine, thy link shall be marked but not severed.
+            {t('hb.installed.subtitle')}
           </div>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'flex-end', gap: 20 }}>
           <div style={{ textAlign: 'right' }}>
-            <div className="ao-overline">Active</div>
+            <div className="ao-overline">{t('hb.installed.active')}</div>
             <div style={{ fontFamily: 'var(--font-serif)', fontSize: 28, color: 'var(--ink-bright)', lineHeight: 1 }}>
               {activeCount}
             </div>
           </div>
           <div style={{ width: 1, height: 36, background: 'var(--rule)' }} />
           <div style={{ textAlign: 'right' }}>
-            <div className="ao-overline">Redacted</div>
+            <div className="ao-overline">{t('hb.installed.redacted')}</div>
             <div style={{ fontFamily: 'var(--font-serif)', fontSize: 28, color: '#d8896a', lineHeight: 1 }}>
               {redactedCount}
             </div>
           </div>
           <div style={{ width: 1, height: 36, background: 'var(--rule)' }} />
           <div style={{ textAlign: 'right' }}>
-            <div className="ao-overline">Behind</div>
+            <div className="ao-overline">{t('hb.installed.behind')}</div>
             <div style={{ fontFamily: 'var(--font-serif)', fontSize: 28, color: 'var(--gold-pale)', lineHeight: 1 }}>
               {behindCount}
             </div>
@@ -83,15 +85,16 @@ export default function InstalledDoctrinesPage() {
           <Rune kind="flame" size={16} color="var(--ember)" />
           <div style={{ flex: 1 }}>
             <span style={{ fontSize: 13, color: '#d8896a', fontFamily: 'var(--font-display)', letterSpacing: '0.03em' }}>
-              {redactedCount} doctrine{redactedCount > 1 ? 's have' : ' has'} been redacted by{' '}
-              {redactedCount > 1 ? 'their authors' : 'its author'}.
+              {redactedCount > 1
+                ? t('hb.installed.warningMany', { count: redactedCount })
+                : t('hb.installed.warningOne', { count: redactedCount })}
             </span>
             <span className="ao-italic" style={{ fontSize: 12, color: 'var(--ink-quiet)', marginLeft: 8 }}>
-              Reference persists; no further updates shall arrive.
+              {t('hb.installed.warningNote')}
             </span>
           </div>
           <button className="ao-btn ao-btn--ghost ao-btn--sm" onClick={() => { /* scroll to first redacted */ }}>
-            <Rune kind="eye" size={10} /> Audit
+            <Rune kind="eye" size={10} /> {t('hb.installed.audit')}
           </button>
         </div>
       )}
@@ -105,15 +108,15 @@ export default function InstalledDoctrinesPage() {
         <div style={{ textAlign: 'center', padding: 60 }}>
           <Rune kind="book" size={64} color="var(--ink-quiet)" />
           <div className="ao-codex" style={{ marginTop: 14, color: 'var(--ink-faint)' }}>
-            — THE ARCHIVE IS EMPTY —
+            {t('hb.installed.emptyOverline')}
           </div>
-          <div className="ao-h3" style={{ marginTop: 10, color: 'var(--ink)' }}>No Instated Doctrines</div>
+          <div className="ao-h3" style={{ marginTop: 10, color: 'var(--ink)' }}>{t('hb.installed.emptyTitle')}</div>
           <p className="ao-italic" style={{ fontSize: 16, color: 'var(--ink-quiet)', maxWidth: 480, margin: '8px auto 0' }}>
-            Browse the catalogue and instate doctrines to gain reference.
+            {t('hb.installed.emptyBody')}
           </p>
           <div style={{ display: 'flex', gap: 10, marginTop: 22, justifyContent: 'center' }}>
             <button className="ao-btn ao-btn--primary" onClick={() => navigate('/gm/homebrew/marketplace')}>
-              <Rune kind="arrow-r" size={11} /> Browse Catalogue
+              <Rune kind="arrow-r" size={11} /> {t('hb.installed.browseCatalogue')}
             </button>
           </div>
         </div>
@@ -135,7 +138,9 @@ export default function InstalledDoctrinesPage() {
             background: 'var(--abyss)',
           }}>
             <span className="ao-codex" style={{ fontSize: 11, color: 'var(--ink-faint)' }}>
-              {totalElements} instatement{totalElements !== 1 ? 's' : ''} &middot; only what thy charter permits
+              {totalElements !== 1
+                ? t('hb.installed.footerMany', { count: totalElements })
+                : t('hb.installed.footerOne', { count: totalElements })}
             </span>
           </div>
         </OrdoPanel>
@@ -152,7 +157,7 @@ export default function InstalledDoctrinesPage() {
           borderTop: '1px solid var(--rule)',
         }}>
           <span className="ao-codex">
-            Page {page + 1} of {totalPages} &middot; displaying {packages.length} of {totalElements}
+            {t('hb.installed.pageInfo', { page: page + 1, total: totalPages, shown: packages.length, total2: totalElements })}
           </span>
           <div style={{ display: 'flex', gap: 4 }}>
             <button
@@ -179,18 +184,18 @@ export default function InstalledDoctrinesPage() {
       <AlertDialog open={!!revokeId} onOpenChange={(open) => !open && setRevokeId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Revoke Instatement?</AlertDialogTitle>
+            <AlertDialogTitle>{t('hb.installed.revokeTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              The doctrine reference will be removed. Content from this doctrine will no longer be available in thy sessions.
+              {t('hb.installed.revokeDescription')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleRevoke}
               style={{ background: 'var(--ember)', color: '#fff' }}
             >
-              Revoke
+              {t('hb.installed.revoke')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -212,6 +217,7 @@ function InstalledRow({
   onView: () => void;
   onRevoke: () => void;
 }) {
+  const t = useT();
   const deleted = pkg.isDeleted;
   const s = pkg.contentSummary;
 
@@ -269,13 +275,13 @@ function InstalledRow({
               color: '#d8896a',
               fontFamily: 'var(--font-mono)',
             }}>
-              [REDACTED]
+              {t('hb.installed.redactedBadge')}
             </span>
           )}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
           <span className="ao-codex" style={{ fontSize: 12, color: 'var(--ink-faint)' }}>
-            by <span style={{ color: 'var(--ink)' }}>{pkg.authorUsername}</span>
+            {t('hb.installed.byLabel')} <span style={{ color: 'var(--ink)' }}>{pkg.authorUsername}</span>
           </span>
           <span style={{ color: 'var(--ink-faint)', fontSize: 10 }}>&middot;</span>
           <CodexID>{pkg.packageId.substring(0, 8)}</CodexID>
@@ -286,7 +292,7 @@ function InstalledRow({
       <div>
         <StatusBadge status={deleted ? 'DELETED' : 'INSTALLED'} />
         <div className="ao-codex" style={{ fontSize: 10, marginTop: 5, color: 'var(--ink-faint)' }}>
-          {deleted ? 'reference persists' : 'live link'}
+          {deleted ? t('hb.installed.referencePersists') : t('hb.installed.liveLink')}
         </div>
       </div>
 
@@ -301,7 +307,7 @@ function InstalledRow({
 
       {/* Col 5: Instated date */}
       <div>
-        <div className="ao-overline" style={{ fontSize: 9 }}>Instated</div>
+        <div className="ao-overline" style={{ fontSize: 9 }}>{t('hb.installed.instated')}</div>
         <div className="ao-codex" style={{ fontSize: 12, marginTop: 3 }}>
           {formatDate(pkg.installedAt)}
         </div>
@@ -311,11 +317,11 @@ function InstalledRow({
       <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
         {!deleted && (
           <button className="ao-btn ao-btn--ghost ao-btn--sm" onClick={onView}>
-            <Rune kind="book" size={10} /> View
+            <Rune kind="book" size={10} /> {t('hb.installed.view')}
           </button>
         )}
         <button className="ao-btn ao-btn--danger ao-btn--sm" onClick={onRevoke}>
-          <Rune kind="x" size={10} /> Revoke
+          <Rune kind="x" size={10} /> {t('hb.installed.revoke')}
         </button>
       </div>
     </div>

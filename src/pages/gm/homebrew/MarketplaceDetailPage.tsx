@@ -7,17 +7,19 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction,
 } from '@/components/ui/alert-dialog';
 import { useMarketplacePackage, useInstallPackage } from '@/hooks/useHomebrew';
+import { useT } from '@/i18n/I18nContext';
 import { formatDate } from '@/lib/utils';
 import type { ContentType } from '@/types';
 
-const CONTENT_TABS: { id: ContentType; label: string; glyph: string }[] = [
-  { id: 'ITEM_TYPE', label: 'Items', glyph: 'sword' },
-  { id: 'CHARACTER_CLASS', label: 'Classes', glyph: 'helm' },
-  { id: 'SKILL', label: 'Skills', glyph: 'eye' },
-  { id: 'FEAT', label: 'Feats', glyph: 'sigil-3' },
+const CONTENT_TABS: { id: ContentType; labelKey: string; glyph: string }[] = [
+  { id: 'ITEM_TYPE', labelKey: 'hb.detail.tabItems', glyph: 'sword' },
+  { id: 'CHARACTER_CLASS', labelKey: 'hb.detail.tabClasses', glyph: 'helm' },
+  { id: 'SKILL', labelKey: 'hb.detail.tabSkills', glyph: 'eye' },
+  { id: 'FEAT', labelKey: 'hb.detail.tabFeats', glyph: 'sigil-3' },
 ];
 
 export default function MarketplaceDetailPage() {
+  const t = useT();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { data: pkg, isLoading } = useMarketplacePackage(id);
@@ -48,14 +50,14 @@ export default function MarketplaceDetailPage() {
       {/* Top actions */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
         <button className="ao-btn ao-btn--ghost ao-btn--sm" onClick={() => navigate('/gm/homebrew/marketplace')}>
-          <Rune kind="arrow-l" size={11} /> Catalogue
+          <Rune kind="arrow-l" size={11} /> {t('hb.detail.catalogue')}
         </button>
         <div style={{ display: 'flex', gap: 8 }}>
           <button className="ao-btn ao-btn--ghost ao-btn--sm">
-            <Rune kind="scroll" size={11} /> Report
+            <Rune kind="scroll" size={11} /> {t('hb.detail.report')}
           </button>
           <button className="ao-btn ao-btn--primary ao-btn--sm" onClick={() => setShowConfirm(true)}>
-            <Rune kind="diamond-fill" size={9} /> Instate Doctrine
+            <Rune kind="diamond-fill" size={9} /> {t('hb.detail.instate')}
           </button>
         </div>
       </div>
@@ -84,7 +86,7 @@ export default function MarketplaceDetailPage() {
                   {pkg.authorUsername}
                 </div>
                 <div className="ao-codex" style={{ fontSize: 10, color: 'var(--ink-faint)', marginTop: 2 }}>
-                  Game-Master
+                  {t('hb.detail.gameMaster')}
                 </div>
               </div>
 
@@ -92,7 +94,7 @@ export default function MarketplaceDetailPage() {
                 <>
                   <span style={{ width: 1, height: 32, background: 'var(--rule)', flexShrink: 0 }} />
                   <div>
-                    <div className="ao-overline" style={{ fontSize: 9 }}>First Sealed</div>
+                    <div className="ao-overline" style={{ fontSize: 9 }}>{t('hb.detail.firstSealed')}</div>
                     <div className="ao-codex" style={{ fontSize: 12, marginTop: 2 }}>{formatDate(pkg.createdAt)}</div>
                   </div>
                 </>
@@ -102,7 +104,7 @@ export default function MarketplaceDetailPage() {
                 <>
                   <span style={{ width: 1, height: 32, background: 'var(--rule)', flexShrink: 0 }} />
                   <div>
-                    <div className="ao-overline" style={{ fontSize: 9 }}>Last Re-Sealed</div>
+                    <div className="ao-overline" style={{ fontSize: 9 }}>{t('hb.detail.lastReSealed')}</div>
                     <div className="ao-codex" style={{ fontSize: 12, marginTop: 2 }}>{formatDate(pkg.publishedAt)}</div>
                   </div>
                 </>
@@ -127,17 +129,17 @@ export default function MarketplaceDetailPage() {
               borderLeft: '2px solid var(--brass)',
             }}>
               <div className="ao-overline" style={{ fontSize: 9, color: 'var(--gold)', marginBottom: 4 }}>
-                Author's Caveat
+                {t('hb.detail.authorCaveat')}
               </div>
               <div className="ao-italic" style={{ fontSize: 12, color: 'var(--ink-quiet)' }}>
-                Installation grants reference, not ownership. Should the author redact this doctrine, thy reference shall be marked but not erased.
+                {t('hb.detail.caveatBody')}
               </div>
             </div>
 
             {/* Tags */}
             {pkg.tags.length > 0 && (
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 16 }}>
-                {pkg.tags.map((t) => <HBTag key={t}>{t}</HBTag>)}
+                {pkg.tags.map((tag) => <HBTag key={tag}>{tag}</HBTag>)}
               </div>
             )}
           </div>
@@ -148,11 +150,11 @@ export default function MarketplaceDetailPage() {
             <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
               <VersionSeal version={pkg.version} size={68} />
               <div>
-                <div className="ao-overline" style={{ fontSize: 9 }}>Edition</div>
-                <div className="ao-h5" style={{ marginTop: 2 }}>Version {pkg.version}</div>
+                <div className="ao-overline" style={{ fontSize: 9 }}>{t('hb.detail.edition')}</div>
+                <div className="ao-h5" style={{ marginTop: 2 }}>{t('hb.detail.version', { version: pkg.version })}</div>
                 {pkg.publishedAt && (
                   <div className="ao-codex" style={{ fontSize: 11, color: 'var(--ink-faint)', marginTop: 4 }}>
-                    re-sealed {formatDate(pkg.publishedAt)}
+                    {t('hb.detail.reSealed', { date: formatDate(pkg.publishedAt) })}
                   </div>
                 )}
               </div>
@@ -167,12 +169,12 @@ export default function MarketplaceDetailPage() {
                 background: 'var(--abyss)',
                 border: '1px solid var(--hairline)',
               }}>
-                <div className="ao-overline" style={{ fontSize: 9 }}>Instated</div>
+                <div className="ao-overline" style={{ fontSize: 9 }}>{t('hb.detail.instatedStat')}</div>
                 <div className="ao-h4" style={{ marginTop: 6, color: 'var(--ink-bright)' }}>
                   {pkg.downloadCount.toLocaleString()}
                 </div>
                 <div className="ao-codex" style={{ fontSize: 10, color: 'var(--ink-faint)', marginTop: 2 }}>
-                  times installed
+                  {t('hb.detail.timesInstalled')}
                 </div>
               </div>
               <div style={{
@@ -180,12 +182,12 @@ export default function MarketplaceDetailPage() {
                 background: 'var(--abyss)',
                 border: '1px solid var(--hairline)',
               }}>
-                <div className="ao-overline" style={{ fontSize: 9 }}>Version</div>
+                <div className="ao-overline" style={{ fontSize: 9 }}>{t('hb.detail.versionStat')}</div>
                 <div className="ao-h4" style={{ marginTop: 6, color: 'var(--gold)' }}>
                   v{pkg.version}
                 </div>
                 <div className="ao-codex" style={{ fontSize: 10, color: 'var(--ink-faint)', marginTop: 2 }}>
-                  current edition
+                  {t('hb.detail.currentEdition')}
                 </div>
               </div>
             </div>
@@ -201,28 +203,28 @@ export default function MarketplaceDetailPage() {
               style={{ marginTop: 18 }}
               onClick={() => setShowConfirm(true)}
             >
-              <Rune kind="diamond-fill" size={12} /> Authorize Instatement
+              <Rune kind="diamond-fill" size={12} /> {t('hb.detail.authorize')}
             </button>
 
             <div className="ao-codex" style={{ textAlign: 'center', fontSize: 10, color: 'var(--ink-faint)', marginTop: 8 }}>
-              installation grants reference, not ownership
+              {t('hb.detail.grantsReference')}
             </div>
           </div>
         </div>
 
         {/* Content tabs */}
         <div style={{ display: 'flex', borderBottom: '1px solid var(--rule)' }}>
-          {CONTENT_TABS.map((t) => {
-            const count = (contentByType[t.id] || []).length;
+          {CONTENT_TABS.map((ct) => {
+            const count = (contentByType[ct.id] || []).length;
             return (
               <button
-                key={t.id}
-                className={`ao-tab${tab === t.id ? ' is-active' : ''}`}
-                onClick={() => setTab(t.id)}
+                key={ct.id}
+                className={`ao-tab${tab === ct.id ? ' is-active' : ''}`}
+                onClick={() => setTab(ct.id)}
                 style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 20px' }}
               >
-                <Rune kind={t.glyph} size={13} color={tab === t.id ? 'var(--gold)' : 'var(--ink-quiet)'} />
-                {t.label} <span className="ao-codex" style={{ fontSize: 10, color: 'var(--ink-faint)' }}>{count}</span>
+                <Rune kind={ct.glyph} size={13} color={tab === ct.id ? 'var(--gold)' : 'var(--ink-quiet)'} />
+                {t(ct.labelKey)} <span className="ao-codex" style={{ fontSize: 10, color: 'var(--ink-faint)' }}>{count}</span>
               </button>
             );
           })}
@@ -234,7 +236,7 @@ export default function MarketplaceDetailPage() {
             <div style={{ textAlign: 'center', padding: '36px 0' }}>
               <Rune kind="sigil-3" size={40} color="var(--ink-quiet)" />
               <div className="ao-italic" style={{ marginTop: 12, color: 'var(--ink-faint)', fontSize: 14 }}>
-                No {CONTENT_TABS.find((t) => t.id === tab)?.label.toLowerCase()} in this doctrine.
+                {t('hb.detail.noContent', { label: (t(CONTENT_TABS.find((ct) => ct.id === tab)?.labelKey ?? '')).toLowerCase() })}
               </div>
             </div>
           ) : tab === 'FEAT' ? (
@@ -242,9 +244,9 @@ export default function MarketplaceDetailPage() {
             <table className="ao-table" style={{ width: '100%' }}>
               <thead>
                 <tr>
-                  <th>Tier</th>
-                  <th>Feat</th>
-                  <th>Inscription</th>
+                  <th>{t('hb.detail.colTier')}</th>
+                  <th>{t('hb.detail.colFeat')}</th>
+                  <th>{t('hb.detail.colInscription')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -358,10 +360,10 @@ export default function MarketplaceDetailPage() {
           <div style={{ textAlign: 'center', padding: '28px 32px 0' }}>
             <Sigil size={56} glyph="sigil-2" color="var(--gold)" />
             <div className="ao-overline" style={{ marginTop: 14, color: 'var(--gold)', letterSpacing: '0.2em' }}>
-              RITE OF INSTATEMENT
+              {t('hb.detail.riteOfInstatement')}
             </div>
             <div className="ao-h4" style={{ marginTop: 8 }}>
-              Authorize this Doctrine?
+              {t('hb.detail.authorizeThis')}
             </div>
           </div>
 
@@ -374,7 +376,7 @@ export default function MarketplaceDetailPage() {
               <div style={{ flex: 1 }}>
                 <div className="ao-h6" style={{ fontSize: 16 }}>{pkg.title}</div>
                 <div className="ao-codex" style={{ fontSize: 11, color: 'var(--ink-faint)', marginTop: 4 }}>
-                  by {pkg.authorUsername} <span style={{ margin: '0 4px' }}>|</span> {pkg.id.substring(0, 8)}
+                  {t('hb.detail.byPipe', { author: pkg.authorUsername })} <span style={{ margin: '0 4px' }}>|</span> {pkg.id.substring(0, 8)}
                 </div>
               </div>
             </div>
@@ -382,9 +384,9 @@ export default function MarketplaceDetailPage() {
             <ContentPills items={s.itemTypeCount} classes={s.classCount} skills={s.skillCount} feats={s.featCount} compact />
 
             <AlertDialogHeader style={{ marginTop: 14 }}>
-              <AlertDialogTitle style={{ display: 'none' }}>Authorize Instatement</AlertDialogTitle>
+              <AlertDialogTitle style={{ display: 'none' }}>{t('hb.detail.authorizeTitle')}</AlertDialogTitle>
               <AlertDialogDescription style={{ fontSize: 13, lineHeight: 1.6, color: 'var(--ink-quiet)' }}>
-                By instatement, you may reference the contents of "{pkg.title}". The doctrine is not copied — should the author redact it, your reference shall be marked but not erased.
+                {t('hb.detail.confirmBody', { title: pkg.title })}
               </AlertDialogDescription>
             </AlertDialogHeader>
           </div>
@@ -397,12 +399,12 @@ export default function MarketplaceDetailPage() {
           }}>
             <AlertDialogCancel asChild>
               <button className="ao-btn ao-btn--ghost">
-                <Rune kind="x" size={10} /> Withhold
+                <Rune kind="x" size={10} /> {t('hb.detail.withhold')}
               </button>
             </AlertDialogCancel>
             <AlertDialogAction asChild>
               <button className="ao-btn ao-btn--primary" onClick={handleInstall}>
-                <Rune kind="diamond-fill" size={9} /> Seal Instatement
+                <Rune kind="diamond-fill" size={9} /> {t('hb.detail.sealInstatement')}
               </button>
             </AlertDialogAction>
           </AlertDialogFooter>

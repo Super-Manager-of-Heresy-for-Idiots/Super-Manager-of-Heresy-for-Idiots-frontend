@@ -1,5 +1,6 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Trophy } from 'lucide-react';
+import { useT } from '@/i18n/I18nContext';
 import { OrdoPanel, PanelHeader, OrdoDivider } from '@/components/ordo';
 import { useCharacterRewards } from '@/hooks/useLevelUp';
 import { useCharacter } from '@/hooks/useCharacter';
@@ -13,6 +14,7 @@ function formatDate(value: string): string {
 }
 
 export default function CharacterRewardsPage() {
+  const t = useT();
   const navigate = useNavigate();
   const { campaignId, characterId } = useParams<{ campaignId: string; characterId: string }>();
   const { data, isLoading, error } = useCharacterRewards(characterId!);
@@ -34,9 +36,9 @@ export default function CharacterRewardsPage() {
     return (
       <div style={{ textAlign: 'center', padding: '48px 0' }}>
         <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginBottom: 16 }}>
-          Не удалось загрузить список наград.
+          {t('camp.rewards.loadError')}
         </p>
-        <button className="ao-btn" onClick={back}>← Назад</button>
+        <button className="ao-btn" onClick={back}>{t('camp.back')}</button>
       </div>
     );
   }
@@ -45,22 +47,22 @@ export default function CharacterRewardsPage() {
     <div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
         <div>
-          <p className="ao-overline" style={{ color: 'var(--gold)' }}>Codex of Reward</p>
-          <h3 className="ao-h3" style={{ marginTop: 4 }}>Награды персонажа</h3>
+          <p className="ao-overline" style={{ color: 'var(--gold)' }}>{t('camp.rewards.overline')}</p>
+          <h3 className="ao-h3" style={{ marginTop: 4 }}>{t('camp.rewards.title')}</h3>
           {character && (
             <p className="ao-italic" style={{ color: 'var(--ink-quiet)', fontSize: 13, marginTop: 4 }}>
-              {character.name} · Total LVL {data.totalLevel}
+              {character.name} · {t('camp.rewards.totalLvl', { level: data.totalLevel })}
             </p>
           )}
         </div>
         <button className="ao-btn ao-btn--ghost" onClick={back}>
-          <ArrowLeft className="h-3 w-3" /> К персонажу
+          <ArrowLeft className="h-3 w-3" /> {t('camp.backToCharacter')}
         </button>
       </div>
 
       {data.classBreakdown.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '48px 0' }} className="ao-italic">
-          У персонажа пока нет полученных наград.
+          {t('camp.rewards.empty')}
         </div>
       ) : (
         data.classBreakdown.map((cls) => (
@@ -69,7 +71,7 @@ export default function CharacterRewardsPage() {
               title={cls.className}
               glyph="helm"
               tone="gold"
-              sub={`Уровень ${cls.classLevel}${cls.subclass ? ` · ${cls.subclass.name}` : ''}`}
+              sub={`${t('camp.rewards.classLevel', { level: cls.classLevel })}${cls.subclass ? ` · ${cls.subclass.name}` : ''}`}
             />
             <div style={{ padding: 16 }}>
               {cls.subclass && (
@@ -82,7 +84,7 @@ export default function CharacterRewardsPage() {
               )}
               {Object.keys(cls.rewardsByType || {}).length === 0 ? (
                 <div className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 13 }}>
-                  Нет наград для этого класса.
+                  {t('camp.rewards.noClassRewards')}
                 </div>
               ) : (
                 Object.entries(cls.rewardsByType).map(([type, rewards]) => (

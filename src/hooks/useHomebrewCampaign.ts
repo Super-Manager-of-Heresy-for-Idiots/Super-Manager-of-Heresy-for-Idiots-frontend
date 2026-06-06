@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { homebrewCampaignApi } from '@/api/homebrew-campaign.api';
 import { homebrewApi } from '@/api/homebrew.api';
+import { useT } from '@/i18n/I18nContext';
 import type {
   AttachHomebrewRequest,
   PinHomebrewVersionRequest,
@@ -12,32 +13,34 @@ import { AxiosError } from 'axios';
 
 export function useAttachHomebrew() {
   const queryClient = useQueryClient();
+  const t = useT();
 
   return useMutation({
     mutationFn: ({ campaignId, data }: { campaignId: string; data: AttachHomebrewRequest }) =>
       homebrewCampaignApi.attach(campaignId, data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'homebrew'] });
-      toast.success('Homebrew attached to campaign!');
+      toast.success(t('hk.homebrewCampaign.attached'));
     },
     onError: (error: AxiosError<ApiError>) => {
-      toast.error(error.response?.data?.message || 'Failed to attach homebrew');
+      toast.error(error.response?.data?.message || t('hk.homebrewCampaign.attachFailed'));
     },
   });
 }
 
 export function useDetachHomebrew() {
   const queryClient = useQueryClient();
+  const t = useT();
 
   return useMutation({
     mutationFn: ({ campaignId, packageId }: { campaignId: string; packageId: string }) =>
       homebrewCampaignApi.detach(campaignId, packageId),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'homebrew'] });
-      toast.success('Homebrew detached from campaign!');
+      toast.success(t('hk.homebrewCampaign.detached'));
     },
     onError: (error: AxiosError<ApiError>) => {
-      toast.error(error.response?.data?.message || 'Failed to detach homebrew');
+      toast.error(error.response?.data?.message || t('hk.homebrewCampaign.detachFailed'));
     },
   });
 }
@@ -55,6 +58,7 @@ export function useAttachedHomebrew(campaignId: string) {
 
 export function usePinHomebrewVersion() {
   const queryClient = useQueryClient();
+  const t = useT();
 
   return useMutation({
     mutationFn: ({
@@ -68,10 +72,10 @@ export function usePinHomebrewVersion() {
     }) => homebrewCampaignApi.pinVersion(campaignId, packageId, data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'homebrew'] });
-      toast.success('Version pinned!');
+      toast.success(t('hk.homebrewCampaign.versionPinned'));
     },
     onError: (error: AxiosError<ApiError>) => {
-      toast.error(error.response?.data?.message || 'Failed to pin version');
+      toast.error(error.response?.data?.message || t('hk.homebrewCampaign.pinFailed'));
     },
   });
 }
@@ -123,16 +127,17 @@ export function useHomebrewLibrary() {
 
 export function useRateHomebrew() {
   const queryClient = useQueryClient();
+  const t = useT();
   return useMutation({
     mutationFn: ({ packageId, data }: { packageId: string; data: RateHomebrewRequest }) =>
       homebrewApi.rate(packageId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['homebrew-marketplace'] });
       queryClient.invalidateQueries({ queryKey: ['homebrew-library'] });
-      toast.success('Rating submitted!');
+      toast.success(t('hk.homebrewCampaign.rated'));
     },
     onError: (error: AxiosError<ApiError>) => {
-      toast.error(error.response?.data?.message || 'Failed to rate');
+      toast.error(error.response?.data?.message || t('hk.homebrewCampaign.rateFailed'));
     },
   });
 }

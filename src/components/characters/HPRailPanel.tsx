@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { OrdoPanel, PanelHeader, Rune, OrdoChip, Bar } from '@/components/ordo';
 import { CharStatusBadge } from '@/components/campaigns';
 import { useUpdateHp } from '@/hooks/useCharacter';
+import { useT } from '@/i18n/I18nContext';
 
 interface HPRailPanelProps {
   characterId: string;
@@ -18,6 +19,7 @@ export function HPRailPanel({
   status,
   onOpenDamageHeal,
 }: HPRailPanelProps) {
+  const t = useT();
   const [amount, setAmount] = useState(1);
   const updateHp = useUpdateHp();
 
@@ -37,7 +39,7 @@ export function HPRailPanel({
   return (
     <OrdoPanel frame>
       <PanelHeader
-        title="Vitae \u00B7 Hit Points"
+        title={t('cmp.hp.title')}
         glyph="flame"
         tone="ember"
         right={
@@ -46,7 +48,7 @@ export function HPRailPanel({
               <CharStatusBadge status="DOWN" />
             ) : (
               <OrdoChip tone="gold" glyph="cir-dot">
-                Hale
+                {t('cmp.hp.hale')}
               </OrdoChip>
             )}
           </div>
@@ -149,7 +151,7 @@ export function HPRailPanel({
             }}
           >
             <Rune kind="minus" size={10} color="var(--ember)" />
-            Damage
+            {t('cmp.hp.damage')}
           </button>
 
           {/* Amount input */}
@@ -193,7 +195,7 @@ export function HPRailPanel({
             }}
           >
             <Rune kind="plus" size={10} color="#7a9866" />
-            Heal
+            {t('cmp.hp.heal')}
           </button>
         </div>
 
@@ -216,7 +218,7 @@ export function HPRailPanel({
               textUnderlineOffset: 3,
             }}
           >
-            Advanced...
+            {t('cmp.hp.advanced')}
           </button>
         )}
       </div>

@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/select';
 import { useCampaignQuests, useCreateQuest } from '@/hooks/useQuests';
 import { BackLink } from '@/components/campaigns';
+import { useT } from '@/i18n/I18nContext';
 import type { QuestResponse, QuestStatus } from '@/types';
 
 /* ── constants ───────────────────────────────────────────────── */
@@ -28,6 +29,7 @@ const QUEST_STATUSES: QuestStatus[] = ['ACTIVE', 'COMPLETED', 'FAILED', 'HIDDEN'
 /* ── page ────────────────────────────────────────────────────── */
 
 export default function QuestManagerPage() {
+  const t = useT();
   const { campaignId } = useParams<{ campaignId: string }>();
   const navigate = useNavigate();
   const { data: quests, isLoading, error, refetch } = useCampaignQuests(campaignId!);
@@ -72,11 +74,11 @@ export default function QuestManagerPage() {
   if (isLoading) {
     return (
       <div>
-        <BackLink to={backTo} label="К кампании" style={{ marginBottom: 12 }} />
+        <BackLink to={backTo} label={t('camp2.back.campaign')} style={{ marginBottom: 12 }} />
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 32 }}>
           <div>
-            <p className="ao-overline" style={{ color: 'var(--gold)' }}>The Chronicle</p>
-            <h3 className="ao-h3" style={{ marginTop: 4 }}>Quests</h3>
+            <p className="ao-overline" style={{ color: 'var(--gold)' }}>{t('camp2.questMgr.overline')}</p>
+            <h3 className="ao-h3" style={{ marginTop: 4 }}>{t('camp2.questMgr.title')}</h3>
           </div>
         </div>
         <div className="ao-panel ao-frame ao-breathe" style={{ padding: 24, minHeight: 200 }}>
@@ -98,12 +100,12 @@ export default function QuestManagerPage() {
   if (error) {
     return (
       <div>
-        <BackLink to={backTo} label="К кампании" style={{ marginBottom: 12 }} />
+        <BackLink to={backTo} label={t('camp2.back.campaign')} style={{ marginBottom: 12 }} />
         <div style={{ textAlign: 'center', padding: '48px 0' }}>
           <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginBottom: 16 }}>
-            The quest ledger could not be opened. Its seals remain intact.
+            {t('camp2.questMgr.loadError')}
           </p>
-          <button className="ao-btn" onClick={() => refetch()}>Retry</button>
+          <button className="ao-btn" onClick={() => refetch()}>{t('common.retry')}</button>
         </div>
       </div>
     );
@@ -121,14 +123,14 @@ export default function QuestManagerPage() {
 
   return (
     <div>
-      <BackLink to={backTo} label="К кампании" style={{ marginBottom: 12 }} />
+      <BackLink to={backTo} label={t('camp2.back.campaign')} style={{ marginBottom: 12 }} />
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 32 }}>
         <div>
-          <p className="ao-overline" style={{ color: 'var(--gold)' }}>The Chronicle</p>
-          <h3 className="ao-h3" style={{ marginTop: 4 }}>Quests</h3>
+          <p className="ao-overline" style={{ color: 'var(--gold)' }}>{t('camp2.questMgr.overline')}</p>
+          <h3 className="ao-h3" style={{ marginTop: 4 }}>{t('camp2.questMgr.title')}</h3>
           <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 13, marginTop: 4 }}>
-            Deeds recorded and fates yet unwritten, bound by the Game-Master's decree.
+            {t('camp2.questMgr.subtitle')}
           </p>
         </div>
         <button
@@ -136,7 +138,7 @@ export default function QuestManagerPage() {
           onClick={() => { resetForm(); setDialogOpen(true); }}
         >
           <Rune kind="plus" size={14} color="currentColor" />
-          <span style={{ marginLeft: 6 }}>New Quest</span>
+          <span style={{ marginLeft: 6 }}>{t('camp2.questMgr.newQuest')}</span>
         </button>
       </div>
 
@@ -144,12 +146,12 @@ export default function QuestManagerPage() {
       {sorted.length === 0 ? (
         <EmptyVault
           glyph="scroll"
-          title="No Quests Recorded"
-          body="The chronicle lies blank. Create your first quest to set the tale in motion."
+          title={t('camp2.questMgr.empty.title')}
+          body={t('camp2.questMgr.empty.body')}
           action={
             <button className="ao-btn ao-btn--primary" onClick={() => { resetForm(); setDialogOpen(true); }}>
               <Rune kind="plus" size={14} color="currentColor" />
-              <span style={{ marginLeft: 6 }}>New Quest</span>
+              <span style={{ marginLeft: 6 }}>{t('camp2.questMgr.newQuest')}</span>
             </button>
           }
         />
@@ -166,9 +168,9 @@ export default function QuestManagerPage() {
               background: 'var(--abyss)',
             }}
           >
-            <span className="ao-overline" style={{ fontSize: 9, color: 'var(--ink-faint)' }}>Quest</span>
-            <span className="ao-overline" style={{ fontSize: 9, color: 'var(--ink-faint)' }}>Status</span>
-            <span className="ao-overline" style={{ fontSize: 9, color: 'var(--ink-faint)' }}>Visibility</span>
+            <span className="ao-overline" style={{ fontSize: 9, color: 'var(--ink-faint)' }}>{t('camp2.questMgr.col.quest')}</span>
+            <span className="ao-overline" style={{ fontSize: 9, color: 'var(--ink-faint)' }}>{t('camp2.questMgr.col.status')}</span>
+            <span className="ao-overline" style={{ fontSize: 9, color: 'var(--ink-faint)' }}>{t('camp2.questMgr.col.visibility')}</span>
             <span />
           </div>
 
@@ -233,7 +235,7 @@ export default function QuestManagerPage() {
                     className="ao-btn ao-btn--sm"
                     onClick={() => navigate(`/campaigns/${campaignId}/quests/${quest.id}`)}
                   >
-                    Open
+                    {t('common.open')}
                   </button>
                 </div>
               </div>
@@ -246,38 +248,38 @@ export default function QuestManagerPage() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Record New Quest</DialogTitle>
+            <DialogTitle>{t('camp2.questMgr.dialog.title')}</DialogTitle>
           </DialogHeader>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <OrdoField label="Name" required>
+            <OrdoField label={t('camp2.questMgr.field.name')} required>
               <input
                 className="ao-input"
                 value={formTitle}
                 onChange={(e) => setFormTitle(e.target.value)}
-                placeholder="Name of the quest"
+                placeholder={t('camp2.questMgr.field.namePlaceholder')}
               />
             </OrdoField>
 
-            <OrdoField label="Description" hint="Visible to players">
+            <OrdoField label={t('camp2.questMgr.field.description')} hint={t('camp2.questMgr.field.descriptionHint')}>
               <textarea
                 className="ao-input"
                 value={formDescription}
                 onChange={(e) => setFormDescription(e.target.value)}
-                placeholder="What the players know..."
+                placeholder={t('camp2.questMgr.field.descriptionPlaceholder')}
                 rows={3}
                 style={{ resize: 'vertical' }}
               />
             </OrdoField>
 
-            <OrdoField label="Status">
+            <OrdoField label={t('camp2.questMgr.field.status')}>
               <Select value={formStatus} onValueChange={(v) => setFormStatus(v as QuestStatus)}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select status" />
+                  <SelectValue placeholder={t('camp2.questMgr.field.selectStatus')} />
                 </SelectTrigger>
                 <SelectContent>
                   {QUEST_STATUSES.map((s) => (
                     <SelectItem key={s} value={s}>
-                      {s.charAt(0) + s.slice(1).toLowerCase()}
+                      {t(`camp2.questStatus.${s}`)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -290,7 +292,7 @@ export default function QuestManagerPage() {
                 checked={formVisible}
                 onChange={(e) => setFormVisible(e.target.checked)}
               />
-              <span className="ao-label" style={{ marginBottom: 0 }}>Visible to players</span>
+              <span className="ao-label" style={{ marginBottom: 0 }}>{t('camp2.questMgr.field.visible')}</span>
             </label>
           </div>
           <DialogFooter>
@@ -299,7 +301,7 @@ export default function QuestManagerPage() {
               onClick={() => setDialogOpen(false)}
               disabled={createMutation.isPending}
             >
-              Withhold
+              {t('camp2.questMgr.withhold')}
             </button>
             <button
               type="button"
@@ -310,7 +312,7 @@ export default function QuestManagerPage() {
               {createMutation.isPending && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
-              Record
+              {t('camp2.questMgr.record')}
             </button>
           </DialogFooter>
         </DialogContent>

@@ -1,4 +1,5 @@
 import { OrdoPanel, PanelHeader, Rune, OrdoDivider } from '@/components/ordo';
+import { useT } from '@/i18n/I18nContext';
 
 interface ClassLevel {
   classId: string;
@@ -22,12 +23,13 @@ function getGlyph(className: string): string {
 }
 
 export function MulticlassPanel({ classLevels, onAddClass }: MulticlassPanelProps) {
+  const t = useT();
   const totalLevel = classLevels.reduce((sum, cl) => sum + cl.classLevel, 0);
 
   return (
     <OrdoPanel frame>
       <PanelHeader
-        title="Classes & Oaths"
+        title={t('cmp.multiclass.title')}
         glyph="shield"
         right={
           onAddClass ? (
@@ -49,7 +51,7 @@ export function MulticlassPanel({ classLevels, onAddClass }: MulticlassPanelProp
               }}
             >
               <Rune kind="plus" size={10} color="var(--ink-quiet)" />
-              Add Class
+              {t('cmp.multiclass.addClass')}
             </button>
           ) : undefined
         }
@@ -145,7 +147,7 @@ export function MulticlassPanel({ classLevels, onAddClass }: MulticlassPanelProp
           className="ao-overline"
           style={{ color: 'var(--gold)', letterSpacing: '0.18em' }}
         >
-          Total Level
+          {t('cmp.multiclass.totalLevel')}
         </span>
         <span
           style={{

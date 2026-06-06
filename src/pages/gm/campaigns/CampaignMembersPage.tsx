@@ -13,11 +13,13 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { useCampaign, useKickMember } from '@/hooks/useCampaigns';
+import { useT } from '@/i18n/I18nContext';
 import type { CampaignMember } from '@/types';
 
 /* ── page ────────────────────────────────────────────────────── */
 
 export default function CampaignMembersPage() {
+  const t = useT();
   const { campaignId } = useParams<{ campaignId: string }>();
   const navigate = useNavigate();
   const { data: campaign, isLoading, error, refetch } = useCampaign(campaignId!);
@@ -39,8 +41,8 @@ export default function CampaignMembersPage() {
     return (
       <div>
         <div style={{ marginBottom: 32 }}>
-          <p className="ao-overline" style={{ color: 'var(--gold)' }}>Campaign Roster</p>
-          <h3 className="ao-h3" style={{ marginTop: 4 }}>Members</h3>
+          <p className="ao-overline" style={{ color: 'var(--gold)' }}>{t('camp.members.overline')}</p>
+          <h3 className="ao-h3" style={{ marginTop: 4 }}>{t('camp.members.title')}</h3>
         </div>
         <div className="ao-panel ao-frame ao-breathe" style={{ padding: 24, minHeight: 200 }}>
           <span className="ao-frame-c" />
@@ -62,9 +64,9 @@ export default function CampaignMembersPage() {
     return (
       <div style={{ textAlign: 'center', padding: '48px 0' }}>
         <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginBottom: 16 }}>
-          The roster could not be retrieved. The sigils remain unreadable.
+          {t('camp.members.loadError')}
         </p>
-        <button className="ao-btn" onClick={() => refetch()}>Retry</button>
+        <button className="ao-btn" onClick={() => refetch()}>{t('camp.retry')}</button>
       </div>
     );
   }
@@ -82,16 +84,16 @@ export default function CampaignMembersPage() {
         style={{ marginBottom: 16 }}
       >
         <Rune kind="chev-l" size={12} color="currentColor" />
-        <span style={{ marginLeft: 4 }}>Back to Dashboard</span>
+        <span style={{ marginLeft: 4 }}>{t('camp.backToDashboard')}</span>
       </button>
 
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 28 }}>
         <div>
-          <p className="ao-overline" style={{ color: 'var(--gold)' }}>Campaign Roster</p>
-          <h3 className="ao-h3" style={{ marginTop: 4 }}>Members</h3>
+          <p className="ao-overline" style={{ color: 'var(--gold)' }}>{t('camp.members.overline')}</p>
+          <h3 className="ao-h3" style={{ marginTop: 4 }}>{t('camp.members.title')}</h3>
           <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 13, marginTop: 4 }}>
-            {members.length} {members.length === 1 ? 'soul' : 'souls'} sworn to this campaign.
+            {members.length} {members.length === 1 ? t('camp.members.soulOne') : t('camp.members.soulMany')} {t('camp.members.swornSuffix')}
           </p>
         </div>
       </div>
@@ -100,15 +102,15 @@ export default function CampaignMembersPage() {
       {members.length === 0 ? (
         <EmptyVault
           glyph="helm"
-          title="No Members"
-          body="No souls have been sworn to this campaign."
+          title={t('camp.members.empty.title')}
+          body={t('camp.members.empty.body')}
         />
       ) : (
         <OrdoPanel frame padding={0}>
           <PanelHeader
-            title="SWORN MEMBERS"
+            title={t('camp.members.swornMembers')}
             glyph="helm"
-            sub={`${members.length} total`}
+            sub={`${members.length} ${t('camp.members.totalSuffix')}`}
           />
 
           {/* Column headers */}
@@ -122,9 +124,9 @@ export default function CampaignMembersPage() {
               background: 'var(--abyss)',
             }}
           >
-            <span className="ao-overline" style={{ fontSize: 9, color: 'var(--ink-faint)' }}>Username</span>
-            <span className="ao-overline" style={{ fontSize: 9, color: 'var(--ink-faint)' }}>Role</span>
-            <span className="ao-overline" style={{ fontSize: 9, color: 'var(--ink-faint)' }}>Joined</span>
+            <span className="ao-overline" style={{ fontSize: 9, color: 'var(--ink-faint)' }}>{t('camp.members.col.username')}</span>
+            <span className="ao-overline" style={{ fontSize: 9, color: 'var(--ink-faint)' }}>{t('camp.members.col.role')}</span>
+            <span className="ao-overline" style={{ fontSize: 9, color: 'var(--ink-faint)' }}>{t('camp.members.col.joined')}</span>
             <span />
           </div>
 
@@ -149,7 +151,7 @@ export default function CampaignMembersPage() {
                 </span>
                 {member.isCreator && (
                   <span className="ao-overline" style={{ fontSize: 8, color: 'var(--gold)' }}>
-                    CREATOR
+                    {t('camp.members.creator')}
                   </span>
                 )}
               </div>
@@ -160,7 +162,7 @@ export default function CampaignMembersPage() {
                   tone={member.roleInCampaign === 'GAME_MASTER' ? 'arcane' : 'gold'}
                   glyph={member.roleInCampaign === 'GAME_MASTER' ? 'sigil-1' : 'helm'}
                 >
-                  {member.roleInCampaign}
+                  {t(`role.${member.roleInCampaign}`)}
                 </OrdoChip>
               </div>
 
@@ -177,7 +179,7 @@ export default function CampaignMembersPage() {
                   <button
                     className="ao-btn ao-btn--danger ao-btn--sm"
                     onClick={() => setKickUserId(member.userId)}
-                    title="Exile member"
+                    title={t('camp.members.exileMember')}
                   >
                     <Rune kind="x" size={10} color="currentColor" />
                   </button>
@@ -192,19 +194,19 @@ export default function CampaignMembersPage() {
       <AlertDialog open={!!kickUserId} onOpenChange={() => setKickUserId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Exile this Member?</AlertDialogTitle>
+            <AlertDialogTitle>{t('camp.members.exile.title')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This soul shall be cast from the campaign. Their characters will remain but they will lose access until re-invited.
+              {t('camp.members.exile.body')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Withhold</AlertDialogCancel>
+            <AlertDialogCancel>{t('camp.list.withhold')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleKick}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               {kickMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Exile
+              {t('camp.members.exile')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

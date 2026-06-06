@@ -1,4 +1,5 @@
 import { Rune } from '@/components/ordo';
+import { useT } from '@/i18n/I18nContext';
 
 type SigilState = 'connected' | 'reconnecting' | 'offline';
 
@@ -6,14 +7,16 @@ interface ConnectionSigilProps {
   state?: SigilState;
 }
 
-const CONFIG: Record<SigilState, { glyph: string; color: string; label: string }> = {
-  connected:    { glyph: 'cir-dot',  color: 'var(--verdigris)',  label: 'Connected' },
-  reconnecting: { glyph: 'cir',      color: 'var(--gold)',       label: 'Reconnecting' },
-  offline:      { glyph: 'cir',      color: 'var(--ink-ghost)',  label: 'Offline' },
+const CONFIG: Record<SigilState, { glyph: string; color: string; labelKey: string }> = {
+  connected:    { glyph: 'cir-dot',  color: 'var(--verdigris)',  labelKey: 'cmp2.conn.connected' },
+  reconnecting: { glyph: 'cir',      color: 'var(--gold)',       labelKey: 'cmp2.conn.reconnecting' },
+  offline:      { glyph: 'cir',      color: 'var(--ink-ghost)',  labelKey: 'cmp2.conn.offline' },
 };
 
 export function ConnectionSigil({ state = 'offline' }: ConnectionSigilProps) {
+  const t = useT();
   const cfg = CONFIG[state];
+  const label = t(cfg.labelKey);
 
   return (
     <div
@@ -22,7 +25,7 @@ export function ConnectionSigil({ state = 'offline' }: ConnectionSigilProps) {
         alignItems: 'center',
         gap: 6,
       }}
-      title={cfg.label}
+      title={label}
     >
       <div
         className={state === 'reconnecting' ? 'ao-breathe' : undefined}
@@ -41,7 +44,7 @@ export function ConnectionSigil({ state = 'offline' }: ConnectionSigilProps) {
         className="ao-overline"
         style={{ color: cfg.color, fontSize: 10 }}
       >
-        {cfg.label}
+        {label}
       </span>
     </div>
   );

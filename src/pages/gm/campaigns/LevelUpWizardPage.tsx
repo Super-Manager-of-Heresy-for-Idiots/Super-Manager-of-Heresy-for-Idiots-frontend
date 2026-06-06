@@ -11,6 +11,7 @@ import {
   Placeholder,
 } from '@/components/ordo';
 import { CodexID } from '@/components/homebrew';
+import { useT } from '@/i18n/I18nContext';
 import { useCharacter } from '@/hooks/useCharacter';
 import { useLevelUpOptions, useLevelUp } from '@/hooks/useLevelUp';
 import type {
@@ -32,6 +33,7 @@ interface AsiAllocation {
 type Tone = 'gold' | 'arcane' | 'ember';
 
 export default function LevelUpWizardPage() {
+  const t = useT();
   const navigate = useNavigate();
   const { campaignId, characterId } = useParams<{ campaignId: string; characterId: string }>();
   const { data: character } = useCharacter(campaignId!, characterId!);
@@ -64,7 +66,7 @@ export default function LevelUpWizardPage() {
         glyph="scroll"
         message={
           (error as { response?: { data?: { message?: string } } })?.response?.data?.message
-          || 'Этот персонаж пока не готов к Восхождению.'
+          || t('camp.lvl.notReady')
         }
         onBack={backToCharacter}
       />
@@ -75,7 +77,7 @@ export default function LevelUpWizardPage() {
     return (
       <RiteGate
         glyph="lock"
-        message={`До следующего Восхождения недостаёт ${options.xpToNextLevel.toLocaleString()} опыта.`}
+        message={t('camp.lvl.needXp', { xp: options.xpToNextLevel.toLocaleString() })}
         onBack={backToCharacter}
       />
     );
@@ -91,7 +93,7 @@ export default function LevelUpWizardPage() {
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 18 }}>
         <Sigil size={72} glyph="sigil-2" />
         <div className="ao-codex ao-flicker" style={{ marginTop: 10, color: 'var(--gold-pale)' }}>
-          — RITE OF ASCENT —
+          {t('camp.lvl.riteOfAscent')}
         </div>
         {character && (
           <div className="ao-italic" style={{ color: 'var(--ink-quiet)', fontSize: 13, marginTop: 4 }}>
@@ -165,6 +167,7 @@ export default function LevelUpWizardPage() {
 // ── Gate (locked / error) ────────────────────────────────────────────
 
 function RiteGate({ glyph, message, onBack }: { glyph: string; message: string; onBack: () => void }) {
+  const t = useT();
   return (
     <OrdoPanel frame padding={0}>
       <div style={{ padding: '56px 24px', textAlign: 'center' }}>
@@ -175,7 +178,7 @@ function RiteGate({ glyph, message, onBack }: { glyph: string; message: string; 
           {message}
         </p>
         <button className="ao-btn" onClick={onBack}>
-          <ArrowLeft className="h-3 w-3" /> К персонажу
+          <ArrowLeft className="h-3 w-3" /> {t('camp.backToCharacter')}
         </button>
       </div>
     </OrdoPanel>
@@ -185,11 +188,12 @@ function RiteGate({ glyph, message, onBack }: { glyph: string; message: string; 
 // ── Step rail ────────────────────────────────────────────────────────
 
 function StepRail({ step, hasResult }: { step: WizardStep; hasResult: boolean }) {
+  const t = useT();
   const steps: { id: WizardStep; label: string }[] = [
-    { id: 'pick-class', label: 'Призвание' },
-    { id: 'rewards', label: 'Дары' },
-    { id: 'confirm', label: 'Печать' },
-    { id: 'result', label: 'Свершилось' },
+    { id: 'pick-class', label: t('camp.lvl.step.pickClass') },
+    { id: 'rewards', label: t('camp.lvl.step.rewards') },
+    { id: 'confirm', label: t('camp.lvl.step.confirm') },
+    { id: 'result', label: t('camp.lvl.step.result') },
   ];
   const activeIdx = steps.findIndex((s) => s.id === step);
   return (
@@ -254,20 +258,21 @@ function StepPickClass({
   onNext: () => void;
   onBack: () => void;
 }) {
+  const t = useT();
   const existing = options.filter((o) => o.currentLevelInClass > 0);
   const multi = options.filter((o) => o.currentLevelInClass === 0);
   return (
     <div>
       <OrdoPanel frame padding={0} style={{ marginBottom: 16 }}>
         <PanelHeader
-          title="Избери призвание"
+          title={t('camp.lvl.chooseClass')}
           glyph="helm"
-          sub={`Общий уровень: ${roman(currentTotal)} → ${roman(currentTotal + 1)}`}
+          sub={t('camp.lvl.totalLevel', { from: roman(currentTotal), to: roman(currentTotal + 1) })}
         />
         <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 18 }}>
           {existing.length > 0 && (
             <ClassGroup
-              title="Углубить путь"
+              title={t('camp.lvl.deepenPath')}
               options={existing}
               selectedClassId={selectedClassId}
               onSelect={onSelect}
@@ -275,24 +280,24 @@ function StepPickClass({
           )}
           {multi.length > 0 && (
             <ClassGroup
-              title="Принять новый обет — мультикласс"
+              title={t('camp.lvl.newOath')}
               options={multi}
               selectedClassId={selectedClassId}
               onSelect={onSelect}
             />
           )}
           {options.length === 0 && (
-            <div className="ao-codex" style={{ padding: 12 }}>Нет доступных призваний для Восхождения.</div>
+            <div className="ao-codex" style={{ padding: 12 }}>{t('camp.lvl.noClasses')}</div>
           )}
         </div>
       </OrdoPanel>
 
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
         <button className="ao-btn ao-btn--ghost" onClick={onBack}>
-          <ArrowLeft className="h-3 w-3" /> Отложить
+          <ArrowLeft className="h-3 w-3" /> {t('camp.lvl.postpone')}
         </button>
         <button className="ao-btn ao-btn--primary" onClick={onNext} disabled={!selectedClassId}>
-          К дарам <ArrowRight className="h-3 w-3" />
+          {t('camp.lvl.toRewards')} <ArrowRight className="h-3 w-3" />
         </button>
       </div>
     </div>
@@ -310,6 +315,7 @@ function ClassGroup({
   selectedClassId: string | null;
   onSelect: (id: string) => void;
 }) {
+  const t = useT();
   return (
     <div>
       <div className="ao-overline" style={{ marginBottom: 8 }}>{title}</div>
@@ -331,7 +337,7 @@ function ClassGroup({
             >
               <div className="wiz-card-top">
                 <span className="ao-h5" style={{ fontSize: 16, flex: 1 }}>{opt.className}</span>
-                {isMulti && <span className="ao-chip ao-chip--arcane">Обет</span>}
+                {isMulti && <span className="ao-chip ao-chip--arcane">{t('camp.lvl.oathChip')}</span>}
                 {isActive && <Rune kind="check" size={14} color="var(--gold-pale)" />}
               </div>
               <div className="ao-codex" style={{ fontSize: 11 }}>
@@ -343,7 +349,7 @@ function ClassGroup({
                 </div>
               ) : (
                 <div className="ao-italic" style={{ fontSize: 13, color: 'var(--ink-faint)' }}>
-                  Без избираемых даров
+                  {t('camp.lvl.noChoosableRewards')}
                 </div>
               )}
             </button>
@@ -377,6 +383,7 @@ function StepRewards({
   onBack: () => void;
   onNext: () => void;
 }) {
+  const t = useT();
   const automatic = option.rewardGroups.filter((g) => !g.isChoice);
   const choices = option.rewardGroups.filter((g) => g.isChoice);
   const asiGroup = choices.find((g) => g.rewardType === 'ABILITY_SCORE_IMPROVEMENT');
@@ -399,19 +406,19 @@ function StepRewards({
     ...allChoiceGroups.map((g) => {
       const allAlready = g.rewards.length > 0 && g.rewards.every((r) => r.alreadyAcquired);
       return {
-        name: `Избрать · ${REWARD_TYPE_LABELS[g.rewardType] || g.rewardType}`,
+        name: t('camp.lvl.choose', { label: REWARD_TYPE_LABELS[g.rewardType] || g.rewardType }),
         complete: allAlready || !!choiceSelections[g.rewardType],
       };
     }),
-    ...(asiGroup ? [{ name: 'Возвысить аспекты · 2 очка', complete: asiValid }] : []),
+    ...(asiGroup ? [{ name: t('camp.lvl.asiChecklist'), complete: asiValid }] : []),
   ];
 
   // Grants granted automatically by the ascent (always Vitae first)
   const grants: { glyph: string; label: string; value: string; sub?: string; tone: Tone }[] = [
-    { glyph: 'flame', label: 'Виталис', value: '+по классу', sub: 'Хиты', tone: 'ember' },
+    { glyph: 'flame', label: t('camp.lvl.vitae'), value: t('camp.lvl.vitaeValue'), sub: t('camp.lvl.hits'), tone: 'ember' },
     ...automatic.flatMap((g) =>
       g.rewards.length === 0
-        ? [{ glyph: 'scroll', label: REWARD_TYPE_LABELS[g.rewardType] || g.rewardType, value: 'Авто', sub: 'При печати', tone: 'arcane' as Tone }]
+        ? [{ glyph: 'scroll', label: REWARD_TYPE_LABELS[g.rewardType] || g.rewardType, value: t('camp.lvl.auto'), sub: t('camp.lvl.atSeal'), tone: 'arcane' as Tone }]
         : g.rewards.map((r) => ({
             glyph: 'sigil-3',
             label: REWARD_TYPE_LABELS[g.rewardType] || g.rewardType,
@@ -443,7 +450,7 @@ function StepRewards({
             {option.className} · Folio V-{String(option.newLevelInClass).padStart(3, '0')}
           </div>
           <div className="ao-engraved" style={{ fontSize: 13, color: 'var(--ink-quiet)', marginTop: 6 }}>
-            По свидетельству Ордо
+            {t('camp.lvl.byOrdo')}
           </div>
           <OrdoDivider glyph="diamond-fill" />
         </div>
@@ -452,7 +459,7 @@ function StepRewards({
         <div style={{ padding: '0 48px', textAlign: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 32 }}>
             <div style={{ textAlign: 'right' }}>
-              <div className="ao-overline">Было</div>
+              <div className="ao-overline">{t('camp.lvl.before')}</div>
               <div style={{ fontFamily: 'var(--font-serif)', fontSize: 64, color: 'var(--ink-faint)', lineHeight: 1, fontStyle: 'italic' }}>
                 {roman(currentTotal)}
               </div>
@@ -469,15 +476,14 @@ function StepRewards({
           </div>
           {characterName && (
             <p className="ao-italic" style={{ fontSize: 16, marginTop: 8, color: 'var(--ink)', maxWidth: 540, margin: '8px auto 0', lineHeight: 1.5 }}>
-              {characterName}, Ордо признаёт твоё бдение. Дары, что грядут, избираются с тщанием и
-              скрепляются печатью в анналах Капитула.
+              {t('camp.lvl.charBlessing', { name: characterName })}
             </p>
           )}
         </div>
 
         {/* Grants summary */}
         <div style={{ padding: 32, paddingTop: 24 }}>
-          <OrdoDivider glyph="diamond-fill">Дарованное Восхождением</OrdoDivider>
+          <OrdoDivider glyph="diamond-fill">{t('camp.lvl.grantedByAscent')}</OrdoDivider>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12, marginTop: 14 }}>
             {grants.map((g, i) => (
               <GrantCard key={i} glyph={g.glyph} label={g.label} value={g.value} sub={g.sub} tone={g.tone} />
@@ -486,7 +492,7 @@ function StepRewards({
 
           {rites.length > 0 && (
             <>
-              <OrdoDivider glyph="cross-pat">Дары, что должно избрать</OrdoDivider>
+              <OrdoDivider glyph="cross-pat">{t('camp.lvl.ritesToChoose')}</OrdoDivider>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {rites.map((r, i) => (
                   <div
@@ -517,7 +523,7 @@ function StepRewards({
                       {r.name}
                     </span>
                     <span className="ao-overline" style={{ color: r.complete ? 'var(--gold-pale)' : 'var(--ember)' }}>
-                      {r.complete ? 'Скреплено' : 'Открыто'}
+                      {r.complete ? t('camp.lvl.sealed') : t('camp.lvl.open')}
                     </span>
                   </div>
                 ))}
@@ -552,7 +558,7 @@ function StepRewards({
       {rites.length === 0 && (
         <OrdoPanel frame padding={0} style={{ marginBottom: 16 }}>
           <div style={{ padding: 18 }} className="ao-italic">
-            На этой ступени нет избираемых даров. Виталис и уровень будут возвышены при печати.
+            {t('camp.lvl.noChoosableThisStep')}
           </div>
         </OrdoPanel>
       )}
@@ -560,10 +566,10 @@ function StepRewards({
       {/* Footer ribbon */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
         <button className="ao-btn ao-btn--ghost" onClick={onBack}>
-          <ArrowLeft className="h-3 w-3" /> Назад к Восхождению
+          <ArrowLeft className="h-3 w-3" /> {t('camp.lvl.backToAscent')}
         </button>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          <span className="ao-codex">Ступень II из III</span>
+          <span className="ao-codex">{t('camp.lvl.stepIndicator')}</span>
           <span style={{ display: 'flex', gap: 4 }}>
             <span style={{ width: 16, height: 4, background: 'var(--gold)' }} />
             <span style={{ width: 16, height: 4, background: 'var(--gold)' }} />
@@ -571,7 +577,7 @@ function StepRewards({
           </span>
         </div>
         <button className="ao-btn ao-btn--primary ao-btn--lg" onClick={onNext} disabled={!choicesValid || !asiValid}>
-          <Rune kind="diamond-fill" size={9} /> К печати
+          <Rune kind="diamond-fill" size={9} /> {t('camp.lvl.toSeal')}
         </button>
       </div>
     </div>
@@ -615,20 +621,21 @@ function OathGroup({
   selectedId: string;
   onSelect: (id: string) => void;
 }) {
+  const t = useT();
   const allAlready = group.rewards.length > 0 && group.rewards.every((r) => r.alreadyAcquired);
   return (
     <OrdoPanel frame padding={0} style={{ marginBottom: 16 }}>
       <PanelHeader
-        title="Избрание обета"
+        title={t('camp.lvl.oath.title')}
         glyph="shield"
-        sub="Обет нельзя обменять — лишь углубить или преступить"
+        sub={t('camp.lvl.oath.sub')}
         tone="arcane"
       />
       <div style={{ padding: 16 }}>
         {group.rewards.length === 0 ? (
-          <EmptyChoiceNote text="Список обетов недоступен — возможно, выбор более не требуется." />
+          <EmptyChoiceNote text={t('camp.lvl.oath.noList')} />
         ) : allAlready ? (
-          <EmptyChoiceNote text="Все обеты уже приняты ранее." />
+          <EmptyChoiceNote text={t('camp.lvl.oath.allTaken')} />
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 18 }}>
             {group.rewards.map((r, i) => (
@@ -658,6 +665,7 @@ function OathCard({
   selected: boolean;
   onSelect: () => void;
 }) {
+  const t = useT();
   const disabled = reward.alreadyAcquired;
   const color = toneVar(tone);
   return (
@@ -677,18 +685,18 @@ function OathCard({
       <span className="ao-frame-c" />
       {/* Banner area */}
       <div style={{ position: 'relative', height: 140, borderBottom: '1px solid var(--rule)', overflow: 'hidden' }}>
-        <Placeholder style={{ position: 'absolute', inset: 0 }}>знамя · иконография «{reward.name}»</Placeholder>
+        <Placeholder style={{ position: 'absolute', inset: 0 }}>{t('camp.lvl.oath.banner', { name: reward.name })}</Placeholder>
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, transparent 0%, var(--panel) 100%)' }} />
         <div style={{ position: 'absolute', top: 14, left: 14 }}>
           <Sigil size={36} glyph="shield" color={color} />
         </div>
         <div style={{ position: 'absolute', bottom: 14, left: 14, right: 14 }}>
-          <div className="ao-overline" style={{ color }}>обет · священный</div>
+          <div className="ao-overline" style={{ color }}>{t('camp.lvl.oath.sacred')}</div>
           <div className="ao-h5" style={{ fontSize: 22, marginTop: 2 }}>{reward.name}</div>
         </div>
         {selected && (
           <div style={{ position: 'absolute', top: 14, right: 14 }}>
-            <OrdoChip glyph="diamond-fill" tone={tone}>Рассматривается</OrdoChip>
+            <OrdoChip glyph="diamond-fill" tone={tone}>{t('camp.lvl.oath.considered')}</OrdoChip>
           </div>
         )}
       </div>
@@ -701,7 +709,7 @@ function OathCard({
 
       <div style={{ padding: '12px 16px', background: 'var(--abyss)', borderTop: '1px solid var(--rule)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <span className="ao-codex" style={{ fontSize: 11, color: 'var(--ink-faint)' }}>
-          {disabled ? 'Уже принят' : selected ? 'Избран к печати' : 'Принять обет'}
+          {disabled ? t('camp.lvl.oath.alreadyTaken') : selected ? t('camp.lvl.oath.chosenToSeal') : t('camp.lvl.oath.acceptOath')}
         </span>
         <Rune kind="chev-r" size={12} color={selected ? color : 'var(--ink-faint)'} />
       </div>
@@ -720,20 +728,21 @@ function ChoiceGroup({
   selectedId: string;
   onSelect: (id: string) => void;
 }) {
+  const t = useT();
   const allAlready = group.rewards.length > 0 && group.rewards.every((r) => r.alreadyAcquired);
   return (
     <OrdoPanel frame padding={0} style={{ marginBottom: 16 }}>
       <PanelHeader
-        title={`Подношения: ${REWARD_TYPE_LABELS[group.rewardType] || group.rewardType}`}
+        title={t('camp.lvl.offering.title', { label: REWARD_TYPE_LABELS[group.rewardType] || group.rewardType })}
         glyph="sigil-1"
-        sub="Избери один — прочие вернутся в Хранилище"
+        sub={t('camp.lvl.offering.sub')}
         tone="arcane"
       />
       <div style={{ padding: 16 }}>
         {group.rewards.length === 0 ? (
-          <EmptyChoiceNote text="Список вариантов недоступен — возможно, выбор более не требуется." />
+          <EmptyChoiceNote text={t('camp.lvl.offering.noList')} />
         ) : allAlready ? (
-          <EmptyChoiceNote text="Все варианты уже получены ранее." />
+          <EmptyChoiceNote text={t('camp.lvl.offering.allTaken')} />
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 22 }}>
             {group.rewards.map((r, i) => (
@@ -766,6 +775,7 @@ function OfferingCard({
   selected: boolean;
   onSelect: () => void;
 }) {
+  const t = useT();
   const disabled = reward.alreadyAcquired;
   const color = toneVar(tone);
   const glow =
@@ -792,9 +802,9 @@ function OfferingCard({
       <div style={{ padding: '14px 18px', borderBottom: '1px solid var(--rule)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <CodexID>{typeLabel}</CodexID>
         {selected ? (
-          <OrdoChip glyph="check" tone={tone}>Скрепляется</OrdoChip>
+          <OrdoChip glyph="check" tone={tone}>{t('camp.lvl.offering.sealing')}</OrdoChip>
         ) : (
-          <span className="ao-codex" style={{ fontSize: 11 }}>{disabled ? 'уже получено' : 'нажми, чтобы скрепить'}</span>
+          <span className="ao-codex" style={{ fontSize: 11 }}>{disabled ? t('camp.lvl.offering.alreadyReceived') : t('camp.lvl.offering.clickToSeal')}</span>
         )}
       </div>
 
@@ -827,7 +837,7 @@ function OfferingCard({
 
       {reward.description && (
         <div style={{ padding: '12px 18px', background: 'var(--abyss)', borderTop: '1px solid var(--rule)' }}>
-          <div className="ao-overline" style={{ marginBottom: 4 }}>Инскрипция</div>
+          <div className="ao-overline" style={{ marginBottom: 4 }}>{t('camp.lvl.offering.inscription')}</div>
           <div className="ao-italic" style={{ fontSize: 12, color: 'var(--ink)', lineHeight: 1.45 }}>«{reward.description}»</div>
         </div>
       )}
@@ -852,6 +862,7 @@ function AsiGroup({
   asi: AsiAllocation;
   setAsi: (a: AsiAllocation) => void;
 }) {
+  const t = useT();
   const total = Object.values(asi.points).reduce((sum, v) => sum + v, 0);
   const remaining = 2 - total;
   const change = (rewardEntryId: string, delta: number) => {
@@ -864,19 +875,19 @@ function AsiGroup({
   return (
     <OrdoPanel frame padding={0} style={{ marginBottom: 16 }}>
       <PanelHeader
-        title="Возвышение аспектов"
+        title={t('camp.lvl.asi.title')}
         glyph="sigil-2"
-        sub="Распредели два очка характеристик"
+        sub={t('camp.lvl.asi.sub')}
         tone="arcane"
         right={
           <span className="ao-codex" style={{ fontSize: 11, color: remaining === 0 ? 'var(--gold-pale)' : 'var(--ink-quiet)' }}>
-            Осталось: {remaining}
+            {t('camp.lvl.asi.remaining', { count: remaining })}
           </span>
         }
       />
       <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
         {group.rewards.length === 0 && (
-          <EmptyChoiceNote text="Нет доступных аспектов для возвышения на этой ступени." />
+          <EmptyChoiceNote text={t('camp.lvl.asi.noAspects')} />
         )}
         {group.rewards.map((r) => {
           const value = asi.points[r.rewardEntryId] || 0;
@@ -933,6 +944,7 @@ function StepConfirm({
   onBack: () => void;
   onConfirm: () => void;
 }) {
+  const t = useT();
   const automatic = option.rewardGroups.filter((g) => !g.isChoice);
   const chosenLines: { type: string; name: string; tag: 'auto' | 'choice' }[] = [];
   for (const g of automatic) {
@@ -956,16 +968,16 @@ function StepConfirm({
   return (
     <div>
       <OrdoPanel frame padding={0} style={{ marginBottom: 16 }}>
-        <PanelHeader title="Печать Восхождения" glyph="diamond" sub="Скреплённое не переписать" />
+        <PanelHeader title={t('camp.lvl.confirm.title')} glyph="diamond" sub={t('camp.lvl.confirm.sub')} />
         <div style={{ padding: 16 }}>
           <div className="ao-codex" style={{ fontSize: 13, marginBottom: 8 }}>
-            Призвание: <strong style={{ color: 'var(--gold)' }}>{option.className}</strong>{' '}
+            {t('camp.lvl.confirm.calling')} <strong style={{ color: 'var(--gold)' }}>{option.className}</strong>{' '}
             {roman(option.currentLevelInClass)} → {roman(option.newLevelInClass)}
           </div>
           <OrdoDivider glyph="diamond" />
-          <div className="ao-overline" style={{ marginTop: 10, marginBottom: 8 }}>Дары, что будут скреплены</div>
+          <div className="ao-overline" style={{ marginTop: 10, marginBottom: 8 }}>{t('camp.lvl.confirm.giftsToSeal')}</div>
           {chosenLines.length === 0 ? (
-            <div className="ao-italic" style={{ color: 'var(--ink-faint)' }}>Виталис и уровень будут возвышены.</div>
+            <div className="ao-italic" style={{ color: 'var(--ink-faint)' }}>{t('camp.lvl.confirm.vitaeAndLevel')}</div>
           ) : (
             chosenLines.map((line, idx) => (
               <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0', borderBottom: '1px solid var(--hairline)' }}>
@@ -993,17 +1005,17 @@ function StepConfirm({
       >
         <Rune kind="lock" size={14} color="var(--ember)" />
         <span className="ao-italic" style={{ fontSize: 13 }}>
-          Этот выбор не переписать. Неизбранное не вернётся.
+          {t('camp.lvl.confirm.warning')}
         </span>
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <button className="ao-btn ao-btn--ghost" onClick={onBack} disabled={submitting}>
-          <ArrowLeft className="h-3 w-3" /> Назад
+          <ArrowLeft className="h-3 w-3" /> {t('camp.lvl.confirm.back')}
         </button>
         <button className="ao-btn ao-btn--primary ao-btn--lg" onClick={onConfirm} disabled={submitting}>
           {submitting ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
-          Скрепить печатью
+          {t('camp.lvl.confirm.seal')}
         </button>
       </div>
     </div>
@@ -1013,6 +1025,7 @@ function StepConfirm({
 // ── Step 4: result ───────────────────────────────────────────────────
 
 function StepResult({ result, onDone }: { result: LevelUpResultResponse; onDone: () => void }) {
+  const t = useT();
   return (
     <div>
       <div
@@ -1031,7 +1044,7 @@ function StepResult({ result, onDone }: { result: LevelUpResultResponse; onDone:
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}>
           <Sigil size={64} glyph="flame" color="var(--gold-pale)" />
         </div>
-        <div className="ao-codex ao-flicker" style={{ color: 'var(--gold-pale)' }}>— ВОСХОЖДЕНИЕ СВЕРШИЛОСЬ —</div>
+        <div className="ao-codex ao-flicker" style={{ color: 'var(--gold-pale)' }}>{t('camp.lvl.result.ascentComplete')}</div>
         <div className="ao-breathe" style={{ marginTop: 10 }}>
           <div style={{ fontFamily: 'var(--font-display)', fontSize: 72, fontWeight: 700, color: 'var(--gold-pale)', lineHeight: 1, textShadow: '0 0 32px rgba(176, 141, 78, 0.4)' }}>
             {roman(result.newTotalLevel)}
@@ -1043,22 +1056,22 @@ function StepResult({ result, onDone }: { result: LevelUpResultResponse; onDone:
       </div>
 
       <OrdoPanel frame padding={0} style={{ marginBottom: 16 }}>
-        <PanelHeader title="Скреплённые дары" glyph="check" tone="gold" />
+        <PanelHeader title={t('camp.lvl.result.sealedGifts')} glyph="check" tone="gold" />
         <div style={{ padding: 18 }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12, marginBottom: 16 }}>
-            <GrantCard glyph="helm" label="Призвание" value={`${result.classLeveled} ${roman(result.newClassLevel)}`} tone="gold" />
-            <GrantCard glyph="sigil-2" label="Общий уровень" value={roman(result.newTotalLevel)} tone="arcane" />
+            <GrantCard glyph="helm" label={t('camp.lvl.result.calling')} value={`${result.classLeveled} ${roman(result.newClassLevel)}`} tone="gold" />
+            <GrantCard glyph="sigil-2" label={t('camp.lvl.result.totalLevel')} value={roman(result.newTotalLevel)} tone="arcane" />
             {result.hpIncrease !== undefined && (
               <GrantCard
                 glyph="flame"
-                label="Виталис"
+                label={t('camp.lvl.result.vitae')}
                 value={`+${result.hpIncrease}`}
-                sub={result.newMaxHp ? `Всего ${result.newMaxHp}` : undefined}
+                sub={result.newMaxHp ? t('camp.lvl.result.totalHp', { hp: result.newMaxHp }) : undefined}
                 tone="ember"
               />
             )}
           </div>
-          <OrdoDivider glyph="diamond-fill">Полученные дары</OrdoDivider>
+          <OrdoDivider glyph="diamond-fill">{t('camp.lvl.result.acquiredGifts')}</OrdoDivider>
           {result.rewardsAcquired.length === 0 ? (
             <div className="ao-italic" style={{ color: 'var(--ink-faint)', marginTop: 8 }}>—</div>
           ) : (
@@ -1077,7 +1090,7 @@ function StepResult({ result, onDone }: { result: LevelUpResultResponse; onDone:
       </OrdoPanel>
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
         <button className="ao-btn ao-btn--primary" onClick={onDone}>
-          <Heart className="h-3 w-3" /> К персонажу <ArrowRight className="h-3 w-3" />
+          <Heart className="h-3 w-3" /> {t('camp.lvl.result.toCharacter')} <ArrowRight className="h-3 w-3" />
         </button>
       </div>
     </div>

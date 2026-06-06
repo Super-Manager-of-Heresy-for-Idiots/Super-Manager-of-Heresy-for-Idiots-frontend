@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { levelUpApi } from '@/api/levelup.api';
+import { useT } from '@/i18n/I18nContext';
 import type { LevelUpRequest, ApiError } from '@/types';
 import { AxiosError } from 'axios';
 
@@ -17,6 +18,7 @@ export function useLevelUpOptions(characterId: string) {
 
 export function useLevelUp() {
   const queryClient = useQueryClient();
+  const t = useT();
   return useMutation({
     mutationFn: ({ characterId, data }: { characterId: string; data: LevelUpRequest }) =>
       levelUpApi.levelUp(characterId, data),
@@ -24,10 +26,10 @@ export function useLevelUp() {
       queryClient.invalidateQueries({ queryKey: ['characters', variables.characterId] });
       queryClient.invalidateQueries({ queryKey: ['characters'] });
       queryClient.invalidateQueries({ queryKey: ['level-up-options', variables.characterId] });
-      toast.success('Level up successful!');
+      toast.success(t('hk.levelUp.success'));
     },
     onError: (error: AxiosError<ApiError>) => {
-      toast.error(error.response?.data?.message || 'Failed to level up');
+      toast.error(error.response?.data?.message || t('hk.levelUp.failed'));
     },
   });
 }

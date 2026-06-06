@@ -20,11 +20,13 @@ import {
 import { useCharacter } from '@/hooks/useCharacter';
 import { useBuffsDebuffs } from '@/hooks/useAdmin';
 import { useAuthStore } from '@/store/authStore';
+import { useT } from '@/i18n/I18nContext';
 
 /* ================================================================== */
 /*  ApplyEffectPage                                                   */
 /* ================================================================== */
 export default function ApplyEffectPage() {
+  const t = useT();
   const { campaignId, characterId } = useParams<{
     campaignId: string;
     characterId: string;
@@ -105,13 +107,13 @@ export default function ApplyEffectPage() {
   if (isLoading) {
     return (
       <div>
-        <BackLink to={backTo} label="К персонажу" style={{ marginBottom: 12 }} />
+        <BackLink to={backTo} label={t('camp2.back.character')} style={{ marginBottom: 12 }} />
         <div style={{ marginBottom: 32 }}>
           <p className="ao-overline" style={{ color: 'var(--gold)' }}>
-            Character Effects
+            {t('camp2.effect.charEffectsOverline')}
           </p>
           <h3 className="ao-h3" style={{ marginTop: 4 }}>
-            Active Effects
+            {t('camp2.effect.activeEffectsTitle')}
           </h3>
         </div>
         <div
@@ -151,17 +153,16 @@ export default function ApplyEffectPage() {
   if (charError || effectsError) {
     return (
       <div>
-        <BackLink to={backTo} label="К персонажу" style={{ marginBottom: 12 }} />
+        <BackLink to={backTo} label={t('camp2.back.character')} style={{ marginBottom: 12 }} />
         <div style={{ textAlign: 'center', padding: '48px 0' }}>
           <p
             className="ao-italic"
             style={{ color: 'var(--ink-faint)', marginBottom: 16 }}
           >
-            The effects ledger could not be opened. The wards remain
-            unbroken.
+            {t('camp2.effect.loadError')}
           </p>
           <button className="ao-btn" onClick={() => refetchEffects()}>
-            Retry
+            {t('common.retry')}
           </button>
         </div>
       </div>
@@ -171,7 +172,7 @@ export default function ApplyEffectPage() {
   /* ---- render ---- */
   return (
     <div>
-      <BackLink to={backTo} label="К персонажу" style={{ marginBottom: 12 }} />
+      <BackLink to={backTo} label={t('camp2.back.character')} style={{ marginBottom: 12 }} />
       {/* Header */}
       <div
         style={{
@@ -185,10 +186,10 @@ export default function ApplyEffectPage() {
       >
         <div>
           <p className="ao-overline" style={{ color: 'var(--gold)' }}>
-            Game Master Tools
+            {t('camp2.effect.gmTools')}
           </p>
           <h3 className="ao-h3" style={{ marginTop: 4 }}>
-            Apply Effects
+            {t('camp2.effect.applyTitle')}
           </h3>
           {character && (
             <p
@@ -199,14 +200,14 @@ export default function ApplyEffectPage() {
                 marginTop: 4,
               }}
             >
-              Effects for{' '}
+              {t('camp2.effect.effectsFor')}{' '}
               <strong>{character.name}</strong>
             </p>
           )}
         </div>
         {canManageEffects && (
           <OrdoChip tone="arcane" glyph="sigil-1">
-            Game-Master
+            {t('camp2.effect.gmChip')}
           </OrdoChip>
         )}
       </div>
@@ -223,8 +224,8 @@ export default function ApplyEffectPage() {
         {/* ════════════ Picker Panel ════════════ */}
         <OrdoPanel frame padding={0} style={{ display: canManageEffects ? undefined : 'none' }}>
           <PanelHeader
-            title="EFFECT PICKER"
-            sub={`${filteredBd.length} available`}
+            title={t('camp2.effect.picker')}
+            sub={t('camp2.effect.available', { count: filteredBd.length })}
             glyph="flame"
             tone="ember"
           />
@@ -252,7 +253,7 @@ export default function ApplyEffectPage() {
                   fontFamily: 'var(--font-body)',
                   fontSize: 13,
                 }}
-                placeholder="Search buffs & debuffs..."
+                placeholder={t('camp2.effect.searchPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -279,7 +280,7 @@ export default function ApplyEffectPage() {
                   className="ao-italic"
                   style={{ color: 'var(--ink-faint)', fontSize: 13 }}
                 >
-                  No effects match thy inquiry
+                  {t('camp2.effect.noMatch')}
                 </p>
               </div>
             ) : (
@@ -331,7 +332,7 @@ export default function ApplyEffectPage() {
                               : '#c9803a',
                           }}
                         >
-                          {bd.isBuff ? 'BUFF' : 'DEBUFF'}
+                          {bd.isBuff ? t('camp2.effect.buff') : t('camp2.effect.debuff')}
                         </span>
                       </div>
                       {bd.targetStatName &&
@@ -383,7 +384,7 @@ export default function ApplyEffectPage() {
                   className="ao-label"
                   style={{ marginBottom: 0, fontSize: 11 }}
                 >
-                  Duration (rounds)
+                  {t('camp2.effect.durationRounds')}
                 </label>
                 <input
                   className="ao-input"
@@ -393,7 +394,7 @@ export default function ApplyEffectPage() {
                   onChange={(e) =>
                     setDurationRounds(e.target.value)
                   }
-                  placeholder="permanent"
+                  placeholder={t('camp2.effect.permanent')}
                   style={{
                     width: 100,
                     fontFamily: 'var(--font-mono)',
@@ -418,7 +419,7 @@ export default function ApplyEffectPage() {
                       color="currentColor"
                     />
                     <span style={{ marginLeft: 6 }}>
-                      Impose Effect
+                      {t('camp2.effect.impose')}
                     </span>
                   </>
                 )}
@@ -430,8 +431,8 @@ export default function ApplyEffectPage() {
         {/* ════════════ Active Effects Ledger ════════════ */}
         <OrdoPanel frame padding={0}>
           <PanelHeader
-            title="ACTIVE EFFECTS"
-            sub={`${buffCount} buffs, ${debuffCount} debuffs`}
+            title={t('camp2.effect.activeEffects')}
+            sub={t('camp2.effect.buffsDebuffsCount', { buffs: buffCount, debuffs: debuffCount })}
             glyph="sigil-2"
           />
 
@@ -450,8 +451,7 @@ export default function ApplyEffectPage() {
                   fontSize: 13,
                 }}
               >
-                No effects are presently active. The sworn stands
-                unburdened.
+                {t('camp2.effect.noneActive')}
               </p>
             </div>
           ) : (
@@ -473,7 +473,7 @@ export default function ApplyEffectPage() {
                         color: '#7a9866',
                       }}
                     >
-                      Boons ({buffCount})
+                      {t('camp2.effect.boons', { count: buffCount })}
                     </span>
                   </div>
                   {effects
@@ -505,7 +505,7 @@ export default function ApplyEffectPage() {
                         color: '#c9803a',
                       }}
                     >
-                      Banes ({debuffCount})
+                      {t('camp2.effect.banes', { count: debuffCount })}
                     </span>
                   </div>
                   {effects

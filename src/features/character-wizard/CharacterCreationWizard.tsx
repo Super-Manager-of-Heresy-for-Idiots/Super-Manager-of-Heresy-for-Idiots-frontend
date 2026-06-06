@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useReducer } from 'react';
 import toast from 'react-hot-toast';
 import { Rune, Sigil } from '@/components/ordo';
+import { useT } from '@/i18n/I18nContext';
 import type { AvailableContentEntry } from '@/types';
 import type { CreateFullCharacterRequest } from '@/api/characters-full.api';
 import type { ReferenceCurrencyType } from '@/api/reference.api';
@@ -18,6 +19,7 @@ import {
   reducer,
   requirementHint,
   validate,
+  type RequirementHint,
   type StepId,
   type WizardChar,
 } from './wizardState';
@@ -125,17 +127,17 @@ function validateCampaignReferences(id: StepId, c: WizardChar, availability: Wiz
   return (c.classSkills || []).length === expected;
 }
 
-function campaignReferenceHint(id: StepId, c: WizardChar, availability: WizardAvailability): string {
+function campaignReferenceHint(id: StepId, c: WizardChar, availability: WizardAvailability): RequirementHint {
   if (id === 'race') {
     const selectedRace = availability.raceOptions.find((race) => race.key === c.raceKey);
-    if (selectedRace?.detail?.subraces?.length && !c.subraceKey) return 'Choose a subrace';
-    return '';
+    if (selectedRace?.detail?.subraces?.length && !c.subraceKey) return { key: 'wiz.hint.chooseSubrace' };
+    return { key: '' };
   }
-  if (id !== 'background') return '';
+  if (id !== 'background') return { key: '' };
   const selectedClass = availability.classOptions.find((cl) => cl.key === c.classKey);
   const expected = selectedClass?.detail?.skillChoiceCount;
-  if (expected === undefined) return '';
-  return 'Choose ' + expected + ' class skills (' + (c.classSkills || []).length + '/' + expected + ')';
+  if (expected === undefined) return { key: '' };
+  return { key: 'wiz.hint.classSkills', vars: { count: expected, chosen: (c.classSkills || []).length } };
 }
 
 function buildAvailability(
@@ -232,6 +234,7 @@ export function CharacterCreationWizard({
   onSubmit,
   onCancel,
 }: CharacterCreationWizardProps) {
+  const t = useT();
   const [st, dispatch] = useReducer(reducer, undefined, freshState);
   const { c } = st;
 
@@ -272,7 +275,8 @@ export function CharacterCreationWizard({
   const A = makeActions(c, setC);
 
   const canNext = validate(current.id, c) && validateCampaignReferences(current.id, c, availability);
-  const hint = requirementHint(current.id, c) || campaignReferenceHint(current.id, c, availability);
+  const baseHint = requirementHint(current.id, c);
+  const hint = baseHint.key ? baseHint : campaignReferenceHint(current.id, c, availability);
   const isSummary = current.id === 'summary';
 
   const goNext = () => {
@@ -301,7 +305,7 @@ export function CharacterCreationWizard({
     const classId = availability.classIdByKey[c.classKey];
     const raceId = availability.raceIdByKey[c.raceKey];
     if (!classId || !raceId) {
-      toast.error('Selected class or race is not available in this campaign.');
+      toast.error(t('wiz.err.classOrRace'));
       return;
     }
     const statByName = new Map(availability.statTypes.map((stat) => [normalizeContentName(stat.name), stat]));
@@ -310,7 +314,7 @@ export function CharacterCreationWizard({
       return stat ? { statId: stat.id, baseValue: c.baseScores[a.key] || 0 } : null;
     });
     if (abilityScores.some((entry) => !entry)) {
-      toast.error('Ability stat types are not loaded for this campaign.');
+      toast.error(t('wiz.err.statTypes'));
       return;
     }
 
@@ -320,7 +324,7 @@ export function CharacterCreationWizard({
       ? availability.backgrounds.find((b) => c.backgroundKey === `db-background:${b.id}`)
       : availability.backgrounds.find((b) => normalizeContentName(b.name) === normalizeContentName(backgroundName));
     if (!background) {
-      toast.error('Selected background is not available in this campaign.');
+      toast.error(t('wiz.err.background'));
       return;
     }
 
@@ -333,13 +337,13 @@ export function CharacterCreationWizard({
       return proficiencyByName.get(normalizeContentName(skillLabel))?.id;
     });
     if (chosenSkillProficiencyIds.some((id) => !id)) {
-      toast.error('Selected class skills are not available in this campaign.');
+      toast.error(t('wiz.err.classSkills'));
       return;
     }
     const selectedClass = availability.classOptions.find((cl) => cl.key === c.classKey);
     const expectedSkillChoices = selectedClass?.detail?.skillChoiceCount;
     if (expectedSkillChoices !== undefined && chosenSkillProficiencyIds.length !== expectedSkillChoices) {
-      toast.error(`Choose ${expectedSkillChoices} class skills before forging.`);
+      toast.error(t('wiz.err.chooseSkillsBeforeForge', { count: expectedSkillChoices }));
       return;
     }
 
@@ -419,9 +423,9 @@ export function CharacterCreationWizard({
         <div className="wiz-brand">
           <Sigil size={34} glyph="sigil-2" />
           <div>
-            <div className="ao-engraved" style={{ fontSize: 13 }}>Rite of Creation</div>
+            <div className="ao-engraved" style={{ fontSize: 13 }}>{t('wiz.rite')}</div>
             <div className="ao-codex" style={{ fontSize: 10 }}>
-              {c.name || 'New soul'}{c.cls ? ' · ' + c.cls + ' ' + c.level : ''}
+              {c.name || t('wiz.newSoul')}{c.cls ? ' · ' + c.cls + ' ' + c.level : ''}
             </div>
           </div>
         </div>
@@ -442,7 +446,7 @@ export function CharacterCreationWizard({
                   <span className="wiz-rail-node">
                     {done ? <Rune kind="check" size={12} color="var(--gold-pale)" /> : <span className="wiz-rail-num">{i + 1}</span>}
                   </span>
-                  <span className="wiz-rail-label">{s.label}</span>
+                  <span className="wiz-rail-label">{t(s.labelKey)}</span>
                 </button>
                 {i < steps.length - 1 && <span className={'wiz-rail-link' + (i < stepIdx ? ' is-done' : '')} />}
               </li>
@@ -451,8 +455,8 @@ export function CharacterCreationWizard({
         </ol>
 
         <div className="wiz-compact">
-          <span className="ao-engraved" style={{ fontSize: 12 }}>{current.label}</span>
-          <span className="ao-codex">Step {stepIdx + 1} of {steps.length}</span>
+          <span className="ao-engraved" style={{ fontSize: 12 }}>{t(current.labelKey)}</span>
+          <span className="ao-codex">{t('wiz.stepOf', { current: stepIdx + 1, total: steps.length })}</span>
           <div className="wiz-compact-bar"><span style={{ width: ((stepIdx + 1) / steps.length * 100) + '%' }} /></div>
         </div>
       </header>
@@ -466,23 +470,23 @@ export function CharacterCreationWizard({
       <footer className="wiz-nav">
         {stepIdx === 0 ? (
           <button className="ao-btn ao-btn--ghost" onClick={onCancel}>
-            <Rune kind="x" size={11} /> Cancel
+            <Rune kind="x" size={11} /> {t('wiz.cancel')}
           </button>
         ) : (
           <button className="ao-btn ao-btn--ghost" onClick={goBack}>
-            <Rune kind="arrow-l" size={11} /> Back
+            <Rune kind="arrow-l" size={11} /> {t('wiz.back')}
           </button>
         )}
         <div className="wiz-nav-mid ao-codex">
-          {isSummary ? 'Review & seal the record' : (canNext ? 'Ready to continue' : hint)}
+          {isSummary ? t('wiz.reviewAndSeal') : (canNext ? t('wiz.readyToContinue') : (hint.key ? t(hint.key, hint.vars) : ''))}
         </div>
         {isSummary ? (
           <button className="ao-btn ao-btn--primary" onClick={handleForge} disabled={submitting}>
-            <Rune kind="flame" size={11} /> {submitting ? 'Forging…' : 'Forge character'}
+            <Rune kind="flame" size={11} /> {submitting ? t('wiz.forging') : t('wiz.forgeCharacter')}
           </button>
         ) : (
           <button className="ao-btn ao-btn--primary" onClick={goNext} disabled={!canNext}>
-            {stepIdx === steps.length - 2 ? 'Finish · Review' : 'Next'} <Rune kind="arrow-r" size={11} />
+            {stepIdx === steps.length - 2 ? t('wiz.finishReview') : t('wiz.next')} <Rune kind="arrow-r" size={11} />
           </button>
         )}
       </footer>
@@ -504,22 +508,23 @@ function SummaryReview({
   onForge: () => void;
   onChange: (next: WizardChar) => void;
 }) {
+  const t = useT();
   return (
     <div className="wiz-summary">
       <div className="wiz-summary-bar">
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <Sigil size={42} glyph="sigil-2" />
           <div>
-            <div className="ao-engraved" style={{ fontSize: 14 }}>The Folio is Forged</div>
-            <div className="ao-codex">Review the soul, then seal the record.</div>
+            <div className="ao-engraved" style={{ fontSize: 14 }}>{t('wiz.summary.title')}</div>
+            <div className="ao-codex">{t('wiz.summary.sub')}</div>
           </div>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
           <button className="ao-btn ao-btn--ghost" onClick={onEdit}>
-            <Rune kind="arrow-l" size={11} /> Edit steps
+            <Rune kind="arrow-l" size={11} /> {t('wiz.summary.editSteps')}
           </button>
           <button className="ao-btn ao-btn--primary" onClick={onForge} disabled={submitting}>
-            <Rune kind="flame" size={11} /> {submitting ? 'Forging…' : 'Forge character'}
+            <Rune kind="flame" size={11} /> {submitting ? t('wiz.forging') : t('wiz.forgeCharacter')}
           </button>
         </div>
       </div>

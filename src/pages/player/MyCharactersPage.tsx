@@ -13,10 +13,12 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { useMyTemplates, useDeleteTemplate } from '@/hooks/useTemplates';
+import { useT } from '@/i18n/I18nContext';
 import type { CharacterResponse } from '@/types';
 
 export default function MyCharactersPage() {
   const navigate = useNavigate();
+  const t = useT();
   const { data: templates, isLoading, error, refetch } = useMyTemplates();
   const deleteMutation = useDeleteTemplate();
 
@@ -48,9 +50,9 @@ export default function MyCharactersPage() {
         <Header onCreate={() => navigate('/characters/templates/new')} />
         <div style={{ textAlign: 'center', padding: '48px 0' }}>
           <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginBottom: 16 }}>
-            Не удалось загрузить ваших персонажей.
+            {t('chars.loadError')}
           </p>
-          <button className="ao-btn" onClick={() => refetch()}>Retry</button>
+          <button className="ao-btn" onClick={() => refetch()}>{t('common.retry')}</button>
         </div>
       </div>
     );
@@ -63,12 +65,12 @@ export default function MyCharactersPage() {
       {!templates || templates.length === 0 ? (
         <EmptyVault
           glyph="scroll"
-          overline="Шаблоны"
-          title="У вас нет ванильных персонажей"
-          body="Создайте «болванку» — её можно загружать в любую кампанию повторно."
+          overline={t('chars.empty.overline')}
+          title={t('chars.empty.title')}
+          body={t('chars.empty.body')}
           action={
             <button className="ao-btn ao-btn--primary" onClick={() => navigate('/characters/templates/new')}>
-              <Plus className="h-3 w-3 mr-1" /> Создать шаблон
+              <Plus className="h-3 w-3 mr-1" /> {t('chars.createTemplate')}
             </button>
           }
         />
@@ -88,16 +90,16 @@ export default function MyCharactersPage() {
       <AlertDialog open={!!pendingDelete} onOpenChange={(o) => !o && setPendingDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Удалить шаблон?</AlertDialogTitle>
+            <AlertDialogTitle>{t('chars.delete.title')}</AlertDialogTitle>
             <AlertDialogDescription>
-              «{pendingDelete?.name}» будет удалён безвозвратно. Уже добавленные в кампании копии останутся.
+              {t('chars.delete.body', { name: pendingDelete?.name ?? '' })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Отмена</AlertDialogCancel>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction onClick={handleConfirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
               {deleteMutation.isPending ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : null}
-              Удалить
+              {t('common.delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -107,6 +109,7 @@ export default function MyCharactersPage() {
 }
 
 function Header({ onCreate }: { onCreate: () => void }) {
+  const t = useT();
   return (
     <div
       style={{
@@ -119,14 +122,14 @@ function Header({ onCreate }: { onCreate: () => void }) {
       }}
     >
       <div>
-        <p className="ao-overline" style={{ color: 'var(--gold)' }}>Vault of Souls</p>
-        <h3 className="ao-h3" style={{ marginTop: 4 }}>Мои персонажи</h3>
+        <p className="ao-overline" style={{ color: 'var(--gold)' }}>{t('chars.overline')}</p>
+        <h3 className="ao-h3" style={{ marginTop: 4 }}>{t('chars.title')}</h3>
         <p className="ao-italic" style={{ color: 'var(--ink-quiet)', fontSize: 13, marginTop: 4 }}>
-          Ванильные «болванки» персонажей — без хоумбрю. Можно загрузить в любую кампанию.
+          {t('chars.subtitle')}
         </p>
       </div>
       <button className="ao-btn ao-btn--primary" onClick={onCreate}>
-        <Plus className="h-3 w-3 mr-1" /> Создать шаблон
+        <Plus className="h-3 w-3 mr-1" /> {t('chars.createTemplate')}
       </button>
     </div>
   );
@@ -141,6 +144,7 @@ function TemplateCard({
   onOpen: () => void;
   onDelete: () => void;
 }) {
+  const t = useT();
   const classLabel = character.classLevels?.length
     ? character.classLevels.map((c) => `${c.className} ${c.classLevel}`).join(' / ')
     : `LVL ${character.totalLevel}`;
@@ -148,7 +152,7 @@ function TemplateCard({
   const inCampaign = !!(character as CharacterResponse & { campaignId?: string | null }).campaignId;
   return (
     <OrdoPanel frame padding={0}>
-      <PanelHeader title={character.name} glyph="helm" tone="gold" sub={inCampaign ? 'В кампании' : 'Шаблон'} />
+      <PanelHeader title={character.name} glyph="helm" tone="gold" sub={inCampaign ? t('chars.inCampaign') : t('chars.template')} />
       <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
         <div className="ao-codex" style={{ fontSize: 12, color: 'var(--ink-quiet)' }}>
           {classLabel} · {raceLabel}
@@ -159,9 +163,9 @@ function TemplateCard({
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, marginTop: 4 }}>
           <button className="ao-btn ao-btn--ghost ao-btn--sm" onClick={onOpen}>
-            <Eye className="h-3 w-3" /> <span style={{ marginLeft: 4 }}>Открыть</span>
+            <Eye className="h-3 w-3" /> <span style={{ marginLeft: 4 }}>{t('common.open')}</span>
           </button>
-          <button className="ao-btn ao-btn--ghost ao-btn--sm" onClick={onDelete} title="Удалить шаблон">
+          <button className="ao-btn ao-btn--ghost ao-btn--sm" onClick={onDelete} title={t('chars.deleteTemplateTitle')}>
             <Trash2 className="h-3 w-3" style={{ color: 'var(--ember)' }} />
           </button>
         </div>

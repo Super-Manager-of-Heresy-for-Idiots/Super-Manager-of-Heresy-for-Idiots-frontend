@@ -1,5 +1,6 @@
 import { OrdoPanel, PanelHeader, Rune, OrdoDivider } from '@/components/ordo';
 import { useUpdateWallet } from '@/hooks/useCharacter';
+import { useT } from '@/i18n/I18nContext';
 import type { WalletEntry } from '@/types';
 
 interface WalletPanelProps {
@@ -9,6 +10,7 @@ interface WalletPanelProps {
 }
 
 export function WalletPanel({ characterId, wallet, onAddCurrency }: WalletPanelProps) {
+  const t = useT();
   const updateWallet = useUpdateWallet();
 
   const totalGoldEquivalent = wallet.reduce(
@@ -28,7 +30,7 @@ export function WalletPanel({ characterId, wallet, onAddCurrency }: WalletPanelP
   return (
     <OrdoPanel frame>
       <PanelHeader
-        title="Coin & Coffer"
+        title={t('cmp.wallet.title')}
         glyph="coin"
         right={
           <span
@@ -39,7 +41,7 @@ export function WalletPanel({ characterId, wallet, onAddCurrency }: WalletPanelP
               letterSpacing: '0.04em',
             }}
           >
-            {totalGoldEquivalent.toLocaleString()} gp
+            {t('cmp.wallet.gp', { amount: totalGoldEquivalent.toLocaleString() })}
           </span>
         }
       />
@@ -91,7 +93,7 @@ export function WalletPanel({ characterId, wallet, onAddCurrency }: WalletPanelP
                     cursor: 'pointer',
                     opacity: updateWallet.isPending ? 0.5 : 1,
                   }}
-                  aria-label={`Decrease ${entry.currencyName}`}
+                  aria-label={t('cmp.wallet.decrease', { name: entry.currencyName })}
                 >
                   <Rune kind="minus" size={10} color="var(--ink-quiet)" />
                 </button>
@@ -122,7 +124,7 @@ export function WalletPanel({ characterId, wallet, onAddCurrency }: WalletPanelP
                     cursor: 'pointer',
                     opacity: updateWallet.isPending ? 0.5 : 1,
                   }}
-                  aria-label={`Increase ${entry.currencyName}`}
+                  aria-label={t('cmp.wallet.increase', { name: entry.currencyName })}
                 >
                   <Rune kind="plus" size={10} color="var(--ink-quiet)" />
                 </button>
@@ -145,7 +147,7 @@ export function WalletPanel({ characterId, wallet, onAddCurrency }: WalletPanelP
               fontStyle: 'italic',
             }}
           >
-            No currencies tracked
+            {t('cmp.wallet.empty')}
           </div>
         )}
       </div>
@@ -178,7 +180,7 @@ export function WalletPanel({ characterId, wallet, onAddCurrency }: WalletPanelP
             }}
           >
             <Rune kind="plus" size={10} color="var(--ink-quiet)" />
-            Add Currency
+            {t('cmp.wallet.addCurrency')}
           </button>
         </div>
       )}

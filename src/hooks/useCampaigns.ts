@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { campaignsApi } from '@/api/campaigns.api';
+import { useT } from '@/i18n/I18nContext';
 import type {
   CreateCampaignRequest,
   UpdateCampaignRequest,
@@ -37,15 +38,16 @@ export function useCampaign(id: string) {
 
 export function useDeleteCampaign() {
   const queryClient = useQueryClient();
+  const t = useT();
 
   return useMutation({
     mutationFn: (id: string) => campaignsApi.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['campaigns'] });
-      toast.success('Campaign deleted successfully!');
+      toast.success(t('hk.campaign.deleted'));
     },
     onError: (error: AxiosError<ApiError>) => {
-      const message = error.response?.data?.message || 'Failed to delete campaign';
+      const message = error.response?.data?.message || t('hk.campaign.deleteFailed');
       toast.error(message);
     },
   });
@@ -53,15 +55,16 @@ export function useDeleteCampaign() {
 
 export function useCreateCampaign() {
   const queryClient = useQueryClient();
+  const t = useT();
 
   return useMutation({
     mutationFn: (data: CreateCampaignRequest) => campaignsApi.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['campaigns'] });
-      toast.success('Campaign created successfully!');
+      toast.success(t('hk.campaign.created'));
     },
     onError: (error: AxiosError<ApiError>) => {
-      const message = error.response?.data?.message || 'Failed to create campaign';
+      const message = error.response?.data?.message || t('hk.campaign.createFailed');
       toast.error(message);
     },
   });
@@ -69,6 +72,7 @@ export function useCreateCampaign() {
 
 export function useUpdateCampaign() {
   const queryClient = useQueryClient();
+  const t = useT();
 
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: UpdateCampaignRequest }) =>
@@ -76,10 +80,10 @@ export function useUpdateCampaign() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['campaigns'] });
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.id] });
-      toast.success('Campaign updated successfully!');
+      toast.success(t('hk.campaign.updated'));
     },
     onError: (error: AxiosError<ApiError>) => {
-      const message = error.response?.data?.message || 'Failed to update campaign';
+      const message = error.response?.data?.message || t('hk.campaign.updateFailed');
       toast.error(message);
     },
   });
@@ -87,6 +91,7 @@ export function useUpdateCampaign() {
 
 export function useSetCampaignStatus() {
   const queryClient = useQueryClient();
+  const t = useT();
 
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: SetCampaignStatusRequest }) =>
@@ -94,10 +99,10 @@ export function useSetCampaignStatus() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.id] });
       queryClient.invalidateQueries({ queryKey: ['campaigns'] });
-      toast.success('Campaign status updated!');
+      toast.success(t('hk.campaign.statusUpdated'));
     },
     onError: (error: AxiosError<ApiError>) => {
-      const message = error.response?.data?.message || 'Failed to update campaign status';
+      const message = error.response?.data?.message || t('hk.campaign.statusUpdateFailed');
       toast.error(message);
     },
   });
@@ -105,16 +110,17 @@ export function useSetCampaignStatus() {
 
 export function useJoinCampaign() {
   const queryClient = useQueryClient();
+  const t = useT();
 
   return useMutation({
     mutationFn: (data: JoinCampaignRequest) => campaignsApi.join(data),
     onSuccess: (response) => {
       queryClient.invalidateQueries({ queryKey: ['campaigns'] });
-      const campaignName = response.data?.name || 'the campaign';
-      toast.success(`Joined campaign ${campaignName}!`);
+      const campaignName = response.data?.name || t('hk.campaign.joinFallback');
+      toast.success(t('hk.campaign.joined', { name: campaignName }));
     },
     onError: (error: AxiosError<ApiError>) => {
-      const message = error.response?.data?.message || 'Failed to join campaign';
+      const message = error.response?.data?.message || t('hk.campaign.joinFailed');
       toast.error(message);
     },
   });
@@ -122,15 +128,16 @@ export function useJoinCampaign() {
 
 export function useLeaveCampaign() {
   const queryClient = useQueryClient();
+  const t = useT();
 
   return useMutation({
     mutationFn: (id: string) => campaignsApi.leave(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['campaigns'] });
-      toast.success('Left campaign successfully!');
+      toast.success(t('hk.campaign.left'));
     },
     onError: (error: AxiosError<ApiError>) => {
-      const message = error.response?.data?.message || 'Failed to leave campaign';
+      const message = error.response?.data?.message || t('hk.campaign.leaveFailed');
       toast.error(message);
     },
   });
@@ -149,16 +156,17 @@ export function useCampaignInviteCode(id: string) {
 
 export function useRegenerateCampaignInvite() {
   const queryClient = useQueryClient();
+  const t = useT();
 
   return useMutation({
     mutationFn: (id: string) => campaignsApi.regenerateInviteCode(id),
     onSuccess: (_, id) => {
       queryClient.invalidateQueries({ queryKey: ['campaigns', id] });
       queryClient.invalidateQueries({ queryKey: ['campaigns'] });
-      toast.success('Invite code regenerated!');
+      toast.success(t('hk.campaign.inviteRegenerated'));
     },
     onError: (error: AxiosError<ApiError>) => {
-      const message = error.response?.data?.message || 'Failed to regenerate invite code';
+      const message = error.response?.data?.message || t('hk.campaign.inviteRegenFailed');
       toast.error(message);
     },
   });
@@ -166,6 +174,7 @@ export function useRegenerateCampaignInvite() {
 
 export function useKickMember() {
   const queryClient = useQueryClient();
+  const t = useT();
 
   return useMutation({
     mutationFn: ({ campaignId, userId }: { campaignId: string; userId: string }) =>
@@ -173,10 +182,10 @@ export function useKickMember() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId] });
       queryClient.invalidateQueries({ queryKey: ['campaigns'] });
-      toast.success('Member kicked from campaign!');
+      toast.success(t('hk.campaign.memberKicked'));
     },
     onError: (error: AxiosError<ApiError>) => {
-      const message = error.response?.data?.message || 'Failed to kick member';
+      const message = error.response?.data?.message || t('hk.campaign.kickFailed');
       toast.error(message);
     },
   });
@@ -184,6 +193,7 @@ export function useKickMember() {
 
 export function useReassignCharacter() {
   const queryClient = useQueryClient();
+  const t = useT();
 
   return useMutation({
     mutationFn: ({ campaignId, characterId, data }: { campaignId: string; characterId: string; data: ReassignCharacterRequest }) =>
@@ -191,10 +201,10 @@ export function useReassignCharacter() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId] });
       queryClient.invalidateQueries({ queryKey: ['characters'] });
-      toast.success('Character reassigned successfully!');
+      toast.success(t('hk.campaign.charReassigned'));
     },
     onError: (error: AxiosError<ApiError>) => {
-      const message = error.response?.data?.message || 'Failed to reassign character';
+      const message = error.response?.data?.message || t('hk.campaign.reassignFailed');
       toast.error(message);
     },
   });
@@ -213,16 +223,17 @@ export function useCampaignStorage(id: string) {
 
 export function useCreateStorageContainer() {
   const queryClient = useQueryClient();
+  const t = useT();
 
   return useMutation({
     mutationFn: ({ campaignId, data }: { campaignId: string; data: CreateStorageContainerRequest }) =>
       campaignsApi.createStorage(campaignId, data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'shared-storage'] });
-      toast.success('Storage container created!');
+      toast.success(t('hk.campaign.storageCreated'));
     },
     onError: (error: AxiosError<ApiError>) => {
-      const message = error.response?.data?.message || 'Failed to create storage container';
+      const message = error.response?.data?.message || t('hk.campaign.storageCreateFailed');
       toast.error(message);
     },
   });
@@ -230,16 +241,17 @@ export function useCreateStorageContainer() {
 
 export function useDepositItem() {
   const queryClient = useQueryClient();
+  const t = useT();
 
   return useMutation({
     mutationFn: ({ campaignId, storageId, instanceId }: { campaignId: string; storageId: string; instanceId: string }) =>
       campaignsApi.depositItem(campaignId, storageId, instanceId),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'shared-storage'] });
-      toast.success('Item deposited to storage!');
+      toast.success(t('hk.campaign.itemDeposited'));
     },
     onError: (error: AxiosError<ApiError>) => {
-      const message = error.response?.data?.message || 'Failed to deposit item';
+      const message = error.response?.data?.message || t('hk.campaign.depositFailed');
       toast.error(message);
     },
   });
@@ -247,16 +259,17 @@ export function useDepositItem() {
 
 export function useTakeItem() {
   const queryClient = useQueryClient();
+  const t = useT();
 
   return useMutation({
     mutationFn: ({ campaignId, storageId, instanceId, characterId }: { campaignId: string; storageId: string; instanceId: string; characterId: string }) =>
       campaignsApi.takeItem(campaignId, storageId, instanceId, characterId),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'shared-storage'] });
-      toast.success('Item taken from storage!');
+      toast.success(t('hk.campaign.itemTaken'));
     },
     onError: (error: AxiosError<ApiError>) => {
-      const message = error.response?.data?.message || 'Failed to take item';
+      const message = error.response?.data?.message || t('hk.campaign.takeFailed');
       toast.error(message);
     },
   });

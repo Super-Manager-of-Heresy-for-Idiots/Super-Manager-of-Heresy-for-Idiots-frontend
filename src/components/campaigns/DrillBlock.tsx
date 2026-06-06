@@ -1,5 +1,6 @@
 import { Rune } from '@/components/ordo';
 import { useNavigate } from 'react-router-dom';
+import { useT } from '@/i18n/I18nContext';
 
 interface DrillBlockProps {
   label: string;
@@ -10,6 +11,7 @@ interface DrillBlockProps {
 
 export function DrillBlock({ label, glyph, count, to }: DrillBlockProps) {
   const nav = useNavigate();
+  const t = useT();
   return (
     <button
       onClick={() => nav(to)}
@@ -30,7 +32,7 @@ export function DrillBlock({ label, glyph, count, to }: DrillBlockProps) {
       </div>
       <div style={{ flex: 1 }}>
         <div style={{ color: 'var(--ink-bright)', fontSize: 14 }}>{label}</div>
-        {count != null && <div className="ao-codex" style={{ marginTop: 2 }}>{count} entries</div>}
+        {count != null && <div className="ao-codex" style={{ marginTop: 2 }}>{t('cmp2.drill.entries', { count })}</div>}
       </div>
       <Rune kind="chev-r" size={14} color="var(--ink-faint)" />
     </button>

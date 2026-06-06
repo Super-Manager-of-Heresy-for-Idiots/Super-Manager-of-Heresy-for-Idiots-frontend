@@ -1,4 +1,5 @@
 import { Rune } from '@/components/ordo';
+import { useT } from '@/i18n/I18nContext';
 
 /* ── Rarity colour & glyph maps ───────────────────────────────── */
 
@@ -18,12 +19,12 @@ const RARITY_GLYPH: Record<string, string> = {
   LEGENDARY: 'sigil-2',
 };
 
-const RARITY_LABEL: Record<string, string> = {
-  COMMON: 'Common',
-  UNCOMMON: 'Uncommon',
-  RARE: 'Rare',
-  VERY_RARE: 'Very Rare',
-  LEGENDARY: 'Legendary',
+const RARITY_LABEL_KEY: Record<string, string> = {
+  COMMON: 'cmp.rarity.COMMON',
+  UNCOMMON: 'cmp.rarity.UNCOMMON',
+  RARE: 'cmp.rarity.RARE',
+  VERY_RARE: 'cmp.rarity.VERY_RARE',
+  LEGENDARY: 'cmp.rarity.LEGENDARY',
 };
 
 /* ── Component ─────────────────────────────────────────────────── */
@@ -34,9 +35,11 @@ interface RarityBadgeProps {
 }
 
 export function RarityBadge({ rarity, size = 'sm' }: RarityBadgeProps) {
+  const t = useT();
   const color = RARITY_HUE[rarity] ?? RARITY_HUE.COMMON;
   const glyph = RARITY_GLYPH[rarity] ?? RARITY_GLYPH.COMMON;
-  const label = RARITY_LABEL[rarity] ?? rarity;
+  const labelKey = RARITY_LABEL_KEY[rarity];
+  const label = labelKey ? t(labelKey) : rarity;
   const isLegendary = rarity === 'LEGENDARY';
 
   const fontSize = size === 'md' ? 10 : 9;
@@ -70,4 +73,4 @@ export function RarityBadge({ rarity, size = 'sm' }: RarityBadgeProps) {
   );
 }
 
-export { RARITY_HUE, RARITY_GLYPH, RARITY_LABEL };
+export { RARITY_HUE, RARITY_GLYPH, RARITY_LABEL_KEY };

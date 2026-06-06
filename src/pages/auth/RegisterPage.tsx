@@ -8,32 +8,34 @@ import { getRoleRedirectPath } from '@/lib/utils';
 import type { ApiError } from '@/types';
 import { AxiosError } from 'axios';
 import { Rune, Sigil, OrdoDivider, OrdoPanel, OrdoField } from '@/components/ordo';
+import { useT } from '@/i18n/I18nContext';
 
 const registerSchema = z
   .object({
     username: z
       .string()
-      .min(3, 'Username must be at least 3 characters')
-      .max(30, 'Username must be at most 30 characters')
-      .regex(/^[a-zA-Z0-9_]+$/, 'Username can only contain letters, numbers, and underscores'),
-    email: z.string().email('Invalid email address'),
-    password: z.string().min(8, 'Password must be at least 8 characters'),
+      .min(3, 'auth.register.errUsernameMin')
+      .max(30, 'auth.register.errUsernameMax')
+      .regex(/^[a-zA-Z0-9_]+$/, 'auth.register.errUsernameRegex'),
+    email: z.string().email('auth.register.errEmail'),
+    password: z.string().min(8, 'auth.register.errPasswordMin'),
     confirmPassword: z.string(),
     role: z.enum(['PLAYER', 'GAME_MASTER']),
   })
   .refine((data) => data.password === data.confirmPassword, {
-    message: 'Passwords do not match',
+    message: 'auth.register.errPasswordMatch',
     path: ['confirmPassword'],
   });
 
 type RegisterFormData = z.infer<typeof registerSchema>;
 
 function FieldError({ message }: { message?: string }) {
+  const t = useT();
   if (!message) return null;
   return (
     <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', gap: 7, color: '#d8896a', fontSize: 12 }}>
       <Rune kind="flame" size={11} color="var(--ember)" />
-      <span className="ao-italic">{message}</span>
+      <span className="ao-italic">{t(message)}</span>
     </div>
   );
 }
@@ -41,6 +43,7 @@ function FieldError({ message }: { message?: string }) {
 export default function RegisterPage() {
   const registerMutation = useRegister();
   const { isAuthenticated, user } = useAuthStore();
+  const t = useT();
 
   const {
     register,
@@ -100,26 +103,26 @@ export default function RegisterPage() {
         <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 14 }}>
           <Sigil size={48} glyph="sigil-3" />
           <div>
-            <div className="ao-engraved" style={{ fontSize: 12, color: 'var(--gold-pale)' }}>Ordo Arcanum</div>
-            <div className="ao-codex">Imperial Archive &middot; MMDXLIV</div>
+            <div className="ao-engraved" style={{ fontSize: 12, color: 'var(--gold-pale)' }}>{t('app.name')}</div>
+            <div className="ao-codex">{t('auth.brandSub')}</div>
           </div>
         </div>
 
         {/* Middle — hero text */}
         <div style={{ position: 'relative' }}>
-          <div className="ao-codex" style={{ marginBottom: 16, color: 'var(--ink-faint)' }}>&mdash; INSCRIPTIO NOVA &mdash;</div>
-          <div className="ao-h2" style={{ fontSize: 56, lineHeight: 1.05, maxWidth: 520 }}>Inscribe Thy Name</div>
+          <div className="ao-codex" style={{ marginBottom: 16, color: 'var(--ink-faint)' }}>{t('auth.register.inscriptio')}</div>
+          <div className="ao-h2" style={{ fontSize: 56, lineHeight: 1.05, maxWidth: 520 }}>{t('auth.register.heroTitle')}</div>
           <p className="ao-italic" style={{ fontSize: 20, marginTop: 18, maxWidth: 480, color: 'var(--ink-quiet)' }}>
-            No soul enters the Archive unrecorded. Choose thy office, set thy cipher, and be bound to the ledger of the Ordo.
+            {t('auth.register.heroText')}
           </p>
 
-          <OrdoDivider glyph="diamond-fill">RITE OF ENROLMENT</OrdoDivider>
+          <OrdoDivider glyph="diamond-fill">{t('auth.register.riteOfEnrolment')}</OrdoDivider>
 
           <div style={{ display: 'flex', gap: 28, marginTop: 28 }}>
             {[
-              { label: 'Hands Sworn', value: '2,118' },
-              { label: 'Chroniclers', value: '284' },
-              { label: 'Names This Moon', value: '61' },
+              { label: t('auth.register.statHands'), value: '2,118' },
+              { label: t('auth.register.statChroniclers'), value: '284' },
+              { label: t('auth.register.statNames'), value: '61' },
             ].map((stat) => (
               <div key={stat.label}>
                 <div className="ao-overline">{stat.label}</div>
@@ -131,8 +134,8 @@ export default function RegisterPage() {
 
         {/* Bottom — version */}
         <div style={{ position: 'relative', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', color: 'var(--ink-faint)' }}>
-          <div className="ao-codex">Cohort VII &mdash; Vault of Ash and Brass</div>
-          <div className="ao-codex">v &middot; 4.21.3 &mdash; gilded</div>
+          <div className="ao-codex">{t('auth.cohort')}</div>
+          <div className="ao-codex">{t('auth.version')}</div>
         </div>
       </div>
 
@@ -152,8 +155,8 @@ export default function RegisterPage() {
           <OrdoPanel frame padding={32} style={{ position: 'relative' }}>
             <div style={{ textAlign: 'center', marginBottom: 18 }}>
               <Rune kind="diamond" size={18} color="var(--gold)" />
-              <div className="ao-engraved" style={{ fontSize: 16, marginTop: 12 }}>Rite of Inscription</div>
-              <div className="ao-italic" style={{ fontSize: 14, marginTop: 6 }}>Set thy mark upon the rolls</div>
+              <div className="ao-engraved" style={{ fontSize: 16, marginTop: 12 }}>{t('auth.register.riteTitle')}</div>
+              <div className="ao-italic" style={{ fontSize: 14, marginTop: 6 }}>{t('auth.register.riteSub')}</div>
             </div>
 
             <OrdoDivider glyph="diamond-fill" />
@@ -164,7 +167,7 @@ export default function RegisterPage() {
             >
               {/* Username */}
               <div>
-                <OrdoField label="Chosen Name" required hint={!errors.username ? '3\u201330 glyphs \u00b7 letters, numerals, underscore' : undefined}>
+                <OrdoField label={t('auth.register.chosenName')} required hint={!errors.username ? t('auth.register.chosenNameHint') : undefined}>
                   <input
                     className="ao-input"
                     {...register('username')}
@@ -175,24 +178,24 @@ export default function RegisterPage() {
               </div>
 
               {/* Email */}
-              <OrdoField label="Sigil Address" required>
+              <OrdoField label={t('auth.register.sigilAddress')} required>
                 <input className="ao-input" type="email" {...register('email')} />
                 <FieldError message={errors.email?.message} />
               </OrdoField>
 
               {/* Passwords side by side */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                <OrdoField label="Cipher Word" required hint="min. 8 glyphs">
+                <OrdoField label={t('auth.register.cipherWord')} required hint={t('auth.register.cipherHint')}>
                   <input className="ao-input" type="password" {...register('password')} placeholder="••••••••" />
                   <FieldError message={errors.password?.message} />
                 </OrdoField>
-                <OrdoField label="Repeat Cipher" required>
+                <OrdoField label={t('auth.register.repeatCipher')} required>
                   <input className="ao-input" type="password" {...register('confirmPassword')} placeholder="••••••••" />
                   <FieldError message={errors.confirmPassword?.message} />
                 </OrdoField>
               </div>
 
-              <OrdoDivider glyph="cross-pat">CHOOSE THY OFFICE</OrdoDivider>
+              <OrdoDivider glyph="cross-pat">{t('auth.register.chooseOffice')}</OrdoDivider>
 
               {/* Role selection — ChoiceCard style */}
               <div style={{ display: 'flex', gap: 12 }}>
@@ -217,8 +220,8 @@ export default function RegisterPage() {
                     </span>
                   </div>
                   <div>
-                    <div className="ao-h6" style={{ fontSize: 16, color: selectedRole === 'PLAYER' ? 'var(--ink-bright)' : 'var(--ink)' }}>Player</div>
-                    <div className="ao-italic" style={{ fontSize: 13, marginTop: 3, color: 'var(--ink-quiet)' }}>The Hand of Fate &mdash; seek adventure, forge thy legend.</div>
+                    <div className="ao-h6" style={{ fontSize: 16, color: selectedRole === 'PLAYER' ? 'var(--ink-bright)' : 'var(--ink)' }}>{t('auth.register.player')}</div>
+                    <div className="ao-italic" style={{ fontSize: 13, marginTop: 3, color: 'var(--ink-quiet)' }}>{t('auth.register.playerDesc')}</div>
                   </div>
                 </button>
 
@@ -243,8 +246,8 @@ export default function RegisterPage() {
                     </span>
                   </div>
                   <div>
-                    <div className="ao-h6" style={{ fontSize: 16, color: selectedRole === 'GAME_MASTER' ? 'var(--ink-bright)' : 'var(--ink)' }}>Game Master</div>
-                    <div className="ao-italic" style={{ fontSize: 13, marginTop: 3, color: 'var(--ink-quiet)' }}>The Chronicler &mdash; weave the tale, command the stage.</div>
+                    <div className="ao-h6" style={{ fontSize: 16, color: selectedRole === 'GAME_MASTER' ? 'var(--ink-bright)' : 'var(--ink)' }}>{t('auth.register.gm')}</div>
+                    <div className="ao-italic" style={{ fontSize: 13, marginTop: 3, color: 'var(--ink-quiet)' }}>{t('auth.register.gmDesc')}</div>
                   </div>
                 </button>
               </div>
@@ -256,18 +259,18 @@ export default function RegisterPage() {
                 style={{ marginTop: 4 }}
               >
                 <Rune kind="diamond-fill" size={9} />
-                {registerMutation.isPending ? 'Inscribing...' : 'Inscribe My Name'}
+                {registerMutation.isPending ? t('auth.register.submitting') : t('auth.register.submit')}
               </button>
             </form>
 
             <div style={{ textAlign: 'center', marginTop: 16 }}>
-              <span className="ao-codex" style={{ color: 'var(--ink-quiet)' }}>Already a member? </span>
-              <Link to="/login" className="ao-codex" style={{ color: 'var(--gold-pale)', textDecoration: 'none' }}>Enter the Vigil &rarr;</Link>
+              <span className="ao-codex" style={{ color: 'var(--ink-quiet)' }}>{t('auth.register.already')}</span>
+              <Link to="/login" className="ao-codex" style={{ color: 'var(--gold-pale)', textDecoration: 'none' }}>{t('auth.register.enterVigil')}</Link>
             </div>
           </OrdoPanel>
 
           <div style={{ textAlign: 'center', marginTop: 18, color: 'var(--ink-faint)' }}>
-            <span className="ao-codex">By inscribing, thou submit to the Archive Charter</span>
+            <span className="ao-codex">{t('auth.register.charter')}</span>
           </div>
         </div>
       </div>

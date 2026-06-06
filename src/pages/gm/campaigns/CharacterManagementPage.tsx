@@ -9,6 +9,7 @@ import {
 import { useCharacter, useDeleteCharacter } from '@/hooks/useCharacter';
 import { useLevelUpOptions } from '@/hooks/useLevelUp';
 import { useAuthStore } from '@/store/authStore';
+import { useT } from '@/i18n/I18nContext';
 import { xpForLevel, xpForNextLevel } from '@/types';
 
 interface ManagementTile {
@@ -20,6 +21,7 @@ interface ManagementTile {
 }
 
 export default function CharacterManagementPage() {
+  const t = useT();
   const navigate = useNavigate();
   const { campaignId, characterId } = useParams<{ campaignId: string; characterId: string }>();
   const { data: character, isLoading, error, refetch } = useCharacter(campaignId!, characterId!);
@@ -32,56 +34,56 @@ export default function CharacterManagementPage() {
     const base = `/campaigns/${campaignId}/characters/${characterId}`;
     return [
       {
-        title: 'Character Sheet (Folio)',
-        body: 'Full sheet: abilities, vitae, litanies, class features and sacred marks.',
+        title: t('camp.mgmt.tile.sheet.title'),
+        body: t('camp.mgmt.tile.sheet.body'),
         glyph: 'book',
         to: `${base}/sheet`,
         ready: true,
       },
       {
-        title: 'Arsenal & Reliquary',
-        body: 'Loadout, coin & wealth, relic folio, the bag, renaming and transfers.',
+        title: t('camp.mgmt.tile.arsenal.title'),
+        body: t('camp.mgmt.tile.arsenal.body'),
         glyph: 'sword',
         to: `${base}/inventory`,
         ready: true,
       },
       {
-        title: 'Stats',
-        body: 'View base values, effective values and active modifiers.',
+        title: t('camp.mgmt.tile.stats.title'),
+        body: t('camp.mgmt.tile.stats.body'),
         glyph: 'sigil-2',
         to: `${base}/stats`,
         ready: false,
       },
       {
-        title: 'Active Effects',
-        body: 'Review current buffs and debuffs. Game Master can apply or remove effects.',
+        title: t('camp.mgmt.tile.effects.title'),
+        body: t('camp.mgmt.tile.effects.body'),
         glyph: 'flame',
         to: `${base}/effects`,
         ready: true,
       },
       {
-        title: 'Wallet',
-        body: 'Track currencies and future income/spend operations.',
+        title: t('camp.mgmt.tile.wallet.title'),
+        body: t('camp.mgmt.tile.wallet.body'),
         glyph: 'coin',
         to: `${base}/wallet`,
         ready: false,
       },
       {
-        title: 'Resources',
-        body: 'Track spell slots, charges and other expendable pools.',
+        title: t('camp.mgmt.tile.resources.title'),
+        body: t('camp.mgmt.tile.resources.body'),
         glyph: 'hex',
         to: `${base}/resources`,
         ready: false,
       },
       {
-        title: 'Rewards & Progression',
-        body: 'View feats, class features and subclasses acquired across all classes.',
+        title: t('camp.mgmt.tile.rewards.title'),
+        body: t('camp.mgmt.tile.rewards.body'),
         glyph: 'sigil-3',
         to: `${base}/rewards`,
         ready: true,
       },
     ];
-  }, [campaignId, characterId]);
+  }, [campaignId, characterId, t]);
 
   if (isLoading) {
     return (
@@ -97,14 +99,14 @@ export default function CharacterManagementPage() {
     return (
       <div style={{ textAlign: 'center', padding: '48px 0' }}>
         <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginBottom: 16 }}>
-          The character record could not be opened.
+          {t('camp.mgmt.loadError')}
         </p>
-        <button className="ao-btn" onClick={() => refetch()}>Retry</button>
+        <button className="ao-btn" onClick={() => refetch()}>{t('camp.retry')}</button>
       </div>
     );
   }
 
-  const className = character.classLevels?.[0]?.className ?? 'Unknown';
+  const className = character.classLevels?.[0]?.className ?? t('camp.mgmt.unknownClass');
   const isOwner = user?.id === character.ownerId;
   const isPrivileged = user?.role === 'GAME_MASTER' || user?.role === 'ADMIN';
   const canLevelUp = isOwner || isPrivileged;
@@ -135,13 +137,13 @@ export default function CharacterManagementPage() {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, marginBottom: 24 }}>
         <div>
-          <p className="ao-overline" style={{ color: 'var(--gold)' }}>Character Management</p>
+          <p className="ao-overline" style={{ color: 'var(--gold)' }}>{t('camp.mgmt.overline')}</p>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 4, flexWrap: 'wrap' }}>
             <h3 className="ao-h3">{character.name}</h3>
             <CharStatusBadge status={character.status ?? ''} />
           </div>
           <p className="ao-italic" style={{ color: 'var(--ink-quiet)', fontSize: 13, marginTop: 6 }}>
-            {classLevelsLabel} · {className} · Owner: {character.ownerUsername}
+            {classLevelsLabel} · {className} · {t('camp.mgmt.owner', { name: character.ownerUsername })}
           </p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -152,18 +154,18 @@ export default function CharacterManagementPage() {
               style={{ color: 'var(--ember)', borderColor: 'var(--ember)' }}
             >
               <Rune kind="x" size={14} color="currentColor" />
-              <span style={{ marginLeft: 6 }}>Delete</span>
+              <span style={{ marginLeft: 6 }}>{t('common.delete')}</span>
             </button>
           )}
           <button className="ao-btn ao-btn--ghost" onClick={() => navigate(`/campaigns/${campaignId}`)}>
             <Rune kind="arrow-l" size={14} color="currentColor" />
-            <span style={{ marginLeft: 6 }}>Campaign</span>
+            <span style={{ marginLeft: 6 }}>{t('camp.mgmt.campaign')}</span>
           </button>
         </div>
       </div>
 
       <OrdoPanel frame padding={0} style={{ marginBottom: 24 }}>
-        <PanelHeader title="STATUS" glyph="helm" tone="gold" />
+        <PanelHeader title={t('camp.mgmt.status')} glyph="helm" tone="gold" />
         <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', gap: 12, alignItems: 'center' }}>
             <Bar value={character.currentHp ?? 0} max={character.maxHp ?? 0} tone="ember" height={7} />
@@ -196,9 +198,9 @@ export default function CharacterManagementPage() {
           }}
         >
           <div>
-            <p className="ao-overline" style={{ color: 'var(--gold)' }}>Level Up Available</p>
+            <p className="ao-overline" style={{ color: 'var(--gold)' }}>{t('camp.mgmt.levelUpAvailable')}</p>
             <p className="ao-italic" style={{ color: 'var(--ink-bright)', fontSize: 13, marginTop: 4 }}>
-              Персонаж готов повысить уровень. Выберите класс и награды.
+              {t('camp.mgmt.levelUpReady')}
             </p>
           </div>
           <button
@@ -206,7 +208,7 @@ export default function CharacterManagementPage() {
             onClick={() => navigate(`/campaigns/${campaignId}/characters/${characterId}/level-up`)}
           >
             <Rune kind="flame" size={12} color="currentColor" />
-            <span style={{ marginLeft: 6 }}>Повысить уровень</span>
+            <span style={{ marginLeft: 6 }}>{t('camp.mgmt.levelUp')}</span>
           </button>
         </div>
       )}
@@ -246,7 +248,7 @@ export default function CharacterManagementPage() {
               <span style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 5 }}>
                 <span style={{ color: 'var(--ink-bright)', fontSize: 14 }}>{tile.title}</span>
                 {!tile.ready && (
-                  <span className="ao-overline" style={{ fontSize: 8, color: 'var(--ink-faint)' }}>TODO</span>
+                  <span className="ao-overline" style={{ fontSize: 8, color: 'var(--ink-faint)' }}>{t('camp.mgmt.todo')}</span>
                 )}
               </span>
               <span className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 12, lineHeight: 1.35 }}>
@@ -261,19 +263,19 @@ export default function CharacterManagementPage() {
       <AlertDialog open={confirmDelete} onOpenChange={setConfirmDelete}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete {character.name}?</AlertDialogTitle>
+            <AlertDialogTitle>{t('camp.mgmt.delete.title', { name: character.name })}</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently remove the character from the campaign. This cannot be undone.
+              {t('camp.mgmt.delete.body')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleteCharacter.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={deleteCharacter.isPending}>{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
               disabled={deleteCharacter.isPending}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {deleteCharacter.isPending ? 'Deleting…' : 'Delete'}
+              {deleteCharacter.isPending ? t('camp.mgmt.deleting') : t('common.delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -7,6 +7,7 @@ import {
   type CreateFullCharacterRequest,
 } from '@/api/characters-full.api';
 import type { ApiError, ApiResponse, CharacterResponse } from '@/types';
+import { useT } from '@/i18n/I18nContext';
 
 /**
  * Creates a character through the rich wizard payload.
@@ -18,6 +19,7 @@ import type { ApiError, ApiResponse, CharacterResponse } from '@/types';
  */
 export function useCreateFullCharacter() {
   const queryClient = useQueryClient();
+  const t = useT();
 
   return useMutation<ApiResponse<CharacterResponse>, AxiosError<ApiError>, CreateFullCharacterRequest>({
     mutationFn: async (data) => {
@@ -38,10 +40,10 @@ export function useCreateFullCharacter() {
     },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters'] });
-      toast.success('Character forged successfully!');
+      toast.success(t('hk.fullCharacter.forged'));
     },
     onError: (error) => {
-      const message = error.response?.data?.message || 'Failed to forge character';
+      const message = error.response?.data?.message || t('hk.fullCharacter.forgeFailed');
       toast.error(message);
     },
   });
