@@ -11,6 +11,7 @@ import {
   EmptyVault,
 } from '@/components/ordo';
 import { EffectRow } from '@/components/gm/EffectRow';
+import { BackLink } from '@/components/campaigns';
 import {
   useCharacterEffects,
   useApplyEffect,
@@ -100,9 +101,11 @@ export default function ApplyEffectPage() {
 
   /* ---- loading ---- */
   const isLoading = charLoading || effectsLoading;
+  const backTo = `/campaigns/${campaignId}/characters/${characterId}`;
   if (isLoading) {
     return (
       <div>
+        <BackLink to={backTo} label="К персонажу" style={{ marginBottom: 12 }} />
         <div style={{ marginBottom: 32 }}>
           <p className="ao-overline" style={{ color: 'var(--gold)' }}>
             Character Effects
@@ -147,17 +150,20 @@ export default function ApplyEffectPage() {
   /* ---- error ---- */
   if (charError || effectsError) {
     return (
-      <div style={{ textAlign: 'center', padding: '48px 0' }}>
-        <p
-          className="ao-italic"
-          style={{ color: 'var(--ink-faint)', marginBottom: 16 }}
-        >
-          The effects ledger could not be opened. The wards remain
-          unbroken.
-        </p>
-        <button className="ao-btn" onClick={() => refetchEffects()}>
-          Retry
-        </button>
+      <div>
+        <BackLink to={backTo} label="К персонажу" style={{ marginBottom: 12 }} />
+        <div style={{ textAlign: 'center', padding: '48px 0' }}>
+          <p
+            className="ao-italic"
+            style={{ color: 'var(--ink-faint)', marginBottom: 16 }}
+          >
+            The effects ledger could not be opened. The wards remain
+            unbroken.
+          </p>
+          <button className="ao-btn" onClick={() => refetchEffects()}>
+            Retry
+          </button>
+        </div>
       </div>
     );
   }
@@ -165,6 +171,7 @@ export default function ApplyEffectPage() {
   /* ---- render ---- */
   return (
     <div>
+      <BackLink to={backTo} label="К персонажу" style={{ marginBottom: 12 }} />
       {/* Header */}
       <div
         style={{

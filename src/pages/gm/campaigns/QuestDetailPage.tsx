@@ -3,6 +3,7 @@ import { Loader2 } from 'lucide-react';
 import { OrdoPanel, PanelHeader, Rune } from '@/components/ordo';
 import { CodexID } from '@/components/homebrew/CodexID';
 import { VisibilityToggle, QuestStatusBadge } from '@/components/narrative';
+import { BackLink } from '@/components/campaigns';
 import { useQuest, useUpdateQuest } from '@/hooks/useQuests';
 import type { QuestStatus, QuestReward } from '@/types';
 
@@ -33,6 +34,7 @@ function rewardGlyph(type: string): string {
 
 export default function QuestDetailPage() {
   const { campaignId, questId } = useParams<{ campaignId: string; questId: string }>();
+  const backTo = `/campaigns/${campaignId}/quests`;
   const { data: quest, isLoading, error, refetch } = useQuest(campaignId!, questId!);
   const updateMutation = useUpdateQuest();
 
@@ -57,7 +59,9 @@ export default function QuestDetailPage() {
 
   if (isLoading) {
     return (
-      <div style={{ display: 'flex', gap: 24 }}>
+      <div>
+        <BackLink to={backTo} label="К квестам" style={{ marginBottom: 12 }} />
+        <div style={{ display: 'flex', gap: 24 }}>
         <div style={{ flex: '1.5 1 0' }}>
           <div className="ao-panel ao-frame ao-breathe" style={{ padding: 24, minHeight: 300 }}>
             <span className="ao-frame-c" />
@@ -74,6 +78,7 @@ export default function QuestDetailPage() {
             <div className="ao-ph" style={{ width: '40%', height: 14 }} />
           </div>
         </div>
+        </div>
       </div>
     );
   }
@@ -82,11 +87,14 @@ export default function QuestDetailPage() {
 
   if (error || !quest) {
     return (
-      <div style={{ textAlign: 'center', padding: '48px 0' }}>
-        <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginBottom: 16 }}>
-          This quest could not be found within the chronicle.
-        </p>
-        <button className="ao-btn" onClick={() => refetch()}>Retry</button>
+      <div>
+        <BackLink to={backTo} label="К квестам" style={{ marginBottom: 12 }} />
+        <div style={{ textAlign: 'center', padding: '48px 0' }}>
+          <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginBottom: 16 }}>
+            This quest could not be found within the chronicle.
+          </p>
+          <button className="ao-btn" onClick={() => refetch()}>Retry</button>
+        </div>
       </div>
     );
   }
@@ -98,7 +106,9 @@ export default function QuestDetailPage() {
   /* ── main ────────────────────────────────────────────────── */
 
   return (
-    <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start' }}>
+    <div>
+      <BackLink to={backTo} label="К квестам" style={{ marginBottom: 12 }} />
+      <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start' }}>
       {/* ═══ Left column ═══ */}
       <div style={{ flex: '1.5 1 0', display: 'flex', flexDirection: 'column', gap: 20 }}>
         {/* Identity block */}
@@ -220,6 +230,7 @@ export default function QuestDetailPage() {
             })}
           </div>
         </OrdoPanel>
+      </div>
       </div>
     </div>
   );

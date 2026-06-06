@@ -28,6 +28,7 @@ import {
   useDeleteLocation,
   useToggleLocationVisibility,
 } from '@/hooks/useLocations';
+import { BackLink } from '@/components/campaigns';
 import type { LocationResponse } from '@/types';
 
 /* ── page ────────────────────────────────────────────────────── */
@@ -112,11 +113,13 @@ export default function LocationsPage() {
     });
   };
 
+  const backTo = `/campaigns/${campaignId}`;
   /* ── loading ─────────────────────────────────────────────── */
 
   if (isLoading) {
     return (
       <div>
+        <BackLink to={backTo} label="К кампании" style={{ marginBottom: 12 }} />
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 32 }}>
           <div>
             <p className="ao-overline" style={{ color: 'var(--gold)' }}>Cartography</p>
@@ -141,11 +144,14 @@ export default function LocationsPage() {
 
   if (error) {
     return (
-      <div style={{ textAlign: 'center', padding: '48px 0' }}>
-        <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginBottom: 16 }}>
-          The atlas could not be unfurled. Its bindings remain sealed.
-        </p>
-        <button className="ao-btn" onClick={() => refetch()}>Retry</button>
+      <div>
+        <BackLink to={backTo} label="К кампании" style={{ marginBottom: 12 }} />
+        <div style={{ textAlign: 'center', padding: '48px 0' }}>
+          <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginBottom: 16 }}>
+            The atlas could not be unfurled. Its bindings remain sealed.
+          </p>
+          <button className="ao-btn" onClick={() => refetch()}>Retry</button>
+        </div>
       </div>
     );
   }
@@ -154,6 +160,7 @@ export default function LocationsPage() {
 
   return (
     <div>
+      <BackLink to={backTo} label="К кампании" style={{ marginBottom: 12 }} />
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 32 }}>
         <div>

@@ -16,6 +16,7 @@ import {
   useCreateNpc,
   useSetNpcVisibility,
 } from '@/hooks/useNpcs';
+import { BackLink } from '@/components/campaigns';
 import type { NpcResponse } from '@/types';
 
 /* ── helpers ─────────────────────────────────────────────────── */
@@ -78,9 +79,11 @@ export default function NPCManagerPage() {
 
   /* ── loading ─────────────────────────────────────────────── */
 
+  const backTo = `/campaigns/${campaignId}`;
   if (isLoading) {
     return (
       <div>
+        <BackLink to={backTo} label="К кампании" style={{ marginBottom: 12 }} />
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 32 }}>
           <div>
             <p className="ao-overline" style={{ color: 'var(--gold)' }}>Dramatis Personae</p>
@@ -105,11 +108,14 @@ export default function NPCManagerPage() {
 
   if (error) {
     return (
-      <div style={{ textAlign: 'center', padding: '48px 0' }}>
-        <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginBottom: 16 }}>
-          The chronicle could not be read. Its pages remain sealed.
-        </p>
-        <button className="ao-btn" onClick={() => refetch()}>Retry</button>
+      <div>
+        <BackLink to={backTo} label="К кампании" style={{ marginBottom: 12 }} />
+        <div style={{ textAlign: 'center', padding: '48px 0' }}>
+          <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginBottom: 16 }}>
+            The chronicle could not be read. Its pages remain sealed.
+          </p>
+          <button className="ao-btn" onClick={() => refetch()}>Retry</button>
+        </div>
       </div>
     );
   }
@@ -118,6 +124,7 @@ export default function NPCManagerPage() {
 
   return (
     <div>
+      <BackLink to={backTo} label="К кампании" style={{ marginBottom: 12 }} />
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 32 }}>
         <div>

@@ -8,6 +8,7 @@ import {
   Bar,
 } from '@/components/ordo';
 import {
+  BackLink,
   CampaignStatusPill,
   CharStatusBadge,
   DrillBlock,
@@ -63,6 +64,7 @@ export default function CampaignDashboardPage() {
   if (isLoading) {
     return (
       <div>
+        <BackLink to="/campaigns" label="К кампаниям" style={{ marginBottom: 12 }} />
         <div className="ao-panel ao-frame ao-breathe" style={{ padding: 24, minHeight: 120, marginBottom: 20 }}>
           <span className="ao-frame-c" />
           <div className="ao-ph" style={{ width: '40%', height: 24, marginBottom: 12 }} />
@@ -85,11 +87,14 @@ export default function CampaignDashboardPage() {
 
   if (error || !campaign) {
     return (
-      <div style={{ textAlign: 'center', padding: '48px 0' }}>
-        <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginBottom: 16 }}>
-          The campaign chronicle could not be unfurled. Its wards remain unbroken.
-        </p>
-        <button className="ao-btn" onClick={() => refetch()}>Retry</button>
+      <div>
+        <BackLink to="/campaigns" label="К кампаниям" style={{ marginBottom: 12 }} />
+        <div style={{ textAlign: 'center', padding: '48px 0' }}>
+          <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginBottom: 16 }}>
+            The campaign chronicle could not be unfurled. Its wards remain unbroken.
+          </p>
+          <button className="ao-btn" onClick={() => refetch()}>Retry</button>
+        </div>
       </div>
     );
   }
@@ -101,6 +106,7 @@ export default function CampaignDashboardPage() {
 
   return (
     <div>
+      <BackLink to="/campaigns" label="К кампаниям" style={{ marginBottom: 12 }} />
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16, marginBottom: 28 }}>
         <div>

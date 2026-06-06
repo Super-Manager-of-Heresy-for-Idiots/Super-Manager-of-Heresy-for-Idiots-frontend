@@ -10,7 +10,7 @@ import {
   Bar,
   EmptyVault,
 } from '@/components/ordo';
-import { CharStatusBadge } from '@/components/campaigns';
+import { BackLink, CharStatusBadge } from '@/components/campaigns';
 import { useCampaignCharacters } from '@/hooks/useCharacterV2';
 import { useGrantXp } from '@/hooks/useXp';
 import type { CharacterV2Response, XpTarget } from '@/types';
@@ -105,6 +105,7 @@ export default function XPGrantPage() {
   if (isLoading) {
     return (
       <div>
+        <BackLink to={`/campaigns/${campaignId}`} label="К кампании" style={{ marginBottom: 12 }} />
         <div style={{ marginBottom: 32 }}>
           <p className="ao-overline" style={{ color: 'var(--gold)' }}>
             Game Master Tools
@@ -149,16 +150,19 @@ export default function XPGrantPage() {
   /* ---- error ---- */
   if (error) {
     return (
-      <div style={{ textAlign: 'center', padding: '48px 0' }}>
-        <p
-          className="ao-italic"
-          style={{ color: 'var(--ink-faint)', marginBottom: 16 }}
-        >
-          The roster could not be retrieved. The XP coffers remain sealed.
-        </p>
-        <button className="ao-btn" onClick={() => refetch()}>
-          Retry
-        </button>
+      <div>
+        <BackLink to={`/campaigns/${campaignId}`} label="К кампании" style={{ marginBottom: 12 }} />
+        <div style={{ textAlign: 'center', padding: '48px 0' }}>
+          <p
+            className="ao-italic"
+            style={{ color: 'var(--ink-faint)', marginBottom: 16 }}
+          >
+            The roster could not be retrieved. The XP coffers remain sealed.
+          </p>
+          <button className="ao-btn" onClick={() => refetch()}>
+            Retry
+          </button>
+        </div>
       </div>
     );
   }
@@ -166,6 +170,7 @@ export default function XPGrantPage() {
   if (!activeCharacters.length) {
     return (
       <div>
+        <BackLink to={`/campaigns/${campaignId}`} label="К кампании" style={{ marginBottom: 12 }} />
         <div style={{ marginBottom: 32 }}>
           <p className="ao-overline" style={{ color: 'var(--gold)' }}>
             Game Master Tools
@@ -187,6 +192,8 @@ export default function XPGrantPage() {
   /* ---- render ---- */
   return (
     <div>
+      <BackLink to={`/campaigns/${campaignId}`} label="К кампании" style={{ marginBottom: 12 }} />
+
       {/* Header */}
       <div
         style={{

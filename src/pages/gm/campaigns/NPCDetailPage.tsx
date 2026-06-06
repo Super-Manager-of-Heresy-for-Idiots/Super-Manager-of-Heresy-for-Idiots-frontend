@@ -4,6 +4,7 @@ import { Loader2 } from 'lucide-react';
 import { OrdoPanel, PanelHeader, Rune, OrdoDivider, Placeholder, EmptyVault } from '@/components/ordo';
 import { CodexID } from '@/components/homebrew/CodexID';
 import { VisibilityToggle, QuestStatusBadge } from '@/components/narrative';
+import { BackLink } from '@/components/campaigns';
 import {
   useNpc,
   useNpcNotes,
@@ -16,6 +17,7 @@ import type { NpcNoteResponse, QuestStatus } from '@/types';
 
 export default function NPCDetailPage() {
   const { campaignId, npcId } = useParams<{ campaignId: string; npcId: string }>();
+  const backTo = `/campaigns/${campaignId}/npcs`;
   const { data: npc, isLoading, error, refetch } = useNpc(campaignId!, npcId!);
   const { data: notes, isLoading: notesLoading } = useNpcNotes(campaignId!, npcId!);
   const addNoteMutation = useAddNpcNote();
@@ -48,6 +50,7 @@ export default function NPCDetailPage() {
   if (isLoading) {
     return (
       <div>
+        <BackLink to={backTo} label="К NPC" style={{ marginBottom: 12 }} />
         <div style={{ display: 'flex', gap: 24 }}>
           <div style={{ flex: '1.5 1 0' }}>
             <div className="ao-panel ao-frame ao-breathe" style={{ padding: 24, minHeight: 300 }}>
@@ -74,11 +77,14 @@ export default function NPCDetailPage() {
 
   if (error || !npc) {
     return (
-      <div style={{ textAlign: 'center', padding: '48px 0' }}>
-        <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginBottom: 16 }}>
-          This soul could not be found within the chronicle.
-        </p>
-        <button className="ao-btn" onClick={() => refetch()}>Retry</button>
+      <div>
+        <BackLink to={backTo} label="К NPC" style={{ marginBottom: 12 }} />
+        <div style={{ textAlign: 'center', padding: '48px 0' }}>
+          <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginBottom: 16 }}>
+            This soul could not be found within the chronicle.
+          </p>
+          <button className="ao-btn" onClick={() => refetch()}>Retry</button>
+        </div>
       </div>
     );
   }
@@ -92,7 +98,9 @@ export default function NPCDetailPage() {
   /* ── main ────────────────────────────────────────────────── */
 
   return (
-    <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start' }}>
+    <div>
+      <BackLink to={backTo} label="К NPC" style={{ marginBottom: 12 }} />
+      <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start' }}>
       {/* ═══ Left column ═══ */}
       <div style={{ flex: '1.5 1 0', display: 'flex', flexDirection: 'column', gap: 20 }}>
         {/* Identity block */}
@@ -302,6 +310,7 @@ export default function NPCDetailPage() {
             )}
           </div>
         </OrdoPanel>
+      </div>
       </div>
     </div>
   );

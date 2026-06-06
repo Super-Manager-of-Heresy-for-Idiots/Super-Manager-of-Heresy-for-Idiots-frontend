@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useCampaignQuests, useCreateQuest } from '@/hooks/useQuests';
+import { BackLink } from '@/components/campaigns';
 import type { QuestResponse, QuestStatus } from '@/types';
 
 /* ── constants ───────────────────────────────────────────────── */
@@ -65,11 +66,13 @@ export default function QuestManagerPage() {
     );
   };
 
+  const backTo = `/campaigns/${campaignId}`;
   /* ── loading ─────────────────────────────────────────────── */
 
   if (isLoading) {
     return (
       <div>
+        <BackLink to={backTo} label="К кампании" style={{ marginBottom: 12 }} />
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 32 }}>
           <div>
             <p className="ao-overline" style={{ color: 'var(--gold)' }}>The Chronicle</p>
@@ -94,11 +97,14 @@ export default function QuestManagerPage() {
 
   if (error) {
     return (
-      <div style={{ textAlign: 'center', padding: '48px 0' }}>
-        <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginBottom: 16 }}>
-          The quest ledger could not be opened. Its seals remain intact.
-        </p>
-        <button className="ao-btn" onClick={() => refetch()}>Retry</button>
+      <div>
+        <BackLink to={backTo} label="К кампании" style={{ marginBottom: 12 }} />
+        <div style={{ textAlign: 'center', padding: '48px 0' }}>
+          <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginBottom: 16 }}>
+            The quest ledger could not be opened. Its seals remain intact.
+          </p>
+          <button className="ao-btn" onClick={() => refetch()}>Retry</button>
+        </div>
       </div>
     );
   }
@@ -115,6 +121,7 @@ export default function QuestManagerPage() {
 
   return (
     <div>
+      <BackLink to={backTo} label="К кампании" style={{ marginBottom: 12 }} />
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 32 }}>
         <div>

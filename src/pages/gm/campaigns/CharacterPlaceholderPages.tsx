@@ -1,5 +1,6 @@
 import { useParams } from 'react-router-dom';
 import { OrdoPanel, PanelHeader, Rune } from '@/components/ordo';
+import { BackLink } from '@/components/campaigns';
 import { useCharacterV2 } from '@/hooks/useCharacterV2';
 
 interface PlaceholderSpec {
@@ -13,15 +14,20 @@ interface PlaceholderSpec {
 function CharacterFeaturePlaceholder({ overline, title, glyph, todo, details }: PlaceholderSpec) {
   const { campaignId, characterId } = useParams<{ campaignId: string; characterId: string }>();
   const { data: character } = useCharacterV2(campaignId!, characterId!);
+  const backTo = characterId
+    ? `/campaigns/${campaignId}/characters/${characterId}`
+    : `/campaigns/${campaignId}`;
 
   return (
-    <OrdoPanel frame padding={0}>
-      <PanelHeader
-        title={title}
-        glyph={glyph}
-        tone="gold"
-        sub={character ? character.name : 'Character scoped screen'}
-      />
+    <div>
+      <BackLink to={backTo} label="К персонажу" style={{ marginBottom: 12 }} />
+      <OrdoPanel frame padding={0}>
+        <PanelHeader
+          title={title}
+          glyph={glyph}
+          tone="gold"
+          sub={character ? character.name : 'Character scoped screen'}
+        />
       <div style={{ padding: 24 }}>
         <p className="ao-overline" style={{ color: 'var(--gold)', marginBottom: 8 }}>
           {overline}
@@ -48,13 +54,39 @@ function CharacterFeaturePlaceholder({ overline, title, glyph, todo, details }: 
           ))}
         </div>
       </div>
-    </OrdoPanel>
+      </OrdoPanel>
+    </div>
+  );
+}
+
+// Roster page links to dashboard, not character.
+function CampaignFeaturePlaceholder({ overline, title, glyph, todo, details }: PlaceholderSpec) {
+  const { campaignId } = useParams<{ campaignId: string }>();
+  return (
+    <div>
+      <BackLink to={`/campaigns/${campaignId}`} label="К кампании" style={{ marginBottom: 12 }} />
+      <OrdoPanel frame padding={0}>
+        <PanelHeader title={title} glyph={glyph} tone="gold" sub="Campaign scoped screen" />
+        <div style={{ padding: 24 }}>
+          <p className="ao-overline" style={{ color: 'var(--gold)', marginBottom: 8 }}>{overline}</p>
+          <h3 className="ao-h3" style={{ marginBottom: 12 }}>TODO: {todo}</h3>
+          <div style={{ display: 'grid', gap: 10, maxWidth: 760 }}>
+            {details.map((detail) => (
+              <div key={detail} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', color: 'var(--ink-quiet)', fontSize: 13, lineHeight: 1.45 }}>
+                <Rune kind="diamond-fill" size={8} color="var(--gold)" />
+                <span>{detail}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </OrdoPanel>
+    </div>
   );
 }
 
 export function CampaignRosterPage() {
   return (
-    <CharacterFeaturePlaceholder
+    <CampaignFeaturePlaceholder
       overline="Campaign roster"
       title="CAMPAIGN ROSTER"
       glyph="helm"

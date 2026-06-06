@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
+import { BackLink } from '@/components/campaigns';
 import {
   OrdoPanel,
   PanelHeader,
@@ -281,9 +282,12 @@ export default function InventoryV2Page() {
 
   /* ── loading / error ───────────────────────────────────────── */
 
+  const backTo = `/campaigns/${campaignId}/characters/${characterId}`;
+
   if (isLoading) {
     return (
       <div>
+        <BackLink to={backTo} label="К персонажу" style={{ marginBottom: 12 }} />
         <PageHeader name={character?.name} slotsFilled={0} held={0} />
         <div className="ao-panel ao-frame ao-breathe" style={{ padding: 24, minHeight: 360 }}>
           <span className="ao-frame-c" />
@@ -299,11 +303,14 @@ export default function InventoryV2Page() {
 
   if (error) {
     return (
-      <div style={{ textAlign: 'center', padding: '48px 0' }}>
-        <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginBottom: 16 }}>
-          The arsenal could not be inspected. Its wards remain unbroken.
-        </p>
-        <button className="ao-btn" onClick={() => refetch()}>Retry</button>
+      <div>
+        <BackLink to={backTo} label="К персонажу" style={{ marginBottom: 12 }} />
+        <div style={{ textAlign: 'center', padding: '48px 0' }}>
+          <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginBottom: 16 }}>
+            The arsenal could not be inspected. Its wards remain unbroken.
+          </p>
+          <button className="ao-btn" onClick={() => refetch()}>Retry</button>
+        </div>
       </div>
     );
   }
@@ -312,6 +319,7 @@ export default function InventoryV2Page() {
 
   return (
     <div>
+      <BackLink to={backTo} label="К персонажу" style={{ marginBottom: 12 }} />
       <PageHeader
         name={character?.name}
         slotsFilled={slotsFilled}
