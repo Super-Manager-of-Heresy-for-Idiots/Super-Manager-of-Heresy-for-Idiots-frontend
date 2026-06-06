@@ -93,4 +93,56 @@ export const charactersFullApi = {
     );
     return response.data;
   },
+
+  // ── Templates (character without campaign) ────────────────
+
+  /** Create a vanilla character template (no campaign attached). */
+  createTemplate: async (
+    data: CreateFullCharacterRequest,
+  ): Promise<ApiResponse<CharacterResponse>> => {
+    const response = await api.post<ApiResponse<CharacterResponse>>(
+      `/characters/full`,
+      data,
+    );
+    return response.data;
+  },
+
+  /** List the current user's character templates. */
+  listMyTemplates: async (): Promise<ApiResponse<CharacterResponse[]>> => {
+    const response = await api.get<ApiResponse<CharacterResponse[]>>(`/characters/my`);
+    return response.data;
+  },
+
+  /** Get a single template by id. */
+  getTemplate: async (templateId: string): Promise<ApiResponse<CharacterResponse>> => {
+    const response = await api.get<ApiResponse<CharacterResponse>>(`/characters/${templateId}`);
+    return response.data;
+  },
+
+  /** Delete a template. */
+  deleteTemplate: async (templateId: string): Promise<ApiResponse<void>> => {
+    const response = await api.delete<ApiResponse<void>>(`/characters/${templateId}`);
+    return response.data;
+  },
+
+  /**
+   * Bring a template into a campaign.
+   * When `mode === 'clone'`, the original template stays available for re-use.
+   * When `mode === 'move'`, the backend is asked (via `?clone=false`) to attach
+   * the original record itself; servers that don't implement the flag will
+   * fall back to a clone.
+   */
+  fromTemplate: async (
+    campaignId: string,
+    templateId: string,
+    mode: 'clone' | 'move' = 'clone',
+  ): Promise<ApiResponse<CharacterResponse>> => {
+    const params = mode === 'move' ? { clone: false } : undefined;
+    const response = await api.post<ApiResponse<CharacterResponse>>(
+      `/campaigns/${campaignId}/characters/from-template/${templateId}`,
+      {},
+      { params },
+    );
+    return response.data;
+  },
 };

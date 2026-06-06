@@ -18,9 +18,13 @@ import ApplyEffectPage from '@/pages/gm/campaigns/ApplyEffectPage';
 import InventoryV2Page from '@/pages/gm/campaigns/InventoryV2Page';
 import CharacterManagementPage from '@/pages/gm/campaigns/CharacterManagementPage';
 import CharacterCreationWizardPage from '@/pages/gm/campaigns/CharacterCreationWizardPage';
+import AddCharacterPage from '@/pages/gm/campaigns/AddCharacterPage';
 import LevelUpWizardPage from '@/pages/gm/campaigns/LevelUpWizardPage';
 import CharacterRewardsPage from '@/pages/gm/campaigns/CharacterRewardsPage';
 import FolioPage from '@/pages/gm/campaigns/FolioPage';
+import MyCharactersPage from '@/pages/player/MyCharactersPage';
+import TemplateWizardPage from '@/pages/player/TemplateWizardPage';
+import TemplateDetailPage from '@/pages/player/TemplateDetailPage';
 import {
   AbilityCheckPage,
   CampaignRosterPage,
@@ -74,6 +78,10 @@ export const router = createBrowserRouter([
           { path: '/campaigns', element: <CampaignListPage /> },
           { path: '/campaigns/:campaignId', element: <CampaignDashboardPage /> },
           { path: '/campaigns/:campaignId/characters/create', element: <CharacterCreationWizardPage /> },
+          { path: '/campaigns/:campaignId/characters/add', element: <AddCharacterPage /> },
+          { path: '/characters/templates', element: <MyCharactersPage /> },
+          { path: '/characters/templates/new', element: <TemplateWizardPage /> },
+          { path: '/characters/templates/:templateId', element: <TemplateDetailPage /> },
           { path: '/campaigns/:campaignId/roster', element: <CampaignRosterPage /> },
           { path: '/campaigns/:campaignId/members', element: <CampaignMembersPage /> },
           { path: '/campaigns/:campaignId/invite', element: <CampaignInvitePage /> },

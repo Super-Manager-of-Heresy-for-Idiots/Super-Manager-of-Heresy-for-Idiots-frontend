@@ -56,7 +56,7 @@ export default function CampaignDashboardPage() {
   };
 
   const openCharacterWizard = () => {
-    navigate(`/campaigns/${campaignId}/characters/create`);
+    navigate(`/campaigns/${campaignId}/characters/add`);
   };
 
   /* ── loading ─────────────────────────────────────────────── */
@@ -128,7 +128,7 @@ export default function CampaignDashboardPage() {
               onClick={openCharacterWizard}
             >
               <Rune kind="plus" size={14} color="currentColor" />
-              <span style={{ marginLeft: 6 }}>Create Character</span>
+              <span style={{ marginLeft: 6 }}>Add Character</span>
             </button>
           )}
           {campaign.isCreator && (

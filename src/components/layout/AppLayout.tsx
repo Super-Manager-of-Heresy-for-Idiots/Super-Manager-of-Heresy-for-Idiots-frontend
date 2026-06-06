@@ -14,11 +14,13 @@ interface NavEntry {
 
 const playerNav: NavEntry[] = [
   { label: 'Campaigns', path: '/campaigns', glyph: 'helm' },
+  { label: 'My Characters', path: '/characters/templates', glyph: 'shield' },
   { label: 'Marketplace', path: '/marketplace', glyph: 'book' },
 ];
 
 const gmNav: NavEntry[] = [
   { label: 'Campaigns', path: '/campaigns', glyph: 'helm' },
+  { label: 'My Characters', path: '/characters/templates', glyph: 'shield' },
   { label: 'Marketplace', path: '/marketplace', glyph: 'book' },
   { label: 'My Doctrines', path: '/gm/homebrew/my', glyph: 'scroll' },
   { label: 'Installed', path: '/gm/homebrew/installed', glyph: 'check' },
@@ -27,6 +29,7 @@ const gmNav: NavEntry[] = [
 
 const adminNav: NavEntry[] = [
   { label: 'Campaigns', path: '/campaigns', glyph: 'helm' },
+  { label: 'My Characters', path: '/characters/templates', glyph: 'shield' },
   { label: 'Admin', path: '/admin', glyph: 'book', exact: true },
   { label: 'Users', path: '/admin/users', glyph: 'helm' },
   { label: 'Characters', path: '/admin/characters', glyph: 'shield' },
