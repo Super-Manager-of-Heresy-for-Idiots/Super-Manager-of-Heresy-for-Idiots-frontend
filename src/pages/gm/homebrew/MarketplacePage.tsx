@@ -56,7 +56,7 @@ export default function MarketplacePage() {
           <p className="ao-overline" style={{ color: 'var(--gold)' }}>{t('hb.market.overline')}</p>
           <h3 className="ao-h3" style={{ marginTop: 4 }}>{t('hb.market.heading')}</h3>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+        <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
           {Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className="ao-panel ao-frame ao-breathe" style={{ padding: 24, minHeight: 220 }}>
               <span className="ao-frame-c" />
@@ -166,7 +166,7 @@ export default function MarketplacePage() {
         />
       ) : (
         <>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginTop: 20 }}>
+          <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginTop: 20 }}>
             {packages.map((pkg: HomebrewPackageResponse) => {
               const isArchived = pkg.status === 'UNPUBLISHED' || pkg.isDeleted;
 

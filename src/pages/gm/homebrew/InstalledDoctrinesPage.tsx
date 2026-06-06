@@ -224,7 +224,7 @@ function InstalledRow({
   const rowBg = deleted ? 'rgba(179,70,26,0.03)' : 'transparent';
 
   return (
-    <div style={{
+    <div className="ao-rgrid" style={{
       display: 'grid',
       gridTemplateColumns: '56px 1.2fr 200px 1fr 200px 240px',
       alignItems: 'center',

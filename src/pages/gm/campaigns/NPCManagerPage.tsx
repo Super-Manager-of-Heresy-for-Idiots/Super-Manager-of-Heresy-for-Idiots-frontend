@@ -201,7 +201,7 @@ export default function NPCManagerPage() {
                   </div>
 
                   {/* Two-column description grid */}
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginTop: 14 }}>
+                  <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginTop: 14 }}>
                     {/* Public description */}
                     <div
                       style={{

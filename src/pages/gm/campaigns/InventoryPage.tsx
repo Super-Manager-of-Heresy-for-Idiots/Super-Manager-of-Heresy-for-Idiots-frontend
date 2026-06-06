@@ -330,7 +330,7 @@ export default function InventoryPage() {
         <PageHeader name={character?.name} slotsFilled={0} held={0} />
         <div className="ao-panel ao-frame ao-breathe" style={{ padding: 24, minHeight: 360 }}>
           <span className="ao-frame-c" />
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 6 }}>
+          <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 6 }}>
             {Array.from({ length: 18 }).map((_, i) => (
               <div key={i} className="ao-ph" style={{ aspectRatio: '1' }} />
             ))}
@@ -387,7 +387,7 @@ export default function InventoryPage() {
         }
       />
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.3fr 1fr', gap: 18, alignItems: 'start' }}>
+      <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: '1fr 1.3fr 1fr', gap: 18, alignItems: 'start' }}>
         {/* ── LEFT: equipped slots (paper-doll) ──────────── */}
         <OrdoPanel frame padding={0}>
           <PanelHeader
@@ -426,7 +426,7 @@ export default function InventoryPage() {
 
             <OrdoDivider glyph="diamond-fill" color="var(--rule)">{t('camp2.inv.loadout')}</OrdoDivider>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
+            <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
               {SLOT_LAYOUT.map(({ slot, glyph }) => {
                 const it = equippedBySlot.get(slot);
                 const isSel = it != null && it.id === selectedId;
@@ -512,7 +512,7 @@ export default function InventoryPage() {
               </div>
             )}
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 6 }}>
+            <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 6 }}>
               {Array.from({ length: Math.max(BAG_MIN_CELLS, filteredBag.length) }).map((_, i) => {
                 const item = filteredBag[i];
                 if (!item) return <div key={i} className="ao-slot" style={{ aspectRatio: '1' }} />;
@@ -556,7 +556,7 @@ export default function InventoryPage() {
             <OrdoDivider glyph="diamond-fill" color="var(--rule)">{t('camp2.inv.coinWealth')}</OrdoDivider>
 
             {wallet && wallet.length > 0 ? (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
+              <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
                 {wallet.map((c) => {
                   const color = COIN_COLOR[c.currencyName.toLowerCase()] ?? 'var(--gold-pale)';
                   return (
@@ -842,7 +842,7 @@ function RelicDetail({
 
       <OrdoDivider glyph="diamond-fill" color="var(--rule)" />
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
+      <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
         {stats.map((s) => (
           <div key={s.label}>
             <div className="ao-overline">{s.label}</div>

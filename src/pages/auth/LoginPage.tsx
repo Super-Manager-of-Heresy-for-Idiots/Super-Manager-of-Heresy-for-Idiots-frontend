@@ -39,9 +39,10 @@ export default function LoginPage() {
   };
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 1fr', height: '100vh', background: 'var(--void)' }}>
+    <div className="auth-split" style={{ background: 'var(--void)' }}>
       {/* ── LEFT — atmospheric panel ──────────────────── */}
       <div
+        className="auth-hero"
         style={{
           position: 'relative',
           overflow: 'hidden',
@@ -99,6 +100,7 @@ export default function LoginPage() {
 
       {/* ── RIGHT — sign-in panel ─────────────────────── */}
       <div
+        className="auth-form-side"
         style={{
           display: 'flex',
           alignItems: 'center',

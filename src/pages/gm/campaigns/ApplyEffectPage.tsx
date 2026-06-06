@@ -117,6 +117,7 @@ export default function ApplyEffectPage() {
           </h3>
         </div>
         <div
+          className="ao-rgrid"
           style={{
             display: 'grid',
             gridTemplateColumns: '1fr 1.2fr',
@@ -214,6 +215,7 @@ export default function ApplyEffectPage() {
 
       {/* Main Grid: Picker + Active Ledger */}
       <div
+        className="ao-rgrid"
         style={{
           display: 'grid',
           gridTemplateColumns: canManageEffects ? '1fr 1.2fr' : '1fr',

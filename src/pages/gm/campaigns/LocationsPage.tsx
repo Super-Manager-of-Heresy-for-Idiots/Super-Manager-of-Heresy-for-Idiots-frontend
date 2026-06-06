@@ -128,7 +128,7 @@ export default function LocationsPage() {
             <h3 className="ao-h3" style={{ marginTop: 4 }}>{t('camp2.loc.title')}</h3>
           </div>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
+        <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="ao-panel ao-frame ao-breathe" style={{ padding: 24, minHeight: 180 }}>
               <span className="ao-frame-c" />
@@ -192,7 +192,7 @@ export default function LocationsPage() {
           }
         />
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
+        <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
           {locations.map((loc) => (
             <OrdoPanel key={loc.id} frame padding={0}>
               <div style={{ padding: 18 }}>

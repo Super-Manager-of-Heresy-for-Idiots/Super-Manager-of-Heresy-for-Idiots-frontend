@@ -99,7 +99,7 @@ export default function HomebrewLibraryPage() {
           <p className="ao-overline" style={{ color: 'var(--gold)' }}>{t('hb.library.overline')}</p>
           <h3 className="ao-h3" style={{ marginTop: 4 }}>{t('hb.library.heading')}</h3>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 18 }}>
+        <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 18 }}>
           {[0, 1].map((i) => (
             <div key={i} className="ao-panel ao-frame ao-breathe" style={{ padding: 24, minHeight: 300 }}>
               <span className="ao-frame-c" />
@@ -140,7 +140,7 @@ export default function HomebrewLibraryPage() {
       </div>
 
       {/* Main Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 18, alignItems: 'start' }}>
+      <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 18, alignItems: 'start' }}>
         {/* Library List */}
         <OrdoPanel frame padding={0}>
           <PanelHeader title={t('hb.library.libraryTitle')} glyph="scroll" tone="gold" sub={t('hb.library.doctrinesCount', { count: libraryEntries.length })} />

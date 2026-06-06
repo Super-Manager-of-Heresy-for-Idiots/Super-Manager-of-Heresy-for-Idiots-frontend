@@ -159,6 +159,7 @@ export default function QuestManagerPage() {
         <OrdoPanel frame padding={0}>
           {/* Column headers */}
           <div
+            className="ao-rgrid"
             style={{
               display: 'grid',
               gridTemplateColumns: '1fr 140px 120px 80px',
@@ -180,6 +181,7 @@ export default function QuestManagerPage() {
             return (
               <div
                 key={quest.id}
+                className="ao-rgrid"
                 style={{
                   display: 'grid',
                   gridTemplateColumns: '1fr 140px 120px 80px',

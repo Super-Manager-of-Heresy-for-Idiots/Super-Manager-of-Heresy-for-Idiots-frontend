@@ -296,6 +296,7 @@ export default function LevelRewardsPage() {
           return (
             <div
               key={level}
+              className="ao-rgrid"
               style={{
                 display: 'grid',
                 gridTemplateColumns: '92px 1fr 130px',

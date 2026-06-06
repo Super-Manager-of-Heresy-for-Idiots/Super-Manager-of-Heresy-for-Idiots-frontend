@@ -513,7 +513,7 @@ export function AdminClassRichWizard({ open, onOpenChange, editingClass }: Admin
     <div style={{ display: 'grid', gap: 10 }}>
       <input className="ao-input" value={value.name} onChange={(event) => onChange({ ...value, name: event.target.value })} placeholder={t('cmp2.rich.buffName')} />
       <textarea className="ao-input" value={value.description} onChange={(event) => onChange({ ...value, description: event.target.value })} rows={3} placeholder={t('cmp2.rich.description')} />
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+      <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
         <select className="ao-input" value={value.effectType} onChange={(event) => onChange({ ...value, effectType: event.target.value })}>
           {EFFECT_TYPES.map((type) => <option key={type} value={type}>{type.replace(/_/g, ' ')}</option>)}
         </select>
@@ -533,7 +533,7 @@ export function AdminClassRichWizard({ open, onOpenChange, editingClass }: Admin
           {(statTypes || []).map((stat) => <option key={stat.id} value={stat.id}>{stat.name}</option>)}
         </select>
       )}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+      <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
         <input className="ao-input" type="number" value={value.modifierValue} onChange={(event) => onChange({ ...value, modifierValue: event.target.value })} placeholder={t('cmp2.rich.modifier')} />
         <input className="ao-input" type="number" value={value.durationRounds} onChange={(event) => onChange({ ...value, durationRounds: event.target.value })} placeholder={t('cmp2.rich.durationRounds')} />
       </div>
@@ -546,14 +546,14 @@ export function AdminClassRichWizard({ open, onOpenChange, editingClass }: Admin
         <div style={{ display: 'grid', gap: 12 }}>
           <input className="ao-input" value={reward.skill.name} onChange={(event) => updateSelectedReward((item) => ({ ...item, skill: { ...item.skill, name: event.target.value } }))} placeholder={t('cmp2.rich.skillName')} />
           <textarea className="ao-input" value={reward.skill.description} onChange={(event) => updateSelectedReward((item) => ({ ...item, skill: { ...item.skill, description: event.target.value } }))} rows={3} placeholder={t('cmp2.rich.skillDescription')} />
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+          <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
             <input className="ao-input" value={reward.skill.skillType} onChange={(event) => updateSelectedReward((item) => ({ ...item, skill: { ...item.skill, skillType: event.target.value } }))} placeholder={t('cmp2.rich.skillType')} />
             <select className="ao-input" value={reward.skill.damageType} onChange={(event) => updateSelectedReward((item) => ({ ...item, skill: { ...item.skill, damageType: event.target.value } }))}>
               <option value="">{t('cmp2.rich.noDamageType')}</option>
               {DAMAGE_TYPES.map((type) => <option key={type} value={type}>{type}</option>)}
             </select>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+          <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
             <input className="ao-input" value={reward.skill.damageDice} onChange={(event) => updateSelectedReward((item) => ({ ...item, skill: { ...item.skill, damageDice: event.target.value } }))} placeholder={t('cmp2.rich.damageDice')} />
             <input className="ao-input" type="number" value={reward.skill.damageBonus} onChange={(event) => updateSelectedReward((item) => ({ ...item, skill: { ...item.skill, damageBonus: event.target.value } }))} placeholder={t('cmp2.rich.damageBonus')} />
           </div>
@@ -574,7 +574,7 @@ export function AdminClassRichWizard({ open, onOpenChange, editingClass }: Admin
           </div>
           {reward.skill.effects.map((effect, index) => (
             <div key={effect.localId} className="ao-panel--inset" style={{ padding: 10, display: 'grid', gap: 10 }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: 8 }}>
+              <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: 8 }}>
                 <select
                   className="ao-input"
                   value={effect.effectRole}
@@ -728,7 +728,7 @@ export function AdminClassRichWizard({ open, onOpenChange, editingClass }: Admin
               <div className="ao-h5">{result.characterClass.name}</div>
               <div className="ao-codex" style={{ marginTop: 4 }}>{t('cmp2.rich.rewardsSaved', { count: result.rewards.length })}</div>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: 8 }}>
+            <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: 8 }}>
               {(['CHARACTER_CLASS', 'SKILL', 'FEAT', 'SUBCLASS', 'BUFF_DEBUFF'] as const).map((type) => (
                 <div key={type} className="ao-panel--inset" style={{ padding: 12, minHeight: 96 }}>
                   <div className="ao-overline" style={{ fontSize: 9 }}>{type.replace(/_/g, ' ')}</div>
@@ -785,7 +785,7 @@ export function AdminClassRichWizard({ open, onOpenChange, editingClass }: Admin
           </div>
         </DialogHeader>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '180px minmax(360px, 1fr) 380px', height: 'calc(90vh - 76px)' }}>
+        <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: '180px minmax(360px, 1fr) 380px', height: 'calc(90vh - 76px)' }}>
           <aside className="ao-scroll" style={{ borderRight: '1px solid var(--rule)', overflow: 'auto', background: 'var(--abyss)' }}>
             <div style={{ padding: 12, display: 'grid', gap: 6 }}>
               {LEVELS.map((level) => {
@@ -812,7 +812,7 @@ export function AdminClassRichWizard({ open, onOpenChange, editingClass }: Admin
 
           <main className="ao-scroll" style={{ overflow: 'auto', padding: 18, display: 'grid', alignContent: 'start', gap: 16 }}>
             <div className="ao-panel" style={{ padding: 16, display: 'grid', gap: 12 }}>
-              <div style={{ display: 'grid', gridTemplateColumns: 'minmax(220px, 360px) 1fr', gap: 10 }}>
+              <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: 'minmax(220px, 360px) 1fr', gap: 10 }}>
                 <div>
                   <label className="ao-label">{t('cmp2.rich.className')}</label>
                   <input className="ao-input" value={className} maxLength={50} onChange={(event) => setClassName(event.target.value.slice(0, 50))} placeholder={t('cmp2.rich.classNamePlaceholder')} />
@@ -864,7 +864,7 @@ export function AdminClassRichWizard({ open, onOpenChange, editingClass }: Admin
                       }}
                       onClick={() => setSelectedRewardId(reward.localId)}
                     >
-                      <div style={{ display: 'grid', gridTemplateColumns: '34px 1fr auto', gap: 10, alignItems: 'center' }}>
+                      <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: '34px 1fr auto', gap: 10, alignItems: 'center' }}>
                         <div className="ao-slot" style={{ width: 32, height: 32 }}>
                           <Rune kind={reward.rewardType === 'SKILL' ? 'eye' : reward.rewardType === 'FEAT' ? 'sigil-3' : reward.rewardType === 'SUBCLASS' ? 'cross-pat' : 'hex'} size={14} />
                         </div>
@@ -917,7 +917,7 @@ export function AdminClassRichWizard({ open, onOpenChange, editingClass }: Admin
               <div style={{ display: 'grid', gap: 14 }}>
                 <div>
                   <div className="ao-overline">{t('cmp2.rich.rewardType')}</div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, marginTop: 8 }}>
+                  <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, marginTop: 8 }}>
                     {REWARD_TYPES.map((type) => (
                       <button
                         key={type.value}

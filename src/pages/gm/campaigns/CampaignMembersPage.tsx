@@ -115,6 +115,7 @@ export default function CampaignMembersPage() {
 
           {/* Column headers */}
           <div
+            className="ao-rgrid"
             style={{
               display: 'grid',
               gridTemplateColumns: '1fr 120px 140px 80px',
@@ -134,6 +135,7 @@ export default function CampaignMembersPage() {
           {members.map((member: CampaignMember) => (
             <div
               key={member.userId}
+              className="ao-rgrid"
               style={{
                 display: 'grid',
                 gridTemplateColumns: '1fr 120px 140px 80px',

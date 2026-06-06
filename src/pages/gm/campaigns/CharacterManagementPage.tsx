@@ -167,13 +167,13 @@ export default function CharacterManagementPage() {
       <OrdoPanel frame padding={0} style={{ marginBottom: 24 }}>
         <PanelHeader title={t('camp.mgmt.status')} glyph="helm" tone="gold" />
         <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', gap: 12, alignItems: 'center' }}>
+          <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', gap: 12, alignItems: 'center' }}>
             <Bar value={character.currentHp ?? 0} max={character.maxHp ?? 0} tone="ember" height={7} />
             <span className="ao-codex" style={{ fontSize: 12, color: 'var(--ink-quiet)' }}>
               {character.currentHp ?? 0}/{character.maxHp ?? 0} HP
             </span>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', gap: 12, alignItems: 'center' }}>
+          <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', gap: 12, alignItems: 'center' }}>
             <Bar value={xpProgressVal} max={xpProgressMax} tone="arcane" height={5} />
             <span className="ao-codex" style={{ fontSize: 11, color: 'var(--ink-faint)' }}>
               {xpNext === Infinity

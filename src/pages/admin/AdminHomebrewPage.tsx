@@ -148,6 +148,7 @@ function ModerationPanel() {
       {/* ── banner panel: stats grid ──────────────────────────── */}
       <OrdoPanel frame padding={0} style={{ marginBottom: 18 }}>
         <div
+          className="ao-rgrid"
           style={{
             display: 'grid',
             gridTemplateColumns: '1.4fr 1fr 1fr 1fr 1fr 1fr',
@@ -416,7 +417,7 @@ function ModerationPanel() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           {auditPkg && (
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, fontSize: 13 }}>
+            <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, fontSize: 13 }}>
               <div><span className="ao-overline">{t('adm.hb.labelPackageId')}</span><br />{auditPkg.id}</div>
               <div><span className="ao-overline">{t('adm.hb.labelAuthor')}</span><br />{auditPkg.authorUsername}</div>
               <div><span className="ao-overline">{t('adm.hb.labelStatus')}</span><br />{auditPkg.isDeleted ? t('adm.hb.statusDeleted') : auditPkg.status}</div>

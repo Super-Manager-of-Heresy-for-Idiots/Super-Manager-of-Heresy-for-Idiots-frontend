@@ -895,6 +895,7 @@ function AsiGroup({
           return (
             <div
               key={r.rewardEntryId}
+              className="ao-rgrid"
               style={{
                 display: 'grid',
                 gridTemplateColumns: '1fr auto auto auto',

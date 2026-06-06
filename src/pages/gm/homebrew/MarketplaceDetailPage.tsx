@@ -64,7 +64,7 @@ export default function MarketplaceDetailPage() {
 
       {/* Hero panel */}
       <OrdoPanel padding={0} frame>
-        <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr', borderBottom: '1px solid var(--rule)' }}>
+        <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr', borderBottom: '1px solid var(--rule)' }}>
           {/* LEFT column */}
           <div style={{ padding: 24, borderRight: '1px solid var(--rule)' }}>
             {/* Codex ID + status */}
@@ -163,7 +163,7 @@ export default function MarketplaceDetailPage() {
             <OrdoDivider />
 
             {/* Stats grid 2x2 */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 16 }}>
+            <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 16 }}>
               <div style={{
                 padding: 12,
                 background: 'var(--abyss)',
@@ -265,7 +265,7 @@ export default function MarketplaceDetailPage() {
             </table>
           ) : tab === 'ITEM_TYPE' ? (
             /* Items: 2-column grid with icon slots */
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+            <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
               {currentContent.map((item) => (
                 <OrdoPanel key={item.id} padding={0} inset style={{ display: 'flex', gap: 12, padding: 12 }}>
                   <div style={{
@@ -298,7 +298,7 @@ export default function MarketplaceDetailPage() {
             </div>
           ) : tab === 'CHARACTER_CLASS' ? (
             /* Classes: single card per class */
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 10 }}>
+            <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 10 }}>
               {currentContent.map((cls) => (
                 <OrdoPanel key={cls.id} padding={16} inset>
                   <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
@@ -328,7 +328,7 @@ export default function MarketplaceDetailPage() {
             </div>
           ) : (
             /* Skills: 3-column grid */
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
+            <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
               {currentContent.map((skill) => (
                 <OrdoPanel key={skill.id} padding={12} inset>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>

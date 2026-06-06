@@ -53,6 +53,7 @@ const core: Record<Lang, Dict> = {
 
     /* ── Top bar actions ────────────────────────────── */
     'topbar.logout': 'Покинуть Архив',
+    'topbar.menu': 'Меню',
     'lang.label': 'Язык',
     'lang.ru': 'Русский',
     'lang.en': 'English',
@@ -181,6 +182,7 @@ const core: Record<Lang, Dict> = {
 
     /* ── Top bar actions ────────────────────────────── */
     'topbar.logout': 'Leave the Archive',
+    'topbar.menu': 'Menu',
     'lang.label': 'Language',
     'lang.ru': 'Русский',
     'lang.en': 'English',

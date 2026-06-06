@@ -358,7 +358,7 @@ export default function FolioPage() {
           <>
             <PanelHeader title={t('camp2.folio.bio.title')} sub={t('camp2.folio.bio.sub')} glyph="book" />
             <div style={{ padding: 18, display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
+              <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
                 <IdentityField label={t('camp2.folio.bio.background')} value={background?.name ?? NA} sub={background?.skillProficiencyNames?.length ? background.skillProficiencyNames.join(', ') : t('camp2.folio.bio.noGrantedSkills')} />
                 <IdentityField label={t('camp2.folio.bio.alignment')} value={alignment ? gt.alignment(alignment) : NA} sub={t('camp2.folio.bio.moralCompass')} />
                 {snap && (
@@ -379,7 +379,7 @@ export default function FolioPage() {
               )}
 
               {biography && (biography.personalityTraits || biography.ideals || biography.bonds || biography.flaws) && (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
+                <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
                   {([
                     ['camp2.folio.bio.personalityTraits', biography.personalityTraits],
                     ['camp2.folio.bio.ideals', biography.ideals],
@@ -435,7 +435,7 @@ export default function FolioPage() {
       </div>
 
       {/* ── HEADER ROW: Identity + Oath ────────────────────────── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.4fr) minmax(0, 1fr)', gap: 18 }}>
+      <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.4fr) minmax(0, 1fr)', gap: 18 }}>
         {/* Identity */}
         <OrdoPanel frame padding={0}>
           <div style={{ display: 'flex', gap: 18, padding: 20 }}>
@@ -461,7 +461,7 @@ export default function FolioPage() {
 
               <OrdoDivider glyph="diamond-fill" color="var(--bronze)" />
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
+              <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
                 <IdentityField label={t('camp2.folio.id.label')} value={primaryClass?.className ?? t('camp2.folio.unclassed')} sub={primaryClass ? t('camp2.folio.id.level', { level: primaryClass.classLevel }) : NA} />
                 <IdentityField label={t('camp2.folio.id.race')} value={character.race?.name ?? t('camp2.folio.unknown')} sub={lineageName ?? (character.race?.description ? character.race.description.slice(0, 28) : NA)} />
                 <IdentityField label={t('camp2.folio.id.size')} value={snap ? gt.size(snap.size) : NA} sub={snap?.darkvisionRange ? t('camp2.folio.darkvision', { range: snap.darkvisionRange }) : t('camp2.folio.noDarkvision')} />
@@ -471,7 +471,7 @@ export default function FolioPage() {
           </div>
 
           {/* Level / XP / HP rail */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr 1fr', borderTop: '1px solid var(--rule)' }}>
+          <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: 'auto 1fr 1fr', borderTop: '1px solid var(--rule)' }}>
             <div style={{ padding: 18, borderRight: '1px solid var(--rule)', display: 'flex', alignItems: 'center', gap: 14 }}>
               <Sigil size={56} glyph="sigil-3" />
               <div>
@@ -566,7 +566,7 @@ export default function FolioPage() {
         <OrdoDivider glyph="diamond-fill" color="var(--bronze)">{t('camp2.folio.abilitiesCombat')}</OrdoDivider>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0, 1fr)) 280px', gap: 12, marginTop: 12 }}>
+      <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0, 1fr)) 280px', gap: 12, marginTop: 12 }}>
         {stats.length === 0 && (
           <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 12, gridColumn: '1 / -1', textAlign: 'center', padding: '12px 0' }}>
             {t('camp2.folio.noAbilities')}
@@ -595,7 +595,7 @@ export default function FolioPage() {
         {/* Saves & Tier — not served by API */}
         <OrdoPanel padding={14}>
           <div className="ao-overline" style={{ marginBottom: 8 }}>{t('camp2.folio.savesTier')}</div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
+          <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
             {[
               { label: t('camp2.folio.armour'), value: armorClass != null ? `${armorClass}` : NA },
               { label: t('camp2.folio.init'), value: initiative != null ? fmtMod(initiative) : NA },
@@ -637,7 +637,7 @@ export default function FolioPage() {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.4fr) minmax(0, 1fr)', gap: 18, marginTop: 18, alignItems: 'start' }}>
+      <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.4fr) minmax(0, 1fr)', gap: 18, marginTop: 18, alignItems: 'start' }}>
         {/* LEFT — tab content */}
         <OrdoPanel frame padding={0}>
           {renderTab()}

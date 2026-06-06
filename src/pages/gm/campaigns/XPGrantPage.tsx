@@ -117,6 +117,7 @@ export default function XPGrantPage() {
           </h3>
         </div>
         <div
+          className="ao-rgrid"
           style={{
             display: 'grid',
             gridTemplateColumns: '1.5fr 1fr',
@@ -228,6 +229,7 @@ export default function XPGrantPage() {
 
       {/* Main Grid: Recipients + Grant Panel */}
       <div
+        className="ao-rgrid"
         style={{
           display: 'grid',
           gridTemplateColumns: '1.5fr 1fr',

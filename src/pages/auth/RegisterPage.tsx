@@ -81,9 +81,10 @@ export default function RegisterPage() {
   };
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 1fr', height: '100vh', background: 'var(--void)' }}>
+    <div className="auth-split" style={{ background: 'var(--void)' }}>
       {/* ── LEFT — atmospheric panel ──────────────────── */}
       <div
+        className="auth-hero"
         style={{
           position: 'relative',
           overflow: 'hidden',
@@ -141,7 +142,7 @@ export default function RegisterPage() {
 
       {/* ── RIGHT — registration form ─────────────────── */}
       <div
-        className="ao-scroll"
+        className="ao-scroll auth-form-side"
         style={{
           overflow: 'auto',
           display: 'flex',
@@ -184,7 +185,7 @@ export default function RegisterPage() {
               </OrdoField>
 
               {/* Passwords side by side */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                 <OrdoField label={t('auth.register.cipherWord')} required hint={t('auth.register.cipherHint')}>
                   <input className="ao-input" type="password" {...register('password')} placeholder="••••••••" />
                   <FieldError message={errors.password?.message} />

@@ -104,7 +104,7 @@ export default function SessionNotesPage() {
           <p className="ao-overline" style={{ color: 'var(--gold)' }}>{t('camp2.session.overline')}</p>
           <h3 className="ao-h3" style={{ marginTop: 4 }}>{t('camp2.session.title')}</h3>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+        <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="ao-panel ao-frame ao-breathe" style={{ padding: 24, minHeight: 160 }}>
               <span className="ao-frame-c" />
@@ -203,7 +203,7 @@ export default function SessionNotesPage() {
           }
         />
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+        <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
           {notesList.map((note: GmSessionNoteResponse) => (
             <OrdoPanel
               key={note.id}

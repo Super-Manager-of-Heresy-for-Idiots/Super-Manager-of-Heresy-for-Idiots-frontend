@@ -57,7 +57,7 @@ export default function MyDoctrinesPage() {
     <div>
       {/* ── Banner panel ── */}
       <OrdoPanel padding={0} frame>
-        <div style={{
+        <div className="ao-rgrid" style={{
           display: 'grid',
           gridTemplateColumns: '1.4fr 1fr 1fr 1fr 1fr',
         }}>
@@ -178,7 +178,7 @@ export default function MyDoctrinesPage() {
       ) : (
         <OrdoPanel padding={0} frame>
           {/* Header row */}
-          <div style={{
+          <div className="ao-rgrid" style={{
             display: 'grid',
             gridTemplateColumns: '60px 1fr 240px 200px 200px 60px',
             padding: '10px 16px',
@@ -272,7 +272,7 @@ function PackageRow({
   };
 
   return (
-    <div style={rowStyle}>
+    <div className="ao-rgrid" style={rowStyle}>
       {/* Diagonal stripe overlay for deleted */}
       {isDeleted && (
         <div style={{

@@ -255,7 +255,7 @@ export default function EnchantmentTypesPage() {
     return (
       <div>
         {header}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+        <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
           {Array.from({ length: 6 }).map((_, i) => (
             <div
               key={i}
@@ -303,7 +303,7 @@ export default function EnchantmentTypesPage() {
           </p>
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+        <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
           {data.map((item) => {
             const c = damageColor(item.damageType);
 

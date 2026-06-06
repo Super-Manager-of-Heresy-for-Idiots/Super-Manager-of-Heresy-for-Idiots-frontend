@@ -374,6 +374,7 @@ export default function BuffsDebuffsPage() {
         <OrdoPanel frame padding={0}>
           {/* Grid header */}
           <div
+            className="ao-rgrid"
             style={{
               display: 'grid',
               gridTemplateColumns: GRID_COLS,
@@ -394,6 +395,7 @@ export default function BuffsDebuffsPage() {
           {filteredData.map((item) => (
             <div
               key={item.id}
+              className="ao-rgrid"
               style={{
                 display: 'grid',
                 gridTemplateColumns: GRID_COLS,

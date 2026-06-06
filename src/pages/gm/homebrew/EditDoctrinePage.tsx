@@ -270,7 +270,7 @@ export default function EditDoctrinePage() {
       </div>
 
       {/* Two-column grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.4fr', gap: 16 }}>
+      <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: '1fr 1.4fr', gap: 16 }}>
         {/* LEFT column */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           {/* Outer Inscription */}
@@ -423,7 +423,7 @@ export default function EditDoctrinePage() {
               background: 'var(--abyss)',
             }}>
               <div className="ao-overline" style={{ marginBottom: 8 }}>{t('hb.edit.slotContentReference')}</div>
-              <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr', gap: 8, alignItems: 'center', marginBottom: 10 }}>
+              <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: '140px 1fr', gap: 8, alignItems: 'center', marginBottom: 10 }}>
                 <select
                   className="ao-input"
                   value={addType}
@@ -459,7 +459,7 @@ export default function EditDoctrinePage() {
 
               {addMode === 'existing' ? (
                 <>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr auto auto', gap: 8, alignItems: 'center' }}>
+                  <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: '1fr auto auto', gap: 8, alignItems: 'center' }}>
                     <input
                       className="ao-input"
                       value={addSearch}
@@ -485,7 +485,7 @@ export default function EditDoctrinePage() {
                 </>
               ) : (
                 <div style={{ display: 'grid', gap: 10 }}>
-                  <div style={{ display: 'grid', gridTemplateColumns: addType === 'ITEM_TYPE' ? '1fr 180px' : '1fr', gap: 8 }}>
+                  <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: addType === 'ITEM_TYPE' ? '1fr 180px' : '1fr', gap: 8 }}>
                     <input
                       className="ao-input"
                       value={newName}
@@ -540,7 +540,7 @@ export default function EditDoctrinePage() {
 
                   {addType === 'BUFF_DEBUFF' && (
                     <div style={{ display: 'grid', gap: 8 }}>
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                      <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
                         <select
                           className="ao-input"
                           value={newBuffEffectType}
@@ -577,7 +577,7 @@ export default function EditDoctrinePage() {
                           ))}
                         </select>
                       )}
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                      <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
                         <input
                           className="ao-input"
                           type="number"

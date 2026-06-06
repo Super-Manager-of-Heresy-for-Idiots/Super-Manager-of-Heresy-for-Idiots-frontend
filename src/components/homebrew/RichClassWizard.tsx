@@ -538,7 +538,7 @@ export function RichClassWizard({ open, onOpenChange, packageDetail, editingClas
         rows={3}
         placeholder={t('cmp2.rich.description')}
       />
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+      <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
         <select
           className="ao-input"
           value={value.effectType}
@@ -570,7 +570,7 @@ export function RichClassWizard({ open, onOpenChange, packageDetail, editingClas
           ))}
         </select>
       )}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+      <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
         <input
           className="ao-input"
           type="number"
@@ -606,7 +606,7 @@ export function RichClassWizard({ open, onOpenChange, packageDetail, editingClas
             rows={3}
             placeholder={t('cmp2.rich.skillDescription')}
           />
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+          <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
             <input
               className="ao-input"
               value={reward.skill.skillType}
@@ -624,7 +624,7 @@ export function RichClassWizard({ open, onOpenChange, packageDetail, editingClas
               ))}
             </select>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+          <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
             <input
               className="ao-input"
               value={reward.skill.damageDice}
@@ -663,7 +663,7 @@ export function RichClassWizard({ open, onOpenChange, packageDetail, editingClas
               key={effect.localId}
               style={{ border: '1px solid var(--rule)', background: 'var(--abyss)', padding: 10, display: 'grid', gap: 10 }}
             >
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: 8, alignItems: 'center' }}>
+              <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: 8, alignItems: 'center' }}>
                 <select
                   className="ao-input"
                   value={effect.effectRole}
@@ -825,7 +825,7 @@ export function RichClassWizard({ open, onOpenChange, packageDetail, editingClas
               <div className="ao-h5">{result.characterClass.name}</div>
               <div className="ao-codex" style={{ marginTop: 4 }}>{t('cmp2.rich.rewardsCreated', { count: result.rewards.length })}</div>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: 8 }}>
+            <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: 8 }}>
               {(['CHARACTER_CLASS', 'SKILL', 'FEAT', 'SUBCLASS', 'BUFF_DEBUFF'] as ContentType[]).map((type) => (
                 <div key={type} className="ao-panel--inset" style={{ padding: 12, minHeight: 96 }}>
                   <div className="ao-overline" style={{ fontSize: 9 }}>{type.replace(/_/g, ' ')}</div>
@@ -880,7 +880,7 @@ export function RichClassWizard({ open, onOpenChange, packageDetail, editingClas
           </div>
         </DialogHeader>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '180px minmax(360px, 1fr) 380px', height: 'calc(90vh - 76px)' }}>
+        <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: '180px minmax(360px, 1fr) 380px', height: 'calc(90vh - 76px)' }}>
           <aside className="ao-scroll" style={{ borderRight: '1px solid var(--rule)', overflow: 'auto', background: 'var(--abyss)' }}>
             <div style={{ padding: 12, display: 'grid', gap: 6 }}>
               {LEVELS.map((level) => {
@@ -907,7 +907,7 @@ export function RichClassWizard({ open, onOpenChange, packageDetail, editingClas
 
           <main className="ao-scroll" style={{ overflow: 'auto', padding: 18, display: 'grid', alignContent: 'start', gap: 16 }}>
             <div className="ao-panel" style={{ padding: 16, display: 'grid', gap: 12 }}>
-              <div style={{ display: 'grid', gridTemplateColumns: 'minmax(220px, 360px) 1fr', gap: 10 }}>
+              <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: 'minmax(220px, 360px) 1fr', gap: 10 }}>
                 <div>
                   <label className="ao-label">{t('cmp2.rich.className')}</label>
                   <input
@@ -976,7 +976,7 @@ export function RichClassWizard({ open, onOpenChange, packageDetail, editingClas
                       }}
                       onClick={() => setSelectedRewardId(reward.localId)}
                     >
-                      <div style={{ display: 'grid', gridTemplateColumns: '34px 1fr auto', gap: 10, alignItems: 'center' }}>
+                      <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: '34px 1fr auto', gap: 10, alignItems: 'center' }}>
                         <div className="ao-slot" style={{ width: 32, height: 32 }}>
                           <Rune kind={reward.rewardType === 'SKILL' ? 'eye' : reward.rewardType === 'FEAT' ? 'sigil-3' : reward.rewardType === 'SUBCLASS' ? 'cross-pat' : 'hex'} size={14} />
                         </div>
@@ -1029,7 +1029,7 @@ export function RichClassWizard({ open, onOpenChange, packageDetail, editingClas
               <div style={{ display: 'grid', gap: 14 }}>
                 <div>
                   <div className="ao-overline">{t('cmp2.rich.rewardType')}</div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, marginTop: 8 }}>
+                  <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, marginTop: 8 }}>
                     {REWARD_TYPES.map((type) => (
                       <button
                         key={type.value}

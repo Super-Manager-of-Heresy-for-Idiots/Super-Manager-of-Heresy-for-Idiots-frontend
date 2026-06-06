@@ -1002,3 +1002,92 @@
   .forge-header { grid-template-columns: 1fr; }
   .forge-header-meta { grid-template-columns: repeat(2, 1fr); }
 }
+
+/* ════════════════════════════════════════════════════════════
+   RESPONSIVE — global adaptivity for phones & tablets
+   ════════════════════════════════════════════════════════════ */
+
+/* App shell main scroll area — padding scales down on small screens. */
+.app-main { padding: 24px; }
+@media (max-width: 768px) {
+  .app-main { padding: 14px; }
+}
+@media (max-width: 420px) {
+  .app-main { padding: 12px 10px; }
+}
+
+/* ── Responsive grid helper ──────────────────────────────────
+   Tag any element that has an inline `gridTemplateColumns` with the
+   class `ao-rgrid`. The element keeps its desktop columns inline; on
+   phones the rule below collapses it to a single column. `!important`
+   is required so the stylesheet wins over the element's inline style.
+   Use `ao-rgrid--keep2` for grids that should stay 2-up on phones. */
+@media (max-width: 768px) {
+  .ao-rgrid { grid-template-columns: 1fr !important; }
+  .ao-rgrid.ao-rgrid--keep2 { grid-template-columns: 1fr 1fr !important; }
+}
+
+/* Horizontal-scroll wrapper for wide content (tables, wide rows). */
+.ao-xscroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ── Auth pages (Login / Register) ───────────────────────────
+   Hero panel collapses away on small screens; form fills width. */
+.auth-split {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  height: 100vh;
+}
+@media (max-width: 860px) {
+  .auth-split { grid-template-columns: 1fr; }
+  .auth-hero { display: none !important; }
+  .auth-form-side { padding: 28px 18px !important; }
+}
+
+/* ── Typography down-scaling on phones ───────────────────────
+   The display scale is desktop-first; shrink the largest sizes so
+   headings don't overflow narrow viewports. */
+@media (max-width: 768px) {
+  :root {
+    --t-h1: 40px;
+    --t-h2: 32px;
+    --t-h3: 26px;
+    --t-h4: 22px;
+    --t-h5: 19px;
+  }
+}
+@media (max-width: 420px) {
+  :root {
+    --t-h1: 32px;
+    --t-h2: 26px;
+    --t-h3: 22px;
+  }
+}
+
+/* ── Tabs become horizontally scrollable instead of wrapping ── */
+@media (max-width: 768px) {
+  .ao-tabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .ao-tabs::-webkit-scrollbar { display: none; }
+  .ao-tab { white-space: nowrap; padding: 12px 14px; }
+}
+
+/* ── Radix dialogs sit comfortably within a phone viewport ──── */
+@media (max-width: 768px) {
+  [role='dialog'] {
+    max-width: calc(100vw - 20px) !important;
+    max-height: calc(100vh - 32px) !important;
+    overflow-y: auto;
+  }
+}
+
+/* Wizard footer nav stacks on the smallest screens. */
+@media (max-width: 560px) {
+  .wiz-nav { flex-direction: column; align-items: stretch; gap: 10px; }
+  .wiz-nav-mid { order: -1; }
+}

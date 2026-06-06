@@ -72,7 +72,7 @@ export default function CampaignDashboardPage() {
           <div className="ao-ph" style={{ width: '40%', height: 24, marginBottom: 12 }} />
           <div className="ao-ph" style={{ width: '60%', height: 14 }} />
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+        <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
           {Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className="ao-panel ao-frame ao-breathe" style={{ padding: 24, minHeight: 80 }}>
               <span className="ao-frame-c" />
@@ -179,7 +179,7 @@ export default function CampaignDashboardPage() {
       <OrdoDivider glyph="diamond" />
 
       {/* DrillBlock grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 24, marginBottom: 28 }}>
+      <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 24, marginBottom: 28 }}>
         <DrillBlock label={t('camp.dash.drill.roster')} glyph="helm" count={charCounts.total} to={`/campaigns/${campaignId}/roster`} />
         {canManageCampaign && (
           <>
