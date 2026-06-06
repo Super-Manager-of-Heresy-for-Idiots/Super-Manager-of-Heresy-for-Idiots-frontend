@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useReducer } from 'react';
 import toast from 'react-hot-toast';
-import { OrdoPanel, PanelHeader, Rune, Sigil } from '@/components/ordo';
+import { Rune, Sigil } from '@/components/ordo';
 import type { AvailableContentEntry } from '@/types';
 import type { CreateFullCharacterRequest } from '@/api/characters-full.api';
 import {
@@ -9,9 +9,6 @@ import {
   CLASSES,
   RACES,
   SKILLS,
-  abilityMod,
-  fmtMod,
-  profByLevel,
 } from '@/data/wizard5e';
 import {
   ALL_STEPS,
@@ -32,7 +29,8 @@ import {
   StepSpells,
   type StepProps,
 } from './steps';
-import { DetailLine, type WizardAvailability } from './parts';
+import { type WizardAvailability } from './parts';
+import { ForgeSheetBody } from './ForgeSheetBody';
 import type {
   BackgroundResponse,
   CharacterClassDetailResponse,
@@ -341,10 +339,10 @@ export function CharacterCreationWizard({
       case 'summary': return (
         <SummaryReview
           c={c}
-          availability={availability}
           submitting={submitting}
           onEdit={() => dispatch({ type: 'setStep', step: 0 })}
           onForge={handleForge}
+          onChange={setC}
         />
       );
       default: return null;
@@ -428,26 +426,20 @@ export function CharacterCreationWizard({
   );
 }
 
-// ── Summary / review ───────────────────────────────────────
+// ── Summary / review — the full editable Forge sheet ───────
 function SummaryReview({
   c,
-  availability,
   submitting,
   onEdit,
   onForge,
+  onChange,
 }: {
   c: WizardChar;
-  availability: WizardAvailability;
   submitting: boolean;
   onEdit: () => void;
   onForge: () => void;
+  onChange: (next: WizardChar) => void;
 }) {
-  const prof = profByLevel(c.level);
-  const chosenSkillLabels = Object.keys(c.skills || {}).map((key) => {
-    const local = SKILLS.find((s) => s.key === key);
-    const db = availability.proficiencySkills.find((s) => s.id === key || normalizeContentName(s.name) === normalizeContentName(key));
-    return local?.label || db?.name || key;
-  });
   return (
     <div className="wiz-summary">
       <div className="wiz-summary-bar">
@@ -468,113 +460,7 @@ function SummaryReview({
         </div>
       </div>
 
-      <div className="wiz-summary-grid">
-        <OrdoPanel frame padding={0}>
-          <PanelHeader title="Identity" glyph="helm" />
-          <div style={{ display: 'flex', gap: 16, padding: 16 }}>
-            <div className="wiz-avatar-preview" style={{ width: 96, height: 96, flexShrink: 0 }}>
-              {c.avatar ? <img src={c.avatar} alt="portrait" /> : <span className="ao-codex" style={{ fontSize: 10 }}>no portrait</span>}
-            </div>
-            <div style={{ flex: 1 }}>
-              <div className="ao-h4" style={{ fontSize: 24 }}>{c.name || 'Unnamed'}</div>
-              <div className="ao-italic" style={{ fontSize: 14, marginBottom: 8 }}>
-                {[c.race, c.cls ? c.cls + ' ' + c.level : '', c.background].filter(Boolean).join(' · ')}
-              </div>
-              <div className="ao-codex" style={{ fontSize: 11 }}>
-                {c.alignment || 'Unaligned'}{c.player ? ' · Kept by ' + c.player : ''}
-              </div>
-            </div>
-          </div>
-          <div className="wiz-summary-defense">
-            <Defense label="Armour Class" value={c.ac} />
-            <Defense label="Hit Points" value={c.hp.max} />
-            <Defense label="Speed" value={c.speed + ' ft'} />
-            <Defense label="Prof. Bonus" value={fmtMod(prof)} />
-            <Defense label="Hit Dice" value={c.hitDiceTotal || '—'} />
-          </div>
-        </OrdoPanel>
-
-        <OrdoPanel frame padding={0}>
-          <PanelHeader title="Abilities" glyph="cir-dot" />
-          <div className="wiz-summary-abil">
-            {ABILITIES.map((a) => {
-              const score = c.scores[a.key];
-              const isSave = !!c.saves[a.key];
-              return (
-                <div key={a.key} className="ao-stat" style={{ position: 'relative' }}>
-                  {isSave && (
-                    <span title="Save proficiency" style={{ position: 'absolute', top: 6, right: 6, width: 8, height: 8, transform: 'rotate(45deg)', background: 'var(--gold)', border: '1px solid var(--brass)' }} />
-                  )}
-                  <span className="ao-stat-label">{a.abbr}</span>
-                  <span className="ao-stat-value">{score}</span>
-                  <span className="ao-stat-mod">{fmtMod(abilityMod(score))}</span>
-                </div>
-              );
-            })}
-          </div>
-        </OrdoPanel>
-
-        <OrdoPanel frame padding={0}>
-          <PanelHeader title="Origin" glyph="scroll" />
-          <div style={{ padding: 16, display: 'grid', gap: 8 }}>
-            <DetailLine label="Background">{c.background || 'Not selected'}</DetailLine>
-            <DetailLine label="Score Method">{scoreMethodForApi(c.scoreMethod).replace(/_/g, ' ')}</DetailLine>
-            <DetailLine label="Class Skill Choices">{(c.classSkills || []).length}</DetailLine>
-          </div>
-        </OrdoPanel>
-
-        <OrdoPanel frame padding={0}>
-          <PanelHeader title="Skills" glyph="diamond-fill" right={<span className="ao-codex">{chosenSkillLabels.length}</span>} />
-          <div style={{ padding: 16, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            {chosenSkillLabels.length ? chosenSkillLabels.map((label) => (
-              <span key={label} className="ao-chip ao-chip--gold">{label}</span>
-            )) : <span className="ao-codex">No skill proficiencies.</span>}
-          </div>
-        </OrdoPanel>
-
-        {c.isSpellcaster && (
-          <OrdoPanel frame padding={0}>
-            <PanelHeader title="Spells" glyph="book" tone="arcane" />
-            <div style={{ padding: 16 }}>
-              {c.spells.cantrips.length > 0 && (
-                <>
-                  <div className="ao-overline" style={{ marginBottom: 6 }}>Cantrips</div>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 12 }}>
-                    {c.spells.cantrips.map((s) => <span key={s} className="ao-chip ao-chip--arcane">{s}</span>)}
-                  </div>
-                </>
-              )}
-              {c.spells.known.length > 0 && (
-                <>
-                  <div className="ao-overline" style={{ marginBottom: 6 }}>Known spells</div>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                    {c.spells.known.map((s) => <span key={s} className="ao-chip ao-chip--arcane">{s}</span>)}
-                  </div>
-                </>
-              )}
-              {!c.spells.cantrips.length && !c.spells.known.length && (
-                <span className="ao-codex">No spells selected.</span>
-              )}
-            </div>
-          </OrdoPanel>
-        )}
-
-        {c.proficiencies && (
-          <OrdoPanel frame padding={0}>
-            <PanelHeader title="Proficiencies" glyph="shield" />
-            <div className="ao-italic" style={{ padding: 16, fontSize: 14, whiteSpace: 'pre-line' }}>{c.proficiencies}</div>
-          </OrdoPanel>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function Defense({ label, value }: { label: string; value: string | number }) {
-  return (
-    <div className="wiz-defense">
-      <span className="ao-stat-value" style={{ fontSize: 26 }}>{value}</span>
-      <span className="ao-stat-label">{label}</span>
+      <ForgeSheetBody c={c} onChange={onChange} />
     </div>
   );
 }

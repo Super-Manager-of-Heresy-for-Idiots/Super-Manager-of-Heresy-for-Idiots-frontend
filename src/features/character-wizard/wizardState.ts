@@ -58,6 +58,26 @@ export interface WizardChar {
   features: string;
   // portrait
   avatar: string | null;
+  // ── full sheet fields (edited on the Summary / Forge step) ──
+  xp: string;
+  inspiration: boolean;
+  attacks: ForgeAttack[];
+  coins: Record<CoinKey, string>;
+  equipment: string;
+  traits: string;
+  ideals: string;
+  bonds: string;
+  flaws: string;
+  deathSucc: number;
+  deathFail: number;
+}
+
+export type CoinKey = 'pp' | 'gp' | 'ep' | 'sp' | 'cp';
+export interface ForgeAttack {
+  name: string;
+  hit: string;
+  dmg: string;
+  type: string;
 }
 
 export interface WizardState {
@@ -100,6 +120,11 @@ export function initialChar(): WizardChar {
     spells: { cantrips: [], known: [] },
     proficiencies: '', features: '',
     avatar: null,
+    xp: '0', inspiration: false,
+    attacks: [{ name: '', hit: '', dmg: '', type: '' }],
+    coins: { pp: '0', gp: '0', ep: '0', sp: '0', cp: '0' },
+    equipment: '', traits: '', ideals: '', bonds: '', flaws: '',
+    deathSucc: 0, deathFail: 0,
   };
 }
 

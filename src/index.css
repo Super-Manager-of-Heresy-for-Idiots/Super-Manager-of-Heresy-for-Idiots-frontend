@@ -829,3 +829,176 @@
   .wiz-compact { display: flex; }
   .wiz-split, .wiz-spell-cols, .wiz-summary-grid { grid-template-columns: 1fr; }
 }
+
+/* ════════════════════════════════════════════════════════════
+   FORGE SHEET — the full editable character sheet (summary step)
+   ════════════════════════════════════════════════════════════ */
+.forge-page { display: flex; flex-direction: column; gap: 16px; }
+
+/* ── Header band ──────────────────────────────────────────── */
+.forge-header {
+  display: grid; grid-template-columns: minmax(260px, 1fr) 2fr;
+  gap: 20px; padding: 20px;
+}
+.forge-header-name { display: flex; align-items: center; gap: 16px; min-width: 0; }
+.forge-avatar-frame {
+  width: 96px; height: 96px; flex-shrink: 0;
+  border: 1px solid var(--rule-strong); background: var(--abyss);
+  box-shadow: var(--shadow-inset);
+}
+.forge-avatar-frame img { width: 100%; height: 100%; object-fit: cover; }
+.forge-header-meta {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+}
+
+/* ── Three columns ────────────────────────────────────────── */
+.forge-grid {
+  display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px; align-items: start;
+}
+.forge-col { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+
+/* ── Proficiency badge + inspiration row ──────────────────── */
+.forge-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.forge-prof {
+  position: relative; display: flex; align-items: center; gap: 12px;
+  padding: 14px; background: var(--abyss);
+}
+.forge-prof-num {
+  font-family: var(--font-mono); font-size: 26px; color: var(--gold-pale);
+  font-variant-numeric: tabular-nums;
+}
+.forge-insp {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 14px; border: 1px solid var(--rule);
+  cursor: pointer; transition: all 150ms; text-align: left;
+}
+.forge-insp:hover { border-color: var(--brass); }
+
+/* ── Ability blocks ───────────────────────────────────────── */
+.forge-ability {
+  display: grid; grid-template-columns: 76px 1fr; gap: 12px;
+  padding: 12px; border: 1px solid var(--rule); background: var(--panel);
+}
+.forge-ability-card {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 10px 6px; background: var(--abyss); border: 1px solid var(--rule);
+  align-self: start;
+}
+.forge-score {
+  width: 100%; text-align: center; background: transparent; border: 0;
+  font-family: var(--font-serif); font-size: 28px; color: var(--ink-bright);
+  outline: none;
+}
+.forge-score:focus { color: var(--gold-pale); }
+.forge-modchip {
+  font-family: var(--font-mono); font-size: 13px; color: var(--gold-pale);
+  padding: 1px 10px; border: 1px solid var(--rule); background: var(--panel-raised);
+}
+.forge-skills { display: flex; flex-direction: column; gap: 2px; }
+.forge-skill {
+  display: flex; align-items: center; gap: 8px;
+  padding: 4px 6px; background: transparent; border: 0; cursor: pointer;
+  text-align: left; transition: background 120ms;
+}
+.forge-skill:hover { background: var(--abyss); }
+.forge-skill-label {
+  flex: 1; font-family: var(--font-serif); font-size: 14px; color: var(--ink-quiet);
+}
+.forge-skill-num {
+  font-family: var(--font-mono); font-size: 12px; color: var(--gold-pale);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Passive wisdom ───────────────────────────────────────── */
+.forge-passive {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; padding: 14px;
+}
+.forge-passive-num {
+  font-family: var(--font-mono); font-size: 28px; color: var(--ink-bright);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Defense boxes (AC / Init / Speed) ────────────────────── */
+.forge-defense { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.forge-defbox {
+  position: relative; display: flex; flex-direction: column;
+  align-items: center; gap: 4px; padding: 14px 8px;
+  background: var(--abyss);
+}
+.forge-defbox--shield { background: linear-gradient(180deg, rgba(176,141,78,0.06), var(--abyss)); }
+.forge-defnum {
+  font-family: var(--font-serif); font-size: 30px; color: var(--ink-bright);
+  text-align: center; font-variant-numeric: tabular-nums;
+}
+.forge-defnum--in { width: 100%; background: transparent; border: 0; outline: none; }
+.forge-defnum--in:focus { color: var(--gold-pale); }
+
+/* ── Hit points ───────────────────────────────────────────── */
+.forge-hp-fields { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.forge-numfield { display: flex; flex-direction: column; }
+.forge-hp-foot {
+  display: grid; grid-template-columns: 1fr 1.4fr; gap: 16px;
+  margin-top: 16px; align-items: start;
+}
+.forge-hd { display: flex; flex-direction: column; gap: 6px; }
+
+/* ── Death saves ──────────────────────────────────────────── */
+.forge-death { display: flex; flex-direction: column; gap: 6px; }
+.forge-death-row { display: flex; align-items: center; gap: 10px; }
+.forge-death-pip {
+  width: 16px; height: 16px; border-radius: 50%;
+  border: 1px solid var(--rule); background: transparent;
+  cursor: pointer; transition: all 150ms;
+}
+
+/* ── Attacks table ────────────────────────────────────────── */
+.forge-attacks { display: flex; flex-direction: column; padding: 8px 14px 14px; }
+.forge-attack-head, .forge-attack-row {
+  display: grid; grid-template-columns: 1fr 56px 1.2fr 28px;
+  gap: 8px; align-items: center;
+}
+.forge-attack-head { padding: 6px 0; border-bottom: 1px solid var(--rule); }
+.forge-attack-row { padding: 4px 0; }
+.forge-cell {
+  width: 100%; background: var(--abyss); border: 1px solid var(--rule);
+  padding: 6px 8px; font-family: var(--font-serif); font-size: 14px;
+  color: var(--ink); outline: none;
+}
+.forge-cell:focus { border-color: var(--brass); }
+.forge-cell--c { text-align: center; }
+.forge-del {
+  display: flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; background: transparent; border: 1px solid var(--rule);
+  color: var(--ink-quiet); cursor: pointer; transition: all 150ms;
+}
+.forge-del:hover { border-color: var(--ember); color: var(--ember); }
+
+/* ── Coins ────────────────────────────────────────────────── */
+.forge-coins {
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 14px;
+}
+.forge-coin { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.forge-coin-in {
+  width: 100%; text-align: center; background: var(--abyss);
+  border: 1px solid var(--rule); padding: 6px 4px;
+  font-family: var(--font-mono); font-size: 14px; color: var(--gold-pale);
+  outline: none;
+}
+.forge-coin-in:focus { border-color: var(--brass); }
+
+/* ── Footer ───────────────────────────────────────────────── */
+.forge-footer {
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  padding-top: 8px;
+}
+
+@media (max-width: 1100px) {
+  .forge-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 880px) {
+  .forge-grid { grid-template-columns: 1fr; }
+  .forge-header { grid-template-columns: 1fr; }
+  .forge-header-meta { grid-template-columns: repeat(2, 1fr); }
+}
