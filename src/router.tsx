@@ -18,6 +18,8 @@ import ApplyEffectPage from '@/pages/gm/campaigns/ApplyEffectPage';
 import InventoryV2Page from '@/pages/gm/campaigns/InventoryV2Page';
 import CharacterManagementPage from '@/pages/gm/campaigns/CharacterManagementPage';
 import CharacterCreationWizardPage from '@/pages/gm/campaigns/CharacterCreationWizardPage';
+import LevelUpWizardPage from '@/pages/gm/campaigns/LevelUpWizardPage';
+import CharacterRewardsPage from '@/pages/gm/campaigns/CharacterRewardsPage';
 import FolioPage from '@/pages/gm/campaigns/FolioPage';
 import {
   AbilityCheckPage,
@@ -86,6 +88,8 @@ export const router = createBrowserRouter([
           { path: '/campaigns/:campaignId/characters/:characterId/wallet', element: <CharacterWalletPage /> },
           { path: '/campaigns/:campaignId/characters/:characterId/resources', element: <CharacterResourcesPage /> },
           { path: '/campaigns/:campaignId/characters/:characterId/hp', element: <CharacterHpPage /> },
+          { path: '/campaigns/:campaignId/characters/:characterId/level-up', element: <LevelUpWizardPage /> },
+          { path: '/campaigns/:campaignId/characters/:characterId/rewards', element: <CharacterRewardsPage /> },
           { path: '/marketplace', element: <MarketplacePage /> },
           { path: '/marketplace/:id', element: <MarketplaceDetailPage /> },
         ],

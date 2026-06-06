@@ -195,12 +195,38 @@ export interface LevelUpResultResponse {
   newTotalLevel: number;
   classLeveled: string;
   newClassLevel: number;
+  hpIncrease?: number;
+  newMaxHp?: number;
   rewardsAcquired: AcquiredRewardSummary[];
 }
 
 export interface AcquiredRewardSummary {
   rewardType: string;
   name: string;
+}
+
+export const REWARD_TYPE_LABELS: Record<string, string> = {
+  FEAT: 'Feat',
+  SKILL: 'Class Feature',
+  SUBCLASS: 'Subclass',
+  BUFF_DEBUFF: 'Effect',
+  ABILITY_SCORE_IMPROVEMENT: 'Ability Score Improvement',
+};
+
+// === XP thresholds (D&D 5e cumulative XP per level) ===
+export const XP_THRESHOLDS: Record<number, number> = {
+  1: 0, 2: 300, 3: 900, 4: 2700, 5: 6500,
+  6: 14000, 7: 23000, 8: 34000, 9: 48000, 10: 64000,
+  11: 85000, 12: 100000, 13: 120000, 14: 140000, 15: 165000,
+  16: 240000, 17: 265000, 18: 355000, 19: 405000, 20: 475000,
+};
+
+export function xpForLevel(level: number): number {
+  return XP_THRESHOLDS[level] ?? 0;
+}
+
+export function xpForNextLevel(currentLevel: number): number {
+  return XP_THRESHOLDS[currentLevel + 1] ?? Infinity;
 }
 
 export interface CharacterRewardsResponse {

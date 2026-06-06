@@ -185,6 +185,9 @@ export default function CampaignDashboardPage() {
         {canManageCampaign && (
           <DrillBlock label="Session Notes" glyph="lock" to={`/campaigns/${campaignId}/notes`} />
         )}
+        {canManageCampaign && (
+          <DrillBlock label="Grant XP" glyph="flame" to={`/campaigns/${campaignId}/xp`} />
+        )}
       </div>
 
       <OrdoDivider glyph="diamond" />
