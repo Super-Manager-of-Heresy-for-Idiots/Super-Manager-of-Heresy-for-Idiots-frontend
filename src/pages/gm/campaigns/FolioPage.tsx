@@ -141,6 +141,18 @@ export default function FolioPage() {
   const currentHp = character.currentHp ?? 0;
   const maxHp = character.maxHp ?? 0;
   const hpPct = maxHp > 0 ? Math.min(100, (currentHp / maxHp) * 100) : 0;
+  const snap = character.raceSnapshot;
+  const lineageName = snap?.lineageName ?? null;
+  const walkSpeed = snap?.speed?.walk ?? null;
+  const extraSpeeds = snap
+    ? ([
+        ['Fly', snap.speed.fly],
+        ['Swim', snap.speed.swim],
+        ['Climb', snap.speed.climb],
+        ['Burrow', snap.speed.burrow],
+      ] as const).filter(([, v]) => v != null && v > 0)
+    : [];
+  const raceTraits = snap?.traitNames ?? [];
 
   /* ── tab content (left main column) ───────────────────────── */
   function renderTab(): ReactNode {
@@ -242,8 +254,34 @@ export default function FolioPage() {
       case 'biography':
         return (
           <>
-            <PanelHeader title="Biography" sub="Background, alignment & life record" glyph="book" right={<span className="ao-overline" style={{ fontSize: 8, color: 'var(--ink-faint)' }}>TODO</span>} />
-            <VoidBody note="Background and life record await a dedicated lore endpoint." />
+            <PanelHeader title="Biography" sub="Lineage, traits & life record" glyph="book" />
+            {!snap ? (
+              <VoidBody note="No lineage record is sealed for this soul." />
+            ) : (
+              <div style={{ padding: 18, display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
+                  <IdentityField label="Race" value={snap.raceName} sub={lineageName ?? 'no lineage'} />
+                  <IdentityField label="Size" value={snap.size.charAt(0) + snap.size.slice(1).toLowerCase()} sub={snap.darkvisionRange ? `darkvision ${snap.darkvisionRange} ft` : 'no darkvision'} />
+                  <IdentityField label="Speed" value={walkSpeed != null ? `${walkSpeed} ft` : NA} sub={extraSpeeds.length ? extraSpeeds.map(([k, v]) => `${k} ${v} ft`).join(' · ') : 'walking'} />
+                  <IdentityField label="ASI Bonuses" value={snap.allowAbilityScoreBonuses ? 'Allowed' : 'Fixed'} sub="lineage rule" />
+                </div>
+
+                {raceTraits.length > 0 && (
+                  <div>
+                    <div className="ao-overline" style={{ marginBottom: 8 }}>Racial Traits</div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                      {raceTraits.map((t) => (
+                        <OrdoChip key={t} tone="gold" glyph="diamond-fill">{t}</OrdoChip>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <p className="ao-codex" style={{ fontSize: 11, color: 'var(--ink-faint)', lineHeight: 1.5 }}>
+                  Background, alignment and personal life record are not yet served by the character API.
+                </p>
+              </div>
+            )}
           </>
         );
       default:
@@ -286,16 +324,16 @@ export default function FolioPage() {
               </div>
               <div className="ao-h3" style={{ marginTop: 8, fontSize: 32 }}>{character.name}</div>
               <div className="ao-italic" style={{ marginTop: 2, fontSize: 16, color: 'var(--ink-quiet)' }}>
-                {character.race?.name ?? 'Unknown'} {primaryClass ? `· ${primaryClass.className}` : ''}
+                {character.race?.name ?? 'Unknown'}{lineageName ? ` (${lineageName})` : ''} {primaryClass ? `· ${primaryClass.className}` : ''}
               </div>
 
               <OrdoDivider glyph="diamond-fill" color="var(--bronze)" />
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
                 <IdentityField label="Class" value={primaryClass?.className ?? 'Unclassed'} sub={primaryClass ? `level ${primaryClass.classLevel}` : NA} />
-                <IdentityField label="Race" value={character.race?.name ?? 'Unknown'} sub={character.race?.description ? character.race.description.slice(0, 28) : NA} />
-                <IdentityField label="Background" value={NA} sub="unrecorded" />
-                <IdentityField label="Alignment" value={NA} sub="unrecorded" />
+                <IdentityField label="Race" value={character.race?.name ?? 'Unknown'} sub={lineageName ?? (character.race?.description ? character.race.description.slice(0, 28) : NA)} />
+                <IdentityField label="Size" value={snap ? snap.size.charAt(0) + snap.size.slice(1).toLowerCase() : NA} sub={snap?.darkvisionRange ? `darkvision ${snap.darkvisionRange} ft` : 'no darkvision'} />
+                <IdentityField label="Speed" value={walkSpeed != null ? `${walkSpeed} ft` : NA} sub={extraSpeeds.length ? extraSpeeds.map(([k, v]) => `${k} ${v}`).join(' · ') : 'walk'} />
               </div>
             </div>
           </div>
@@ -383,7 +421,7 @@ export default function FolioPage() {
             {[
               { label: 'Armour', value: NA },
               { label: 'Init', value: NA },
-              { label: 'Speed', value: NA },
+              { label: 'Speed', value: walkSpeed != null ? `${walkSpeed}` : NA },
               { label: 'Prof.', value: `+${Math.max(2, Math.ceil(character.totalLevel / 4) + 1)}` },
             ].map((c) => (
               <div key={c.label} style={{ padding: 8, background: 'var(--abyss)', border: '1px solid var(--rule)', textAlign: 'center' }}>

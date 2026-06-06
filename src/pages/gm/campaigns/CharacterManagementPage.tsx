@@ -87,13 +87,6 @@ export default function CharacterManagementPage() {
         to: `${base}/rewards`,
         ready: true,
       },
-      {
-        title: 'Profile',
-        body: 'Rename the character, change race and expose delete controls.',
-        glyph: 'scroll',
-        to: `${base}/edit`,
-        ready: false,
-      },
     ];
   }, [campaignId, characterId]);
 
