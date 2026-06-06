@@ -1,9 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import toast from 'react-hot-toast';
-import { charactersFullApi } from '@/api/characters-full.api';
+import { charactersFullApi, type CreateFullCharacterRequest } from '@/api/characters-full.api';
 import { referenceApi } from '@/api/reference.api';
-import type { ApiError, CharacterResponse, CreateFullCharacterRequest } from '@/types';
+import type { ApiError, CharacterResponse } from '@/types';
 
 const myKey = ['characters', 'my'];
 const detailKey = (id: string) => ['characters', 'template', id];
