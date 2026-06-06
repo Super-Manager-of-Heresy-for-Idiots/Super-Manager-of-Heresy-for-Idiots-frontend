@@ -1,8 +1,12 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { OrdoPanel, PanelHeader, Rune, Bar } from '@/components/ordo';
 import { CharStatusBadge } from '@/components/campaigns';
-import { useCharacterV2 } from '@/hooks/useCharacterV2';
+import {
+  AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction,
+} from '@/components/ui/alert-dialog';
+import { useCharacterV2, useDeleteCharacter } from '@/hooks/useCharacterV2';
 import { useLevelUpOptions } from '@/hooks/useLevelUp';
 import { useAuthStore } from '@/store/authStore';
 import { xpForLevel, xpForNextLevel } from '@/types';
@@ -21,6 +25,8 @@ export default function CharacterManagementPage() {
   const { data: character, isLoading, error, refetch } = useCharacterV2(campaignId!, characterId!);
   const { user } = useAuthStore();
   const { data: levelUpOptions } = useLevelUpOptions(characterId!);
+  const deleteCharacter = useDeleteCharacter();
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const tiles = useMemo<ManagementTile[]>(() => {
     const base = `/campaigns/${campaignId}/characters/${characterId}`;
@@ -116,6 +122,20 @@ export default function CharacterManagementPage() {
   const isOwner = user?.id === character.ownerId;
   const isPrivileged = user?.role === 'GAME_MASTER' || user?.role === 'ADMIN';
   const canLevelUp = isOwner || isPrivileged;
+  const canDelete = isOwner || isPrivileged;
+
+  const handleDelete = () => {
+    if (!campaignId || !characterId) return;
+    deleteCharacter.mutate(
+      { campaignId, characterId },
+      {
+        onSuccess: () => {
+          setConfirmDelete(false);
+          navigate(`/campaigns/${campaignId}`);
+        },
+      },
+    );
+  };
   const readyForLevelUp = !!levelUpOptions && levelUpOptions.xpToNextLevel === 0;
   const xpPrev = xpForLevel(character.totalLevel);
   const xpNext = xpForNextLevel(character.totalLevel);
@@ -138,10 +158,22 @@ export default function CharacterManagementPage() {
             {classLevelsLabel} · {className} · Owner: {character.ownerUsername}
           </p>
         </div>
-        <button className="ao-btn ao-btn--ghost" onClick={() => navigate(`/campaigns/${campaignId}`)}>
-          <Rune kind="arrow-l" size={14} color="currentColor" />
-          <span style={{ marginLeft: 6 }}>Campaign</span>
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          {canDelete && (
+            <button
+              className="ao-btn ao-btn--ghost"
+              onClick={() => setConfirmDelete(true)}
+              style={{ color: 'var(--ember)', borderColor: 'var(--ember)' }}
+            >
+              <Rune kind="x" size={14} color="currentColor" />
+              <span style={{ marginLeft: 6 }}>Delete</span>
+            </button>
+          )}
+          <button className="ao-btn ao-btn--ghost" onClick={() => navigate(`/campaigns/${campaignId}`)}>
+            <Rune kind="arrow-l" size={14} color="currentColor" />
+            <span style={{ marginLeft: 6 }}>Campaign</span>
+          </button>
+        </div>
       </div>
 
       <OrdoPanel frame padding={0} style={{ marginBottom: 24 }}>
@@ -239,6 +271,27 @@ export default function CharacterManagementPage() {
           </button>
         ))}
       </div>
+
+      <AlertDialog open={confirmDelete} onOpenChange={setConfirmDelete}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete {character.name}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently remove the character from the campaign. This cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteCharacter.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={deleteCharacter.isPending}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleteCharacter.isPending ? 'Deleting…' : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

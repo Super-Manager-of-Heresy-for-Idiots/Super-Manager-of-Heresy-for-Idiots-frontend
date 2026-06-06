@@ -224,6 +224,16 @@ export default function CampaignDashboardPage() {
                 ? 'You have no characters in this campaign.'
                 : 'No characters have been sworn to this campaign.'}
             </p>
+            {canCreateCharacter && (
+              <button
+                className="ao-btn ao-btn--primary"
+                onClick={openCharacterWizard}
+                style={{ marginTop: 14 }}
+              >
+                <Rune kind="plus" size={14} color="currentColor" />
+                <span style={{ marginLeft: 6 }}>Create Character</span>
+              </button>
+            )}
           </div>
         ) : (
           <div>
