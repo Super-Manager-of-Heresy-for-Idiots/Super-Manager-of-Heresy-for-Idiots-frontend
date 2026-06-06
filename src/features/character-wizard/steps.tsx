@@ -50,6 +50,10 @@ export interface StepProps {
 
 const norm = (value: string | undefined): string => (value || '').trim().toLowerCase();
 const skillKeyForLabel = (label: string): string | undefined => SKILLS.find((skill) => norm(skill.label) === norm(label))?.key;
+const shortStatName = (name: string): string => ABILITIES.find((a) => norm(a.label) === norm(name))?.abbr || name;
+const abilityKeyForStatName = (name: string): AbilityKey | undefined => ABILITIES.find((a) => norm(a.label) === norm(name))?.key;
+const dbAsiText = (items: { statName: string; bonus: number }[] | undefined): string =>
+  items?.length ? items.map((item) => shortStatName(item.statName) + ' +' + item.bonus).join(' \u00b7 ') : '\u2014';
 
 // ════════════════════════════════════════════════════════════
 // STEP 1 — BASICS
@@ -108,6 +112,8 @@ export function StepBasics({ c, A, n, total }: StepProps) {
 export function StepRace({ c, A, n, total, availability }: StepProps) {
   const race = raceByKey(c.raceKey);
   const selectedRace = availability.raceOptions.find((r) => r.key === c.raceKey);
+  const selectedRaceDetail = selectedRace?.detail;
+  const selectedDbSubrace = selectedRaceDetail?.subraces?.find((s) => s.id === c.subraceKey);
   const onFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files && e.target.files[0];
     if (!f) return;
@@ -123,6 +129,7 @@ export function StepRace({ c, A, n, total, availability }: StepProps) {
           <div className="wiz-grid">
             {availability.raceOptions.map((option) => {
               const r = option.local;
+              const detail = option.detail;
               const source = option.entry.homebrewTitle || option.entry.source;
               return (
                 <WizCard
@@ -131,7 +138,7 @@ export function StepRace({ c, A, n, total, availability }: StepProps) {
                   onClick={() => A.setRace(option.key, option.entry.name)}
                   glyph="hex"
                   title={option.entry.name}
-                  sub={r ? asiText(r.asi) + ' \u00b7 ' + r.speed + ' ft' : source}
+                  sub={(detail ? dbAsiText(detail.abilityScoreIncreases) + ' \u00b7 ' + (detail.speed ?? 30) + ' ft' : r ? asiText(r.asi) + ' \u00b7 ' + r.speed + ' ft' : '30 ft') + ' \u00b7 ' + source}
                 />
               );
             })}
@@ -143,9 +150,38 @@ export function StepRace({ c, A, n, total, availability }: StepProps) {
 
         <div className="wiz-side">
           <OrdoPanel frame padding={0}>
-            <PanelHeader title={race ? race.label : selectedRace?.entry.name || 'Select a race'} glyph="hex" />
+            <PanelHeader title={selectedRaceDetail?.name || race?.label || selectedRace?.entry.name || 'Select a race'} glyph="hex" />
             <div style={{ padding: 16 }}>
-              {race ? (
+              {selectedRaceDetail ? (
+                <>
+                  <div className="ao-italic" style={{ fontSize: 14, marginBottom: 12 }}>{selectedRaceDetail.description}</div>
+                  <DetailLine label="Source">{selectedRace?.entry.homebrewTitle || selectedRace?.entry.source}</DetailLine>
+                  <DetailLine label="Ability Bonus">{dbAsiText(selectedDbSubrace?.abilityScoreIncreases || selectedRaceDetail.abilityScoreIncreases)}</DetailLine>
+                  <DetailLine label="Speed">{selectedDbSubrace?.speedOverride || selectedRaceDetail.speed || 30} ft</DetailLine>
+                  <DetailLine label="Traits">{(selectedDbSubrace?.traits?.length ? selectedDbSubrace.traits : selectedRaceDetail.traits || []).join(' \u00b7 ') || '\u2014'}</DetailLine>
+                  {!!selectedRaceDetail.subraces?.length && (
+                    <div style={{ marginTop: 14 }}>
+                      <label className="ao-label">Subrace <span className="wiz-req">required</span></label>
+                      <select
+                        className="ao-input"
+                        value={c.subraceKey || ''}
+                        onChange={(e) => A.setSubrace(e.target.value)}
+                        style={{ color: 'var(--ink-bright)' }}
+                      >
+                        <option value="">вЂ” choose subrace вЂ”</option>
+                        {selectedRaceDetail.subraces.map((s) => (
+                          <option key={s.id} value={s.id}>{s.name} ({dbAsiText(s.abilityScoreIncreases)})</option>
+                        ))}
+                      </select>
+                      {selectedDbSubrace && (
+                        <div className="ao-italic" style={{ fontSize: 13, marginTop: 8 }}>
+                          {selectedDbSubrace.description}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </>
+              ) : race ? (
                 <>
                   <div className="ao-italic" style={{ fontSize: 14, marginBottom: 12 }}>{race.desc}</div>
                   <DetailLine label="Ability Bonus">{asiText(combinedASI(race, c.subraceKey))}</DetailLine>
@@ -236,7 +272,12 @@ export function StepRace({ c, A, n, total, availability }: StepProps) {
 export function StepClass({ c, A, n, total, availability }: StepProps) {
   const cls = classByKey(c.classKey);
   const selectedClass = availability.classOptions.find((cl) => cl.key === c.classKey);
+  const selectedClassDetail = selectedClass?.detail;
   const prof = profByLevel(c.level);
+  const StatName = ({ id }: { id?: string }) => {
+    const stat = availability.statTypes.find((item) => item.id === id);
+    return <>{stat ? stat.name : '\u2014'}</>;
+  };
   return (
     <div>
       <StepHead n={n} total={total} title="Calling & Discipline" sub="The path you walk and the powers it grants." />
@@ -245,15 +286,25 @@ export function StepClass({ c, A, n, total, availability }: StepProps) {
           <div className="wiz-grid">
             {availability.classOptions.map((option) => {
               const cl = option.local;
+              const detail = option.detail;
               const source = option.entry.homebrewTitle || option.entry.source;
+              const primaryStat = availability.statTypes.find((stat) => stat.id === detail?.primaryAbilityStatId);
+              const isSpellcaster = detail?.spellcasting?.isSpellcaster ?? cl?.spellcaster;
               return (
                 <WizCard
                   key={option.key}
                   active={c.classKey === option.key}
-                  onClick={() => A.setClass(option.key, option.entry.name)}
+                  onClick={() => A.setClass(option.key, option.entry.name, {
+                    hitDie: detail?.hitDie,
+                    isSpellcaster,
+                    saves: detail?.savingThrowStatNames?.map(abilityKeyForStatName).filter((key): key is AbilityKey => !!key),
+                    proficiencies: detail?.armorWeaponProficiencies ? 'Weapons & armour: ' + detail.armorWeaponProficiencies : undefined,
+                  })}
                   glyph={cl ? CLASS_GLYPH[cl.key] : 'book'}
                   title={option.entry.name}
-                  sub={cl ? 'd' + cl.hitDie + ' \u00b7 ' + cl.primary.toUpperCase() + (cl.spellcaster ? ' \u00b7 caster' : '') : source}
+                  sub={(detail
+                    ? 'd' + (detail.hitDie || 8) + ' \u00b7 ' + (primaryStat ? shortStatName(primaryStat.name) : 'DB') + (isSpellcaster ? ' \u00b7 caster' : '')
+                    : cl ? 'd' + cl.hitDie + ' \u00b7 ' + cl.primary.toUpperCase() + (cl.spellcaster ? ' \u00b7 caster' : '') : 'd8') + ' \u00b7 ' + source}
                 />
               );
             })}
@@ -264,9 +315,49 @@ export function StepClass({ c, A, n, total, availability }: StepProps) {
         </div>
         <div className="wiz-side">
           <OrdoPanel frame padding={0}>
-            <PanelHeader title={cls ? cls.label : selectedClass?.entry.name || 'Select a class'} glyph={cls ? CLASS_GLYPH[cls.key] : 'sword'} />
+            <PanelHeader title={selectedClassDetail?.name || cls?.label || selectedClass?.entry.name || 'Select a class'} glyph={cls ? CLASS_GLYPH[cls.key] : 'sword'} />
             <div style={{ padding: 16 }}>
-              {cls ? (
+              {selectedClassDetail ? (
+                <>
+                  <div className="ao-italic" style={{ fontSize: 14, marginBottom: 12 }}>{selectedClassDetail.description}</div>
+                  <DetailLine label="Source">{selectedClass?.entry.homebrewTitle || selectedClass?.entry.source}</DetailLine>
+                  <DetailLine label="Hit Die">d{selectedClassDetail.hitDie || 8}</DetailLine>
+                  <DetailLine label="Primary"><StatName id={selectedClassDetail.primaryAbilityStatId} /></DetailLine>
+                  <DetailLine label="Saves">{selectedClassDetail.savingThrowStatNames?.map(shortStatName).join(' \u00b7 ') || '\u2014'}</DetailLine>
+                  <DetailLine label="Proficiencies">{selectedClassDetail.armorWeaponProficiencies || '\u2014'}</DetailLine>
+                  {selectedClassDetail.spellcasting?.isSpellcaster && (
+                    <div style={{ marginTop: 10 }}>
+                      <OrdoChip tone="arcane" glyph="sigil-1">
+                        Spellcaster{selectedClassDetail.spellcasting.isHalfCaster ? ' \u00b7 half' : ''}{!selectedClassDetail.spellcasting.hasCantrips ? ' \u00b7 no cantrips' : ''}
+                      </OrdoChip>
+                    </div>
+                  )}
+                  <OrdoDivider glyph="diamond-fill" />
+                  <div className="wiz-level">
+                    <div>
+                      <label className="ao-label" style={{ margin: 0 }}>Level</label>
+                      <div className="ao-codex" style={{ fontSize: 10 }}>Proficiency bonus {fmtMod(prof)}</div>
+                    </div>
+                    <div className="wiz-level-ctrl">
+                      <button className="ao-iconbtn" onClick={() => A.setLevel(clamp(c.level - 1, 1, 20))}>
+                        <Rune kind="minus" size={12} />
+                      </button>
+                      <input
+                        className="ao-input"
+                        type="number"
+                        min={1}
+                        max={20}
+                        value={c.level}
+                        onChange={(e) => A.setLevel(clamp(Number(e.target.value || 1), 1, 20))}
+                        style={{ width: 64, textAlign: 'center', fontFamily: 'var(--font-serif)', fontSize: 22, color: 'var(--gold-pale)' }}
+                      />
+                      <button className="ao-iconbtn" onClick={() => A.setLevel(clamp(c.level + 1, 1, 20))}>
+                        <Rune kind="plus" size={12} />
+                      </button>
+                    </div>
+                  </div>
+                </>
+              ) : cls ? (
                 <>
                   <div className="ao-italic" style={{ fontSize: 14, marginBottom: 12 }}>{cls.desc}</div>
                   <DetailLine label="Hit Die">d{cls.hitDie}</DetailLine>

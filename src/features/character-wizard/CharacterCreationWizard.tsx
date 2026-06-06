@@ -66,6 +66,11 @@ const scoreMethodForApi = (method: WizardChar['scoreMethod']): string => {
 };
 
 function validateCampaignReferences(id: StepId, c: WizardChar, availability: WizardAvailability): boolean {
+  if (id === 'race') {
+    const selectedRace = availability.raceOptions.find((race) => race.key === c.raceKey);
+    if (selectedRace?.detail?.subraces?.length) return !!c.subraceKey;
+    return true;
+  }
   if (id !== 'background') return true;
   const selectedClass = availability.classOptions.find((cl) => cl.key === c.classKey);
   const expected = selectedClass?.detail?.skillChoiceCount;
@@ -74,6 +79,11 @@ function validateCampaignReferences(id: StepId, c: WizardChar, availability: Wiz
 }
 
 function campaignReferenceHint(id: StepId, c: WizardChar, availability: WizardAvailability): string {
+  if (id === 'race') {
+    const selectedRace = availability.raceOptions.find((race) => race.key === c.raceKey);
+    if (selectedRace?.detail?.subraces?.length && !c.subraceKey) return 'Choose a subrace';
+    return '';
+  }
   if (id !== 'background') return '';
   const selectedClass = availability.classOptions.find((cl) => cl.key === c.classKey);
   const expected = selectedClass?.detail?.skillChoiceCount;

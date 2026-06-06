@@ -138,7 +138,7 @@ export function recompute(c: WizardChar): WizardChar {
     next.cls = c.cls;
     next.hitDiceType = c.hitDiceType || 'd8';
     next.hitDiceTotal = c.level + (next.hitDiceType || 'd8');
-    next.isSpellcaster = false;
+    next.isSpellcaster = c.isSpellcaster;
     next.saves = c.saves || {};
     const hitDie = Number((next.hitDiceType || 'd8').replace('d', '')) || 8;
     const conMod = abilityMod(next.scores.con);
@@ -155,6 +155,7 @@ export function recompute(c: WizardChar): WizardChar {
 
   const profLines: string[] = [];
   if (cls) profLines.push('Weapons & armour: ' + cls.profs);
+  if (!cls && c.proficiencies) profLines.push(c.proficiencies);
   if (bg) profLines.push('Background: ' + bg.extra);
   next.proficiencies = profLines.join('\n');
 
@@ -273,7 +274,16 @@ export interface WizardActions {
   setLevel: (n: number) => void;
   setRace: (key: string, label?: string) => void;
   setSubrace: (key: string) => void;
-  setClass: (key: string, label?: string) => void;
+  setClass: (
+    key: string,
+    label?: string,
+    meta?: {
+      hitDie?: number;
+      isSpellcaster?: boolean;
+      saves?: AbilityKey[];
+      proficiencies?: string;
+    },
+  ) => void;
   setMethod: (m: ScoreMethod) => void;
   setBaseScore: (abil: AbilityKey, val: number) => void;
   rollPool: () => void;
@@ -294,13 +304,19 @@ export function makeActions(c: WizardChar, setC: (c: WizardChar) => void): Wizar
       setC(recompute({ ...c, raceKey: key, subraceKey: '', race: local?.label ?? label ?? c.race }));
     },
     setSubrace: (key) => derivePatch({ subraceKey: key }),
-    setClass: (key, label) => {
+    setClass: (key, label, meta) => {
       const local = classByKey(key);
       setC(recompute({
         ...c,
         classKey: key,
         cls: local?.label ?? label ?? c.cls,
-        hitDiceType: local ? c.hitDiceType : 'd8',
+        hitDiceType: local ? c.hitDiceType : 'd' + (meta?.hitDie || 8),
+        isSpellcaster: local ? c.isSpellcaster : !!meta?.isSpellcaster,
+        saves: meta?.saves?.reduce<Partial<Record<AbilityKey, boolean>>>((acc, save) => {
+          acc[save] = true;
+          return acc;
+        }, {}) || {},
+        proficiencies: meta?.proficiencies || c.proficiencies,
         classSkills: [],
         spells: { cantrips: [], known: [] },
       }));
