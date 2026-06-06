@@ -46,6 +46,7 @@ export default function TemplateWizardPage() {
       referenceBackgrounds={reference.backgrounds}
       referenceProficiencySkills={reference.skills}
       referenceStatTypes={reference.statTypes}
+      availableCurrencies={reference.currencies}
       submitting={createTemplate.isPending}
       onSubmit={handleSubmit}
       onCancel={backToList}

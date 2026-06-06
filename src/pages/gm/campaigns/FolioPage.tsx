@@ -19,10 +19,12 @@ import {
 import {
   useCharacter,
   useCharacterResources,
+  useCharacterWallet,
   useAbilityCheck,
 } from '@/hooks/useCharacter';
 import { useCharacterEffects } from '@/hooks/useEffects';
 import { useEquippedInventory } from '@/hooks/useInventory';
+import { useGlobalReferenceContent } from '@/hooks/useTemplates';
 import type { CharacterStatResponse, ItemInstanceResponse } from '@/types';
 
 /* ── helpers ─────────────────────────────────────────────────── */
@@ -77,8 +79,10 @@ export default function FolioPage() {
 
   const { data: character, isLoading, error, refetch } = useCharacter(campaignId!, characterId!);
   const { data: resources } = useCharacterResources(campaignId!, characterId!);
+  const { data: wallet } = useCharacterWallet(campaignId!, characterId!);
   const { data: effects } = useCharacterEffects(campaignId!, characterId!);
   const { data: equipped } = useEquippedInventory(campaignId!, characterId!);
+  const { data: refContent } = useGlobalReferenceContent();
   const abilityCheck = useAbilityCheck();
 
   const [tab, setTab] = useState<TabId>('combat');
@@ -154,6 +158,38 @@ export default function FolioPage() {
     : [];
   const raceTraits = snap?.traitNames ?? [];
 
+  /* ── rich sheet fields (served inline by CharacterResponse) ── */
+  const tempHp = character.tempHp ?? 0;
+  const armorClass = character.armorClass ?? null;
+  const alignment = character.alignment ?? null;
+  const background = character.background ?? null;
+  const biography = character.biography ?? null;
+  const features = character.features ?? null;
+  const attacks = character.attacks ?? [];
+  const knownSpells = character.knownSpells ?? [];
+  const skillProficiencies = character.skillProficiencies ?? [];
+  const savingThrows = character.savingThrowProficiencyStatNames ?? [];
+  const inspiration = character.inspiration ?? false;
+  const deathSuccesses = character.deathSaveSuccesses ?? 0;
+  const deathFailures = character.deathSaveFailures ?? 0;
+  const hitDiceLabel = character.hitDiceTotal ?? character.hitDiceType ?? NA;
+
+  const profBonus = Math.floor((character.totalLevel - 1) / 4) + 2;
+  const statByName = new Map(stats.map((s) => [s.statTypeName.toLowerCase(), s]));
+  const dexStat = statByName.get('dexterity') ?? stats.find((s) => s.statTypeName.toLowerCase().startsWith('dex'));
+  const initiative = dexStat ? abilityMod(dexStat) : null;
+  // skillId → governing stat name, from reference skills.
+  const skillGovernByName = new Map((refContent?.skills ?? []).map((s) => [s.id, s.governingStatName]));
+
+  function skillModifier(skillId: string): number | null {
+    const govName = skillGovernByName.get(skillId);
+    if (!govName) return null;
+    const stat = statByName.get(govName.toLowerCase());
+    if (!stat) return null;
+    return abilityMod(stat) + profBonus;
+  }
+  const fmtMod = (n: number) => (n >= 0 ? `+${n}` : `${n}`);
+
   /* ── tab content (left main column) ───────────────────────── */
   function renderTab(): ReactNode {
     if (!character) return null;
@@ -163,7 +199,7 @@ export default function FolioPage() {
           <>
             <PanelHeader
               title="Sanctioned Strikes"
-              sub={`${weapons.length} blade${weapons.length === 1 ? '' : 's'} bound to the hands`}
+              sub={`${attacks.length} attack${attacks.length === 1 ? '' : 's'} · ${weapons.length} blade${weapons.length === 1 ? '' : 's'} equipped`}
               glyph="sword"
               right={
                 <button className="ao-btn ao-btn--ghost ao-btn--sm" onClick={() => navigate(`/campaigns/${campaignId}/characters/${characterId}/inventory`)}>
@@ -171,24 +207,31 @@ export default function FolioPage() {
                 </button>
               }
             />
-            {weapons.length === 0 ? (
-              <VoidBody note="No weapon is bound to the hands. Equip arms in the Arsenal." />
+            {attacks.length === 0 && weapons.length === 0 ? (
+              <VoidBody note="No attacks recorded and no weapon bound to the hands. Equip arms in the Arsenal." />
             ) : (
               <table className="ao-table">
                 <thead>
-                  <tr><th>Weapon</th><th>Hit</th><th>Damage</th><th>Type</th><th>Range</th></tr>
+                  <tr><th>Attack</th><th>Hit</th><th>Damage</th><th>Type</th></tr>
                 </thead>
                 <tbody>
+                  {attacks.map((a, i) => (
+                    <tr key={`atk-${i}`}>
+                      <td style={{ color: 'var(--ink-bright)' }}>{a.name}</td>
+                      <td className="ao-num" style={{ color: 'var(--gold-pale)' }}>{a.attackBonus}</td>
+                      <td className="ao-num" style={{ color: 'var(--ink-bright)' }}>{a.damage}</td>
+                      <td className="ao-italic" style={{ color: 'var(--ink-faint)' }}>{a.damageType}</td>
+                    </tr>
+                  ))}
                   {weapons.map((w) => (
                     <tr key={w.id}>
-                      <td style={{ color: 'var(--ink-bright)' }}>
+                      <td style={{ color: 'var(--ink-quiet)' }}>
                         {w.displayName}
                         {w.isUnique && <span style={{ marginLeft: 8 }}><OrdoChip tone="gold" glyph="diamond-fill">attuned</OrdoChip></span>}
                       </td>
                       <td className="ao-num" style={{ color: 'var(--ink-ghost)' }}>{NA}</td>
                       <td className="ao-num" style={{ color: 'var(--ink-ghost)' }}>{NA}</td>
-                      <td className="ao-italic" style={{ color: 'var(--ink-faint)' }}>{w.itemTypeName ?? NA}</td>
-                      <td className="ao-codex">{w.slot?.replace('_', ' ').toLowerCase()}</td>
+                      <td className="ao-italic" style={{ color: 'var(--ink-faint)' }}>{w.itemTypeName ?? w.slot?.replace('_', ' ').toLowerCase() ?? NA}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -199,9 +242,25 @@ export default function FolioPage() {
       case 'spells':
         return (
           <>
-            <PanelHeader title="Litanies & Spells" sub="Reserves & founts · ± at the table" glyph="hex" tone="arcane" />
-            {!resources || resources.length === 0 ? (
-              <VoidBody note="No reserves or founts are tracked for this soul." />
+            <PanelHeader title="Litanies & Spells" sub={`${knownSpells.length} known · reserves & founts`} glyph="hex" tone="arcane" />
+            {knownSpells.length > 0 && (
+              <div style={{ padding: '14px 16px', borderBottom: '1px solid var(--hairline)' }}>
+                <div className="ao-overline" style={{ marginBottom: 10 }}>Known Litanies</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  {[...knownSpells].sort((a, b) => a.level - b.level).map((sp) => (
+                    <div key={sp.spellId} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <span className="ao-num" style={{ width: 30, flexShrink: 0, color: 'var(--arcane)', fontSize: 12 }}>
+                        {sp.level === 0 ? 'C' : `L${sp.level}`}
+                      </span>
+                      <span style={{ flex: 1, color: 'var(--ink-bright)', fontSize: 13 }}>{sp.name}</span>
+                      {sp.school && <span className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 11 }}>{sp.school}</span>}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            {(!resources || resources.length === 0) ? (
+              knownSpells.length === 0 ? <VoidBody note="No litanies known and no reserves tracked for this soul." /> : null
             ) : (
               <div style={{ padding: 16 }}>
                 {resources.map((r, i) => {
@@ -224,22 +283,36 @@ export default function FolioPage() {
       case 'features':
         return (
           <>
-            <PanelHeader title="Class Features" sub="Granted by oath & tier" glyph="sigil-3" />
+            <PanelHeader
+              title="Class Features"
+              sub="Granted by oath & tier"
+              glyph="sigil-3"
+              right={
+                <button className="ao-btn ao-btn--ghost ao-btn--sm" onClick={() => navigate(`/campaigns/${campaignId}/characters/${characterId}/rewards`)}>
+                  <Rune kind="arrow-r" size={9} /> Rewards
+                </button>
+              }
+            />
             {!character.classLevels || character.classLevels.length === 0 ? (
               <VoidBody note="No class progression recorded for this soul." />
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column' }}>
                 {character.classLevels.map((c, i) => (
                   <div key={c.classId} style={{ padding: 14, borderBottom: i < character.classLevels.length - 1 ? '1px solid var(--hairline)' : 'none' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 4 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
                       <span className="ao-h6" style={{ fontSize: 15 }}>{c.className}</span>
                       <span className="ao-num" style={{ color: 'var(--gold-pale)', fontSize: 13 }}>level {c.classLevel}</span>
                     </div>
-                    <div className="ao-italic" style={{ fontSize: 13, color: 'var(--ink-quiet)' }}>
-                      Detailed feature grants await the rewards endpoint.
-                    </div>
                   </div>
                 ))}
+                {features && (
+                  <div style={{ padding: 16, borderTop: '1px solid var(--rule)' }}>
+                    <div className="ao-overline" style={{ marginBottom: 8 }}>Recorded Features</div>
+                    <p className="ao-italic" style={{ fontSize: 13, color: 'var(--ink-quiet)', lineHeight: 1.55, whiteSpace: 'pre-wrap' }}>
+                      {features}
+                    </p>
+                  </div>
+                )}
               </div>
             )}
           </>
@@ -247,41 +320,84 @@ export default function FolioPage() {
       case 'skills':
         return (
           <>
-            <PanelHeader title="Skills" sub="Proficiencies & expertise" glyph="eye" right={<span className="ao-overline" style={{ fontSize: 8, color: 'var(--ink-faint)' }}>TODO</span>} />
-            <VoidBody note="Skill proficiencies are not yet provided by the character API." />
+            <PanelHeader title="Skills" sub={`${skillProficiencies.length} proficiencies · prof. bonus +${profBonus}`} glyph="eye" />
+            {skillProficiencies.length === 0 ? (
+              <VoidBody note="No skill proficiencies recorded for this soul." />
+            ) : (
+              <table className="ao-table">
+                <thead>
+                  <tr><th>Skill</th><th>Source</th><th style={{ textAlign: 'right' }}>Mod</th></tr>
+                </thead>
+                <tbody>
+                  {[...skillProficiencies].sort((a, b) => a.skillName.localeCompare(b.skillName)).map((sp) => {
+                    const mod = skillModifier(sp.skillId);
+                    return (
+                      <tr key={sp.skillId}>
+                        <td style={{ color: 'var(--ink-bright)' }}>{sp.skillName}</td>
+                        <td className="ao-italic" style={{ color: 'var(--ink-faint)' }}>{sp.source.toLowerCase()}</td>
+                        <td className="ao-num" style={{ textAlign: 'right', color: mod != null ? 'var(--gold-pale)' : 'var(--ink-ghost)' }}>
+                          {mod != null ? fmtMod(mod) : NA}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            )}
           </>
         );
       case 'biography':
         return (
           <>
-            <PanelHeader title="Biography" sub="Lineage, traits & life record" glyph="book" />
-            {!snap ? (
-              <VoidBody note="No lineage record is sealed for this soul." />
-            ) : (
-              <div style={{ padding: 18, display: 'flex', flexDirection: 'column', gap: 16 }}>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
-                  <IdentityField label="Race" value={snap.raceName} sub={lineageName ?? 'no lineage'} />
-                  <IdentityField label="Size" value={snap.size.charAt(0) + snap.size.slice(1).toLowerCase()} sub={snap.darkvisionRange ? `darkvision ${snap.darkvisionRange} ft` : 'no darkvision'} />
-                  <IdentityField label="Speed" value={walkSpeed != null ? `${walkSpeed} ft` : NA} sub={extraSpeeds.length ? extraSpeeds.map(([k, v]) => `${k} ${v} ft`).join(' · ') : 'walking'} />
-                  <IdentityField label="ASI Bonuses" value={snap.allowAbilityScoreBonuses ? 'Allowed' : 'Fixed'} sub="lineage rule" />
-                </div>
-
-                {raceTraits.length > 0 && (
-                  <div>
-                    <div className="ao-overline" style={{ marginBottom: 8 }}>Racial Traits</div>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                      {raceTraits.map((t) => (
-                        <OrdoChip key={t} tone="gold" glyph="diamond-fill">{t}</OrdoChip>
-                      ))}
-                    </div>
-                  </div>
+            <PanelHeader title="Biography" sub="Background, lineage, traits & life record" glyph="book" />
+            <div style={{ padding: 18, display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
+                <IdentityField label="Background" value={background?.name ?? NA} sub={background?.skillProficiencyNames?.length ? background.skillProficiencyNames.join(', ') : 'no granted skills'} />
+                <IdentityField label="Alignment" value={alignment ?? NA} sub="moral compass" />
+                {snap && (
+                  <>
+                    <IdentityField label="Race" value={snap.raceName} sub={lineageName ?? 'no lineage'} />
+                    <IdentityField label="Size" value={snap.size.charAt(0) + snap.size.slice(1).toLowerCase()} sub={snap.darkvisionRange ? `darkvision ${snap.darkvisionRange} ft` : 'no darkvision'} />
+                    <IdentityField label="Speed" value={walkSpeed != null ? `${walkSpeed} ft` : NA} sub={extraSpeeds.length ? extraSpeeds.map(([k, v]) => `${k} ${v} ft`).join(' · ') : 'walking'} />
+                    <IdentityField label="ASI Bonuses" value={snap.allowAbilityScoreBonuses ? 'Allowed' : 'Fixed'} sub="lineage rule" />
+                  </>
                 )}
-
-                <p className="ao-codex" style={{ fontSize: 11, color: 'var(--ink-faint)', lineHeight: 1.5 }}>
-                  Background, alignment and personal life record are not yet served by the character API.
-                </p>
               </div>
-            )}
+
+              {background?.description && (
+                <div>
+                  <div className="ao-overline" style={{ marginBottom: 6 }}>Background</div>
+                  <p className="ao-italic" style={{ fontSize: 13, color: 'var(--ink-quiet)', lineHeight: 1.55 }}>{background.description}</p>
+                </div>
+              )}
+
+              {biography && (biography.personalityTraits || biography.ideals || biography.bonds || biography.flaws) && (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
+                  {([
+                    ['Personality Traits', biography.personalityTraits],
+                    ['Ideals', biography.ideals],
+                    ['Bonds', biography.bonds],
+                    ['Flaws', biography.flaws],
+                  ] as const).filter(([, v]) => !!v).map(([label, v]) => (
+                    <div key={label}>
+                      <div className="ao-overline" style={{ marginBottom: 6 }}>{label}</div>
+                      <p className="ao-italic" style={{ fontSize: 13, color: 'var(--ink-quiet)', lineHeight: 1.5, whiteSpace: 'pre-wrap' }}>{v}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {raceTraits.length > 0 && (
+                <div>
+                  <div className="ao-overline" style={{ marginBottom: 8 }}>Racial Traits</div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                    {raceTraits.map((t) => (
+                      <OrdoChip key={t} tone="gold" glyph="diamond-fill">{t}</OrdoChip>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </>
         );
       default:
@@ -316,15 +432,24 @@ export default function FolioPage() {
         {/* Identity */}
         <OrdoPanel frame padding={0}>
           <div style={{ display: 'flex', gap: 18, padding: 20 }}>
-            <Placeholder style={{ width: 140, height: 180, flexShrink: 0 }}>portrait</Placeholder>
+            {character.avatarUrl ? (
+              <img
+                src={character.avatarUrl}
+                alt={character.name}
+                style={{ width: 140, height: 180, flexShrink: 0, objectFit: 'cover', border: '1px solid var(--rule)', background: 'var(--abyss)' }}
+              />
+            ) : (
+              <Placeholder style={{ width: 140, height: 180, flexShrink: 0 }}>portrait</Placeholder>
+            )}
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
                 <span className="ao-codex">№ {character.id.slice(0, 8)}</span>
                 <CharStatusBadge status={character.status ?? 'ACTIVE'} />
+                {alignment && <OrdoChip tone="gold" glyph="diamond-fill">{alignment}</OrdoChip>}
               </div>
               <div className="ao-h3" style={{ marginTop: 8, fontSize: 32 }}>{character.name}</div>
               <div className="ao-italic" style={{ marginTop: 2, fontSize: 16, color: 'var(--ink-quiet)' }}>
-                {character.race?.name ?? 'Unknown'}{lineageName ? ` (${lineageName})` : ''} {primaryClass ? `· ${primaryClass.className}` : ''}
+                {character.race?.name ?? 'Unknown'}{lineageName ? ` (${lineageName})` : ''} {primaryClass ? `· ${primaryClass.className}` : ''}{background ? ` · ${background.name}` : ''}
               </div>
 
               <OrdoDivider glyph="diamond-fill" color="var(--bronze)" />
@@ -358,8 +483,8 @@ export default function FolioPage() {
               </div>
               <div className="ao-bar"><div className="ao-bar-fill ao-bar-fill--ember" style={{ width: `${hpPct}%` }} /></div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 10 }}>
-                <span className="ao-codex">Temp +0 · Death saves {NA}</span>
-                <span className="ao-codex">Hit Dice {NA}</span>
+                <span className="ao-codex">Temp +{tempHp} · Death {deathSuccesses}✓ / {deathFailures}✗</span>
+                <span className="ao-codex">Hit Dice {hitDiceLabel}</span>
               </div>
             </button>
             <div style={{ padding: '18px 20px' }}>
@@ -369,17 +494,63 @@ export default function FolioPage() {
               </div>
               <div className="ao-bar"><div className="ao-bar-fill ao-bar-fill--gold" style={{ width: '100%', opacity: 0.35 }} /></div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 10 }}>
-                <span className="ao-codex">Inspiration {NA}</span>
+                <span className="ao-codex" style={{ color: inspiration ? 'var(--gold-pale)' : undefined }}>
+                  Inspiration {inspiration ? '◆ yes' : '— no'}
+                </span>
                 <span className="ao-codex">{(character.experience ?? 0).toLocaleString()} XP earned</span>
               </div>
             </div>
           </div>
         </OrdoPanel>
 
-        {/* Oath & Tenets — not served by API */}
+        {/* Saving Throws */}
         <OrdoPanel frame padding={0}>
-          <PanelHeader title="Oath & Tenets" sub="Covenants & sworn vows" glyph="flame" tone="ember" right={<span className="ao-overline" style={{ fontSize: 8, color: 'var(--ink-faint)' }}>TODO</span>} />
-          <VoidBody note="Oaths, tenets and covenants are not yet served by the character API." />
+          <PanelHeader title="Saving Throws" sub="Proficient defences" glyph="flame" tone="ember" />
+          {savingThrows.length === 0 ? (
+            <VoidBody note="No saving-throw proficiencies recorded for this soul." />
+          ) : (
+            <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {savingThrows.map((name) => {
+                const stat = statByName.get(name.toLowerCase());
+                const mod = stat ? abilityMod(stat) + profBonus : null;
+                return (
+                  <div key={name} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', background: 'var(--abyss)', border: '1px solid var(--hairline)' }}>
+                    <Rune kind="diamond-fill" size={9} color="var(--gold-pale)" />
+                    <span style={{ flex: 1, color: 'var(--ink-bright)', fontSize: 13 }}>{name}</span>
+                    <span className="ao-num" style={{ color: 'var(--gold-pale)', fontSize: 13 }}>{mod != null ? fmtMod(mod) : NA}</span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </OrdoPanel>
+
+        {/* Treasury · Coin */}
+        <OrdoPanel frame padding={0}>
+          <PanelHeader
+            title="Treasury"
+            sub="Coin & wealth"
+            glyph="coin"
+            tone="gold"
+            right={
+              <button className="ao-btn ao-btn--ghost ao-btn--sm" onClick={() => navigate(`/campaigns/${campaignId}/characters/${characterId}/wallet`)}>
+                <Rune kind="arrow-r" size={9} /> Wallet
+              </button>
+            }
+          />
+          {(wallet ?? []).length === 0 ? (
+            <VoidBody note="No coin is recorded in this soul's purse." />
+          ) : (
+            <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {(wallet ?? []).map((entry) => (
+                <div key={entry.currencyTypeId} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', background: 'var(--abyss)', border: '1px solid var(--hairline)' }}>
+                  <Rune kind="coin" size={11} color="var(--gold-pale)" />
+                  <span style={{ flex: 1, color: 'var(--ink-bright)', fontSize: 13 }}>{entry.currencyName}</span>
+                  <span className="ao-num" style={{ color: 'var(--gold-pale)', fontSize: 14 }}>{entry.amount.toLocaleString()}</span>
+                </div>
+              ))}
+            </div>
+          )}
         </OrdoPanel>
       </div>
 
@@ -419,10 +590,10 @@ export default function FolioPage() {
           <div className="ao-overline" style={{ marginBottom: 8 }}>Saves & Tier</div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
             {[
-              { label: 'Armour', value: NA },
-              { label: 'Init', value: NA },
+              { label: 'Armour', value: armorClass != null ? `${armorClass}` : NA },
+              { label: 'Init', value: initiative != null ? fmtMod(initiative) : NA },
               { label: 'Speed', value: walkSpeed != null ? `${walkSpeed}` : NA },
-              { label: 'Prof.', value: `+${Math.max(2, Math.ceil(character.totalLevel / 4) + 1)}` },
+              { label: 'Prof.', value: `+${profBonus}` },
             ].map((c) => (
               <div key={c.label} style={{ padding: 8, background: 'var(--abyss)', border: '1px solid var(--rule)', textAlign: 'center' }}>
                 <div className="ao-overline" style={{ fontSize: 9 }}>{c.label}</div>

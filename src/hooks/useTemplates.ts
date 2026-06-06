@@ -90,6 +90,17 @@ function detailToEntry(item: { id: string; name: string }): AvailableContentEntr
   return { id: item.id, name: item.name, source: VANILLA_SOURCE };
 }
 
+// Currency reference (gold/silver/…), used to resolve wizard coin pools to ids.
+export function useReferenceCurrencies() {
+  return useQuery({
+    queryKey: ['reference', 'currencies'],
+    queryFn: async () => {
+      const response = await referenceApi.getCurrencies();
+      return response.data ?? [];
+    },
+  });
+}
+
 export function useGlobalReferenceContent() {
   return useQuery({
     queryKey: ['reference', 'global'],

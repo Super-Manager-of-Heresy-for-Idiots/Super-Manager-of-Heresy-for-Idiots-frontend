@@ -15,6 +15,18 @@ export interface CreateFullCharacterAbilityScore {
   baseValue: number;
 }
 
+export interface CreateFullCharacterBiography {
+  personalityTraits?: string;
+  ideals?: string;
+  bonds?: string;
+  flaws?: string;
+}
+
+export interface CreateFullCharacterCoin {
+  currencyTypeId: string;
+  amount: number;
+}
+
 export interface CreateFullCharacterRequest {
   campaignId: string;
   name: string;
@@ -49,7 +61,10 @@ export interface CreateFullCharacterRequest {
   maxHp?: number;
   hitDice?: string;
   avatar?: string | null;
-  biography?: string;
+  // Personal-life record (Traits / Ideals / Bonds / Flaws) — persisted as an object.
+  biography?: CreateFullCharacterBiography;
+  // Starting wallet balances, resolved to backend currency ids.
+  startingCoins?: CreateFullCharacterCoin[];
   features?: string;
   proficiencies?: string;
 }

@@ -10,6 +10,7 @@ import type {
   ProficiencySkillResponse,
   StatTypeResponse,
 } from '@/types';
+import type { ReferenceCurrencyType } from '@/api/reference.api';
 
 // ── Shared availability + step props ───────────────────────
 export interface WizardClassOption {
@@ -37,6 +38,7 @@ export interface WizardAvailability {
   backgrounds: BackgroundResponse[];
   proficiencySkills: ProficiencySkillResponse[];
   statTypes: StatTypeResponse[];
+  currencies: ReferenceCurrencyType[];
 }
 
 // ── Selectable card ────────────────────────────────────────

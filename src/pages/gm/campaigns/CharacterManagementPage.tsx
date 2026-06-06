@@ -74,13 +74,6 @@ export default function CharacterManagementPage() {
         ready: false,
       },
       {
-        title: 'HP',
-        body: 'Apply damage and healing through the campaign HP controller.',
-        glyph: 'cross',
-        to: `${base}/hp`,
-        ready: false,
-      },
-      {
         title: 'Rewards & Progression',
         body: 'View feats, class features and subclasses acquired across all classes.',
         glyph: 'sigil-3',

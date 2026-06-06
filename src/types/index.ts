@@ -119,8 +119,54 @@ export interface CharacterResponse {
   status?: CharacterStatus;
   currentHp?: number;
   maxHp?: number;
+  tempHp?: number;
+  // Rich sheet fields (persisted by the wizard / full-create endpoint).
+  alignment?: string;
+  avatarUrl?: string;
+  armorClass?: number;
+  hitDiceType?: string;
+  hitDiceTotal?: string;
+  inspiration?: boolean;
+  deathSaveSuccesses?: number;
+  deathSaveFailures?: number;
+  savingThrowProficiencyStatNames?: string[];
+  background?: BackgroundResponse;
+  biography?: BiographyResponse;
+  features?: string;
+  skillProficiencies?: CharacterSkillProficiency[];
+  knownSpells?: CharacterKnownSpell[];
+  attacks?: CharacterAttack[];
   createdAt: string;
   updatedAt: string;
+}
+
+export interface BiographyResponse {
+  personalityTraits?: string;
+  ideals?: string;
+  bonds?: string;
+  flaws?: string;
+}
+
+export type SkillProficiencySource = 'CLASS' | 'BACKGROUND' | 'RACE' | 'FEAT' | 'OTHER';
+
+export interface CharacterSkillProficiency {
+  skillId: string;
+  skillName: string;
+  source: SkillProficiencySource;
+}
+
+export interface CharacterKnownSpell {
+  spellId: string;
+  name: string;
+  level: number;
+  school?: string;
+}
+
+export interface CharacterAttack {
+  name: string;
+  attackBonus: string;
+  damage: string;
+  damageType: string;
 }
 
 export interface ClassLevelResponse {

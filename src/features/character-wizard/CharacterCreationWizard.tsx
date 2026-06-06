@@ -3,6 +3,7 @@ import toast from 'react-hot-toast';
 import { Rune, Sigil } from '@/components/ordo';
 import type { AvailableContentEntry } from '@/types';
 import type { CreateFullCharacterRequest } from '@/api/characters-full.api';
+import type { ReferenceCurrencyType } from '@/api/reference.api';
 import {
   ABILITIES,
   BACKGROUNDS,
@@ -51,6 +52,7 @@ interface CharacterCreationWizardProps {
   referenceBackgrounds?: BackgroundResponse[];
   referenceProficiencySkills?: ProficiencySkillResponse[];
   referenceStatTypes?: StatTypeResponse[];
+  availableCurrencies?: ReferenceCurrencyType[];
   submitting: boolean;
   onSubmit: (req: CreateFullCharacterRequest) => void;
   onCancel: () => void;
@@ -76,6 +78,39 @@ const scoreMethodForApi = (method: WizardChar['scoreMethod']): string => {
   if (method === 'roll') return 'ROLL';
   return 'STANDARD_ARRAY';
 };
+
+// Traits / Ideals / Bonds / Flaws → backend biography object (omit when empty).
+function buildBiography(c: WizardChar): CreateFullCharacterRequest['biography'] {
+  const trim = (v: string) => (v.trim() ? v.trim() : undefined);
+  const bio = {
+    personalityTraits: trim(c.traits),
+    ideals: trim(c.ideals),
+    bonds: trim(c.bonds),
+    flaws: trim(c.flaws),
+  };
+  return Object.values(bio).some(Boolean) ? bio : undefined;
+}
+
+// Wizard coin pools (pp/gp/ep/sp/cp) → wallet entries keyed by currency id.
+function buildStartingCoins(
+  c: WizardChar,
+  currencies: ReferenceCurrencyType[],
+): CreateFullCharacterRequest['startingCoins'] {
+  if (!currencies.length) return undefined;
+  const byAbbr = new Map(
+    currencies
+      .filter((cur) => cur.abbreviation)
+      .map((cur) => [cur.abbreviation!.toLowerCase(), cur.id]),
+  );
+  const entries = (Object.keys(c.coins) as (keyof WizardChar['coins'])[])
+    .map((key) => {
+      const amount = Number(c.coins[key]) || 0;
+      const currencyTypeId = byAbbr.get(key.toLowerCase());
+      return amount > 0 && currencyTypeId ? { currencyTypeId, amount } : null;
+    })
+    .filter((entry): entry is { currencyTypeId: string; amount: number } => entry !== null);
+  return entries.length ? entries : undefined;
+}
 
 function validateCampaignReferences(id: StepId, c: WizardChar, availability: WizardAvailability): boolean {
   if (id === 'race') {
@@ -114,6 +149,7 @@ function buildAvailability(
   referenceBackgrounds: BackgroundResponse[] = [],
   referenceProficiencySkills: ProficiencySkillResponse[] = [],
   referenceStatTypes: StatTypeResponse[] = [],
+  availableCurrencies: ReferenceCurrencyType[] = [],
 ): WizardAvailability {
   const classIdByKey: Record<string, string> = {};
   const raceIdByKey: Record<string, string> = {};
@@ -175,6 +211,7 @@ function buildAvailability(
     backgrounds: referenceBackgrounds,
     proficiencySkills: referenceProficiencySkills,
     statTypes: referenceStatTypes,
+    currencies: availableCurrencies,
   };
 }
 
@@ -190,6 +227,7 @@ export function CharacterCreationWizard({
   referenceBackgrounds = [],
   referenceProficiencySkills = [],
   referenceStatTypes = [],
+  availableCurrencies = [],
   submitting,
   onSubmit,
   onCancel,
@@ -209,6 +247,7 @@ export function CharacterCreationWizard({
       referenceBackgrounds,
       referenceProficiencySkills,
       referenceStatTypes,
+      availableCurrencies,
     ),
     [
       availableClasses,
@@ -221,6 +260,7 @@ export function CharacterCreationWizard({
       referenceProficiencySkills,
       referenceRaces,
       referenceStatTypes,
+      availableCurrencies,
     ],
   );
 
@@ -344,6 +384,8 @@ export function CharacterCreationWizard({
       avatar: c.avatar,
       features: c.features,
       proficiencies: c.proficiencies,
+      biography: buildBiography(c),
+      startingCoins: buildStartingCoins(c, availability.currencies),
     };
     onSubmit(req);
   };

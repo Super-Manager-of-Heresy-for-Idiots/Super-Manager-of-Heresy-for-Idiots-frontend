@@ -3,6 +3,7 @@ import { useAuthStore } from '@/store/authStore';
 import { useCampaign } from '@/hooks/useCampaigns';
 import { useAvailableContent, useCampaignReferenceContent } from '@/hooks/useHomebrewCampaign';
 import { useCreateFullCharacter } from '@/hooks/useCreateFullCharacter';
+import { useReferenceCurrencies } from '@/hooks/useTemplates';
 import { CharacterCreationWizard } from '@/features/character-wizard/CharacterCreationWizard';
 import type { CreateFullCharacterRequest } from '@/api/characters-full.api';
 
@@ -13,6 +14,7 @@ export default function CharacterCreationWizardPage() {
   const { data: campaign, isLoading, error } = useCampaign(campaignId!);
   const { data: availableContent, isLoading: contentLoading } = useAvailableContent(campaignId!);
   const { data: referenceContent, isLoading: referenceLoading } = useCampaignReferenceContent(campaignId!);
+  const { data: currencies } = useReferenceCurrencies();
   const createMutation = useCreateFullCharacter();
 
   const backToDashboard = () => navigate(`/campaigns/${campaignId}`);
@@ -70,6 +72,7 @@ export default function CharacterCreationWizardPage() {
       referenceBackgrounds={referenceContent?.backgrounds ?? []}
       referenceProficiencySkills={referenceContent?.skills ?? []}
       referenceStatTypes={referenceContent?.statTypes ?? []}
+      availableCurrencies={currencies ?? []}
       submitting={createMutation.isPending}
       onSubmit={handleSubmit}
       onCancel={backToDashboard}
