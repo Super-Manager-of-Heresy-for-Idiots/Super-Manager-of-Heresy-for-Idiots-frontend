@@ -57,6 +57,20 @@ interface CharacterCreationWizardProps {
 }
 
 const normalizeContentName = (value: string): string => value.trim().toLowerCase();
+const VANILLA_CLASS_KEY_BY_ID: Record<string, string> = {
+  'b0000000-0000-0000-0000-000000000001': 'fighter',
+  'b0000000-0000-0000-0000-000000000002': 'wizard',
+  'b0000000-0000-0000-0000-000000000003': 'rogue',
+  'b0000000-0000-0000-0000-000000000004': 'cleric',
+  'b0000000-0000-0000-0000-000000000005': 'ranger',
+  'b0000000-0000-0000-0000-000000000006': 'paladin',
+  'b0000000-0000-0000-0000-000000000007': 'bard',
+  'b0000000-0000-0000-0000-000000000008': 'druid',
+  'b0000000-0000-0000-0000-000000000009': 'barbarian',
+  'b0000000-0000-0000-0000-000000000010': 'monk',
+  'b0000000-0000-0000-0000-000000000011': 'sorcerer',
+  'b0000000-0000-0000-0000-000000000012': 'warlock',
+};
 const scoreMethodForApi = (method: WizardChar['scoreMethod']): string => {
   if (method === 'pointbuy') return 'POINT_BUY';
   if (method === 'roll') return 'ROLL';
@@ -104,6 +118,11 @@ function buildAvailability(
   const classIdByKey: Record<string, string> = {};
   const raceIdByKey: Record<string, string> = {};
   const classByName = new Map(CLASSES.map((cl) => [normalizeContentName(cl.label), cl]));
+  const classByVanillaId = new Map<string, (typeof CLASSES)[number]>();
+  Object.entries(VANILLA_CLASS_KEY_BY_ID).forEach(([id, key]) => {
+    const local = CLASSES.find((cl) => cl.key === key);
+    if (local) classByVanillaId.set(id, local);
+  });
   const raceByName = new Map(RACES.map((r) => [normalizeContentName(r.label), r]));
   const classDetailById = new Map(referenceClasses.map((cl) => [cl.id, cl]));
   const raceDetailById = new Map(referenceRaces.map((r) => [r.id, r]));
@@ -117,12 +136,15 @@ function buildAvailability(
       return true;
     })
     .map((entry) => {
-      const local = classByName.get(normalizeContentName(entry.name));
+      const detail = classDetailById.get(entry.id);
+      const local = classByName.get(normalizeContentName(entry.name))
+        || (detail ? classByName.get(normalizeContentName(detail.name)) : undefined)
+        || classByVanillaId.get(entry.id);
       const localKeyAvailable = local && !usedClassKeys.has(local.key);
       const key = localKeyAvailable ? local.key : `db-class:${entry.id}`;
       usedClassKeys.add(key);
       classIdByKey[key] = entry.id;
-      return { key, entry, local, detail: classDetailById.get(entry.id) };
+      return { key, entry, local, detail };
     });
 
   const seenRaceIds = new Set<string>();

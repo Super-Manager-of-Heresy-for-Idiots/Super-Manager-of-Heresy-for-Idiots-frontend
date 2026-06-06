@@ -582,8 +582,8 @@ export function StepAbilities({ c, A, n, total }: StepProps) {
 // STEP 5 — BACKGROUND & SKILLS
 // ════════════════════════════════════════════════════════════
 export function StepBackground({ c, A, n, total, availability }: StepProps) {
-  const cls = classByKey(c.classKey);
   const selectedClass = availability.classOptions.find((option) => option.key === c.classKey);
+  const cls = classByKey(c.classKey) || selectedClass?.local;
   const bg = BACKGROUNDS.find((b) => b.key === c.backgroundKey);
   const dbBackground = availability.backgrounds.find((b) => c.backgroundKey === `db-background:${b.id}` || norm(b.name) === norm(c.background));
   const backgroundOptions = availability.backgrounds.length
