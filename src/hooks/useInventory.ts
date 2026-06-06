@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
-import { inventoryV2Api } from '@/api/inventory-v2.api';
+import { inventoryApi } from '@/api/inventory.api';
 import { itemTemplatesApi } from '@/api/item-templates.api';
 import type {
   GrantItemRequest,
@@ -27,7 +27,7 @@ export function useCharacterInventory(campaignId: string, characterId: string) {
   return useQuery({
     queryKey: ['campaigns', campaignId, 'characters', characterId, 'inventory'],
     queryFn: async () => {
-      const response = await inventoryV2Api.list(campaignId, characterId);
+      const response = await inventoryApi.list(campaignId, characterId);
       return response.data;
     },
     enabled: !!campaignId && !!characterId,
@@ -38,7 +38,7 @@ export function useEquippedInventory(campaignId: string, characterId: string) {
   return useQuery({
     queryKey: ['campaigns', campaignId, 'characters', characterId, 'inventory', 'equipped'],
     queryFn: async () => {
-      const response = await inventoryV2Api.listEquipped(campaignId, characterId);
+      const response = await inventoryApi.listEquipped(campaignId, characterId);
       return response.data;
     },
     enabled: !!campaignId && !!characterId,
@@ -49,7 +49,7 @@ export function useBackpackInventory(campaignId: string, characterId: string) {
   return useQuery({
     queryKey: ['campaigns', campaignId, 'characters', characterId, 'inventory', 'backpack'],
     queryFn: async () => {
-      const response = await inventoryV2Api.listBackpack(campaignId, characterId);
+      const response = await inventoryApi.listBackpack(campaignId, characterId);
       return response.data;
     },
     enabled: !!campaignId && !!characterId,
@@ -61,7 +61,7 @@ export function useGrantItem() {
 
   return useMutation({
     mutationFn: ({ campaignId, characterId, data }: { campaignId?: string; characterId: string; data: GrantItemRequest }) =>
-      inventoryV2Api.grant(campaignId || '_', characterId, data),
+      inventoryApi.grant(campaignId || '_', characterId, data),
     onSuccess: (_, variables) => {
       if (variables.campaignId) {
         queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId, 'inventory'] });
@@ -81,7 +81,7 @@ export function useRemoveItem() {
 
   return useMutation({
     mutationFn: ({ campaignId, characterId, instanceId }: { campaignId: string; characterId: string; instanceId: string }) =>
-      inventoryV2Api.remove(campaignId, characterId, instanceId),
+      inventoryApi.remove(campaignId, characterId, instanceId),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId, 'inventory'] });
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId] });
@@ -107,7 +107,7 @@ export function useEquipItem() {
       characterId: string;
       instanceId: string;
       data: EquipItemRequest;
-    }) => inventoryV2Api.equip(campaignId, characterId, instanceId, data),
+    }) => inventoryApi.equip(campaignId, characterId, instanceId, data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId, 'inventory'] });
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId] });
@@ -131,7 +131,7 @@ export function useUnequipItem() {
       campaignId: string;
       characterId: string;
       instanceId: string;
-    }) => inventoryV2Api.unequip(campaignId, characterId, instanceId),
+    }) => inventoryApi.unequip(campaignId, characterId, instanceId),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId, 'inventory'] });
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId] });
@@ -157,7 +157,7 @@ export function useRenameItem() {
       characterId: string;
       instanceId: string;
       data: RenameItemRequest;
-    }) => inventoryV2Api.rename(campaignId, characterId, instanceId, data),
+    }) => inventoryApi.rename(campaignId, characterId, instanceId, data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId, 'inventory'] });
       toast.success('Item renamed!');
@@ -182,7 +182,7 @@ export function useTransferItem() {
       fromCharId: string;
       instanceId: string;
       data: TransferItemRequest;
-    }) => inventoryV2Api.transfer(campaignId, fromCharId, instanceId, data),
+    }) => inventoryApi.transfer(campaignId, fromCharId, instanceId, data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.fromCharId, 'inventory'] });
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters'] });
@@ -200,7 +200,7 @@ export function useInstanceEnchantments(campaignId: string, characterId: string,
   return useQuery({
     queryKey: ['campaigns', campaignId, 'characters', characterId, 'inventory', instanceId, 'enchantments'],
     queryFn: async () => {
-      const response = await inventoryV2Api.getEnchantments(campaignId, characterId, instanceId);
+      const response = await inventoryApi.getEnchantments(campaignId, characterId, instanceId);
       return response.data;
     },
     enabled: !!campaignId && !!characterId && !!instanceId,
@@ -221,7 +221,7 @@ export function useAddInstanceEnchantment() {
       characterId: string;
       instanceId: string;
       data: CreateEnchantmentRequest;
-    }) => inventoryV2Api.addEnchantment(campaignId, characterId, instanceId, data),
+    }) => inventoryApi.addEnchantment(campaignId, characterId, instanceId, data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
         queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId, 'inventory', variables.instanceId, 'enchantments'],
@@ -251,7 +251,7 @@ export function useRemoveInstanceEnchantment() {
       characterId: string;
       instanceId: string;
       enchantmentId: string;
-    }) => inventoryV2Api.removeEnchantment(campaignId, characterId, instanceId, enchantmentId),
+    }) => inventoryApi.removeEnchantment(campaignId, characterId, instanceId, enchantmentId),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
         queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId, 'inventory', variables.instanceId, 'enchantments'],

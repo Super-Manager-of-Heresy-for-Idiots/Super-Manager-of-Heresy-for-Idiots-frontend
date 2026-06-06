@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
-import { charactersV2Api } from '@/api/characters-v2.api';
+import { charactersApi } from '@/api/characters.api';
 import type {
   CreateCharacterInCampaignRequest,
   UpdateCharacterRequest,
@@ -16,18 +16,18 @@ export function useCampaignCharacters(campaignId: string) {
   return useQuery({
     queryKey: ['campaigns', campaignId, 'characters'],
     queryFn: async () => {
-      const response = await charactersV2Api.listInCampaign(campaignId);
+      const response = await charactersApi.listInCampaign(campaignId);
       return response.data;
     },
     enabled: !!campaignId,
   });
 }
 
-export function useCharacterV2(campaignId: string, characterId: string) {
+export function useCharacter(campaignId: string, characterId: string) {
   return useQuery({
     queryKey: ['campaigns', campaignId, 'characters', characterId],
     queryFn: async () => {
-      const response = await charactersV2Api.getById(campaignId, characterId);
+      const response = await charactersApi.getById(campaignId, characterId);
       return response.data;
     },
     enabled: !!campaignId && !!characterId,
@@ -39,7 +39,7 @@ export function useCreateCharacterInCampaign() {
 
   return useMutation({
     mutationFn: ({ campaignId, data }: { campaignId: string; data: CreateCharacterInCampaignRequest }) =>
-      charactersV2Api.createInCampaign(campaignId, data),
+      charactersApi.createInCampaign(campaignId, data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters'] });
       toast.success('Character created successfully!');
@@ -63,7 +63,7 @@ export function useUpdateCharacter() {
       campaignId: string;
       characterId: string;
       data: UpdateCharacterRequest;
-    }) => charactersV2Api.update(campaignId, characterId, data),
+    }) => charactersApi.update(campaignId, characterId, data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters'] });
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId] });
@@ -81,7 +81,7 @@ export function useDeleteCharacter() {
 
   return useMutation({
     mutationFn: ({ campaignId, characterId }: { campaignId: string; characterId: string }) =>
-      charactersV2Api.delete(campaignId, characterId),
+      charactersApi.delete(campaignId, characterId),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters'] });
       queryClient.removeQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId] });
@@ -98,7 +98,7 @@ export function useCharacterStats(campaignId: string, characterId: string) {
   return useQuery({
     queryKey: ['campaigns', campaignId, 'characters', characterId, 'stats'],
     queryFn: async () => {
-      const response = await charactersV2Api.getStats(campaignId, characterId);
+      const response = await charactersApi.getStats(campaignId, characterId);
       return response.data;
     },
     enabled: !!campaignId && !!characterId,
@@ -119,7 +119,7 @@ export function useUpdateCharacterStat() {
       characterId: string;
       statId: string;
       data: UpdateStatRequest;
-    }) => charactersV2Api.updateStat(campaignId, characterId, statId, data),
+    }) => charactersApi.updateStat(campaignId, characterId, statId, data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId, 'stats'] });
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId] });
@@ -139,7 +139,7 @@ export function useUpdateHp() {
     mutationFn: ({ campaignId, characterId, id, data }: { campaignId?: string; characterId?: string; id?: string; data: UpdateHpRequest }) => {
       const cId = characterId || id || '';
       const campId = campaignId || '_';
-      return charactersV2Api.modifyHp(campId, cId, data);
+      return charactersApi.modifyHp(campId, cId, data);
     },
     onSuccess: (_, variables) => {
       const cId = variables.characterId || variables.id || '';
@@ -160,7 +160,7 @@ export function useCharacterWallet(campaignId: string, characterId: string) {
   return useQuery({
     queryKey: ['campaigns', campaignId, 'characters', characterId, 'wallet'],
     queryFn: async () => {
-      const response = await charactersV2Api.getWallet(campaignId, characterId);
+      const response = await charactersApi.getWallet(campaignId, characterId);
       return response.data;
     },
     enabled: !!campaignId && !!characterId,
@@ -179,7 +179,7 @@ export function useModifyWallet() {
       const campId = campaignId || '_';
       const finalData: ModifyWalletRequest = { ...data };
       if (currencyTypeId && !finalData.currencyTypeId) finalData.currencyTypeId = currencyTypeId;
-      return charactersV2Api.modifyWallet(campId, cId, finalData);
+      return charactersApi.modifyWallet(campId, cId, finalData);
     },
     onSuccess: (_, variables) => {
       const cId = variables.characterId || variables.id || '';
@@ -200,7 +200,7 @@ export function useCharacterResources(campaignId: string, characterId: string) {
   return useQuery({
     queryKey: ['campaigns', campaignId, 'characters', characterId, 'resources'],
     queryFn: async () => {
-      const response = await charactersV2Api.getResources(campaignId, characterId);
+      const response = await charactersApi.getResources(campaignId, characterId);
       return response.data;
     },
     enabled: !!campaignId && !!characterId,
@@ -221,7 +221,7 @@ export function useModifyResource() {
         resourceTypeId: resourceTypeId || (data as ModifyResourceRequest).resourceTypeId || '',
         currentValue: ('value' in data) ? (data as { value: number }).value : (data as ModifyResourceRequest).currentValue,
       };
-      return charactersV2Api.modifyResource(campId, cId, finalData);
+      return charactersApi.modifyResource(campId, cId, finalData);
     },
     onSuccess: (_, variables) => {
       const cId = variables.characterId || variables.id || '';
@@ -241,7 +241,7 @@ export function useModifyResource() {
 export function useAbilityCheck() {
   return useMutation({
     mutationFn: ({ campaignId, characterId, statId }: { campaignId: string; characterId: string; statId: string }) =>
-      charactersV2Api.abilityCheck(campaignId, characterId, statId),
+      charactersApi.abilityCheck(campaignId, characterId, statId),
     onError: (error: AxiosError<ApiError>) => {
       const message = error.response?.data?.message || 'Failed to perform ability check';
       toast.error(message);

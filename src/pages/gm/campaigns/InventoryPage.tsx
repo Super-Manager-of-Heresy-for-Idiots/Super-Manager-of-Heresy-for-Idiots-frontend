@@ -28,8 +28,8 @@ import {
   useEquipItem,
   useUnequipItem,
   useRemoveItem,
-} from '@/hooks/useInventoryV2';
-import { useCharacterV2, useCharacterWallet } from '@/hooks/useCharacterV2';
+} from '@/hooks/useInventory';
+import { useCharacter, useCharacterWallet } from '@/hooks/useCharacter';
 import { useAuthStore } from '@/store/authStore';
 import type {
   ItemInstanceResponse,
@@ -112,12 +112,12 @@ const COIN_COLOR: Record<string, string> = {
 
 /* ── page ────────────────────────────────────────────────────── */
 
-export default function InventoryV2Page() {
+export default function InventoryPage() {
   const { campaignId, characterId } = useParams<{ campaignId: string; characterId: string }>();
   const { user } = useAuthStore();
   const isGm = user?.role === 'GAME_MASTER' || user?.role === 'ADMIN';
 
-  const { data: character } = useCharacterV2(campaignId!, characterId!);
+  const { data: character } = useCharacter(campaignId!, characterId!);
   const { data: inventory, isLoading, error, refetch } = useCharacterInventory(campaignId!, characterId!);
   const { data: equipped } = useEquippedInventory(campaignId!, characterId!);
   const { data: backpack } = useBackpackInventory(campaignId!, characterId!);

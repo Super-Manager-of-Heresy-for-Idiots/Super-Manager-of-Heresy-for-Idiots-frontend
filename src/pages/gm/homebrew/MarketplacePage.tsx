@@ -15,7 +15,7 @@ import type { HomebrewPackageResponse } from '@/types';
 
 /* ── page ────────────────────────────────────────────────────── */
 
-export default function MarketplaceV2Page() {
+export default function MarketplacePage() {
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [page, setPage] = useState(0);

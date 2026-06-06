@@ -1,7 +1,7 @@
 import { useParams } from 'react-router-dom';
 import { OrdoPanel, PanelHeader, Rune } from '@/components/ordo';
 import { BackLink } from '@/components/campaigns';
-import { useCharacterV2 } from '@/hooks/useCharacterV2';
+import { useCharacter } from '@/hooks/useCharacter';
 
 interface PlaceholderSpec {
   overline: string;
@@ -13,7 +13,7 @@ interface PlaceholderSpec {
 
 function CharacterFeaturePlaceholder({ overline, title, glyph, todo, details }: PlaceholderSpec) {
   const { campaignId, characterId } = useParams<{ campaignId: string; characterId: string }>();
-  const { data: character } = useCharacterV2(campaignId!, characterId!);
+  const { data: character } = useCharacter(campaignId!, characterId!);
   const backTo = characterId
     ? `/campaigns/${campaignId}/characters/${characterId}`
     : `/campaigns/${campaignId}`;

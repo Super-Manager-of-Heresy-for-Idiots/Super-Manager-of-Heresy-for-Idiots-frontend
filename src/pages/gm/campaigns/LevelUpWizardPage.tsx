@@ -11,7 +11,7 @@ import {
   Placeholder,
 } from '@/components/ordo';
 import { CodexID } from '@/components/homebrew';
-import { useCharacterV2 } from '@/hooks/useCharacterV2';
+import { useCharacter } from '@/hooks/useCharacter';
 import { useLevelUpOptions, useLevelUp } from '@/hooks/useLevelUp';
 import type {
   AvailableClassOption,
@@ -34,7 +34,7 @@ type Tone = 'gold' | 'arcane' | 'ember';
 export default function LevelUpWizardPage() {
   const navigate = useNavigate();
   const { campaignId, characterId } = useParams<{ campaignId: string; characterId: string }>();
-  const { data: character } = useCharacterV2(campaignId!, characterId!);
+  const { data: character } = useCharacter(campaignId!, characterId!);
   const { data: options, isLoading, error } = useLevelUpOptions(characterId!);
   const levelUpMutation = useLevelUp();
 

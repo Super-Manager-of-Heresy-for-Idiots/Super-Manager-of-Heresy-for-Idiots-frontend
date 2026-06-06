@@ -1,5 +1,5 @@
 import { OrdoPanel, PanelHeader, Rune, OrdoDivider } from '@/components/ordo';
-import { useUpdateWallet } from '@/hooks/useCharacterV2';
+import { useUpdateWallet } from '@/hooks/useCharacter';
 import type { WalletEntry } from '@/types';
 
 interface WalletPanelProps {

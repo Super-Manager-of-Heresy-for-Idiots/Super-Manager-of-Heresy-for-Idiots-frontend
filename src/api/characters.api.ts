@@ -15,7 +15,7 @@ import type {
   CharacterStatResponse,
 } from '@/types';
 
-export const charactersV2Api = {
+export const charactersApi = {
   createInCampaign: async (campaignId: string, data: CreateCharacterInCampaignRequest): Promise<ApiResponse<CharacterResponse>> => {
     const response = await api.post<ApiResponse<CharacterResponse>>(`/campaigns/${campaignId}/characters`, data);
     return response.data;

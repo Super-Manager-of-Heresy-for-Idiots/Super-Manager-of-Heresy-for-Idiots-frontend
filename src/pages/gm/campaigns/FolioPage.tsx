@@ -15,14 +15,14 @@ import {
   MulticlassPanel,
   AbilityCheckPanel,
   DamageHealModal,
-} from '@/components/characters/v2';
+} from '@/components/characters';
 import {
-  useCharacterV2,
+  useCharacter,
   useCharacterResources,
   useAbilityCheck,
-} from '@/hooks/useCharacterV2';
+} from '@/hooks/useCharacter';
 import { useCharacterEffects } from '@/hooks/useEffects';
-import { useEquippedInventory } from '@/hooks/useInventoryV2';
+import { useEquippedInventory } from '@/hooks/useInventory';
 import type { CharacterStatResponse, ItemInstanceResponse } from '@/types';
 
 /* ── helpers ─────────────────────────────────────────────────── */
@@ -75,7 +75,7 @@ export default function FolioPage() {
   const navigate = useNavigate();
   const { campaignId, characterId } = useParams<{ campaignId: string; characterId: string }>();
 
-  const { data: character, isLoading, error, refetch } = useCharacterV2(campaignId!, characterId!);
+  const { data: character, isLoading, error, refetch } = useCharacter(campaignId!, characterId!);
   const { data: resources } = useCharacterResources(campaignId!, characterId!);
   const { data: effects } = useCharacterEffects(campaignId!, characterId!);
   const { data: equipped } = useEquippedInventory(campaignId!, characterId!);

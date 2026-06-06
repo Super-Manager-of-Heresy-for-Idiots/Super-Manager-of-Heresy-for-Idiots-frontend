@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { OrdoPanel, PanelHeader, Rune, OrdoChip, Bar } from '@/components/ordo';
 import { CharStatusBadge } from '@/components/campaigns';
-import { useUpdateHp } from '@/hooks/useCharacterV2';
+import { useUpdateHp } from '@/hooks/useCharacter';
 
 interface HPRailPanelProps {
   characterId: string;

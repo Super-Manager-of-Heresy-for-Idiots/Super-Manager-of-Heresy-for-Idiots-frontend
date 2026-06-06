@@ -17,7 +17,7 @@ import {
   useApplyEffect,
   useRemoveEffect,
 } from '@/hooks/useEffects';
-import { useCharacterV2 } from '@/hooks/useCharacterV2';
+import { useCharacter } from '@/hooks/useCharacter';
 import { useBuffsDebuffs } from '@/hooks/useAdmin';
 import { useAuthStore } from '@/store/authStore';
 
@@ -36,7 +36,7 @@ export default function ApplyEffectPage() {
     data: character,
     isLoading: charLoading,
     error: charError,
-  } = useCharacterV2(campaignId!, characterId!);
+  } = useCharacter(campaignId!, characterId!);
 
   const {
     data: effects,

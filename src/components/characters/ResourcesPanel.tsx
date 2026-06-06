@@ -1,5 +1,5 @@
 import { OrdoPanel, PanelHeader, Rune, OrdoDivider, Bar } from '@/components/ordo';
-import { useUpdateResource } from '@/hooks/useCharacterV2';
+import { useUpdateResource } from '@/hooks/useCharacter';
 import type { ResourceEntry } from '@/types';
 
 interface ResourcesPanelProps {

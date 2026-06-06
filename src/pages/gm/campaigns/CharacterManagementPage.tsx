@@ -6,7 +6,7 @@ import {
   AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle,
   AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction,
 } from '@/components/ui/alert-dialog';
-import { useCharacterV2, useDeleteCharacter } from '@/hooks/useCharacterV2';
+import { useCharacter, useDeleteCharacter } from '@/hooks/useCharacter';
 import { useLevelUpOptions } from '@/hooks/useLevelUp';
 import { useAuthStore } from '@/store/authStore';
 import { xpForLevel, xpForNextLevel } from '@/types';
@@ -22,7 +22,7 @@ interface ManagementTile {
 export default function CharacterManagementPage() {
   const navigate = useNavigate();
   const { campaignId, characterId } = useParams<{ campaignId: string; characterId: string }>();
-  const { data: character, isLoading, error, refetch } = useCharacterV2(campaignId!, characterId!);
+  const { data: character, isLoading, error, refetch } = useCharacter(campaignId!, characterId!);
   const { user } = useAuthStore();
   const { data: levelUpOptions } = useLevelUpOptions(characterId!);
   const deleteCharacter = useDeleteCharacter();

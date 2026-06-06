@@ -11,7 +11,7 @@ import {
   EmptyVault,
 } from '@/components/ordo';
 import { BackLink, CharStatusBadge } from '@/components/campaigns';
-import { useCampaignCharacters } from '@/hooks/useCharacterV2';
+import { useCampaignCharacters } from '@/hooks/useCharacter';
 import { useGrantXp } from '@/hooks/useXp';
 import type { CharacterV2Response, XpTarget } from '@/types';
 

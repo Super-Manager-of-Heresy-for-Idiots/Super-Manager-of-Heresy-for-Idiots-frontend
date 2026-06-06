@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { ModalScene, OrdoField, Rune } from '@/components/ordo';
-import { useRenameItem } from '@/hooks/useInventoryV2';
+import { useRenameItem } from '@/hooks/useInventory';
 import type { ItemInstanceResponse } from '@/types';
 
 /* ── Props ─────────────────────────────────────────────────────── */

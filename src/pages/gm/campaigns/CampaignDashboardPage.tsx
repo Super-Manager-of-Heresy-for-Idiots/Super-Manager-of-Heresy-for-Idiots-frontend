@@ -16,7 +16,7 @@ import {
 } from '@/components/campaigns';
 import { useAuthStore } from '@/store/authStore';
 import { useCampaign, useSetCampaignStatus } from '@/hooks/useCampaigns';
-import { useCampaignCharacters } from '@/hooks/useCharacterV2';
+import { useCampaignCharacters } from '@/hooks/useCharacter';
 import type { CampaignStatus, CharacterV2Response } from '@/types';
 
 /* ── page ────────────────────────────────────────────────────── */

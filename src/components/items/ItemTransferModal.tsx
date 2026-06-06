@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { ModalScene, OrdoField, Rune, OrdoDivider } from '@/components/ordo';
-import { useTransferItem } from '@/hooks/useInventoryV2';
+import { useTransferItem } from '@/hooks/useInventory';
 import type { ItemInstanceResponse, CampaignMember } from '@/types';
 
 /* ── Props ─────────────────────────────────────────────────────── */

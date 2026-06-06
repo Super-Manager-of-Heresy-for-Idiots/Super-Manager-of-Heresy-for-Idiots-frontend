@@ -2,7 +2,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Trophy } from 'lucide-react';
 import { OrdoPanel, PanelHeader, OrdoDivider } from '@/components/ordo';
 import { useCharacterRewards } from '@/hooks/useLevelUp';
-import { useCharacterV2 } from '@/hooks/useCharacterV2';
+import { useCharacter } from '@/hooks/useCharacter';
 import { REWARD_TYPE_LABELS } from '@/types';
 
 function formatDate(value: string): string {
@@ -16,7 +16,7 @@ export default function CharacterRewardsPage() {
   const navigate = useNavigate();
   const { campaignId, characterId } = useParams<{ campaignId: string; characterId: string }>();
   const { data, isLoading, error } = useCharacterRewards(characterId!);
-  const { data: character } = useCharacterV2(campaignId!, characterId!);
+  const { data: character } = useCharacter(campaignId!, characterId!);
 
   const back = () => navigate(`/campaigns/${campaignId}/characters/${characterId}`);
 

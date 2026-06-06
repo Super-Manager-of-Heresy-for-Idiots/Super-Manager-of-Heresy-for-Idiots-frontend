@@ -10,7 +10,7 @@ import type {
   CreateEnchantmentRequest,
 } from '@/types';
 
-export const inventoryV2Api = {
+export const inventoryApi = {
   list: async (campaignId: string, characterId: string): Promise<ApiResponse<ItemInstanceResponse[]>> => {
     const response = await api.get<ApiResponse<ItemInstanceResponse[]>>(`/campaigns/${campaignId}/characters/${characterId}/inventory`);
     return response.data;

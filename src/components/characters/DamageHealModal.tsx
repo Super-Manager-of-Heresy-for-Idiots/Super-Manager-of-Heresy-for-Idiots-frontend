@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ModalScene, Bar } from '@/components/ordo';
-import { useUpdateHp } from '@/hooks/useCharacterV2';
+import { useUpdateHp } from '@/hooks/useCharacter';
 
 type Mode = 'damage' | 'heal';
 

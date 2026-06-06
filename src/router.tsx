@@ -6,7 +6,7 @@ import LoginPage from '@/pages/auth/LoginPage';
 import RegisterPage from '@/pages/auth/RegisterPage';
 import TodoPage from '@/pages/TodoPage';
 
-// Campaign v2 pages
+// Campaign pages
 import CampaignListPage from '@/pages/gm/campaigns/CampaignListPage';
 import CampaignDashboardPage from '@/pages/gm/campaigns/CampaignDashboardPage';
 import CampaignMembersPage from '@/pages/gm/campaigns/CampaignMembersPage';
@@ -15,7 +15,7 @@ import SharedStoragePage from '@/pages/gm/campaigns/SharedStoragePage';
 import SessionNotesPage from '@/pages/gm/campaigns/SessionNotesPage';
 import XPGrantPage from '@/pages/gm/campaigns/XPGrantPage';
 import ApplyEffectPage from '@/pages/gm/campaigns/ApplyEffectPage';
-import InventoryV2Page from '@/pages/gm/campaigns/InventoryV2Page';
+import InventoryPage from '@/pages/gm/campaigns/InventoryPage';
 import CharacterManagementPage from '@/pages/gm/campaigns/CharacterManagementPage';
 import CharacterCreationWizardPage from '@/pages/gm/campaigns/CharacterCreationWizardPage';
 import AddCharacterPage from '@/pages/gm/campaigns/AddCharacterPage';
@@ -41,7 +41,7 @@ import QuestDetailPage from '@/pages/gm/campaigns/QuestDetailPage';
 import LocationsPage from '@/pages/gm/campaigns/LocationsPage';
 
 // Homebrew pages
-import MarketplacePage from '@/pages/gm/homebrew/MarketplaceV2Page';
+import MarketplacePage from '@/pages/gm/homebrew/MarketplacePage';
 import MarketplaceDetailPage from '@/pages/gm/homebrew/MarketplaceDetailPage';
 import MyDoctrinesPage from '@/pages/gm/homebrew/MyDoctrinesPage';
 import CreateDoctrinePage from '@/pages/gm/homebrew/CreateDoctrinePage';
@@ -91,7 +91,7 @@ export const router = createBrowserRouter([
           { path: '/campaigns/:campaignId/characters/:characterId/edit', element: <CharacterEditPage /> },
           { path: '/campaigns/:campaignId/characters/:characterId/stats', element: <CharacterStatsPage /> },
           { path: '/campaigns/:campaignId/characters/:characterId/ability-check/:statTypeId', element: <AbilityCheckPage /> },
-          { path: '/campaigns/:campaignId/characters/:characterId/inventory', element: <InventoryV2Page /> },
+          { path: '/campaigns/:campaignId/characters/:characterId/inventory', element: <InventoryPage /> },
           { path: '/campaigns/:campaignId/characters/:characterId/effects', element: <ApplyEffectPage /> },
           { path: '/campaigns/:campaignId/characters/:characterId/wallet', element: <CharacterWalletPage /> },
           { path: '/campaigns/:campaignId/characters/:characterId/resources', element: <CharacterResourcesPage /> },
