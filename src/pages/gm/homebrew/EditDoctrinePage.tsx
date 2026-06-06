@@ -5,6 +5,14 @@ import toast from 'react-hot-toast';
 import { Rune, OrdoPanel, OrdoChip, PanelHeader } from '@/components/ordo';
 import { ContentPills } from '@/components/homebrew';
 import { RichClassWizard } from '@/components/homebrew/RichClassWizard';
+import { RaceEditor } from '@/components/admin/RaceEditor';
+import {
+  useCreateHomebrewRace,
+  useUpdateHomebrewRace,
+  useEnableHomebrewRace,
+  useDisableHomebrewRace,
+} from '@/hooks/useRaces';
+import type { RaceRequest } from '@/types';
 import {
   AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle,
   AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction,
@@ -25,6 +33,7 @@ import type { ContentSummaryDto, ContentType, EquipmentSlot } from '@/types';
 const CONTENT_GROUPS: { title: string; icon: string; type: ContentType }[] = [
   { title: 'Items', icon: 'sword', type: 'ITEM_TYPE' },
   { title: 'Classes', icon: 'helm', type: 'CHARACTER_CLASS' },
+  { title: 'Species', icon: 'hex', type: 'RACE' },
   { title: 'Skills', icon: 'eye', type: 'SKILL' },
   { title: 'Feats', icon: 'sigil-3', type: 'FEAT' },
   { title: 'Subclasses', icon: 'cross-pat', type: 'SUBCLASS' },
@@ -69,6 +78,14 @@ export default function EditDoctrinePage() {
   const [editingRichClass, setEditingRichClass] = useState<ContentSummaryDto | null>(null);
   const [showPublish, setShowPublish] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
+  const [showRaceEditor, setShowRaceEditor] = useState(false);
+  const [editingRaceId, setEditingRaceId] = useState<string | null>(null);
+  const [editingRaceSummary, setEditingRaceSummary] = useState<ContentSummaryDto | null>(null);
+
+  const createRaceMutation = useCreateHomebrewRace();
+  const updateRaceMutation = useUpdateHomebrewRace();
+  const enableRaceMutation = useEnableHomebrewRace();
+  const disableRaceMutation = useDisableHomebrewRace();
 
   if (pkg && !metaLoaded) {
     setTitle(pkg.title);
@@ -197,6 +214,32 @@ export default function EditDoctrinePage() {
 
   const handlePublish = () => {
     publishMutation.mutate(pkg.id, { onSuccess: () => setShowPublish(false) });
+  };
+
+  const handleOpenNewRace = () => {
+    setEditingRaceId(null);
+    setEditingRaceSummary(null);
+    setShowRaceEditor(true);
+  };
+
+  const handleOpenEditRace = (row: ContentSummaryDto) => {
+    setEditingRaceId(row.id);
+    setEditingRaceSummary(row);
+    setShowRaceEditor(true);
+  };
+
+  const handleSubmitRace = (data: RaceRequest) => {
+    if (editingRaceId) {
+      updateRaceMutation.mutate(
+        { packageId: pkg.id, raceId: editingRaceId, data },
+        { onSuccess: () => setShowRaceEditor(false) },
+      );
+    } else {
+      createRaceMutation.mutate(
+        { packageId: pkg.id, data },
+        { onSuccess: () => setShowRaceEditor(false) },
+      );
+    }
   };
 
   const handleDelete = () => {
@@ -359,6 +402,9 @@ export default function EditDoctrinePage() {
                   }}
                 >
                   <Rune kind="helm" size={10} /> Rich Class
+                </button>
+                <button className="ao-btn ao-btn--ghost ao-btn--sm" onClick={handleOpenNewRace}>
+                  <Rune kind="hex" size={10} /> Species
                 </button>
                 <button className="ao-btn ao-btn--primary ao-btn--sm" onClick={() => setAdding(!adding)}>
                   <Rune kind="plus" size={10} /> {adding ? 'Close' : 'Slot New Entry'}
@@ -636,20 +682,39 @@ export default function EditDoctrinePage() {
                         </div>
                       </div>
 
-                      {/* Book button */}
+                      {/* Book / Edit button */}
                       <button
                         className="ao-iconbtn"
                         style={{ width: 28, height: 28 }}
-                        title={grp.type === 'CHARACTER_CLASS' ? 'Edit rich class' : 'View'}
+                        title={grp.type === 'CHARACTER_CLASS' ? 'Edit rich class' : grp.type === 'RACE' ? 'Edit species' : 'View'}
                         onClick={() => {
                           if (grp.type === 'CHARACTER_CLASS') {
                             setEditingRichClass(r);
                             setShowRichClassWizard(true);
+                          } else if (grp.type === 'RACE') {
+                            handleOpenEditRace(r);
                           }
                         }}
                       >
                         <Rune kind="book" size={12} />
                       </button>
+                      {grp.type === 'RACE' && (
+                        <button
+                          className="ao-iconbtn"
+                          style={{ width: 28, height: 28 }}
+                          title="Toggle active"
+                          onClick={() => {
+                            const active = (r as { active?: boolean }).active !== false;
+                            if (active) {
+                              disableRaceMutation.mutate({ packageId: pkg.id, raceId: r.id });
+                            } else {
+                              enableRaceMutation.mutate({ packageId: pkg.id, raceId: r.id });
+                            }
+                          }}
+                        >
+                          <Rune kind="sigil-1" size={12} />
+                        </button>
+                      )}
 
                       {/* Remove button */}
                       <button
@@ -677,6 +742,41 @@ export default function EditDoctrinePage() {
         }}
         packageDetail={pkg}
         editingClass={editingRichClass}
+      />
+
+      <RaceEditor
+        open={showRaceEditor}
+        onClose={() => setShowRaceEditor(false)}
+        onSubmit={handleSubmitRace}
+        isSubmitting={createRaceMutation.isPending || updateRaceMutation.isPending}
+        scope={{ kind: 'homebrew', packageId: pkg.id, packageTitle: pkg.title }}
+        initial={
+          editingRaceSummary
+            ? {
+                id: editingRaceSummary.id,
+                name: editingRaceSummary.name,
+                description: editingRaceSummary.description,
+                sourceType: 'HOMEBREW',
+                active: true,
+                creatureType: 'HUMANOID',
+                sizeOptions: ['MEDIUM'],
+                defaultSize: 'MEDIUM',
+                speed: { walk: 30 },
+                traits: [],
+                lineageOptions: [],
+                lineageRequired: false,
+                languages: [],
+                proficiencies: [],
+                resistances: [],
+                vulnerabilities: [],
+                immunities: [],
+                conditionResistances: [],
+                conditionAdvantages: [],
+                allowAbilityScoreBonuses: false,
+                abilityScoreBonuses: [],
+              }
+            : null
+        }
       />
 
       {/* Publish dialog */}

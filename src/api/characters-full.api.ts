@@ -24,6 +24,8 @@ export interface CreateFullCharacterRequest {
   // backend reference ids (resolved from available content)
   classId: string;
   raceId: string;
+  // Race v2 — lineage chosen at creation, when race.lineageRequired === true.
+  selectedLineageId?: string | null;
   // rich 5e selections, keyed by SRD keys (graceful no-op if backend ignores)
   raceKey?: string;
   subraceKey?: string;
@@ -57,6 +59,7 @@ export interface BasicCreateCharacterRequest {
   name: string;
   classId: string;
   raceId: string;
+  selectedLineageId?: string | null;
 }
 
 const NOT_IMPLEMENTED_STATUSES = new Set([404, 405, 501]);

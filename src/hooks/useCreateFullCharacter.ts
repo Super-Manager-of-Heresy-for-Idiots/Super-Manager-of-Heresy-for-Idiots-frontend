@@ -30,6 +30,7 @@ export function useCreateFullCharacter() {
             name: data.name,
             classId: data.classId,
             raceId: data.raceId,
+            selectedLineageId: data.selectedLineageId ?? null,
           });
         }
         throw error;

@@ -299,6 +299,7 @@ export function CharacterCreationWizard({
       level: c.level,
       classId,
       raceId,
+      selectedLineageId: selectedSubrace?.id ?? null,
       subraceId: selectedSubrace?.id,
       raceKey: c.raceKey,
       subraceKey: c.subraceKey || undefined,

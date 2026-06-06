@@ -94,12 +94,14 @@ export interface CreateCharacterRequest {
   name: string;
   classId: string;
   raceId: string;
+  selectedLineageId?: string | null;
   campaignId: string;
 }
 
 export interface UpdateCharacterRequest {
   name?: string;
   raceId?: string;
+  selectedLineageId?: string | null;
 }
 
 export interface CharacterResponse {
@@ -109,6 +111,8 @@ export interface CharacterResponse {
   experience: number;
   classLevels: ClassLevelResponse[];
   race: CharacterRaceResponse;
+  selectedLineageId?: string | null;
+  raceSnapshot?: RaceSnapshot;
   ownerId: string;
   ownerUsername: string;
   stats: CharacterStatResponse[];
@@ -712,6 +716,7 @@ export interface CreateCharacterInCampaignRequest {
   name: string;
   classId: string;
   raceId: string;
+  selectedLineageId?: string | null;
   campaignId: string;
 }
 
@@ -1075,3 +1080,164 @@ export type WalletEntry = WalletEntryResponse;
 export type ResourceEntry = ResourceResponse;
 
 export type BadgeStatus = HomebrewStatus | 'DELETED' | 'ARCHIVED';
+
+// === Race / Species (v2 backend) ===
+
+export type RaceSourceType = 'SYSTEM' | 'HOMEBREW';
+
+export type CreatureSize = 'TINY' | 'SMALL' | 'MEDIUM' | 'LARGE' | 'HUGE' | 'GARGANTUAN';
+
+export const CREATURE_SIZES: CreatureSize[] = ['TINY', 'SMALL', 'MEDIUM', 'LARGE', 'HUGE', 'GARGANTUAN'];
+
+export type AbilityEnum = 'STRENGTH' | 'DEXTERITY' | 'CONSTITUTION' | 'INTELLIGENCE' | 'WISDOM' | 'CHARISMA';
+
+export const ABILITY_ENUMS: AbilityEnum[] = ['STRENGTH', 'DEXTERITY', 'CONSTITUTION', 'INTELLIGENCE', 'WISDOM', 'CHARISMA'];
+
+export type AbilityScoreBonusMode = 'FIXED' | 'CHOICE';
+
+export type RaceTraitUseType = 'PASSIVE' | 'LIMITED' | 'ACTION' | 'BONUS_ACTION' | 'REACTION';
+
+export type RaceTraitRecharge = 'NONE' | 'SHORT_REST' | 'LONG_REST' | 'PROFICIENCY_BONUS_PER_LONG_REST' | 'CUSTOM';
+
+export type RaceTraitActionType = 'PASSIVE' | 'ACTION' | 'BONUS_ACTION' | 'REACTION' | 'PART_OF_ATTACK_ACTION';
+
+export interface RaceSpeedProfile {
+  walk: number;
+  fly?: number | null;
+  swim?: number | null;
+  climb?: number | null;
+  burrow?: number | null;
+}
+
+export interface RaceTraitUses {
+  type: RaceTraitUseType;
+  recharge: RaceTraitRecharge;
+  amountExpression?: string | null;
+}
+
+export interface RaceTraitDamage {
+  damageType: string;
+  diceExpression?: string;
+  bonus?: number;
+}
+
+export interface RaceTraitSavingThrow {
+  ability: AbilityEnum;
+  dcExpression?: string;
+}
+
+export interface RaceTrait {
+  id?: string;
+  name: string;
+  description?: string;
+  levelRequirement?: number;
+  uses?: RaceTraitUses | null;
+  actionType?: RaceTraitActionType;
+  damage?: RaceTraitDamage | null;
+  savingThrow?: RaceTraitSavingThrow | null;
+  grantedSpells?: string[] | null;
+  innateSpells?: string[] | null;
+  metadata?: Record<string, unknown> | null;
+}
+
+export interface RaceLineageOption {
+  id?: string;
+  name: string;
+  description?: string;
+  traits?: RaceTrait[];
+  innateSpells?: string[] | null;
+  resistances?: string[];
+  speedModifiers?: Partial<RaceSpeedProfile> | null;
+  metadata?: Record<string, unknown> | null;
+}
+
+export interface RaceAbilityScoreBonus {
+  ability?: AbilityEnum;
+  bonus?: number;
+  mode: AbilityScoreBonusMode;
+  choiceCount?: number;
+  choiceAmount?: number;
+}
+
+export interface RaceRequest {
+  name: string;
+  slug?: string;
+  description?: string;
+  loreDescription?: string;
+  sourceType?: RaceSourceType;
+  sourceName?: string;
+  active?: boolean;
+  creatureType: string;
+  sizeOptions: CreatureSize[];
+  defaultSize: CreatureSize;
+  speed: RaceSpeedProfile;
+  darkvisionRange?: number | null;
+  traits?: RaceTrait[];
+  lineageOptions?: RaceLineageOption[];
+  lineageRequired?: boolean;
+  languages?: string[];
+  languageOptions?: string[] | null;
+  proficiencies?: string[];
+  resistances?: string[];
+  vulnerabilities?: string[];
+  immunities?: string[];
+  conditionResistances?: string[];
+  conditionAdvantages?: string[];
+  innateSpells?: string[] | null;
+  allowAbilityScoreBonuses?: boolean;
+  abilityScoreBonuses?: RaceAbilityScoreBonus[];
+  metadata?: Record<string, unknown> | null;
+}
+
+export interface RaceResponse {
+  id: string;
+  name: string;
+  slug?: string;
+  description?: string;
+  loreDescription?: string;
+  sourceType: RaceSourceType;
+  sourceName?: string;
+  active: boolean;
+  creatureType: string;
+  sizeOptions: CreatureSize[];
+  defaultSize: CreatureSize;
+  speed: RaceSpeedProfile;
+  darkvisionRange?: number | null;
+  traits: RaceTrait[];
+  lineageOptions: RaceLineageOption[];
+  lineageRequired: boolean;
+  languages: string[];
+  languageOptions?: string[] | null;
+  proficiencies: string[];
+  resistances: string[];
+  vulnerabilities: string[];
+  immunities: string[];
+  conditionResistances: string[];
+  conditionAdvantages: string[];
+  innateSpells?: string[] | null;
+  allowAbilityScoreBonuses: boolean;
+  abilityScoreBonuses: RaceAbilityScoreBonus[];
+  metadata?: Record<string, unknown> | null;
+  homebrewPackageId?: string;
+  homebrewPackageTitle?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface RaceSnapshot {
+  raceId: string;
+  raceName: string;
+  lineageId?: string | null;
+  lineageName?: string | null;
+  size: CreatureSize;
+  speed: RaceSpeedProfile;
+  darkvisionRange?: number | null;
+  traitNames: string[];
+  allowAbilityScoreBonuses: boolean;
+}
+
+export interface CharacterRaceBriefResponse {
+  id: string;
+  name: string;
+  description?: string;
+}
