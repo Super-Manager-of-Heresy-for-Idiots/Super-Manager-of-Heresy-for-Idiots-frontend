@@ -21,6 +21,7 @@ import {
   useCharacterInventory,
   useEquippedInventory,
   useBackpackInventory,
+  useCampaignItemTemplates,
   useGrantItem,
   useTransferItem,
   useRenameItem,
@@ -35,6 +36,7 @@ import type {
   GrantItemRequest,
   RenameItemRequest,
   EquipmentSlot,
+  ItemTemplateResponse,
 } from '@/types';
 
 /* ── helpers ─────────────────────────────────────────────────── */
@@ -120,6 +122,7 @@ export default function InventoryV2Page() {
   const { data: equipped } = useEquippedInventory(campaignId!, characterId!);
   const { data: backpack } = useBackpackInventory(campaignId!, characterId!);
   const { data: wallet } = useCharacterWallet(campaignId!, characterId!);
+  const { data: itemTemplates, isLoading: itemTemplatesLoading } = useCampaignItemTemplates(campaignId);
 
   const grantMutation = useGrantItem();
   const transferMutation = useTransferItem();
@@ -139,6 +142,7 @@ export default function InventoryV2Page() {
 
   /* Grant form */
   const [grantTemplateId, setGrantTemplateId] = useState('');
+  const [grantTemplateSearch, setGrantTemplateSearch] = useState('');
   const [grantQuantity, setGrantQuantity] = useState('1');
   const [grantUnique, setGrantUnique] = useState(false);
   const [grantCustomName, setGrantCustomName] = useState('');
@@ -156,6 +160,7 @@ export default function InventoryV2Page() {
   const items: ItemInstanceResponse[] = inventory ?? [];
   const equippedItems: ItemInstanceResponse[] = equipped ?? [];
   const backpackItems: ItemInstanceResponse[] = backpack ?? [];
+  const grantTemplates: ItemTemplateResponse[] = itemTemplates ?? [];
 
   const equippedBySlot = useMemo(() => {
     const map = new Map<string, ItemInstanceResponse>();
@@ -179,10 +184,45 @@ export default function InventoryV2Page() {
     [items, selectedId],
   );
 
+  const filteredGrantTemplates = useMemo(() => {
+    const q = grantTemplateSearch.trim().toLowerCase();
+    if (!q) return grantTemplates;
+    return grantTemplates.filter((template) => {
+      const haystack = [
+        template.name,
+        template.itemTypeName,
+        template.rarity,
+        template.sourceHomebrewTitle,
+      ].filter(Boolean).join(' ').toLowerCase();
+      return haystack.includes(q);
+    });
+  }, [grantTemplateSearch, grantTemplates]);
+
+  const grantTemplateOptions = useMemo(() => {
+    const selectedTemplate = grantTemplates.find((template) => template.id === grantTemplateId);
+    if (!selectedTemplate || filteredGrantTemplates.some((template) => template.id === selectedTemplate.id)) {
+      return filteredGrantTemplates;
+    }
+    return [selectedTemplate, ...filteredGrantTemplates];
+  }, [filteredGrantTemplates, grantTemplateId, grantTemplates]);
+
+  const selectedGrantTemplate = useMemo(
+    () => grantTemplates.find((template) => template.id === grantTemplateId) ?? null,
+    [grantTemplateId, grantTemplates],
+  );
+
   const slotsFilled = equippedItems.length;
   const attunedCount = items.filter((i) => i.isUnique || i.artifactName).length;
 
   /* ── handlers ──────────────────────────────────────────────── */
+
+  const resetGrantForm = () => {
+    setGrantTemplateId('');
+    setGrantTemplateSearch('');
+    setGrantQuantity('1');
+    setGrantUnique(false);
+    setGrantCustomName('');
+  };
 
   const handleGrant = () => {
     if (!campaignId || !characterId || !grantTemplateId) return;
@@ -197,10 +237,7 @@ export default function InventoryV2Page() {
       {
         onSuccess: () => {
           setGrantOpen(false);
-          setGrantTemplateId('');
-          setGrantQuantity('1');
-          setGrantUnique(false);
-          setGrantCustomName('');
+          resetGrantForm();
         },
       },
     );
@@ -572,13 +609,53 @@ export default function InventoryV2Page() {
       </div>
 
       {/* Grant Item Dialog */}
-      <Dialog open={grantOpen} onOpenChange={setGrantOpen}>
+      <Dialog
+        open={grantOpen}
+        onOpenChange={(open) => {
+          setGrantOpen(open);
+          if (!open) resetGrantForm();
+        }}
+      >
         <DialogContent>
           <DialogHeader><DialogTitle>Grant Item</DialogTitle></DialogHeader>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             <div>
-              <label className="ao-label">Template ID</label>
-              <input className="ao-input" value={grantTemplateId} onChange={(e) => setGrantTemplateId(e.target.value)} placeholder="Item template ID" />
+              <label className="ao-label">Item Template</label>
+              <input
+                className="ao-input"
+                value={grantTemplateSearch}
+                onChange={(e) => setGrantTemplateSearch(e.target.value)}
+                placeholder="Search by name, type, rarity, or source"
+                disabled={itemTemplatesLoading}
+                style={{ marginBottom: 8 }}
+              />
+              <select
+                className="ao-input"
+                value={grantTemplateId}
+                onChange={(e) => setGrantTemplateId(e.target.value)}
+                disabled={itemTemplatesLoading || grantTemplates.length === 0}
+              >
+                <option value="">
+                  {itemTemplatesLoading
+                    ? 'Loading item templates...'
+                    : grantTemplates.length
+                      ? 'Choose item template'
+                      : 'No item templates available'}
+                </option>
+                {!itemTemplatesLoading && grantTemplateOptions.length === 0 && (
+                  <option value="" disabled>No templates match the search</option>
+                )}
+                {grantTemplateOptions.map((template) => (
+                  <option key={template.id} value={template.id}>
+                    {template.name} · {template.itemTypeName || 'Item'} · {template.rarity}
+                  </option>
+                ))}
+              </select>
+              {selectedGrantTemplate && (
+                <div className="ao-codex" style={{ marginTop: 8 }}>
+                  {selectedGrantTemplate.description || selectedGrantTemplate.sourceHomebrewTitle || 'Campaign item template'}
+                </div>
+              )}
             </div>
             <div>
               <label className="ao-label">Quantity</label>
@@ -595,7 +672,7 @@ export default function InventoryV2Page() {
           </div>
           <DialogFooter>
             <button className="ao-btn ao-btn--ghost" onClick={() => setGrantOpen(false)} disabled={grantMutation.isPending}>Withhold</button>
-            <button className="ao-btn ao-btn--primary" onClick={handleGrant} disabled={!grantTemplateId || grantMutation.isPending}>
+            <button className="ao-btn ao-btn--primary" onClick={handleGrant} disabled={!grantTemplateId || itemTemplatesLoading || grantMutation.isPending}>
               {grantMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Grant
             </button>

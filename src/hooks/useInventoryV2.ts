@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { inventoryV2Api } from '@/api/inventory-v2.api';
+import { itemTemplatesApi } from '@/api/item-templates.api';
 import type {
   GrantItemRequest,
   RenameItemRequest,
@@ -10,6 +11,17 @@ import type {
   ApiError,
 } from '@/types';
 import { AxiosError } from 'axios';
+
+export function useCampaignItemTemplates(campaignId: string | undefined) {
+  return useQuery({
+    queryKey: ['campaigns', campaignId, 'item-templates'],
+    queryFn: async () => {
+      const response = await itemTemplatesApi.listForCampaign(campaignId!);
+      return response.data ?? [];
+    },
+    enabled: !!campaignId,
+  });
+}
 
 export function useCharacterInventory(campaignId: string, characterId: string) {
   return useQuery({
