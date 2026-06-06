@@ -3,7 +3,7 @@ import { AxiosError } from 'axios';
 import toast from 'react-hot-toast';
 import { charactersFullApi, type CreateFullCharacterRequest } from '@/api/characters-full.api';
 import { referenceApi } from '@/api/reference.api';
-import type { ApiError, CharacterResponse } from '@/types';
+import type { ApiError, AvailableContentEntry, CharacterResponse } from '@/types';
 
 const myKey = ['characters', 'my'];
 const detailKey = (id: string) => ['characters', 'template', id];
@@ -84,27 +84,37 @@ export function useCloneTemplateToCampaign() {
 
 // ── Global vanilla reference content for template wizard ──────────
 
+const VANILLA_SOURCE = 'PHB';
+
+function detailToEntry(item: { id: string; name: string }): AvailableContentEntry {
+  return { id: item.id, name: item.name, source: VANILLA_SOURCE };
+}
+
 export function useGlobalReferenceContent() {
   return useQuery({
     queryKey: ['reference', 'global'],
     queryFn: async () => {
-      const [classes, races, backgrounds, skills, statTypes, availableClasses, availableRaces] = await Promise.all([
+      const [classes, races, backgrounds, skills, statTypes, currencies] = await Promise.all([
         referenceApi.getClasses(),
         referenceApi.getRaces(),
         referenceApi.getBackgrounds(),
-        referenceApi.getProficiencySkills(),
+        referenceApi.getSkills(),
         referenceApi.getStatTypes(),
-        referenceApi.getAvailableClasses(),
-        referenceApi.getAvailableRaces(),
+        referenceApi.getCurrencies(),
       ]);
+      const classList = classes.data ?? [];
+      const raceList = races.data ?? [];
       return {
-        classes: classes.data ?? [],
-        races: races.data ?? [],
+        classes: classList,
+        races: raceList,
         backgrounds: backgrounds.data ?? [],
         skills: skills.data ?? [],
         statTypes: statTypes.data ?? [],
-        availableClasses: availableClasses.data ?? [],
-        availableRaces: availableRaces.data ?? [],
+        currencies: currencies.data ?? [],
+        // Wizard picker entries are derived from the detail lists — no extra
+        // round-trip to a (non-existent) `/reference/available/*` endpoint.
+        availableClasses: classList.map(detailToEntry),
+        availableRaces: raceList.map(detailToEntry),
       };
     },
   });
