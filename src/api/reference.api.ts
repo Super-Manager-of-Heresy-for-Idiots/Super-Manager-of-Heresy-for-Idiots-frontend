@@ -1,7 +1,6 @@
 import api from './axios';
 import type {
   ApiResponse,
-  AvailableContentEntry,
   BackgroundResponse,
   CharacterClassDetailResponse,
   CharacterRaceDetailResponse,
@@ -10,9 +9,19 @@ import type {
   StatTypeResponse,
 } from '@/types';
 
+export interface ReferenceCurrencyType {
+  id: string;
+  name: string;
+  abbreviation?: string;
+  goldValue?: number;
+}
+
 /**
  * Global (vanilla) reference data, used by template character creation
  * outside any campaign. Endpoints filter out homebrew on the backend.
+ *
+ * Endpoint shape matches the campaign-scoped reference controller — no
+ * `/available/` prefix; skills live at `/skills` and currencies at `/currencies`.
  */
 export const referenceApi = {
   getStatTypes: async (): Promise<ApiResponse<StatTypeResponse[]>> => {
@@ -35,8 +44,15 @@ export const referenceApi = {
     return response.data;
   },
 
-  getProficiencySkills: async (): Promise<ApiResponse<ProficiencySkillResponse[]>> => {
-    const response = await api.get<ApiResponse<ProficiencySkillResponse[]>>('/reference/proficiency-skills');
+  /** Backend exposes proficiency skills at `/reference/skills` (no `proficiency-` prefix). */
+  getSkills: async (): Promise<ApiResponse<ProficiencySkillResponse[]>> => {
+    const response = await api.get<ApiResponse<ProficiencySkillResponse[]>>('/reference/skills');
+    return response.data;
+  },
+
+  /** Vanilla currencies (e.g. gold/silver/copper). */
+  getCurrencies: async (): Promise<ApiResponse<ReferenceCurrencyType[]>> => {
+    const response = await api.get<ApiResponse<ReferenceCurrencyType[]>>('/reference/currencies');
     return response.data;
   },
 
@@ -44,20 +60,6 @@ export const referenceApi = {
     const response = await api.get<ApiResponse<SpellReferenceResponse[]>>('/reference/spells', {
       params: classId ? { classId } : undefined,
     });
-    return response.data;
-  },
-
-  /**
-   * Catalogue entries (id + name + source label) the wizard uses to render
-   * picker cards. The wizard expects this shape, so we expose it directly.
-   */
-  getAvailableClasses: async (): Promise<ApiResponse<AvailableContentEntry[]>> => {
-    const response = await api.get<ApiResponse<AvailableContentEntry[]>>('/reference/available/classes');
-    return response.data;
-  },
-
-  getAvailableRaces: async (): Promise<ApiResponse<AvailableContentEntry[]>> => {
-    const response = await api.get<ApiResponse<AvailableContentEntry[]>>('/reference/available/races');
     return response.data;
   },
 };
