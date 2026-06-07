@@ -136,6 +136,11 @@ export interface CharacterResponse {
   skillProficiencies?: CharacterSkillProficiency[];
   knownSpells?: CharacterKnownSpell[];
   attacks?: CharacterAttack[];
+  // Fields needed to mirror the template/forge sheet read-only on the Folio.
+  // NOTE: backend must populate these (see API notes); currently optional.
+  playerName?: string;
+  proficiencies?: string;
+  equipment?: string;
   createdAt: string;
   updatedAt: string;
 }

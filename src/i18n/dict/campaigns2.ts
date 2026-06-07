@@ -342,6 +342,16 @@ export const campaigns2: DictModule = {
     'camp2.folio.sacredMarks': 'Священные метки',
     'camp2.folio.sacredMarksSub': 'Активные баффы и дебаффы',
     'camp2.folio.noMarks': 'Ни одна метка не пылает на этой душе.',
+    'camp2.folio.profSection': 'Владения и навыки',
+    'camp2.folio.savingThrow': 'Спасбросок',
+    'camp2.folio.passivePerception': 'Пассивная внимательность',
+    'camp2.folio.passiveSub': '10 + внимательность',
+    'camp2.folio.profsLanguages': 'Владения и языки',
+    'camp2.folio.noProfs': 'Владения и языки для этой души не записаны.',
+    'camp2.folio.equipmentTitle': 'Снаряжение',
+    'camp2.folio.noEquipment': 'Снаряжение для этой души не записано.',
+    'camp2.folio.playerName': 'Игрок',
+    'camp2.folio.noPlayer': 'не указан',
 
     /* ── InventoryPage ──────────────────────────────── */
     'camp2.inv.loadError': 'Арсенал не удалось осмотреть. Его обереги остаются нерушимы.',
@@ -765,6 +775,16 @@ export const campaigns2: DictModule = {
     'camp2.folio.sacredMarks': 'Sacred Marks',
     'camp2.folio.sacredMarksSub': 'Active buffs & debuffs',
     'camp2.folio.noMarks': 'No marks burn upon this soul.',
+    'camp2.folio.profSection': 'Proficiencies & Skills',
+    'camp2.folio.savingThrow': 'Saving throw',
+    'camp2.folio.passivePerception': 'Passive Perception',
+    'camp2.folio.passiveSub': '10 + Perception',
+    'camp2.folio.profsLanguages': 'Proficiencies & Languages',
+    'camp2.folio.noProfs': 'No proficiencies or languages recorded for this soul.',
+    'camp2.folio.equipmentTitle': 'Equipment',
+    'camp2.folio.noEquipment': 'No equipment recorded for this soul.',
+    'camp2.folio.playerName': 'Player',
+    'camp2.folio.noPlayer': 'unassigned',
 
     /* ── InventoryPage ──────────────────────────────── */
     'camp2.inv.loadError': 'The arsenal could not be inspected. Its wards remain unbroken.',

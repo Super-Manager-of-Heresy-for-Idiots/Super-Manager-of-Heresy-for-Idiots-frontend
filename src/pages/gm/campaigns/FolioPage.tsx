@@ -61,6 +61,17 @@ function IdentityField({ label, value, sub }: { label: string; value: string; su
   );
 }
 
+/* Read-only proficiency row: a diamond pip + label + computed bonus. */
+function ProfRow({ proficient, label, value }: { proficient: boolean; label: string; value: string }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '3px 0' }}>
+      <Rune kind="diamond-fill" size={8} color={proficient ? 'var(--gold-pale)' : 'var(--ink-ghost)'} />
+      <span style={{ flex: 1, fontSize: 12.5, color: proficient ? 'var(--ink-bright)' : 'var(--ink-quiet)' }}>{label}</span>
+      <span className="ao-num" style={{ fontSize: 12.5, color: proficient ? 'var(--gold-pale)' : 'var(--ink-quiet)' }}>{value}</span>
+    </div>
+  );
+}
+
 /* Empty, clearly-marked section for data the API does not serve. */
 function VoidBody({ note }: { note: string }) {
   return (
@@ -193,6 +204,25 @@ export default function FolioPage() {
     return abilityMod(stat) + profBonus;
   }
   const fmtMod = (n: number) => (n >= 0 ? `+${n}` : `${n}`);
+
+  /* ── read-only mirror of the template/forge sheet ─────────── */
+  const proficiencies = character.proficiencies ?? null;
+  const equipment = character.equipment ?? null;
+  const playerName = character.playerName ?? null;
+  const refSkills = refContent?.skills ?? [];
+  const profSkillIds = new Set(skillProficiencies.map((sp) => sp.skillId));
+  const saveProfByName = new Set(savingThrows.map((n) => n.toLowerCase()));
+  // skills grouped under the stat that governs them
+  function skillsForStat(statName: string) {
+    const key = statName.toLowerCase();
+    return refSkills.filter((s) => (s.governingStatName ?? '').toLowerCase() === key);
+  }
+  // passive perception = 10 + WIS mod + (proficient ? prof : 0)
+  const perceptionSkill = refSkills.find((s) => s.name.toLowerCase().includes('percept'));
+  const wisStat = statByName.get('wisdom') ?? stats.find((s) => s.statTypeName.toLowerCase().startsWith('wis'));
+  const wisMod = wisStat ? abilityMod(wisStat) : 0;
+  const perceptionProf = perceptionSkill ? profSkillIds.has(perceptionSkill.id) : false;
+  const passivePerception = 10 + wisMod + (perceptionProf ? profBonus : 0);
 
   /* ── tab content (left main column) ───────────────────────── */
   function renderTab(): ReactNode {
@@ -632,6 +662,82 @@ export default function FolioPage() {
           )}
         </div>
       )}
+
+      {/* ── PROFICIENCIES & SKILLS (read-only mirror of the forge) ─ */}
+      <div style={{ margin: '24px 0 0' }}>
+        <OrdoDivider glyph="diamond-fill" color="var(--bronze)">{t('camp2.folio.profSection')}</OrdoDivider>
+      </div>
+
+      <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 12, marginTop: 12 }}>
+        {stats.length === 0 && (
+          <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 12, gridColumn: '1 / -1', textAlign: 'center', padding: '12px 0' }}>
+            {t('camp2.folio.noAbilities')}
+          </p>
+        )}
+        {stats.map((stat) => {
+          const mod = abilityMod(stat);
+          const eff = stat.effectiveValue ?? stat.value;
+          const saveOn = saveProfByName.has(stat.statTypeName.toLowerCase());
+          const saveBonus = mod + (saveOn ? profBonus : 0);
+          const skills = skillsForStat(stat.statTypeName);
+          return (
+            <OrdoPanel key={`prof-${stat.id}`} frame padding={0}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '11px 14px', borderBottom: '1px solid var(--rule)' }}>
+                <div className="ao-overline" style={{ flex: 1 }}>{gt.ability(stat.statTypeName)}</div>
+                <span className="ao-num" style={{ fontSize: 18, color: 'var(--ink-bright)' }}>{eff}</span>
+                <span className="ao-num" style={{ fontSize: 13, color: mod >= 0 ? 'var(--gold-pale)' : '#d8896a' }}>{fmtMod(mod)}</span>
+              </div>
+              <div style={{ padding: '8px 14px 12px' }}>
+                <ProfRow proficient={saveOn} label={t('camp2.folio.savingThrow')} value={fmtMod(saveBonus)} />
+                {skills.length > 0 && <OrdoDivider />}
+                {skills.map((sk) => {
+                  const on = profSkillIds.has(sk.id);
+                  const bonus = mod + (on ? profBonus : 0);
+                  return <ProfRow key={sk.id} proficient={on} label={gt.skill(sk.name)} value={fmtMod(bonus)} />;
+                })}
+              </div>
+            </OrdoPanel>
+          );
+        })}
+      </div>
+
+      <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 2fr)', gap: 18, marginTop: 18, alignItems: 'start' }}>
+        {/* Passive perception + player */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+          <OrdoPanel frame padding={0}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 18px' }}>
+              <div>
+                <div className="ao-overline">{t('camp2.folio.passivePerception')}</div>
+                <div className="ao-codex" style={{ fontSize: 10 }}>{t('camp2.folio.passiveSub')}</div>
+              </div>
+              <div style={{ fontFamily: 'var(--font-serif)', fontSize: 34, color: 'var(--ink-bright)', lineHeight: 1 }}>{passivePerception}</div>
+            </div>
+          </OrdoPanel>
+          <OrdoPanel padding={14}>
+            <IdentityField label={t('camp2.folio.playerName')} value={playerName ?? t('camp2.folio.noPlayer')} sub={character.ownerUsername} />
+          </OrdoPanel>
+        </div>
+
+        {/* Proficiencies & languages + equipment */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+          <OrdoPanel frame padding={0}>
+            <PanelHeader title={t('camp2.folio.profsLanguages')} glyph="scroll" />
+            {proficiencies ? (
+              <p className="ao-italic" style={{ padding: 14, fontSize: 13, color: 'var(--ink-quiet)', lineHeight: 1.55, whiteSpace: 'pre-wrap' }}>{proficiencies}</p>
+            ) : (
+              <VoidBody note={t('camp2.folio.noProfs')} />
+            )}
+          </OrdoPanel>
+          <OrdoPanel frame padding={0}>
+            <PanelHeader title={t('camp2.folio.equipmentTitle')} glyph="coin" tone="gold" />
+            {equipment ? (
+              <p className="ao-italic" style={{ padding: 14, fontSize: 13, color: 'var(--ink-quiet)', lineHeight: 1.55, whiteSpace: 'pre-wrap' }}>{equipment}</p>
+            ) : (
+              <VoidBody note={t('camp2.folio.noEquipment')} />
+            )}
+          </OrdoPanel>
+        </div>
+      </div>
 
       {/* ── TABS ───────────────────────────────────────────────── */}
       <div style={{ marginTop: 24 }}>
