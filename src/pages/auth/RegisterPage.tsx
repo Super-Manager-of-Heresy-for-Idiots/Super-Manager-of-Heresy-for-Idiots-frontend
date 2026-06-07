@@ -9,6 +9,7 @@ import type { ApiError } from '@/types';
 import { AxiosError } from 'axios';
 import { Rune, Sigil, OrdoDivider, OrdoPanel, OrdoField } from '@/components/ordo';
 import { useT } from '@/i18n/I18nContext';
+import { LanguageSwitcher } from '@/components/layout/LanguageSwitcher';
 
 const registerSchema = z
   .object({
@@ -82,6 +83,11 @@ export default function RegisterPage() {
 
   return (
     <div className="auth-split" style={{ background: 'var(--void)' }}>
+      {/* Language switcher — fixed top-right, visible on desktop & mobile */}
+      <div className="auth-lang">
+        <LanguageSwitcher />
+      </div>
+
       {/* ── LEFT — atmospheric panel ──────────────────── */}
       <div
         className="auth-hero"

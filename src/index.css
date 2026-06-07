@@ -1045,6 +1045,16 @@
   .auth-hero { display: none !important; }
   .auth-form-side { padding: 28px 18px !important; }
 }
+/* Language switcher pinned to the top-right corner of auth pages. */
+.auth-lang {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  z-index: 50;
+}
+@media (max-width: 420px) {
+  .auth-lang { top: 12px; right: 12px; }
+}
 
 /* ── Typography down-scaling on phones ───────────────────────
    The display scale is desktop-first; shrink the largest sizes so

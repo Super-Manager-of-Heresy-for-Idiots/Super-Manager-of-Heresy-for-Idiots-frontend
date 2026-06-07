@@ -8,6 +8,7 @@ import { useAuthStore } from '@/store/authStore';
 import { getRoleRedirectPath } from '@/lib/utils';
 import { Rune, Sigil, OrdoDivider, OrdoPanel, OrdoField } from '@/components/ordo';
 import { useT } from '@/i18n/I18nContext';
+import { LanguageSwitcher } from '@/components/layout/LanguageSwitcher';
 
 const loginSchema = z.object({
   username: z.string().min(1, 'auth.login.errUsername'),
@@ -40,6 +41,11 @@ export default function LoginPage() {
 
   return (
     <div className="auth-split" style={{ background: 'var(--void)' }}>
+      {/* Language switcher — fixed top-right, visible on desktop & mobile */}
+      <div className="auth-lang">
+        <LanguageSwitcher />
+      </div>
+
       {/* ── LEFT — atmospheric panel ──────────────────── */}
       <div
         className="auth-hero"
