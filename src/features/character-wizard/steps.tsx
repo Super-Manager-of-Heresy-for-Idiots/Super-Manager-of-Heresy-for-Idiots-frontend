@@ -83,16 +83,6 @@ export function StepBasics({ c, A, n, total }: StepProps) {
             />
           </div>
           <div>
-            <label className="ao-label">{t('wiz.basics.playerName')}</label>
-            <input
-              className="ao-input"
-              value={c.player}
-              placeholder={t('wiz.basics.playerNamePh')}
-              onChange={(e) => A.patch({ player: e.target.value })}
-              style={{ color: 'var(--ink-bright)' }}
-            />
-          </div>
-          <div>
             <label className="ao-label">{t('wiz.basics.alignment')}</label>
             <div className="wiz-align-grid">
               {ALIGNMENTS.map((al) => (

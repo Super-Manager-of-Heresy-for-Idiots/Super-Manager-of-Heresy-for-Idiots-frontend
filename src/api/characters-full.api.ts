@@ -1,6 +1,6 @@
 import { AxiosError } from 'axios';
 import api from './axios';
-import type { ApiResponse, CharacterResponse } from '@/types';
+import type { ApiResponse, CharacterResponse, UpdateCharacterRequest } from '@/types';
 
 // Full aggregate creation payload (see BACKEND_SPEC_CHARACTER_WIZARD.md §4).
 // The backend endpoint may not exist yet; the hook falls back to the basic
@@ -137,6 +137,18 @@ export const charactersFullApi = {
   /** Delete a template. */
   deleteTemplate: async (templateId: string): Promise<ApiResponse<void>> => {
     const response = await api.delete<ApiResponse<void>>(`/characters/${templateId}`);
+    return response.data;
+  },
+
+  /** Partial update for a template (mirrors the campaign PUT semantics). */
+  updateTemplate: async (
+    templateId: string,
+    data: UpdateCharacterRequest,
+  ): Promise<ApiResponse<CharacterResponse>> => {
+    const response = await api.put<ApiResponse<CharacterResponse>>(
+      `/characters/${templateId}`,
+      data,
+    );
     return response.data;
   },
 

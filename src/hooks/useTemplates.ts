@@ -4,7 +4,7 @@ import toast from 'react-hot-toast';
 import { charactersFullApi, type CreateFullCharacterRequest } from '@/api/characters-full.api';
 import { referenceApi } from '@/api/reference.api';
 import { useT } from '@/i18n/I18nContext';
-import type { ApiError, AvailableContentEntry, CharacterResponse } from '@/types';
+import type { ApiError, AvailableContentEntry, CharacterResponse, UpdateCharacterRequest } from '@/types';
 
 const myKey = ['characters', 'my'];
 const detailKey = (id: string) => ['characters', 'template', id];
@@ -41,6 +41,23 @@ export function useCreateTemplate() {
     },
     onError: (error: AxiosError<ApiError>) => {
       toast.error(error.response?.data?.message || t('hk.template.createFailed'));
+    },
+  });
+}
+
+export function useUpdateTemplate() {
+  const qc = useQueryClient();
+  const t = useT();
+  return useMutation({
+    mutationFn: ({ templateId, data }: { templateId: string; data: UpdateCharacterRequest }) =>
+      charactersFullApi.updateTemplate(templateId, data),
+    onSuccess: (_, vars) => {
+      qc.invalidateQueries({ queryKey: myKey });
+      qc.invalidateQueries({ queryKey: detailKey(vars.templateId) });
+      toast.success(t('hk.character.updated'));
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error.response?.data?.message || t('hk.character.updateFailed'));
     },
   });
 }

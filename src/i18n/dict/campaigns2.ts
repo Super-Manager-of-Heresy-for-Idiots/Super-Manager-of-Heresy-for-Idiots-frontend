@@ -352,6 +352,7 @@ export const campaigns2: DictModule = {
     'camp2.folio.noEquipment': 'Снаряжение для этой души не записано.',
     'camp2.folio.playerName': 'Игрок',
     'camp2.folio.noPlayer': 'не указан',
+    'camp2.folio.playerFromOwner': 'из аккаунта владельца',
 
     /* ── InventoryPage ──────────────────────────────── */
     'camp2.inv.loadError': 'Арсенал не удалось осмотреть. Его обереги остаются нерушимы.',
@@ -785,6 +786,7 @@ export const campaigns2: DictModule = {
     'camp2.folio.noEquipment': 'No equipment recorded for this soul.',
     'camp2.folio.playerName': 'Player',
     'camp2.folio.noPlayer': 'unassigned',
+    'camp2.folio.playerFromOwner': 'from owner account',
 
     /* ── InventoryPage ──────────────────────────────── */
     'camp2.inv.loadError': 'The arsenal could not be inspected. Its wards remain unbroken.',

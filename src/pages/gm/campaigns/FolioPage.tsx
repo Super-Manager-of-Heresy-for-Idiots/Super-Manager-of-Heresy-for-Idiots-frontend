@@ -15,12 +15,14 @@ import {
   MulticlassPanel,
   AbilityCheckPanel,
   DamageHealModal,
+  EditableSheetField,
 } from '@/components/characters';
 import {
   useCharacter,
   useCharacterResources,
   useCharacterWallet,
   useAbilityCheck,
+  useUpdateCharacter,
 } from '@/hooks/useCharacter';
 import { useCharacterEffects } from '@/hooks/useEffects';
 import { useEquippedInventory } from '@/hooks/useInventory';
@@ -99,6 +101,12 @@ export default function FolioPage() {
   const { data: equipped } = useEquippedInventory(campaignId!, characterId!);
   const { data: refContent } = useGlobalReferenceContent();
   const abilityCheck = useAbilityCheck();
+  const updateCharacter = useUpdateCharacter();
+
+  const saveSheetField = (field: 'proficiencies' | 'equipment', next: string) => {
+    if (!campaignId || !characterId) return;
+    updateCharacter.mutate({ campaignId, characterId, data: { [field]: next } });
+  };
 
   const [tab, setTab] = useState<TabId>('combat');
   const [hpModalOpen, setHpModalOpen] = useState(false);
@@ -208,7 +216,6 @@ export default function FolioPage() {
   /* ── read-only mirror of the template/forge sheet ─────────── */
   const proficiencies = character.proficiencies ?? null;
   const equipment = character.equipment ?? null;
-  const playerName = character.playerName ?? null;
   const refSkills = refContent?.skills ?? [];
   const profSkillIds = new Set(skillProficiencies.map((sp) => sp.skillId));
   const saveProfByName = new Set(savingThrows.map((n) => n.toLowerCase()));
@@ -714,7 +721,7 @@ export default function FolioPage() {
             </div>
           </OrdoPanel>
           <OrdoPanel padding={14}>
-            <IdentityField label={t('camp2.folio.playerName')} value={playerName ?? t('camp2.folio.noPlayer')} sub={character.ownerUsername} />
+            <IdentityField label={t('camp2.folio.playerName')} value={character.ownerUsername} sub={t('camp2.folio.playerFromOwner')} />
           </OrdoPanel>
         </div>
 
@@ -722,19 +729,21 @@ export default function FolioPage() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
           <OrdoPanel frame padding={0}>
             <PanelHeader title={t('camp2.folio.profsLanguages')} glyph="scroll" />
-            {proficiencies ? (
-              <p className="ao-italic" style={{ padding: 14, fontSize: 13, color: 'var(--ink-quiet)', lineHeight: 1.55, whiteSpace: 'pre-wrap' }}>{proficiencies}</p>
-            ) : (
-              <VoidBody note={t('camp2.folio.noProfs')} />
-            )}
+            <EditableSheetField
+              value={proficiencies}
+              placeholder={t('camp2.folio.noProfs')}
+              saving={updateCharacter.isPending}
+              onSave={(next) => saveSheetField('proficiencies', next)}
+            />
           </OrdoPanel>
           <OrdoPanel frame padding={0}>
             <PanelHeader title={t('camp2.folio.equipmentTitle')} glyph="coin" tone="gold" />
-            {equipment ? (
-              <p className="ao-italic" style={{ padding: 14, fontSize: 13, color: 'var(--ink-quiet)', lineHeight: 1.55, whiteSpace: 'pre-wrap' }}>{equipment}</p>
-            ) : (
-              <VoidBody note={t('camp2.folio.noEquipment')} />
-            )}
+            <EditableSheetField
+              value={equipment}
+              placeholder={t('camp2.folio.noEquipment')}
+              saving={updateCharacter.isPending}
+              onSave={(next) => saveSheetField('equipment', next)}
+            />
           </OrdoPanel>
         </div>
       </div>

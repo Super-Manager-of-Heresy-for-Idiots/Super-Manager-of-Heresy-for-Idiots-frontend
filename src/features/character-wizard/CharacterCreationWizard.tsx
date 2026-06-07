@@ -2,6 +2,7 @@ import { useEffect, useMemo, useReducer } from 'react';
 import toast from 'react-hot-toast';
 import { Rune, Sigil } from '@/components/ordo';
 import { useT } from '@/i18n/I18nContext';
+import { useAuthStore } from '@/store/authStore';
 import type { AvailableContentEntry } from '@/types';
 import type { CreateFullCharacterRequest } from '@/api/characters-full.api';
 import type { ReferenceCurrencyType } from '@/api/reference.api';
@@ -235,6 +236,7 @@ export function CharacterCreationWizard({
   onCancel,
 }: CharacterCreationWizardProps) {
   const t = useT();
+  const currentUser = useAuthStore((s) => s.user);
   const [st, dispatch] = useReducer(reducer, undefined, freshState);
   const { c } = st;
 
@@ -358,7 +360,7 @@ export function CharacterCreationWizard({
     const req: CreateFullCharacterRequest = {
       campaignId,
       name: c.name.trim(),
-      playerName: c.player || undefined,
+      playerName: currentUser?.username || undefined,
       alignment: c.alignment || undefined,
       level: c.level,
       classId,

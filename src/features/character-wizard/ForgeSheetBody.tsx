@@ -86,7 +86,6 @@ export function ForgeSheetBody({ c, onChange }: ForgeSheetBodyProps) {
           <div className="forge-header-meta">
             <ClassLevelField c={c} set={set} />
             <FForgeField label={t('wiz.forge.background')} value={c.background} onChange={(v) => set({ background: v })} placeholder={t('wiz.forge.backgroundPh')} />
-            <FForgeField label={t('wiz.forge.playerName')} value={c.player} onChange={(v) => set({ player: v })} placeholder={t('wiz.forge.playerNamePh')} />
             <FForgeField label={t('wiz.forge.race')} value={c.race} onChange={(v) => set({ race: v })} placeholder={t('wiz.forge.racePh')} />
             <FForgeField label={t('wiz.forge.alignment')} value={c.alignment} onChange={(v) => set({ alignment: v })} placeholder={t('wiz.forge.alignmentPh')} />
             <FForgeField label={t('wiz.forge.experience')} value={c.xp} onChange={(v) => set({ xp: onlyDigits(v) })} placeholder="0" mono />

@@ -62,6 +62,7 @@ const core: Record<Lang, Dict> = {
     'common.cancel': 'Отмена',
     'common.delete': 'Удалить',
     'common.save': 'Сохранить',
+    'common.edit': 'Изменить',
     'common.confirm': 'Подтвердить',
     'common.loading': 'Загрузка…',
 
@@ -193,6 +194,7 @@ const core: Record<Lang, Dict> = {
     'common.cancel': 'Cancel',
     'common.delete': 'Delete',
     'common.save': 'Save',
+    'common.edit': 'Edit',
     'common.confirm': 'Confirm',
     'common.loading': 'Loading…',
 
