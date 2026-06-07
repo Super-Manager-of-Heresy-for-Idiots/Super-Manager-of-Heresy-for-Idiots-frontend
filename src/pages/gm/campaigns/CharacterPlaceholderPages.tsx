@@ -155,23 +155,6 @@ export function AbilityCheckPage() {
   );
 }
 
-export function CharacterWalletPage() {
-  const t = useT();
-  return (
-    <CharacterFeaturePlaceholder
-      overline={t('camp.ph.wallet.overline')}
-      title={t('camp.ph.wallet.title')}
-      glyph="coin"
-      todo={t('camp.ph.wallet.todo')}
-      details={[
-        t('camp.ph.wallet.d1'),
-        t('camp.ph.wallet.d2'),
-        t('camp.ph.wallet.d3'),
-      ]}
-    />
-  );
-}
-
 export function CharacterResourcesPage() {
   const t = useT();
   return (

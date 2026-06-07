@@ -203,6 +203,29 @@ export function useModifyWallet() {
   });
 }
 
+/**
+ * Wallet transaction journal. The backend does not implement this endpoint yet,
+ * so a `404`/`501` is treated as "feature not available" and resolves to `null`
+ * (the journal section is hidden) instead of surfacing an error.
+ */
+export function useWalletHistory(campaignId: string, characterId: string) {
+  return useQuery({
+    queryKey: ['campaigns', campaignId, 'characters', characterId, 'wallet', 'history'],
+    queryFn: async () => {
+      try {
+        const response = await charactersApi.getWalletHistory(campaignId, characterId);
+        return response.data ?? null;
+      } catch (err) {
+        const status = (err as AxiosError)?.response?.status;
+        if (status === 404 || status === 501) return null;
+        throw err;
+      }
+    },
+    enabled: !!campaignId && !!characterId,
+    retry: false,
+  });
+}
+
 export function useCharacterResources(campaignId: string, characterId: string) {
   return useQuery({
     queryKey: ['campaigns', campaignId, 'characters', characterId, 'resources'],

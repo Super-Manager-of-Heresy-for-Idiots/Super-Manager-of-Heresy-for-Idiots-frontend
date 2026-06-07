@@ -9,6 +9,7 @@ import { components2 } from './components2';
 import { components3 } from './components3';
 import { wizard } from './wizard';
 import { hooks } from './hooks';
+import { wallet } from './wallet';
 
 /** Every feature dictionary module, merged into the final translations. */
 export const modules: DictModule[] = [
@@ -22,4 +23,5 @@ export const modules: DictModule[] = [
   components3,
   wizard,
   hooks,
+  wallet,
 ];

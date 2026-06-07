@@ -822,6 +822,38 @@ export interface ModifyResourceRequest {
   currentValue: number;
 }
 
+/**
+ * Wallet transaction-log entry (GET /wallet/history).
+ *
+ * Diverges from the original contract on purpose, to match the live backend:
+ * currencies are identified by `currencyTypeId` + `currencyName` (there is no
+ * `currencyCode` in the domain), and `reason` is always `null` until the field
+ * is added to the POST /wallet request. If the endpoint is absent, the journal
+ * section stays hidden (404/501 → null).
+ */
+export interface WalletHistoryEntry {
+  id: string;
+  currencyTypeId: string;
+  currencyName: string;
+  delta: number;
+  balanceAfter: number;
+  reason: string | null;
+  performedBy: string;
+  createdAt: string; // ISO 8601
+}
+
+/**
+ * Pagination envelope returned by the wallet-history endpoint. The backend
+ * serves a dedicated `PageResponse` (field `page`, per the contract) rather
+ * than the raw Spring `Page` (field `number`) used elsewhere in the project.
+ */
+export interface PageResponse<T> {
+  content: T[];
+  page: number;
+  size: number;
+  totalElements: number;
+}
+
 // === Item Instances ===
 
 export interface ItemInstanceResponse {

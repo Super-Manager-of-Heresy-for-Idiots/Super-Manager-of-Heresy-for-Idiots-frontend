@@ -22,6 +22,7 @@ import AddCharacterPage from '@/pages/gm/campaigns/AddCharacterPage';
 import LevelUpWizardPage from '@/pages/gm/campaigns/LevelUpWizardPage';
 import CharacterRewardsPage from '@/pages/gm/campaigns/CharacterRewardsPage';
 import FolioPage from '@/pages/gm/campaigns/FolioPage';
+import CharacterWalletPage from '@/pages/gm/campaigns/CharacterWalletPage';
 import MyCharactersPage from '@/pages/player/MyCharactersPage';
 import TemplateWizardPage from '@/pages/player/TemplateWizardPage';
 import TemplateDetailPage from '@/pages/player/TemplateDetailPage';
@@ -32,7 +33,6 @@ import {
   CharacterHpPage,
   CharacterResourcesPage,
   CharacterStatsPage,
-  CharacterWalletPage,
 } from '@/pages/gm/campaigns/CharacterPlaceholderPages';
 import NPCManagerPage from '@/pages/gm/campaigns/NPCManagerPage';
 import NPCDetailPage from '@/pages/gm/campaigns/NPCDetailPage';

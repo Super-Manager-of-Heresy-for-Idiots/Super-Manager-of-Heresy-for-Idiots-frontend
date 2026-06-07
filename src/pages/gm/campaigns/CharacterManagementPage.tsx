@@ -66,7 +66,7 @@ export default function CharacterManagementPage() {
         body: t('camp.mgmt.tile.wallet.body'),
         glyph: 'coin',
         to: `${base}/wallet`,
-        ready: false,
+        ready: true,
       },
       {
         title: t('camp.mgmt.tile.resources.title'),

@@ -556,6 +556,13 @@ export default function FolioPage() {
                   <span className="ao-num" style={{ color: 'var(--gold-pale)', fontSize: 14 }}>{entry.amount.toLocaleString()}</span>
                 </div>
               ))}
+              {/* Reduced gold-equivalent total — full ledger lives on the wallet page. */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 6, marginTop: 2, borderTop: '1px solid var(--hairline)' }}>
+                <span className="ao-overline" style={{ color: 'var(--ink-faint)' }}>{t('camp.wallet.total')}</span>
+                <span className="ao-num" style={{ color: 'var(--gold)', fontSize: 14 }}>
+                  {t('camp2.folio.coinTotal', { amount: (wallet ?? []).reduce((s, w) => s + (w.goldEquivalent ?? 0), 0).toLocaleString() })}
+                </span>
+              </div>
             </div>
           )}
         </OrdoPanel>

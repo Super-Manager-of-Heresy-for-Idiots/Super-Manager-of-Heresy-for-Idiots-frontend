@@ -5,11 +5,14 @@ import type { WalletEntry } from '@/types';
 
 interface WalletPanelProps {
   characterId: string;
+  campaignId?: string;
   wallet: WalletEntry[];
+  /** When false, hide the +/- controls and "add currency" CTA (read-only viewers). */
+  canEdit?: boolean;
   onAddCurrency?: () => void;
 }
 
-export function WalletPanel({ characterId, wallet, onAddCurrency }: WalletPanelProps) {
+export function WalletPanel({ characterId, campaignId, wallet, canEdit = true, onAddCurrency }: WalletPanelProps) {
   const t = useT();
   const updateWallet = useUpdateWallet();
 
@@ -21,6 +24,7 @@ export function WalletPanel({ characterId, wallet, onAddCurrency }: WalletPanelP
   function handleDelta(currencyTypeId: string, delta: number) {
     const entry = wallet.find((item) => item.currencyTypeId === currencyTypeId);
     updateWallet.mutate({
+      campaignId,
       id: characterId,
       currencyTypeId,
       data: { currencyTypeId, amount: Math.max(0, (entry?.amount ?? 0) + delta) },
@@ -57,8 +61,8 @@ export function WalletPanel({ characterId, wallet, onAddCurrency }: WalletPanelP
                 padding: '10px 0',
               }}
             >
-              {/* Currency name */}
-              <div style={{ flex: 1 }}>
+              {/* Currency name + gold equivalent */}
+              <div style={{ flex: 1, minWidth: 0 }}>
                 <div
                   style={{
                     fontSize: 13,
@@ -68,6 +72,9 @@ export function WalletPanel({ characterId, wallet, onAddCurrency }: WalletPanelP
                   }}
                 >
                   {entry.currencyName}
+                </div>
+                <div className="ao-codex" style={{ fontSize: 10, color: 'var(--ink-faint)', marginTop: 2 }}>
+                  {t('cmp.wallet.gp', { amount: (entry.goldEquivalent ?? 0).toLocaleString() })}
                 </div>
               </div>
 
@@ -79,24 +86,26 @@ export function WalletPanel({ characterId, wallet, onAddCurrency }: WalletPanelP
                   gap: 4,
                 }}
               >
-                <button
-                  onClick={() => handleDelta(entry.currencyTypeId, -1)}
-                  disabled={updateWallet.isPending}
-                  style={{
-                    width: 28,
-                    height: 28,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    background: 'var(--abyss)',
-                    border: '1px solid var(--rule)',
-                    cursor: 'pointer',
-                    opacity: updateWallet.isPending ? 0.5 : 1,
-                  }}
-                  aria-label={t('cmp.wallet.decrease', { name: entry.currencyName })}
-                >
-                  <Rune kind="minus" size={10} color="var(--ink-quiet)" />
-                </button>
+                {canEdit && (
+                  <button
+                    onClick={() => handleDelta(entry.currencyTypeId, -1)}
+                    disabled={updateWallet.isPending}
+                    style={{
+                      width: 28,
+                      height: 28,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      background: 'var(--abyss)',
+                      border: '1px solid var(--rule)',
+                      cursor: 'pointer',
+                      opacity: updateWallet.isPending ? 0.5 : 1,
+                    }}
+                    aria-label={t('cmp.wallet.decrease', { name: entry.currencyName })}
+                  >
+                    <Rune kind="minus" size={10} color="var(--ink-quiet)" />
+                  </button>
+                )}
 
                 <span
                   style={{
@@ -110,24 +119,26 @@ export function WalletPanel({ characterId, wallet, onAddCurrency }: WalletPanelP
                   {entry.amount.toLocaleString()}
                 </span>
 
-                <button
-                  onClick={() => handleDelta(entry.currencyTypeId, 1)}
-                  disabled={updateWallet.isPending}
-                  style={{
-                    width: 28,
-                    height: 28,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    background: 'var(--abyss)',
-                    border: '1px solid var(--rule)',
-                    cursor: 'pointer',
-                    opacity: updateWallet.isPending ? 0.5 : 1,
-                  }}
-                  aria-label={t('cmp.wallet.increase', { name: entry.currencyName })}
-                >
-                  <Rune kind="plus" size={10} color="var(--ink-quiet)" />
-                </button>
+                {canEdit && (
+                  <button
+                    onClick={() => handleDelta(entry.currencyTypeId, 1)}
+                    disabled={updateWallet.isPending}
+                    style={{
+                      width: 28,
+                      height: 28,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      background: 'var(--abyss)',
+                      border: '1px solid var(--rule)',
+                      cursor: 'pointer',
+                      opacity: updateWallet.isPending ? 0.5 : 1,
+                    }}
+                    aria-label={t('cmp.wallet.increase', { name: entry.currencyName })}
+                  >
+                    <Rune kind="plus" size={10} color="var(--ink-quiet)" />
+                  </button>
+                )}
               </div>
             </div>
 
@@ -153,7 +164,7 @@ export function WalletPanel({ characterId, wallet, onAddCurrency }: WalletPanelP
       </div>
 
       {/* Add Currency ghost button */}
-      {onAddCurrency && (
+      {canEdit && onAddCurrency && (
         <div
           style={{
             padding: '8px 16px 12px',

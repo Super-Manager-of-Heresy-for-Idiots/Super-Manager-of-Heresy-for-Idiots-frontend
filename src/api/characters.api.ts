@@ -9,6 +9,8 @@ import type {
   UpdateStatRequest,
   WalletEntryResponse,
   ModifyWalletRequest,
+  WalletHistoryEntry,
+  PageResponse,
   ResourceResponse,
   ModifyResourceRequest,
   AbilityCheckResponse,
@@ -71,6 +73,15 @@ export const charactersApi = {
 
   modifyWallet: async (campaignId: string, characterId: string, data: ModifyWalletRequest): Promise<ApiResponse<WalletEntryResponse>> => {
     const response = await api.post<ApiResponse<WalletEntryResponse>>(`/campaigns/${campaignId}/characters/${characterId}/wallet`, data);
+    return response.data;
+  },
+
+  // Wallet history — future endpoint, not yet served by the backend.
+  getWalletHistory: async (campaignId: string, characterId: string, page = 0, size = 20): Promise<ApiResponse<PageResponse<WalletHistoryEntry>>> => {
+    const response = await api.get<ApiResponse<PageResponse<WalletHistoryEntry>>>(
+      `/campaigns/${campaignId}/characters/${characterId}/wallet/history`,
+      { params: { page, size } },
+    );
     return response.data;
   },
 
