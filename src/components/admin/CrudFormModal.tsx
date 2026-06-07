@@ -16,12 +16,19 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { EQUIPMENT_SLOTS, EQUIPMENT_SLOT_LABELS } from '@/types';
+import { useT } from '@/i18n/I18nContext';
+
+interface SelectOption {
+  value: string;
+  label: string;
+}
 
 interface FieldDef {
   name: string;
   label: string;
-  type: 'text' | 'textarea' | 'slot-select';
+  type: 'text' | 'textarea' | 'slot-select' | 'select';
   required?: boolean;
+  options?: SelectOption[];
 }
 
 interface CrudFormModalProps {
@@ -43,11 +50,12 @@ export function CrudFormModal({
   fields,
   defaultValues,
 }: CrudFormModalProps) {
+  const t = useT();
   const schemaShape: Record<string, z.ZodString> = {};
   fields.forEach((f) => {
     let schema = z.string();
     if (f.required !== false) {
-      schema = schema.min(1, `${f.label} is required`);
+      schema = schema.min(1, t('cmp2.crudForm.required', { label: f.label }));
     }
     if (f.type === 'text') {
       schema = schema.max(50);
@@ -86,14 +94,14 @@ export function CrudFormModal({
             <div key={field.name} className="space-y-2">
               <Label>{field.label}</Label>
               {field.type === 'textarea' ? (
-                <Textarea {...register(field.name)} placeholder={`Enter ${field.label.toLowerCase()}`} />
+                <Textarea {...register(field.name)} placeholder={t('cmp2.crudForm.enterField', { field: field.label.toLowerCase() })} />
               ) : field.type === 'slot-select' ? (
                 <Select
                   value={watch(field.name) || ''}
                   onValueChange={(v) => setValue(field.name, v, { shouldValidate: true })}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a slot" />
+                    <SelectValue placeholder={t('cmp2.crudForm.selectSlot')} />
                   </SelectTrigger>
                   <SelectContent>
                     {EQUIPMENT_SLOTS.map((slot) => (
@@ -103,8 +111,24 @@ export function CrudFormModal({
                     ))}
                   </SelectContent>
                 </Select>
+              ) : field.type === 'select' && field.options ? (
+                <Select
+                  value={watch(field.name) || ''}
+                  onValueChange={(v) => setValue(field.name, v, { shouldValidate: true })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t('cmp2.crudForm.selectField', { field: field.label.toLowerCase() })} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {field.options.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               ) : (
-                <Input {...register(field.name)} placeholder={`Enter ${field.label.toLowerCase()}`} />
+                <Input {...register(field.name)} placeholder={t('cmp2.crudForm.enterField', { field: field.label.toLowerCase() })} />
               )}
               {errors[field.name] && (
                 <p className="text-sm text-dnd-red">{errors[field.name]?.message as string}</p>
@@ -113,11 +137,11 @@ export function CrudFormModal({
           ))}
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button type="submit" variant="gold" disabled={isSubmitting}>
               {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Save
+              {t('common.save')}
             </Button>
           </DialogFooter>
         </form>

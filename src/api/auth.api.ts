@@ -1,14 +1,14 @@
 import api from './axios';
-import type { ApiResponse, LoginResponse, LoginDto, RegisterDto } from '@/types';
+import type { ApiResponse, AuthResponse, LoginRequest, RegisterRequest, UserResponse } from '@/types';
 
 export const authApi = {
-  login: async (data: LoginDto): Promise<ApiResponse<LoginResponse>> => {
-    const response = await api.post<ApiResponse<LoginResponse>>('/auth/login', data);
+  login: async (data: LoginRequest): Promise<ApiResponse<AuthResponse>> => {
+    const response = await api.post<ApiResponse<AuthResponse>>('/auth/login', data);
     return response.data;
   },
 
-  register: async (data: RegisterDto): Promise<ApiResponse<null>> => {
-    const response = await api.post<ApiResponse<null>>('/auth/register', data);
+  register: async (data: RegisterRequest): Promise<ApiResponse<UserResponse>> => {
+    const response = await api.post<ApiResponse<UserResponse>>('/auth/register', data);
     return response.data;
   },
 };

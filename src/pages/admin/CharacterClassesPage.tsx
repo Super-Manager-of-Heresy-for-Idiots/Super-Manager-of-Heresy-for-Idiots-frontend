@@ -1,75 +1,50 @@
 import { useState } from 'react';
 import { CrudTable } from '@/components/admin/CrudTable';
-import { CrudFormModal } from '@/components/admin/CrudFormModal';
+import { AdminClassRichWizard } from '@/components/admin/AdminClassRichWizard';
 import {
   useCharacterClasses,
-  useCreateCharacterClass,
-  useUpdateCharacterClass,
   useDeleteCharacterClass,
 } from '@/hooks/useAdmin';
-import type { CharacterClass } from '@/types';
+import type { CharacterClassResponse } from '@/types';
+import { useT } from '@/i18n/I18nContext';
 
 export default function CharacterClassesPage() {
+  const t = useT();
   const { data, isLoading } = useCharacterClasses();
-  const createMutation = useCreateCharacterClass();
-  const updateMutation = useUpdateCharacterClass();
   const deleteMutation = useDeleteCharacterClass();
 
-  const [modalOpen, setModalOpen] = useState(false);
-  const [editing, setEditing] = useState<CharacterClass | null>(null);
+  const [wizardOpen, setWizardOpen] = useState(false);
+  const [editing, setEditing] = useState<CharacterClassResponse | null>(null);
 
   const handleAdd = () => {
     setEditing(null);
-    setModalOpen(true);
+    setWizardOpen(true);
   };
 
-  const handleEdit = (item: CharacterClass) => {
+  const handleEdit = (item: CharacterClassResponse) => {
     setEditing(item);
-    setModalOpen(true);
-  };
-
-  const handleSubmit = (formData: Record<string, string>) => {
-    if (editing) {
-      updateMutation.mutate(
-        { id: editing.id, data: { name: formData.name, description: formData.description } },
-        { onSuccess: () => setModalOpen(false) }
-      );
-    } else {
-      createMutation.mutate(
-        { name: formData.name, description: formData.description },
-        { onSuccess: () => setModalOpen(false) }
-      );
-    }
+    setWizardOpen(true);
   };
 
   return (
     <>
       <CrudTable
-        title="Character Classes"
+        title={t('adm.classes.title')}
         data={data}
         isLoading={isLoading}
         onAdd={handleAdd}
         onEdit={handleEdit}
         onDelete={(id) => deleteMutation.mutate(id)}
-        addLabel="Add Class"
+        addLabel={t('adm.classes.add')}
         columns={[
-          { header: 'Name', accessor: 'name' },
-          { header: 'Description', accessor: 'description' },
+          { header: t('adm.shared.colName'), accessor: 'name' },
+          { header: t('adm.shared.colDescription'), accessor: 'description' },
         ]}
       />
-      <CrudFormModal
-        open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        onSubmit={handleSubmit}
-        isSubmitting={createMutation.isPending || updateMutation.isPending}
-        title={editing ? 'Edit Character Class' : 'Add Character Class'}
-        fields={[
-          { name: 'name', label: 'Name', type: 'text' },
-          { name: 'description', label: 'Description', type: 'textarea' },
-        ]}
-        defaultValues={
-          editing ? { name: editing.name, description: editing.description } : undefined
-        }
+      <AdminClassRichWizard
+        open={wizardOpen}
+        onOpenChange={setWizardOpen}
+        editingClass={editing}
       />
     </>
   );

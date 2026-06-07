@@ -17,7 +17,14 @@ api.interceptors.request.use((config) => {
 });
 
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    if (response.data && response.data.success === false) {
+      const error = new Error(response.data.message || 'Request failed');
+      (error as any).response = response;
+      return Promise.reject(error);
+    }
+    return response;
+  },
   (error) => {
     if (error.response?.status === 401) {
       useAuthStore.getState().logout();

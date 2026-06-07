@@ -4,24 +4,26 @@ import toast from 'react-hot-toast';
 import { authApi } from '@/api/auth.api';
 import { useAuthStore } from '@/store/authStore';
 import { getRoleRedirectPath } from '@/lib/utils';
-import type { LoginDto, RegisterDto, ApiError } from '@/types';
+import { useT } from '@/i18n/I18nContext';
+import type { LoginRequest, RegisterRequest, ApiError } from '@/types';
 import { AxiosError } from 'axios';
 
 export function useLogin() {
   const navigate = useNavigate();
   const login = useAuthStore((s) => s.login);
+  const t = useT();
 
   return useMutation({
-    mutationFn: (data: LoginDto & { remember: boolean }) =>
+    mutationFn: (data: LoginRequest & { remember: boolean }) =>
       authApi.login({ username: data.username, password: data.password }),
     onSuccess: (response, variables) => {
-      const { token, user } = response.data;
+      const { token, user } = response.data!;
       login(user, token, variables.remember);
-      toast.success('Welcome back, ' + user.username + '!');
+      toast.success(t('hk.auth.welcomeBack', { name: user.username }));
       navigate(getRoleRedirectPath(user.role));
     },
     onError: (error: AxiosError<ApiError>) => {
-      const message = error.response?.data?.message || 'Login failed';
+      const message = error.response?.data?.message || t('hk.auth.loginFailed');
       toast.error(message);
     },
   });
@@ -29,15 +31,16 @@ export function useLogin() {
 
 export function useRegister() {
   const navigate = useNavigate();
+  const t = useT();
 
   return useMutation({
-    mutationFn: (data: RegisterDto) => authApi.register(data),
+    mutationFn: (data: RegisterRequest) => authApi.register(data),
     onSuccess: () => {
-      toast.success('Registration successful! Please log in.');
+      toast.success(t('hk.auth.registerSuccess'));
       navigate('/login');
     },
     onError: (error: AxiosError<ApiError>) => {
-      const message = error.response?.data?.message || 'Registration failed';
+      const message = error.response?.data?.message || t('hk.auth.registerFailed');
       if (!error.response?.data?.fields) {
         toast.error(message);
       }
@@ -49,10 +52,11 @@ export function useRegister() {
 export function useLogout() {
   const navigate = useNavigate();
   const logout = useAuthStore((s) => s.logout);
+  const t = useT();
 
   return () => {
     logout();
     navigate('/login');
-    toast.success('Logged out successfully');
+    toast.success(t('hk.auth.loggedOut'));
   };
 }

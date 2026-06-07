@@ -3,18 +3,16 @@ import { Link, Navigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Dices, Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useLogin } from '@/hooks/useAuth';
 import { useAuthStore } from '@/store/authStore';
 import { getRoleRedirectPath } from '@/lib/utils';
+import { Rune, Sigil, OrdoDivider, OrdoPanel, OrdoField } from '@/components/ordo';
+import { useT } from '@/i18n/I18nContext';
+import { LanguageSwitcher } from '@/components/layout/LanguageSwitcher';
 
 const loginSchema = z.object({
-  username: z.string().min(1, 'Username is required'),
-  password: z.string().min(1, 'Password is required'),
+  username: z.string().min(1, 'auth.login.errUsername'),
+  password: z.string().min(1, 'auth.login.errPassword'),
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
@@ -23,6 +21,7 @@ export default function LoginPage() {
   const [remember, setRemember] = useState(false);
   const loginMutation = useLogin();
   const { isAuthenticated, user } = useAuthStore();
+  const t = useT();
 
   const {
     register,
@@ -41,76 +40,189 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <Card className="w-full max-w-md border-gold/20">
-        <CardHeader className="text-center">
-          <div className="flex justify-center mb-4">
-            <Dices className="h-12 w-12 text-gold" />
+    <div className="auth-split" style={{ background: 'var(--void)' }}>
+      {/* Language switcher — fixed top-right, visible on desktop & mobile */}
+      <div className="auth-lang">
+        <LanguageSwitcher />
+      </div>
+
+      {/* ── LEFT — atmospheric panel ──────────────────── */}
+      <div
+        className="auth-hero"
+        style={{
+          position: 'relative',
+          overflow: 'hidden',
+          borderRight: '1px solid var(--rule)',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          padding: '56px 64px',
+        }}
+      >
+        {/* Radial glow */}
+        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(60% 50% at 50% 35%, rgba(176, 141, 78, 0.10), transparent 60%)' }} />
+        {/* Horizontal line pattern */}
+        <div style={{ position: 'absolute', inset: 0, background: 'repeating-linear-gradient(0deg, transparent 0 6px, rgba(176,141,78,0.025) 6px 7px)' }} />
+
+        {/* Top — branding */}
+        <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 14 }}>
+          <Sigil size={48} glyph="sigil-3" />
+          <div>
+            <div className="ao-engraved" style={{ fontSize: 12, color: 'var(--gold-pale)' }}>{t('app.name')}</div>
+            <div className="ao-codex">{t('auth.brandSub')}</div>
           </div>
-          <CardTitle className="text-3xl text-gold">D&D Manager</CardTitle>
-          <CardDescription>Sign in to your account</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
-              <Input
-                id="username"
-                {...register('username')}
-                placeholder="Enter your username"
-                autoComplete="username"
-              />
-              {errors.username && (
-                <p className="text-sm text-dnd-red">{errors.username.message}</p>
-              )}
+        </div>
+
+        {/* Middle — hero text */}
+        <div style={{ position: 'relative' }}>
+          <div className="ao-codex" style={{ marginBottom: 16, color: 'var(--ink-faint)' }}>{t('auth.login.sacramentum')}</div>
+          <div className="ao-h2" style={{ fontSize: 56, lineHeight: 1.05, maxWidth: 520 }}>{t('auth.login.heroTitle')}</div>
+          <p className="ao-italic" style={{ fontSize: 20, marginTop: 18, maxWidth: 480, color: 'var(--ink-quiet)' }}>
+            {t('auth.login.heroText')}
+          </p>
+
+          <OrdoDivider glyph="diamond-fill">{t('auth.login.sealOfEntry')}</OrdoDivider>
+
+          <div style={{ display: 'flex', gap: 28, marginTop: 28 }}>
+            {[
+              { label: t('auth.login.statChapters'), value: '148' },
+              { label: t('auth.login.statSouls'), value: '3,402' },
+              { label: t('auth.login.statVigil'), value: '912 d' },
+            ].map((stat) => (
+              <div key={stat.label}>
+                <div className="ao-overline">{stat.label}</div>
+                <div className="ao-h4 ao-num" style={{ fontFamily: 'var(--font-mono)' }}>{stat.value}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Bottom — version */}
+        <div style={{ position: 'relative', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', color: 'var(--ink-faint)' }}>
+          <div className="ao-codex">{t('auth.cohort')}</div>
+          <div className="ao-codex">{t('auth.version')}</div>
+        </div>
+      </div>
+
+      {/* ── RIGHT — sign-in panel ─────────────────────── */}
+      <div
+        className="auth-form-side"
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: 56,
+          background: 'linear-gradient(180deg, var(--stone), var(--abyss))',
+        }}
+      >
+        <div style={{ width: '100%', maxWidth: 400 }}>
+          <OrdoPanel frame padding={36} style={{ position: 'relative' }}>
+            {/* Top rune */}
+            <div style={{ textAlign: 'center', marginBottom: 28 }}>
+              <Rune kind="diamond" size={18} color="var(--gold)" />
+              <div className="ao-engraved ao-flicker" style={{ fontSize: 16, marginTop: 14 }}>{t('auth.login.presentSeal')}</div>
+              <div className="ao-italic" style={{ fontSize: 14, marginTop: 6 }}>{t('auth.login.awaits')}</div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                {...register('password')}
-                placeholder="Enter your password"
-                autoComplete="current-password"
-              />
-              {errors.password && (
-                <p className="text-sm text-dnd-red">{errors.password.message}</p>
-              )}
-            </div>
+            <OrdoDivider glyph="diamond-fill" />
 
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                id="remember"
-                checked={remember}
-                onChange={(e) => setRemember(e.target.checked)}
-                className="rounded border-border"
-              />
-              <Label htmlFor="remember" className="text-sm cursor-pointer">
-                Remember me
-              </Label>
-            </div>
-
-            <Button
-              type="submit"
-              variant="gold"
-              className="w-full"
-              disabled={loginMutation.isPending}
+            {/* Form */}
+            <form
+              onSubmit={handleSubmit(onSubmit)}
+              style={{ display: 'flex', flexDirection: 'column', gap: 18, marginTop: 22 }}
             >
-              {loginMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Sign In
-            </Button>
-          </form>
+              <div>
+                <label className="ao-label">{t('auth.login.sigilAddress')}</label>
+                <input
+                  className="ao-input"
+                  {...register('username')}
+                  placeholder={t('auth.login.sigilPlaceholder')}
+                  autoComplete="username"
+                />
+                {errors.username && (
+                  <span style={{ fontSize: 12, color: 'var(--ember)', display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
+                    <Rune kind="flame" size={11} color="var(--ember)" />
+                    {t(errors.username.message ?? '')}
+                  </span>
+                )}
+              </div>
 
-          <div className="mt-6 text-center text-sm">
-            <span className="text-muted-foreground">Don't have an account? </span>
-            <Link to="/register" className="text-gold hover:underline">
-              Create one
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                  <label className="ao-label">{t('auth.login.cipherWord')}</label>
+                  <a className="ao-codex" style={{ cursor: 'pointer', color: 'var(--gold-pale)' }}>{t('auth.login.recover')}</a>
+                </div>
+                <div style={{ position: 'relative' }}>
+                  <input
+                    className="ao-input"
+                    type="password"
+                    {...register('password')}
+                    placeholder="••••••••••••"
+                    autoComplete="current-password"
+                    style={{ paddingRight: 40 }}
+                  />
+                  <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--ink-faint)' }}>
+                    <Rune kind="eye" size={14} />
+                  </span>
+                </div>
+                {errors.password && (
+                  <span style={{ fontSize: 12, color: 'var(--ember)', display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
+                    <Rune kind="flame" size={11} color="var(--ember)" />
+                    {t(errors.password.message ?? '')}
+                  </span>
+                )}
+              </div>
+
+              {/* Remember me */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--ink-quiet)', fontSize: 12 }}>
+                <span
+                  onClick={() => setRemember(!remember)}
+                  style={{
+                    width: 14, height: 14,
+                    border: `1px solid ${remember ? 'var(--brass)' : 'var(--rule-strong)'}`,
+                    background: remember ? 'var(--gold)' : 'var(--abyss)',
+                    display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                    cursor: 'pointer',
+                  }}
+                >
+                  {remember && <Rune kind="check" size={10} color="var(--abyss)" />}
+                </span>
+                <span className="ao-italic" style={{ cursor: 'pointer' }} onClick={() => setRemember(!remember)}>
+                  {t('auth.login.remember')}
+                </span>
+              </div>
+
+              {/* Primary submit */}
+              <button
+                type="submit"
+                className="ao-btn ao-btn--primary ao-btn--lg ao-btn--block"
+                disabled={loginMutation.isPending}
+                style={{ marginTop: 4 }}
+              >
+                <Rune kind="diamond-fill" size={9} />
+                {loginMutation.isPending ? t('auth.login.submitting') : t('auth.login.submit')}
+              </button>
+            </form>
+
+            {/* OR divider */}
+            <OrdoDivider>{t('auth.login.or')}</OrdoDivider>
+
+            {/* Accept Invitation */}
+            <Link
+              to="/register"
+              className="ao-btn ao-btn--ghost ao-btn--block"
+              style={{ textDecoration: 'none', textAlign: 'center', marginTop: 8 }}
+            >
+              <Rune kind="scroll" size={12} />
+              {t('auth.login.acceptInvite')}
             </Link>
+          </OrdoPanel>
+
+          <div style={{ textAlign: 'center', marginTop: 20, color: 'var(--ink-faint)' }}>
+            <span className="ao-codex">{t('auth.login.footer')}</span>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

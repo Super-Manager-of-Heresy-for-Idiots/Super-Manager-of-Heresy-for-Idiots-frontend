@@ -9,23 +9,25 @@ import {
   useUpdateItemType,
   useDeleteItemType,
 } from '@/hooks/useAdmin';
-import type { ItemType } from '@/types';
+import type { ItemTypeResponse } from '@/types';
+import { useT } from '@/i18n/I18nContext';
 
 export default function ItemTypesPage() {
+  const t = useT();
   const { data, isLoading } = useItemTypes();
   const createMutation = useCreateItemType();
   const updateMutation = useUpdateItemType();
   const deleteMutation = useDeleteItemType();
 
   const [modalOpen, setModalOpen] = useState(false);
-  const [editing, setEditing] = useState<ItemType | null>(null);
+  const [editing, setEditing] = useState<ItemTypeResponse | null>(null);
 
   const handleAdd = () => {
     setEditing(null);
     setModalOpen(true);
   };
 
-  const handleEdit = (item: ItemType) => {
+  const handleEdit = (item: ItemTypeResponse) => {
     setEditing(item);
     setModalOpen(true);
   };
@@ -33,12 +35,12 @@ export default function ItemTypesPage() {
   const handleSubmit = (formData: Record<string, string>) => {
     if (editing) {
       updateMutation.mutate(
-        { id: editing.id, data: { name: formData.name, description: formData.description, slot: formData.slot } },
+        { id: editing.id, data: { name: formData.name, description: formData.description, slot: formData.slot as import('@/types').EquipmentSlot } },
         { onSuccess: () => setModalOpen(false) }
       );
     } else {
       createMutation.mutate(
-        { name: formData.name, description: formData.description, slot: formData.slot },
+        { name: formData.name, description: formData.description, slot: formData.slot as import('@/types').EquipmentSlot },
         { onSuccess: () => setModalOpen(false) }
       );
     }
@@ -47,21 +49,21 @@ export default function ItemTypesPage() {
   return (
     <>
       <CrudTable
-        title="Item Types"
+        title={t('adm.itemTypes.title')}
         data={data}
         isLoading={isLoading}
         onAdd={handleAdd}
         onEdit={handleEdit}
         onDelete={(id) => deleteMutation.mutate(id)}
-        addLabel="Add Item Type"
+        addLabel={t('adm.itemTypes.add')}
         columns={[
-          { header: 'Name', accessor: 'name' },
-          { header: 'Description', accessor: 'description' },
+          { header: t('adm.shared.colName'), accessor: 'name' },
+          { header: t('adm.shared.colDescription'), accessor: 'description' },
           {
-            header: 'Slot',
+            header: t('adm.itemTypes.colSlot'),
             accessor: (item) => (
               <Badge variant="outline">
-                {EQUIPMENT_SLOT_LABELS[item.slot] || item.slot}
+                {EQUIPMENT_SLOT_LABELS[item.slot as import('@/types').EquipmentSlot] || item.slot}
               </Badge>
             ),
           },
@@ -72,15 +74,15 @@ export default function ItemTypesPage() {
         onClose={() => setModalOpen(false)}
         onSubmit={handleSubmit}
         isSubmitting={createMutation.isPending || updateMutation.isPending}
-        title={editing ? 'Edit Item Type' : 'Add Item Type'}
+        title={editing ? t('adm.itemTypes.editTitle') : t('adm.itemTypes.addTitle')}
         fields={[
-          { name: 'name', label: 'Name', type: 'text' },
-          { name: 'description', label: 'Description', type: 'textarea' },
-          { name: 'slot', label: 'Slot', type: 'slot-select' },
+          { name: 'name', label: t('adm.shared.fieldName'), type: 'text' },
+          { name: 'description', label: t('adm.shared.fieldDescription'), type: 'textarea' },
+          { name: 'slot', label: t('adm.itemTypes.fieldSlot'), type: 'slot-select' },
         ]}
         defaultValues={
           editing
-            ? { name: editing.name, description: editing.description, slot: editing.slot }
+            ? { name: editing.name, description: editing.description || '', slot: editing.slot }
             : undefined
         }
       />

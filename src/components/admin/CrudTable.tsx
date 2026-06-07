@@ -1,4 +1,5 @@
 import { Pencil, Trash2, Plus } from 'lucide-react';
+import { useT } from '@/i18n/I18nContext';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -40,8 +41,10 @@ export function CrudTable<T extends { id: string }>({
   onEdit,
   onDelete,
   canDelete,
-  addLabel = 'Add New',
+  addLabel,
 }: CrudTableProps<T>) {
+  const t = useT();
+  const resolvedAddLabel = addLabel ?? t('cmp2.crud.addNew');
   const renderCell = (item: T, col: Column<T>) => {
     if (typeof col.accessor === 'function') {
       return col.accessor(item);
@@ -55,7 +58,7 @@ export function CrudTable<T extends { id: string }>({
         <h1 className="text-2xl font-heading font-bold">{title}</h1>
         <Button variant="gold" onClick={onAdd}>
           <Plus className="h-4 w-4 mr-2" />
-          {addLabel}
+          {resolvedAddLabel}
         </Button>
       </div>
 
@@ -67,8 +70,8 @@ export function CrudTable<T extends { id: string }>({
         </div>
       ) : !data || data.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground">
-          <p className="text-lg">No items found</p>
-          <p className="text-sm mt-1">Click "{addLabel}" to create one</p>
+          <p className="text-lg">{t('cmp2.crud.noItems')}</p>
+          <p className="text-sm mt-1">{t('cmp2.crud.clickToCreate', { label: resolvedAddLabel })}</p>
         </div>
       ) : (
         <div className="border border-border rounded-lg overflow-hidden">
@@ -81,7 +84,7 @@ export function CrudTable<T extends { id: string }>({
                   </th>
                 ))}
                 {(onEdit || onDelete) && (
-                  <th className="px-4 py-3 text-right text-sm font-semibold w-24">Actions</th>
+                  <th className="px-4 py-3 text-right text-sm font-semibold w-24">{t('cmp2.crud.actions')}</th>
                 )}
               </tr>
             </thead>
@@ -115,18 +118,18 @@ export function CrudTable<T extends { id: string }>({
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                               <AlertDialogHeader>
-                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                <AlertDialogTitle>{t('cmp2.crud.areYouSure')}</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                  This action cannot be undone. This will permanently delete this item.
+                                  {t('cmp2.crud.deleteWarning')}
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
                                 <AlertDialogAction
                                   onClick={() => onDelete(item.id)}
                                   className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                 >
-                                  Delete
+                                  {t('common.delete')}
                                 </AlertDialogAction>
                               </AlertDialogFooter>
                             </AlertDialogContent>
