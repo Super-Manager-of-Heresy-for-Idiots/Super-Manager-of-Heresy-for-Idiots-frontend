@@ -24,7 +24,6 @@ class WebSocketService {
   private subscriptions: StompSubscription[] = [];
   private handlers: Set<WsEventHandler> = new Set();
   private currentCampaignId: string | null = null;
-  private reconnectAttempt = 0;
 
   /* ── public API ────────────────────────────────────────── */
 
@@ -41,7 +40,6 @@ class WebSocketService {
     this.disconnect();
 
     this.currentCampaignId = campaignId;
-    this.reconnectAttempt = 0;
 
     const token = useAuthStore.getState().token;
     const wsStore = useWsStore.getState();
@@ -54,11 +52,10 @@ class WebSocketService {
           }
         : {},
 
-      // Disable built-in reconnect; we handle it ourselves for back-off
+      // No auto-reconnect: a dropped socket goes 'offline' instead of polling the server.
       reconnectDelay: 0,
 
       onConnect: () => {
-        this.reconnectAttempt = 0;
         useWsStore.getState().setConnectionState('connected');
 
         // Campaign broadcast topic
@@ -70,12 +67,11 @@ class WebSocketService {
 
       onStompError: (frame) => {
         console.error('[WS] STOMP error', frame.headers['message'], frame.body);
-        this.scheduleReconnect();
+        useWsStore.getState().setConnectionState('offline');
       },
 
       onWebSocketClose: () => {
-        wsStore.setConnectionState('offline');
-        this.scheduleReconnect();
+        useWsStore.getState().setConnectionState('offline');
       },
 
       onDisconnect: () => {
@@ -110,7 +106,6 @@ class WebSocketService {
     }
 
     this.currentCampaignId = null;
-    this.reconnectAttempt = 0;
     useWsStore.getState().setConnectionState('offline');
   }
 
@@ -193,24 +188,6 @@ class WebSocketService {
         console.error('[WS] Handler error', err);
       }
     });
-  }
-
-  /**
-   * Exponential back-off: 1 s, 2 s, 4 s, 8 s ... capped at 30 s.
-   */
-  private scheduleReconnect(): void {
-    if (!this.currentCampaignId) return;
-
-    useWsStore.getState().setConnectionState('reconnecting');
-    this.reconnectAttempt += 1;
-
-    const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempt - 1), 30_000);
-
-    setTimeout(() => {
-      if (!this.currentCampaignId) return; // disconnect() was called
-      console.info(`[WS] Reconnecting (attempt ${this.reconnectAttempt}, delay ${delay}ms)`);
-      this.connect(this.currentCampaignId);
-    }, delay);
   }
 }
 

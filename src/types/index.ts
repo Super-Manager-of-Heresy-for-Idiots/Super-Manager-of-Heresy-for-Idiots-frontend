@@ -802,9 +802,25 @@ export interface WalletEntryResponse {
   currencyTypeId: string;
   currencyName: string;
   amount: number;
-  goldEquivalent: number;
+  /** Value of this stack in gold; `null` when the currency has no exchange rate. */
+  goldEquivalent: number | null;
 }
 
+/**
+ * Currency reference for a campaign (GET /campaigns/{id}/reference/currencies).
+ * `id` is the `currencyTypeId` used by wallet operations.
+ */
+export interface CurrencyTypeResponse {
+  id: string;
+  name: string;
+  exchangeRateToGold: number;
+  isDefault: boolean;
+}
+
+/**
+ * Wallet add/deduct request (POST /campaigns/{id}/characters/{id}/wallet).
+ * `amount` is a DELTA: positive = credit (add), negative = debit (deduct).
+ */
 export interface ModifyWalletRequest {
   currencyTypeId: string;
   amount: number;

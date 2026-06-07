@@ -17,7 +17,23 @@ export function useLogin() {
     mutationFn: (data: LoginRequest & { remember: boolean }) =>
       authApi.login({ username: data.username, password: data.password }),
     onSuccess: (response, variables) => {
-      const { token, user } = response.data!;
+      // The login endpoint is an external boundary: tolerate both the `{ success, data }`
+      // envelope and a flat body, plus common token field names. If the token is missing
+      // we surface a clear error instead of redirecting into a session that 401/403s.
+      const body = response as Record<string, any>;
+      const payload = (body?.data ?? body) as Record<string, any>;
+      const token: string | undefined = payload?.token ?? payload?.accessToken ?? payload?.jwt;
+      const user = payload?.user ?? body?.user;
+
+      if (!token || !user) {
+        console.error('[auth] Login response missing token/user.', {
+          bodyKeys: body ? Object.keys(body) : null,
+          payloadKeys: payload ? Object.keys(payload) : null,
+        });
+        toast.error(t('hk.auth.loginFailed'));
+        return;
+      }
+
       login(user, token, variables.remember);
       toast.success(t('hk.auth.welcomeBack', { name: user.username }));
       navigate(getRoleRedirectPath(user.role));

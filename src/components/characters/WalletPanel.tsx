@@ -22,12 +22,12 @@ export function WalletPanel({ characterId, campaignId, wallet, canEdit = true, o
   );
 
   function handleDelta(currencyTypeId: string, delta: number) {
-    const entry = wallet.find((item) => item.currencyTypeId === currencyTypeId);
+    // `amount` is a signed delta: +1 credits, -1 debits.
     updateWallet.mutate({
       campaignId,
       id: characterId,
       currencyTypeId,
-      data: { currencyTypeId, amount: Math.max(0, (entry?.amount ?? 0) + delta) },
+      data: { currencyTypeId, amount: delta },
     });
   }
 

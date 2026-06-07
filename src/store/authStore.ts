@@ -11,7 +11,15 @@ interface AuthState {
 }
 
 function getStoredToken(): string | null {
-  return localStorage.getItem('token') || sessionStorage.getItem('token');
+  const raw = localStorage.getItem('token') || sessionStorage.getItem('token');
+  // Self-heal: older sessions may have persisted the literal string "undefined"/"null"
+  // (when the login response lacked a token), which would be sent as `Bearer undefined`.
+  if (!raw || raw === 'undefined' || raw === 'null') {
+    localStorage.removeItem('token');
+    sessionStorage.removeItem('token');
+    return null;
+  }
+  return raw;
 }
 
 function getStoredUser(): UserResponse | null {
@@ -31,6 +39,11 @@ export const useAuthStore = create<AuthState>((set) => ({
   token: getStoredToken(),
   isAuthenticated: !!getStoredToken(),
   login: (user: UserResponse, token: string, remember: boolean) => {
+    if (!token) {
+      // Guard against persisting an empty/undefined token, which would leave the app
+      // looking "logged in" while every request fails with 401/403.
+      throw new Error('Authentication token missing from login response');
+    }
     const storage = remember ? localStorage : sessionStorage;
     storage.setItem('token', token);
     storage.setItem('user', JSON.stringify(user));

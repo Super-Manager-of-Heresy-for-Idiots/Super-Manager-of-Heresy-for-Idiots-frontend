@@ -69,6 +69,8 @@ const core: Record<Lang, Dict> = {
     'auth.brandSub': 'Имперский Архив · MMDXLIV',
     'auth.cohort': 'Когорта VII — Хранилище Пепла и Латуни',
     'auth.version': 'в · 4.21.3 — позолочено',
+    'auth.showPassword': 'Показать пароль',
+    'auth.hidePassword': 'Скрыть пароль',
 
     /* ── Login ──────────────────────────────────────── */
     'auth.login.sacramentum': '— SACRAMENTUM —',
@@ -196,6 +198,8 @@ const core: Record<Lang, Dict> = {
 
     /* ── Auth — shared atmospheric panel ────────────── */
     'auth.brandSub': 'Imperial Archive · MMDXLIV',
+    'auth.showPassword': 'Show password',
+    'auth.hidePassword': 'Hide password',
     'auth.cohort': 'Cohort VII — Vault of Ash and Brass',
     'auth.version': 'v · 4.21.3 — gilded',
 

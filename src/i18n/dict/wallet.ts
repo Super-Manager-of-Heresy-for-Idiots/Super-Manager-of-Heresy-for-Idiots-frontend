@@ -35,6 +35,23 @@ export const wallet: DictModule = {
     'camp.wallet.journal.col.balance': 'Баланс',
     'camp.wallet.journal.col.reason': 'Причина',
     'camp.wallet.journal.col.by': 'Кем',
+    'camp.wallet.journal.prev': 'Назад',
+    'camp.wallet.journal.next': 'Далее',
+    'camp.wallet.journal.page': 'Стр. {page} из {total}',
+
+    /* ── Управление балансами (экран мастера) ── */
+    'camp.balances.overline': 'Управление балансами',
+    'camp.balances.title': 'Казна кампании',
+    'camp.balances.sub': 'Начисление и списание валют игрокам',
+    'camp.balances.pickTitle': 'Персонажи',
+    'camp.balances.pickSub': 'Выберите, кому изменить баланс',
+    'camp.balances.pickEmpty': 'В кампании пока нет персонажей.',
+    'camp.balances.selectPrompt.title': 'Выберите персонажа',
+    'camp.balances.selectPrompt.body': 'Выберите персонажа слева, чтобы просмотреть и изменить его кошелёк.',
+    'camp.balances.walletTitle': 'Кошелёк',
+    'camp.balances.walletEmpty': 'У персонажа пока нет валют.',
+    'camp.balances.loadError': 'Не удалось загрузить данные.',
+    'camp.balances.noCurrencies': 'В кампании не настроены валюты.',
 
     /* ── Фолио (урезанный вид) ── */
     'camp2.folio.coinTotal': 'Итого ≈ {amount} зм',
@@ -73,6 +90,23 @@ export const wallet: DictModule = {
     'camp.wallet.journal.col.balance': 'Balance',
     'camp.wallet.journal.col.reason': 'Reason',
     'camp.wallet.journal.col.by': 'By',
+    'camp.wallet.journal.prev': 'Prev',
+    'camp.wallet.journal.next': 'Next',
+    'camp.wallet.journal.page': 'Page {page} of {total}',
+
+    /* ── Balance management (GM screen) ── */
+    'camp.balances.overline': 'Balance management',
+    'camp.balances.title': 'Campaign treasury',
+    'camp.balances.sub': 'Credit and debit player currencies',
+    'camp.balances.pickTitle': 'Characters',
+    'camp.balances.pickSub': 'Choose whose balance to change',
+    'camp.balances.pickEmpty': 'No characters in this campaign yet.',
+    'camp.balances.selectPrompt.title': 'Select a character',
+    'camp.balances.selectPrompt.body': 'Pick a character on the left to view and adjust their wallet.',
+    'camp.balances.walletTitle': 'Wallet',
+    'camp.balances.walletEmpty': 'No currencies yet.',
+    'camp.balances.loadError': 'Failed to load data.',
+    'camp.balances.noCurrencies': 'No currencies are configured for this campaign.',
 
     /* ── Folio (reduced view) ── */
     'camp2.folio.coinTotal': 'Total ≈ {amount} gp',

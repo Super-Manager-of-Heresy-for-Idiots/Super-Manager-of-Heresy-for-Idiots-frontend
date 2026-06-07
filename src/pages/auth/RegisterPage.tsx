@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -41,10 +42,33 @@ function FieldError({ message }: { message?: string }) {
   );
 }
 
+function PasswordToggle({ shown, onToggle }: { shown: boolean; onToggle: () => void }) {
+  const t = useT();
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      aria-label={shown ? t('auth.hidePassword') : t('auth.showPassword')}
+      title={shown ? t('auth.hidePassword') : t('auth.showPassword')}
+      style={{
+        position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)',
+        display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+        width: 28, height: 28, padding: 0, zIndex: 2,
+        background: 'none', border: 'none', cursor: 'pointer',
+        color: shown ? 'var(--gold-pale)' : 'var(--ink-faint)',
+      }}
+    >
+      <Rune kind={shown ? 'eye-off' : 'eye'} size={14} />
+    </button>
+  );
+}
+
 export default function RegisterPage() {
   const registerMutation = useRegister();
   const { isAuthenticated, user } = useAuthStore();
   const t = useT();
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const {
     register,
@@ -193,11 +217,17 @@ export default function RegisterPage() {
               {/* Passwords side by side */}
               <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                 <OrdoField label={t('auth.register.cipherWord')} required hint={t('auth.register.cipherHint')}>
-                  <input className="ao-input" type="password" {...register('password')} placeholder="••••••••" />
+                  <div style={{ position: 'relative' }}>
+                    <input className="ao-input" type={showPassword ? 'text' : 'password'} {...register('password')} placeholder="••••••••" style={{ paddingRight: 40 }} />
+                    <PasswordToggle shown={showPassword} onToggle={() => setShowPassword((v) => !v)} />
+                  </div>
                   <FieldError message={errors.password?.message} />
                 </OrdoField>
                 <OrdoField label={t('auth.register.repeatCipher')} required>
-                  <input className="ao-input" type="password" {...register('confirmPassword')} placeholder="••••••••" />
+                  <div style={{ position: 'relative' }}>
+                    <input className="ao-input" type={showConfirm ? 'text' : 'password'} {...register('confirmPassword')} placeholder="••••••••" style={{ paddingRight: 40 }} />
+                    <PasswordToggle shown={showConfirm} onToggle={() => setShowConfirm((v) => !v)} />
+                  </div>
                   <FieldError message={errors.confirmPassword?.message} />
                 </OrdoField>
               </div>

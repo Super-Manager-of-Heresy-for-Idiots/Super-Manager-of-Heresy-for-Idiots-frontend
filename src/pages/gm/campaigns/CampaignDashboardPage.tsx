@@ -196,6 +196,9 @@ export default function CampaignDashboardPage() {
         {canManageCampaign && (
           <DrillBlock label={t('camp.dash.drill.grantXp')} glyph="flame" to={`/campaigns/${campaignId}/xp`} />
         )}
+        {canManageCampaign && (
+          <DrillBlock label={t('camp.dash.drill.balances')} glyph="coin" to={`/campaigns/${campaignId}/wallet`} />
+        )}
       </div>
 
       <OrdoDivider glyph="diamond" />

@@ -56,7 +56,7 @@ function WalletModifyForm({ campaignId, characterId, wallet }: ModifyFormProps) 
         campaignId,
         characterId,
         currencyTypeId: selected.currencyTypeId,
-        data: { currencyTypeId: selected.currencyTypeId, amount: projected },
+        data: { currencyTypeId: selected.currencyTypeId, amount: delta },
       },
       { onSuccess: () => setAmount(0) },
     );

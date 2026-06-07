@@ -10,6 +10,7 @@ import type {
   WalletEntryResponse,
   ModifyWalletRequest,
   WalletHistoryEntry,
+  CurrencyTypeResponse,
   PageResponse,
   ResourceResponse,
   ModifyResourceRequest,
@@ -62,6 +63,12 @@ export const charactersApi = {
   // HP
   modifyHp: async (campaignId: string, characterId: string, data: UpdateHpRequest): Promise<ApiResponse<CharacterResponse>> => {
     const response = await api.post<ApiResponse<CharacterResponse>>(`/campaigns/${campaignId}/characters/${characterId}/hp`, data);
+    return response.data;
+  },
+
+  // Campaign currency reference (used by the GM balance manager).
+  getCampaignCurrencies: async (campaignId: string): Promise<ApiResponse<CurrencyTypeResponse[]>> => {
+    const response = await api.get<ApiResponse<CurrencyTypeResponse[]>>(`/campaigns/${campaignId}/reference/currencies`);
     return response.data;
   },
 

@@ -19,6 +19,7 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   const [remember, setRemember] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const loginMutation = useLogin();
   const { isAuthenticated, user } = useAuthStore();
   const t = useT();
@@ -155,15 +156,27 @@ export default function LoginPage() {
                 <div style={{ position: 'relative' }}>
                   <input
                     className="ao-input"
-                    type="password"
+                    type={showPassword ? 'text' : 'password'}
                     {...register('password')}
                     placeholder="••••••••••••"
                     autoComplete="current-password"
                     style={{ paddingRight: 40 }}
                   />
-                  <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--ink-faint)' }}>
-                    <Rune kind="eye" size={14} />
-                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((v) => !v)}
+                    aria-label={showPassword ? t('auth.hidePassword') : t('auth.showPassword')}
+                    title={showPassword ? t('auth.hidePassword') : t('auth.showPassword')}
+                    style={{
+                      position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)',
+                      display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                      width: 28, height: 28, padding: 0, zIndex: 2,
+                      background: 'none', border: 'none', cursor: 'pointer',
+                      color: showPassword ? 'var(--gold-pale)' : 'var(--ink-faint)',
+                    }}
+                  >
+                    <Rune kind={showPassword ? 'eye-off' : 'eye'} size={14} />
+                  </button>
                 </div>
                 {errors.password && (
                   <span style={{ fontSize: 12, color: 'var(--ember)', display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>

@@ -173,6 +173,18 @@ export function useCharacterWallet(campaignId: string, characterId: string) {
   });
 }
 
+/** Campaign currency reference (id = currencyTypeId), used by the GM balance manager. */
+export function useCampaignCurrencies(campaignId: string) {
+  return useQuery({
+    queryKey: ['campaigns', campaignId, 'reference', 'currencies'],
+    queryFn: async () => {
+      const response = await charactersApi.getCampaignCurrencies(campaignId);
+      return response.data ?? [];
+    },
+    enabled: !!campaignId,
+  });
+}
+
 export function useModifyWallet() {
   const queryClient = useQueryClient();
   const t = useT();
@@ -192,12 +204,17 @@ export function useModifyWallet() {
       const cId = variables.characterId || variables.id || '';
       if (variables.campaignId) {
         queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', cId, 'wallet'] });
+        queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', cId, 'wallet', 'history'] });
         queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', cId] });
       }
       toast.success(t('hk.character.walletUpdated'));
     },
     onError: (error: AxiosError<ApiError>) => {
-      const message = error.response?.data?.message || t('hk.character.walletUpdateFailed');
+      const raw = error.response?.data?.message;
+      // Backend returns "Insufficient funds for this operation" — surface a localized toast.
+      const message = raw
+        ? (/insufficient funds/i.test(raw) ? t('camp.wallet.form.insufficient') : raw)
+        : t('hk.character.walletUpdateFailed');
       toast.error(message);
     },
   });
@@ -223,6 +240,29 @@ export function useWalletHistory(campaignId: string, characterId: string) {
     },
     enabled: !!campaignId && !!characterId,
     retry: false,
+  });
+}
+
+/**
+ * Paginated wallet journal for the GM balance manager. Keeps previous page data
+ * while the next page loads, and resolves a missing endpoint (404/501) to `null`.
+ */
+export function useWalletHistoryPaged(campaignId: string, characterId: string, page: number, size = 20) {
+  return useQuery({
+    queryKey: ['campaigns', campaignId, 'characters', characterId, 'wallet', 'history', page, size],
+    queryFn: async () => {
+      try {
+        const response = await charactersApi.getWalletHistory(campaignId, characterId, page, size);
+        return response.data ?? null;
+      } catch (err) {
+        const status = (err as AxiosError)?.response?.status;
+        if (status === 404 || status === 501) return null;
+        throw err;
+      }
+    },
+    enabled: !!campaignId && !!characterId,
+    retry: false,
+    placeholderData: (prev) => prev,
   });
 }
 

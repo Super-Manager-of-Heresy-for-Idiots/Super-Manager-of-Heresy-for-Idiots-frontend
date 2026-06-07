@@ -33,6 +33,10 @@ const glyphs: Record<string, GlyphRenderer> = {
     <circle key="c1" cx="12" cy="12" r="3" />,
     <circle key="c2" cx="12" cy="12" r="0.8" fill={c} />,
   ],
+  'eye-off': () => [
+    <path key="p1" d="M2 12c1.5-2.2 3.6-3.9 5.9-4.9M12 8a4 4 0 014 4M10 16.5c.6.2 1.3.3 2 .3 4 0 7.5-2.4 9-5-0.6-1-1.5-2-2.5-2.7" />,
+    <path key="p2" d="M3 3l18 18" />,
+  ],
   check: () => [<path key="p" d="M4 12l5 5L20 6" />],
   plus: () => [<path key="p" d="M12 5v14M5 12h14" />],
   minus: () => [<path key="p" d="M5 12h14" />],
