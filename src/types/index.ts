@@ -829,6 +829,9 @@ export interface CurrencyTypeResponse {
 export interface ModifyWalletRequest {
   currencyTypeId: string;
   amount: number;
+  /** Optional human note for the operations journal. Sent only when non-empty;
+   *  backend persists it once the field is supported (forward-compatible). */
+  reason?: string;
 }
 
 export interface ResourceResponse {

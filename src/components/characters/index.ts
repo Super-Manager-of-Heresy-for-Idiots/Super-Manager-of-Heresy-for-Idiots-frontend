@@ -1,6 +1,14 @@
 export { MulticlassPanel } from './MulticlassPanel';
 export { HPRailPanel } from './HPRailPanel';
-export { WalletPanel } from './WalletPanel';
+export {
+  CurrencyPanel,
+  TopupForm,
+  WalletJournal,
+  WalletSkeleton,
+  WalletErrorBanner,
+  WalletReadOnlyBanner,
+  walletTotalGold,
+} from './WalletKit';
 export { ResourcesPanel } from './ResourcesPanel';
 export { AbilityCheckPanel } from './AbilityCheckPanel';
 export { StatusControlPanel } from './StatusControlPanel';
