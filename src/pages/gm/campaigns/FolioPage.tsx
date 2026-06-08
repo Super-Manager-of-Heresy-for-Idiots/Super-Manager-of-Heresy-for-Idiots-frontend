@@ -38,10 +38,9 @@ function abilityMod(stat: CharacterStatResponse): number {
 
 const WEAPON_SLOTS = ['MAIN_HAND', 'OFF_HAND'];
 
-type TabId = 'combat' | 'spells' | 'features' | 'skills' | 'biography';
+type TabId = 'spells' | 'features' | 'skills' | 'biography';
 
 const TABS: { id: TabId }[] = [
-  { id: 'combat' },
   { id: 'spells' },
   { id: 'features' },
   { id: 'skills' },
@@ -100,7 +99,7 @@ export default function FolioPage() {
   const { data: refContent } = useGlobalReferenceContent();
   const abilityCheck = useAbilityCheck();
 
-  const [tab, setTab] = useState<TabId>('combat');
+  const [tab, setTab] = useState<TabId>('spells');
   const [hpModalOpen, setHpModalOpen] = useState(false);
   const [checkResult, setCheckResult] = useState<{ statName: string; total: number; breakdown: { source: string; value: number }[] } | null>(null);
   const [activeStatId, setActiveStatId] = useState<string | null>(null);
@@ -207,7 +206,6 @@ export default function FolioPage() {
 
   /* ── read-only mirror of the template/forge sheet ─────────── */
   const proficiencies = character.proficiencies ?? null;
-  const equipment = character.equipment ?? null;
   const playerName = character.playerName ?? null;
   const refSkills = refContent?.skills ?? [];
   const profSkillIds = new Set(skillProficiencies.map((sp) => sp.skillId));
@@ -228,54 +226,6 @@ export default function FolioPage() {
   function renderTab(): ReactNode {
     if (!character) return null;
     switch (tab) {
-      case 'combat':
-        return (
-          <>
-            <PanelHeader
-              title={t('camp2.folio.combat.title')}
-              sub={t('camp2.folio.combat.sub', {
-                attacks: `${attacks.length} ${attacks.length === 1 ? t('camp2.folio.combat.attackOne') : t('camp2.folio.combat.attackMany')}`,
-                weapons: `${weapons.length} ${weapons.length === 1 ? t('camp2.folio.combat.bladeOne') : t('camp2.folio.combat.bladeMany')}`,
-              })}
-              glyph="sword"
-              right={
-                <button className="ao-btn ao-btn--ghost ao-btn--sm" onClick={() => navigate(`/campaigns/${campaignId}/characters/${characterId}/inventory`)}>
-                  <Rune kind="arrow-r" size={9} /> {t('camp2.folio.combat.arsenal')}
-                </button>
-              }
-            />
-            {attacks.length === 0 && weapons.length === 0 ? (
-              <VoidBody note={t('camp2.folio.combat.void')} />
-            ) : (
-              <table className="ao-table">
-                <thead>
-                  <tr><th>{t('camp2.folio.combat.col.attack')}</th><th>{t('camp2.folio.combat.col.hit')}</th><th>{t('camp2.folio.combat.col.damage')}</th><th>{t('camp2.folio.combat.col.type')}</th></tr>
-                </thead>
-                <tbody>
-                  {attacks.map((a, i) => (
-                    <tr key={`atk-${i}`}>
-                      <td style={{ color: 'var(--ink-bright)' }}>{a.name}</td>
-                      <td className="ao-num" style={{ color: 'var(--gold-pale)' }}>{a.attackBonus}</td>
-                      <td className="ao-num" style={{ color: 'var(--ink-bright)' }}>{a.damage}</td>
-                      <td className="ao-italic" style={{ color: 'var(--ink-faint)' }}>{a.damageType}</td>
-                    </tr>
-                  ))}
-                  {weapons.map((w) => (
-                    <tr key={w.id}>
-                      <td style={{ color: 'var(--ink-quiet)' }}>
-                        {w.displayName}
-                        {w.isUnique && <span style={{ marginLeft: 8 }}><OrdoChip tone="gold" glyph="diamond-fill">{t('camp2.folio.combat.attuned')}</OrdoChip></span>}
-                      </td>
-                      <td className="ao-num" style={{ color: 'var(--ink-ghost)' }}>{NA}</td>
-                      <td className="ao-num" style={{ color: 'var(--ink-ghost)' }}>{NA}</td>
-                      <td className="ao-italic" style={{ color: 'var(--ink-faint)' }}>{w.itemTypeName ?? w.slot?.replace('_', ' ').toLowerCase() ?? NA}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </>
-        );
       case 'spells':
         return (
           <>
@@ -296,25 +246,7 @@ export default function FolioPage() {
                 </div>
               </div>
             )}
-            {(!resources || resources.length === 0) ? (
-              knownSpells.length === 0 ? <VoidBody note={t('camp2.folio.spells.void')} /> : null
-            ) : (
-              <div style={{ padding: 16 }}>
-                {resources.map((r, i) => {
-                  const pct = r.maxValue > 0 ? Math.min(100, (r.currentValue / r.maxValue) * 100) : 0;
-                  return (
-                    <div key={r.resourceTypeId} style={{ padding: '11px 0', borderBottom: i < resources.length - 1 ? '1px solid var(--hairline)' : 'none' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-                        <Rune kind="sigil-2" size={11} color="var(--arcane)" />
-                        <span style={{ flex: 1, color: 'var(--ink-bright)', fontSize: 13.5 }}>{r.resourceName}</span>
-                        <span className="ao-num" style={{ color: 'var(--arcane)', fontSize: 14 }}>{r.currentValue}<span style={{ color: 'var(--ink-faint)' }}> / {r.maxValue}</span></span>
-                      </div>
-                      <div className="ao-bar"><div className="ao-bar-fill ao-bar-fill--arcane" style={{ width: `${pct}%` }} /></div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
+            {knownSpells.length === 0 && <VoidBody note={t('camp2.folio.spells.void')} />}
           </>
         );
       case 'features':
@@ -562,6 +494,10 @@ export default function FolioPage() {
           )}
         </OrdoPanel>
 
+      </div>
+
+      {/* ── TREASURY · ARSENAL · RESOURCES ──────────────────────── */}
+      <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 18, marginTop: 18, alignItems: 'start' }}>
         {/* Treasury · Coin */}
         <OrdoPanel frame padding={0}>
           <PanelHeader
@@ -593,6 +529,82 @@ export default function FolioPage() {
                   {t('camp2.folio.coinTotal', { amount: (wallet ?? []).reduce((s, w) => s + (w.goldEquivalent ?? 0), 0).toLocaleString() })}
                 </span>
               </div>
+            </div>
+          )}
+        </OrdoPanel>
+
+        {/* Arsenal · Sanctioned Strikes */}
+        <OrdoPanel frame padding={0}>
+          <PanelHeader
+            title={t('camp2.folio.combat.title')}
+            sub={t('camp2.folio.combat.sub', {
+              attacks: `${attacks.length} ${attacks.length === 1 ? t('camp2.folio.combat.attackOne') : t('camp2.folio.combat.attackMany')}`,
+              weapons: `${weapons.length} ${weapons.length === 1 ? t('camp2.folio.combat.bladeOne') : t('camp2.folio.combat.bladeMany')}`,
+            })}
+            glyph="sword"
+            right={
+              <button className="ao-btn ao-btn--ghost ao-btn--sm" onClick={() => navigate(`/campaigns/${campaignId}/characters/${characterId}/inventory`)}>
+                <Rune kind="arrow-r" size={9} /> {t('camp2.folio.combat.arsenal')}
+              </button>
+            }
+          />
+          {attacks.length === 0 && weapons.length === 0 ? (
+            <VoidBody note={t('camp2.folio.combat.void')} />
+          ) : (
+            <table className="ao-table">
+              <thead>
+                <tr><th>{t('camp2.folio.combat.col.attack')}</th><th>{t('camp2.folio.combat.col.hit')}</th><th>{t('camp2.folio.combat.col.damage')}</th><th>{t('camp2.folio.combat.col.type')}</th></tr>
+              </thead>
+              <tbody>
+                {attacks.map((a, i) => (
+                  <tr key={`atk-${i}`}>
+                    <td style={{ color: 'var(--ink-bright)' }}>{a.name}</td>
+                    <td className="ao-num" style={{ color: 'var(--gold-pale)' }}>{a.attackBonus}</td>
+                    <td className="ao-num" style={{ color: 'var(--ink-bright)' }}>{a.damage}</td>
+                    <td className="ao-italic" style={{ color: 'var(--ink-faint)' }}>{a.damageType}</td>
+                  </tr>
+                ))}
+                {weapons.map((w) => (
+                  <tr key={w.id}>
+                    <td style={{ color: 'var(--ink-quiet)' }}>
+                      {w.displayName}
+                      {w.isUnique && <span style={{ marginLeft: 8 }}><OrdoChip tone="gold" glyph="diamond-fill">{t('camp2.folio.combat.attuned')}</OrdoChip></span>}
+                    </td>
+                    <td className="ao-num" style={{ color: 'var(--ink-ghost)' }}>{NA}</td>
+                    <td className="ao-num" style={{ color: 'var(--ink-ghost)' }}>{NA}</td>
+                    <td className="ao-italic" style={{ color: 'var(--ink-faint)' }}>{w.itemTypeName ?? w.slot?.replace('_', ' ').toLowerCase() ?? NA}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </OrdoPanel>
+
+        {/* Resources · Reserves */}
+        <OrdoPanel frame padding={0}>
+          <PanelHeader
+            title={t('camp2.folio.resourcesTitle')}
+            sub={t('camp2.folio.resourcesSub')}
+            glyph="sigil-2"
+            tone="arcane"
+          />
+          {(!resources || resources.length === 0) ? (
+            <VoidBody note={t('camp2.folio.noResources')} />
+          ) : (
+            <div style={{ padding: 16 }}>
+              {resources.map((r, i) => {
+                const pct = r.maxValue > 0 ? Math.min(100, (r.currentValue / r.maxValue) * 100) : 0;
+                return (
+                  <div key={r.resourceTypeId} style={{ padding: '11px 0', borderBottom: i < resources.length - 1 ? '1px solid var(--hairline)' : 'none' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+                      <Rune kind="sigil-2" size={11} color="var(--arcane)" />
+                      <span style={{ flex: 1, color: 'var(--ink-bright)', fontSize: 13.5 }}>{r.resourceName}</span>
+                      <span className="ao-num" style={{ color: 'var(--arcane)', fontSize: 14 }}>{r.currentValue}<span style={{ color: 'var(--ink-faint)' }}> / {r.maxValue}</span></span>
+                    </div>
+                    <div className="ao-bar"><div className="ao-bar-fill ao-bar-fill--arcane" style={{ width: `${pct}%` }} /></div>
+                  </div>
+                );
+              })}
             </div>
           )}
         </OrdoPanel>
@@ -718,7 +730,7 @@ export default function FolioPage() {
           </OrdoPanel>
         </div>
 
-        {/* Proficiencies & languages + equipment */}
+        {/* Proficiencies & languages */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
           <OrdoPanel frame padding={0}>
             <PanelHeader title={t('camp2.folio.profsLanguages')} glyph="scroll" />
@@ -726,14 +738,6 @@ export default function FolioPage() {
               <p className="ao-italic" style={{ padding: 14, fontSize: 13, color: 'var(--ink-quiet)', lineHeight: 1.55, whiteSpace: 'pre-wrap' }}>{proficiencies}</p>
             ) : (
               <VoidBody note={t('camp2.folio.noProfs')} />
-            )}
-          </OrdoPanel>
-          <OrdoPanel frame padding={0}>
-            <PanelHeader title={t('camp2.folio.equipmentTitle')} glyph="coin" tone="gold" />
-            {equipment ? (
-              <p className="ao-italic" style={{ padding: 14, fontSize: 13, color: 'var(--ink-quiet)', lineHeight: 1.55, whiteSpace: 'pre-wrap' }}>{equipment}</p>
-            ) : (
-              <VoidBody note={t('camp2.folio.noEquipment')} />
             )}
           </OrdoPanel>
         </div>
