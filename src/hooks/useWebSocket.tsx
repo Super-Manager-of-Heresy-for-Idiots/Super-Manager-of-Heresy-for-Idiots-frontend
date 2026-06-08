@@ -29,6 +29,7 @@ const EVENT_STYLE: Record<WsEventType, EventStyle> = {
   QUEST_UPDATED:            { glyph: 'book',     color: 'var(--gold)',      label: 'Quest Updated' },
   CAMPAIGN_STATUS_CHANGED:  { glyph: 'hex',      color: 'var(--gold-pale)', label: 'Campaign Status' },
   MEMBER_KICKED:            { glyph: 'lock',     color: 'var(--ember)',     label: 'Member Kicked' },
+  WALLET_CHANGED:           { glyph: 'coin',     color: 'var(--gold)',      label: 'Wallet Changed' },
 };
 
 /* ── the hook ────────────────────────────────────────────── */
@@ -126,6 +127,15 @@ export function useWebSocket(campaignId: string | undefined): { connectionState:
         case 'CAMPAIGN_STATUS_CHANGED': {
           queryClient.invalidateQueries({ queryKey: ['campaigns', cid] });
           queryClient.invalidateQueries({ queryKey: ['campaigns'] });
+          break;
+        }
+
+        case 'WALLET_CHANGED': {
+          if (charId) {
+            queryClient.invalidateQueries({ queryKey: ['campaigns', cid, 'characters', charId, 'wallet'] });
+            queryClient.invalidateQueries({ queryKey: ['campaigns', cid, 'characters', charId, 'wallet', 'history'] });
+            queryClient.invalidateQueries({ queryKey: ['campaigns', cid, 'characters', charId] });
+          }
           break;
         }
 

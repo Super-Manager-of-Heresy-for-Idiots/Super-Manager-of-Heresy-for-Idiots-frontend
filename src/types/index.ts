@@ -1182,7 +1182,8 @@ export type WsEventType =
   | 'NPC_HIDDEN'
   | 'QUEST_UPDATED'
   | 'CAMPAIGN_STATUS_CHANGED'
-  | 'MEMBER_KICKED';
+  | 'MEMBER_KICKED'
+  | 'WALLET_CHANGED';
 
 export interface WsEvent<T = unknown> {
   type: WsEventType;

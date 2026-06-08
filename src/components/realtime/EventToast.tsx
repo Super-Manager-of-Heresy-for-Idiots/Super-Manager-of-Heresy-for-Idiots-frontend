@@ -23,6 +23,7 @@ const EVENT_STYLE: Record<WsEventType, EventVisual> = {
   QUEST_UPDATED:           { glyph: 'book',    color: 'var(--gold)',      border: 'var(--gold)' },
   CAMPAIGN_STATUS_CHANGED: { glyph: 'hex',     color: 'var(--gold-pale)', border: 'var(--gold-pale)' },
   MEMBER_KICKED:           { glyph: 'lock',    color: 'var(--ember)',     border: 'var(--ember)' },
+  WALLET_CHANGED:          { glyph: 'coin',    color: 'var(--gold)',      border: 'var(--gold)' },
 };
 
 /* ── component ───────────────────────────────────────────── */

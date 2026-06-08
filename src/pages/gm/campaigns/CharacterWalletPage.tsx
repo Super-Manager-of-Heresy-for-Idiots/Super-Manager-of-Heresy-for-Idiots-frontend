@@ -6,12 +6,13 @@ import { WalletPanel } from '@/components/characters';
 import {
   useCharacter,
   useCharacterWallet,
+  useCampaignCurrencies,
   useModifyWallet,
   useWalletHistory,
 } from '@/hooks/useCharacter';
 import { useAuthStore } from '@/store/authStore';
 import { useT } from '@/i18n/I18nContext';
-import type { WalletEntry, WalletHistoryEntry, PageResponse } from '@/types';
+import type { WalletEntry, WalletHistoryEntry, PageResponse, CurrencyTypeResponse } from '@/types';
 
 /* ── Add / deduct form (owner & Chronicler only) ─────────────── */
 
@@ -19,17 +20,18 @@ interface ModifyFormProps {
   campaignId: string;
   characterId: string;
   wallet: WalletEntry[];
+  currencies: CurrencyTypeResponse[];
 }
 
-function WalletModifyForm({ campaignId, characterId, wallet }: ModifyFormProps) {
+function WalletModifyForm({ campaignId, characterId, wallet, currencies }: ModifyFormProps) {
   const t = useT();
   const modifyWallet = useModifyWallet();
 
-  const [currencyTypeId, setCurrencyTypeId] = useState(wallet[0]?.currencyTypeId ?? '');
+  const [currencyTypeId, setCurrencyTypeId] = useState(currencies[0]?.id ?? '');
   const [mode, setMode] = useState<'add' | 'deduct'>('add');
   const [amount, setAmount] = useState(0);
 
-  if (wallet.length === 0) {
+  if (currencies.length === 0) {
     return (
       <OrdoPanel frame>
         <PanelHeader title={t('camp.wallet.form.title')} sub={t('camp.wallet.form.sub')} glyph="scroll" tone="gold" />
@@ -42,21 +44,21 @@ function WalletModifyForm({ campaignId, characterId, wallet }: ModifyFormProps) 
     );
   }
 
-  const selected = wallet.find((w) => w.currencyTypeId === currencyTypeId) ?? wallet[0];
-  const current = selected?.amount ?? 0;
+  const walletEntry = wallet.find((w) => w.currencyTypeId === currencyTypeId);
+  const current = walletEntry?.amount ?? 0;
   const delta = mode === 'add' ? amount : -amount;
   const projected = current + delta;
   const insufficient = projected < 0;
   const canSubmit = amount > 0 && !insufficient && !modifyWallet.isPending;
 
   function handleSubmit() {
-    if (!canSubmit || !selected) return;
+    if (!canSubmit) return;
     modifyWallet.mutate(
       {
         campaignId,
         characterId,
-        currencyTypeId: selected.currencyTypeId,
-        data: { currencyTypeId: selected.currencyTypeId, amount: delta },
+        currencyTypeId,
+        data: { currencyTypeId, amount: delta },
       },
       { onSuccess: () => setAmount(0) },
     );
@@ -113,11 +115,14 @@ function WalletModifyForm({ campaignId, characterId, wallet }: ModifyFormProps) 
               fontFamily: 'var(--font-display)',
             }}
           >
-            {wallet.map((w) => (
-              <option key={w.currencyTypeId} value={w.currencyTypeId}>
-                {w.currencyName} · {w.amount.toLocaleString()}
-              </option>
-            ))}
+            {currencies.map((c) => {
+              const bal = wallet.find((w) => w.currencyTypeId === c.id)?.amount ?? 0;
+              return (
+                <option key={c.id} value={c.id}>
+                  {c.name} · {bal.toLocaleString()}
+                </option>
+              );
+            })}
           </select>
         </OrdoField>
 
@@ -242,6 +247,7 @@ export default function CharacterWalletPage() {
 
   const { data: character } = useCharacter(campaignId!, characterId!);
   const { data: wallet, isLoading, error, refetch } = useCharacterWallet(campaignId!, characterId!);
+  const { data: currencies } = useCampaignCurrencies(campaignId!);
   const { data: history } = useWalletHistory(campaignId!, characterId!);
 
   const entries = useMemo<WalletEntry[]>(() => wallet ?? [], [wallet]);
@@ -335,7 +341,7 @@ export default function CharacterWalletPage() {
 
           {/* RIGHT — add/deduct form (owner & Chronicler only) */}
           {canWrite && (
-            <WalletModifyForm campaignId={campaignId!} characterId={characterId!} wallet={entries} />
+            <WalletModifyForm campaignId={campaignId!} characterId={characterId!} wallet={entries} currencies={currencies ?? []} />
           )}
         </div>
       )}
