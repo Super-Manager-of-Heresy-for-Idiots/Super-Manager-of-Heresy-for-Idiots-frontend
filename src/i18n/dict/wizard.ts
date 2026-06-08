@@ -54,8 +54,6 @@ export const wizard: DictModule = {
     'wiz.forge.nameSoul': 'Нареки душу…',
     'wiz.forge.background': 'Происхождение',
     'wiz.forge.backgroundPh': 'Аколит-Маршал',
-    'wiz.forge.playerName': 'Имя игрока',
-    'wiz.forge.playerNamePh': 'Летописец',
     'wiz.forge.race': 'Род',
     'wiz.forge.racePh': 'Полуэльф',
     'wiz.forge.alignment': 'Мировоззрение',
@@ -123,8 +121,6 @@ export const wizard: DictModule = {
     'wiz.basics.title': 'Основы',
     'wiz.basics.sub': 'Кто несёт сей фолиант и чьей рукой он ведётся.',
     'wiz.basics.required': 'обязательно',
-    'wiz.basics.playerName': 'Имя игрока',
-    'wiz.basics.playerNamePh': 'Летописец',
     'wiz.basics.alignment': 'Мировоззрение',
 
     /* ── Step 2 — Race ──────────────────────────────── */
@@ -274,8 +270,6 @@ export const wizard: DictModule = {
     'wiz.forge.nameSoul': 'Name the soul…',
     'wiz.forge.background': 'Background',
     'wiz.forge.backgroundPh': 'Acolyte-Marshal',
-    'wiz.forge.playerName': 'Player Name',
-    'wiz.forge.playerNamePh': 'Chronicler',
     'wiz.forge.race': 'Race',
     'wiz.forge.racePh': 'Half-Elf',
     'wiz.forge.alignment': 'Alignment',
@@ -343,8 +337,6 @@ export const wizard: DictModule = {
     'wiz.basics.title': 'The Basics',
     'wiz.basics.sub': 'Who carries this folio, and by whose hand it is kept.',
     'wiz.basics.required': 'required',
-    'wiz.basics.playerName': 'Player Name',
-    'wiz.basics.playerNamePh': 'The Chronicler',
     'wiz.basics.alignment': 'Alignment',
 
     /* ── Step 2 — Race ──────────────────────────────── */

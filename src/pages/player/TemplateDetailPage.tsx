@@ -1,7 +1,8 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Trash2, Loader2 } from 'lucide-react';
 import { OrdoPanel, PanelHeader, Bar, OrdoDivider } from '@/components/ordo';
-import { useTemplate, useDeleteTemplate } from '@/hooks/useTemplates';
+import { EditableSheetField } from '@/components/characters';
+import { useTemplate, useDeleteTemplate, useUpdateTemplate } from '@/hooks/useTemplates';
 import { useT } from '@/i18n/I18nContext';
 
 export default function TemplateDetailPage() {
@@ -10,6 +11,12 @@ export default function TemplateDetailPage() {
   const navigate = useNavigate();
   const { data: tpl, isLoading, error } = useTemplate(templateId);
   const deleteMutation = useDeleteTemplate();
+  const updateMutation = useUpdateTemplate();
+
+  const saveField = (field: 'proficiencies' | 'equipment', next: string) => {
+    if (!templateId) return;
+    updateMutation.mutate({ templateId, data: { [field]: next } });
+  };
 
   const back = () => navigate('/characters/templates');
 
@@ -92,6 +99,32 @@ export default function TemplateDetailPage() {
           ) : null}
         </div>
       </OrdoPanel>
+
+      <div style={{ display: 'grid', gap: 14, marginTop: 18 }}>
+        <OrdoPanel padding={14}>
+          <div className="ao-overline">{t('camp2.folio.playerName')}</div>
+          <div className="ao-h6" style={{ fontSize: 16, marginTop: 2 }}>{tpl.ownerUsername}</div>
+          <div className="ao-codex" style={{ marginTop: 2 }}>{t('camp2.folio.playerFromOwner')}</div>
+        </OrdoPanel>
+        <OrdoPanel frame padding={0}>
+          <PanelHeader title={t('camp2.folio.profsLanguages')} glyph="scroll" />
+          <EditableSheetField
+            value={tpl.proficiencies ?? null}
+            placeholder={t('camp2.folio.noProfs')}
+            saving={updateMutation.isPending}
+            onSave={(next) => saveField('proficiencies', next)}
+          />
+        </OrdoPanel>
+        <OrdoPanel frame padding={0}>
+          <PanelHeader title={t('camp2.folio.equipmentTitle')} glyph="coin" tone="gold" />
+          <EditableSheetField
+            value={tpl.equipment ?? null}
+            placeholder={t('camp2.folio.noEquipment')}
+            saving={updateMutation.isPending}
+            onSave={(next) => saveField('equipment', next)}
+          />
+        </OrdoPanel>
+      </div>
     </div>
   );
 }

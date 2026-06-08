@@ -23,7 +23,6 @@ export type ScoreMethod = 'standard' | 'pointbuy' | 'roll';
 export interface WizardChar {
   // identity
   name: string;
-  player: string;
   alignment: string;
   level: number;
   // race
@@ -110,7 +109,7 @@ export const eightScores = (): ScoreMap => ({ str: 8, dex: 8, con: 8, int: 8, wi
 
 export function initialChar(): WizardChar {
   return {
-    name: '', player: '', alignment: '', level: 1,
+    name: '', alignment: '', level: 1,
     raceKey: '', subraceKey: '', race: '', speed: 30,
     classKey: '', cls: '', isSpellcaster: false, hitDiceType: 'd8', hitDiceTotal: '',
     saves: {}, ac: 10, hp: { max: 0, cur: 0, temp: 0 },

@@ -100,6 +100,9 @@ export interface CreateCharacterRequest {
 
 export interface UpdateCharacterRequest {
   name?: string;
+  playerName?: string;
+  proficiencies?: string;
+  equipment?: string;
   raceId?: string;
   selectedLineageId?: string | null;
 }
