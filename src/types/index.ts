@@ -835,15 +835,22 @@ export interface ModifyWalletRequest {
 }
 
 export interface ResourceResponse {
-  resourceTypeId: string;
-  resourceName: string;
+  id: string;
+  name: string;
   currentValue: number;
   maxValue: number;
+  resourceTypeId: string;
+  /** Optional accent colour for the resource bar; `null` falls back to the theme. */
+  color?: string | null;
 }
 
+/**
+ * Resource change request (POST /campaigns/{id}/characters/{id}/resources).
+ * `delta` is signed: negative spends, positive restores.
+ */
 export interface ModifyResourceRequest {
-  resourceTypeId: string;
-  currentValue: number;
+  resourceId: string;
+  delta: number;
 }
 
 /**

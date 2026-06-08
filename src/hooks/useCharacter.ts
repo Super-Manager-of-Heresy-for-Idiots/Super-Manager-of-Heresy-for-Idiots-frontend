@@ -8,7 +8,7 @@ import type {
   UpdateHpRequest,
   UpdateStatRequest,
   ModifyWalletRequest,
-  ModifyResourceRequest,
+  ResourceResponse,
   ApiError,
 } from '@/types';
 import { AxiosError } from 'axios';
@@ -277,34 +277,51 @@ export function useCharacterResources(campaignId: string, characterId: string) {
   });
 }
 
+interface ModifyResourceVars {
+  campaignId: string;
+  characterId: string;
+  resourceId: string;
+  delta: number;
+}
+
+/**
+ * Spend (`delta < 0`) or restore (`delta > 0`) a character resource.
+ * Applies an optimistic update to the cached resource list and rolls back on error.
+ */
 export function useModifyResource() {
   const queryClient = useQueryClient();
   const t = useT();
 
   return useMutation({
-    mutationFn: ({ campaignId, characterId, id, resourceTypeId, data }: {
-      campaignId?: string; characterId?: string; id?: string;
-      resourceTypeId?: string; data: ModifyResourceRequest | { value: number };
-    }) => {
-      const cId = characterId || id || '';
-      const campId = campaignId || '_';
-      const finalData: ModifyResourceRequest = {
-        resourceTypeId: resourceTypeId || (data as ModifyResourceRequest).resourceTypeId || '',
-        currentValue: ('value' in data) ? (data as { value: number }).value : (data as ModifyResourceRequest).currentValue,
-      };
-      return charactersApi.modifyResource(campId, cId, finalData);
+    mutationFn: ({ campaignId, characterId, resourceId, delta }: ModifyResourceVars) =>
+      charactersApi.modifyResource(campaignId, characterId, { resourceId, delta }),
+    onMutate: async ({ campaignId, characterId, resourceId, delta }) => {
+      const key = ['campaigns', campaignId, 'characters', characterId, 'resources'];
+      await queryClient.cancelQueries({ queryKey: key });
+      const previous = queryClient.getQueryData<ResourceResponse[]>(key);
+      queryClient.setQueryData<ResourceResponse[]>(key, (old) =>
+        old?.map((r) =>
+          r.id === resourceId
+            ? { ...r, currentValue: Math.max(0, Math.min(r.maxValue, r.currentValue + delta)) }
+            : r,
+        ),
+      );
+      return { key, previous };
     },
-    onSuccess: (_, variables) => {
-      const cId = variables.characterId || variables.id || '';
-      if (variables.campaignId) {
-        queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', cId, 'resources'] });
-        queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', cId] });
+    onError: (error: AxiosError<ApiError>, _vars, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(context.key, context.previous);
       }
-      toast.success(t('hk.character.resourceUpdated'));
-    },
-    onError: (error: AxiosError<ApiError>) => {
       const message = error.response?.data?.message || t('hk.character.resourceUpdateFailed');
       toast.error(message);
+    },
+    onSettled: (_data, _error, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId, 'resources'],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId],
+      });
     },
   });
 }
@@ -323,4 +340,3 @@ export function useAbilityCheck() {
 
 // Aliases for backward-compat
 export const useUpdateWallet = useModifyWallet;
-export const useUpdateResource = useModifyResource;

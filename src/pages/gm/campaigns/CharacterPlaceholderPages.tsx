@@ -155,23 +155,6 @@ export function AbilityCheckPage() {
   );
 }
 
-export function CharacterResourcesPage() {
-  const t = useT();
-  return (
-    <CharacterFeaturePlaceholder
-      overline={t('camp.ph.resources.overline')}
-      title={t('camp.ph.resources.title')}
-      glyph="hex"
-      todo={t('camp.ph.resources.todo')}
-      details={[
-        t('camp.ph.resources.d1'),
-        t('camp.ph.resources.d2'),
-        t('camp.ph.resources.d3'),
-      ]}
-    />
-  );
-}
-
 export function CharacterHpPage() {
   const t = useT();
   return (

@@ -636,14 +636,15 @@ export default function FolioPage() {
             <div style={{ padding: 16 }}>
               {resources.map((r, i) => {
                 const pct = r.maxValue > 0 ? Math.min(100, (r.currentValue / r.maxValue) * 100) : 0;
+                const tone = r.color || 'var(--arcane)';
                 return (
-                  <div key={r.resourceTypeId} style={{ padding: '11px 0', borderBottom: i < resources.length - 1 ? '1px solid var(--hairline)' : 'none' }}>
+                  <div key={r.id} style={{ padding: '11px 0', borderBottom: i < resources.length - 1 ? '1px solid var(--hairline)' : 'none' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-                      <Rune kind="sigil-2" size={11} color="var(--arcane)" />
-                      <span style={{ flex: 1, color: 'var(--ink-bright)', fontSize: 13.5 }}>{r.resourceName}</span>
-                      <span className="ao-num" style={{ color: 'var(--arcane)', fontSize: 14 }}>{r.currentValue}<span style={{ color: 'var(--ink-faint)' }}> / {r.maxValue}</span></span>
+                      <Rune kind="sigil-2" size={11} color={tone} />
+                      <span style={{ flex: 1, color: 'var(--ink-bright)', fontSize: 13.5 }}>{r.name}</span>
+                      <span className="ao-num" style={{ color: tone, fontSize: 14 }}>{r.currentValue}<span style={{ color: 'var(--ink-faint)' }}> / {r.maxValue}</span></span>
                     </div>
-                    <div className="ao-bar"><div className="ao-bar-fill ao-bar-fill--arcane" style={{ width: `${pct}%` }} /></div>
+                    <div className="ao-bar"><div className="ao-bar-fill" style={{ width: `${pct}%`, background: tone }} /></div>
                   </div>
                 );
               })}

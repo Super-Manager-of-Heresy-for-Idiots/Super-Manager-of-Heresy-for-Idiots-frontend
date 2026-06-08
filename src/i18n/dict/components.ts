@@ -38,10 +38,8 @@ export const components: DictModule = {
 
     /* ── characters/ResourcesPanel ──────────────────── */
     'cmp.resources.title': 'Запасы и Источники',
-    'cmp.resources.add': 'Добавить',
-    'cmp.resources.decrease': 'Уменьшить {name}',
-    'cmp.resources.increase': 'Увеличить {name}',
-    'cmp.resources.noMax': '{value} (без предела)',
+    'cmp.resources.spend': 'Потратить {name}',
+    'cmp.resources.restore': 'Восстановить {name}',
     'cmp.resources.empty': 'Ресурсы не отслеживаются',
 
     /* ── characters/StatusControlPanel ──────────────── */
@@ -168,10 +166,8 @@ export const components: DictModule = {
 
     /* ── characters/ResourcesPanel ──────────────────── */
     'cmp.resources.title': 'Reserves & Founts',
-    'cmp.resources.add': 'Add',
-    'cmp.resources.decrease': 'Decrease {name}',
-    'cmp.resources.increase': 'Increase {name}',
-    'cmp.resources.noMax': '{value} (no max)',
+    'cmp.resources.spend': 'Spend {name}',
+    'cmp.resources.restore': 'Restore {name}',
     'cmp.resources.empty': 'No resources tracked',
 
     /* ── characters/StatusControlPanel ──────────────── */

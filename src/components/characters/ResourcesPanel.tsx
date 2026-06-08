@@ -1,202 +1,146 @@
-import { OrdoPanel, PanelHeader, Rune, OrdoDivider, Bar } from '@/components/ordo';
-import { useUpdateResource } from '@/hooks/useCharacter';
+import { OrdoPanel, PanelHeader, Rune, OrdoDivider } from '@/components/ordo';
 import { useT } from '@/i18n/I18nContext';
 import type { ResourceEntry } from '@/types';
 
 interface ResourcesPanelProps {
-  characterId: string;
   resources: ResourceEntry[];
-  onAddResource?: () => void;
+  /** When false, Spend/Restore controls are hidden (read-only view). */
+  editable?: boolean;
+  /** Apply a signed change to a resource: `-1` spends, `+1` restores. */
+  onModify?: (resourceId: string, delta: number) => void;
+  /** A mutation is in flight — disables controls to avoid double-submits. */
+  pending?: boolean;
 }
 
+const DEFAULT_TONE = 'var(--arcane)';
+
 export function ResourcesPanel({
-  characterId,
   resources,
-  onAddResource,
+  editable = false,
+  onModify,
+  pending = false,
 }: ResourcesPanelProps) {
   const t = useT();
-  const updateResource = useUpdateResource();
-
-  function handleChange(resourceTypeId: string, currentValue: number, delta: number) {
-    const newValue = Math.max(0, currentValue + delta);
-    updateResource.mutate({
-      id: characterId,
-      resourceTypeId,
-      data: { value: newValue },
-    });
-  }
 
   return (
-    <OrdoPanel frame>
-      <PanelHeader
-        title={t('cmp.resources.title')}
-        glyph="hex"
-        tone="arcane"
-        right={
-          onAddResource ? (
-            <button
-              onClick={onAddResource}
-              style={{
-                background: 'none',
-                border: '1px solid var(--rule)',
-                color: 'var(--ink-quiet)',
-                padding: '4px 12px',
-                fontSize: 11,
-                fontFamily: 'var(--font-display)',
-                letterSpacing: '0.1em',
-                textTransform: 'uppercase' as const,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 6,
-              }}
-            >
-              <Rune kind="plus" size={10} color="var(--ink-quiet)" />
-              {t('cmp.resources.add')}
-            </button>
-          ) : undefined
-        }
-      />
+    <OrdoPanel frame padding={0}>
+      <PanelHeader title={t('cmp.resources.title')} glyph="hex" tone="arcane" />
 
-      <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 0 }}>
-        {resources.map((res, idx) => {
-          const hasMax = res.maxValue != null && res.maxValue > 0;
-          return (
-            <div key={res.resourceTypeId}>
-              <div style={{ padding: '10px 0' }}>
-                {/* Name row */}
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    marginBottom: 8,
-                  }}
-                >
-                  <div>
+      {resources.length === 0 ? (
+        <div
+          style={{
+            padding: '24px 16px',
+            textAlign: 'center',
+            color: 'var(--ink-faint)',
+            fontSize: 12,
+            fontStyle: 'italic',
+          }}
+        >
+          {t('cmp.resources.empty')}
+        </div>
+      ) : (
+        <div style={{ padding: 16 }}>
+          {resources.map((res, idx) => {
+            const tone = res.color || DEFAULT_TONE;
+            const hasMax = res.maxValue > 0;
+            const pct = hasMax ? Math.min(100, (res.currentValue / res.maxValue) * 100) : 0;
+            const atFloor = res.currentValue <= 0;
+            const atCeil = hasMax && res.currentValue >= res.maxValue;
+
+            return (
+              <div key={res.id}>
+                <div style={{ padding: '11px 0' }}>
+                  {/* Name + counter + controls */}
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 10,
+                      marginBottom: 8,
+                    }}
+                  >
+                    <Rune kind="sigil-2" size={11} color={tone} />
                     <span
                       style={{
-                        fontSize: 13,
+                        flex: 1,
+                        fontSize: 13.5,
                         fontFamily: 'var(--font-display)',
                         color: 'var(--ink-bright)',
                         letterSpacing: '0.04em',
                       }}
                     >
-                      {res.resourceName}
+                      {res.name}
                     </span>
+
+                    <span className="ao-num" style={{ fontSize: 14, color: tone }}>
+                      {res.currentValue}
+                      <span style={{ color: 'var(--ink-faint)' }}> / {res.maxValue}</span>
+                    </span>
+
+                    {editable && onModify && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginLeft: 4 }}>
+                        <StepButton
+                          kind="minus"
+                          label={t('cmp.resources.spend', { name: res.name })}
+                          disabled={pending || atFloor}
+                          onClick={() => onModify(res.id, -1)}
+                        />
+                        <StepButton
+                          kind="plus"
+                          label={t('cmp.resources.restore', { name: res.name })}
+                          disabled={pending || atCeil}
+                          onClick={() => onModify(res.id, 1)}
+                        />
+                      </div>
+                    )}
                   </div>
 
-                  {/* +/- buttons */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                    <button
-                      onClick={() =>
-                        handleChange(res.resourceTypeId, res.currentValue, -1)
-                      }
-                      disabled={updateResource.isPending || res.currentValue <= 0}
-                      style={{
-                        width: 24,
-                        height: 24,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        background: 'var(--abyss)',
-                        border: '1px solid var(--rule)',
-                        cursor: 'pointer',
-                        opacity:
-                          updateResource.isPending || res.currentValue <= 0 ? 0.4 : 1,
-                      }}
-                      aria-label={t('cmp.resources.decrease', { name: res.resourceName })}
-                    >
-                      <Rune kind="minus" size={9} color="var(--ink-quiet)" />
-                    </button>
-
-                    <span
-                      style={{
-                        minWidth: 32,
-                        textAlign: 'center',
-                        fontSize: 14,
-                        fontFamily: 'var(--font-mono, monospace)',
-                        color: 'var(--ink-bright)',
-                      }}
-                    >
-                      {res.currentValue}
-                    </span>
-
-                    <button
-                      onClick={() =>
-                        handleChange(res.resourceTypeId, res.currentValue, 1)
-                      }
-                      disabled={
-                        updateResource.isPending ||
-                        (hasMax && res.currentValue >= res.maxValue!)
-                      }
-                      style={{
-                        width: 24,
-                        height: 24,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        background: 'var(--abyss)',
-                        border: '1px solid var(--rule)',
-                        cursor: 'pointer',
-                        opacity:
-                          updateResource.isPending ||
-                          (hasMax && res.currentValue >= res.maxValue!)
-                            ? 0.4
-                            : 1,
-                      }}
-                      aria-label={t('cmp.resources.increase', { name: res.resourceName })}
-                    >
-                      <Rune kind="plus" size={9} color="var(--ink-quiet)" />
-                    </button>
+                  {/* Fill bar (tinted by the resource colour) */}
+                  <div className="ao-bar">
+                    <div
+                      className="ao-bar-fill"
+                      style={{ width: `${pct}%`, background: tone }}
+                    />
                   </div>
                 </div>
 
-                {/* Bar */}
-                {hasMax && (
-                  <Bar
-                    value={res.currentValue}
-                    max={res.maxValue!}
-                    tone="arcane"
-                    height={6}
-                    showNumbers
-                  />
-                )}
-
-                {!hasMax && (
-                  <div
-                    style={{
-                      fontSize: 11,
-                      color: 'var(--ink-faint)',
-                      fontFamily: 'var(--font-mono, monospace)',
-                    }}
-                  >
-                    {t('cmp.resources.noMax', { value: res.currentValue })}
-                  </div>
-                )}
+                {idx < resources.length - 1 && <OrdoDivider glyph="hex" color="var(--rule)" />}
               </div>
-
-              {idx < resources.length - 1 && (
-                <OrdoDivider glyph="hex" color="var(--rule)" />
-              )}
-            </div>
-          );
-        })}
-
-        {resources.length === 0 && (
-          <div
-            style={{
-              padding: '24px 0',
-              textAlign: 'center',
-              color: 'var(--ink-faint)',
-              fontSize: 12,
-              fontStyle: 'italic',
-            }}
-          >
-            {t('cmp.resources.empty')}
-          </div>
-        )}
-      </div>
+            );
+          })}
+        </div>
+      )}
     </OrdoPanel>
+  );
+}
+
+interface StepButtonProps {
+  kind: 'plus' | 'minus';
+  label: string;
+  disabled: boolean;
+  onClick: () => void;
+}
+
+function StepButton({ kind, label, disabled, onClick }: StepButtonProps) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      aria-label={label}
+      title={label}
+      style={{
+        width: 26,
+        height: 26,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'var(--abyss)',
+        border: '1px solid var(--rule)',
+        cursor: disabled ? 'default' : 'pointer',
+        opacity: disabled ? 0.35 : 1,
+      }}
+    >
+      <Rune kind={kind} size={9} color="var(--ink-quiet)" />
+    </button>
   );
 }
