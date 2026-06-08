@@ -24,9 +24,11 @@ import {
 } from '@/hooks/useCharacter';
 import { useCharacterEffects } from '@/hooks/useEffects';
 import { useEquippedInventory } from '@/hooks/useInventory';
+import { useCharacterRewards } from '@/hooks/useLevelUp';
 import { useGlobalReferenceContent } from '@/hooks/useTemplates';
 import { useT } from '@/i18n/I18nContext';
 import { useGameTerms } from '@/i18n/gameTerms';
+import { REWARD_TYPE_LABELS } from '@/types';
 import type { CharacterStatResponse, ItemInstanceResponse } from '@/types';
 
 /* ── helpers ─────────────────────────────────────────────────── */
@@ -38,13 +40,14 @@ function abilityMod(stat: CharacterStatResponse): number {
 
 const WEAPON_SLOTS = ['MAIN_HAND', 'OFF_HAND'];
 
-type TabId = 'spells' | 'features' | 'skills' | 'biography';
+type TabId = 'spells' | 'features' | 'skills' | 'biography' | 'rewards';
 
 const TABS: { id: TabId }[] = [
   { id: 'spells' },
   { id: 'features' },
   { id: 'skills' },
   { id: 'biography' },
+  { id: 'rewards' },
 ];
 
 /* A field whose value the character API does not (yet) expose. */
@@ -96,6 +99,7 @@ export default function FolioPage() {
   const { data: wallet } = useCharacterWallet(campaignId!, characterId!);
   const { data: effects } = useCharacterEffects(campaignId!, characterId!);
   const { data: equipped } = useEquippedInventory(campaignId!, characterId!);
+  const { data: rewards } = useCharacterRewards(characterId!);
   const { data: refContent } = useGlobalReferenceContent();
   const abilityCheck = useAbilityCheck();
 
@@ -369,6 +373,43 @@ export default function FolioPage() {
             </div>
           </>
         );
+      case 'rewards':
+        return (
+          <>
+            <PanelHeader title={t('camp2.folio.rewards.title')} sub={t('camp2.folio.rewards.sub')} glyph="sigil-3" tone="gold" />
+            {!rewards || rewards.classBreakdown.length === 0 ? (
+              <VoidBody note={t('camp2.folio.rewards.void')} />
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                {rewards.classBreakdown.map((cls, ci) => (
+                  <div key={cls.classId} style={{ padding: 16, borderBottom: ci < rewards.classBreakdown.length - 1 ? '1px solid var(--rule)' : 'none' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8 }}>
+                      <span className="ao-h6" style={{ fontSize: 15 }}>{cls.className}</span>
+                      <span className="ao-num" style={{ color: 'var(--gold-pale)', fontSize: 13 }}>
+                        {t('camp2.folio.features.classLevel', { level: cls.classLevel })}{cls.subclass ? ` · ${cls.subclass.name}` : ''}
+                      </span>
+                    </div>
+                    {Object.keys(cls.rewardsByType || {}).length === 0 ? (
+                      <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 12 }}>{t('camp2.folio.rewards.noClass')}</p>
+                    ) : (
+                      Object.entries(cls.rewardsByType).map(([type, rwds]) => (
+                        <div key={type} style={{ marginTop: 10 }}>
+                          <div className="ao-overline" style={{ marginBottom: 6 }}>{REWARD_TYPE_LABELS[type] ?? type}</div>
+                          {rwds.map((r, idx) => (
+                            <div key={`${r.name}-${idx}`} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '6px 0', borderBottom: '1px solid var(--hairline)' }}>
+                              <Rune kind="diamond-fill" size={9} color="var(--gold-pale)" />
+                              <span style={{ flex: 1, color: 'var(--ink-bright)', fontSize: 13 }}>{r.name}</span>
+                            </div>
+                          ))}
+                        </div>
+                      ))
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        );
       default:
         return null;
     }
@@ -473,22 +514,20 @@ export default function FolioPage() {
         </OrdoPanel>
 
         {/* Saves & Tier — not served by API */}
-        <OrdoPanel frame padding={0}>
+        <OrdoPanel frame padding={0} style={{ display: 'flex', flexDirection: 'column' }}>
           <PanelHeader title={t('camp2.folio.savesTier')} glyph="helm" tone="gold" />
-          <div style={{ padding: 16 }}>
-            <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
-              {[
-                { label: t('camp2.folio.armour'), value: armorClass != null ? `${armorClass}` : NA },
-                { label: t('camp2.folio.init'), value: initiative != null ? fmtMod(initiative) : NA },
-                { label: t('camp2.folio.speedShort'), value: walkSpeed != null ? `${walkSpeed}` : NA },
-                { label: t('camp2.folio.prof'), value: `+${profBonus}` },
-              ].map((c) => (
-                <div key={c.label} style={{ padding: 8, background: 'var(--abyss)', border: '1px solid var(--rule)', textAlign: 'center' }}>
-                  <div className="ao-overline" style={{ fontSize: 9 }}>{c.label}</div>
-                  <div style={{ fontFamily: 'var(--font-serif)', fontSize: 22, color: 'var(--ink-bright)', lineHeight: 1.1 }}>{c.value}</div>
-                </div>
-              ))}
-            </div>
+          <div className="ao-rgrid" style={{ flex: 1, padding: 16, display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gridTemplateRows: 'repeat(2, 1fr)', gap: 10 }}>
+            {[
+              { label: t('camp2.folio.armour'), value: armorClass != null ? `${armorClass}` : NA },
+              { label: t('camp2.folio.init'), value: initiative != null ? fmtMod(initiative) : NA },
+              { label: t('camp2.folio.speedShort'), value: walkSpeed != null ? `${walkSpeed}` : NA },
+              { label: t('camp2.folio.prof'), value: `+${profBonus}` },
+            ].map((c) => (
+              <div key={c.label} style={{ padding: 12, background: 'var(--abyss)', border: '1px solid var(--rule)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                <div className="ao-overline" style={{ fontSize: 9 }}>{c.label}</div>
+                <div style={{ fontFamily: 'var(--font-serif)', fontSize: 28, color: 'var(--ink-bright)', lineHeight: 1.1 }}>{c.value}</div>
+              </div>
+            ))}
           </div>
         </OrdoPanel>
 

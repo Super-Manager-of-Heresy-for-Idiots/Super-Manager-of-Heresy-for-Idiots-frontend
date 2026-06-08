@@ -61,13 +61,6 @@ export default function CharacterManagementPage() {
         to: `${base}/resources`,
         ready: false,
       },
-      {
-        title: t('camp.mgmt.tile.rewards.title'),
-        body: t('camp.mgmt.tile.rewards.body'),
-        glyph: 'sigil-3',
-        to: `${base}/rewards`,
-        ready: true,
-      },
     ];
   }, [campaignId, characterId, t]);
 
