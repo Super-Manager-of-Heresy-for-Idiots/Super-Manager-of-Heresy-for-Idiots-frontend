@@ -59,7 +59,9 @@ class WebSocketService {
         useWsStore.getState().setConnectionState('connected');
 
         // Campaign broadcast topic
-        this.subscribeTo(`/topic/campaign/${campaignId}`);
+        // Dot separator (not slash): a RabbitMQ STOMP /topic/ destination must be a single
+        // word with no inner slash, so the campaign id is appended after a '.'.
+        this.subscribeTo(`/topic/campaign.${campaignId}`);
 
         // Private user notifications
         this.subscribeTo('/user/queue/notifications');

@@ -24,6 +24,7 @@ const EVENT_VISUAL: Record<WsEventType, EventVisual> = {
   QUEST_UPDATED:           { glyph: 'book',    color: 'var(--gold)' },
   CAMPAIGN_STATUS_CHANGED: { glyph: 'hex',     color: 'var(--gold-pale)' },
   MEMBER_KICKED:           { glyph: 'lock',    color: 'var(--ember)' },
+  WALLET_CHANGED:          { glyph: 'coin',    color: 'var(--gold)' },
 };
 
 /* human-readable label keys */
@@ -40,6 +41,7 @@ const EVENT_LABEL_KEY: Record<WsEventType, string> = {
   QUEST_UPDATED:           'cmp2.event.QUEST_UPDATED',
   CAMPAIGN_STATUS_CHANGED: 'cmp2.event.CAMPAIGN_STATUS_CHANGED',
   MEMBER_KICKED:           'cmp2.event.MEMBER_KICKED',
+  WALLET_CHANGED:          'cmp2.event.WALLET_CHANGED',
 };
 
 /* ── single notification row ─────────────────────────────── */
