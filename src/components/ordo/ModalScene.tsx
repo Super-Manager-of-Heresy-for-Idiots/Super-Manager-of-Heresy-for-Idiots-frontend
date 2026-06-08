@@ -3,7 +3,7 @@ import { Rune, type GlyphKind } from './Rune';
 import {
   Dialog,
   DialogContent,
-  DialogOverlay,
+  DialogTitle,
 } from '@/components/ui/dialog';
 
 interface ModalSceneProps {
@@ -39,10 +39,14 @@ export function ModalScene({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogOverlay />
       <DialogContent
         className="ao-panel ao-frame"
+        aria-describedby={undefined}
         style={{
+          position: 'fixed',
+          left: '50%',
+          top: '50%',
+          transform: 'translate(-50%, -50%)',
           maxWidth: width,
           padding: 0,
           border: `1px solid ${accentColor}44`,
@@ -89,7 +93,9 @@ export function ModalScene({
               </div>
             )}
             <div>
-              <div className="ao-h4" style={{ fontSize: 22 }}>{title}</div>
+              <DialogTitle asChild>
+                <div className="ao-h4" style={{ fontSize: 22 }}>{title}</div>
+              </DialogTitle>
               {sub && <div className="ao-italic" style={{ fontSize: 13, color: 'var(--ink-quiet)', marginTop: 2 }}>{sub}</div>}
             </div>
           </div>
