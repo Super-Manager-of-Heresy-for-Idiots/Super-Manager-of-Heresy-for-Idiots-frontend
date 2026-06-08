@@ -472,26 +472,24 @@ export default function FolioPage() {
           </div>
         </OrdoPanel>
 
-        {/* Saving Throws */}
+        {/* Saves & Tier — not served by API */}
         <OrdoPanel frame padding={0}>
-          <PanelHeader title={t('camp2.folio.savingThrows')} sub={t('camp2.folio.savingThrowsSub')} glyph="flame" tone="ember" />
-          {savingThrows.length === 0 ? (
-            <VoidBody note={t('camp2.folio.noSavingThrows')} />
-          ) : (
-            <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {savingThrows.map((name) => {
-                const stat = statByName.get(name.toLowerCase());
-                const mod = stat ? abilityMod(stat) + profBonus : null;
-                return (
-                  <div key={name} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', background: 'var(--abyss)', border: '1px solid var(--hairline)' }}>
-                    <Rune kind="diamond-fill" size={9} color="var(--gold-pale)" />
-                    <span style={{ flex: 1, color: 'var(--ink-bright)', fontSize: 13 }}>{gt.ability(name)}</span>
-                    <span className="ao-num" style={{ color: 'var(--gold-pale)', fontSize: 13 }}>{mod != null ? fmtMod(mod) : NA}</span>
-                  </div>
-                );
-              })}
+          <PanelHeader title={t('camp2.folio.savesTier')} glyph="helm" tone="gold" />
+          <div style={{ padding: 16 }}>
+            <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
+              {[
+                { label: t('camp2.folio.armour'), value: armorClass != null ? `${armorClass}` : NA },
+                { label: t('camp2.folio.init'), value: initiative != null ? fmtMod(initiative) : NA },
+                { label: t('camp2.folio.speedShort'), value: walkSpeed != null ? `${walkSpeed}` : NA },
+                { label: t('camp2.folio.prof'), value: `+${profBonus}` },
+              ].map((c) => (
+                <div key={c.label} style={{ padding: 8, background: 'var(--abyss)', border: '1px solid var(--rule)', textAlign: 'center' }}>
+                  <div className="ao-overline" style={{ fontSize: 9 }}>{c.label}</div>
+                  <div style={{ fontFamily: 'var(--font-serif)', fontSize: 22, color: 'var(--ink-bright)', lineHeight: 1.1 }}>{c.value}</div>
+                </div>
+              ))}
             </div>
-          )}
+          </div>
         </OrdoPanel>
 
       </div>
@@ -587,6 +585,11 @@ export default function FolioPage() {
             sub={t('camp2.folio.resourcesSub')}
             glyph="sigil-2"
             tone="arcane"
+            right={
+              <button className="ao-btn ao-btn--ghost ao-btn--sm" onClick={() => navigate(`/campaigns/${campaignId}/characters/${characterId}/resources`)}>
+                <Rune kind="arrow-r" size={9} /> {t('camp2.folio.resourcesLink')}
+              </button>
+            }
           />
           {(!resources || resources.length === 0) ? (
             <VoidBody note={t('camp2.folio.noResources')} />
@@ -641,22 +644,26 @@ export default function FolioPage() {
           );
         })}
 
-        {/* Saves & Tier — not served by API */}
+        {/* Saving Throws */}
         <OrdoPanel padding={14}>
-          <div className="ao-overline" style={{ marginBottom: 8 }}>{t('camp2.folio.savesTier')}</div>
-          <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
-            {[
-              { label: t('camp2.folio.armour'), value: armorClass != null ? `${armorClass}` : NA },
-              { label: t('camp2.folio.init'), value: initiative != null ? fmtMod(initiative) : NA },
-              { label: t('camp2.folio.speedShort'), value: walkSpeed != null ? `${walkSpeed}` : NA },
-              { label: t('camp2.folio.prof'), value: `+${profBonus}` },
-            ].map((c) => (
-              <div key={c.label} style={{ padding: 8, background: 'var(--abyss)', border: '1px solid var(--rule)', textAlign: 'center' }}>
-                <div className="ao-overline" style={{ fontSize: 9 }}>{c.label}</div>
-                <div style={{ fontFamily: 'var(--font-serif)', fontSize: 22, color: 'var(--ink-bright)', lineHeight: 1.1 }}>{c.value}</div>
-              </div>
-            ))}
-          </div>
+          <div className="ao-overline" style={{ marginBottom: 8 }}>{t('camp2.folio.savingThrows')}</div>
+          {savingThrows.length === 0 ? (
+            <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 11, lineHeight: 1.4 }}>{t('camp2.folio.noSavingThrows')}</p>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              {savingThrows.map((name) => {
+                const stat = statByName.get(name.toLowerCase());
+                const mod = stat ? abilityMod(stat) + profBonus : null;
+                return (
+                  <div key={name} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 10px', background: 'var(--abyss)', border: '1px solid var(--hairline)' }}>
+                    <Rune kind="diamond-fill" size={9} color="var(--gold-pale)" />
+                    <span style={{ flex: 1, color: 'var(--ink-bright)', fontSize: 12.5 }}>{gt.ability(name)}</span>
+                    <span className="ao-num" style={{ color: 'var(--gold-pale)', fontSize: 12.5 }}>{mod != null ? fmtMod(mod) : NA}</span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </OrdoPanel>
       </div>
 

@@ -48,20 +48,6 @@ export default function CharacterManagementPage() {
         ready: true,
       },
       {
-        title: t('camp.mgmt.tile.stats.title'),
-        body: t('camp.mgmt.tile.stats.body'),
-        glyph: 'sigil-2',
-        to: `${base}/stats`,
-        ready: false,
-      },
-      {
-        title: t('camp.mgmt.tile.effects.title'),
-        body: t('camp.mgmt.tile.effects.body'),
-        glyph: 'flame',
-        to: `${base}/effects`,
-        ready: true,
-      },
-      {
         title: t('camp.mgmt.tile.wallet.title'),
         body: t('camp.mgmt.tile.wallet.body'),
         glyph: 'coin',
