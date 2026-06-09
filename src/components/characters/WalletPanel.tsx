@@ -51,7 +51,7 @@ export function WalletPanel({ characterId, campaignId, wallet, canEdit = true, o
       />
 
       <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 0 }}>
-        {wallet.map((entry, idx) => (
+        {wallet.filter((entry) => entry.amount !== 0).map((entry, idx, visible) => (
           <div key={entry.currencyTypeId}>
             <div
               style={{
@@ -142,7 +142,7 @@ export function WalletPanel({ characterId, campaignId, wallet, canEdit = true, o
               </div>
             </div>
 
-            {idx < wallet.length - 1 && (
+            {idx < visible.length - 1 && (
               <OrdoDivider glyph="diamond" color="var(--rule)" />
             )}
           </div>

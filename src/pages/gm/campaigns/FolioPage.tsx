@@ -561,7 +561,7 @@ export default function FolioPage() {
             <VoidBody note={t('camp2.folio.noCoin')} />
           ) : (
             <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {(wallet ?? []).map((entry) => (
+              {(wallet ?? []).filter((entry) => entry.amount !== 0).map((entry) => (
                 <div key={entry.currencyTypeId} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', background: 'var(--abyss)', border: '1px solid var(--hairline)' }}>
                   <Rune kind="coin" size={11} color="var(--gold-pale)" />
                   <span style={{ flex: 1, color: 'var(--ink-bright)', fontSize: 13 }}>{entry.currencyName}</span>
