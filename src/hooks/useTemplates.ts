@@ -3,7 +3,7 @@ import { AxiosError } from 'axios';
 import toast from 'react-hot-toast';
 import { charactersFullApi, type CreateFullCharacterRequest } from '@/api/characters-full.api';
 import { referenceApi } from '@/api/reference.api';
-import { useT } from '@/i18n/I18nContext';
+import { useT, useI18n } from '@/i18n/I18nContext';
 import type { ApiError, AvailableContentEntry, CharacterResponse, UpdateCharacterRequest } from '@/types';
 
 const myKey = ['characters', 'my'];
@@ -113,8 +113,9 @@ function detailToEntry(item: { id: string; name: string }): AvailableContentEntr
 
 // Currency reference (gold/silver/…), used to resolve wizard coin pools to ids.
 export function useReferenceCurrencies() {
+  const { lang } = useI18n();
   return useQuery({
-    queryKey: ['reference', 'currencies'],
+    queryKey: ['reference', 'currencies', lang],
     queryFn: async () => {
       const response = await referenceApi.getCurrencies();
       return response.data ?? [];
@@ -123,8 +124,9 @@ export function useReferenceCurrencies() {
 }
 
 export function useGlobalReferenceContent() {
+  const { lang } = useI18n();
   return useQuery({
-    queryKey: ['reference', 'global'],
+    queryKey: ['reference', 'global', lang],
     queryFn: async () => {
       const [classes, races, backgrounds, skills, statTypes, currencies] = await Promise.all([
         referenceApi.getClasses(),

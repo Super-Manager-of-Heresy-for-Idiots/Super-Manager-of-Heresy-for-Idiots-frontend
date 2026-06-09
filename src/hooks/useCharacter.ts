@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { charactersApi } from '@/api/characters.api';
-import { useT } from '@/i18n/I18nContext';
+import { useT, useI18n } from '@/i18n/I18nContext';
 import type {
   CreateCharacterInCampaignRequest,
   UpdateCharacterRequest,
@@ -175,8 +175,9 @@ export function useCharacterWallet(campaignId: string, characterId: string) {
 
 /** Campaign currency reference (id = currencyTypeId), used by the GM balance manager. */
 export function useCampaignCurrencies(campaignId: string) {
+  const { lang } = useI18n();
   return useQuery({
-    queryKey: ['campaigns', campaignId, 'reference', 'currencies'],
+    queryKey: ['campaigns', campaignId, 'reference', 'currencies', lang],
     queryFn: async () => {
       const response = await charactersApi.getCampaignCurrencies(campaignId);
       return response.data ?? [];

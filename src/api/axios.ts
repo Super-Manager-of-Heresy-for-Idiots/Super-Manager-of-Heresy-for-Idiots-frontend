@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { useAuthStore } from '@/store/authStore';
+import { getStoredLang } from '@/i18n/lang';
 
 const api = axios.create({
   baseURL: '/api',
@@ -12,6 +13,13 @@ api.interceptors.request.use((config) => {
   const token = useAuthStore.getState().token;
   if (token && token !== 'undefined' && token !== 'null') {
     config.headers.Authorization = `Bearer ${token}`;
+  }
+  // Reference data (PHB spells/races/classes/backgrounds/skills/currencies) is
+  // localized server-side by a `lang` query param. Attach the active UI language
+  // to every reference request so all roles get RU/EN text. `stat-types` has no
+  // translations, so it is left untouched.
+  if (config.url?.includes('/reference/') && !config.url.includes('/reference/stat-types')) {
+    config.params = { ...config.params, lang: getStoredLang() };
   }
   return config;
 });

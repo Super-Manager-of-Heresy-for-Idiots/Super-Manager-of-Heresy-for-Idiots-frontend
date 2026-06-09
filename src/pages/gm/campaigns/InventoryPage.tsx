@@ -29,7 +29,7 @@ import {
   useUnequipItem,
   useRemoveItem,
 } from '@/hooks/useInventory';
-import { useCharacter, useCharacterWallet } from '@/hooks/useCharacter';
+import { useCharacter, useCharacterWallet, useCampaignCharacters } from '@/hooks/useCharacter';
 import { useAuthStore } from '@/store/authStore';
 import { useT } from '@/i18n/I18nContext';
 import type {
@@ -125,6 +125,7 @@ export default function InventoryPage() {
   const { data: backpack } = useBackpackInventory(campaignId!, characterId!);
   const { data: wallet } = useCharacterWallet(campaignId!, characterId!);
   const { data: itemTemplates, isLoading: itemTemplatesLoading } = useCampaignItemTemplates(campaignId);
+  const { data: campaignCharacters } = useCampaignCharacters(campaignId!);
 
   const grantMutation = useGrantItem();
   const transferMutation = useTransferItem();
@@ -211,6 +212,11 @@ export default function InventoryPage() {
   const selectedGrantTemplate = useMemo(
     () => grantTemplates.find((template) => template.id === grantTemplateId) ?? null,
     [grantTemplateId, grantTemplates],
+  );
+
+  const transferCandidates = useMemo(
+    () => (campaignCharacters ?? []).filter((c) => c.status === 'ACTIVE' && c.id !== characterId),
+    [campaignCharacters, characterId],
   );
 
   const slotsFilled = equippedItems.length;
@@ -711,11 +717,41 @@ export default function InventoryPage() {
       <Dialog open={transferOpen} onOpenChange={setTransferOpen}>
         <DialogContent>
           <DialogHeader><DialogTitle>{t('camp2.inv.dialog.transferTitle')}</DialogTitle></DialogHeader>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <div>
-              <label className="ao-label">{t('camp2.inv.field.destCharId')}</label>
-              <input className="ao-input" value={transferToCharId} onChange={(e) => setTransferToCharId(e.target.value)} placeholder={t('camp2.inv.field.targetCharId')} />
-            </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <label className="ao-label">{t('camp2.inv.field.chooseRecipient')}</label>
+            {transferCandidates.length === 0 ? (
+              <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 13, textAlign: 'center', padding: '12px 0' }}>
+                {t('camp2.inv.field.noActiveChars')}
+              </p>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 260, overflowY: 'auto' }}>
+                {transferCandidates.map((c) => {
+                  const isSel = c.id === transferToCharId;
+                  return (
+                    <button
+                      key={c.id}
+                      type="button"
+                      onClick={() => setTransferToCharId(c.id)}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: 10,
+                        padding: '8px 12px', cursor: 'pointer', textAlign: 'left',
+                        background: isSel ? 'rgba(var(--gold-rgb, 180,155,100), 0.15)' : 'var(--abyss)',
+                        border: isSel ? '1px solid var(--brass)' : '1px solid var(--rule)',
+                        transition: 'border-color 0.15s, background 0.15s',
+                      }}
+                    >
+                      <Rune kind="cir-dot" size={14} color={isSel ? 'var(--gold)' : 'var(--ink-faint)'} />
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: 14, color: isSel ? 'var(--ink-bright)' : 'var(--ink)' }}>{c.name}</div>
+                        <div style={{ fontSize: 11, color: 'var(--ink-quiet)' }}>
+                          {c.classLevels?.[0]?.className ?? ''} · {t('camp2.inv.field.ownerLabel', { owner: c.ownerUsername })}
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
           <DialogFooter>
             <button className="ao-btn ao-btn--ghost" onClick={() => setTransferOpen(false)} disabled={transferMutation.isPending}>{t('camp2.inv.withhold')}</button>

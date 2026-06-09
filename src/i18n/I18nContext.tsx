@@ -7,15 +7,7 @@ import {
   type ReactNode,
 } from 'react';
 import { translations, type Lang } from './translations';
-
-const STORAGE_KEY = 'lang';
-const DEFAULT_LANG: Lang = 'ru';
-
-function getInitialLang(): Lang {
-  const stored = localStorage.getItem(STORAGE_KEY);
-  if (stored === 'ru' || stored === 'en') return stored;
-  return DEFAULT_LANG;
-}
+import { LANG_STORAGE_KEY, DEFAULT_LANG, getStoredLang } from './lang';
 
 interface I18nContextValue {
   lang: Lang;
@@ -27,10 +19,10 @@ interface I18nContextValue {
 const I18nContext = createContext<I18nContextValue | null>(null);
 
 export function I18nProvider({ children }: { children: ReactNode }) {
-  const [lang, setLangState] = useState<Lang>(getInitialLang);
+  const [lang, setLangState] = useState<Lang>(getStoredLang);
 
   const setLang = useCallback((next: Lang) => {
-    localStorage.setItem(STORAGE_KEY, next);
+    localStorage.setItem(LANG_STORAGE_KEY, next);
     document.documentElement.lang = next;
     setLangState(next);
   }, []);

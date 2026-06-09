@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { homebrewCampaignApi } from '@/api/homebrew-campaign.api';
 import { homebrewApi } from '@/api/homebrew.api';
-import { useT } from '@/i18n/I18nContext';
+import { useT, useI18n } from '@/i18n/I18nContext';
 import type {
   AttachHomebrewRequest,
   PinHomebrewVersionRequest,
@@ -92,8 +92,9 @@ export function useAvailableContent(campaignId: string) {
 }
 
 export function useCampaignReferenceContent(campaignId: string) {
+  const { lang } = useI18n();
   return useQuery({
-    queryKey: ['campaigns', campaignId, 'reference-content'],
+    queryKey: ['campaigns', campaignId, 'reference-content', lang],
     queryFn: async () => {
       const [classes, races, backgrounds, skills, statTypes] = await Promise.all([
         homebrewCampaignApi.getReferenceClasses(campaignId),
