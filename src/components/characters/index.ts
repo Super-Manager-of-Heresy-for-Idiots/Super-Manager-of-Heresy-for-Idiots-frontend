@@ -15,3 +15,5 @@ export { StatusControlPanel } from './StatusControlPanel';
 export { ReadOnlyOverlay } from './ReadOnlyOverlay';
 export { DamageHealModal } from './DamageHealModal';
 export { EditableSheetField } from './EditableSheetField';
+export { WalletPanel } from './WalletPanel';
+
