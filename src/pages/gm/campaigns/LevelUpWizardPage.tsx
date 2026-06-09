@@ -15,6 +15,8 @@ import { useT } from '@/i18n/I18nContext';
 import { useCharacter } from '@/hooks/useCharacter';
 import { useLevelUpOptions, useLevelUp } from '@/hooks/useLevelUp';
 import type {
+  AbilityOption,
+  AbilityScoreImprovementRequest,
   AvailableClassOption,
   LevelUpResultResponse,
   RewardDetail,
@@ -27,7 +29,7 @@ import { REWARD_TYPE_LABELS } from '@/types';
 type WizardStep = 'pick-class' | 'rewards' | 'confirm' | 'result';
 
 interface AsiAllocation {
-  // rewardEntryId -> points (0..2)
+  // statTypeId -> points (0..total)
   points: Record<string, number>;
 }
 
@@ -45,7 +47,7 @@ export default function LevelUpWizardPage() {
   const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
   // groupKey (rewardType) -> selected rewardEntryId
   const [choiceSelections, setChoiceSelections] = useState<Record<string, string>>({});
-  // ASI: rewardEntryId -> point count
+  // ASI: statTypeId -> point count
   const [asi, setAsi] = useState<AsiAllocation>({ points: {} });
   const [result, setResult] = useState<LevelUpResultResponse | null>(null);
 
@@ -142,9 +144,10 @@ export default function LevelUpWizardPage() {
           submitting={levelUpMutation.isPending}
           onBack={() => setStep('rewards')}
           onConfirm={() => {
-            const selections = buildSelections(selectedClass, choiceSelections, asi);
+            const selections = buildSelections(selectedClass, choiceSelections);
+            const abilityScoreImprovement = buildAsi(asi);
             levelUpMutation.mutate(
-              { characterId: characterId!, data: { classId: selectedClass.classId, selections } },
+              { characterId: characterId!, data: { classId: selectedClass.classId, selections, abilityScoreImprovement } },
               {
                 onSuccess: (res) => {
                   if (res.data) {
@@ -385,9 +388,17 @@ function StepRewards({
   onNext: () => void;
 }) {
   const t = useT();
-  const automatic = option.rewardGroups.filter((g) => !g.isChoice);
+  // ASI arrives as a non-choice group with a single reward whose detail carries
+  // abilityOptions + asiPointsTotal, so detect it regardless of isChoice.
+  const asiGroup = option.rewardGroups.find((g) => g.rewardType === 'ABILITY_SCORE_IMPROVEMENT');
+  const asiDetail = asiGroup?.rewards[0]?.detail;
+  const asiOptions: AbilityOption[] = asiDetail?.abilityOptions ?? [];
+  const asiPointsTotal = asiDetail?.asiPointsTotal ?? 2;
+
+  const automatic = option.rewardGroups.filter(
+    (g) => !g.isChoice && g.rewardType !== 'ABILITY_SCORE_IMPROVEMENT',
+  );
   const choices = option.rewardGroups.filter((g) => g.isChoice);
-  const asiGroup = choices.find((g) => g.rewardType === 'ABILITY_SCORE_IMPROVEMENT');
   const subclassGroups = choices.filter((g) => g.rewardType === 'SUBCLASS');
   const normalChoices = choices.filter(
     (g) => g.rewardType !== 'ABILITY_SCORE_IMPROVEMENT' && g.rewardType !== 'SUBCLASS',
@@ -395,7 +406,7 @@ function StepRewards({
 
   const allChoiceGroups = [...subclassGroups, ...normalChoices];
   const asiTotal = asiGroup ? Object.values(asi.points).reduce((sum, v) => sum + v, 0) : 0;
-  const asiValid = asiGroup ? asiTotal === 2 : true;
+  const asiValid = asiGroup ? asiTotal === asiPointsTotal : true;
   const choicesValid = allChoiceGroups.every((g) => {
     const allAlready = g.rewards.length > 0 && g.rewards.every((r) => r.alreadyAcquired);
     if (allAlready) return true;
@@ -605,7 +616,7 @@ function StepRewards({
         />
       ))}
 
-      {asiGroup && <AsiGroup group={asiGroup} asi={asi} setAsi={setAsi} />}
+      {asiGroup && <AsiGroup options={asiOptions} pointsTotal={asiPointsTotal} asi={asi} setAsi={setAsi} />}
 
       {rites.length === 0 && (
         <OrdoPanel frame padding={0} style={{ marginBottom: 16 }}>
@@ -1015,23 +1026,25 @@ function AutoGrantRow({ typeLabel, reward }: { typeLabel: string; reward: Reward
 // ── ASI ──────────────────────────────────────────────────────────────
 
 function AsiGroup({
-  group,
+  options,
+  pointsTotal,
   asi,
   setAsi,
 }: {
-  group: RewardGroup;
+  options: AbilityOption[];
+  pointsTotal: number;
   asi: AsiAllocation;
   setAsi: (a: AsiAllocation) => void;
 }) {
   const t = useT();
   const total = Object.values(asi.points).reduce((sum, v) => sum + v, 0);
-  const remaining = 2 - total;
-  const change = (rewardEntryId: string, delta: number) => {
-    const current = asi.points[rewardEntryId] || 0;
-    const next = Math.max(0, Math.min(2, current + delta));
+  const remaining = pointsTotal - total;
+  const change = (statTypeId: string, delta: number) => {
+    const current = asi.points[statTypeId] || 0;
     if (delta > 0 && remaining <= 0) return;
+    const next = Math.max(0, Math.min(pointsTotal, current + delta));
     if (next === current) return;
-    setAsi({ points: { ...asi.points, [rewardEntryId]: next } });
+    setAsi({ points: { ...asi.points, [statTypeId]: next } });
   };
   return (
     <OrdoPanel frame padding={0} style={{ marginBottom: 16 }}>
@@ -1047,21 +1060,20 @@ function AsiGroup({
         }
       />
       <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {group.rewards.length === 0 && (
+        {options.length === 0 && (
           <EmptyChoiceNote text={t('camp.lvl.asi.noAspects')} />
         )}
-        {group.rewards.map((r) => {
-          const value = asi.points[r.rewardEntryId] || 0;
-          const disabled = r.alreadyAcquired;
-          const cur = r.detail?.currentScore;
-          const cap = r.detail?.maxScore ?? 20;
-          const after = cur != null ? cur + value : undefined;
-          const atCap = cur != null && cur + value >= cap;
-          const modBefore = cur != null ? abilityMod(cur) : undefined;
-          const modAfter = after != null ? abilityMod(after) : undefined;
+        {options.map((o) => {
+          const value = asi.points[o.statTypeId] || 0;
+          const cur = o.currentScore;
+          const cap = o.maxScore ?? 20;
+          const after = cur + value;
+          const atCap = after >= cap;
+          const modBefore = abilityMod(cur);
+          const modAfter = abilityMod(after);
           return (
             <div
-              key={r.rewardEntryId}
+              key={o.statTypeId}
               className="ao-rgrid"
               style={{
                 display: 'grid',
@@ -1071,18 +1083,15 @@ function AsiGroup({
                 padding: '8px 12px',
                 background: value > 0 ? 'rgba(176,141,78,0.06)' : 'var(--abyss)',
                 border: `1px solid ${value > 0 ? 'var(--bronze-warm)' : 'var(--hairline)'}`,
-                opacity: disabled ? 0.5 : 1,
               }}
             >
               <span style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                 <span style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
-                  <span className="ao-h5" style={{ fontSize: 14 }}>{r.name}</span>
-                  {cur != null && (
-                    <span className="ao-codex" style={{ fontSize: 12, color: 'var(--gold)' }}>
-                      {t('camp.lvl.asi.score', { from: cur, to: cur + value })}
-                    </span>
-                  )}
-                  {modBefore != null && modAfter != null && modBefore !== modAfter && (
+                  <span className="ao-h5" style={{ fontSize: 14 }}>{o.name}</span>
+                  <span className="ao-codex" style={{ fontSize: 12, color: 'var(--gold)' }}>
+                    {t('camp.lvl.asi.score', { from: cur, to: after })}
+                  </span>
+                  {modBefore !== modAfter && (
                     <span className="ao-codex" style={{ fontSize: 11, color: 'var(--arcane)' }}>
                       {t('camp.lvl.asi.mod', { from: fmtMod(modBefore), to: fmtMod(modAfter) })}
                     </span>
@@ -1091,15 +1100,12 @@ function AsiGroup({
                     <span className="ao-overline" style={{ color: 'var(--ember)' }}>{t('camp.lvl.asi.atCap')}</span>
                   )}
                 </span>
-                {r.description && (
-                  <span className="ao-italic" style={{ fontSize: 11, color: 'var(--ink-quiet)' }}>{r.description}</span>
-                )}
               </span>
-              <button className="ao-iconbtn" disabled={disabled || value <= 0} onClick={() => change(r.rewardEntryId, -1)}>
+              <button className="ao-iconbtn" disabled={value <= 0} onClick={() => change(o.statTypeId, -1)}>
                 <Rune kind="minus" size={11} />
               </button>
               <span style={{ minWidth: 28, textAlign: 'center', fontFamily: 'var(--font-mono)', color: 'var(--gold)' }}>+{value}</span>
-              <button className="ao-iconbtn" disabled={disabled || remaining <= 0 || value >= 2 || atCap} onClick={() => change(r.rewardEntryId, 1)}>
+              <button className="ao-iconbtn" disabled={remaining <= 0 || value >= pointsTotal || atCap} onClick={() => change(o.statTypeId, 1)}>
                 <Rune kind="plus" size={11} />
               </button>
             </div>
@@ -1140,15 +1146,13 @@ function StepConfirm({
     if (r) chosenLines.push({ type: g.rewardType, name: r.name, tag: 'choice' });
   }
   const asiGroup = option.rewardGroups.find((g) => g.rewardType === 'ABILITY_SCORE_IMPROVEMENT');
-  if (asiGroup) {
-    for (const [entryId, points] of Object.entries(asi.points)) {
-      if (!points) continue;
-      const r = asiGroup.rewards.find((x) => x.rewardEntryId === entryId);
-      if (!r) continue;
-      const cur = r.detail?.currentScore;
-      const label = cur != null ? `${r.name} ${cur} → ${cur + points}` : `${r.name} +${points}`;
-      chosenLines.push({ type: 'ABILITY_SCORE_IMPROVEMENT', name: label, tag: 'choice' });
-    }
+  const asiOptions = asiGroup?.rewards[0]?.detail?.abilityOptions ?? [];
+  for (const [statTypeId, points] of Object.entries(asi.points)) {
+    if (!points) continue;
+    const o = asiOptions.find((x) => x.statTypeId === statTypeId);
+    if (!o) continue;
+    const label = `${o.name} ${o.currentScore} → ${o.currentScore + points}`;
+    chosenLines.push({ type: 'ABILITY_SCORE_IMPROVEMENT', name: label, tag: 'choice' });
   }
 
   return (
@@ -1355,7 +1359,6 @@ function roman(n: number): string {
 function buildSelections(
   option: AvailableClassOption,
   choiceSelections: Record<string, string>,
-  asi: AsiAllocation,
 ): RewardSelection[] {
   const out: RewardSelection[] = [];
   for (const g of option.rewardGroups) {
@@ -1364,10 +1367,13 @@ function buildSelections(
     const id = choiceSelections[g.rewardType];
     if (id) out.push({ rewardType: g.rewardType, rewardEntryId: id });
   }
-  for (const [entryId, points] of Object.entries(asi.points)) {
-    for (let i = 0; i < points; i++) {
-      out.push({ rewardType: 'ABILITY_SCORE_IMPROVEMENT', rewardEntryId: entryId });
-    }
-  }
   return out;
+}
+
+// ASI is sent as a dedicated top-level field, not via selections.
+function buildAsi(asi: AsiAllocation): AbilityScoreImprovementRequest | undefined {
+  const increases = Object.entries(asi.points)
+    .filter(([, amount]) => amount > 0)
+    .map(([statTypeId, amount]) => ({ statTypeId, amount }));
+  return increases.length > 0 ? { increases } : undefined;
 }

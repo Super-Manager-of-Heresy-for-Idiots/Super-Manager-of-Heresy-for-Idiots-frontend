@@ -210,11 +210,22 @@ export interface InviteCodeResponse {
 export interface LevelUpRequest {
   classId: string;
   selections: RewardSelection[];
+  // Required when the new class level grants an ABILITY_SCORE_IMPROVEMENT.
+  abilityScoreImprovement?: AbilityScoreImprovementRequest;
 }
 
 export interface RewardSelection {
   rewardType: string;
   rewardEntryId: string;
+}
+
+export interface AbilityScoreImprovementRequest {
+  increases: StatIncrease[];
+}
+
+export interface StatIncrease {
+  statTypeId: string;  // matches AbilityOption.statTypeId
+  amount: number;      // 1 or 2; total across increases must equal asiPointsTotal
 }
 
 export interface LevelUpOptionsResponse {
@@ -286,6 +297,16 @@ export interface RewardDetail {
   abilityStatName?: string;              // "Strength"
   currentScore?: number;                 // 15
   maxScore?: number;                     // 20 cap
+  abilityOptions?: AbilityOption[];      // per-ability choices for ASI
+  asiPointsTotal?: number;               // total points to distribute (usually 2)
+}
+
+// One distributable ability inside an ABILITY_SCORE_IMPROVEMENT reward.
+export interface AbilityOption {
+  statTypeId: string;    // identifier sent back as RewardSelection.rewardEntryId
+  name: string;          // "Strength"
+  currentScore: number;  // 15
+  maxScore: number;      // 20 cap
 }
 
 export interface LevelUpResultResponse {
