@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Sparkles, Heart, Loader2 } from 'lucide-react';
 import {
@@ -17,6 +17,7 @@ import { useLevelUpOptions, useLevelUp } from '@/hooks/useLevelUp';
 import type {
   AvailableClassOption,
   LevelUpResultResponse,
+  RewardDetail,
   RewardEntry,
   RewardGroup,
   RewardSelection,
@@ -413,21 +414,61 @@ function StepRewards({
     ...(asiGroup ? [{ name: t('camp.lvl.asiChecklist'), complete: asiValid }] : []),
   ];
 
-  // Grants granted automatically by the ascent (always Vitae first)
+  // Vitae + derived stat tiles granted automatically by the ascent (Vitae always first).
+  const hp = option.hpGain;
   const grants: { glyph: string; label: string; value: string; sub?: string; tone: Tone }[] = [
-    { glyph: 'flame', label: t('camp.lvl.vitae'), value: t('camp.lvl.vitaeValue'), sub: t('camp.lvl.hits'), tone: 'ember' },
-    ...automatic.flatMap((g) =>
-      g.rewards.length === 0
-        ? [{ glyph: 'scroll', label: REWARD_TYPE_LABELS[g.rewardType] || g.rewardType, value: t('camp.lvl.auto'), sub: t('camp.lvl.atSeal'), tone: 'arcane' as Tone }]
-        : g.rewards.map((r) => ({
-            glyph: 'sigil-3',
-            label: REWARD_TYPE_LABELS[g.rewardType] || g.rewardType,
-            value: r.name,
-            sub: r.description,
-            tone: 'gold' as Tone,
-          })),
-    ),
+    {
+      glyph: 'flame',
+      label: t('camp.lvl.vitae'),
+      value: hp?.average != null ? `+${hp.average}` : t('camp.lvl.vitaeValue'),
+      sub:
+        hp?.rolledMin != null && hp?.rolledMax != null
+          ? t('camp.lvl.vitaeRange', { min: hp.rolledMin, max: hp.rolledMax })
+          : t('camp.lvl.hits'),
+      tone: 'ember',
+    },
   ];
+  if (hp?.currentMaxHp != null && hp?.average != null) {
+    grants.push({
+      glyph: 'flame',
+      label: t('camp.lvl.hpTotal'),
+      value: `≈${hp.currentMaxHp + hp.average}`,
+      sub: t('camp.lvl.hpFrom', { from: hp.currentMaxHp }),
+      tone: 'gold',
+    });
+  }
+  const derived = option.derived;
+  if (derived?.proficiencyBonusAfter != null && derived.proficiencyBonusAfter !== derived.proficiencyBonusBefore) {
+    grants.push({
+      glyph: 'sigil-1',
+      label: t('camp.lvl.prof'),
+      value: `+${derived.proficiencyBonusAfter}`,
+      sub: derived.proficiencyBonusBefore != null ? t('camp.lvl.profFrom', { from: derived.proficiencyBonusBefore }) : undefined,
+      tone: 'arcane',
+    });
+  }
+  if (derived?.spellSlotsGained) {
+    grants.push({ glyph: 'sigil-3', label: t('camp.lvl.slots'), value: derived.spellSlotsGained, tone: 'arcane' });
+  }
+  if (derived?.cantripsGained) {
+    grants.push({ glyph: 'sigil-3', label: t('camp.lvl.cantrips'), value: `+${derived.cantripsGained}`, tone: 'arcane' });
+  }
+  // Empty automatic groups (reward decided at seal) shown as small "auto" tiles.
+  for (const g of automatic) {
+    if (g.rewards.length === 0) {
+      grants.push({
+        glyph: 'scroll',
+        label: REWARD_TYPE_LABELS[g.rewardType] || g.rewardType,
+        value: t('camp.lvl.auto'),
+        sub: t('camp.lvl.atSeal'),
+        tone: 'arcane',
+      });
+    }
+  }
+  // Concrete automatic features shown as full-width rows (name + description + effects).
+  const autoRewards = automatic.flatMap((g) =>
+    g.rewards.map((r) => ({ typeLabel: REWARD_TYPE_LABELS[g.rewardType] || g.rewardType, reward: r })),
+  );
 
   return (
     <div>
@@ -489,6 +530,17 @@ function StepRewards({
               <GrantCard key={i} glyph={g.glyph} label={g.label} value={g.value} sub={g.sub} tone={g.tone} />
             ))}
           </div>
+
+          {autoRewards.length > 0 && (
+            <>
+              <OrdoDivider glyph="diamond">{t('camp.lvl.autoFeatures')}</OrdoDivider>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {autoRewards.map((a, i) => (
+                  <AutoGrantRow key={i} typeLabel={a.typeLabel} reward={a.reward} />
+                ))}
+              </div>
+            </>
+          )}
 
           {rites.length > 0 && (
             <>
@@ -701,9 +753,12 @@ function OathCard({
         )}
       </div>
 
-      {reward.description && (
+      {(reward.description || reward.detail) && (
         <div style={{ padding: 16 }}>
-          <p className="ao-italic" style={{ fontSize: 14, color: 'var(--ink)', lineHeight: 1.45 }}>«{reward.description}»</p>
+          {reward.description && (
+            <p className="ao-italic" style={{ fontSize: 14, color: 'var(--ink)', lineHeight: 1.45 }}>«{reward.description}»</p>
+          )}
+          <DetailBadges detail={reward.detail} />
         </div>
       )}
 
@@ -835,10 +890,15 @@ function OfferingCard({
         <OrdoDivider glyph="diamond" color={color} />
       </div>
 
-      {reward.description && (
+      {(reward.description || reward.detail) && (
         <div style={{ padding: '12px 18px', background: 'var(--abyss)', borderTop: '1px solid var(--rule)' }}>
-          <div className="ao-overline" style={{ marginBottom: 4 }}>{t('camp.lvl.offering.inscription')}</div>
-          <div className="ao-italic" style={{ fontSize: 12, color: 'var(--ink)', lineHeight: 1.45 }}>«{reward.description}»</div>
+          {reward.description && (
+            <>
+              <div className="ao-overline" style={{ marginBottom: 4 }}>{t('camp.lvl.offering.inscription')}</div>
+              <div className="ao-italic" style={{ fontSize: 12, color: 'var(--ink)', lineHeight: 1.45 }}>«{reward.description}»</div>
+            </>
+          )}
+          <DetailBadges detail={reward.detail} />
         </div>
       )}
     </div>
@@ -848,6 +908,107 @@ function OfferingCard({
 function EmptyChoiceNote({ text }: { text: string }) {
   return (
     <div className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 13 }}>{text}</div>
+  );
+}
+
+// ── Effect badges / structured mechanics ─────────────────────────────
+
+function Tag({ children, tone }: { children: ReactNode; tone?: Tone }) {
+  const color = tone ? toneVar(tone) : 'var(--ink-quiet)';
+  return (
+    <span
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 4,
+        fontSize: 10.5,
+        fontFamily: 'var(--font-mono)',
+        letterSpacing: '0.04em',
+        padding: '2px 7px',
+        border: `1px solid ${color}`,
+        color,
+        background: 'var(--abyss)',
+        textTransform: 'uppercase',
+        whiteSpace: 'nowrap',
+      }}
+    >
+      {children}
+    </span>
+  );
+}
+
+/** Renders concrete mechanics (action type, damage, range, duration, prerequisites,
+ *  buff/debuff effects) from RewardDetail. Renders nothing when no detail is present. */
+function DetailBadges({ detail }: { detail?: RewardDetail }) {
+  const t = useT();
+  if (!detail) return null;
+
+  const tags: { label: string; tone?: Tone }[] = [];
+
+  if (detail.skillActivation) {
+    tags.push({
+      label: detail.skillActivation === 'ACTIVE' ? t('camp.lvl.fx.active') : t('camp.lvl.fx.passive'),
+      tone: detail.skillActivation === 'ACTIVE' ? 'ember' : 'arcane',
+    });
+  }
+  if (detail.damageDice || detail.damageBonus) {
+    const dmg = [detail.damageDice, detail.damageBonus ? `+${detail.damageBonus}` : '']
+      .filter(Boolean)
+      .join(' ');
+    const typ = detail.damageType ? ` ${detail.damageType.toLowerCase()}` : '';
+    tags.push({ label: `${t('camp.lvl.fx.damage')}: ${dmg}${typ}`, tone: 'ember' });
+  }
+  if (detail.range) tags.push({ label: `${t('camp.lvl.fx.range')}: ${detail.range}` });
+  if (detail.duration) tags.push({ label: `${t('camp.lvl.fx.duration')}: ${detail.duration}` });
+  if (detail.usage) tags.push({ label: detail.usage });
+
+  const effects = detail.effects ?? [];
+  const hasContent = tags.length > 0 || !!detail.prerequisites || effects.length > 0;
+  if (!hasContent) return null;
+
+  return (
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 8 }}>
+      {tags.map((tg, i) => (
+        <Tag key={`t${i}`} tone={tg.tone}>{tg.label}</Tag>
+      ))}
+      {effects.map((e, i) => {
+        const bd = e.buffDebuff;
+        const mod =
+          bd?.modifierValue != null && bd.targetStatName
+            ? ` (${bd.modifierValue >= 0 ? '+' : ''}${bd.modifierValue} ${bd.targetStatName})`
+            : '';
+        const chance = e.chancePercent != null && e.chancePercent < 100 ? ` · ${t('camp.lvl.fx.chance', { chance: e.chancePercent })}` : '';
+        const rounds = bd?.durationRounds ? ` · ${t('camp.lvl.fx.rounds', { rounds: bd.durationRounds })}` : '';
+        const arrow = e.effectRole === 'BUFF' ? '▲' : '▼';
+        return (
+          <Tag key={`e${i}`} tone={e.effectRole === 'BUFF' ? 'arcane' : 'ember'}>
+            {arrow} {bd?.name ?? ''}{mod}{chance}{rounds}
+          </Tag>
+        );
+      })}
+      {detail.prerequisites && (
+        <Tag tone="ember">{t('camp.lvl.fx.requires', { req: detail.prerequisites })}</Tag>
+      )}
+    </div>
+  );
+}
+
+// ── Automatic feature row (granted by the ascent, no choice) ─────────
+
+function AutoGrantRow({ typeLabel, reward }: { typeLabel: string; reward: RewardEntry }) {
+  return (
+    <div style={{ padding: '12px 14px', background: 'var(--abyss)', border: '1px solid var(--rule)' }}>
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
+        <span className="ao-codex" style={{ fontSize: 10, color: 'var(--ink-faint)' }}>{typeLabel}</span>
+        <span className="ao-h5" style={{ fontSize: 15 }}>{reward.name}</span>
+      </div>
+      {reward.description && (
+        <p className="ao-italic" style={{ fontSize: 12.5, color: 'var(--ink)', marginTop: 4, lineHeight: 1.45 }}>
+          {reward.description}
+        </p>
+      )}
+      <DetailBadges detail={reward.detail} />
+    </div>
   );
 }
 
@@ -892,6 +1053,12 @@ function AsiGroup({
         {group.rewards.map((r) => {
           const value = asi.points[r.rewardEntryId] || 0;
           const disabled = r.alreadyAcquired;
+          const cur = r.detail?.currentScore;
+          const cap = r.detail?.maxScore ?? 20;
+          const after = cur != null ? cur + value : undefined;
+          const atCap = cur != null && cur + value >= cap;
+          const modBefore = cur != null ? abilityMod(cur) : undefined;
+          const modAfter = after != null ? abilityMod(after) : undefined;
           return (
             <div
               key={r.rewardEntryId}
@@ -907,8 +1074,23 @@ function AsiGroup({
                 opacity: disabled ? 0.5 : 1,
               }}
             >
-              <span style={{ display: 'flex', flexDirection: 'column' }}>
-                <span className="ao-h5" style={{ fontSize: 14 }}>{r.name}</span>
+              <span style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <span style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
+                  <span className="ao-h5" style={{ fontSize: 14 }}>{r.name}</span>
+                  {cur != null && (
+                    <span className="ao-codex" style={{ fontSize: 12, color: 'var(--gold)' }}>
+                      {t('camp.lvl.asi.score', { from: cur, to: cur + value })}
+                    </span>
+                  )}
+                  {modBefore != null && modAfter != null && modBefore !== modAfter && (
+                    <span className="ao-codex" style={{ fontSize: 11, color: 'var(--arcane)' }}>
+                      {t('camp.lvl.asi.mod', { from: fmtMod(modBefore), to: fmtMod(modAfter) })}
+                    </span>
+                  )}
+                  {atCap && (
+                    <span className="ao-overline" style={{ color: 'var(--ember)' }}>{t('camp.lvl.asi.atCap')}</span>
+                  )}
+                </span>
                 {r.description && (
                   <span className="ao-italic" style={{ fontSize: 11, color: 'var(--ink-quiet)' }}>{r.description}</span>
                 )}
@@ -917,7 +1099,7 @@ function AsiGroup({
                 <Rune kind="minus" size={11} />
               </button>
               <span style={{ minWidth: 28, textAlign: 'center', fontFamily: 'var(--font-mono)', color: 'var(--gold)' }}>+{value}</span>
-              <button className="ao-iconbtn" disabled={disabled || remaining <= 0 || value >= 2} onClick={() => change(r.rewardEntryId, 1)}>
+              <button className="ao-iconbtn" disabled={disabled || remaining <= 0 || value >= 2 || atCap} onClick={() => change(r.rewardEntryId, 1)}>
                 <Rune kind="plus" size={11} />
               </button>
             </div>
@@ -962,7 +1144,10 @@ function StepConfirm({
     for (const [entryId, points] of Object.entries(asi.points)) {
       if (!points) continue;
       const r = asiGroup.rewards.find((x) => x.rewardEntryId === entryId);
-      if (r) chosenLines.push({ type: 'ABILITY_SCORE_IMPROVEMENT', name: `${r.name} +${points}`, tag: 'choice' });
+      if (!r) continue;
+      const cur = r.detail?.currentScore;
+      const label = cur != null ? `${r.name} ${cur} → ${cur + points}` : `${r.name} +${points}`;
+      chosenLines.push({ type: 'ABILITY_SCORE_IMPROVEMENT', name: label, tag: 'choice' });
     }
   }
 
@@ -975,6 +1160,21 @@ function StepConfirm({
             {t('camp.lvl.confirm.calling')} <strong style={{ color: 'var(--gold)' }}>{option.className}</strong>{' '}
             {roman(option.currentLevelInClass)} → {roman(option.newLevelInClass)}
           </div>
+          {option.hpGain?.average != null && (
+            <div className="ao-codex" style={{ fontSize: 13, marginBottom: 8, color: 'var(--ember)' }}>
+              {t('camp.lvl.confirm.vitaeGain', { hp: option.hpGain.average })}
+              {option.hpGain.rolledMin != null && option.hpGain.rolledMax != null
+                ? ` · ${t('camp.lvl.vitaeRange', { min: option.hpGain.rolledMin, max: option.hpGain.rolledMax })}`
+                : ''}
+            </div>
+          )}
+          {option.derived?.proficiencyBonusAfter != null
+            && option.derived.proficiencyBonusAfter !== option.derived.proficiencyBonusBefore
+            && option.derived.proficiencyBonusBefore != null && (
+            <div className="ao-codex" style={{ fontSize: 13, marginBottom: 8, color: 'var(--arcane)' }}>
+              {t('camp.lvl.result.profGain', { from: option.derived.proficiencyBonusBefore, to: option.derived.proficiencyBonusAfter })}
+            </div>
+          )}
           <OrdoDivider glyph="diamond" />
           <div className="ao-overline" style={{ marginTop: 10, marginBottom: 8 }}>{t('camp.lvl.confirm.giftsToSeal')}</div>
           {chosenLines.length === 0 ? (
@@ -1071,6 +1271,16 @@ function StepResult({ result, onDone }: { result: LevelUpResultResponse; onDone:
                 tone="ember"
               />
             )}
+            {result.proficiencyBonusAfter != null
+              && result.proficiencyBonusAfter !== result.proficiencyBonusBefore && (
+              <GrantCard
+                glyph="sigil-1"
+                label={t('camp.lvl.prof')}
+                value={`+${result.proficiencyBonusAfter}`}
+                sub={result.proficiencyBonusBefore != null ? t('camp.lvl.profFrom', { from: result.proficiencyBonusBefore }) : undefined}
+                tone="arcane"
+              />
+            )}
           </div>
           <OrdoDivider glyph="diamond-fill">{t('camp.lvl.result.acquiredGifts')}</OrdoDivider>
           {result.rewardsAcquired.length === 0 ? (
@@ -1083,6 +1293,10 @@ function StepResult({ result, onDone }: { result: LevelUpResultResponse; onDone:
                     {REWARD_TYPE_LABELS[r.rewardType] || r.rewardType}
                   </span>
                   <span style={{ color: 'var(--ink-bright)' }}>{r.name}</span>
+                  {r.description && (
+                    <span className="ao-italic" style={{ fontSize: 11, color: 'var(--ink-quiet)', marginTop: 2, lineHeight: 1.4 }}>{r.description}</span>
+                  )}
+                  <DetailBadges detail={r.detail} />
                 </div>
               ))}
             </div>
@@ -1102,6 +1316,14 @@ function StepResult({ result, onDone }: { result: LevelUpResultResponse; onDone:
 
 function toneVar(tone: Tone): string {
   return tone === 'arcane' ? 'var(--arcane)' : tone === 'ember' ? 'var(--ember)' : 'var(--gold)';
+}
+
+function abilityMod(score: number): number {
+  return Math.floor((score - 10) / 2);
+}
+
+function fmtMod(mod: number): string {
+  return mod >= 0 ? `+${mod}` : `${mod}`;
 }
 
 function cycleTone(i: number): Tone {

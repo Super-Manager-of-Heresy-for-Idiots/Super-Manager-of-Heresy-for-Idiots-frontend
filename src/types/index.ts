@@ -229,6 +229,27 @@ export interface AvailableClassOption {
   currentLevelInClass: number;
   newLevelInClass: number;
   rewardGroups: RewardGroup[];
+  // Preview of the HP gained by ascending in THIS class (depends on its hit die).
+  // Optional: when omitted the UI falls back to a generic "+by class" hint.
+  hpGain?: HpGainPreview;
+  // Preview of derived stat changes triggered by this ascent.
+  derived?: AscentDerivedPreview;
+}
+
+export interface HpGainPreview {
+  hitDie?: number;        // e.g. 8 for a d8 class
+  conModifier?: number;   // Constitution modifier added per level (can be negative)
+  average?: number;       // average roll + con, rounded as the system rules dictate
+  rolledMin?: number;     // minimum possible gain (1 + con, floored at 1)
+  rolledMax?: number;     // maximum possible gain (hitDie + con)
+  currentMaxHp?: number;  // current max HP before the ascent (for projected total)
+}
+
+export interface AscentDerivedPreview {
+  proficiencyBonusBefore?: number;
+  proficiencyBonusAfter?: number;
+  spellSlotsGained?: string;  // free text, e.g. "+1 slot (lvl 2)"
+  cantripsGained?: number;
 }
 
 export interface RewardGroup {
@@ -243,6 +264,28 @@ export interface RewardEntry {
   name: string;
   description?: string;
   alreadyAcquired: boolean;
+  // Structured mechanics for richer display. Optional; backend may omit.
+  detail?: RewardDetail;
+}
+
+// Mirrors the structured fields already modelled on SkillResponse / FeatResponse /
+// BuffDebuffResponse so the level-up screen can show concrete effects, not just prose.
+export interface RewardDetail {
+  // Skill / class-feature mechanics
+  skillActivation?: SkillActivation;     // PASSIVE / ACTIVE
+  damageDice?: string;                   // "2d6"
+  damageBonus?: number;
+  damageType?: DamageType;
+  effects?: SkillEffectResponse[];       // buff/debuff chances applied by the skill
+  range?: string;                        // "30 ft"
+  duration?: string;                     // "1 minute"
+  usage?: string;                        // "1/long rest"
+  // Feat
+  prerequisites?: string;
+  // Ability Score Improvement
+  abilityStatName?: string;              // "Strength"
+  currentScore?: number;                 // 15
+  maxScore?: number;                     // 20 cap
 }
 
 export interface LevelUpResultResponse {
@@ -252,11 +295,15 @@ export interface LevelUpResultResponse {
   hpIncrease?: number;
   newMaxHp?: number;
   rewardsAcquired: AcquiredRewardSummary[];
+  proficiencyBonusBefore?: number;
+  proficiencyBonusAfter?: number;
 }
 
 export interface AcquiredRewardSummary {
   rewardType: string;
   name: string;
+  description?: string;
+  detail?: RewardDetail;
 }
 
 export const REWARD_TYPE_LABELS: Record<string, string> = {
