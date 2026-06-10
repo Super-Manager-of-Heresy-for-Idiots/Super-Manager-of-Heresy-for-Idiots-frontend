@@ -68,6 +68,14 @@ import EditDoctrinePage from '@/pages/gm/homebrew/EditDoctrinePage';
 import InstalledDoctrinesPage from '@/pages/gm/homebrew/InstalledDoctrinesPage';
 import HomebrewLibraryPage from '@/pages/gm/homebrew/HomebrewLibraryPage';
 
+// Bestiary (monsters + dictionaries) — wired to the bestiary API contract
+import BestiaryMonstersPage from '@/pages/admin/BestiaryMonstersPage';
+import BestiaryDictionariesPage from '@/pages/admin/BestiaryDictionariesPage';
+import HomebrewBestiaryPage from '@/pages/gm/homebrew/HomebrewBestiaryPage';
+import CampaignBestiaryPage from '@/pages/gm/campaigns/CampaignBestiaryPage';
+import MonsterDetailPage from '@/pages/bestiary/MonsterDetailPage';
+import MonsterFormPage from '@/pages/bestiary/MonsterFormPage';
+
 import AdminDashboardPage from '@/pages/admin/AdminDashboardPage';
 import UsersListPage from '@/pages/admin/UsersListPage';
 import StatTypesPage from '@/pages/admin/StatTypesPage';
@@ -120,6 +128,9 @@ export const router = createBrowserRouter([
           { path: '/marketplace', element: <MarketplacePage /> },
           { path: '/marketplace/:id', element: <MarketplaceDetailPage /> },
           { path: '/combat-preview', element: <CombatPreviewIndexPage /> },
+          // Campaign bestiary — read access for every member; mutations are GM-only (below).
+          { path: '/campaigns/:campaignId/bestiary', element: <CampaignBestiaryPage /> },
+          { path: '/campaigns/:campaignId/bestiary/monsters/:monsterId', element: <MonsterDetailPage source="campaign" /> },
         ],
       },
     ],
@@ -169,6 +180,9 @@ export const router = createBrowserRouter([
           { path: '/campaigns/:campaignId/quests', element: <QuestManagerPage /> },
           { path: '/campaigns/:campaignId/quests/:questId', element: <QuestDetailPage /> },
           { path: '/campaigns/:campaignId/locations', element: <LocationsPage /> },
+          // Campaign bestiary — GM-only create/edit.
+          { path: '/campaigns/:campaignId/bestiary/monsters/new', element: <MonsterFormPage /> },
+          { path: '/campaigns/:campaignId/bestiary/monsters/:monsterId/edit', element: <MonsterFormPage /> },
         ],
       },
     ],
@@ -191,6 +205,11 @@ export const router = createBrowserRouter([
           { path: '/gm/homebrew/:id/edit', element: <EditDoctrinePage /> },
           { path: '/gm/homebrew/installed', element: <InstalledDoctrinesPage /> },
           { path: '/gm/homebrew/library', element: <HomebrewLibraryPage /> },
+          // Homebrew package bestiary (GAME_MASTER, DRAFT package)
+          { path: '/gm/homebrew/:packageId/bestiary', element: <HomebrewBestiaryPage /> },
+          { path: '/gm/homebrew/:packageId/bestiary/monsters/new', element: <MonsterFormPage /> },
+          { path: '/gm/homebrew/:packageId/bestiary/monsters/:monsterId', element: <MonsterDetailPage source="homebrew" /> },
+          { path: '/gm/homebrew/:packageId/bestiary/monsters/:monsterId/edit', element: <MonsterFormPage /> },
         ],
       },
     ],
@@ -217,6 +236,12 @@ export const router = createBrowserRouter([
           { path: '/admin/buffs-debuffs', element: <BuffsDebuffsPage /> },
           { path: '/admin/enchantment-types', element: <EnchantmentTypesPage /> },
           { path: '/admin/homebrew', element: <AdminHomebrewPage /> },
+          // System bestiary (ADMIN)
+          { path: '/admin/bestiary/monsters', element: <BestiaryMonstersPage /> },
+          { path: '/admin/bestiary/monsters/new', element: <MonsterFormPage /> },
+          { path: '/admin/bestiary/monsters/:monsterId', element: <MonsterDetailPage source="admin" /> },
+          { path: '/admin/bestiary/monsters/:monsterId/edit', element: <MonsterFormPage /> },
+          { path: '/admin/bestiary/dictionaries', element: <BestiaryDictionariesPage /> },
         ],
       },
     ],

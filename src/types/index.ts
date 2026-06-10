@@ -1448,3 +1448,304 @@ export interface CharacterRaceBriefResponse {
   name: string;
   description?: string;
 }
+
+// ============================================================
+// Bestiary (monsters + dictionaries) — bestiary-api-contracts
+// Reuses existing CreatureSize / AbilityEnum / DamageType.
+// ============================================================
+
+export type MonsterScope = 'SYSTEM' | 'HOMEBREW' | 'CAMPAIGN';
+
+/** Dictionary kind slugs (§0.6). `bookCode` is only meaningful for `sources`. */
+export type DictionaryKind =
+  | 'creature-types'
+  | 'alignments'
+  | 'languages'
+  | 'sense-types'
+  | 'movement-types'
+  | 'habitats'
+  | 'treasure-tags'
+  | 'conditions'
+  | 'gear-items'
+  | 'sources';
+
+export interface DictionaryEntryRequest {
+  code: string;
+  nameRusloc: string;
+  nameEngloc?: string;
+  /** Only for kind=sources, ≤20. Ignored otherwise. */
+  bookCode?: string;
+  isUnique?: boolean;
+}
+
+export interface DictionaryEntryResponse {
+  id: string;
+  code: string;
+  nameRusloc: string;
+  nameEngloc?: string | null;
+  bookCode?: string | null;
+  homebrewId?: string | null;
+  isUnique: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** Expanded reference inside a MonsterResponse. */
+export interface DictionaryRef {
+  id: string;
+  code: string;
+  nameRusloc: string;
+  nameEngloc?: string | null;
+  homebrewId?: string | null;
+}
+
+export interface MonsterSummaryResponse {
+  id: string;
+  slug: string;
+  nameRusloc: string;
+  nameEngloc?: string | null;
+  size: CreatureSize;
+  crRating: string;
+  crValue: number;
+  scope: MonsterScope;
+  homebrewId: string | null;
+  campaignId: string | null;
+  isVisibleToPlayers: boolean;
+  isActive: boolean;
+  sourceMonsterId?: string | null;
+}
+
+// --- MonsterResponse nested rows (each has its own id) ---
+export interface MonsterSpeedRow {
+  id: string;
+  movementType: DictionaryRef;
+  ft: number;
+  hover: boolean;
+}
+export interface MonsterSenseRow {
+  id: string;
+  senseType: DictionaryRef;
+  ft: number;
+}
+export interface MonsterSaveRow {
+  id: string;
+  ability: AbilityEnum;
+  bonus: number;
+}
+export interface MonsterSkillRow {
+  id: string;
+  proficiencySkillId: string;
+  skillName: string;
+  bonus: number;
+}
+export interface MonsterDamageNoteRow {
+  id: string;
+  damageType: DamageType | null;
+  note: string | null;
+}
+export interface MonsterGearRow {
+  id: string;
+  item: DictionaryRef;
+  qty: number;
+}
+export interface MonsterFeatureDamageRow {
+  id: string;
+  sortOrder: number;
+  average: number | null;
+  dice: string | null;
+  damageType: DamageType | null;
+  note: string | null;
+}
+export interface MonsterFeatureRow {
+  id: string;
+  section: string;
+  sortOrder: number;
+  nameRusloc: string;
+  nameEngloc?: string | null;
+  kind: string;
+  rechargeMin?: number | null;
+  rechargeMax?: number | null;
+  descriptionRusloc: string;
+  descriptionEngloc?: string | null;
+  attackType?: string | null;
+  attackBonus?: number | null;
+  reachFt?: number | null;
+  rangeFt?: number | null;
+  rangeLongFt?: number | null;
+  saveAbility?: AbilityEnum | null;
+  saveDc?: number | null;
+  damages: MonsterFeatureDamageRow[];
+}
+
+export interface MonsterResponse {
+  id: string;
+  slug: string;
+  sourceExternalId?: string | null;
+  scope: MonsterScope;
+  homebrewId: string | null;
+  campaignId: string | null;
+  sourceMonsterId: string | null;
+  nameRusloc: string;
+  nameEngloc?: string | null;
+  alignment: DictionaryRef | null;
+  size: CreatureSize;
+  sizeSecondary: CreatureSize | null;
+  isSwarm: boolean;
+  swarmSize: CreatureSize | null;
+  armorClass: number;
+  armorClassText?: string | null;
+  initiativeBonus?: number | null;
+  initiativeScore?: number | null;
+  hpAverage?: number | null;
+  hpDiceCount?: number | null;
+  hpDiceSides?: number | null;
+  hpDiceModifier?: number | null;
+  hpFormula?: string | null;
+  strScore: number;
+  dexScore: number;
+  conScore: number;
+  intScore: number;
+  wisScore: number;
+  chaScore: number;
+  passivePerception?: number | null;
+  telepathyFt?: number | null;
+  crRating: string;
+  crValue: number;
+  xpBase?: number | null;
+  xpLair?: number | null;
+  proficiencyBonus?: number | null;
+  legendaryUsesBase?: number | null;
+  legendaryUsesLair?: number | null;
+  legendaryText?: string | null;
+  loreText?: string | null;
+  isVisibleToPlayers: boolean;
+  isActive: boolean;
+  creatureTypes: DictionaryRef[];
+  languages: DictionaryRef[];
+  conditionImmunities: DictionaryRef[];
+  habitats: DictionaryRef[];
+  treasureTags: DictionaryRef[];
+  sources: DictionaryRef[];
+  speeds: MonsterSpeedRow[];
+  senses: MonsterSenseRow[];
+  savingThrows: MonsterSaveRow[];
+  skillProficiencies: MonsterSkillRow[];
+  damageResistances: MonsterDamageNoteRow[];
+  damageImmunities: MonsterDamageNoteRow[];
+  damageVulnerabilities: MonsterDamageNoteRow[];
+  gear: MonsterGearRow[];
+  features: MonsterFeatureRow[];
+  createdBy?: string;
+  createdByUsername?: string;
+  updatedBy?: string;
+  updatedByUsername?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// --- MonsterRequest nested entries (rebuild-semantics on PUT) ---
+export interface MonsterSpeedRequest {
+  movementTypeId: string;
+  ft: number;
+  hover?: boolean;
+}
+export interface MonsterSenseRequest {
+  senseTypeId: string;
+  ft: number;
+}
+export interface MonsterSaveRequest {
+  ability: AbilityEnum;
+  bonus: number;
+}
+export interface MonsterSkillRequest {
+  proficiencySkillId: string;
+  bonus: number;
+}
+export interface MonsterDamageNoteRequest {
+  damageType?: DamageType | null;
+  note?: string | null;
+}
+export interface MonsterGearRequest {
+  itemId: string;
+  qty?: number;
+}
+export interface MonsterFeatureDamageRequest {
+  sortOrder: number;
+  average?: number | null;
+  dice?: string | null;
+  damageType?: DamageType | null;
+  note?: string | null;
+}
+export interface MonsterFeatureRequest {
+  section: string;
+  sortOrder: number;
+  nameRusloc?: string;
+  nameEngloc?: string;
+  kind: string;
+  rechargeMin?: number | null;
+  rechargeMax?: number | null;
+  descriptionRusloc: string;
+  descriptionEngloc?: string;
+  attackType?: string | null;
+  attackBonus?: number | null;
+  reachFt?: number | null;
+  rangeFt?: number | null;
+  rangeLongFt?: number | null;
+  saveAbility?: AbilityEnum | null;
+  saveDc?: number | null;
+  damages?: MonsterFeatureDamageRequest[];
+}
+
+export interface MonsterRequest {
+  slug?: string;
+  nameRusloc: string;
+  nameEngloc?: string;
+  alignmentId?: string | null;
+  size: CreatureSize;
+  sizeSecondary?: CreatureSize | null;
+  isSwarm?: boolean;
+  swarmSize?: CreatureSize | null;
+  armorClass: number;
+  armorClassText?: string;
+  initiativeBonus?: number | null;
+  initiativeScore?: number | null;
+  hpAverage?: number | null;
+  hpDiceCount?: number | null;
+  hpDiceSides?: number | null;
+  hpDiceModifier?: number | null;
+  hpFormula?: string;
+  strScore: number;
+  dexScore: number;
+  conScore: number;
+  intScore: number;
+  wisScore: number;
+  chaScore: number;
+  passivePerception?: number | null;
+  telepathyFt?: number | null;
+  crRating: string;
+  crValue: number;
+  xpBase?: number | null;
+  xpLair?: number | null;
+  proficiencyBonus?: number | null;
+  legendaryUsesBase?: number | null;
+  legendaryUsesLair?: number | null;
+  legendaryText?: string;
+  loreText?: string;
+  isVisibleToPlayers?: boolean;
+  isActive?: boolean;
+  creatureTypeIds?: string[];
+  languageIds?: string[];
+  conditionImmunityIds?: string[];
+  habitatIds?: string[];
+  treasureTagIds?: string[];
+  sourceIds?: string[];
+  speeds?: MonsterSpeedRequest[];
+  senses?: MonsterSenseRequest[];
+  savingThrows?: MonsterSaveRequest[];
+  skillProficiencies?: MonsterSkillRequest[];
+  damageResistances?: MonsterDamageNoteRequest[];
+  damageImmunities?: MonsterDamageNoteRequest[];
+  damageVulnerabilities?: MonsterDamageNoteRequest[];
+  gear?: MonsterGearRequest[];
+  features?: MonsterFeatureRequest[];
+}

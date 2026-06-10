@@ -47,6 +47,8 @@ const adminNav: NavEntry[] = [
   { labelKey: 'nav.feats', path: '/admin/feats', glyph: 'flame' },
   { labelKey: 'nav.buffsDebuffs', path: '/admin/buffs-debuffs', glyph: 'hex' },
   { labelKey: 'nav.enchantments', path: '/admin/enchantment-types', glyph: 'eye' },
+  { labelKey: 'nav.bestiary', path: '/admin/bestiary/monsters', glyph: 'sword' },
+  { labelKey: 'nav.bestiaryDicts', path: '/admin/bestiary/dictionaries', glyph: 'book' },
   { labelKey: 'nav.homebrew', path: '/admin/homebrew', glyph: 'scroll' },
 ];
 

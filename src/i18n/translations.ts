@@ -50,6 +50,8 @@ const core: Record<Lang, Dict> = {
     'nav.buffsDebuffs': 'Баффы/Дебаффы',
     'nav.enchantments': 'Зачарования',
     'nav.homebrew': 'Хоумбрю',
+    'nav.bestiary': 'Бестиарий',
+    'nav.bestiaryDicts': 'Справочники бестиария',
 
     /* ── Top bar actions ────────────────────────────── */
     'topbar.logout': 'Покинуть Архив',
@@ -182,6 +184,8 @@ const core: Record<Lang, Dict> = {
     'nav.buffsDebuffs': 'Buffs/Debuffs',
     'nav.enchantments': 'Enchantments',
     'nav.homebrew': 'Homebrew',
+    'nav.bestiary': 'Bestiary',
+    'nav.bestiaryDicts': 'Bestiary dictionaries',
 
     /* ── Top bar actions ────────────────────────────── */
     'topbar.logout': 'Leave the Archive',
