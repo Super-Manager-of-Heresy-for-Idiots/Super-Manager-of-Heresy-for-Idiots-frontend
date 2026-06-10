@@ -41,6 +41,24 @@ import QuestManagerPage from '@/pages/gm/campaigns/QuestManagerPage';
 import QuestDetailPage from '@/pages/gm/campaigns/QuestDetailPage';
 import LocationsPage from '@/pages/gm/campaigns/LocationsPage';
 
+// Combat / Loot prototype preview pages (screens only, no API wiring)
+import CombatPreviewIndexPage from '@/pages/gm/combat/CombatPreviewIndexPage';
+import CombatTrackerGMPage from '@/pages/gm/combat/CombatTrackerGMPage';
+import CombatTrackerPlayerPage from '@/pages/gm/combat/CombatTrackerPlayerPage';
+import EncounterBuilderPage from '@/pages/gm/combat/EncounterBuilderPage';
+import EncounterListPage from '@/pages/gm/combat/EncounterListPage';
+import CombatSummaryPage from '@/pages/gm/combat/CombatSummaryPage';
+import DashboardTilesPage from '@/pages/gm/combat/DashboardTilesPage';
+import LootTableEditorPage from '@/pages/gm/combat/LootTableEditorPage';
+import LootGeneratorPage from '@/pages/gm/combat/LootGeneratorPage';
+import QuestDetailV2Page from '@/pages/gm/combat/QuestDetailV2Page';
+import NPCDetailV2Page from '@/pages/gm/combat/NPCDetailV2Page';
+import QuestListV2Page from '@/pages/gm/combat/QuestListV2Page';
+import NPCListV2Page from '@/pages/gm/combat/NPCListV2Page';
+import SystemPatternsPage from '@/pages/gm/combat/SystemPatternsPage';
+import CombatKitReferencePage from '@/pages/gm/combat/CombatKitReferencePage';
+import MobilePreviewPage from '@/pages/gm/combat/MobilePreviewPage';
+
 // Homebrew pages
 import MarketplacePage from '@/pages/gm/homebrew/MarketplacePage';
 import MarketplaceDetailPage from '@/pages/gm/homebrew/MarketplaceDetailPage';
@@ -101,8 +119,37 @@ export const router = createBrowserRouter([
           { path: '/campaigns/:campaignId/characters/:characterId/rewards', element: <CharacterRewardsPage /> },
           { path: '/marketplace', element: <MarketplacePage /> },
           { path: '/marketplace/:id', element: <MarketplaceDetailPage /> },
+          { path: '/combat-preview', element: <CombatPreviewIndexPage /> },
         ],
       },
+    ],
+  },
+
+  // Combat / Loot prototype previews — full-screen standalone routes
+  // (screens only, no API wiring). Rendered outside AppLayout so the
+  // tracker's queue | actions | log layout owns the whole viewport.
+  {
+    element: <ProtectedRoute allowedRoles={['PLAYER', 'GAME_MASTER', 'ADMIN']} />,
+    children: [
+      { path: '/combat-preview/kit', element: <CombatKitReferencePage /> },
+      { path: '/combat-preview/tracker-gm', element: <CombatTrackerGMPage /> },
+      { path: '/combat-preview/tracker-gm-paused', element: <CombatTrackerGMPage initialPaused /> },
+      { path: '/combat-preview/tracker-player', element: <CombatTrackerPlayerPage myTurn /> },
+      { path: '/combat-preview/tracker-player-wait', element: <CombatTrackerPlayerPage myTurn={false} /> },
+      { path: '/combat-preview/encounter-builder', element: <EncounterBuilderPage /> },
+      { path: '/combat-preview/encounters', element: <EncounterListPage /> },
+      { path: '/combat-preview/summary', element: <CombatSummaryPage /> },
+      { path: '/combat-preview/dashboard', element: <DashboardTilesPage /> },
+      { path: '/combat-preview/loot-table', element: <LootTableEditorPage /> },
+      { path: '/combat-preview/loot-gen', element: <LootGeneratorPage /> },
+      { path: '/combat-preview/loot-gen-empty', element: <LootGeneratorPage empty /> },
+      { path: '/combat-preview/quest', element: <QuestDetailV2Page /> },
+      { path: '/combat-preview/npc', element: <NPCDetailV2Page /> },
+      { path: '/combat-preview/npc-empty', element: <NPCDetailV2Page noStatblock /> },
+      { path: '/combat-preview/quests-list', element: <QuestListV2Page /> },
+      { path: '/combat-preview/npc-list', element: <NPCListV2Page /> },
+      { path: '/combat-preview/patterns', element: <SystemPatternsPage /> },
+      { path: '/combat-preview/mobile', element: <MobilePreviewPage /> },
     ],
   },
 

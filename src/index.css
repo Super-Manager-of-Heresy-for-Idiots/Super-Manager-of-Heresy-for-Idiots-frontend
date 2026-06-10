@@ -1104,3 +1104,86 @@
   .wiz-nav { flex-direction: column; align-items: stretch; gap: 10px; }
   .wiz-nav-mid { order: -1; }
 }
+
+/* ════════════════════════════════════════════════════════════
+   COMBAT & LOOT — interactive prototype helpers (.cb-*)
+   ════════════════════════════════════════════════════════════ */
+
+/* Quick actions — revealed on parent hover */
+.cb-quick { opacity: 0; pointer-events: none; transition: opacity 160ms ease; }
+.cb-card:hover .cb-quick,
+.cb-note-row:hover .cb-quick,
+div:hover > .cb-quick { opacity: 1; pointer-events: auto; }
+.cb-card { transition: border-color 160ms, box-shadow 160ms; }
+.cb-card:hover { border-color: var(--brass); }
+
+/* Pulse for the active encounter / "your turn" */
+@keyframes cb-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(179, 70, 26, 0); }
+  50%      { box-shadow: 0 0 14px 1px rgba(179, 70, 26, 0.35); }
+}
+.cb-pulse { animation: cb-pulse 2.2s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .cb-pulse, .cb-sk { animation: none; } }
+
+/* Skeleton shimmer */
+@keyframes cb-sk { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+.cb-sk {
+  background: linear-gradient(90deg, var(--panel) 25%, var(--panel-raised) 50%, var(--panel) 75%);
+  background-size: 200% 100%;
+  animation: cb-sk 1.5s ease-in-out infinite;
+  border: 1px solid var(--hairline);
+  display: block;
+}
+
+/* Instant feedback — golden flash */
+@keyframes cb-flash { 0% { color: var(--gold-pale); text-shadow: 0 0 12px rgba(176,141,78,0.55); } 100% { text-shadow: none; } }
+.cb-flash { display: inline-block; animation: cb-flash 480ms ease-out; }
+
+/* Tooltip-reason on disabled controls */
+.cb-tip { opacity: 0; visibility: hidden; transition: opacity 160ms; }
+.cb-tipwrap:hover .cb-tip { opacity: 1; visibility: visible; }
+
+/* Small link button inside the log */
+.cb-linkbtn {
+  background: none; border: none; cursor: pointer; padding: 2px 0 0;
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.06em;
+  color: var(--ink-faint); text-transform: uppercase;
+}
+.cb-linkbtn:hover { color: var(--gold-pale); }
+.cb-log-row:hover { background: rgba(176, 141, 78, 0.03); }
+
+/* Die — slight tilt on hover */
+.cb-die { transition: transform 200ms, color 160ms; }
+.cb-die:hover { transform: rotate(18deg); color: var(--gold); }
+
+/* Hover on tile cards */
+.cb-hoverable { transition: border-color 160ms, box-shadow 160ms; }
+.cb-hoverable:hover { border-color: var(--brass); box-shadow: var(--shadow-mid), 0 0 16px rgba(176,141,78,0.1); }
+
+/* "⋯" menu item */
+.cb-menu-item:hover { background: rgba(176, 141, 78, 0.07); }
+
+/* Inline editing — hover highlight */
+.cb-inline { border-bottom: 1px dashed transparent; transition: all 150ms; }
+.cb-inline:hover { border-bottom-color: var(--bronze); background: rgba(176, 141, 78, 0.04); }
+
+/* Linked-entity chip */
+.cb-linkchip:hover { border-color: var(--brass); color: var(--ink-bright); }
+
+/* Loot table row */
+.cb-loot-row:hover td { background: rgba(176, 141, 78, 0.035); }
+
+/* Range slider */
+.cb-range { -webkit-appearance: none; appearance: none; height: 4px; background: var(--abyss); border: 1px solid var(--rule); outline: none; }
+.cb-range::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none; width: 18px; height: 18px;
+  background: linear-gradient(180deg, var(--gold-pale), var(--gold-deep));
+  border: 1px solid var(--brass); cursor: pointer; transform: rotate(45deg);
+}
+.cb-range::-moz-range-thumb { width: 16px; height: 16px; background: var(--gold); border: 1px solid var(--brass); border-radius: 0; cursor: pointer; }
+
+select.ao-input option { background: var(--abyss); color: var(--ink-bright); }
+input[type="number"].ao-input::-webkit-inner-spin-button { opacity: 0.3; }
+
+/* Full-screen combat shells own the whole viewport (standalone routes). */
+.cb-screen { display: flex; flex-direction: column; height: 100%; }
