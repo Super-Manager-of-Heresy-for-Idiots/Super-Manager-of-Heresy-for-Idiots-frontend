@@ -9,6 +9,7 @@ import {
 } from '@/api/bestiary.api';
 import { referenceApi } from '@/api/reference.api';
 import { DICTIONARY_KINDS } from '@/components/bestiary/constants';
+import { useT } from '@/i18n/I18nContext';
 import type {
   ApiError,
   DictionaryEntryRequest,
@@ -83,49 +84,53 @@ export function useAdminMonster(id?: string) {
 
 export function useCreateAdminMonster() {
   const qc = useQueryClient();
+  const t = useT();
   return useMutation({
     mutationFn: (data: MonsterRequest) => adminBestiaryApi.createMonster(data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['bestiary', 'admin', 'monsters'] });
-      toast.success('Монстр создан');
+      toast.success(t('best.toast.monsterCreated'));
     },
-    onError: (e) => toast.error(errMsg(e, 'Не удалось создать монстра')),
+    onError: (e) => toast.error(errMsg(e, t('best.toast.createFailed'))),
   });
 }
 
 export function useUpdateAdminMonster() {
   const qc = useQueryClient();
+  const t = useT();
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: MonsterRequest }) => adminBestiaryApi.updateMonster(id, data),
     onSuccess: (_res, { id }) => {
       qc.invalidateQueries({ queryKey: ['bestiary', 'admin', 'monsters'] });
       qc.invalidateQueries({ queryKey: ['bestiary', 'admin', 'monster', id] });
-      toast.success('Монстр сохранён');
+      toast.success(t('best.toast.monsterSaved'));
     },
-    onError: (e) => toast.error(errMsg(e, 'Не удалось сохранить монстра')),
+    onError: (e) => toast.error(errMsg(e, t('best.toast.saveFailed'))),
   });
 }
 
 export function useSetAdminMonsterActive() {
   const qc = useQueryClient();
+  const t = useT();
   return useMutation({
     mutationFn: ({ id, active }: { id: string; active: boolean }) => adminBestiaryApi.setMonsterActive(id, active),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['bestiary', 'admin', 'monsters'] });
     },
-    onError: (e) => toast.error(errMsg(e, 'Не удалось изменить публикацию')),
+    onError: (e) => toast.error(errMsg(e, t('best.toast.activeFailed'))),
   });
 }
 
 export function useDeleteAdminMonster() {
   const qc = useQueryClient();
+  const t = useT();
   return useMutation({
     mutationFn: (id: string) => adminBestiaryApi.deleteMonster(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['bestiary', 'admin', 'monsters'] });
-      toast.success('Монстр удалён');
+      toast.success(t('best.toast.monsterDeleted'));
     },
-    onError: (e) => toast.error(errMsg(e, 'Не удалось удалить монстра')),
+    onError: (e) => toast.error(errMsg(e, t('best.toast.deleteFailed'))),
   });
 }
 
@@ -138,43 +143,46 @@ export function useAdminDictionary(kind: DictionaryKind) {
 
 export function useCreateAdminDictionaryEntry() {
   const qc = useQueryClient();
+  const t = useT();
   return useMutation({
     mutationFn: ({ kind, data }: { kind: DictionaryKind; data: DictionaryEntryRequest }) =>
       adminBestiaryApi.createDictionaryEntry(kind, data),
     onSuccess: (_r, { kind }) => {
       qc.invalidateQueries({ queryKey: ['bestiary', 'admin', 'dict', kind] });
       qc.invalidateQueries({ queryKey: DICTS_KEY });
-      toast.success('Запись добавлена');
+      toast.success(t('best.toast.entryAdded'));
     },
-    onError: (e) => toast.error(errMsg(e, 'Не удалось сохранить запись')),
+    onError: (e) => toast.error(errMsg(e, t('best.toast.entrySaveFailed'))),
   });
 }
 
 export function useUpdateAdminDictionaryEntry() {
   const qc = useQueryClient();
+  const t = useT();
   return useMutation({
     mutationFn: ({ kind, id, data }: { kind: DictionaryKind; id: string; data: DictionaryEntryRequest }) =>
       adminBestiaryApi.updateDictionaryEntry(kind, id, data),
     onSuccess: (_r, { kind }) => {
       qc.invalidateQueries({ queryKey: ['bestiary', 'admin', 'dict', kind] });
       qc.invalidateQueries({ queryKey: DICTS_KEY });
-      toast.success('Запись обновлена');
+      toast.success(t('best.toast.entryUpdated'));
     },
-    onError: (e) => toast.error(errMsg(e, 'Не удалось сохранить запись')),
+    onError: (e) => toast.error(errMsg(e, t('best.toast.entrySaveFailed'))),
   });
 }
 
 export function useDeleteAdminDictionaryEntry() {
   const qc = useQueryClient();
+  const t = useT();
   return useMutation({
     mutationFn: ({ kind, id }: { kind: DictionaryKind; id: string }) =>
       adminBestiaryApi.deleteDictionaryEntry(kind, id),
     onSuccess: (_r, { kind }) => {
       qc.invalidateQueries({ queryKey: ['bestiary', 'admin', 'dict', kind] });
       qc.invalidateQueries({ queryKey: DICTS_KEY });
-      toast.success('Запись удалена');
+      toast.success(t('best.toast.entryDeleted'));
     },
-    onError: (e) => toast.error(errMsg(e, 'Не удалось удалить запись')),
+    onError: (e) => toast.error(errMsg(e, t('best.toast.entryDeleteFailed'))),
   });
 }
 
@@ -222,50 +230,54 @@ export function useHomebrewMonster(packageId?: string, id?: string) {
 
 export function useCreateHomebrewMonster(packageId: string) {
   const qc = useQueryClient();
+  const t = useT();
   return useMutation({
     mutationFn: (data: MonsterRequest) => homebrewBestiaryApi.createMonster(packageId, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['bestiary', 'homebrew', packageId, 'monsters'] });
-      toast.success('Монстр создан');
+      toast.success(t('best.toast.monsterCreated'));
     },
-    onError: (e) => toast.error(errMsg(e, 'Не удалось создать монстра')),
+    onError: (e) => toast.error(errMsg(e, t('best.toast.createFailed'))),
   });
 }
 
 export function useDuplicateHomebrewMonster(packageId: string) {
   const qc = useQueryClient();
+  const t = useT();
   return useMutation({
     mutationFn: (sourceId: string) => homebrewBestiaryApi.duplicateMonster(packageId, sourceId),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['bestiary', 'homebrew', packageId, 'monsters'] });
-      toast.success('Монстр продублирован в пакет');
+      toast.success(t('best.toast.monsterDuplicated'));
     },
-    onError: (e) => toast.error(errMsg(e, 'Не удалось продублировать монстра')),
+    onError: (e) => toast.error(errMsg(e, t('best.toast.duplicateFailed'))),
   });
 }
 
 export function useUpdateHomebrewMonster(packageId: string) {
   const qc = useQueryClient();
+  const t = useT();
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: MonsterRequest }) => homebrewBestiaryApi.updateMonster(packageId, id, data),
     onSuccess: (_r, { id }) => {
       qc.invalidateQueries({ queryKey: ['bestiary', 'homebrew', packageId, 'monsters'] });
       qc.invalidateQueries({ queryKey: ['bestiary', 'homebrew', packageId, 'monster', id] });
-      toast.success('Монстр сохранён');
+      toast.success(t('best.toast.monsterSaved'));
     },
-    onError: (e) => toast.error(errMsg(e, 'Не удалось сохранить монстра')),
+    onError: (e) => toast.error(errMsg(e, t('best.toast.saveFailed'))),
   });
 }
 
 export function useDeleteHomebrewMonster(packageId: string) {
   const qc = useQueryClient();
+  const t = useT();
   return useMutation({
     mutationFn: (id: string) => homebrewBestiaryApi.deleteMonster(packageId, id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['bestiary', 'homebrew', packageId, 'monsters'] });
-      toast.success('Монстр удалён');
+      toast.success(t('best.toast.monsterDeleted'));
     },
-    onError: (e) => toast.error(errMsg(e, 'Не удалось удалить монстра')),
+    onError: (e) => toast.error(errMsg(e, t('best.toast.deleteFailed'))),
   });
 }
 
@@ -279,43 +291,46 @@ export function useHomebrewDictionary(packageId: string | undefined, kind: Dicti
 
 export function useCreateHomebrewDictionaryEntry(packageId: string) {
   const qc = useQueryClient();
+  const t = useT();
   return useMutation({
     mutationFn: ({ kind, data }: { kind: DictionaryKind; data: DictionaryEntryRequest }) =>
       homebrewBestiaryApi.createDictionaryEntry(packageId, kind, data),
     onSuccess: (_r, { kind }) => {
       qc.invalidateQueries({ queryKey: ['bestiary', 'homebrew', packageId, 'dict', kind] });
       qc.invalidateQueries({ queryKey: DICTS_KEY });
-      toast.success('Запись добавлена');
+      toast.success(t('best.toast.entryAdded'));
     },
-    onError: (e) => toast.error(errMsg(e, 'Не удалось сохранить запись')),
+    onError: (e) => toast.error(errMsg(e, t('best.toast.entrySaveFailed'))),
   });
 }
 
 export function useUpdateHomebrewDictionaryEntry(packageId: string) {
   const qc = useQueryClient();
+  const t = useT();
   return useMutation({
     mutationFn: ({ kind, id, data }: { kind: DictionaryKind; id: string; data: DictionaryEntryRequest }) =>
       homebrewBestiaryApi.updateDictionaryEntry(packageId, kind, id, data),
     onSuccess: (_r, { kind }) => {
       qc.invalidateQueries({ queryKey: ['bestiary', 'homebrew', packageId, 'dict', kind] });
       qc.invalidateQueries({ queryKey: DICTS_KEY });
-      toast.success('Запись обновлена');
+      toast.success(t('best.toast.entryUpdated'));
     },
-    onError: (e) => toast.error(errMsg(e, 'Не удалось сохранить запись')),
+    onError: (e) => toast.error(errMsg(e, t('best.toast.entrySaveFailed'))),
   });
 }
 
 export function useDeleteHomebrewDictionaryEntry(packageId: string) {
   const qc = useQueryClient();
+  const t = useT();
   return useMutation({
     mutationFn: ({ kind, id }: { kind: DictionaryKind; id: string }) =>
       homebrewBestiaryApi.deleteDictionaryEntry(packageId, kind, id),
     onSuccess: (_r, { kind }) => {
       qc.invalidateQueries({ queryKey: ['bestiary', 'homebrew', packageId, 'dict', kind] });
       qc.invalidateQueries({ queryKey: DICTS_KEY });
-      toast.success('Запись удалена');
+      toast.success(t('best.toast.entryDeleted'));
     },
-    onError: (e) => toast.error(errMsg(e, 'Не удалось удалить запись')),
+    onError: (e) => toast.error(errMsg(e, t('best.toast.entryDeleteFailed'))),
   });
 }
 
@@ -342,60 +357,65 @@ export function useCampaignMonster(campaignId?: string, id?: string) {
 
 export function useCreateCampaignMonster(campaignId: string) {
   const qc = useQueryClient();
+  const t = useT();
   return useMutation({
     mutationFn: (data: MonsterRequest) => campaignMonsterApi.createMonster(campaignId, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['bestiary', 'campaign', campaignId, 'monsters'] });
-      toast.success('Монстр создан');
+      toast.success(t('best.toast.monsterCreated'));
     },
-    onError: (e) => toast.error(errMsg(e, 'Не удалось создать монстра')),
+    onError: (e) => toast.error(errMsg(e, t('best.toast.createFailed'))),
   });
 }
 
 export function useCloneCampaignMonster(campaignId: string) {
   const qc = useQueryClient();
+  const t = useT();
   return useMutation({
     mutationFn: (sourceId: string) => campaignMonsterApi.cloneMonster(campaignId, sourceId),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['bestiary', 'campaign', campaignId, 'monsters'] });
-      toast.success('Монстр клонирован (скрыт от игроков)');
+      toast.success(t('best.toast.monsterCloned'));
     },
-    onError: (e) => toast.error(errMsg(e, 'Не удалось клонировать монстра')),
+    onError: (e) => toast.error(errMsg(e, t('best.toast.cloneFailed'))),
   });
 }
 
 export function useUpdateCampaignMonster(campaignId: string) {
   const qc = useQueryClient();
+  const t = useT();
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: MonsterRequest }) => campaignMonsterApi.updateMonster(campaignId, id, data),
     onSuccess: (_r, { id }) => {
       qc.invalidateQueries({ queryKey: ['bestiary', 'campaign', campaignId, 'monsters'] });
       qc.invalidateQueries({ queryKey: ['bestiary', 'campaign', campaignId, 'monster', id] });
-      toast.success('Монстр сохранён');
+      toast.success(t('best.toast.monsterSaved'));
     },
-    onError: (e) => toast.error(errMsg(e, 'Не удалось сохранить монстра')),
+    onError: (e) => toast.error(errMsg(e, t('best.toast.saveFailed'))),
   });
 }
 
 export function useToggleCampaignMonsterVisibility(campaignId: string) {
   const qc = useQueryClient();
+  const t = useT();
   return useMutation({
     mutationFn: (id: string) => campaignMonsterApi.toggleVisibility(campaignId, id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['bestiary', 'campaign', campaignId, 'monsters'] });
     },
-    onError: (e) => toast.error(errMsg(e, 'Не удалось изменить видимость')),
+    onError: (e) => toast.error(errMsg(e, t('best.toast.visibilityFailed'))),
   });
 }
 
 export function useDeleteCampaignMonster(campaignId: string) {
   const qc = useQueryClient();
+  const t = useT();
   return useMutation({
     mutationFn: (id: string) => campaignMonsterApi.deleteMonster(campaignId, id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['bestiary', 'campaign', campaignId, 'monsters'] });
-      toast.success('Монстр удалён');
+      toast.success(t('best.toast.monsterDeleted'));
     },
-    onError: (e) => toast.error(errMsg(e, 'Не удалось удалить монстра')),
+    onError: (e) => toast.error(errMsg(e, t('best.toast.deleteFailed'))),
   });
 }

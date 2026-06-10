@@ -1,7 +1,8 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import MonsterFormBody from '@/components/bestiary/MonsterFormBody';
 import { emptyMonsterForm, monsterToForm } from '@/components/bestiary/serialize';
-import { SCOPE_RU } from '@/components/bestiary/constants';
+import { scopeKey } from '@/components/bestiary/constants';
+import { useT } from '@/i18n/I18nContext';
 import {
   useAdminMonster,
   useBestiaryDictionaries,
@@ -23,6 +24,7 @@ const Loader = ({ label }: { label: string }) => (
 
 export default function MonsterFormPage() {
   const navigate = useNavigate();
+  const t = useT();
   const { monsterId, packageId, campaignId } = useParams();
   const scope: MonsterScope = campaignId ? 'CAMPAIGN' : packageId ? 'HOMEBREW' : 'SYSTEM';
   const isEdit = !!monsterId;
@@ -64,10 +66,10 @@ export default function MonsterFormPage() {
   };
 
   if (dictsQ.isLoading || skillsQ.isLoading || (isEdit && existing.isLoading)) {
-    return <Loader label="Загрузка редактора…" />;
+    return <Loader label={t('best.detail.loading')} />;
   }
   if (isEdit && existing.isError) {
-    return <Loader label="Монстр не найден." />;
+    return <Loader label={t('best.detail.notFound')} />;
   }
 
   const initial = isEdit && existing.data ? monsterToForm(existing.data) : emptyMonsterForm();
@@ -78,7 +80,7 @@ export default function MonsterFormPage() {
       dictionaries={dictsQ.data!}
       skills={skillsQ.data ?? []}
       scope={scope}
-      contextLabel={`MonsterRequest · ${SCOPE_RU[scope]}`}
+      contextLabel={t('best.form.context', { scope: t(scopeKey(scope)) })}
       submitting={submitting}
       onSubmit={handleSubmit}
       onCancel={() => navigate(listPath)}

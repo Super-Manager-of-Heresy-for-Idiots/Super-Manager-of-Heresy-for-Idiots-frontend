@@ -11,6 +11,7 @@ import { wizard } from './wizard';
 import { hooks } from './hooks';
 import { wallet } from './wallet';
 import { combat } from './combat';
+import { bestiary } from './bestiary';
 
 /** Every feature dictionary module, merged into the final translations. */
 export const modules: DictModule[] = [
@@ -26,4 +27,5 @@ export const modules: DictModule[] = [
   hooks,
   wallet,
   combat,
+  bestiary,
 ];

@@ -1,13 +1,17 @@
 import React, { useState } from 'react';
 import { Plus, X, ChevronDown, Save, Ban, GripVertical } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useT } from '@/i18n/I18nContext';
 import type { DictionaryEntryResponse, DictionaryKind, MonsterRequest, MonsterScope } from '@/types';
 import {
-  ABILITY_OPTIONS,
-  DAMAGE_TYPE_OPTIONS,
+  ABILITY_SCORE_FIELDS,
   SECTION_PRESETS,
-  SECTION_RU,
-  SIZE_OPTIONS,
+  abilityOptions,
+  abilityShortKey,
+  damageTypeOptions,
+  sectionKey,
+  sizeOptions,
+  type TFunc,
 } from './constants';
 import {
   buildMonsterRequest,
@@ -63,9 +67,9 @@ function Check({ on, onChange, label }: { on: boolean; onChange: () => void; lab
     </button>
   );
 }
-function ChipMulti({ ids, onChange, options }: { ids: string[]; onChange: (v: string[]) => void; options: { id: string; nameRusloc: string }[] }) {
+function ChipMulti({ ids, onChange, options, emptyLabel }: { ids: string[]; onChange: (v: string[]) => void; options: { id: string; nameRusloc: string }[]; emptyLabel: string }) {
   const toggle = (id: string) => onChange(ids.includes(id) ? ids.filter((x) => x !== id) : [...ids, id]);
-  if (options.length === 0) return <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--ink-faint)' }}>Нет записей в справочнике.</div>;
+  if (options.length === 0) return <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--ink-faint)' }}>{emptyLabel}</div>;
   return (
     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7 }}>
       {options.map((o) => {
@@ -82,12 +86,12 @@ function ChipMulti({ ids, onChange, options }: { ids: string[]; onChange: (v: st
 function AddBtn({ onClick, children }: { onClick: () => void; children: React.ReactNode }) {
   return <button type="button" onClick={onClick} className="ao-btn ao-btn--ghost ao-btn--sm" style={{ marginTop: 10 }}><Plus size={11} /> {children}</button>;
 }
-function RowShell({ onRemove, children }: { onRemove: () => void; children: React.ReactNode }) {
+function RowShell({ onRemove, removeTitle, children }: { onRemove: () => void; removeTitle: string; children: React.ReactNode }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
       <GripVertical size={14} style={{ color: 'var(--ink-ghost)', flexShrink: 0 }} />
       <div style={{ display: 'flex', gap: 8, flex: 1, flexWrap: 'wrap', alignItems: 'center' }}>{children}</div>
-      <button type="button" className="ao-iconbtn" title="Удалить строку" onClick={onRemove} style={{ borderColor: 'rgba(179,70,26,0.4)', color: '#d8896a', flexShrink: 0 }}><X size={13} /></button>
+      <button type="button" className="ao-iconbtn" title={removeTitle} onClick={onRemove} style={{ borderColor: 'rgba(179,70,26,0.4)', color: '#d8896a', flexShrink: 0 }}><X size={13} /></button>
     </div>
   );
 }
@@ -126,6 +130,7 @@ function SubHead({ children }: { children: React.ReactNode }) {
 const dictOpts = (list: DictionaryEntryResponse[]) => list.map((x) => ({ v: x.id, label: x.nameRusloc }));
 
 export default function MonsterFormBody({ initial, dictionaries, skills, scope, contextLabel, submitting, onSubmit, onCancel }: Props) {
+  const t = useT() as TFunc;
   const [m, setM] = useState<MonsterFormState>(initial);
   const [open, setOpen] = useState<Record<string, boolean>>({ basic: true, defense: false, abilities: false, refs: false, lists: false, features: false, lore: false });
   const set = <K extends keyof MonsterFormState>(k: K, v: MonsterFormState[K]) => setM((p) => ({ ...p, [k]: v }));
@@ -135,18 +140,17 @@ export default function MonsterFormBody({ initial, dictionaries, skills, scope, 
   const rmRow = <K extends keyof MonsterFormState>(key: K, id: number) => set(key, (m[key] as { _id: number }[]).filter((r) => r._id !== id) as MonsterFormState[K]);
   const setRow = <K extends keyof MonsterFormState>(key: K, id: number, patch: object) => set(key, (m[key] as { _id: number }[]).map((r) => (r._id === id ? { ...r, ...patch } : r)) as MonsterFormState[K]);
 
-  const ABIL_FIELDS = [
-    { k: 'strScore', l: 'СИЛ' }, { k: 'dexScore', l: 'ЛВК' }, { k: 'conScore', l: 'ТЕЛ' },
-    { k: 'intScore', l: 'ИНТ' }, { k: 'wisScore', l: 'МДР' }, { k: 'chaScore', l: 'ХАР' },
-  ] as const;
-
-  const skillOpts = skills.map((s) => ({ v: s.id, label: s.name }));
+  const sizeOpts = sizeOptions(t);
+  const abilityOpts = abilityOptions(t);
+  const damageOpts = damageTypeOptions(t);
+  const skillOpts = skills.map((sk) => ({ v: sk.id, label: sk.name }));
+  const sectionOpts = SECTION_PRESETS.map((sct) => ({ v: sct, label: t(sectionKey(sct)) }));
 
   const submit = () => {
-    if (!m.nameRusloc.trim()) { toast.error('Укажите имя (рус)'); setOpen((p) => ({ ...p, basic: true })); return; }
-    if (!m.size) { toast.error('Выберите размер'); setOpen((p) => ({ ...p, basic: true })); return; }
-    if (!m.crRating.trim() || m.crValue.trim() === '') { toast.error('Заполните ПО (текст и число)'); setOpen((p) => ({ ...p, basic: true })); return; }
-    if (m.armorClass.trim() === '') { toast.error('Укажите класс доспеха'); setOpen((p) => ({ ...p, defense: true })); return; }
+    if (!m.nameRusloc.trim()) { toast.error(t('best.form.errName')); setOpen((p) => ({ ...p, basic: true })); return; }
+    if (!m.size) { toast.error(t('best.form.errSize')); setOpen((p) => ({ ...p, basic: true })); return; }
+    if (!m.crRating.trim() || m.crValue.trim() === '') { toast.error(t('best.form.errCr')); setOpen((p) => ({ ...p, basic: true })); return; }
+    if (m.armorClass.trim() === '') { toast.error(t('best.form.errAc')); setOpen((p) => ({ ...p, defense: true })); return; }
     onSubmit(buildMonsterRequest(m));
   };
 
@@ -156,224 +160,224 @@ export default function MonsterFormBody({ initial, dictionaries, skills, scope, 
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: '1 1 auto' }}>
           <Diamond size={9} />
           <div>
-            <div style={{ fontFamily: 'var(--font-display)', fontSize: 15, letterSpacing: 'var(--track-eng)', textTransform: 'uppercase', color: 'var(--ink-bright)' }}>Редактор монстра</div>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--ink-faint)' }}>{m.nameRusloc || 'Новый монстр'} · {contextLabel}</div>
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: 15, letterSpacing: 'var(--track-eng)', textTransform: 'uppercase', color: 'var(--ink-bright)' }}>{t('best.form.title')}</div>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--ink-faint)' }}>{m.nameRusloc || t('best.form.newMonster')} · {contextLabel}</div>
           </div>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
-          <button type="button" className="ao-btn ao-btn--ghost" onClick={onCancel}><Ban size={13} /> Отмена</button>
-          <button type="button" className="ao-btn ao-btn--primary" onClick={submit} disabled={submitting}><Save size={13} /> {submitting ? 'Сохранение…' : 'Сохранить'}</button>
+          <button type="button" className="ao-btn ao-btn--ghost" onClick={onCancel}><Ban size={13} /> {t('best.com.cancel')}</button>
+          <button type="button" className="ao-btn ao-btn--primary" onClick={submit} disabled={submitting}><Save size={13} /> {submitting ? t('best.com.saving') : t('best.com.save')}</button>
         </div>
       </header>
 
       <div style={{ maxWidth: 880, margin: '0 auto', padding: 'clamp(16px, 3vw, 28px)' }}>
-        {/* 01 ОСНОВНОЕ */}
-        <Section index="01" title="Основное" sub="Имя, размер, опасность, публикация" open={open.basic} onToggle={() => toggleSec('basic')}>
+        {/* 01 */}
+        <Section index="01" title={t('best.form.s01')} sub={t('best.form.s01sub')} open={open.basic} onToggle={() => toggleSec('basic')}>
           <Grid>
-            <FieldBlock label="Имя (рус)" required><Text value={m.nameRusloc} onChange={(v) => set('nameRusloc', v)} placeholder="Гоблин" /></FieldBlock>
-            <FieldBlock label="Имя (англ)"><Text value={m.nameEngloc} onChange={(v) => set('nameEngloc', v)} placeholder="Goblin" /></FieldBlock>
-            <FieldBlock label="Slug" hint="Можно не указывать — сгенерируется из имени"><Text value={m.slug} onChange={(v) => set('slug', v)} placeholder="goblin" mono /></FieldBlock>
-            <FieldBlock label="Мировоззрение"><Sel value={m.alignmentId} onChange={(v) => set('alignmentId', v)} options={dictOpts(dictionaries.alignments)} placeholder="— не выбрано —" /></FieldBlock>
-            <FieldBlock label="Размер" required><Sel value={m.size} onChange={(v) => set('size', v as MonsterFormState['size'])} options={SIZE_OPTIONS} placeholder="— размер —" /></FieldBlock>
-            <FieldBlock label="Вторичный размер"><Sel value={m.sizeSecondary} onChange={(v) => set('sizeSecondary', v)} options={SIZE_OPTIONS} placeholder="— нет —" /></FieldBlock>
+            <FieldBlock label={t('best.form.nameRu')} required><Text value={m.nameRusloc} onChange={(v) => set('nameRusloc', v)} placeholder={t('best.form.namePh')} /></FieldBlock>
+            <FieldBlock label={t('best.form.nameEn')}><Text value={m.nameEngloc} onChange={(v) => set('nameEngloc', v)} placeholder="Goblin" /></FieldBlock>
+            <FieldBlock label={t('best.form.slug')} hint={t('best.form.slugHint')}><Text value={m.slug} onChange={(v) => set('slug', v)} placeholder="goblin" mono /></FieldBlock>
+            <FieldBlock label={t('best.form.alignment')}><Sel value={m.alignmentId} onChange={(v) => set('alignmentId', v)} options={dictOpts(dictionaries.alignments)} placeholder={t('best.form.noneSelected')} /></FieldBlock>
+            <FieldBlock label={t('best.form.size')} required><Sel value={m.size} onChange={(v) => set('size', v as MonsterFormState['size'])} options={sizeOpts} placeholder={t('best.form.pickSize')} /></FieldBlock>
+            <FieldBlock label={t('best.form.sizeSecondary')}><Sel value={m.sizeSecondary} onChange={(v) => set('sizeSecondary', v)} options={sizeOpts} placeholder={t('best.form.none')} /></FieldBlock>
           </Grid>
           <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-end', gap: 18, marginTop: 14 }}>
-            <Check on={m.isSwarm} onChange={() => set('isSwarm', !m.isSwarm)} label="Это рой" />
-            {m.isSwarm && <div style={{ width: 200 }}><Label>Размер роя</Label><Sel value={m.swarmSize} onChange={(v) => set('swarmSize', v)} options={SIZE_OPTIONS} placeholder="— размер —" /></div>}
+            <Check on={m.isSwarm} onChange={() => set('isSwarm', !m.isSwarm)} label={t('best.form.isSwarm')} />
+            {m.isSwarm && <div style={{ width: 200 }}><Label>{t('best.form.swarmSize')}</Label><Sel value={m.swarmSize} onChange={(v) => set('swarmSize', v)} options={sizeOpts} placeholder={t('best.form.pickSize')} /></div>}
           </div>
           <Grid min={150}>
-            <FieldBlock label="ПО (текст)" required><Text value={m.crRating} onChange={(v) => set('crRating', v)} placeholder="1/4" mono /></FieldBlock>
-            <FieldBlock label="ПО (число)" required><Num value={m.crValue} onChange={(v) => set('crValue', v)} /></FieldBlock>
-            <FieldBlock label="Опыт (база)"><Num value={m.xpBase} onChange={(v) => set('xpBase', v)} /></FieldBlock>
-            <FieldBlock label="Опыт (логово)"><Num value={m.xpLair} onChange={(v) => set('xpLair', v)} /></FieldBlock>
-            <FieldBlock label="Бонус мастерства"><Num value={m.proficiencyBonus} onChange={(v) => set('proficiencyBonus', v)} /></FieldBlock>
+            <FieldBlock label={t('best.form.crRating')} required><Text value={m.crRating} onChange={(v) => set('crRating', v)} placeholder="1/4" mono /></FieldBlock>
+            <FieldBlock label={t('best.form.crValue')} required><Num value={m.crValue} onChange={(v) => set('crValue', v)} /></FieldBlock>
+            <FieldBlock label={t('best.form.xpBase')}><Num value={m.xpBase} onChange={(v) => set('xpBase', v)} /></FieldBlock>
+            <FieldBlock label={t('best.form.xpLair')}><Num value={m.xpLair} onChange={(v) => set('xpLair', v)} /></FieldBlock>
+            <FieldBlock label={t('best.form.profBonus')}><Num value={m.proficiencyBonus} onChange={(v) => set('proficiencyBonus', v)} /></FieldBlock>
           </Grid>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 24, marginTop: 18 }}>
-            {scope === 'SYSTEM' && <Check on={m.isActive} onChange={() => set('isActive', !m.isActive)} label="Активен (публикация)" />}
-            {scope === 'CAMPAIGN' && <Check on={m.isVisibleToPlayers} onChange={() => set('isVisibleToPlayers', !m.isVisibleToPlayers)} label="Виден игрокам" />}
+            {scope === 'SYSTEM' && <Check on={m.isActive} onChange={() => set('isActive', !m.isActive)} label={t('best.form.isActive')} />}
+            {scope === 'CAMPAIGN' && <Check on={m.isVisibleToPlayers} onChange={() => set('isVisibleToPlayers', !m.isVisibleToPlayers)} label={t('best.form.isVisible')} />}
           </div>
         </Section>
 
-        {/* 02 ЗАЩИТА */}
-        <Section index="02" title="Защита и здоровье" sub="КД, инициатива, хиты" open={open.defense} onToggle={() => toggleSec('defense')}>
+        {/* 02 */}
+        <Section index="02" title={t('best.form.s02')} sub={t('best.form.s02sub')} open={open.defense} onToggle={() => toggleSec('defense')}>
           <Grid min={150}>
-            <FieldBlock label="Класс доспеха" required><Num value={m.armorClass} onChange={(v) => set('armorClass', v)} /></FieldBlock>
-            <FieldBlock label="КД (примечание)"><Text value={m.armorClassText} onChange={(v) => set('armorClassText', v)} placeholder="природный доспех" /></FieldBlock>
-            <FieldBlock label="Бонус инициативы"><Num value={m.initiativeBonus} onChange={(v) => set('initiativeBonus', v)} /></FieldBlock>
-            <FieldBlock label="Значение инициативы"><Num value={m.initiativeScore} onChange={(v) => set('initiativeScore', v)} /></FieldBlock>
+            <FieldBlock label={t('best.form.armorClass')} required><Num value={m.armorClass} onChange={(v) => set('armorClass', v)} /></FieldBlock>
+            <FieldBlock label={t('best.form.acText')}><Text value={m.armorClassText} onChange={(v) => set('armorClassText', v)} /></FieldBlock>
+            <FieldBlock label={t('best.form.initBonus')}><Num value={m.initiativeBonus} onChange={(v) => set('initiativeBonus', v)} /></FieldBlock>
+            <FieldBlock label={t('best.form.initScore')}><Num value={m.initiativeScore} onChange={(v) => set('initiativeScore', v)} /></FieldBlock>
           </Grid>
-          <SubHead>Хиты</SubHead>
+          <SubHead>{t('best.form.hp')}</SubHead>
           <Grid min={120}>
-            <FieldBlock label="Среднее ХП"><Num value={m.hpAverage} onChange={(v) => set('hpAverage', v)} /></FieldBlock>
-            <FieldBlock label="Кол-во костей"><Num value={m.hpDiceCount} onChange={(v) => set('hpDiceCount', v)} /></FieldBlock>
-            <FieldBlock label="Грань кости"><Num value={m.hpDiceSides} onChange={(v) => set('hpDiceSides', v)} /></FieldBlock>
-            <FieldBlock label="Модификатор"><Num value={m.hpDiceModifier} onChange={(v) => set('hpDiceModifier', v)} /></FieldBlock>
-            <FieldBlock label="Формула"><Text value={m.hpFormula} onChange={(v) => set('hpFormula', v)} placeholder="2d6" mono /></FieldBlock>
+            <FieldBlock label={t('best.form.hpAverage')}><Num value={m.hpAverage} onChange={(v) => set('hpAverage', v)} /></FieldBlock>
+            <FieldBlock label={t('best.form.hpDiceCount')}><Num value={m.hpDiceCount} onChange={(v) => set('hpDiceCount', v)} /></FieldBlock>
+            <FieldBlock label={t('best.form.hpDiceSides')}><Num value={m.hpDiceSides} onChange={(v) => set('hpDiceSides', v)} /></FieldBlock>
+            <FieldBlock label={t('best.form.hpDiceMod')}><Num value={m.hpDiceModifier} onChange={(v) => set('hpDiceModifier', v)} /></FieldBlock>
+            <FieldBlock label={t('best.form.hpFormula')}><Text value={m.hpFormula} onChange={(v) => set('hpFormula', v)} placeholder="2d6" mono /></FieldBlock>
           </Grid>
         </Section>
 
-        {/* 03 ХАРАКТЕРИСТИКИ */}
-        <Section index="03" title="Характеристики" sub="Шесть ability scores, чувства" open={open.abilities} onToggle={() => toggleSec('abilities')}>
-          <SubHead>Ability Scores</SubHead>
+        {/* 03 */}
+        <Section index="03" title={t('best.form.s03')} sub={t('best.form.s03sub')} open={open.abilities} onToggle={() => toggleSec('abilities')}>
+          <SubHead>{t('best.form.abilityScores')}</SubHead>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 10 }} className="bd-abil">
-            {ABIL_FIELDS.map((a) => (
-              <div key={a.k} style={{ textAlign: 'center' }}>
-                <Label required>{a.l}</Label>
-                <Num value={m[a.k]} onChange={(v) => set(a.k, v)} />
+            {ABILITY_SCORE_FIELDS.map((a) => (
+              <div key={a.key} style={{ textAlign: 'center' }}>
+                <Label required>{t(abilityShortKey(a.full))}</Label>
+                <Num value={m[a.key]} onChange={(v) => set(a.key, v)} />
               </div>
             ))}
           </div>
           <Grid min={180}>
-            <FieldBlock label="Пассивное восприятие"><Num value={m.passivePerception} onChange={(v) => set('passivePerception', v)} /></FieldBlock>
-            <FieldBlock label="Телепатия, фт."><Num value={m.telepathyFt} onChange={(v) => set('telepathyFt', v)} /></FieldBlock>
+            <FieldBlock label={t('best.form.passivePerception')}><Num value={m.passivePerception} onChange={(v) => set('passivePerception', v)} /></FieldBlock>
+            <FieldBlock label={t('best.form.telepathy')}><Num value={m.telepathyFt} onChange={(v) => set('telepathyFt', v)} /></FieldBlock>
           </Grid>
         </Section>
 
-        {/* 04 ССЫЛКИ */}
-        <Section index="04" title="Справочные ссылки" sub="Мультиселекты по справочникам" open={open.refs} onToggle={() => toggleSec('refs')}>
-          <SubHead>Типы существа</SubHead><ChipMulti ids={m.creatureTypeIds} onChange={(v) => set('creatureTypeIds', v)} options={dictionaries['creature-types']} />
-          <SubHead>Языки</SubHead><ChipMulti ids={m.languageIds} onChange={(v) => set('languageIds', v)} options={dictionaries.languages} />
-          <SubHead>Иммунитеты к состояниям</SubHead><ChipMulti ids={m.conditionImmunityIds} onChange={(v) => set('conditionImmunityIds', v)} options={dictionaries.conditions} />
-          <SubHead>Места обитания</SubHead><ChipMulti ids={m.habitatIds} onChange={(v) => set('habitatIds', v)} options={dictionaries.habitats} />
-          <SubHead>Теги сокровищ</SubHead><ChipMulti ids={m.treasureTagIds} onChange={(v) => set('treasureTagIds', v)} options={dictionaries['treasure-tags']} />
-          <SubHead>Источники</SubHead><ChipMulti ids={m.sourceIds} onChange={(v) => set('sourceIds', v)} options={dictionaries.sources} />
+        {/* 04 */}
+        <Section index="04" title={t('best.form.s04')} sub={t('best.form.s04sub')} open={open.refs} onToggle={() => toggleSec('refs')}>
+          <SubHead>{t('best.form.creatureTypes')}</SubHead><ChipMulti ids={m.creatureTypeIds} onChange={(v) => set('creatureTypeIds', v)} options={dictionaries['creature-types']} emptyLabel={t('best.form.emptyDict')} />
+          <SubHead>{t('best.form.languages')}</SubHead><ChipMulti ids={m.languageIds} onChange={(v) => set('languageIds', v)} options={dictionaries.languages} emptyLabel={t('best.form.emptyDict')} />
+          <SubHead>{t('best.form.condImmunities')}</SubHead><ChipMulti ids={m.conditionImmunityIds} onChange={(v) => set('conditionImmunityIds', v)} options={dictionaries.conditions} emptyLabel={t('best.form.emptyDict')} />
+          <SubHead>{t('best.form.habitats')}</SubHead><ChipMulti ids={m.habitatIds} onChange={(v) => set('habitatIds', v)} options={dictionaries.habitats} emptyLabel={t('best.form.emptyDict')} />
+          <SubHead>{t('best.form.treasureTags')}</SubHead><ChipMulti ids={m.treasureTagIds} onChange={(v) => set('treasureTagIds', v)} options={dictionaries['treasure-tags']} emptyLabel={t('best.form.emptyDict')} />
+          <SubHead>{t('best.form.sources')}</SubHead><ChipMulti ids={m.sourceIds} onChange={(v) => set('sourceIds', v)} options={dictionaries.sources} emptyLabel={t('best.form.emptyDict')} />
         </Section>
 
-        {/* 05 СПИСКИ */}
-        <Section index="05" title="Скорости · чувства · спасброски · навыки · урон · снаряжение" sub="Динамические списки" open={open.lists} onToggle={() => toggleSec('lists')}>
-          <SubHead>Скорости</SubHead>
+        {/* 05 */}
+        <Section index="05" title={t('best.form.s05')} sub={t('best.form.s05sub')} open={open.lists} onToggle={() => toggleSec('lists')}>
+          <SubHead>{t('best.form.speeds')}</SubHead>
           {m.speeds.map((r) => (
-            <RowShell key={r._id} onRemove={() => rmRow('speeds', r._id)}>
-              <div style={{ flex: '1 1 160px' }}><Sel value={r.movementTypeId} onChange={(v) => setRow('speeds', r._id, { movementTypeId: v })} options={dictOpts(dictionaries['movement-types'])} placeholder="— тип —" /></div>
+            <RowShell key={r._id} removeTitle={t('best.form.removeRow')} onRemove={() => rmRow('speeds', r._id)}>
+              <div style={{ flex: '1 1 160px' }}><Sel value={r.movementTypeId} onChange={(v) => setRow('speeds', r._id, { movementTypeId: v })} options={dictOpts(dictionaries['movement-types'])} placeholder={t('best.form.pickType')} /></div>
               <Num value={r.ft} onChange={(v) => setRow('speeds', r._id, { ft: v })} w={80} />
-              <Check on={r.hover} onChange={() => setRow('speeds', r._id, { hover: !r.hover })} label="парение" />
+              <Check on={r.hover} onChange={() => setRow('speeds', r._id, { hover: !r.hover })} label={t('best.form.hover')} />
             </RowShell>
           ))}
-          <AddBtn onClick={() => addRow('speeds', { movementTypeId: '', ft: '30', hover: false })}>Скорость</AddBtn>
+          <AddBtn onClick={() => addRow('speeds', { movementTypeId: '', ft: '30', hover: false })}>{t('best.form.addSpeed')}</AddBtn>
 
-          <SubHead>Чувства</SubHead>
+          <SubHead>{t('best.form.senses')}</SubHead>
           {m.senses.map((r) => (
-            <RowShell key={r._id} onRemove={() => rmRow('senses', r._id)}>
-              <div style={{ flex: '1 1 160px' }}><Sel value={r.senseTypeId} onChange={(v) => setRow('senses', r._id, { senseTypeId: v })} options={dictOpts(dictionaries['sense-types'])} placeholder="— тип —" /></div>
+            <RowShell key={r._id} removeTitle={t('best.form.removeRow')} onRemove={() => rmRow('senses', r._id)}>
+              <div style={{ flex: '1 1 160px' }}><Sel value={r.senseTypeId} onChange={(v) => setRow('senses', r._id, { senseTypeId: v })} options={dictOpts(dictionaries['sense-types'])} placeholder={t('best.form.pickType')} /></div>
               <Num value={r.ft} onChange={(v) => setRow('senses', r._id, { ft: v })} w={80} />
             </RowShell>
           ))}
-          <AddBtn onClick={() => addRow('senses', { senseTypeId: '', ft: '60' })}>Чувство</AddBtn>
+          <AddBtn onClick={() => addRow('senses', { senseTypeId: '', ft: '60' })}>{t('best.form.addSense')}</AddBtn>
 
-          <SubHead>Спасброски</SubHead>
+          <SubHead>{t('best.form.saves')}</SubHead>
           {m.savingThrows.map((r) => (
-            <RowShell key={r._id} onRemove={() => rmRow('savingThrows', r._id)}>
-              <div style={{ flex: '1 1 160px' }}><Sel value={r.ability} onChange={(v) => setRow('savingThrows', r._id, { ability: v })} options={ABILITY_OPTIONS} /></div>
+            <RowShell key={r._id} removeTitle={t('best.form.removeRow')} onRemove={() => rmRow('savingThrows', r._id)}>
+              <div style={{ flex: '1 1 160px' }}><Sel value={r.ability} onChange={(v) => setRow('savingThrows', r._id, { ability: v })} options={abilityOpts} /></div>
               <Num value={r.bonus} onChange={(v) => setRow('savingThrows', r._id, { bonus: v })} w={80} />
             </RowShell>
           ))}
-          <AddBtn onClick={() => addRow('savingThrows', { ability: 'DEXTERITY', bonus: '0' })}>Спасбросок</AddBtn>
+          <AddBtn onClick={() => addRow('savingThrows', { ability: 'DEXTERITY', bonus: '0' })}>{t('best.form.addSave')}</AddBtn>
 
-          <SubHead>Владение навыками</SubHead>
+          <SubHead>{t('best.form.skills')}</SubHead>
           {m.skillProficiencies.map((r) => (
-            <RowShell key={r._id} onRemove={() => rmRow('skillProficiencies', r._id)}>
-              <div style={{ flex: '1 1 160px' }}><Sel value={r.proficiencySkillId} onChange={(v) => setRow('skillProficiencies', r._id, { proficiencySkillId: v })} options={skillOpts} placeholder="— навык —" /></div>
+            <RowShell key={r._id} removeTitle={t('best.form.removeRow')} onRemove={() => rmRow('skillProficiencies', r._id)}>
+              <div style={{ flex: '1 1 160px' }}><Sel value={r.proficiencySkillId} onChange={(v) => setRow('skillProficiencies', r._id, { proficiencySkillId: v })} options={skillOpts} placeholder={t('best.form.pickSkill')} /></div>
               <Num value={r.bonus} onChange={(v) => setRow('skillProficiencies', r._id, { bonus: v })} w={80} />
             </RowShell>
           ))}
-          <AddBtn onClick={() => addRow('skillProficiencies', { proficiencySkillId: '', bonus: '0' })}>Навык</AddBtn>
+          <AddBtn onClick={() => addRow('skillProficiencies', { proficiencySkillId: '', bonus: '0' })}>{t('best.form.addSkill')}</AddBtn>
 
           {(['damageResistances', 'damageImmunities', 'damageVulnerabilities'] as const).map((key) => {
-            const title = key === 'damageResistances' ? 'Сопротивления урону' : key === 'damageImmunities' ? 'Иммунитеты к урону' : 'Уязвимости к урону';
+            const title = key === 'damageResistances' ? t('best.form.dmgResist') : key === 'damageImmunities' ? t('best.form.dmgImmun') : t('best.form.dmgVuln');
             return (
               <div key={key}>
                 <SubHead>{title}</SubHead>
                 {m[key].map((r) => (
-                  <RowShell key={r._id} onRemove={() => rmRow(key, r._id)}>
-                    <div style={{ flex: '1 1 160px' }}><Sel value={r.damageType} onChange={(v) => setRow(key, r._id, { damageType: v })} options={DAMAGE_TYPE_OPTIONS} placeholder="— тип урона —" /></div>
-                    <div style={{ flex: '2 1 180px' }}><Text value={r.note} onChange={(v) => setRow(key, r._id, { note: v })} placeholder="примечание (необяз.)" /></div>
+                  <RowShell key={r._id} removeTitle={t('best.form.removeRow')} onRemove={() => rmRow(key, r._id)}>
+                    <div style={{ flex: '1 1 160px' }}><Sel value={r.damageType} onChange={(v) => setRow(key, r._id, { damageType: v })} options={damageOpts} placeholder={t('best.form.pickDmg')} /></div>
+                    <div style={{ flex: '2 1 180px' }}><Text value={r.note} onChange={(v) => setRow(key, r._id, { note: v })} placeholder={t('best.form.notePh')} /></div>
                   </RowShell>
                 ))}
-                <AddBtn onClick={() => addRow(key, { damageType: '', note: '' })}>Строка</AddBtn>
+                <AddBtn onClick={() => addRow(key, { damageType: '', note: '' })}>{t('best.form.addRow')}</AddBtn>
               </div>
             );
           })}
 
-          <SubHead>Снаряжение</SubHead>
+          <SubHead>{t('best.form.gear')}</SubHead>
           {m.gear.map((r) => (
-            <RowShell key={r._id} onRemove={() => rmRow('gear', r._id)}>
-              <div style={{ flex: '1 1 160px' }}><Sel value={r.itemId} onChange={(v) => setRow('gear', r._id, { itemId: v })} options={dictOpts(dictionaries['gear-items'])} placeholder="— предмет —" /></div>
+            <RowShell key={r._id} removeTitle={t('best.form.removeRow')} onRemove={() => rmRow('gear', r._id)}>
+              <div style={{ flex: '1 1 160px' }}><Sel value={r.itemId} onChange={(v) => setRow('gear', r._id, { itemId: v })} options={dictOpts(dictionaries['gear-items'])} placeholder={t('best.form.pickItem')} /></div>
               <Num value={r.qty} onChange={(v) => setRow('gear', r._id, { qty: v })} w={70} />
             </RowShell>
           ))}
-          <AddBtn onClick={() => addRow('gear', { itemId: '', qty: '1' })}>Предмет</AddBtn>
+          <AddBtn onClick={() => addRow('gear', { itemId: '', qty: '1' })}>{t('best.form.addGear')}</AddBtn>
         </Section>
 
-        {/* 06 СПОСОБНОСТИ */}
-        <Section index="06" title="Способности" sub="Карточки features с вложенным уроном" open={open.features} onToggle={() => toggleSec('features')}>
+        {/* 06 */}
+        <Section index="06" title={t('best.form.s06')} sub={t('best.form.s06sub')} open={open.features} onToggle={() => toggleSec('features')}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginTop: 10 }}>
             {m.features.map((f) => {
               const patchFeature = (patch: Partial<FeatureFormRow>) => setRow('features', f._id, patch);
               const setDamages = (damages: FeatureDamageFormRow[]) => patchFeature({ damages });
               return (
                 <div key={f._id} className="ao-panel--inset" style={{ padding: 16, position: 'relative' }}>
-                  <button type="button" className="ao-iconbtn" title="Удалить способность" onClick={() => rmRow('features', f._id)} style={{ position: 'absolute', top: 12, right: 12, borderColor: 'rgba(179,70,26,0.4)', color: '#d8896a' }}><X size={13} /></button>
+                  <button type="button" className="ao-iconbtn" title={t('best.form.removeFeature')} onClick={() => rmRow('features', f._id)} style={{ position: 'absolute', top: 12, right: 12, borderColor: 'rgba(179,70,26,0.4)', color: '#d8896a' }}><X size={13} /></button>
                   <Grid min={150}>
-                    <FieldBlock label="Секция"><Sel value={f.section} onChange={(v) => patchFeature({ section: v })} options={SECTION_PRESETS.map((sct) => ({ v: sct, label: SECTION_RU[sct] }))} /></FieldBlock>
-                    <FieldBlock label="Порядок"><Num value={f.sortOrder} onChange={(v) => patchFeature({ sortOrder: v })} /></FieldBlock>
-                    <FieldBlock label="Тип (kind)"><Text value={f.kind} onChange={(v) => patchFeature({ kind: v })} placeholder="melee_weapon" mono /></FieldBlock>
+                    <FieldBlock label={t('best.form.fSection')}><Sel value={f.section} onChange={(v) => patchFeature({ section: v })} options={sectionOpts} /></FieldBlock>
+                    <FieldBlock label={t('best.form.fSort')}><Num value={f.sortOrder} onChange={(v) => patchFeature({ sortOrder: v })} /></FieldBlock>
+                    <FieldBlock label={t('best.form.fKind')}><Text value={f.kind} onChange={(v) => patchFeature({ kind: v })} placeholder="melee_weapon" mono /></FieldBlock>
                   </Grid>
                   <Grid min={200}>
-                    <FieldBlock label="Название (рус)"><Text value={f.nameRusloc} onChange={(v) => patchFeature({ nameRusloc: v })} /></FieldBlock>
-                    <FieldBlock label="Название (англ)"><Text value={f.nameEngloc} onChange={(v) => patchFeature({ nameEngloc: v })} /></FieldBlock>
+                    <FieldBlock label={t('best.form.fNameRu')}><Text value={f.nameRusloc} onChange={(v) => patchFeature({ nameRusloc: v })} /></FieldBlock>
+                    <FieldBlock label={t('best.form.fNameEn')}><Text value={f.nameEngloc} onChange={(v) => patchFeature({ nameEngloc: v })} /></FieldBlock>
                   </Grid>
                   <Grid min={120}>
-                    <FieldBlock label="Перезарядка от"><Num value={f.rechargeMin} onChange={(v) => patchFeature({ rechargeMin: v })} /></FieldBlock>
-                    <FieldBlock label="Перезарядка до"><Num value={f.rechargeMax} onChange={(v) => patchFeature({ rechargeMax: v })} /></FieldBlock>
+                    <FieldBlock label={t('best.form.fRechargeMin')}><Num value={f.rechargeMin} onChange={(v) => patchFeature({ rechargeMin: v })} /></FieldBlock>
+                    <FieldBlock label={t('best.form.fRechargeMax')}><Num value={f.rechargeMax} onChange={(v) => patchFeature({ rechargeMax: v })} /></FieldBlock>
                   </Grid>
-                  <div style={{ marginTop: 14 }}><Label>Описание (рус)</Label><textarea className="ao-input" rows={2} value={f.descriptionRusloc} onChange={(e) => patchFeature({ descriptionRusloc: e.target.value })} style={{ resize: 'vertical', fontFamily: 'var(--font-sans)' }} /></div>
-                  <div style={{ marginTop: 12 }}><Label>Описание (англ)</Label><textarea className="ao-input" rows={2} value={f.descriptionEngloc} onChange={(e) => patchFeature({ descriptionEngloc: e.target.value })} style={{ resize: 'vertical', fontFamily: 'var(--font-sans)' }} /></div>
+                  <div style={{ marginTop: 14 }}><Label>{t('best.form.fDescRu')}</Label><textarea className="ao-input" rows={2} value={f.descriptionRusloc} onChange={(e) => patchFeature({ descriptionRusloc: e.target.value })} style={{ resize: 'vertical', fontFamily: 'var(--font-sans)' }} /></div>
+                  <div style={{ marginTop: 12 }}><Label>{t('best.form.fDescEn')}</Label><textarea className="ao-input" rows={2} value={f.descriptionEngloc} onChange={(e) => patchFeature({ descriptionEngloc: e.target.value })} style={{ resize: 'vertical', fontFamily: 'var(--font-sans)' }} /></div>
 
-                  <SubHead>Атака</SubHead>
+                  <SubHead>{t('best.form.attack')}</SubHead>
                   <Grid min={120}>
-                    <FieldBlock label="Тип атаки"><Text value={f.attackType} onChange={(v) => patchFeature({ attackType: v })} placeholder="melee / ranged" mono /></FieldBlock>
-                    <FieldBlock label="Бонус атаки"><Num value={f.attackBonus} onChange={(v) => patchFeature({ attackBonus: v })} /></FieldBlock>
-                    <FieldBlock label="Досягаемость, фт."><Num value={f.reachFt} onChange={(v) => patchFeature({ reachFt: v })} /></FieldBlock>
-                    <FieldBlock label="Дистанция, фт."><Num value={f.rangeFt} onChange={(v) => patchFeature({ rangeFt: v })} /></FieldBlock>
-                    <FieldBlock label="Дальняя, фт."><Num value={f.rangeLongFt} onChange={(v) => patchFeature({ rangeLongFt: v })} /></FieldBlock>
+                    <FieldBlock label={t('best.form.fAttackType')}><Text value={f.attackType} onChange={(v) => patchFeature({ attackType: v })} placeholder="melee / ranged" mono /></FieldBlock>
+                    <FieldBlock label={t('best.form.fAttackBonus')}><Num value={f.attackBonus} onChange={(v) => patchFeature({ attackBonus: v })} /></FieldBlock>
+                    <FieldBlock label={t('best.form.fReach')}><Num value={f.reachFt} onChange={(v) => patchFeature({ reachFt: v })} /></FieldBlock>
+                    <FieldBlock label={t('best.form.fRange')}><Num value={f.rangeFt} onChange={(v) => patchFeature({ rangeFt: v })} /></FieldBlock>
+                    <FieldBlock label={t('best.form.fRangeLong')}><Num value={f.rangeLongFt} onChange={(v) => patchFeature({ rangeLongFt: v })} /></FieldBlock>
                   </Grid>
-                  <SubHead>Спасбросок</SubHead>
+                  <SubHead>{t('best.form.save2')}</SubHead>
                   <Grid min={150}>
-                    <FieldBlock label="Характеристика"><Sel value={f.saveAbility} onChange={(v) => patchFeature({ saveAbility: v })} options={ABILITY_OPTIONS} placeholder="— нет —" /></FieldBlock>
-                    <FieldBlock label="СЛ спасброска"><Num value={f.saveDc} onChange={(v) => patchFeature({ saveDc: v })} /></FieldBlock>
+                    <FieldBlock label={t('best.form.fSaveAbility')}><Sel value={f.saveAbility} onChange={(v) => patchFeature({ saveAbility: v })} options={abilityOpts} placeholder={t('best.form.none')} /></FieldBlock>
+                    <FieldBlock label={t('best.form.fSaveDc')}><Num value={f.saveDc} onChange={(v) => patchFeature({ saveDc: v })} /></FieldBlock>
                   </Grid>
 
-                  <SubHead>Урон</SubHead>
+                  <SubHead>{t('best.form.damage')}</SubHead>
                   {f.damages.map((d) => (
-                    <RowShell key={d._id} onRemove={() => setDamages(f.damages.filter((x) => x._id !== d._id))}>
+                    <RowShell key={d._id} removeTitle={t('best.form.removeRow')} onRemove={() => setDamages(f.damages.filter((x) => x._id !== d._id))}>
                       <Num value={d.sortOrder} onChange={(v) => setDamages(f.damages.map((x) => x._id === d._id ? { ...x, sortOrder: v } : x))} w={56} />
                       <Num value={d.average} onChange={(v) => setDamages(f.damages.map((x) => x._id === d._id ? { ...x, average: v } : x))} w={64} />
                       <div style={{ flex: '1 1 90px' }}><Text value={d.dice} onChange={(v) => setDamages(f.damages.map((x) => x._id === d._id ? { ...x, dice: v } : x))} placeholder="1d6+2" mono /></div>
-                      <div style={{ flex: '1 1 130px' }}><Sel value={d.damageType} onChange={(v) => setDamages(f.damages.map((x) => x._id === d._id ? { ...x, damageType: v } : x))} options={DAMAGE_TYPE_OPTIONS} placeholder="— тип —" /></div>
-                      <div style={{ flex: '1 1 120px' }}><Text value={d.note} onChange={(v) => setDamages(f.damages.map((x) => x._id === d._id ? { ...x, note: v } : x))} placeholder="прим." /></div>
+                      <div style={{ flex: '1 1 130px' }}><Sel value={d.damageType} onChange={(v) => setDamages(f.damages.map((x) => x._id === d._id ? { ...x, damageType: v } : x))} options={damageOpts} placeholder={t('best.form.pickType')} /></div>
+                      <div style={{ flex: '1 1 120px' }}><Text value={d.note} onChange={(v) => setDamages(f.damages.map((x) => x._id === d._id ? { ...x, note: v } : x))} placeholder={t('best.form.shortNotePh')} /></div>
                     </RowShell>
                   ))}
-                  <AddBtn onClick={() => setDamages([...f.damages, { _id: rowUid(), sortOrder: String(f.damages.length), average: '', dice: '', damageType: '', note: '' }])}>Строку урона</AddBtn>
+                  <AddBtn onClick={() => setDamages([...f.damages, { _id: rowUid(), sortOrder: String(f.damages.length), average: '', dice: '', damageType: '', note: '' }])}>{t('best.form.addDamage')}</AddBtn>
                 </div>
               );
             })}
           </div>
-          <AddBtn onClick={() => addRow('features', { section: 'actions', sortOrder: String(m.features.length), nameRusloc: '', nameEngloc: '', kind: '', rechargeMin: '', rechargeMax: '', descriptionRusloc: '', descriptionEngloc: '', attackType: '', attackBonus: '', reachFt: '', rangeFt: '', rangeLongFt: '', saveAbility: '', saveDc: '', damages: [] })}>Способность</AddBtn>
+          <AddBtn onClick={() => addRow('features', { section: 'actions', sortOrder: String(m.features.length), nameRusloc: '', nameEngloc: '', kind: '', rechargeMin: '', rechargeMax: '', descriptionRusloc: '', descriptionEngloc: '', attackType: '', attackBonus: '', reachFt: '', rangeFt: '', rangeLongFt: '', saveAbility: '', saveDc: '', damages: [] })}>{t('best.form.addFeature')}</AddBtn>
         </Section>
 
-        {/* 07 ЛОР */}
-        <Section index="07" title="Лор" sub="Описание и легендарные действия" open={open.lore} onToggle={() => toggleSec('lore')}>
-          <div style={{ marginTop: 14 }}><Label>Лор (loreText)</Label><textarea className="ao-input" rows={4} value={m.loreText} onChange={(e) => set('loreText', e.target.value)} style={{ resize: 'vertical', fontFamily: 'var(--font-serif)', fontSize: 16 }} /></div>
-          <div style={{ marginTop: 14 }}><Label>Легендарные действия (текст)</Label><textarea className="ao-input" rows={3} value={m.legendaryText} onChange={(e) => set('legendaryText', e.target.value)} style={{ resize: 'vertical', fontFamily: 'var(--font-serif)', fontSize: 16 }} /></div>
+        {/* 07 */}
+        <Section index="07" title={t('best.form.s07')} sub={t('best.form.s07sub')} open={open.lore} onToggle={() => toggleSec('lore')}>
+          <div style={{ marginTop: 14 }}><Label>{t('best.form.lore')}</Label><textarea className="ao-input" rows={4} value={m.loreText} onChange={(e) => set('loreText', e.target.value)} style={{ resize: 'vertical', fontFamily: 'var(--font-serif)', fontSize: 16 }} /></div>
+          <div style={{ marginTop: 14 }}><Label>{t('best.form.legendaryText')}</Label><textarea className="ao-input" rows={3} value={m.legendaryText} onChange={(e) => set('legendaryText', e.target.value)} style={{ resize: 'vertical', fontFamily: 'var(--font-serif)', fontSize: 16 }} /></div>
           <Grid min={180}>
-            <FieldBlock label="Использований (база)"><Num value={m.legendaryUsesBase} onChange={(v) => set('legendaryUsesBase', v)} /></FieldBlock>
-            <FieldBlock label="Использований (логово)"><Num value={m.legendaryUsesLair} onChange={(v) => set('legendaryUsesLair', v)} /></FieldBlock>
+            <FieldBlock label={t('best.form.legendaryBase')}><Num value={m.legendaryUsesBase} onChange={(v) => set('legendaryUsesBase', v)} /></FieldBlock>
+            <FieldBlock label={t('best.form.legendaryLair')}><Num value={m.legendaryUsesLair} onChange={(v) => set('legendaryUsesLair', v)} /></FieldBlock>
           </Grid>
         </Section>
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 18, paddingBottom: 20 }}>
-          <button type="button" className="ao-btn ao-btn--ghost ao-btn--lg" onClick={onCancel}><Ban size={14} /> Отмена</button>
-          <button type="button" className="ao-btn ao-btn--primary ao-btn--lg" onClick={submit} disabled={submitting}><Save size={14} /> {submitting ? 'Сохранение…' : 'Сохранить монстра'}</button>
+          <button type="button" className="ao-btn ao-btn--ghost ao-btn--lg" onClick={onCancel}><Ban size={14} /> {t('best.com.cancel')}</button>
+          <button type="button" className="ao-btn ao-btn--primary ao-btn--lg" onClick={submit} disabled={submitting}><Save size={14} /> {submitting ? t('best.com.saving') : t('best.form.save')}</button>
         </div>
       </div>
 
