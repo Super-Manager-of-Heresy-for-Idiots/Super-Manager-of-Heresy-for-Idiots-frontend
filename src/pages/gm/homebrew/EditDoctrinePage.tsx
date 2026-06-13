@@ -75,6 +75,8 @@ export default function EditDoctrinePage() {
   const [newBuffModifierValue, setNewBuffModifierValue] = useState('');
   const [newBuffDurationRounds, setNewBuffDurationRounds] = useState('');
   const [newBuffIsBuff, setNewBuffIsBuff] = useState('true');
+  const [newDepClassIds, setNewDepClassIds] = useState<string[]>([]);
+  const [newDepRaceIds, setNewDepRaceIds] = useState<string[]>([]);
   const [creatingContent, setCreatingContent] = useState(false);
   const [showRichClassWizard, setShowRichClassWizard] = useState(false);
   const [editingRichClass, setEditingRichClass] = useState<ContentSummaryDto | null>(null);
@@ -159,6 +161,8 @@ export default function EditDoctrinePage() {
     setNewBuffModifierValue('');
     setNewBuffDurationRounds('');
     setNewBuffIsBuff('true');
+    setNewDepClassIds([]);
+    setNewDepRaceIds([]);
   };
 
   const handleCreateAndAddContent = async () => {
@@ -180,12 +184,16 @@ export default function EditDoctrinePage() {
           name,
           description,
           skillType: newSkillType.trim() || undefined,
+          classIds: newDepClassIds.length > 0 ? newDepClassIds : undefined,
+          raceIds: newDepRaceIds.length > 0 ? newDepRaceIds : undefined,
         });
       } else if (addType === 'FEAT') {
         await homebrewApi.createPackageFeat(pkg.id, {
           name,
           description,
           prerequisites: newFeatPrerequisites.trim() || undefined,
+          classIds: newDepClassIds.length > 0 ? newDepClassIds : undefined,
+          raceIds: newDepRaceIds.length > 0 ? newDepRaceIds : undefined,
         });
       } else if (addType === 'BUFF_DEBUFF') {
         await homebrewApi.createPackageBuffDebuff(pkg.id, {
@@ -196,6 +204,8 @@ export default function EditDoctrinePage() {
           modifierValue: newBuffModifierValue ? Number(newBuffModifierValue) : undefined,
           durationRounds: newBuffDurationRounds ? Number(newBuffDurationRounds) : undefined,
           isBuff: newBuffIsBuff === 'true',
+          classIds: newDepClassIds.length > 0 ? newDepClassIds : undefined,
+          raceIds: newDepRaceIds.length > 0 ? newDepRaceIds : undefined,
         });
       }
 
@@ -408,6 +418,12 @@ export default function EditDoctrinePage() {
                 <button className="ao-btn ao-btn--ghost ao-btn--sm" onClick={handleOpenNewRace}>
                   <Rune kind="hex" size={10} /> {t('hb.edit.species')}
                 </button>
+                <button
+                  className="ao-btn ao-btn--ghost ao-btn--sm"
+                  onClick={() => navigate(`/gm/homebrew/${pkg.id}/bestiary`)}
+                >
+                  <Rune kind="sword" size={10} /> {t('hb.edit.bestiary')}
+                </button>
                 <button className="ao-btn ao-btn--primary ao-btn--sm" onClick={() => setAdding(!adding)}>
                   <Rune kind="plus" size={10} /> {adding ? t('hb.edit.close') : t('hb.edit.slotNewEntry')}
                 </button>
@@ -594,6 +610,59 @@ export default function EditDoctrinePage() {
                           placeholder={t('hb.edit.durationPlaceholder')}
                           style={{ padding: '6px 12px' }}
                         />
+                      </div>
+                    </div>
+                  )}
+
+                  {(addType === 'SKILL' || addType === 'FEAT' || addType === 'BUFF_DEBUFF') && (
+                    <div style={{ border: '1px solid var(--rule)', background: 'rgba(0,0,0,0.18)', padding: 12, display: 'grid', gap: 12 }}>
+                      <div className="ao-overline" style={{ color: 'var(--gold-pale)' }}>{t('hb.edit.depTitle')}</div>
+                      <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 12, margin: 0 }}>{t('hb.edit.depHint')}</p>
+                      <div>
+                        <label className="ao-label">{t('hb.edit.depClasses')}</label>
+                        {(contentByType['CHARACTER_CLASS'] || []).length === 0 ? (
+                          <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 12, margin: '4px 0 0' }}>{t('hb.edit.depNoClasses')}</p>
+                        ) : (
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 6 }}>
+                            {(contentByType['CHARACTER_CLASS'] || []).map((c) => {
+                              const on = newDepClassIds.includes(c.id);
+                              return (
+                                <button
+                                  key={c.id}
+                                  type="button"
+                                  className={on ? 'ao-chip ao-chip--gold' : 'ao-chip'}
+                                  style={{ cursor: 'pointer' }}
+                                  onClick={() => setNewDepClassIds(on ? newDepClassIds.filter((x) => x !== c.id) : [...newDepClassIds, c.id])}
+                                >
+                                  {c.name}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                      <div>
+                        <label className="ao-label">{t('hb.edit.depRaces')}</label>
+                        {(contentByType['RACE'] || []).length === 0 ? (
+                          <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 12, margin: '4px 0 0' }}>{t('hb.edit.depNoRaces')}</p>
+                        ) : (
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 6 }}>
+                            {(contentByType['RACE'] || []).map((r) => {
+                              const on = newDepRaceIds.includes(r.id);
+                              return (
+                                <button
+                                  key={r.id}
+                                  type="button"
+                                  className={on ? 'ao-chip ao-chip--gold' : 'ao-chip'}
+                                  style={{ cursor: 'pointer' }}
+                                  onClick={() => setNewDepRaceIds(on ? newDepRaceIds.filter((x) => x !== r.id) : [...newDepRaceIds, r.id])}
+                                >
+                                  {r.name}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}

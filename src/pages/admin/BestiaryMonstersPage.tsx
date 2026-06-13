@@ -2,9 +2,9 @@ import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Plus, Pencil, Trash2, SlidersHorizontal, X, AlertTriangle } from 'lucide-react';
 import { useAdminMonsters, useDeleteAdminMonster, useSetAdminMonsterActive } from '@/hooks/useBestiary';
-import { SIZE_VALUES, sizeKey, type TFunc } from '@/components/bestiary/constants';
-import { useT } from '@/i18n/I18nContext';
-import type { CreatureSize, MonsterSummaryResponse } from '@/types';
+import { SIZE_VALUES, dictName, sizeKey, type TFunc } from '@/components/bestiary/constants';
+import { useI18n, useT } from '@/i18n/I18nContext';
+import type { CreatureSize, DictionaryRef, MonsterSummaryResponse } from '@/types';
 
 const CR_RANGES: { v: string; labelKey: string; min: number; max: number }[] = [
   { v: 'ALL', labelKey: 'best.mon.crAll', min: -1, max: 99 },
@@ -24,10 +24,10 @@ function Toggle({ on, onChange, disabled }: { on: boolean; onChange: () => void;
     </button>
   );
 }
-function SizeBadge({ size, t }: { size: CreatureSize; t: TFunc }) {
+function SizeBadge({ size, lang }: { size: DictionaryRef; lang: string }) {
   return (
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '3px 9px', background: 'rgba(0,0,0,0.4)', border: '1px solid var(--hairline)', fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink-quiet)' }}>
-      <Diamond size={6} color="var(--bronze)" />{t(sizeKey(size))}
+      <Diamond size={6} color="var(--bronze)" />{dictName(size, lang)}
     </span>
   );
 }
@@ -52,6 +52,7 @@ function Select<T extends string>({ value, onChange, options }: { value: T; onCh
 export default function BestiaryMonstersPage() {
   const navigate = useNavigate();
   const t = useT();
+  const { lang } = useI18n();
   const { data: rows = [], isLoading, isError } = useAdminMonsters();
   const setActive = useSetAdminMonsterActive();
   const del = useDeleteAdminMonster();
@@ -69,7 +70,7 @@ export default function BestiaryMonstersPage() {
     return rows.filter((m) => {
       const q = query.trim().toLowerCase();
       const matchQ = !q || m.nameRusloc.toLowerCase().includes(q) || (m.nameEngloc ?? '').toLowerCase().includes(q);
-      const matchSize = sizeFilter === 'ALL' || m.size === sizeFilter;
+      const matchSize = sizeFilter === 'ALL' || m.size.code === sizeFilter;
       const matchCr = m.crValue >= cr.min && m.crValue <= cr.max;
       return matchQ && matchSize && matchCr;
     });
@@ -125,7 +126,7 @@ export default function BestiaryMonstersPage() {
                       </div>
                     </div>
                   </td>
-                  <td><SizeBadge size={m.size} t={t} /></td>
+                  <td><SizeBadge size={m.size} lang={lang} /></td>
                   <td style={{ textAlign: 'center' }}><span style={{ fontFamily: 'var(--font-serif)', fontSize: 20, fontWeight: 600, color: 'var(--gold-pale)' }}>{m.crRating}</span></td>
                   <td><StatusDot active={m.isActive} t={t} /></td>
                   <td style={{ textAlign: 'center' }}><Toggle on={m.isActive} disabled={setActive.isPending} onChange={() => setActive.mutate({ id: m.id, active: !m.isActive })} /></td>

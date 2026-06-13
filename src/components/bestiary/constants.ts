@@ -28,6 +28,7 @@ export const ABILITY_SCORE_FIELDS: { key: 'strScore' | 'dexScore' | 'conScore' |
 export const DICTIONARY_KINDS: DictionaryKind[] = [
   'creature-types', 'alignments', 'languages', 'sense-types', 'movement-types',
   'habitats', 'treasure-tags', 'conditions', 'gear-items', 'sources',
+  'sizes', 'abilities', 'damage-types',
 ];
 
 // === i18n key helpers ===
@@ -39,6 +40,13 @@ export const sectionKey = (s: string) => `best.section.${s}`;
 export const scopeKey = (sc: MonsterScope) => `best.scope.${sc}`;
 export const dictLabelKey = (k: DictionaryKind) => `best.dict.${k}.label`;
 export const dictSubKey = (k: DictionaryKind) => `best.dict.${k}.sub`;
+
+// === DictionaryRef display helper ===
+/** Locale-aware name for an expanded dictionary reference. */
+export const dictName = (
+  r: { nameRusloc: string; nameEngloc?: string | null } | null | undefined,
+  lang: string,
+): string => (r == null ? '' : lang === 'en' ? (r.nameEngloc || r.nameRusloc) : r.nameRusloc);
 
 // === Localised select option builders ===
 export const sizeOptions = (t: TFunc) => SIZE_VALUES.map((v) => ({ v, label: t(sizeKey(v)) }));

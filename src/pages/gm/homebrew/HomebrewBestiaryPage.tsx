@@ -11,15 +11,15 @@ import {
   usePublicMonsters,
   useUpdateHomebrewDictionaryEntry,
 } from '@/hooks/useBestiary';
-import { DICTIONARY_KINDS, dictLabelKey, sizeKey, type TFunc } from '@/components/bestiary/constants';
-import { useT } from '@/i18n/I18nContext';
-import type { CreatureSize, DictionaryEntryResponse, DictionaryKind, MonsterSummaryResponse } from '@/types';
+import { DICTIONARY_KINDS, dictLabelKey, dictName, type TFunc } from '@/components/bestiary/constants';
+import { useI18n, useT } from '@/i18n/I18nContext';
+import type { DictionaryEntryResponse, DictionaryKind, DictionaryRef, MonsterSummaryResponse } from '@/types';
 
 function Diamond({ size = 8, color = 'var(--gold)' }: { size?: number; color?: string }) {
   return <span style={{ width: size, height: size, transform: 'rotate(45deg)', background: color, display: 'inline-block', flexShrink: 0 }} />;
 }
-function SizeBadge({ size, t }: { size: CreatureSize; t: TFunc }) {
-  return <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '3px 9px', background: 'rgba(0,0,0,0.4)', border: '1px solid var(--hairline)', fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink-quiet)' }}><Diamond size={6} color="var(--bronze)" />{t(sizeKey(size))}</span>;
+function SizeBadge({ size, lang }: { size: DictionaryRef; lang: string }) {
+  return <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '3px 9px', background: 'rgba(0,0,0,0.4)', border: '1px solid var(--hairline)', fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink-quiet)' }}><Diamond size={6} color="var(--bronze)" />{dictName(size, lang)}</span>;
 }
 
 interface DraftState { id: string | null; code: string; nameRusloc: string; nameEngloc: string; bookCode: string; isUnique: boolean; }
@@ -28,6 +28,7 @@ const EMPTY_DRAFT: DraftState = { id: null, code: '', nameRusloc: '', nameEngloc
 export default function HomebrewBestiaryPage() {
   const navigate = useNavigate();
   const t = useT();
+  const { lang } = useI18n();
   const { packageId = '' } = useParams();
   const [tab, setTab] = useState<'monsters' | 'dictionaries'>('monsters');
   const [activeKind, setActiveKind] = useState<DictionaryKind>('creature-types');
@@ -112,7 +113,7 @@ export default function HomebrewBestiaryPage() {
                         </div>
                       </td>
                       <td style={{ textAlign: 'center' }}><span style={{ fontFamily: 'var(--font-serif)', fontSize: 20, fontWeight: 600, color: 'var(--gold-pale)' }}>{m.crRating}</span></td>
-                      <td><SizeBadge size={m.size} t={t} /></td>
+                      <td><SizeBadge size={m.size} lang={lang} /></td>
                       <td>{m.sourceMonsterId ? <span className="ao-chip ao-chip--gold">{t('best.hb.fork')}</span> : <span className="ao-chip">{t('best.hb.fromScratch')}</span>}</td>
                       <td>
                         <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>

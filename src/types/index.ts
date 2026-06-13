@@ -482,6 +482,10 @@ export interface CreateSkillRequest {
   damageDice?: string;
   damageBonus?: number;
   damageType?: string;
+  /** Classes this skill is bound to (homebrew dependency picker). */
+  classIds?: string[];
+  /** Races this skill is bound to (homebrew dependency picker). */
+  raceIds?: string[];
 }
 
 export interface SubclassResponse {
@@ -509,6 +513,10 @@ export interface CreateFeatRequest {
   name: string;
   description?: string;
   prerequisites?: string;
+  /** Classes this feat is bound to (homebrew dependency picker). */
+  classIds?: string[];
+  /** Races this feat is bound to (homebrew dependency picker). */
+  raceIds?: string[];
 }
 
 export interface ClassLevelRewardResponse {
@@ -577,6 +585,10 @@ export interface CreateBuffDebuffRequest {
   modifierValue?: number;
   durationRounds?: number;
   isBuff: boolean;
+  /** Classes this buff/debuff is bound to (homebrew dependency picker). */
+  classIds?: string[];
+  /** Races this buff/debuff is bound to (homebrew dependency picker). */
+  raceIds?: string[];
 }
 
 export interface RichClassSkillEffectRequest {
@@ -1467,7 +1479,10 @@ export type DictionaryKind =
   | 'treasure-tags'
   | 'conditions'
   | 'gear-items'
-  | 'sources';
+  | 'sources'
+  | 'sizes'
+  | 'abilities'
+  | 'damage-types';
 
 export interface DictionaryEntryRequest {
   code: string;
@@ -1504,7 +1519,7 @@ export interface MonsterSummaryResponse {
   slug: string;
   nameRusloc: string;
   nameEngloc?: string | null;
-  size: CreatureSize;
+  size: DictionaryRef;
   crRating: string;
   crValue: number;
   scope: MonsterScope;
@@ -1529,7 +1544,7 @@ export interface MonsterSenseRow {
 }
 export interface MonsterSaveRow {
   id: string;
-  ability: AbilityEnum;
+  ability: DictionaryRef;
   bonus: number;
 }
 export interface MonsterSkillRow {
@@ -1540,7 +1555,7 @@ export interface MonsterSkillRow {
 }
 export interface MonsterDamageNoteRow {
   id: string;
-  damageType: DamageType | null;
+  damageType: DictionaryRef | null;
   note: string | null;
 }
 export interface MonsterGearRow {
@@ -1553,7 +1568,7 @@ export interface MonsterFeatureDamageRow {
   sortOrder: number;
   average: number | null;
   dice: string | null;
-  damageType: DamageType | null;
+  damageType: DictionaryRef | null;
   note: string | null;
 }
 export interface MonsterFeatureRow {
@@ -1572,7 +1587,7 @@ export interface MonsterFeatureRow {
   reachFt?: number | null;
   rangeFt?: number | null;
   rangeLongFt?: number | null;
-  saveAbility?: AbilityEnum | null;
+  saveAbility?: DictionaryRef | null;
   saveDc?: number | null;
   damages: MonsterFeatureDamageRow[];
 }
@@ -1588,10 +1603,10 @@ export interface MonsterResponse {
   nameRusloc: string;
   nameEngloc?: string | null;
   alignment: DictionaryRef | null;
-  size: CreatureSize;
-  sizeSecondary: CreatureSize | null;
+  size: DictionaryRef;
+  sizeSecondary: DictionaryRef | null;
   isSwarm: boolean;
-  swarmSize: CreatureSize | null;
+  swarmSize: DictionaryRef | null;
   armorClass: number;
   armorClassText?: string | null;
   initiativeBonus?: number | null;
@@ -1654,7 +1669,7 @@ export interface MonsterSenseRequest {
   ft: number;
 }
 export interface MonsterSaveRequest {
-  ability: AbilityEnum;
+  abilityId: string;
   bonus: number;
 }
 export interface MonsterSkillRequest {
@@ -1662,7 +1677,7 @@ export interface MonsterSkillRequest {
   bonus: number;
 }
 export interface MonsterDamageNoteRequest {
-  damageType?: DamageType | null;
+  damageTypeId?: string | null;
   note?: string | null;
 }
 export interface MonsterGearRequest {
@@ -1673,7 +1688,7 @@ export interface MonsterFeatureDamageRequest {
   sortOrder: number;
   average?: number | null;
   dice?: string | null;
-  damageType?: DamageType | null;
+  damageTypeId?: string | null;
   note?: string | null;
 }
 export interface MonsterFeatureRequest {
@@ -1691,7 +1706,7 @@ export interface MonsterFeatureRequest {
   reachFt?: number | null;
   rangeFt?: number | null;
   rangeLongFt?: number | null;
-  saveAbility?: AbilityEnum | null;
+  saveAbilityId?: string | null;
   saveDc?: number | null;
   damages?: MonsterFeatureDamageRequest[];
 }
@@ -1701,10 +1716,10 @@ export interface MonsterRequest {
   nameRusloc: string;
   nameEngloc?: string;
   alignmentId?: string | null;
-  size: CreatureSize;
-  sizeSecondary?: CreatureSize | null;
+  sizeId: string;
+  sizeSecondaryId?: string | null;
   isSwarm?: boolean;
-  swarmSize?: CreatureSize | null;
+  swarmSizeId?: string | null;
   armorClass: number;
   armorClassText?: string;
   initiativeBonus?: number | null;

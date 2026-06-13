@@ -1,16 +1,13 @@
 import React, { useState } from 'react';
-import { Plus, X, ChevronDown, Save, Ban, GripVertical } from 'lucide-react';
+import { Plus, X, Save, Ban, GripVertical, ChevronLeft, ChevronRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useT } from '@/i18n/I18nContext';
 import type { DictionaryEntryResponse, DictionaryKind, MonsterRequest, MonsterScope } from '@/types';
 import {
   ABILITY_SCORE_FIELDS,
   SECTION_PRESETS,
-  abilityOptions,
   abilityShortKey,
-  damageTypeOptions,
   sectionKey,
-  sizeOptions,
   type TFunc,
 } from './constants';
 import {
@@ -95,22 +92,6 @@ function RowShell({ onRemove, removeTitle, children }: { onRemove: () => void; r
     </div>
   );
 }
-function Section({ index, title, sub, open, onToggle, children }: { index: string; title: string; sub?: string; open: boolean; onToggle: () => void; children: React.ReactNode }) {
-  return (
-    <div className="ao-panel" style={{ padding: 0, marginBottom: 12 }}>
-      <button type="button" onClick={onToggle} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 14, padding: '16px 18px', background: open ? 'linear-gradient(180deg, rgba(176,141,78,0.05), transparent)' : 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left' }}>
-        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--gold-deep)', width: 24 }}>{index}</span>
-        <Diamond size={8} color={open ? 'var(--gold)' : 'var(--bronze)'} />
-        <div style={{ flex: 1 }}>
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: 14, letterSpacing: 'var(--track-eng)', textTransform: 'uppercase', color: 'var(--ink-bright)' }}>{title}</div>
-          {sub && <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--ink-faint)', marginTop: 3 }}>{sub}</div>}
-        </div>
-        <ChevronDown size={18} style={{ color: 'var(--ink-quiet)', transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 200ms' }} />
-      </button>
-      {open && <div style={{ padding: '4px 18px 22px', borderTop: '1px solid var(--rule)' }}>{children}</div>}
-    </div>
-  );
-}
 function Grid({ children, min = 200 }: { children: React.ReactNode; min?: number }) {
   return <div style={{ display: 'grid', gridTemplateColumns: `repeat(auto-fit, minmax(${min}px, 1fr))`, gap: 14, marginTop: 14 }}>{children}</div>;
 }
@@ -129,30 +110,70 @@ function SubHead({ children }: { children: React.ReactNode }) {
 
 const dictOpts = (list: DictionaryEntryResponse[]) => list.map((x) => ({ v: x.id, label: x.nameRusloc }));
 
+type StepKey = 'basic' | 'defense' | 'abilities' | 'refs' | 'lists' | 'features' | 'lore';
+const STEPS: { key: StepKey; index: string; titleKey: string; subKey: string }[] = [
+  { key: 'basic', index: '01', titleKey: 'best.form.s01', subKey: 'best.form.s01sub' },
+  { key: 'defense', index: '02', titleKey: 'best.form.s02', subKey: 'best.form.s02sub' },
+  { key: 'abilities', index: '03', titleKey: 'best.form.s03', subKey: 'best.form.s03sub' },
+  { key: 'refs', index: '04', titleKey: 'best.form.s04', subKey: 'best.form.s04sub' },
+  { key: 'lists', index: '05', titleKey: 'best.form.s05', subKey: 'best.form.s05sub' },
+  { key: 'features', index: '06', titleKey: 'best.form.s06', subKey: 'best.form.s06sub' },
+  { key: 'lore', index: '07', titleKey: 'best.form.s07', subKey: 'best.form.s07sub' },
+];
+
+function StepPanel({ index, title, sub, children }: { index: string; title: string; sub?: string; children: React.ReactNode }) {
+  return (
+    <div className="ao-panel" style={{ padding: 0 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '18px 20px', borderBottom: '1px solid var(--rule)', background: 'linear-gradient(180deg, rgba(176,141,78,0.05), transparent)' }}>
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--gold-deep)', width: 24 }}>{index}</span>
+        <Diamond size={8} color="var(--gold)" />
+        <div style={{ flex: 1 }}>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: 15, letterSpacing: 'var(--track-eng)', textTransform: 'uppercase', color: 'var(--ink-bright)' }}>{title}</div>
+          {sub && <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--ink-faint)', marginTop: 3 }}>{sub}</div>}
+        </div>
+      </div>
+      <div style={{ padding: '4px 20px 24px' }}>{children}</div>
+    </div>
+  );
+}
+
 export default function MonsterFormBody({ initial, dictionaries, skills, scope, contextLabel, submitting, onSubmit, onCancel }: Props) {
   const t = useT() as TFunc;
   const [m, setM] = useState<MonsterFormState>(initial);
-  const [open, setOpen] = useState<Record<string, boolean>>({ basic: true, defense: false, abilities: false, refs: false, lists: false, features: false, lore: false });
+  const [step, setStep] = useState<StepKey>('basic');
   const set = <K extends keyof MonsterFormState>(k: K, v: MonsterFormState[K]) => setM((p) => ({ ...p, [k]: v }));
-  const toggleSec = (k: string) => setOpen((p) => ({ ...p, [k]: !p[k] }));
 
   const addRow = <K extends keyof MonsterFormState>(key: K, row: object) => set(key, [...(m[key] as unknown[]), { _id: rowUid(), ...row }] as MonsterFormState[K]);
   const rmRow = <K extends keyof MonsterFormState>(key: K, id: number) => set(key, (m[key] as { _id: number }[]).filter((r) => r._id !== id) as MonsterFormState[K]);
   const setRow = <K extends keyof MonsterFormState>(key: K, id: number, patch: object) => set(key, (m[key] as { _id: number }[]).map((r) => (r._id === id ? { ...r, ...patch } : r)) as MonsterFormState[K]);
 
-  const sizeOpts = sizeOptions(t);
-  const abilityOpts = abilityOptions(t);
-  const damageOpts = damageTypeOptions(t);
+  const sizeOpts = dictOpts(dictionaries.sizes);
+  const abilityOpts = dictOpts(dictionaries.abilities);
+  const damageOpts = dictOpts(dictionaries['damage-types']);
   const skillOpts = skills.map((sk) => ({ v: sk.id, label: sk.name }));
   const sectionOpts = SECTION_PRESETS.map((sct) => ({ v: sct, label: t(sectionKey(sct)) }));
 
+  const stepErrors: Record<StepKey, boolean> = {
+    basic: !m.nameRusloc.trim() || !m.sizeId || !m.crRating.trim() || m.crValue.trim() === '',
+    defense: m.armorClass.trim() === '',
+    abilities: false,
+    refs: false,
+    lists: false,
+    features: false,
+    lore: false,
+  };
+
   const submit = () => {
-    if (!m.nameRusloc.trim()) { toast.error(t('best.form.errName')); setOpen((p) => ({ ...p, basic: true })); return; }
-    if (!m.size) { toast.error(t('best.form.errSize')); setOpen((p) => ({ ...p, basic: true })); return; }
-    if (!m.crRating.trim() || m.crValue.trim() === '') { toast.error(t('best.form.errCr')); setOpen((p) => ({ ...p, basic: true })); return; }
-    if (m.armorClass.trim() === '') { toast.error(t('best.form.errAc')); setOpen((p) => ({ ...p, defense: true })); return; }
+    if (!m.nameRusloc.trim()) { toast.error(t('best.form.errName')); setStep('basic'); return; }
+    if (!m.sizeId) { toast.error(t('best.form.errSize')); setStep('basic'); return; }
+    if (!m.crRating.trim() || m.crValue.trim() === '') { toast.error(t('best.form.errCr')); setStep('basic'); return; }
+    if (m.armorClass.trim() === '') { toast.error(t('best.form.errAc')); setStep('defense'); return; }
     onSubmit(buildMonsterRequest(m));
   };
+
+  const stepIndex = STEPS.findIndex((s) => s.key === step);
+  const goPrev = () => { if (stepIndex > 0) setStep(STEPS[stepIndex - 1].key); };
+  const goNext = () => { if (stepIndex < STEPS.length - 1) setStep(STEPS[stepIndex + 1].key); };
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--stone)' }}>
@@ -170,20 +191,52 @@ export default function MonsterFormBody({ initial, dictionaries, skills, scope, 
         </div>
       </header>
 
-      <div style={{ maxWidth: 880, margin: '0 auto', padding: 'clamp(16px, 3vw, 28px)' }}>
-        {/* 01 */}
-        <Section index="01" title={t('best.form.s01')} sub={t('best.form.s01sub')} open={open.basic} onToggle={() => toggleSec('basic')}>
+      <div className="bd-wizard" style={{ maxWidth: 1080, margin: '0 auto', padding: 'clamp(16px, 3vw, 28px)', display: 'grid', gridTemplateColumns: '220px 1fr', gap: 20, alignItems: 'start' }}>
+        {/* Left rail */}
+        <nav className="ao-panel bd-rail" style={{ padding: 10, position: 'sticky', top: 84, display: 'flex', flexDirection: 'column', gap: 2 }}>
+          {STEPS.map((s) => {
+            const active = s.key === step;
+            const err = stepErrors[s.key];
+            return (
+              <button
+                key={s.key}
+                type="button"
+                onClick={() => setStep(s.key)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 11,
+                  padding: '11px 12px',
+                  background: active ? 'linear-gradient(90deg, rgba(176,141,78,0.12), transparent)' : 'transparent',
+                  border: 'none',
+                  borderLeft: `2px solid ${active ? 'var(--gold)' : 'transparent'}`,
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                }}
+              >
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: active ? 'var(--gold-deep)' : 'var(--ink-faint)', width: 18 }}>{s.index}</span>
+                <span style={{ width: 7, height: 7, borderRadius: '50%', flexShrink: 0, background: err ? 'var(--ember)' : active ? 'var(--gold)' : 'var(--bronze)', boxShadow: err ? '0 0 7px var(--ember)' : 'none' }} />
+                <span style={{ flex: 1, fontFamily: 'var(--font-display)', fontSize: 11, letterSpacing: 'var(--track-eng)', textTransform: 'uppercase', color: active ? 'var(--ink-bright)' : 'var(--ink-quiet)' }}>{t(s.titleKey)}</span>
+              </button>
+            );
+          })}
+        </nav>
+
+        {/* Main */}
+        <div className="bd-main" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        {step === 'basic' && (
+        <StepPanel index="01" title={t('best.form.s01')} sub={t('best.form.s01sub')}>
           <Grid>
             <FieldBlock label={t('best.form.nameRu')} required><Text value={m.nameRusloc} onChange={(v) => set('nameRusloc', v)} placeholder={t('best.form.namePh')} /></FieldBlock>
             <FieldBlock label={t('best.form.nameEn')}><Text value={m.nameEngloc} onChange={(v) => set('nameEngloc', v)} placeholder="Goblin" /></FieldBlock>
             <FieldBlock label={t('best.form.slug')} hint={t('best.form.slugHint')}><Text value={m.slug} onChange={(v) => set('slug', v)} placeholder="goblin" mono /></FieldBlock>
             <FieldBlock label={t('best.form.alignment')}><Sel value={m.alignmentId} onChange={(v) => set('alignmentId', v)} options={dictOpts(dictionaries.alignments)} placeholder={t('best.form.noneSelected')} /></FieldBlock>
-            <FieldBlock label={t('best.form.size')} required><Sel value={m.size} onChange={(v) => set('size', v as MonsterFormState['size'])} options={sizeOpts} placeholder={t('best.form.pickSize')} /></FieldBlock>
-            <FieldBlock label={t('best.form.sizeSecondary')}><Sel value={m.sizeSecondary} onChange={(v) => set('sizeSecondary', v)} options={sizeOpts} placeholder={t('best.form.none')} /></FieldBlock>
+            <FieldBlock label={t('best.form.size')} required><Sel value={m.sizeId} onChange={(v) => set('sizeId', v)} options={sizeOpts} placeholder={t('best.form.pickSize')} /></FieldBlock>
+            <FieldBlock label={t('best.form.sizeSecondary')}><Sel value={m.sizeSecondaryId} onChange={(v) => set('sizeSecondaryId', v)} options={sizeOpts} placeholder={t('best.form.none')} /></FieldBlock>
           </Grid>
           <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-end', gap: 18, marginTop: 14 }}>
             <Check on={m.isSwarm} onChange={() => set('isSwarm', !m.isSwarm)} label={t('best.form.isSwarm')} />
-            {m.isSwarm && <div style={{ width: 200 }}><Label>{t('best.form.swarmSize')}</Label><Sel value={m.swarmSize} onChange={(v) => set('swarmSize', v)} options={sizeOpts} placeholder={t('best.form.pickSize')} /></div>}
+            {m.isSwarm && <div style={{ width: 200 }}><Label>{t('best.form.swarmSize')}</Label><Sel value={m.swarmSizeId} onChange={(v) => set('swarmSizeId', v)} options={sizeOpts} placeholder={t('best.form.pickSize')} /></div>}
           </div>
           <Grid min={150}>
             <FieldBlock label={t('best.form.crRating')} required><Text value={m.crRating} onChange={(v) => set('crRating', v)} placeholder="1/4" mono /></FieldBlock>
@@ -196,10 +249,10 @@ export default function MonsterFormBody({ initial, dictionaries, skills, scope, 
             {scope === 'SYSTEM' && <Check on={m.isActive} onChange={() => set('isActive', !m.isActive)} label={t('best.form.isActive')} />}
             {scope === 'CAMPAIGN' && <Check on={m.isVisibleToPlayers} onChange={() => set('isVisibleToPlayers', !m.isVisibleToPlayers)} label={t('best.form.isVisible')} />}
           </div>
-        </Section>
-
-        {/* 02 */}
-        <Section index="02" title={t('best.form.s02')} sub={t('best.form.s02sub')} open={open.defense} onToggle={() => toggleSec('defense')}>
+        </StepPanel>
+        )}
+        {step === 'defense' && (
+        <StepPanel index="02" title={t('best.form.s02')} sub={t('best.form.s02sub')}>
           <Grid min={150}>
             <FieldBlock label={t('best.form.armorClass')} required><Num value={m.armorClass} onChange={(v) => set('armorClass', v)} /></FieldBlock>
             <FieldBlock label={t('best.form.acText')}><Text value={m.armorClassText} onChange={(v) => set('armorClassText', v)} /></FieldBlock>
@@ -214,10 +267,10 @@ export default function MonsterFormBody({ initial, dictionaries, skills, scope, 
             <FieldBlock label={t('best.form.hpDiceMod')}><Num value={m.hpDiceModifier} onChange={(v) => set('hpDiceModifier', v)} /></FieldBlock>
             <FieldBlock label={t('best.form.hpFormula')}><Text value={m.hpFormula} onChange={(v) => set('hpFormula', v)} placeholder="2d6" mono /></FieldBlock>
           </Grid>
-        </Section>
-
-        {/* 03 */}
-        <Section index="03" title={t('best.form.s03')} sub={t('best.form.s03sub')} open={open.abilities} onToggle={() => toggleSec('abilities')}>
+        </StepPanel>
+        )}
+        {step === 'abilities' && (
+        <StepPanel index="03" title={t('best.form.s03')} sub={t('best.form.s03sub')}>
           <SubHead>{t('best.form.abilityScores')}</SubHead>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 10 }} className="bd-abil">
             {ABILITY_SCORE_FIELDS.map((a) => (
@@ -231,20 +284,20 @@ export default function MonsterFormBody({ initial, dictionaries, skills, scope, 
             <FieldBlock label={t('best.form.passivePerception')}><Num value={m.passivePerception} onChange={(v) => set('passivePerception', v)} /></FieldBlock>
             <FieldBlock label={t('best.form.telepathy')}><Num value={m.telepathyFt} onChange={(v) => set('telepathyFt', v)} /></FieldBlock>
           </Grid>
-        </Section>
-
-        {/* 04 */}
-        <Section index="04" title={t('best.form.s04')} sub={t('best.form.s04sub')} open={open.refs} onToggle={() => toggleSec('refs')}>
+        </StepPanel>
+        )}
+        {step === 'refs' && (
+        <StepPanel index="04" title={t('best.form.s04')} sub={t('best.form.s04sub')}>
           <SubHead>{t('best.form.creatureTypes')}</SubHead><ChipMulti ids={m.creatureTypeIds} onChange={(v) => set('creatureTypeIds', v)} options={dictionaries['creature-types']} emptyLabel={t('best.form.emptyDict')} />
           <SubHead>{t('best.form.languages')}</SubHead><ChipMulti ids={m.languageIds} onChange={(v) => set('languageIds', v)} options={dictionaries.languages} emptyLabel={t('best.form.emptyDict')} />
           <SubHead>{t('best.form.condImmunities')}</SubHead><ChipMulti ids={m.conditionImmunityIds} onChange={(v) => set('conditionImmunityIds', v)} options={dictionaries.conditions} emptyLabel={t('best.form.emptyDict')} />
           <SubHead>{t('best.form.habitats')}</SubHead><ChipMulti ids={m.habitatIds} onChange={(v) => set('habitatIds', v)} options={dictionaries.habitats} emptyLabel={t('best.form.emptyDict')} />
           <SubHead>{t('best.form.treasureTags')}</SubHead><ChipMulti ids={m.treasureTagIds} onChange={(v) => set('treasureTagIds', v)} options={dictionaries['treasure-tags']} emptyLabel={t('best.form.emptyDict')} />
           <SubHead>{t('best.form.sources')}</SubHead><ChipMulti ids={m.sourceIds} onChange={(v) => set('sourceIds', v)} options={dictionaries.sources} emptyLabel={t('best.form.emptyDict')} />
-        </Section>
-
-        {/* 05 */}
-        <Section index="05" title={t('best.form.s05')} sub={t('best.form.s05sub')} open={open.lists} onToggle={() => toggleSec('lists')}>
+        </StepPanel>
+        )}
+        {step === 'lists' && (
+        <StepPanel index="05" title={t('best.form.s05')} sub={t('best.form.s05sub')}>
           <SubHead>{t('best.form.speeds')}</SubHead>
           {m.speeds.map((r) => (
             <RowShell key={r._id} removeTitle={t('best.form.removeRow')} onRemove={() => rmRow('speeds', r._id)}>
@@ -267,11 +320,11 @@ export default function MonsterFormBody({ initial, dictionaries, skills, scope, 
           <SubHead>{t('best.form.saves')}</SubHead>
           {m.savingThrows.map((r) => (
             <RowShell key={r._id} removeTitle={t('best.form.removeRow')} onRemove={() => rmRow('savingThrows', r._id)}>
-              <div style={{ flex: '1 1 160px' }}><Sel value={r.ability} onChange={(v) => setRow('savingThrows', r._id, { ability: v })} options={abilityOpts} /></div>
+              <div style={{ flex: '1 1 160px' }}><Sel value={r.abilityId} onChange={(v) => setRow('savingThrows', r._id, { abilityId: v })} options={abilityOpts} placeholder={t('best.form.pickType')} /></div>
               <Num value={r.bonus} onChange={(v) => setRow('savingThrows', r._id, { bonus: v })} w={80} />
             </RowShell>
           ))}
-          <AddBtn onClick={() => addRow('savingThrows', { ability: 'DEXTERITY', bonus: '0' })}>{t('best.form.addSave')}</AddBtn>
+          <AddBtn onClick={() => addRow('savingThrows', { abilityId: '', bonus: '0' })}>{t('best.form.addSave')}</AddBtn>
 
           <SubHead>{t('best.form.skills')}</SubHead>
           {m.skillProficiencies.map((r) => (
@@ -289,11 +342,11 @@ export default function MonsterFormBody({ initial, dictionaries, skills, scope, 
                 <SubHead>{title}</SubHead>
                 {m[key].map((r) => (
                   <RowShell key={r._id} removeTitle={t('best.form.removeRow')} onRemove={() => rmRow(key, r._id)}>
-                    <div style={{ flex: '1 1 160px' }}><Sel value={r.damageType} onChange={(v) => setRow(key, r._id, { damageType: v })} options={damageOpts} placeholder={t('best.form.pickDmg')} /></div>
+                    <div style={{ flex: '1 1 160px' }}><Sel value={r.damageTypeId} onChange={(v) => setRow(key, r._id, { damageTypeId: v })} options={damageOpts} placeholder={t('best.form.pickDmg')} /></div>
                     <div style={{ flex: '2 1 180px' }}><Text value={r.note} onChange={(v) => setRow(key, r._id, { note: v })} placeholder={t('best.form.notePh')} /></div>
                   </RowShell>
                 ))}
-                <AddBtn onClick={() => addRow(key, { damageType: '', note: '' })}>{t('best.form.addRow')}</AddBtn>
+                <AddBtn onClick={() => addRow(key, { damageTypeId: '', note: '' })}>{t('best.form.addRow')}</AddBtn>
               </div>
             );
           })}
@@ -306,10 +359,10 @@ export default function MonsterFormBody({ initial, dictionaries, skills, scope, 
             </RowShell>
           ))}
           <AddBtn onClick={() => addRow('gear', { itemId: '', qty: '1' })}>{t('best.form.addGear')}</AddBtn>
-        </Section>
-
-        {/* 06 */}
-        <Section index="06" title={t('best.form.s06')} sub={t('best.form.s06sub')} open={open.features} onToggle={() => toggleSec('features')}>
+        </StepPanel>
+        )}
+        {step === 'features' && (
+        <StepPanel index="06" title={t('best.form.s06')} sub={t('best.form.s06sub')}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginTop: 10 }}>
             {m.features.map((f) => {
               const patchFeature = (patch: Partial<FeatureFormRow>) => setRow('features', f._id, patch);
@@ -343,7 +396,7 @@ export default function MonsterFormBody({ initial, dictionaries, skills, scope, 
                   </Grid>
                   <SubHead>{t('best.form.save2')}</SubHead>
                   <Grid min={150}>
-                    <FieldBlock label={t('best.form.fSaveAbility')}><Sel value={f.saveAbility} onChange={(v) => patchFeature({ saveAbility: v })} options={abilityOpts} placeholder={t('best.form.none')} /></FieldBlock>
+                    <FieldBlock label={t('best.form.fSaveAbility')}><Sel value={f.saveAbilityId} onChange={(v) => patchFeature({ saveAbilityId: v })} options={abilityOpts} placeholder={t('best.form.none')} /></FieldBlock>
                     <FieldBlock label={t('best.form.fSaveDc')}><Num value={f.saveDc} onChange={(v) => patchFeature({ saveDc: v })} /></FieldBlock>
                   </Grid>
 
@@ -353,35 +406,47 @@ export default function MonsterFormBody({ initial, dictionaries, skills, scope, 
                       <Num value={d.sortOrder} onChange={(v) => setDamages(f.damages.map((x) => x._id === d._id ? { ...x, sortOrder: v } : x))} w={56} />
                       <Num value={d.average} onChange={(v) => setDamages(f.damages.map((x) => x._id === d._id ? { ...x, average: v } : x))} w={64} />
                       <div style={{ flex: '1 1 90px' }}><Text value={d.dice} onChange={(v) => setDamages(f.damages.map((x) => x._id === d._id ? { ...x, dice: v } : x))} placeholder="1d6+2" mono /></div>
-                      <div style={{ flex: '1 1 130px' }}><Sel value={d.damageType} onChange={(v) => setDamages(f.damages.map((x) => x._id === d._id ? { ...x, damageType: v } : x))} options={damageOpts} placeholder={t('best.form.pickType')} /></div>
+                      <div style={{ flex: '1 1 130px' }}><Sel value={d.damageTypeId} onChange={(v) => setDamages(f.damages.map((x) => x._id === d._id ? { ...x, damageTypeId: v } : x))} options={damageOpts} placeholder={t('best.form.pickType')} /></div>
                       <div style={{ flex: '1 1 120px' }}><Text value={d.note} onChange={(v) => setDamages(f.damages.map((x) => x._id === d._id ? { ...x, note: v } : x))} placeholder={t('best.form.shortNotePh')} /></div>
                     </RowShell>
                   ))}
-                  <AddBtn onClick={() => setDamages([...f.damages, { _id: rowUid(), sortOrder: String(f.damages.length), average: '', dice: '', damageType: '', note: '' }])}>{t('best.form.addDamage')}</AddBtn>
+                  <AddBtn onClick={() => setDamages([...f.damages, { _id: rowUid(), sortOrder: String(f.damages.length), average: '', dice: '', damageTypeId: '', note: '' }])}>{t('best.form.addDamage')}</AddBtn>
                 </div>
               );
             })}
           </div>
-          <AddBtn onClick={() => addRow('features', { section: 'actions', sortOrder: String(m.features.length), nameRusloc: '', nameEngloc: '', kind: '', rechargeMin: '', rechargeMax: '', descriptionRusloc: '', descriptionEngloc: '', attackType: '', attackBonus: '', reachFt: '', rangeFt: '', rangeLongFt: '', saveAbility: '', saveDc: '', damages: [] })}>{t('best.form.addFeature')}</AddBtn>
-        </Section>
-
-        {/* 07 */}
-        <Section index="07" title={t('best.form.s07')} sub={t('best.form.s07sub')} open={open.lore} onToggle={() => toggleSec('lore')}>
+          <AddBtn onClick={() => addRow('features', { section: 'actions', sortOrder: String(m.features.length), nameRusloc: '', nameEngloc: '', kind: '', rechargeMin: '', rechargeMax: '', descriptionRusloc: '', descriptionEngloc: '', attackType: '', attackBonus: '', reachFt: '', rangeFt: '', rangeLongFt: '', saveAbilityId: '', saveDc: '', damages: [] })}>{t('best.form.addFeature')}</AddBtn>
+        </StepPanel>
+        )}
+        {step === 'lore' && (
+        <StepPanel index="07" title={t('best.form.s07')} sub={t('best.form.s07sub')}>
           <div style={{ marginTop: 14 }}><Label>{t('best.form.lore')}</Label><textarea className="ao-input" rows={4} value={m.loreText} onChange={(e) => set('loreText', e.target.value)} style={{ resize: 'vertical', fontFamily: 'var(--font-serif)', fontSize: 16 }} /></div>
           <div style={{ marginTop: 14 }}><Label>{t('best.form.legendaryText')}</Label><textarea className="ao-input" rows={3} value={m.legendaryText} onChange={(e) => set('legendaryText', e.target.value)} style={{ resize: 'vertical', fontFamily: 'var(--font-serif)', fontSize: 16 }} /></div>
           <Grid min={180}>
             <FieldBlock label={t('best.form.legendaryBase')}><Num value={m.legendaryUsesBase} onChange={(v) => set('legendaryUsesBase', v)} /></FieldBlock>
             <FieldBlock label={t('best.form.legendaryLair')}><Num value={m.legendaryUsesLair} onChange={(v) => set('legendaryUsesLair', v)} /></FieldBlock>
           </Grid>
-        </Section>
+        </StepPanel>
+        )}
 
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 18, paddingBottom: 20 }}>
-          <button type="button" className="ao-btn ao-btn--ghost ao-btn--lg" onClick={onCancel}><Ban size={14} /> {t('best.com.cancel')}</button>
-          <button type="button" className="ao-btn ao-btn--primary ao-btn--lg" onClick={submit} disabled={submitting}><Save size={14} /> {submitting ? t('best.com.saving') : t('best.form.save')}</button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 4, paddingBottom: 20 }}>
+          <button type="button" className="ao-btn ao-btn--ghost" onClick={goPrev} disabled={stepIndex === 0}><ChevronLeft size={14} /> {t('best.form.prevStep')}</button>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--ink-faint)' }}>{t('best.form.stepOf', { n: stepIndex + 1, total: STEPS.length })}</span>
+          <div style={{ flex: 1 }} />
+          {stepIndex < STEPS.length - 1
+            ? <button type="button" className="ao-btn ao-btn--primary" onClick={goNext}>{t('best.form.nextStep')} <ChevronRight size={14} /></button>
+            : <button type="button" className="ao-btn ao-btn--primary ao-btn--lg" onClick={submit} disabled={submitting}><Save size={14} /> {submitting ? t('best.com.saving') : t('best.form.save')}</button>}
+        </div>
         </div>
       </div>
 
-      <style>{`@media (max-width: 560px) { .bd-abil { grid-template-columns: repeat(3, 1fr) !important; } }`}</style>
+      <style>{`
+        @media (max-width: 560px) { .bd-abil { grid-template-columns: repeat(3, 1fr) !important; } }
+        @media (max-width: 820px) {
+          .bd-wizard { grid-template-columns: 1fr !important; }
+          .bd-rail { position: static !important; flex-direction: row !important; flex-wrap: wrap; }
+        }
+      `}</style>
     </div>
   );
 }

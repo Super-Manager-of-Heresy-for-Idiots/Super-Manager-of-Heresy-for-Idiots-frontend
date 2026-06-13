@@ -1,7 +1,4 @@
 import type {
-  AbilityEnum,
-  CreatureSize,
-  DamageType,
   MonsterRequest,
   MonsterResponse,
 } from '@/types';
@@ -16,11 +13,11 @@ export const rowUid = () => ++UID;
 
 export interface SpeedFormRow { _id: number; movementTypeId: string; ft: string; hover: boolean; }
 export interface SenseFormRow { _id: number; senseTypeId: string; ft: string; }
-export interface SaveFormRow { _id: number; ability: AbilityEnum; bonus: string; }
+export interface SaveFormRow { _id: number; abilityId: string; bonus: string; }
 export interface SkillFormRow { _id: number; proficiencySkillId: string; bonus: string; }
-export interface DamageNoteFormRow { _id: number; damageType: string; note: string; }
+export interface DamageNoteFormRow { _id: number; damageTypeId: string; note: string; }
 export interface GearFormRow { _id: number; itemId: string; qty: string; }
-export interface FeatureDamageFormRow { _id: number; sortOrder: string; average: string; dice: string; damageType: string; note: string; }
+export interface FeatureDamageFormRow { _id: number; sortOrder: string; average: string; dice: string; damageTypeId: string; note: string; }
 export interface FeatureFormRow {
   _id: number;
   section: string;
@@ -37,7 +34,7 @@ export interface FeatureFormRow {
   reachFt: string;
   rangeFt: string;
   rangeLongFt: string;
-  saveAbility: string;
+  saveAbilityId: string;
   saveDc: string;
   damages: FeatureDamageFormRow[];
 }
@@ -47,10 +44,10 @@ export interface MonsterFormState {
   nameEngloc: string;
   slug: string;
   alignmentId: string;
-  size: CreatureSize | '';
-  sizeSecondary: string;
+  sizeId: string;
+  sizeSecondaryId: string;
   isSwarm: boolean;
-  swarmSize: string;
+  swarmSizeId: string;
   crRating: string;
   crValue: string;
   xpBase: string;
@@ -99,7 +96,7 @@ export interface MonsterFormState {
 export function emptyMonsterForm(): MonsterFormState {
   return {
     nameRusloc: '', nameEngloc: '', slug: '', alignmentId: '',
-    size: '', sizeSecondary: '', isSwarm: false, swarmSize: '',
+    sizeId: '', sizeSecondaryId: '', isSwarm: false, swarmSizeId: '',
     crRating: '', crValue: '', xpBase: '', xpLair: '', proficiencyBonus: '',
     isActive: true, isVisibleToPlayers: false,
     armorClass: '', armorClassText: '', initiativeBonus: '', initiativeScore: '',
@@ -123,10 +120,10 @@ export function monsterToForm(m: MonsterResponse): MonsterFormState {
     nameEngloc: s(m.nameEngloc),
     slug: m.slug ?? '',
     alignmentId: m.alignment?.id ?? '',
-    size: m.size,
-    sizeSecondary: s(m.sizeSecondary),
+    sizeId: m.size?.id ?? '',
+    sizeSecondaryId: m.sizeSecondary?.id ?? '',
     isSwarm: m.isSwarm,
-    swarmSize: s(m.swarmSize),
+    swarmSizeId: m.swarmSize?.id ?? '',
     crRating: m.crRating,
     crValue: s(m.crValue),
     xpBase: s(m.xpBase),
@@ -159,11 +156,11 @@ export function monsterToForm(m: MonsterResponse): MonsterFormState {
     sourceIds: m.sources.map((x) => x.id),
     speeds: m.speeds.map((r) => ({ _id: rowUid(), movementTypeId: r.movementType.id, ft: s(r.ft), hover: r.hover })),
     senses: m.senses.map((r) => ({ _id: rowUid(), senseTypeId: r.senseType.id, ft: s(r.ft) })),
-    savingThrows: m.savingThrows.map((r) => ({ _id: rowUid(), ability: r.ability, bonus: s(r.bonus) })),
+    savingThrows: m.savingThrows.map((r) => ({ _id: rowUid(), abilityId: r.ability?.id ?? '', bonus: s(r.bonus) })),
     skillProficiencies: m.skillProficiencies.map((r) => ({ _id: rowUid(), proficiencySkillId: r.proficiencySkillId, bonus: s(r.bonus) })),
-    damageResistances: m.damageResistances.map((r) => ({ _id: rowUid(), damageType: s(r.damageType), note: s(r.note) })),
-    damageImmunities: m.damageImmunities.map((r) => ({ _id: rowUid(), damageType: s(r.damageType), note: s(r.note) })),
-    damageVulnerabilities: m.damageVulnerabilities.map((r) => ({ _id: rowUid(), damageType: s(r.damageType), note: s(r.note) })),
+    damageResistances: m.damageResistances.map((r) => ({ _id: rowUid(), damageTypeId: r.damageType?.id ?? '', note: s(r.note) })),
+    damageImmunities: m.damageImmunities.map((r) => ({ _id: rowUid(), damageTypeId: r.damageType?.id ?? '', note: s(r.note) })),
+    damageVulnerabilities: m.damageVulnerabilities.map((r) => ({ _id: rowUid(), damageTypeId: r.damageType?.id ?? '', note: s(r.note) })),
     gear: m.gear.map((r) => ({ _id: rowUid(), itemId: r.item.id, qty: s(r.qty) })),
     features: m.features.map((f) => ({
       _id: rowUid(),
@@ -181,14 +178,14 @@ export function monsterToForm(m: MonsterResponse): MonsterFormState {
       reachFt: s(f.reachFt),
       rangeFt: s(f.rangeFt),
       rangeLongFt: s(f.rangeLongFt),
-      saveAbility: s(f.saveAbility),
+      saveAbilityId: f.saveAbility?.id ?? '',
       saveDc: s(f.saveDc),
       damages: f.damages.map((d) => ({
         _id: rowUid(),
         sortOrder: s(d.sortOrder),
         average: s(d.average),
         dice: s(d.dice),
-        damageType: s(d.damageType),
+        damageTypeId: d.damageType?.id ?? '',
         note: s(d.note),
       })),
     })),
@@ -222,10 +219,10 @@ export function buildMonsterRequest(f: MonsterFormState): MonsterRequest {
     nameRusloc: f.nameRusloc.trim(),
     nameEngloc: orUndef(f.nameEngloc),
     alignmentId: f.alignmentId || null,
-    size: (f.size || 'MEDIUM') as CreatureSize,
-    sizeSecondary: (f.sizeSecondary || null) as CreatureSize | null,
+    sizeId: f.sizeId,
+    sizeSecondaryId: f.sizeSecondaryId || null,
     isSwarm: f.isSwarm,
-    swarmSize: f.isSwarm ? ((f.swarmSize || null) as CreatureSize | null) : null,
+    swarmSizeId: f.isSwarm ? (f.swarmSizeId || null) : null,
     armorClass: reqInt(f.armorClass),
     armorClassText: orUndef(f.armorClassText),
     initiativeBonus: toInt(f.initiativeBonus) ?? null,
@@ -266,13 +263,13 @@ export function buildMonsterRequest(f: MonsterFormState): MonsterRequest {
     senses: f.senses
       .filter((r) => r.senseTypeId)
       .map((r) => ({ senseTypeId: r.senseTypeId, ft: reqInt(r.ft) })),
-    savingThrows: f.savingThrows.map((r) => ({ ability: r.ability, bonus: reqInt(r.bonus) })),
+    savingThrows: f.savingThrows.filter((r) => r.abilityId).map((r) => ({ abilityId: r.abilityId, bonus: reqInt(r.bonus) })),
     skillProficiencies: f.skillProficiencies
       .filter((r) => r.proficiencySkillId)
       .map((r) => ({ proficiencySkillId: r.proficiencySkillId, bonus: reqInt(r.bonus) })),
-    damageResistances: f.damageResistances.map((r) => ({ damageType: (r.damageType || null) as DamageType | null, note: orUndef(r.note) ?? null })),
-    damageImmunities: f.damageImmunities.map((r) => ({ damageType: (r.damageType || null) as DamageType | null, note: orUndef(r.note) ?? null })),
-    damageVulnerabilities: f.damageVulnerabilities.map((r) => ({ damageType: (r.damageType || null) as DamageType | null, note: orUndef(r.note) ?? null })),
+    damageResistances: f.damageResistances.map((r) => ({ damageTypeId: r.damageTypeId || null, note: orUndef(r.note) ?? null })),
+    damageImmunities: f.damageImmunities.map((r) => ({ damageTypeId: r.damageTypeId || null, note: orUndef(r.note) ?? null })),
+    damageVulnerabilities: f.damageVulnerabilities.map((r) => ({ damageTypeId: r.damageTypeId || null, note: orUndef(r.note) ?? null })),
     gear: f.gear.filter((r) => r.itemId).map((r) => ({ itemId: r.itemId, qty: toInt(r.qty) ?? 1 })),
     features: f.features.map((ft, i) => ({
       section: ft.section || 'actions',
@@ -289,13 +286,13 @@ export function buildMonsterRequest(f: MonsterFormState): MonsterRequest {
       reachFt: toInt(ft.reachFt) ?? null,
       rangeFt: toInt(ft.rangeFt) ?? null,
       rangeLongFt: toInt(ft.rangeLongFt) ?? null,
-      saveAbility: (ft.saveAbility || null) as AbilityEnum | null,
+      saveAbilityId: ft.saveAbilityId || null,
       saveDc: toInt(ft.saveDc) ?? null,
       damages: ft.damages.map((d, di) => ({
         sortOrder: toInt(d.sortOrder) ?? di,
         average: toInt(d.average) ?? null,
         dice: orUndef(d.dice) ?? null,
-        damageType: (d.damageType || null) as DamageType | null,
+        damageTypeId: d.damageTypeId || null,
         note: orUndef(d.note) ?? null,
       })),
     })),

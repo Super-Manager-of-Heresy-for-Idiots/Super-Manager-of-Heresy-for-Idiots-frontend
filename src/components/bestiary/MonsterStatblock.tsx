@@ -5,12 +5,10 @@ import type { MonsterFeatureRow, MonsterResponse } from '@/types';
 import {
   ABILITY_SCORE_FIELDS,
   SECTION_ORDER,
-  abilityKey,
   abilityShortKey,
-  damageKey,
+  dictName,
   scopeKey,
   sectionKey,
-  sizeKey,
   type TFunc,
 } from './constants';
 
@@ -56,7 +54,7 @@ function DefenseTile({ icon, value, label }: { icon: React.ReactNode; value: Rea
   );
 }
 
-function FeatureCard({ f, t }: { f: MonsterFeatureRow; t: TFunc }) {
+function FeatureCard({ f, t, lang }: { f: MonsterFeatureRow; t: TFunc; lang: string }) {
   const recharge = f.rechargeMin != null
     ? ` (${t('best.atk.recharge', { range: `${f.rechargeMin}${f.rechargeMax && f.rechargeMax !== f.rechargeMin ? `–${f.rechargeMax}` : ''}` })})`
     : '';
@@ -67,7 +65,7 @@ function FeatureCard({ f, t }: { f: MonsterFeatureRow; t: TFunc }) {
     if (f.reachFt != null) attackBits.push(t('best.atk.reach', { n: f.reachFt }));
     if (f.rangeFt != null) attackBits.push(t('best.atk.range', { r: `${f.rangeFt}${f.rangeLongFt ? `/${f.rangeLongFt}` : ''}` }));
   }
-  if (f.saveAbility && f.saveDc != null) attackBits.push(t('best.atk.save', { ability: t(abilityKey(f.saveAbility)), dc: f.saveDc }));
+  if (f.saveAbility && f.saveDc != null) attackBits.push(t('best.atk.save', { ability: dictName(f.saveAbility, lang), dc: f.saveDc }));
   return (
     <div style={{ fontSize: 14, lineHeight: 1.62, color: 'var(--ink)', paddingLeft: 14, borderLeft: '1px solid var(--hairline)' }}>
       <span style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontWeight: 600, fontSize: 16, color: 'var(--ink-bright)' }}>
@@ -86,7 +84,7 @@ function FeatureCard({ f, t }: { f: MonsterFeatureRow; t: TFunc }) {
               <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--gold-pale)' }}>
                 {d.average != null ? `${d.average} ` : ''}{d.dice ? `(${d.dice})` : ''}
               </span>
-              {d.damageType ? ` ${t(damageKey(d.damageType))}` : ''}
+              {d.damageType ? ` ${dictName(d.damageType, lang)}` : ''}
               {d.note ? <span style={{ color: 'var(--ink-faint)' }}> — {d.note}</span> : ''}
             </span>
           ))}
@@ -107,7 +105,7 @@ export default function MonsterStatblock({ monster: m }: { monster: MonsterRespo
   })();
 
   const subtitle = [
-    `${t(sizeKey(m.size))}${m.sizeSecondary ? ` / ${t(sizeKey(m.sizeSecondary))}` : ''}${m.isSwarm && m.swarmSize ? ` ${t('best.sb.swarmOf', { size: t(sizeKey(m.swarmSize)).toLowerCase() })}` : ''}`,
+    `${dictName(m.size, lang)}${m.sizeSecondary ? ` / ${dictName(m.sizeSecondary, lang)}` : ''}${m.isSwarm && m.swarmSize ? ` ${t('best.sb.swarmOf', { size: dictName(m.swarmSize, lang).toLowerCase() })}` : ''}`,
     m.creatureTypes.map((ct) => ct.nameRusloc.toLowerCase()).join(', '),
     m.alignment ? m.alignment.nameRusloc.toLowerCase() : t('best.sb.unaligned'),
   ].filter(Boolean).join(' · ');
@@ -150,7 +148,7 @@ export default function MonsterStatblock({ monster: m }: { monster: MonsterRespo
         <div style={{ marginTop: 14, display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 8 }} className="bd-abil">
           {ABILITY_SCORE_FIELDS.map((a) => {
             const score = m[a.key];
-            const save = m.savingThrows.find((sv) => sv.ability === a.full);
+            const save = m.savingThrows.find((sv) => sv.ability.code === a.full);
             return (
               <div key={a.full} className="ao-stat ao-frame" style={{ padding: '12px 6px' }}>
                 <span className="ao-frame-c" />
@@ -169,9 +167,9 @@ export default function MonsterStatblock({ monster: m }: { monster: MonsterRespo
 
         <div>
           {m.skillProficiencies.length > 0 && <PropLine label={t('best.prop.skills')}>{m.skillProficiencies.map((sk) => `${sk.skillName} ${signed(sk.bonus)}`).join(', ')}</PropLine>}
-          {m.damageVulnerabilities.length > 0 && <PropLine label={t('best.prop.vulnerabilities')}>{m.damageVulnerabilities.map((d) => `${d.damageType ? t(damageKey(d.damageType)) : ''}${d.note ? ` (${d.note})` : ''}`).join(', ')}</PropLine>}
-          {m.damageResistances.length > 0 && <PropLine label={t('best.prop.resistances')}>{m.damageResistances.map((d) => `${d.damageType ? t(damageKey(d.damageType)) : ''}${d.note ? ` (${d.note})` : ''}`).join(', ')}</PropLine>}
-          {m.damageImmunities.length > 0 && <PropLine label={t('best.prop.dmgImmunities')}>{m.damageImmunities.map((d) => `${d.damageType ? t(damageKey(d.damageType)) : ''}${d.note ? ` (${d.note})` : ''}`).join(', ')}</PropLine>}
+          {m.damageVulnerabilities.length > 0 && <PropLine label={t('best.prop.vulnerabilities')}>{m.damageVulnerabilities.map((d) => `${d.damageType ? dictName(d.damageType, lang) : ''}${d.note ? ` (${d.note})` : ''}`).join(', ')}</PropLine>}
+          {m.damageResistances.length > 0 && <PropLine label={t('best.prop.resistances')}>{m.damageResistances.map((d) => `${d.damageType ? dictName(d.damageType, lang) : ''}${d.note ? ` (${d.note})` : ''}`).join(', ')}</PropLine>}
+          {m.damageImmunities.length > 0 && <PropLine label={t('best.prop.dmgImmunities')}>{m.damageImmunities.map((d) => `${d.damageType ? dictName(d.damageType, lang) : ''}${d.note ? ` (${d.note})` : ''}`).join(', ')}</PropLine>}
           {m.conditionImmunities.length > 0 && <PropLine label={t('best.prop.condImmunities')}>{m.conditionImmunities.map((c) => c.nameRusloc).join(', ')}</PropLine>}
           {(m.senses.length > 0 || m.passivePerception != null) && (
             <PropLine label={t('best.prop.senses')}>
@@ -197,7 +195,7 @@ export default function MonsterStatblock({ monster: m }: { monster: MonsterRespo
               </p>
             )}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-              {m.features.filter((f) => f.section === sec).sort((a, b) => a.sortOrder - b.sortOrder).map((f) => <FeatureCard key={f.id} f={f} t={t} />)}
+              {m.features.filter((f) => f.section === sec).sort((a, b) => a.sortOrder - b.sortOrder).map((f) => <FeatureCard key={f.id} f={f} t={t} lang={lang} />)}
             </div>
           </section>
         ))}

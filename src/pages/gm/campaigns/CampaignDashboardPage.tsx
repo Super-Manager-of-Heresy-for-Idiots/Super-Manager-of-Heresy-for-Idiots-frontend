@@ -188,6 +188,7 @@ export default function CampaignDashboardPage() {
             <DrillBlock label={t('camp.dash.drill.locations')} glyph="sigil-3" to={`/campaigns/${campaignId}/locations`} />
           </>
         )}
+        <DrillBlock label={t('camp.dash.drill.bestiary')} glyph="sword" to={`/campaigns/${campaignId}/bestiary`} />
         <DrillBlock label={t('camp.dash.drill.storage')} glyph="sword" to={`/campaigns/${campaignId}/storage`} />
         <DrillBlock label={t('camp.dash.drill.invite')} glyph="cross-pat" to={`/campaigns/${campaignId}/invite`} />
         {canManageCampaign && (
