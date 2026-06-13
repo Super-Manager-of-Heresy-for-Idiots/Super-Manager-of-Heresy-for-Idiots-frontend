@@ -1,6 +1,9 @@
+import type { CSSProperties } from 'react';
 import { Rune } from '@/components/ordo';
 import { formatTimeAgo } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import type { WsEventType } from '@/types';
+import s from './EventToast.module.css';
 
 /* ── style config per event type ─────────────────────────── */
 
@@ -41,69 +44,18 @@ export function EventToast({ type, title, body, time }: EventToastProps) {
   const visual = EVENT_STYLE[type] ?? EVENT_STYLE.CHARACTER_UPDATED;
 
   return (
-    <div
-      style={{
-        width: 340,
-        background: 'linear-gradient(180deg, var(--panel-raised) 0%, var(--panel) 100%)',
-        border: '1px solid var(--rule-strong)',
-        borderLeft: `3px solid ${visual.border}`,
-        padding: '14px 16px',
-        display: 'flex',
-        gap: 12,
-        boxShadow: 'var(--shadow-mid)',
-      }}
-    >
-      {/* icon box */}
-      <div
-        style={{
-          width: 32,
-          height: 32,
-          flexShrink: 0,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          background: 'var(--abyss)',
-          border: `1px solid ${visual.color}`,
-        }}
-      >
+    <div className={s.toast} style={{ '--tone': visual.color, '--edge': visual.border } as CSSProperties}>
+      <div className={s.icon}>
         <Rune kind={visual.glyph} size={16} color={visual.color} />
       </div>
 
-      {/* text */}
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div
-          className="ao-engraved"
-          style={{
-            fontSize: 'var(--t-micro)',
-            color: visual.color,
-            lineHeight: 1.3,
-          }}
-        >
-          {title}
-        </div>
+      <div className={s.text}>
+        <div className={cn('ao-engraved', s.title)}>{title}</div>
 
-        <div
-          className="ao-italic"
-          style={{
-            fontSize: 'var(--t-small)',
-            color: 'var(--ink)',
-            marginTop: 3,
-            lineHeight: 1.4,
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-          }}
-        >
-          {body}
-        </div>
+        <div className={cn('ao-italic', s.body)}>{body}</div>
 
         {time && (
-          <div
-            className="ao-codex"
-            style={{ marginTop: 4, fontSize: 10, color: 'var(--ink-faint)' }}
-          >
-            {formatTimeAgo(time)}
-          </div>
+          <div className={cn('ao-codex', s.time)}>{formatTimeAgo(time)}</div>
         )}
       </div>
     </div>

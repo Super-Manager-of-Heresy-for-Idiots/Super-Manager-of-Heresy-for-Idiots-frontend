@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import type { CSSProperties } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Rune, OrdoPanel, OrdoChip, Sigil } from '@/components/ordo';
 import { StatusBadge, CodexID } from '@/components/homebrew';
@@ -12,9 +13,10 @@ import {
   useAdminTags,
   useAdminDeleteTag,
 } from '@/hooks/useHomebrew';
-import { formatDate } from '@/lib/utils';
+import { formatDate, cn } from '@/lib/utils';
 import { useT } from '@/i18n/I18nContext';
 import type { HomebrewStatus, HomebrewPackageResponse, HomebrewTagResponse } from '@/types';
+import s from './AdminHomebrewPage.module.css';
 
 type AdminTab = 'moderation' | 'tags';
 type TFunc = (key: string, vars?: Record<string, string | number>) => string;
@@ -36,25 +38,18 @@ export default function AdminHomebrewPage() {
   return (
     <div>
       {/* ── tab header ────────────────────────────────────────── */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'flex-end',
-          justifyContent: 'space-between',
-          marginBottom: 24,
-        }}
-      >
+      <div className={s.header}>
         {/* left */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+        <div className={s.headerLeft}>
           <Sigil size={48} color="var(--ember)" />
           <div>
             <CodexID>{t('adm.hb.identityName')}</CodexID>
-            <h3 className="ao-h3" style={{ margin: 0, marginTop: 2 }}>{t('adm.hb.allDoctrines')}</h3>
+            <h3 className={cn('ao-h3', s.titleH3)}>{t('adm.hb.allDoctrines')}</h3>
           </div>
         </div>
 
         {/* right */}
-        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+        <div className={s.headerRight}>
           <OrdoChip tone="ember" glyph="flame">{t('adm.hb.inquisitorAccess')}</OrdoChip>
           <button className="ao-btn ao-btn--ghost">
             <Rune kind="scroll" size={11} /> {t('adm.hb.auditLog')}
@@ -66,22 +61,15 @@ export default function AdminHomebrewPage() {
       </div>
 
       {/* ── tabs bar ──────────────────────────────────────────── */}
-      <div
-        style={{
-          display: 'flex',
-          gap: 0,
-          borderBottom: '1px solid var(--rule)',
-          marginBottom: 24,
-        }}
-      >
+      <div className={s.tabsBar}>
         <button
-          className={`ao-tab ${tab === 'moderation' ? 'is-active' : ''}`}
+          className={cn('ao-tab', tab === 'moderation' && 'is-active')}
           onClick={() => setTab('moderation')}
         >
           {t('adm.hb.tabModeration')}
         </button>
         <button
-          className={`ao-tab ${tab === 'tags' ? 'is-active' : ''}`}
+          className={cn('ao-tab', tab === 'tags' && 'is-active')}
           onClick={() => setTab('tags')}
         >
           {t('adm.hb.tabTags')}
@@ -146,24 +134,16 @@ function ModerationPanel() {
   return (
     <>
       {/* ── banner panel: stats grid ──────────────────────────── */}
-      <OrdoPanel frame padding={0} style={{ marginBottom: 18 }}>
-        <div
-          className="ao-rgrid"
-          style={{
-            display: 'grid',
-            gridTemplateColumns: '1.4fr 1fr 1fr 1fr 1fr 1fr',
-            alignItems: 'center',
-            padding: '18px 20px',
-          }}
-        >
+      <OrdoPanel frame padding={0} className={s.mb18}>
+        <div className={cn('ao-rgrid', s.bannerGrid)}>
           {/* user identity */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div className={s.identity}>
             <Sigil size={40} color="var(--ember)" />
             <div>
-              <div className="ao-overline" style={{ color: 'var(--ember)', marginBottom: 2 }}>
+              <div className={cn('ao-overline', s.identityOverline)}>
                 {t('adm.hb.grandAssessor')}
               </div>
-              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--ink-quiet)' }}>
+              <div className={s.identitySub}>
                 {t('adm.hb.inquisitorialReview')}
               </div>
             </div>
@@ -176,24 +156,13 @@ function ModerationPanel() {
             { label: t('adm.hb.statDraft'),    value: draftCount,     color: 'var(--ink-quiet)' },
             { label: t('adm.hb.statWithheld'), value: withheldCount,  color: 'var(--ink-quiet)' },
             { label: t('adm.hb.statFlagged'),  value: deletedCount,   color: 'var(--ember)' },
-          ] as const).map((s) => (
-            <div key={s.label} style={{ textAlign: 'center' }}>
-              <div
-                className="ao-num"
-                style={{
-                  fontFamily: 'var(--font-serif, Georgia, serif)',
-                  fontSize: 28,
-                  lineHeight: 1,
-                  color: s.color,
-                }}
-              >
-                {isLoading ? '\u2014' : s.value}
+          ] as const).map((stat) => (
+            <div key={stat.label} className={s.stat} style={{ '--c': stat.color } as CSSProperties}>
+              <div className={cn('ao-num', s.statValue)}>
+                {isLoading ? '—' : stat.value}
               </div>
-              <div
-                className="ao-overline"
-                style={{ fontSize: 9, marginTop: 4, color: s.color, opacity: 0.8 }}
-              >
-                {s.label}
+              <div className={cn('ao-overline', s.statLabel)}>
+                {stat.label}
               </div>
             </div>
           ))}
@@ -201,84 +170,52 @@ function ModerationPanel() {
       </OrdoPanel>
 
       {/* ── filter bar panel ──────────────────────────────────── */}
-      <OrdoPanel frame padding={0} style={{ marginBottom: 18 }}>
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 12,
-            padding: '12px 18px',
-            flexWrap: 'wrap',
-          }}
-        >
+      <OrdoPanel frame padding={0} className={s.mb18}>
+        <div className={s.filterBar}>
           {/* search */}
-          <div style={{ position: 'relative', width: 300 }}>
+          <div className={s.searchWrap}>
             <input
-              className="ao-input"
+              className={cn('ao-input', s.searchInput)}
               placeholder={t('adm.hb.searchDoctrines')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              style={{ paddingLeft: 34, width: '100%' }}
             />
-            <span
-              style={{
-                position: 'absolute',
-                left: 10,
-                top: '50%',
-                transform: 'translateY(-50%)',
-                color: 'var(--ink-faint)',
-              }}
-            >
+            <span className={s.searchIcon}>
               <Rune kind="search" size={13} />
             </span>
           </div>
 
           {/* divider */}
-          <div style={{ width: 1, height: 24, background: 'var(--rule)' }} />
+          <div className={s.vDivider} />
 
           {/* status label */}
           <span className="ao-overline">{t('adm.hb.statusLabel')}</span>
 
           {/* status filter buttons */}
-          {statusFilters.map((s) => (
+          {statusFilters.map((sf) => (
             <button
-              key={s.id}
-              className={`ao-btn ao-btn--ghost ao-btn--sm`}
-              onClick={() => { setStatusFilter(s.id); setPage(0); }}
-              style={{
-                borderColor: statusFilter === s.id ? 'var(--brass)' : 'var(--rule)',
-                color: statusFilter === s.id ? 'var(--gold-pale)' : undefined,
-                background: statusFilter === s.id ? 'rgba(201,168,76,0.08)' : undefined,
-              }}
+              key={sf.id}
+              className={cn('ao-btn ao-btn--ghost ao-btn--sm', s.statusBtn, statusFilter === sf.id && s.active)}
+              onClick={() => { setStatusFilter(sf.id); setPage(0); }}
             >
-              {s.label}
+              {sf.label}
             </button>
           ))}
 
           {/* divider */}
-          <div style={{ width: 1, height: 24, background: 'var(--rule)' }} />
+          <div className={s.vDivider} />
 
           {/* author placeholder */}
           <span className="ao-overline">{t('adm.hb.authorLabel')}</span>
-          <select
-            className="ao-input"
-            style={{
-              width: 140,
-              padding: '4px 8px',
-              fontSize: 12,
-              background: 'transparent',
-              border: '1px solid var(--rule)',
-              color: 'var(--ink-quiet)',
-            }}
-          >
+          <select className={cn('ao-input', s.authorSelect)}>
             <option value="">{t('adm.hb.allAuthors')}</option>
           </select>
 
           {/* spacer */}
-          <div style={{ flex: 1 }} />
+          <div className={s.spacer} />
 
           {/* row count */}
-          <span className="ao-codex" style={{ fontSize: 11, color: 'var(--ink-faint)' }}>
+          <span className={cn('ao-codex', s.rowCount)}>
             {t('adm.hb.rowsOf', { filtered: filtered.length, total: totalElements })}
           </span>
         </div>
@@ -287,30 +224,30 @@ function ModerationPanel() {
       {/* ── ledger table ──────────────────────────────────────── */}
       {isLoading ? (
         <OrdoPanel frame padding={0}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: 16 }}>
+          <div className={s.skelCol}>
             {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="ao-ph" style={{ width: '100%', height: 48 }} />
+              <div key={i} className={cn('ao-ph', s.skelRow)} />
             ))}
           </div>
         </OrdoPanel>
       ) : (
         <OrdoPanel frame padding={0}>
-          <table className="ao-table" style={{ width: '100%' }}>
+          <table className={cn('ao-table', s.table)}>
             <thead>
               <tr>
-                <th style={{ width: 36, padding: '12px 8px 12px 16px' }}>
-                  <input type="checkbox" style={{ accentColor: 'var(--gold)' }} />
+                <th className={s.thCheck}>
+                  <input type="checkbox" className={s.checkbox} />
                 </th>
-                <th style={{ textAlign: 'left', padding: '12px 12px' }}>{t('adm.hb.colCodex')}</th>
-                <th style={{ textAlign: 'left', padding: '12px 12px' }}>{t('adm.hb.colDoctrine')}</th>
-                <th style={{ textAlign: 'left', padding: '12px 12px' }}>{t('adm.hb.colAuthor')}</th>
-                <th style={{ textAlign: 'left', padding: '12px 12px' }}>{t('adm.hb.colState')}</th>
-                <th style={{ textAlign: 'right', padding: '12px 12px', width: 40 }}>{t('adm.hb.colVersion')}</th>
-                <th style={{ textAlign: 'right', padding: '12px 12px' }}>{t('adm.hb.colDownloads')}</th>
-                <th style={{ textAlign: 'right', padding: '12px 12px' }}>{t('adm.hb.colInstalls')}</th>
-                <th style={{ textAlign: 'left', padding: '12px 12px' }}>{t('adm.hb.colInscribed')}</th>
-                <th style={{ textAlign: 'left', padding: '12px 12px' }}>{t('adm.hb.colSealed')}</th>
-                <th style={{ width: 110, padding: '12px 16px 12px 12px' }} />
+                <th className={s.th}>{t('adm.hb.colCodex')}</th>
+                <th className={s.th}>{t('adm.hb.colDoctrine')}</th>
+                <th className={s.th}>{t('adm.hb.colAuthor')}</th>
+                <th className={s.th}>{t('adm.hb.colState')}</th>
+                <th className={s.thVersion}>{t('adm.hb.colVersion')}</th>
+                <th className={s.thRight}>{t('adm.hb.colDownloads')}</th>
+                <th className={s.thRight}>{t('adm.hb.colInstalls')}</th>
+                <th className={s.th}>{t('adm.hb.colInscribed')}</th>
+                <th className={s.th}>{t('adm.hb.colSealed')}</th>
+                <th className={s.thActions} />
               </tr>
             </thead>
             <tbody>
@@ -325,8 +262,8 @@ function ModerationPanel() {
               ))}
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={11} style={{ padding: '32px 16px', textAlign: 'center' }}>
-                    <span className="ao-italic" style={{ color: 'var(--ink-faint)' }}>
+                  <td colSpan={11} className={s.emptyCell}>
+                    <span className={cn('ao-italic', s.emptyText)}>
                       {t('adm.hb.noDoctrines')}
                     </span>
                   </td>
@@ -336,23 +273,10 @@ function ModerationPanel() {
           </table>
 
           {/* pagination footer */}
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '10px 18px',
-              borderTop: '1px solid var(--rule)',
-              background: 'var(--abyss)',
-              fontSize: 11,
-              color: 'var(--ink-faint)',
-              fontFamily: 'var(--font-display)',
-              letterSpacing: '0.06em',
-            }}
-          >
+          <div className={s.pagination}>
             <span>{t('adm.hb.pageOf', { page: page + 1, total: totalPages || 1 })}</span>
             {totalPages > 1 && (
-              <div style={{ display: 'flex', gap: 4 }}>
+              <div className={s.pageBtns}>
                 <button
                   className="ao-btn ao-btn--ghost ao-btn--sm"
                   disabled={page === 0}
@@ -383,7 +307,7 @@ function ModerationPanel() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           {viewPkg && (
-            <div style={{ display: 'grid', gap: 10, fontSize: 13, color: 'var(--ink-quiet)' }}>
+            <div className={s.viewGrid}>
               <div><strong>{t('adm.hb.fieldCodex')}</strong> {viewPkg.id}</div>
               <div><strong>{t('adm.hb.fieldAuthor')}</strong> {viewPkg.authorUsername}</div>
               <div><strong>{t('adm.hb.fieldStatus')}</strong> {viewPkg.isDeleted ? t('adm.hb.statusDeleted') : viewPkg.status}</div>
@@ -417,7 +341,7 @@ function ModerationPanel() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           {auditPkg && (
-            <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, fontSize: 13 }}>
+            <div className={cn('ao-rgrid', s.auditGrid)}>
               <div><span className="ao-overline">{t('adm.hb.labelPackageId')}</span><br />{auditPkg.id}</div>
               <div><span className="ao-overline">{t('adm.hb.labelAuthor')}</span><br />{auditPkg.authorUsername}</div>
               <div><span className="ao-overline">{t('adm.hb.labelStatus')}</span><br />{auditPkg.isDeleted ? t('adm.hb.statusDeleted') : auditPkg.status}</div>
@@ -480,98 +404,76 @@ function AdminDoctrineRow({
   const t = useT();
   const isDeleted = pkg.isDeleted;
 
-  const rowBg = isDeleted
-    ? 'rgba(179,70,26,0.02)'
-    : undefined;
-
   return (
-    <tr style={{ background: rowBg }}>
+    <tr className={cn(s.row, isDeleted && s.deleted)}>
       {/* checkbox */}
-      <td style={{ padding: '10px 8px 10px 16px' }}>
-        <input type="checkbox" style={{ accentColor: 'var(--gold)' }} />
+      <td className={s.tdCheck}>
+        <input type="checkbox" className={s.checkbox} />
       </td>
 
       {/* codex */}
-      <td style={{ padding: '10px 12px' }}>
+      <td className={s.td}>
         <CodexID>{pkg.id.substring(0, 8)}</CodexID>
       </td>
 
       {/* doctrine title */}
-      <td style={{ padding: '10px 12px' }}>
-        <span
-          style={{
-            color: isDeleted ? 'var(--ink-faint)' : 'var(--ink-bright)',
-            textDecoration: isDeleted ? 'line-through' : 'none',
-            fontFamily: 'var(--font-serif, Georgia, serif)',
-            fontSize: 13,
-          }}
-        >
+      <td className={s.td}>
+        <span className={cn(s.doctrineTitle, isDeleted && s.deleted)}>
           {pkg.title}
         </span>
       </td>
 
       {/* author */}
-      <td style={{ padding: '10px 12px' }}>
-        <span style={{ fontSize: 12, color: 'var(--ink-quiet)', fontFamily: 'var(--font-mono)' }}>
-          {pkg.authorUsername}
-        </span>
+      <td className={s.td}>
+        <span className={s.author}>{pkg.authorUsername}</span>
       </td>
 
       {/* state */}
-      <td style={{ padding: '10px 12px' }}>
+      <td className={s.td}>
         <StatusBadge status={isDeleted ? 'DELETED' : pkg.status} />
       </td>
 
       {/* version */}
-      <td style={{ padding: '10px 12px', textAlign: 'right' }}>
-        <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--gold)', fontSize: 12 }}>
-          {pkg.version}
-        </span>
+      <td className={s.tdRight}>
+        <span className={s.version}>{pkg.version}</span>
       </td>
 
       {/* downloads */}
-      <td style={{ padding: '10px 12px', textAlign: 'right' }}>
-        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--ink-quiet)' }}>
-          {pkg.downloadCount.toLocaleString()}
-        </span>
+      <td className={s.tdRight}>
+        <span className={s.num}>{pkg.downloadCount.toLocaleString()}</span>
       </td>
 
       {/* installs (using downloadCount as proxy) */}
-      <td style={{ padding: '10px 12px', textAlign: 'right' }}>
-        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--ink-quiet)' }}>
-          {pkg.downloadCount.toLocaleString()}
-        </span>
+      <td className={s.tdRight}>
+        <span className={s.num}>{pkg.downloadCount.toLocaleString()}</span>
       </td>
 
       {/* inscribed / created */}
-      <td style={{ padding: '10px 12px' }}>
-        <span className="ao-codex" style={{ color: 'var(--ink-faint)', fontSize: 11 }}>
-          {formatDate(pkg.createdAt)}
-        </span>
+      <td className={s.td}>
+        <span className={cn('ao-codex', s.date)}>{formatDate(pkg.createdAt)}</span>
       </td>
 
       {/* sealed / published */}
-      <td style={{ padding: '10px 12px' }}>
-        <span className="ao-codex" style={{ color: 'var(--ink-faint)', fontSize: 11 }}>
-          {pkg.publishedAt ? formatDate(pkg.publishedAt) : '\u2014'}
+      <td className={s.td}>
+        <span className={cn('ao-codex', s.date)}>
+          {pkg.publishedAt ? formatDate(pkg.publishedAt) : '—'}
         </span>
       </td>
 
       {/* actions */}
-      <td style={{ padding: '10px 16px 10px 12px' }}>
-        <div style={{ display: 'inline-flex', gap: 4 }}>
+      <td className={s.tdActions}>
+        <div className={s.rowActions}>
           {/* view */}
-          <button className="ao-iconbtn" style={{ width: 26, height: 26 }} title={t('adm.hb.viewDoctrine')} onClick={onView}>
+          <button className={cn('ao-iconbtn', s.iconBtn)} title={t('adm.hb.viewDoctrine')} onClick={onView}>
             <Rune kind="book" size={12} />
           </button>
           {/* audit */}
-          <button className="ao-iconbtn" style={{ width: 26, height: 26 }} title={t('adm.hb.audit')} onClick={onAudit}>
+          <button className={cn('ao-iconbtn', s.iconBtn)} title={t('adm.hb.audit')} onClick={onAudit}>
             <Rune kind="eye" size={12} />
           </button>
           {/* hard delete */}
           <button
-            className="ao-iconbtn"
-            style={{ width: 26, height: 26, color: '#d8896a' }}
+            className={cn('ao-iconbtn', s.iconBtnDanger)}
             title={t('adm.hb.hardDelete')}
             onClick={onHardDelete}
           >
@@ -611,12 +513,12 @@ function TagRegistryPanel() {
   return (
     <>
       {/* ── heading ───────────────────────────────────────────── */}
-      <div style={{ marginBottom: 18 }}>
-        <p className="ao-overline" style={{ color: 'var(--gold)', marginBottom: 2 }}>
+      <div className={s.tagHeading}>
+        <p className={cn('ao-overline', s.tagOverline)}>
           {t('adm.hb.imperialClassification')}
         </p>
-        <h3 className="ao-h3" style={{ margin: 0, marginTop: 2 }}>{t('adm.hb.classificationMarks')}</h3>
-        <p className="ao-italic" style={{ marginTop: 6, color: 'var(--ink-quiet)', fontSize: 13 }}>
+        <h3 className={cn('ao-h3', s.titleH3)}>{t('adm.hb.classificationMarks')}</h3>
+        <p className={cn('ao-italic', s.tagIntro)}>
           {t('adm.hb.marksIntro')}
         </p>
       </div>
@@ -624,41 +526,24 @@ function TagRegistryPanel() {
       {/* ── main panel ────────────────────────────────────────── */}
       {isLoading ? (
         <OrdoPanel frame padding={0}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: 16 }}>
+          <div className={s.skelCol}>
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="ao-ph" style={{ width: '100%', height: 48 }} />
+              <div key={i} className={cn('ao-ph', s.skelRow)} />
             ))}
           </div>
         </OrdoPanel>
       ) : (
         <OrdoPanel frame padding={0}>
           {/* search + chip row */}
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 12,
-              padding: '12px 18px',
-              borderBottom: '1px solid var(--rule)',
-            }}
-          >
-            <div style={{ position: 'relative', width: 260 }}>
+          <div className={s.tagBar}>
+            <div className={s.tagSearchWrap}>
               <input
-                className="ao-input"
+                className={cn('ao-input', s.searchInput)}
                 placeholder={t('adm.hb.searchMarks')}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                style={{ paddingLeft: 34, width: '100%' }}
               />
-              <span
-                style={{
-                  position: 'absolute',
-                  left: 10,
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  color: 'var(--ink-faint)',
-                }}
-              >
+              <span className={s.searchIcon}>
                 <Rune kind="search" size={13} />
               </span>
             </div>
@@ -666,21 +551,21 @@ function TagRegistryPanel() {
             <OrdoChip tone="gold" glyph="check">{t('adm.hb.inUseCount', { count: inUseCount })}</OrdoChip>
             <OrdoChip tone="rune" glyph="minus">{t('adm.hb.unusedCount', { count: unusedCount })}</OrdoChip>
 
-            <div style={{ flex: 1 }} />
+            <div className={s.spacer} />
 
-            <span className="ao-codex" style={{ fontSize: 11, color: 'var(--ink-faint)' }}>
+            <span className={cn('ao-codex', s.tagSortNote)}>
               {t('adm.hb.sortedUsage')}
             </span>
           </div>
 
           {/* table */}
-          <table className="ao-table" style={{ width: '100%' }}>
+          <table className={cn('ao-table', s.table)}>
             <thead>
               <tr>
-                <th style={{ textAlign: 'left', padding: '12px 16px' }}>{t('adm.hb.colMark')}</th>
-                <th style={{ textAlign: 'right', padding: '12px 16px' }}>{t('adm.hb.colDoctrinesUsing')}</th>
-                <th style={{ textAlign: 'left', padding: '12px 16px' }}>{t('adm.hb.colMarkState')}</th>
-                <th style={{ width: 80, padding: '12px 16px' }} />
+                <th className={s.tagTd}>{t('adm.hb.colMark')}</th>
+                <th className={s.tagTdRight}>{t('adm.hb.colDoctrinesUsing')}</th>
+                <th className={s.tagTd}>{t('adm.hb.colMarkState')}</th>
+                <th className={s.tagTdRight} />
               </tr>
             </thead>
             <tbody>
@@ -691,8 +576,8 @@ function TagRegistryPanel() {
                 ))}
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={4} style={{ padding: '32px 16px', textAlign: 'center' }}>
-                    <span className="ao-italic" style={{ color: 'var(--ink-faint)' }}>
+                  <td colSpan={4} className={s.emptyCell}>
+                    <span className={cn('ao-italic', s.emptyText)}>
                       {t('adm.hb.noMarks')}
                     </span>
                   </td>
@@ -702,14 +587,8 @@ function TagRegistryPanel() {
           </table>
 
           {/* footer note */}
-          <div
-            style={{
-              padding: '10px 18px',
-              borderTop: '1px solid var(--rule)',
-              background: 'var(--abyss)',
-            }}
-          >
-            <p className="ao-italic" style={{ fontSize: 11, color: 'var(--ink-faint)', margin: 0 }}>
+          <div className={s.tagFooter}>
+            <p className={cn('ao-italic', s.tagFooterText)}>
               {t('adm.hb.marksFooter')}
             </p>
           </div>
@@ -746,49 +625,20 @@ function TagRow({ tag, onDelete }: { tag: HomebrewTagResponse; onDelete: () => v
   return (
     <tr>
       {/* mark name with diamond dot */}
-      <td style={{ padding: '10px 16px' }}>
-        <span
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 8,
-            padding: '4px 10px',
-            background: 'rgba(0,0,0,0.35)',
-            border: '1px solid var(--rule)',
-            fontFamily: 'var(--font-mono)',
-            fontSize: 12,
-            color: 'var(--ink-bright)',
-          }}
-        >
-          <span
-            style={{
-              display: 'inline-block',
-              width: 5,
-              height: 5,
-              transform: 'rotate(45deg)',
-              background: inUse ? 'var(--gold)' : 'var(--ink-faint)',
-              flexShrink: 0,
-            }}
-          />
+      <td className={s.tagTd}>
+        <span className={s.tagChip}>
+          <span className={cn(s.tagDot, inUse && s.inUse)} />
           {tag.name}
         </span>
       </td>
 
       {/* usage count */}
-      <td style={{ padding: '10px 16px', textAlign: 'right' }}>
-        <span
-          style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: 13,
-            color: inUse ? 'var(--ink-bright)' : 'var(--ink-faint)',
-          }}
-        >
-          {tag.usageCount}
-        </span>
+      <td className={s.tagTdRight}>
+        <span className={cn(s.tagUsage, inUse && s.inUse)}>{tag.usageCount}</span>
       </td>
 
       {/* state chip */}
-      <td style={{ padding: '10px 16px' }}>
+      <td className={s.tagTd}>
         {inUse ? (
           <OrdoChip tone="gold" glyph="check">{t('adm.hb.inUse')}</OrdoChip>
         ) : (
@@ -797,22 +647,15 @@ function TagRow({ tag, onDelete }: { tag: HomebrewTagResponse; onDelete: () => v
       </td>
 
       {/* actions */}
-      <td style={{ padding: '10px 16px', textAlign: 'right' }}>
-        <div style={{ display: 'inline-flex', gap: 4 }}>
+      <td className={s.tagTdRight}>
+        <div className={s.rowActions}>
           {/* audit */}
-          <button className="ao-iconbtn" style={{ width: 26, height: 26 }} title={t('adm.hb.tagAudit')}>
+          <button className={cn('ao-iconbtn', s.iconBtn)} title={t('adm.hb.tagAudit')}>
             <Rune kind="eye" size={12} />
           </button>
           {/* delete */}
           <button
-            className="ao-iconbtn"
-            style={{
-              width: 26,
-              height: 26,
-              color: inUse ? 'var(--ink-faint)' : '#d8896a',
-              cursor: inUse ? 'not-allowed' : 'pointer',
-              opacity: inUse ? 0.4 : 1,
-            }}
+            className={cn('ao-iconbtn', s.tagDeleteBtn)}
             title={inUse ? t('adm.hb.cannotDelete', { count: tag.usageCount }) : t('adm.hb.deleteMarkTooltip')}
             disabled={inUse}
             onClick={onDelete}

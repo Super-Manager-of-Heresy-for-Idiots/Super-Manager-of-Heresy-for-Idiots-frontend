@@ -14,7 +14,9 @@ import { BackLink, CharStatusBadge } from '@/components/campaigns';
 import { useCampaignCharacters } from '@/hooks/useCharacter';
 import { useGrantXp } from '@/hooks/useXp';
 import { useT } from '@/i18n/I18nContext';
+import { cn } from '@/lib/utils';
 import type { CharacterV2Response, XpTarget } from '@/types';
+import s from './XPGrantPage.module.css';
 
 /* ── D&D 5e-style XP thresholds (level -> cumulative XP needed) ── */
 const XP_THRESHOLDS: Record<number, number> = {
@@ -107,42 +109,22 @@ export default function XPGrantPage() {
   if (isLoading) {
     return (
       <div>
-        <BackLink to={`/campaigns/${campaignId}`} label={t('camp2.back.campaign')} style={{ marginBottom: 12 }} />
-        <div style={{ marginBottom: 32 }}>
-          <p className="ao-overline" style={{ color: 'var(--gold)' }}>
+        <BackLink to={`/campaigns/${campaignId}`} label={t('camp2.back.campaign')} className={s.backLink} />
+        <div className={s.headerBlock}>
+          <p className={cn('ao-overline', s.overlineGold)}>
             {t('camp2.xp.gmTools')}
           </p>
-          <h3 className="ao-h3" style={{ marginTop: 4 }}>
+          <h3 className={cn('ao-h3', s.title)}>
             {t('camp2.xp.title')}
           </h3>
         </div>
-        <div
-          className="ao-rgrid"
-          style={{
-            display: 'grid',
-            gridTemplateColumns: '1.5fr 1fr',
-            gap: 20,
-          }}
-        >
+        <div className={cn('ao-rgrid', s.skelGrid)}>
           {[0, 1].map((i) => (
-            <div
-              key={i}
-              className="ao-panel ao-frame ao-breathe"
-              style={{ padding: 24, minHeight: 280 }}
-            >
+            <div key={i} className={cn('ao-panel ao-frame ao-breathe', s.skelPanel)}>
               <span className="ao-frame-c" />
-              <div
-                className="ao-ph"
-                style={{ width: '50%', height: 16, marginBottom: 16 }}
-              />
-              <div
-                className="ao-ph"
-                style={{ width: '80%', height: 14, marginBottom: 8 }}
-              />
-              <div
-                className="ao-ph"
-                style={{ width: '60%', height: 14 }}
-              />
+              <div className={cn('ao-ph', s.phW50H16)} />
+              <div className={cn('ao-ph', s.phW80H14)} />
+              <div className={cn('ao-ph', s.phW60H14)} />
             </div>
           ))}
         </div>
@@ -154,12 +136,9 @@ export default function XPGrantPage() {
   if (error) {
     return (
       <div>
-        <BackLink to={`/campaigns/${campaignId}`} label={t('camp2.back.campaign')} style={{ marginBottom: 12 }} />
-        <div style={{ textAlign: 'center', padding: '48px 0' }}>
-          <p
-            className="ao-italic"
-            style={{ color: 'var(--ink-faint)', marginBottom: 16 }}
-          >
+        <BackLink to={`/campaigns/${campaignId}`} label={t('camp2.back.campaign')} className={s.backLink} />
+        <div className={s.errorBlock}>
+          <p className={cn('ao-italic', s.errorText)}>
             {t('camp2.xp.loadError')}
           </p>
           <button className="ao-btn" onClick={() => refetch()}>
@@ -173,12 +152,12 @@ export default function XPGrantPage() {
   if (!activeCharacters.length) {
     return (
       <div>
-        <BackLink to={`/campaigns/${campaignId}`} label={t('camp2.back.campaign')} style={{ marginBottom: 12 }} />
-        <div style={{ marginBottom: 32 }}>
-          <p className="ao-overline" style={{ color: 'var(--gold)' }}>
+        <BackLink to={`/campaigns/${campaignId}`} label={t('camp2.back.campaign')} className={s.backLink} />
+        <div className={s.headerBlock}>
+          <p className={cn('ao-overline', s.overlineGold)}>
             {t('camp2.xp.gmTools')}
           </p>
-          <h3 className="ao-h3" style={{ marginTop: 4 }}>
+          <h3 className={cn('ao-h3', s.title)}>
             {t('camp2.xp.title')}
           </h3>
         </div>
@@ -195,30 +174,18 @@ export default function XPGrantPage() {
   /* ---- render ---- */
   return (
     <div>
-      <BackLink to={`/campaigns/${campaignId}`} label={t('camp2.back.campaign')} style={{ marginBottom: 12 }} />
+      <BackLink to={`/campaigns/${campaignId}`} label={t('camp2.back.campaign')} className={s.backLink} />
 
       {/* Header */}
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'flex-start',
-          flexWrap: 'wrap',
-          gap: 16,
-          marginBottom: 28,
-        }}
-      >
+      <div className={s.header}>
         <div>
-          <p className="ao-overline" style={{ color: 'var(--gold)' }}>
+          <p className={cn('ao-overline', s.overlineGold)}>
             {t('camp2.xp.gmTools')}
           </p>
-          <h3 className="ao-h3" style={{ marginTop: 4 }}>
+          <h3 className={cn('ao-h3', s.title)}>
             {t('camp2.xp.title')}
           </h3>
-          <p
-            className="ao-italic"
-            style={{ color: 'var(--ink-quiet)', fontSize: 13, marginTop: 4 }}
-          >
+          <p className={cn('ao-italic', s.subtitle)}>
             {t('camp2.xp.subtitle')}
           </p>
         </div>
@@ -228,15 +195,7 @@ export default function XPGrantPage() {
       </div>
 
       {/* Main Grid: Recipients + Grant Panel */}
-      <div
-        className="ao-rgrid"
-        style={{
-          display: 'grid',
-          gridTemplateColumns: '1.5fr 1fr',
-          gap: 20,
-          alignItems: 'start',
-        }}
-      >
+      <div className={cn('ao-rgrid', s.mainGrid)}>
         {/* ════════════ Recipients Panel ════════════ */}
         <OrdoPanel frame padding={0}>
           <PanelHeader
@@ -245,7 +204,7 @@ export default function XPGrantPage() {
             glyph="helm"
             right={
               targetMode === 'SELECTED' ? (
-                <div style={{ display: 'flex', gap: 6 }}>
+                <div className={s.headerActions}>
                   <button
                     className="ao-btn ao-btn--ghost ao-btn--sm"
                     onClick={selectAll}
@@ -264,34 +223,13 @@ export default function XPGrantPage() {
           />
 
           {/* Segmented Tabs */}
-          <div
-            style={{
-              display: 'flex',
-              borderBottom: '1px solid var(--rule)',
-            }}
-          >
+          <div className={s.tabs}>
             {(['ALL', 'SELECTED', 'SINGLE'] as TargetMode[]).map((mode) => {
               const active = targetMode === mode;
               return (
                 <button
                   key={mode}
-                  style={{
-                    flex: 1,
-                    padding: '10px 8px',
-                    background: active
-                      ? 'rgba(212,180,120,0.06)'
-                      : 'transparent',
-                    border: 'none',
-                    borderBottom: active
-                      ? '2px solid var(--gold)'
-                      : '2px solid transparent',
-                    color: active ? 'var(--gold)' : 'var(--ink-quiet)',
-                    fontFamily: 'var(--font-display)',
-                    fontSize: 10,
-                    letterSpacing: '0.16em',
-                    textTransform: 'uppercase' as const,
-                    cursor: 'pointer',
-                  }}
+                  className={cn(s.tab, active && s.active)}
                   onClick={() => {
                     setTargetMode(mode);
                     if (mode === 'ALL') selectAll();
@@ -305,7 +243,7 @@ export default function XPGrantPage() {
           </div>
 
           {/* Character list */}
-          <div style={{ maxHeight: 460, overflowY: 'auto' }}>
+          <div className={s.charList}>
             {activeCharacters.map((ch) => {
               const isSelected =
                 targetMode === 'ALL' || selectedIds.has(ch.id);
@@ -316,19 +254,7 @@ export default function XPGrantPage() {
               return (
                 <div
                   key={ch.id}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 12,
-                    padding: '10px 16px',
-                    borderBottom: '1px solid var(--hairline)',
-                    background: isSelected
-                      ? 'rgba(212,180,120,0.04)'
-                      : 'transparent',
-                    cursor:
-                      targetMode !== 'ALL' ? 'pointer' : 'default',
-                    opacity: isSelected ? 1 : 0.45,
-                  }}
+                  className={cn(s.charRow, isSelected && s.selected, targetMode !== 'ALL' && s.clickable)}
                   onClick={() => {
                     if (targetMode === 'ALL') return;
                     if (targetMode === 'SINGLE') {
@@ -340,20 +266,7 @@ export default function XPGrantPage() {
                 >
                   {/* Checkbox (only for SELECTED/SINGLE) */}
                   {targetMode !== 'ALL' && (
-                    <div
-                      style={{
-                        width: 18,
-                        height: 18,
-                        flexShrink: 0,
-                        border: `1px solid ${isSelected ? 'var(--gold)' : 'var(--rule)'}`,
-                        background: isSelected
-                          ? 'rgba(212,180,120,0.15)'
-                          : 'var(--abyss)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      }}
-                    >
+                    <div className={cn(s.cbox, isSelected && s.selected)}>
                       {isSelected && (
                         <Rune
                           kind="check"
@@ -365,32 +278,19 @@ export default function XPGrantPage() {
                   )}
 
                   {/* Character info */}
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 8,
-                        marginBottom: 4,
-                      }}
-                    >
-                      <span className="ao-h5" style={{ fontSize: 13 }}>
+                  <div className={s.charMain}>
+                    <div className={s.charNameRow}>
+                      <span className={cn('ao-h5', s.charName)}>
                         {ch.name}
                       </span>
                       <CharStatusBadge status={ch.status ?? 'ACTIVE'} />
-                      <span
-                        className="ao-codex"
-                        style={{
-                          fontSize: 10,
-                          color: 'var(--ink-faint)',
-                        }}
-                      >
+                      <span className={cn('ao-codex', s.charLvl)}>
                         {t('camp2.xp.lvl')} {ch.totalLevel}
                       </span>
                     </div>
 
                     {/* HP bar */}
-                    <div style={{ marginBottom: 3 }}>
+                    <div className={s.hpBarWrap}>
                       <Bar
                         value={ch.currentHp ?? 0}
                         max={ch.maxHp ?? 1}
@@ -414,7 +314,7 @@ export default function XPGrantPage() {
         </OrdoPanel>
 
         {/* ════════════ Grant Panel ════════════ */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div className={s.grantCol}>
           <OrdoPanel frame padding={0}>
             <PanelHeader
               title={t('camp2.xp.grantXp')}
@@ -422,49 +322,28 @@ export default function XPGrantPage() {
               tone="ember"
             />
 
-            <div style={{ padding: '20px 20px 24px' }}>
+            <div className={s.grantBody}>
               {/* XP Input */}
-              <div style={{ marginBottom: 16 }}>
-                <label
-                  className="ao-label"
-                  style={{ display: 'block', marginBottom: 8 }}
-                >
+              <div className={s.inputGroup}>
+                <label className={cn('ao-label', s.inputLabel)}>
                   {t('camp2.xp.amountLabel')}
                 </label>
                 <input
-                  className="ao-input"
+                  className={cn('ao-input', s.xpInput)}
                   type="number"
                   min="0"
                   value={xpAmount}
                   onChange={(e) => setXpAmount(e.target.value)}
                   placeholder="0"
-                  style={{
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: 28,
-                    textAlign: 'center',
-                    letterSpacing: '0.05em',
-                    padding: '12px 16px',
-                  }}
                 />
               </div>
 
               {/* Quick-add buttons */}
-              <div
-                style={{
-                  display: 'flex',
-                  gap: 8,
-                  marginBottom: 20,
-                }}
-              >
+              <div className={s.quickAdd}>
                 {[250, 500, 1000].map((val) => (
                   <button
                     key={val}
-                    className="ao-btn ao-btn--ghost"
-                    style={{
-                      flex: 1,
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: 12,
-                    }}
+                    className={cn('ao-btn ao-btn--ghost', s.quickBtn)}
                     onClick={() =>
                       setXpAmount((prev) =>
                         String((Number(prev) || 0) + val),
@@ -480,13 +359,7 @@ export default function XPGrantPage() {
 
               {/* Grant button */}
               <button
-                className="ao-btn ao-btn--primary"
-                style={{
-                  width: '100%',
-                  padding: '12px 16px',
-                  fontSize: 14,
-                  marginTop: 16,
-                }}
+                className={cn('ao-btn ao-btn--primary', s.grantBtn)}
                 onClick={handleGrant}
                 disabled={
                   amount <= 0 ||
@@ -503,7 +376,7 @@ export default function XPGrantPage() {
                       size={14}
                       color="currentColor"
                     />
-                    <span style={{ marginLeft: 8 }}>
+                    <span className={s.ml8}>
                       {t('camp2.xp.grantTo', { count: recipients.length })}
                     </span>
                   </>
@@ -525,38 +398,16 @@ export default function XPGrantPage() {
               tone="arcane"
             />
 
-            <div style={{ padding: 0 }}>
+            <div>
               {amount <= 0 || recipients.length === 0 ? (
-                <div
-                  style={{
-                    padding: '24px 20px',
-                    textAlign: 'center',
-                  }}
-                >
-                  <p
-                    className="ao-italic"
-                    style={{
-                      color: 'var(--ink-faint)',
-                      fontSize: 13,
-                    }}
-                  >
+                <div className={s.previewEmpty}>
+                  <p className={cn('ao-italic', s.previewEmptyText)}>
                     {t('camp2.xp.specifyAmount')}
                   </p>
                 </div>
               ) : levelUps.length === 0 ? (
-                <div
-                  style={{
-                    padding: '24px 20px',
-                    textAlign: 'center',
-                  }}
-                >
-                  <p
-                    className="ao-italic"
-                    style={{
-                      color: 'var(--ink-faint)',
-                      fontSize: 13,
-                    }}
-                  >
+                <div className={s.previewEmpty}>
+                  <p className={cn('ao-italic', s.previewEmptyText)}>
                     {t('camp2.xp.noneCross')}
                   </p>
                 </div>
@@ -565,49 +416,22 @@ export default function XPGrantPage() {
                   {levelUps.map((ch) => {
                     const nextXp = xpForNextLevel(ch.totalLevel);
                     return (
-                      <div
-                        key={ch.id}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 10,
-                          padding: '10px 16px',
-                          borderBottom:
-                            '1px solid var(--hairline)',
-                          background:
-                            'rgba(122,152,102,0.05)',
-                        }}
-                      >
+                      <div key={ch.id} className={s.levelUpRow}>
                         <Rune
                           kind="arrow-up"
                           size={14}
                           color="#7a9866"
                         />
-                        <div style={{ flex: 1 }}>
-                          <span
-                            className="ao-h5"
-                            style={{ fontSize: 13 }}
-                          >
+                        <div className={s.levelUpMain}>
+                          <span className={cn('ao-h5', s.levelUpName)}>
                             {ch.name}
                           </span>
                         </div>
-                        <span
-                          className="ao-codex"
-                          style={{
-                            fontSize: 10,
-                            color: '#7a9866',
-                          }}
-                        >
+                        <span className={cn('ao-codex', s.lvlGreen)}>
                           {t('camp2.xp.lvl')} {ch.totalLevel} {'\u2192'}{' '}
                           {ch.totalLevel + 1}
                         </span>
-                        <span
-                          className="ao-codex"
-                          style={{
-                            fontSize: 10,
-                            color: 'var(--ink-faint)',
-                          }}
-                        >
+                        <span className={cn('ao-codex', s.levelUpXp)}>
                           ({ch.experience.toLocaleString()} +{' '}
                           {amount.toLocaleString()} /{' '}
                           {nextXp === Infinity

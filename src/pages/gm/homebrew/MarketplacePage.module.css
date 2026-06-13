@@ -1,0 +1,55 @@
+/* ── header ──────────────────────────────────────────────────── */
+.headerBlock { margin-bottom: 24px; }
+.headerBlockLg { margin-bottom: 32px; }
+.overline { color: var(--gold); }
+.heading { margin-top: 4px; }
+.subtitle { color: var(--ink-faint); font-size: 13px; margin-top: 4px; }
+
+/* ── skeleton / states ───────────────────────────────────────── */
+.grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.gridTop { margin-top: 20px; }
+.skelCard { padding: 24px; min-height: 220px; }
+.skelLine1 { width: 60%; height: 16px; margin-bottom: 12px; }
+.skelLine2 { width: 40%; height: 14px; margin-bottom: 8px; }
+.skelLine3 { width: 80%; height: 14px; }
+.errorBox { text-align: center; padding: 48px 0; }
+.errorText { color: var(--ink-faint); margin-bottom: 16px; }
+
+/* ── search + sort bar ───────────────────────────────────────── */
+.barRow { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; align-items: center; }
+.searchBox { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border: 1px solid var(--rule); background: var(--abyss); flex: 1 1 240px; }
+.searchInput { flex: 1; background: transparent; border: none; outline: none; color: var(--ink); font-family: var(--font-body); font-size: 13px; }
+.sortGroup { display: flex; border: 1px solid var(--rule); }
+.sortBtn {
+  padding: 8px 14px; font-family: var(--font-display); font-size: 10px;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  background: transparent; color: var(--ink-faint); border: none; cursor: pointer;
+}
+.sortBtn.active { background: rgba(176,141,78,0.12); color: var(--gold-pale); }
+.sortBtn.divided { border-left: 1px solid var(--hairline); }
+
+/* ── package card ────────────────────────────────────────────── */
+.card { transition: opacity 0.15s ease; }
+.card.archived { opacity: 0.5; }
+.cardBody { padding: 18px; }
+.cardHead { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
+.cardTitleWrap { flex: 1; min-width: 0; }
+.cardTitle { color: var(--ink-bright); margin: 0; }
+.cardBy { font-size: 11px; color: var(--ink-faint); margin-top: 3px; }
+.cardDesc {
+  font-size: 12px; color: var(--ink-quiet); line-height: 1.5; margin-bottom: 12px;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+.ratingWrap { margin-bottom: 12px; }
+.tagsRow { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+.archivedTag { margin-top: 10px; padding: 4px 8px; background: rgba(0,0,0,0.3); border: 1px solid var(--hairline); display: inline-flex; align-items: center; gap: 6px; }
+.archivedLabel { font-size: 8px; color: var(--ink-faint); }
+.cardFoot { display: flex; align-items: center; justify-content: space-between; padding: 10px 18px; border-top: 1px solid var(--hairline); background: var(--abyss); }
+.footStat { font-size: 11px; color: var(--ink-faint); }
+.footVersion { font-size: 10px; color: var(--ink-ghost); }
+
+/* ── pagination ──────────────────────────────────────────────── */
+.pager { display: flex; justify-content: center; gap: 8px; margin-top: 24px; }
+.pagerInfo { display: flex; align-items: center; font-size: 12px; color: var(--ink-quiet); padding: 0 12px; }
+.btnLabelL { margin-left: 4px; }
+.btnLabelR { margin-right: 4px; }

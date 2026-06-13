@@ -1,0 +1,61 @@
+/* ── layout ──────────────────────────────────────────────────── */
+.page { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px; }
+
+/* ── header area ─────────────────────────────────────────────── */
+.header { text-align: center; padding-top: 12px; }
+.sigilWrap { display: inline-block; }
+.riteLabel { margin-top: 16px; color: var(--gold-pale); font-size: 12px; }
+.bigTitle { font-size: 40px; margin-top: 8px; }
+.subtitle { font-size: 14px; margin-top: 10px; color: var(--ink-quiet); max-width: 500px; margin: 10px auto 0; }
+
+/* ── form panel ──────────────────────────────────────────────── */
+.formBody { padding: 24px 24px 28px; display: flex; flex-direction: column; gap: 24px; }
+.fieldHead { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+.reqMark { color: var(--ember); }
+.charCount { font-size: 11px; color: var(--ink-faint); }
+.titleInput { font-family: var(--font-heading); font-size: 18px; width: 100%; }
+.descInput { width: 100%; resize: vertical; }
+.descHint { font-size: 12px; margin-top: 8px; color: var(--ink-faint); }
+
+/* ── tags ────────────────────────────────────────────────────── */
+.tagBox {
+  padding: 10px; background: var(--abyss); border: 1px solid var(--rule);
+  display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+}
+.tag {
+  display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px;
+  background: rgba(176,141,78,0.10); border: 1px solid rgba(176,141,78,0.30);
+  font-family: var(--font-mono); font-size: 12px; color: var(--gold);
+}
+.tagDiamond { width: 5px; height: 5px; background: var(--gold); transform: rotate(45deg); flex-shrink: 0; }
+.tagRemove {
+  background: none; border: none; cursor: pointer; padding: 0; margin-left: 2px;
+  display: flex; align-items: center; color: var(--ink-faint);
+}
+.tagInput {
+  flex: 1; min-width: 140px; background: transparent; border: none; outline: none;
+  font-family: var(--font-mono); font-size: 12px; color: var(--ink); padding: 4px 6px;
+}
+.tagPreview { font-size: 12px; margin-top: 8px; color: var(--gold); }
+.mono { font-family: var(--font-mono); }
+.examples { font-size: 12px; margin-top: 6px; color: var(--ink-faint); }
+
+/* ── validation strip ────────────────────────────────────────── */
+.validStrip {
+  display: flex; align-items: center; gap: 12px; padding: 14px;
+  border: 1px solid rgba(179,70,26,0.30); border-left: 3px solid var(--ember);
+  background: rgba(179,70,26,0.05);
+}
+.validStrip.valid {
+  border: 1px solid rgba(176,141,78,0.30); border-left: 3px solid var(--gold);
+  background: rgba(176,141,78,0.05);
+}
+.validGrow { flex: 1; }
+.validTitle { font-size: 13px; font-weight: 600; color: var(--ember); }
+.validStrip.valid .validTitle { color: var(--gold); }
+.validBody { font-size: 12px; margin-top: 2px; color: var(--ink-faint); }
+
+/* ── bottom actions ──────────────────────────────────────────── */
+.actions { display: flex; justify-content: space-between; align-items: center; padding-top: 4px; }
+.actionsNote { font-size: 11px; color: var(--ink-faint); }
+.actionsBtns { display: flex; gap: 10px; }

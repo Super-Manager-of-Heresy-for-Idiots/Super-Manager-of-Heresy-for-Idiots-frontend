@@ -1,4 +1,5 @@
 import type { CSSProperties, ReactNode } from 'react';
+import { cn } from '@/lib/utils';
 
 interface PlaceholderProps {
   children?: ReactNode;
@@ -8,23 +9,7 @@ interface PlaceholderProps {
 
 export function Placeholder({ children, style, className }: PlaceholderProps) {
   return (
-    <div
-      className={className}
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: 'var(--abyss)',
-        border: '1px solid var(--rule)',
-        color: 'var(--ink-ghost)',
-        fontFamily: 'var(--font-mono)',
-        fontSize: 9,
-        textTransform: 'uppercase',
-        letterSpacing: '0.1em',
-        overflow: 'hidden',
-        ...style,
-      }}
-    >
+    <div className={cn('ao-placeholder', className)} style={style}>
       {children}
     </div>
   );

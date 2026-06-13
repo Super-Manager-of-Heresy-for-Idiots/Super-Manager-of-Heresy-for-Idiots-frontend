@@ -12,14 +12,7 @@ export function Sigil({
   color = 'var(--gold)',
 }: SigilProps) {
   return (
-    <div
-      className="ao-seal"
-      style={{
-        width: size,
-        height: size,
-        borderRadius: '50%',
-      }}
-    >
+    <div className="ao-seal ao-sigil" style={{ width: size, height: size }}>
       <Rune kind={glyph} size={size * 0.5} color={color} />
     </div>
   );

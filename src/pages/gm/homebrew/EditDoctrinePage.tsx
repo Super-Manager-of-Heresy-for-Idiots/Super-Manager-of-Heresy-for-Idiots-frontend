@@ -28,8 +28,10 @@ import {
 import { useStatTypes } from '@/hooks/useAdmin';
 import { homebrewApi } from '@/api/homebrew.api';
 import { useT } from '@/i18n/I18nContext';
+import { cn } from '@/lib/utils';
 import { EQUIPMENT_SLOT_LABELS, EQUIPMENT_SLOTS } from '@/types';
 import type { ContentSummaryDto, ContentType, EquipmentSlot } from '@/types';
+import s from './EditDoctrinePage.module.css';
 
 const CONTENT_GROUPS: { titleKey: string; icon: string; type: ContentType }[] = [
   { titleKey: 'hb.edit.groupItems', icon: 'sword', type: 'ITEM_TYPE' },
@@ -101,15 +103,15 @@ export default function EditDoctrinePage() {
   if (isLoading || !pkg) {
     return (
       <div>
-        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 18 }}>
+        <div className={s.loadHead}>
           <div>
             <div className="ao-overline">{t('hb.edit.editorOverline')}</div>
-            <div className="ao-h3" style={{ marginTop: 4 }}>{t('hb.edit.loading')}</div>
+            <div className={cn('ao-h3', s.loadTitle)}>{t('hb.edit.loading')}</div>
           </div>
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div className={s.loadList}>
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="ao-ph" style={{ width: '100%', height: 48 }} />
+            <div key={i} className={cn('ao-ph', s.loadPh)} />
           ))}
         </div>
       </div>
@@ -117,7 +119,7 @@ export default function EditDoctrinePage() {
   }
 
   const isDraft = pkg.status === 'DRAFT';
-  const s = pkg.contentSummary;
+  const cs = pkg.contentSummary;
   const contentByType = pkg.contentByType || {};
 
   const normalizeTag = (raw: string) =>
@@ -266,74 +268,54 @@ export default function EditDoctrinePage() {
   return (
     <div>
       {/* Top bar */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+      <div className={s.topBar}>
         <button className="ao-btn ao-btn--ghost ao-btn--sm" onClick={() => navigate('/gm/homebrew/my')}>
           <Rune kind="arrow-l" size={11} /> {t('hb.edit.workshop')}
         </button>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div className={s.topRight}>
           <OrdoChip tone={isDraft ? 'rune' : 'gold'}>{pkg.status}</OrdoChip>
         </div>
       </div>
 
-      <div className="ao-codex" style={{ marginBottom: 16, color: 'var(--ink-faint)' }}>
+      <div className={cn('ao-codex', s.codexLine)}>
         {pkg.id.substring(0, 8)} &middot; {pkg.title} &middot; {pkg.status}
       </div>
 
       {/* Two-column grid */}
-      <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: '1fr 1.4fr', gap: 16 }}>
+      <div className={cn('ao-rgrid', s.grid)}>
         {/* LEFT column */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div className={s.leftCol}>
           {/* Outer Inscription */}
           <OrdoPanel padding={0} frame>
             <PanelHeader title={t('hb.edit.outerInscription')} glyph="scroll" sub={t('hb.edit.outerSub')} />
-            <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div className={s.panelBody}>
               <div>
                 <label className="ao-label">{t('hb.edit.titleLabel')}</label>
                 <input
-                  className="ao-input"
+                  className={cn('ao-input', s.titleInput)}
                   value={title}
                   onChange={(e) => setTitle(e.target.value.slice(0, 120))}
-                  style={{ fontFamily: 'var(--font-serif)', fontSize: 17, width: '100%' }}
                 />
               </div>
               <div>
                 <label className="ao-label">{t('hb.edit.descriptionLabel')}</label>
                 <textarea
-                  className="ao-input"
+                  className={cn('ao-input', s.descInput)}
                   value={description}
                   onChange={(e) => setDescription(e.target.value.slice(0, 2000))}
                   rows={5}
-                  style={{ width: '100%', resize: 'vertical' }}
                 />
               </div>
               <div>
                 <label className="ao-label">{t('hb.edit.marksLabel')}</label>
-                <div style={{
-                  padding: 8,
-                  background: 'var(--abyss)',
-                  border: '1px solid var(--hairline)',
-                  display: 'flex',
-                  flexWrap: 'wrap',
-                  gap: 6,
-                  alignItems: 'center',
-                }}>
+                <div className={s.tagBox}>
                   {tags.map((tag, i) => (
-                    <span key={i} style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: 4,
-                      padding: '2px 8px',
-                      background: 'rgba(var(--gold-rgb, 201,176,120), 0.1)',
-                      border: '1px solid rgba(var(--gold-rgb, 201,176,120), 0.3)',
-                      fontSize: 11,
-                      fontFamily: 'var(--font-mono)',
-                      color: 'var(--gold)',
-                    }}>
+                    <span key={i} className={s.tag}>
                       <Rune kind="diamond-fill" size={5} color="var(--gold)" />
                       {tag}
                       <button
                         onClick={() => setTags(tags.filter((_, j) => j !== i))}
-                        style={{ marginLeft: 2, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ink-faint)', padding: 0, display: 'flex' }}
+                        className={s.tagRemove}
                       >
                         <Rune kind="x" size={9} color="currentColor" />
                       </button>
@@ -344,17 +326,7 @@ export default function EditDoctrinePage() {
                     onChange={(e) => setTagText(e.target.value)}
                     onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddTag(); } }}
                     placeholder={t('hb.edit.addPlaceholder')}
-                    style={{
-                      flex: 1,
-                      minWidth: 60,
-                      background: 'transparent',
-                      border: 'none',
-                      color: 'var(--ink)',
-                      outline: 'none',
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: 11,
-                      padding: '2px 4px',
-                    }}
+                    className={s.tagInput}
                   />
                 </div>
               </div>
@@ -364,7 +336,7 @@ export default function EditDoctrinePage() {
           {/* Lifecycle */}
           <OrdoPanel padding={0} frame>
             <PanelHeader title={t('hb.edit.lifecycle')} glyph="sigil-1" sub={t('hb.edit.actionsIn', { status: pkg.status })} />
-            <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div className={s.lifecycleBody}>
               {isDraft && (
                 <button
                   className="ao-btn ao-btn--primary ao-btn--block"
@@ -403,9 +375,9 @@ export default function EditDoctrinePage() {
           <PanelHeader
             title={t('hb.edit.contentFolio')}
             glyph="book"
-            sub={t('hb.edit.folioSub', { items: s.itemTypeCount ?? 0, classes: s.classCount ?? 0, skills: s.skillCount ?? 0, feats: s.featCount ?? 0 })}
+            sub={t('hb.edit.folioSub', { items: cs.itemTypeCount ?? 0, classes: cs.classCount ?? 0, skills: cs.skillCount ?? 0, feats: cs.featCount ?? 0 })}
             right={
-              <div style={{ display: 'flex', gap: 8 }}>
+              <div className={s.folioActions}>
                 <button
                   className="ao-btn ao-btn--ghost ao-btn--sm"
                   onClick={() => {
@@ -433,40 +405,33 @@ export default function EditDoctrinePage() {
 
           {/* Add panel */}
           {adding && (
-            <div style={{
-              padding: '12px 16px',
-              borderBottom: '1px solid var(--rule)',
-              background: 'var(--abyss)',
-            }}>
-              <div className="ao-overline" style={{ marginBottom: 8 }}>{t('hb.edit.slotContentReference')}</div>
-              <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: '140px 1fr', gap: 8, alignItems: 'center', marginBottom: 10 }}>
+            <div className={s.addPanel}>
+              <div className={cn('ao-overline', s.addOverline)}>{t('hb.edit.slotContentReference')}</div>
+              <div className={cn('ao-rgrid', s.addTypeRow)}>
                 <select
-                  className="ao-input"
+                  className={cn('ao-input', s.inputSm)}
                   value={addType}
                   onChange={(e) => {
                     setAddType(e.target.value as ContentType);
                     setAddSearch('');
                     resetNewContentForm();
                   }}
-                  style={{ padding: '6px 10px' }}
                 >
                   <option value="ITEM_TYPE">{t('hb.edit.optItem')}</option>
                   <option value="SKILL">{t('hb.edit.optSkill')}</option>
                   <option value="FEAT">{t('hb.edit.optFeat')}</option>
                   <option value="BUFF_DEBUFF">{t('hb.edit.optBuffDebuff')}</option>
                 </select>
-                <div style={{ display: 'flex', gap: 6 }}>
+                <div className={s.modeRow}>
                   <button
-                    className={`ao-btn ${addMode === 'existing' ? 'ao-btn--primary' : 'ao-btn--ghost'}`}
+                    className={cn('ao-btn', addMode === 'existing' ? 'ao-btn--primary' : 'ao-btn--ghost', s.modeBtn)}
                     onClick={() => setAddMode('existing')}
-                    style={{ flex: 1 }}
                   >
                     {t('hb.edit.existing')}
                   </button>
                   <button
-                    className={`ao-btn ${addMode === 'new' ? 'ao-btn--primary' : 'ao-btn--ghost'}`}
+                    className={cn('ao-btn', addMode === 'new' ? 'ao-btn--primary' : 'ao-btn--ghost', s.modeBtn)}
                     onClick={() => setAddMode('new')}
-                    style={{ flex: 1 }}
                   >
                     {t('hb.edit.createNew')}
                   </button>
@@ -475,14 +440,13 @@ export default function EditDoctrinePage() {
 
               {addMode === 'existing' ? (
                 <>
-                  <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: '1fr auto auto', gap: 8, alignItems: 'center' }}>
+                  <div className={cn('ao-rgrid', s.existRow)}>
                     <input
-                      className="ao-input"
+                      className={cn('ao-input', s.inputSm2)}
                       value={addSearch}
                       onChange={(e) => setAddSearch(e.target.value)}
                       placeholder={t('hb.edit.existingIdPlaceholder')}
                       onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddContent(); } }}
-                      style={{ padding: '6px 12px' }}
                     />
                     <button className="ao-btn ao-btn--ghost" onClick={() => setAddSearch('')}>
                       <Rune kind="x" size={11} /> {t('hb.edit.clear')}
@@ -495,26 +459,24 @@ export default function EditDoctrinePage() {
                       <Rune kind="plus" size={10} /> {t('hb.edit.slot')}
                     </button>
                   </div>
-                  <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 12, marginTop: 8 }}>
+                  <p className={cn('ao-italic', s.existHint)}>
                     {t('hb.edit.existingHint')}
                   </p>
                 </>
               ) : (
-                <div style={{ display: 'grid', gap: 10 }}>
-                  <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: addType === 'ITEM_TYPE' ? '1fr 180px' : '1fr', gap: 8 }}>
+                <div className={s.newGrid}>
+                  <div className={cn('ao-rgrid', s.newNameRow)} style={{ gridTemplateColumns: addType === 'ITEM_TYPE' ? '1fr 180px' : '1fr' }}>
                     <input
-                      className="ao-input"
+                      className={cn('ao-input', s.inputSm2)}
                       value={newName}
                       onChange={(e) => setNewName(e.target.value)}
                       placeholder={t('hb.edit.newNamePlaceholder')}
-                      style={{ padding: '6px 12px' }}
                     />
                     {addType === 'ITEM_TYPE' && (
                       <select
-                        className="ao-input"
+                        className={cn('ao-input', s.inputSm)}
                         value={newItemSlot}
                         onChange={(e) => setNewItemSlot(e.target.value as EquipmentSlot)}
-                        style={{ padding: '6px 10px' }}
                       >
                         {EQUIPMENT_SLOTS.map((slot) => (
                           <option key={slot} value={slot}>
@@ -526,42 +488,38 @@ export default function EditDoctrinePage() {
                   </div>
 
                   <textarea
-                    className="ao-input"
+                    className={cn('ao-input', s.descInput)}
                     value={newDescription}
                     onChange={(e) => setNewDescription(e.target.value)}
                     placeholder={t('hb.edit.descriptionPlaceholder')}
                     rows={3}
-                    style={{ width: '100%', resize: 'vertical' }}
                   />
 
                   {addType === 'SKILL' && (
                     <input
-                      className="ao-input"
+                      className={cn('ao-input', s.inputSm2)}
                       value={newSkillType}
                       onChange={(e) => setNewSkillType(e.target.value)}
                       placeholder={t('hb.edit.skillTypePlaceholder')}
-                      style={{ padding: '6px 12px' }}
                     />
                   )}
 
                   {addType === 'FEAT' && (
                     <input
-                      className="ao-input"
+                      className={cn('ao-input', s.inputSm2)}
                       value={newFeatPrerequisites}
                       onChange={(e) => setNewFeatPrerequisites(e.target.value)}
                       placeholder={t('hb.edit.prerequisitesPlaceholder')}
-                      style={{ padding: '6px 12px' }}
                     />
                   )}
 
                   {addType === 'BUFF_DEBUFF' && (
-                    <div style={{ display: 'grid', gap: 8 }}>
-                      <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                    <div className={s.buffGrid}>
+                      <div className={cn('ao-rgrid', s.buffPair)}>
                         <select
-                          className="ao-input"
+                          className={cn('ao-input', s.inputSm)}
                           value={newBuffEffectType}
                           onChange={(e) => setNewBuffEffectType(e.target.value)}
-                          style={{ padding: '6px 10px' }}
                         >
                           <option value="STAT_MODIFIER">{t('hb.edit.effStatModifier')}</option>
                           <option value="CONDITION">{t('hb.edit.effCondition')}</option>
@@ -571,10 +529,9 @@ export default function EditDoctrinePage() {
                           <option value="VULNERABILITY">{t('hb.edit.effVulnerability')}</option>
                         </select>
                         <select
-                          className="ao-input"
+                          className={cn('ao-input', s.inputSm)}
                           value={newBuffIsBuff}
                           onChange={(e) => setNewBuffIsBuff(e.target.value)}
-                          style={{ padding: '6px 10px' }}
                         >
                           <option value="true">{t('hb.edit.buff')}</option>
                           <option value="false">{t('hb.edit.debuff')}</option>
@@ -582,10 +539,9 @@ export default function EditDoctrinePage() {
                       </div>
                       {newBuffEffectType === 'STAT_MODIFIER' && (
                         <select
-                          className="ao-input"
+                          className={cn('ao-input', s.inputSm)}
                           value={newBuffTargetStatId}
                           onChange={(e) => setNewBuffTargetStatId(e.target.value)}
-                          style={{ padding: '6px 10px' }}
                         >
                           <option value="">{t('hb.edit.targetStatPlaceholder')}</option>
                           {(statTypes || []).map((stat) => (
@@ -593,45 +549,42 @@ export default function EditDoctrinePage() {
                           ))}
                         </select>
                       )}
-                      <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                      <div className={cn('ao-rgrid', s.buffPair)}>
                         <input
-                          className="ao-input"
+                          className={cn('ao-input', s.inputSm2)}
                           type="number"
                           value={newBuffModifierValue}
                           onChange={(e) => setNewBuffModifierValue(e.target.value)}
                           placeholder={t('hb.edit.modifierPlaceholder')}
-                          style={{ padding: '6px 12px' }}
                         />
                         <input
-                          className="ao-input"
+                          className={cn('ao-input', s.inputSm2)}
                           type="number"
                           value={newBuffDurationRounds}
                           onChange={(e) => setNewBuffDurationRounds(e.target.value)}
                           placeholder={t('hb.edit.durationPlaceholder')}
-                          style={{ padding: '6px 12px' }}
                         />
                       </div>
                     </div>
                   )}
 
                   {(addType === 'SKILL' || addType === 'FEAT' || addType === 'BUFF_DEBUFF') && (
-                    <div style={{ border: '1px solid var(--rule)', background: 'rgba(0,0,0,0.18)', padding: 12, display: 'grid', gap: 12 }}>
-                      <div className="ao-overline" style={{ color: 'var(--gold-pale)' }}>{t('hb.edit.depTitle')}</div>
-                      <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 12, margin: 0 }}>{t('hb.edit.depHint')}</p>
+                    <div className={s.depBox}>
+                      <div className={cn('ao-overline', s.depTitle)}>{t('hb.edit.depTitle')}</div>
+                      <p className={cn('ao-italic', s.depHint)}>{t('hb.edit.depHint')}</p>
                       <div>
                         <label className="ao-label">{t('hb.edit.depClasses')}</label>
                         {(contentByType['CHARACTER_CLASS'] || []).length === 0 ? (
-                          <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 12, margin: '4px 0 0' }}>{t('hb.edit.depNoClasses')}</p>
+                          <p className={cn('ao-italic', s.depNote)}>{t('hb.edit.depNoClasses')}</p>
                         ) : (
-                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 6 }}>
+                          <div className={s.chipWrap}>
                             {(contentByType['CHARACTER_CLASS'] || []).map((c) => {
                               const on = newDepClassIds.includes(c.id);
                               return (
                                 <button
                                   key={c.id}
                                   type="button"
-                                  className={on ? 'ao-chip ao-chip--gold' : 'ao-chip'}
-                                  style={{ cursor: 'pointer' }}
+                                  className={cn(on ? 'ao-chip ao-chip--gold' : 'ao-chip', s.chipBtn)}
                                   onClick={() => setNewDepClassIds(on ? newDepClassIds.filter((x) => x !== c.id) : [...newDepClassIds, c.id])}
                                 >
                                   {c.name}
@@ -644,17 +597,16 @@ export default function EditDoctrinePage() {
                       <div>
                         <label className="ao-label">{t('hb.edit.depRaces')}</label>
                         {(contentByType['RACE'] || []).length === 0 ? (
-                          <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 12, margin: '4px 0 0' }}>{t('hb.edit.depNoRaces')}</p>
+                          <p className={cn('ao-italic', s.depNote)}>{t('hb.edit.depNoRaces')}</p>
                         ) : (
-                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 6 }}>
+                          <div className={s.chipWrap}>
                             {(contentByType['RACE'] || []).map((r) => {
                               const on = newDepRaceIds.includes(r.id);
                               return (
                                 <button
                                   key={r.id}
                                   type="button"
-                                  className={on ? 'ao-chip ao-chip--gold' : 'ao-chip'}
-                                  style={{ cursor: 'pointer' }}
+                                  className={cn(on ? 'ao-chip ao-chip--gold' : 'ao-chip', s.chipBtn)}
                                   onClick={() => setNewDepRaceIds(on ? newDepRaceIds.filter((x) => x !== r.id) : [...newDepRaceIds, r.id])}
                                 >
                                   {r.name}
@@ -667,8 +619,8 @@ export default function EditDoctrinePage() {
                     </div>
                   )}
 
-                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center' }}>
-                    <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 12 }}>
+                  <div className={s.createRow}>
+                    <p className={cn('ao-italic', s.createNote)}>
                       {t('hb.edit.createsMissing', { type: addType.toLowerCase().replace('_', ' ') })}
                     </p>
                     <button
@@ -690,62 +642,35 @@ export default function EditDoctrinePage() {
             return (
               <div key={grp.type}>
                 {/* Section header */}
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  padding: '10px 16px',
-                  background: 'var(--abyss)',
-                  borderTop: '1px solid var(--rule)',
-                  borderBottom: '1px solid var(--rule)',
-                }}>
+                <div className={s.sectionHead}>
                   <Rune kind={grp.icon} size={13} color="var(--gold)" />
-                  <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--ink-bright)' }}>{t(grp.titleKey)}</span>
-                  <span className="ao-codex" style={{ color: 'var(--ink-faint)' }}>&middot; {rows.length}</span>
-                  <span style={{ flex: 1 }} />
-                  <span className="ao-codex" style={{ color: 'var(--ink-ghost)', fontSize: 9 }}>{t('hb.edit.dragToReorder')}</span>
+                  <span className={s.sectionTitle}>{t(grp.titleKey)}</span>
+                  <span className={cn('ao-codex', s.sectionCount)}>&middot; {rows.length}</span>
+                  <span className={s.grow} />
+                  <span className={cn('ao-codex', s.sectionHint)}>{t('hb.edit.dragToReorder')}</span>
                 </div>
 
                 {rows.length === 0 ? (
-                  <div className="ao-italic" style={{ padding: '16px', textAlign: 'center', color: 'var(--ink-faint)', fontSize: 13 }}>
+                  <div className={cn('ao-italic', s.emptyRow)}>
                     {t('hb.edit.noneSlotted', { label: t(grp.titleKey).toLowerCase() })}
                   </div>
                 ) : (
                   rows.map((r) => (
-                    <div key={r.id} style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 12,
-                      padding: '10px 16px',
-                      borderBottom: '1px solid var(--hairline)',
-                    }}>
+                    <div key={r.id} className={s.contentRow}>
                       {/* Drag handle */}
                       <Rune kind="dots" size={14} color="var(--ink-ghost)" />
 
                       {/* Icon slot */}
-                      <div className="ao-slot ao-slot--epic" style={{
-                        width: 36,
-                        height: 36,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flexShrink: 0,
-                      }}>
+                      <div className={cn('ao-slot ao-slot--epic', s.iconSlot)}>
                         <Rune kind={grp.icon} size={16} color="var(--gold)" />
                       </div>
 
                       {/* Name + description */}
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontFamily: 'var(--font-serif)', fontWeight: 500, fontSize: 15, color: 'var(--ink-bright)' }}>
+                      <div className={s.rowMain}>
+                        <div className={s.rowName}>
                           {r.name}
                         </div>
-                        <div className="ao-codex" style={{
-                          color: 'var(--ink-faint)',
-                          fontSize: 11,
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap',
-                        }}>
+                        <div className={cn('ao-codex', s.rowDesc)}>
                           {r.description ? r.description.substring(0, 80) : '\u2014'}
                           {r.slot && ` \u00b7 ${r.slot}`}
                           {r.skillType && ` \u00b7 ${r.skillType}`}
@@ -755,8 +680,7 @@ export default function EditDoctrinePage() {
 
                       {/* Book / Edit button */}
                       <button
-                        className="ao-iconbtn"
-                        style={{ width: 28, height: 28 }}
+                        className={cn('ao-iconbtn', s.iconBtnSm)}
                         title={grp.type === 'CHARACTER_CLASS' ? t('hb.edit.editRichClass') : grp.type === 'RACE' ? t('hb.edit.editSpecies') : t('hb.edit.view')}
                         onClick={() => {
                           if (grp.type === 'CHARACTER_CLASS') {
@@ -771,8 +695,7 @@ export default function EditDoctrinePage() {
                       </button>
                       {grp.type === 'RACE' && (
                         <button
-                          className="ao-iconbtn"
-                          style={{ width: 28, height: 28 }}
+                          className={cn('ao-iconbtn', s.iconBtnSm)}
                           title={t('hb.edit.toggleActive')}
                           onClick={() => {
                             const active = (r as { active?: boolean }).active !== false;
@@ -789,8 +712,7 @@ export default function EditDoctrinePage() {
 
                       {/* Remove button */}
                       <button
-                        className="ao-iconbtn"
-                        style={{ width: 28, height: 28, color: 'var(--ember)' }}
+                        className={cn('ao-iconbtn', s.iconBtnSm, s.ember)}
                         onClick={() => handleRemoveContent(r.id)}
                         title={t('hb.edit.remove')}
                       >

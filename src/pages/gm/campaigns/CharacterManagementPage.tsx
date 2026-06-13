@@ -10,7 +10,9 @@ import { useCharacter, useDeleteCharacter } from '@/hooks/useCharacter';
 import { useLevelUpOptions } from '@/hooks/useLevelUp';
 import { useAuthStore } from '@/store/authStore';
 import { useT } from '@/i18n/I18nContext';
+import { cn } from '@/lib/utils';
 import { xpForLevel, xpForNextLevel } from '@/types';
+import s from './CharacterManagementPage.module.css';
 
 interface ManagementTile {
   title: string;
@@ -66,18 +68,18 @@ export default function CharacterManagementPage() {
 
   if (isLoading) {
     return (
-      <div className="ao-panel ao-frame ao-breathe" style={{ padding: 24, minHeight: 160 }}>
+      <div className={cn('ao-panel ao-frame ao-breathe', s.skelPanel)}>
         <span className="ao-frame-c" />
-        <div className="ao-ph" style={{ width: '36%', height: 20, marginBottom: 16 }} />
-        <div className="ao-ph" style={{ width: '64%', height: 12 }} />
+        <div className={cn('ao-ph', s.phTitle)} />
+        <div className={cn('ao-ph', s.phSub)} />
       </div>
     );
   }
 
   if (error || !character) {
     return (
-      <div style={{ textAlign: 'center', padding: '48px 0' }}>
-        <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginBottom: 16 }}>
+      <div className={s.errorBlock}>
+        <p className={cn('ao-italic', s.errorText)}>
           {t('camp.mgmt.loadError')}
         </p>
         <button className="ao-btn" onClick={() => refetch()}>{t('camp.retry')}</button>
@@ -114,47 +116,46 @@ export default function CharacterManagementPage() {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, marginBottom: 24 }}>
+      <div className={s.header}>
         <div>
-          <p className="ao-overline" style={{ color: 'var(--gold)' }}>{t('camp.mgmt.overline')}</p>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 4, flexWrap: 'wrap' }}>
+          <p className={cn('ao-overline', s.overlineGold)}>{t('camp.mgmt.overline')}</p>
+          <div className={s.titleRow}>
             <h3 className="ao-h3">{character.name}</h3>
             <CharStatusBadge status={character.status ?? ''} />
           </div>
-          <p className="ao-italic" style={{ color: 'var(--ink-quiet)', fontSize: 13, marginTop: 6 }}>
+          <p className={cn('ao-italic', s.metaLine)}>
             {classLevelsLabel} · {className} · {t('camp.mgmt.owner', { name: character.ownerUsername })}
           </p>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div className={s.headActions}>
           {canDelete && (
             <button
-              className="ao-btn ao-btn--ghost"
+              className={cn('ao-btn ao-btn--ghost', s.deleteBtn)}
               onClick={() => setConfirmDelete(true)}
-              style={{ color: 'var(--ember)', borderColor: 'var(--ember)' }}
             >
               <Rune kind="x" size={14} color="currentColor" />
-              <span style={{ marginLeft: 6 }}>{t('common.delete')}</span>
+              <span className={s.ml6}>{t('common.delete')}</span>
             </button>
           )}
           <button className="ao-btn ao-btn--ghost" onClick={() => navigate(`/campaigns/${campaignId}`)}>
             <Rune kind="arrow-l" size={14} color="currentColor" />
-            <span style={{ marginLeft: 6 }}>{t('camp.mgmt.campaign')}</span>
+            <span className={s.ml6}>{t('camp.mgmt.campaign')}</span>
           </button>
         </div>
       </div>
 
-      <OrdoPanel frame padding={0} style={{ marginBottom: 24 }}>
+      <OrdoPanel frame padding={0} className={s.statusPanel}>
         <PanelHeader title={t('camp.mgmt.status')} glyph="helm" tone="gold" />
-        <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', gap: 12, alignItems: 'center' }}>
+        <div className={s.statusBody}>
+          <div className={cn('ao-rgrid', s.barRow)}>
             <Bar value={character.currentHp ?? 0} max={character.maxHp ?? 0} tone="ember" height={7} />
-            <span className="ao-codex" style={{ fontSize: 12, color: 'var(--ink-quiet)' }}>
+            <span className={cn('ao-codex', s.hpLabel)}>
               {character.currentHp ?? 0}/{character.maxHp ?? 0} HP
             </span>
           </div>
-          <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', gap: 12, alignItems: 'center' }}>
+          <div className={cn('ao-rgrid', s.barRow)}>
             <Bar value={xpProgressVal} max={xpProgressMax} tone="arcane" height={5} />
-            <span className="ao-codex" style={{ fontSize: 11, color: 'var(--ink-faint)' }}>
+            <span className={cn('ao-codex', s.xpLabel)}>
               {xpNext === Infinity
                 ? `${character.experience.toLocaleString()} XP · MAX`
                 : `${character.experience.toLocaleString()} / ${xpNext.toLocaleString()} XP`}
@@ -164,21 +165,10 @@ export default function CharacterManagementPage() {
       </OrdoPanel>
 
       {readyForLevelUp && canLevelUp && (
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            gap: 16,
-            padding: '14px 18px',
-            marginBottom: 18,
-            border: '1px solid var(--gold)',
-            background: 'rgba(212,180,120,0.08)',
-          }}
-        >
+        <div className={s.levelUpBanner}>
           <div>
-            <p className="ao-overline" style={{ color: 'var(--gold)' }}>{t('camp.mgmt.levelUpAvailable')}</p>
-            <p className="ao-italic" style={{ color: 'var(--ink-bright)', fontSize: 13, marginTop: 4 }}>
+            <p className={cn('ao-overline', s.overlineGold)}>{t('camp.mgmt.levelUpAvailable')}</p>
+            <p className={cn('ao-italic', s.levelUpReady)}>
               {t('camp.mgmt.levelUpReady')}
             </p>
           </div>
@@ -187,50 +177,29 @@ export default function CharacterManagementPage() {
             onClick={() => navigate(`/campaigns/${campaignId}/characters/${characterId}/level-up`)}
           >
             <Rune kind="flame" size={12} color="currentColor" />
-            <span style={{ marginLeft: 6 }}>{t('camp.mgmt.levelUp')}</span>
+            <span className={s.ml6}>{t('camp.mgmt.levelUp')}</span>
           </button>
         </div>
       )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 12 }}>
+      <div className={s.tileGrid}>
         {tiles.map((tile) => (
           <button
             key={tile.to}
-            className="ao-panel"
+            className={cn('ao-panel', s.tile)}
             onClick={() => navigate(tile.to)}
-            style={{
-              display: 'flex',
-              alignItems: 'flex-start',
-              gap: 12,
-              padding: 16,
-              border: '1px solid var(--hairline)',
-              background: 'var(--panel)',
-              textAlign: 'left',
-              cursor: 'pointer',
-            }}
           >
-            <span
-              style={{
-                width: 34,
-                height: 34,
-                border: '1px solid var(--rule)',
-                background: 'var(--abyss)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
-              }}
-            >
+            <span className={s.tileIcon}>
               <Rune kind={tile.glyph} size={16} color="var(--ink-quiet)" />
             </span>
-            <span style={{ flex: 1, minWidth: 0 }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 5 }}>
-                <span style={{ color: 'var(--ink-bright)', fontSize: 14 }}>{tile.title}</span>
+            <span className={s.tileMain}>
+              <span className={s.tileTitleRow}>
+                <span className={s.tileTitle}>{tile.title}</span>
                 {!tile.ready && (
-                  <span className="ao-overline" style={{ fontSize: 8, color: 'var(--ink-faint)' }}>{t('camp.mgmt.todo')}</span>
+                  <span className={cn('ao-overline', s.tileTodo)}>{t('camp.mgmt.todo')}</span>
                 )}
               </span>
-              <span className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 12, lineHeight: 1.35 }}>
+              <span className={cn('ao-italic', s.tileBody)}>
                 {tile.body}
               </span>
             </span>

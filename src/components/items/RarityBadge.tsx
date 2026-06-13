@@ -1,5 +1,8 @@
+import type { CSSProperties } from 'react';
 import { Rune } from '@/components/ordo';
 import { useT } from '@/i18n/I18nContext';
+import { cn } from '@/lib/utils';
+import s from './RarityBadge.module.css';
 
 /* ── Rarity colour & glyph maps ───────────────────────────────── */
 
@@ -41,31 +44,12 @@ export function RarityBadge({ rarity, size = 'sm' }: RarityBadgeProps) {
   const labelKey = RARITY_LABEL_KEY[rarity];
   const label = labelKey ? t(labelKey) : rarity;
   const isLegendary = rarity === 'LEGENDARY';
-
-  const fontSize = size === 'md' ? 10 : 9;
   const iconSize = size === 'md' ? 10 : 8;
-  const py = size === 'md' ? 3 : 2;
-  const px = size === 'md' ? 9 : 7;
 
   return (
     <span
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: 6,
-        padding: `${py}px ${px}px ${py}px ${px - 1}px`,
-        background: 'rgba(0,0,0,0.45)',
-        border: `1px solid ${color}`,
-        borderLeft: `2px solid ${color}`,
-        fontFamily: 'var(--font-display)',
-        fontSize,
-        letterSpacing: '0.2em',
-        color,
-        textTransform: 'uppercase',
-        boxShadow: isLegendary
-          ? `0 0 10px ${color}55, inset 0 0 8px ${color}22`
-          : 'none',
-      }}
+      className={cn(s.badge, size === 'md' && s.md, isLegendary && s.legendary)}
+      style={{ '--rar': color } as CSSProperties}
     >
       <Rune kind={glyph} size={iconSize} color={color} />
       {label}

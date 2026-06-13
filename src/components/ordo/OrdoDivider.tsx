@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import { Rune } from './Rune';
 
 interface OrdoDividerProps {
@@ -12,21 +12,13 @@ export function OrdoDivider({
   children,
   color = 'var(--rule)',
 }: OrdoDividerProps) {
-  const line = (
-    <span
-      style={{
-        flex: 1,
-        height: 1,
-        background: color,
-      }}
-    />
-  );
+  const line = <span className="ao-divide-line" style={{ '--line-color': color } as CSSProperties} />;
 
   if (children) {
     return (
       <div className="ao-divide">
         {line}
-        <span className="ao-overline" style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+        <span className="ao-overline ao-divide-label">
           <Rune kind={glyph} size={10} color={color} />
           {children}
         </span>

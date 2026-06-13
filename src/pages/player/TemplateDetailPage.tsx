@@ -4,6 +4,8 @@ import { OrdoPanel, PanelHeader, Bar, OrdoDivider } from '@/components/ordo';
 import { EditableSheetField } from '@/components/characters';
 import { useTemplate, useDeleteTemplate, useUpdateTemplate } from '@/hooks/useTemplates';
 import { useT } from '@/i18n/I18nContext';
+import { cn } from '@/lib/utils';
+import s from './TemplateDetailPage.module.css';
 
 export default function TemplateDetailPage() {
   const t = useT();
@@ -22,18 +24,18 @@ export default function TemplateDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="ao-panel ao-frame ao-breathe" style={{ padding: 24, minHeight: 160 }}>
+      <div className={cn('ao-panel ao-frame ao-breathe', s.skel)}>
         <span className="ao-frame-c" />
-        <div className="ao-ph" style={{ width: '40%', height: 20, marginBottom: 12 }} />
-        <div className="ao-ph" style={{ width: '60%', height: 14 }} />
+        <div className={cn('ao-ph', s.skelTitle)} />
+        <div className={cn('ao-ph', s.skelLine)} />
       </div>
     );
   }
 
   if (error || !tpl) {
     return (
-      <div style={{ textAlign: 'center', padding: '48px 0' }}>
-        <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginBottom: 16 }}>
+      <div className={s.errorBox}>
+        <p className={cn('ao-italic', s.errorText)}>
           {t('player.template.notFound')}
         </p>
         <button className="ao-btn" onClick={back}>{t('player.template.backToList')}</button>
@@ -52,24 +54,24 @@ export default function TemplateDetailPage() {
 
   return (
     <div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
+      <div className={s.toolbar}>
         <button className="ao-btn ao-btn--ghost" onClick={back}>
           <ArrowLeft className="h-3 w-3" /> {t('player.template.backToListShort')}
         </button>
         <button className="ao-btn ao-btn--ghost" onClick={handleDelete} disabled={deleteMutation.isPending}>
-          {deleteMutation.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Trash2 className="h-3 w-3" style={{ color: 'var(--ember)' }} />}
-          <span style={{ marginLeft: 6 }}>{t('player.template.delete')}</span>
+          {deleteMutation.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Trash2 className={cn('h-3 w-3', s.trashIcon)} />}
+          <span className={s.delLabel}>{t('player.template.delete')}</span>
         </button>
       </div>
 
       <OrdoPanel frame padding={0}>
         <PanelHeader title={tpl.name} glyph="helm" tone="gold" sub={classLabel} />
-        <div style={{ padding: 16, display: 'grid', gap: 14 }}>
-          <div className="ao-codex" style={{ fontSize: 13 }}>
+        <div className={s.bodyGrid}>
+          <div className={cn('ao-codex', s.raceLine)}>
             {t('player.template.race')}: <strong>{tpl.race?.name ?? t('player.template.dash')}</strong>
           </div>
           {tpl.race?.description && (
-            <div className="ao-italic" style={{ fontSize: 12, color: 'var(--ink-quiet)' }}>
+            <div className={cn('ao-italic', s.raceDesc)}>
               {tpl.race.description}
             </div>
           )}
@@ -77,21 +79,21 @@ export default function TemplateDetailPage() {
           <OrdoDivider glyph="diamond" />
 
           <div>
-            <div className="ao-overline" style={{ marginBottom: 6 }}>{t('player.template.health')}</div>
+            <div className={cn('ao-overline', s.sectionLabel)}>{t('player.template.health')}</div>
             <Bar value={tpl.currentHp ?? 0} max={Math.max(1, tpl.maxHp ?? 0)} tone="ember" height={6} />
-            <div className="ao-codex" style={{ fontSize: 11, color: 'var(--ink-faint)', marginTop: 4 }}>
+            <div className={cn('ao-codex', s.hpMeta)}>
               HP {tpl.currentHp ?? 0}/{tpl.maxHp ?? 0} · XP {tpl.experience.toLocaleString()}
             </div>
           </div>
 
           {tpl.stats?.length ? (
             <div>
-              <div className="ao-overline" style={{ marginBottom: 6 }}>{t('player.template.stats')}</div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 8 }}>
-                {tpl.stats.map((s) => (
-                  <div key={s.id} style={{ padding: '6px 10px', border: '1px solid var(--hairline)' }}>
-                    <div className="ao-overline" style={{ fontSize: 9 }}>{s.statTypeName}</div>
-                    <div className="ao-h5" style={{ fontSize: 18 }}>{s.value}</div>
+              <div className={cn('ao-overline', s.sectionLabel)}>{t('player.template.stats')}</div>
+              <div className={s.statsGrid}>
+                {tpl.stats.map((st) => (
+                  <div key={st.id} className={s.statCell}>
+                    <div className={cn('ao-overline', s.statLabel)}>{st.statTypeName}</div>
+                    <div className={cn('ao-h5', s.statValue)}>{st.value}</div>
                   </div>
                 ))}
               </div>
@@ -100,11 +102,11 @@ export default function TemplateDetailPage() {
         </div>
       </OrdoPanel>
 
-      <div style={{ display: 'grid', gap: 14, marginTop: 18 }}>
+      <div className={s.sideGrid}>
         <OrdoPanel padding={14}>
           <div className="ao-overline">{t('camp2.folio.playerName')}</div>
-          <div className="ao-h6" style={{ fontSize: 16, marginTop: 2 }}>{tpl.ownerUsername}</div>
-          <div className="ao-codex" style={{ marginTop: 2 }}>{t('camp2.folio.playerFromOwner')}</div>
+          <div className={cn('ao-h6', s.ownerName)}>{tpl.ownerUsername}</div>
+          <div className={cn('ao-codex', s.ownerFrom)}>{t('camp2.folio.playerFromOwner')}</div>
         </OrdoPanel>
         <OrdoPanel frame padding={0}>
           <PanelHeader title={t('camp2.folio.profsLanguages')} glyph="scroll" />

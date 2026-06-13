@@ -1,20 +1,11 @@
 import type { ReactNode } from 'react';
+import { cn } from '@/lib/utils';
+import s from './CodexID.module.css';
 
 interface CodexIDProps {
   children: ReactNode;
 }
 
 export function CodexID({ children }: CodexIDProps) {
-  return (
-    <span
-      className="ao-codex"
-      style={{
-        fontSize: 11,
-        color: 'var(--ink-faint)',
-        letterSpacing: '0.05em',
-      }}
-    >
-      {children}
-    </span>
-  );
+  return <span className={cn('ao-codex', s.codex)}>{children}</span>;
 }

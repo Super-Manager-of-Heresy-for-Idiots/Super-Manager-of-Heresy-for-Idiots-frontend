@@ -1,7 +1,10 @@
 import { useState } from 'react';
+import type { CSSProperties } from 'react';
 import { ModalScene, Bar } from '@/components/ordo';
 import { useUpdateHp } from '@/hooks/useCharacter';
 import { useT } from '@/i18n/I18nContext';
+import { cn } from '@/lib/utils';
+import s from './DamageHealModal.module.css';
 
 type Mode = 'damage' | 'heal';
 
@@ -56,40 +59,14 @@ export function DamageHealModal({
       danger={isDamage}
       width={420}
       footer={
-        <div style={{ display: 'flex', gap: 8 }}>
-          <button
-            onClick={() => onOpenChange(false)}
-            style={{
-              flex: 1,
-              padding: '10px 16px',
-              background: 'none',
-              border: '1px solid var(--rule)',
-              color: 'var(--ink-quiet)',
-              fontSize: 12,
-              fontFamily: 'var(--font-display)',
-              letterSpacing: '0.1em',
-              textTransform: 'uppercase' as const,
-              cursor: 'pointer',
-            }}
-          >
+        <div className={s.footer} style={{ '--accent': accentColor } as CSSProperties}>
+          <button onClick={() => onOpenChange(false)} className={s.cancel}>
             {t('common.cancel')}
           </button>
           <button
             onClick={handleApply}
             disabled={amount <= 0 || updateHp.isPending}
-            style={{
-              flex: 1,
-              padding: '10px 16px',
-              background: `${accentColor}22`,
-              border: `1px solid ${accentColor}66`,
-              color: accentColor,
-              fontSize: 12,
-              fontFamily: 'var(--font-display)',
-              letterSpacing: '0.1em',
-              textTransform: 'uppercase' as const,
-              cursor: amount > 0 && !updateHp.isPending ? 'pointer' : 'not-allowed',
-              opacity: amount > 0 && !updateHp.isPending ? 1 : 0.5,
-            }}
+            className={s.apply}
           >
             {updateHp.isPending ? t('cmp.dmgHeal.applying') : t('cmp.dmgHeal.apply')}
           </button>
@@ -97,142 +74,58 @@ export function DamageHealModal({
       }
     >
       {/* Mode toggle */}
-      <div
-        style={{
-          display: 'flex',
-          marginBottom: 24,
-          border: '1px solid var(--rule)',
-          overflow: 'hidden',
-        }}
-      >
+      <div className={s.toggle}>
         <button
           onClick={() => setMode('damage')}
-          style={{
-            flex: 1,
-            padding: '10px 0',
-            background: isDamage ? 'var(--ember)18' : 'transparent',
-            border: 'none',
-            borderRight: '1px solid var(--rule)',
-            color: isDamage ? 'var(--ember)' : 'var(--ink-quiet)',
-            fontSize: 12,
-            fontFamily: 'var(--font-display)',
-            letterSpacing: '0.14em',
-            textTransform: 'uppercase' as const,
-            cursor: 'pointer',
-          }}
+          className={cn(s.tab, isDamage && s.active)}
+          style={{ '--tab-accent': 'var(--ember)' } as CSSProperties}
         >
           {t('cmp.dmgHeal.damage')}
         </button>
         <button
           onClick={() => setMode('heal')}
-          style={{
-            flex: 1,
-            padding: '10px 0',
-            background: !isDamage ? 'rgba(122,152,102,0.1)' : 'transparent',
-            border: 'none',
-            color: !isDamage ? '#7a9866' : 'var(--ink-quiet)',
-            fontSize: 12,
-            fontFamily: 'var(--font-display)',
-            letterSpacing: '0.14em',
-            textTransform: 'uppercase' as const,
-            cursor: 'pointer',
-          }}
+          className={cn(s.tab, !isDamage && s.active)}
+          style={{ '--tab-accent': '#7a9866' } as CSSProperties}
         >
           {t('cmp.dmgHeal.heal')}
         </button>
       </div>
 
       {/* Amount input */}
-      <div style={{ textAlign: 'center', marginBottom: 24 }}>
-        <label
-          className="ao-overline"
-          style={{
-            display: 'block',
-            color: accentColor,
-            letterSpacing: '0.18em',
-            marginBottom: 10,
-          }}
-        >
-          {t('cmp.dmgHeal.amount')}
-        </label>
+      <div className={s.amountWrap} style={{ '--accent': accentColor } as CSSProperties}>
+        <label className={cn('ao-overline', s.amountLabel)}>{t('cmp.dmgHeal.amount')}</label>
         <input
           type="number"
           min={0}
           value={amount || ''}
           onChange={(e) => setAmount(Math.max(0, Number(e.target.value)))}
           placeholder="0"
-          style={{
-            width: 120,
-            textAlign: 'center',
-            padding: '12px 8px',
-            background: 'var(--abyss)',
-            border: `1px solid ${accentColor}44`,
-            color: 'var(--ink-bright)',
-            fontSize: 36,
-            fontFamily: 'var(--font-mono, monospace)',
-            lineHeight: 1,
-          }}
+          className={s.amountInput}
         />
       </div>
 
       {/* Preview */}
-      <div
-        style={{
-          background: 'var(--abyss)',
-          border: '1px solid var(--rule)',
-          padding: 16,
-        }}
-      >
-        <div
-          className="ao-overline"
-          style={{
-            color: 'var(--ink-faint)',
-            letterSpacing: '0.16em',
-            marginBottom: 12,
-          }}
-        >
-          {t('cmp.dmgHeal.preview')}
-        </div>
+      <div className={s.preview}>
+        <div className={cn('ao-overline', s.previewLabel)}>{t('cmp.dmgHeal.preview')}</div>
 
         {/* Current -> Projected */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'baseline',
-            justifyContent: 'center',
-            gap: 8,
-            marginBottom: 12,
-          }}
-        >
+        <div className={s.projRow}>
+          <span className={s.cur}>{currentHp}</span>
+          <span className={s.arrow}>&rarr;</span>
           <span
+            className={s.proj}
             style={{
-              fontSize: 24,
-              fontFamily: 'var(--font-display)',
-              color: 'var(--ink-quiet)',
-            }}
-          >
-            {currentHp}
-          </span>
-          <span style={{ color: 'var(--ink-faint)', fontSize: 16 }}>&rarr;</span>
-          <span
-            style={{
-              fontSize: 32,
-              fontFamily: 'var(--font-display)',
-              color: projected < currentHp ? 'var(--ember)' : projected > currentHp ? '#7a9866' : 'var(--ink-bright)',
-              lineHeight: 1,
+              color:
+                projected < currentHp
+                  ? 'var(--ember)'
+                  : projected > currentHp
+                    ? '#7a9866'
+                    : 'var(--ink-bright)',
             }}
           >
             {projected}
           </span>
-          <span
-            style={{
-              fontSize: 14,
-              color: 'var(--ink-faint)',
-              fontFamily: 'var(--font-display)',
-            }}
-          >
-            / {maxHp}
-          </span>
+          <span className={s.projMax}>/ {maxHp}</span>
         </div>
 
         {/* Preview bar */}

@@ -1,5 +1,7 @@
+import type { CSSProperties } from 'react';
 import { Rune } from '@/components/ordo';
 import { useT } from '@/i18n/I18nContext';
+import s from './StatusBadge.module.css';
 
 type BadgeStatus = 'DRAFT' | 'PUBLISHED' | 'UNPUBLISHED' | 'DELETED' | 'INSTALLED' | 'ARCHIVED';
 
@@ -20,20 +22,7 @@ export function StatusBadge({ status }: StatusBadgeProps) {
   const t = useT();
   const m = STATUS_MAP[status] || STATUS_MAP.DRAFT;
   return (
-    <span style={{
-      display: 'inline-flex',
-      alignItems: 'center',
-      gap: 6,
-      padding: '4px 9px 4px 6px',
-      background: 'rgba(0,0,0,0.5)',
-      border: '1px solid var(--rule-strong)',
-      borderLeft: `2px solid ${m.stripe}`,
-      fontFamily: 'var(--font-display)',
-      fontSize: 10,
-      letterSpacing: '0.22em',
-      color: m.text,
-      textTransform: 'uppercase',
-    }}>
+    <span className={s.badge} style={{ '--stripe': m.stripe, '--text-clr': m.text } as CSSProperties}>
       <Rune kind={m.glyph} size={9} color={m.stripe} />
       {t(m.labelKey)}
     </span>

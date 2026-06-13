@@ -1,0 +1,12 @@
+.backLink { margin-bottom: 12px; }
+
+.header { margin-bottom: 18px; }
+.overlineArcane { color: var(--arcane); }
+.title { margin-top: 4px; }
+.subtitle { color: var(--ink-quiet); font-size: 13px; margin-top: 6px; }
+
+.loadingBox { padding: 24px; text-align: center; color: var(--ink-faint); font-size: 13px; }
+.retryBox { padding: 0 24px 24px; text-align: center; }
+
+.body { max-width: 640px; }
+.readonlyNote { color: var(--ink-faint); font-size: 12px; margin-top: 10px; text-align: center; }

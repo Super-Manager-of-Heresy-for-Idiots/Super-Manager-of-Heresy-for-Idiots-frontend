@@ -1,4 +1,5 @@
 import { Fragment, useEffect, useMemo, useState } from 'react';
+import type { CSSProperties } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Plus, Pencil, Trash2, Eye, EyeOff, Copy, X, Search, AlertTriangle, SlidersHorizontal, ChevronDown } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
@@ -14,7 +15,9 @@ import MonsterStatblock from '@/components/bestiary/MonsterStatblock';
 import { BackLink } from '@/components/campaigns';
 import { SIZE_VALUES, dictName, sizeKey } from '@/components/bestiary/constants';
 import { useI18n, useT } from '@/i18n/I18nContext';
+import { cn } from '@/lib/utils';
 import type { CreatureSize, DictionaryRef, MonsterSummaryResponse } from '@/types';
+import s from './CampaignBestiaryPage.module.css';
 
 const CR_RANGES: { v: string; labelKey: string; min: number; max: number }[] = [
   { v: 'ALL', labelKey: 'best.mon.crAll', min: -1, max: 99 },
@@ -25,16 +28,15 @@ const CR_RANGES: { v: string; labelKey: string; min: number; max: number }[] = [
 ];
 
 function Diamond({ size = 8, color = 'var(--gold)' }: { size?: number; color?: string }) {
-  return <span style={{ width: size, height: size, transform: 'rotate(45deg)', background: color, display: 'inline-block', flexShrink: 0 }} />;
+  return <span className={s.diamond} style={{ width: size, height: size, background: color }} />;
 }
 function SizeBadge({ size, lang }: { size: DictionaryRef; lang: string }) {
-  return <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '3px 9px', background: 'rgba(0,0,0,0.4)', border: '1px solid var(--hairline)', fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink-quiet)' }}><Diamond size={6} color="var(--bronze)" />{dictName(size, lang)}</span>;
+  return <span className={s.sizeBadge}><Diamond size={6} color="var(--bronze)" />{dictName(size, lang)}</span>;
 }
 function Select<T extends string>({ value, onChange, options }: { value: T; onChange: (v: T) => void; options: { v: T; label: string }[] }) {
   return (
-    <select className="ao-input" value={value} onChange={(e) => onChange(e.target.value as T)}
-      style={{ width: 'auto', minWidth: 150, padding: '8px 30px 8px 12px', fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: '0.04em', appearance: 'none', cursor: 'pointer', backgroundImage: "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23968c75' stroke-width='2'><path d='M6 9l6 6 6-6'/></svg>\")", backgroundRepeat: 'no-repeat', backgroundPosition: 'right 10px center' }}>
-      {options.map((o) => <option key={o.v} value={o.v} style={{ background: 'var(--abyss)' }}>{o.label}</option>)}
+    <select className={cn('ao-input', s.filterSelect)} value={value} onChange={(e) => onChange(e.target.value as T)}>
+      {options.map((o) => <option key={o.v} value={o.v} className={s.selectOption}>{o.label}</option>)}
     </select>
   );
 }
@@ -47,15 +49,15 @@ function MonsterDetailRow({ campaignId, monsterId, open, colSpan }: { campaignId
 
   return (
     <tr>
-      <td colSpan={colSpan} style={{ padding: 0, background: 'rgba(0,0,0,0.18)', borderBottom: open ? '1px solid var(--rule)' : 'none' }}>
-        <div style={{ display: 'grid', gridTemplateRows: open ? '1fr' : '0fr', transition: 'grid-template-rows 360ms cubic-bezier(0.4, 0, 0.2, 1)' }}>
-          <div style={{ overflow: 'hidden' }}>
-            <div style={{ padding: 'clamp(12px, 2vw, 20px)', opacity: open ? 1 : 0, transition: 'opacity 280ms ease' }}>
+      <td colSpan={colSpan} className={cn(s.detailCell, open && s.open)}>
+        <div className={cn(s.detailGrid, open && s.open)}>
+          <div className={s.detailClip}>
+            <div className={cn(s.detailInner, open && s.open)}>
               {q.isLoading && (
-                <div style={{ textAlign: 'center', padding: '24px 0', fontFamily: 'var(--font-serif)', fontStyle: 'italic', color: 'var(--ink-quiet)' }}>{t('best.com.loading')}</div>
+                <div className={s.detailStatus}>{t('best.com.loading')}</div>
               )}
               {q.isError && (
-                <div style={{ textAlign: 'center', padding: '24px 0', fontFamily: 'var(--font-serif)', fontStyle: 'italic', color: 'var(--ink-quiet)' }}>{t('best.mon.loadError')}</div>
+                <div className={s.detailStatus}>{t('best.mon.loadError')}</div>
               )}
               {q.data && <MonsterStatblock monster={q.data} />}
             </div>
@@ -112,14 +114,14 @@ export default function CampaignBestiaryPage() {
   }, [systemRows, query, sizeFilter, crFilter]);
 
   return (
-    <div style={{ minHeight: '100%', background: 'var(--stone)' }}>
-      <header style={{ minHeight: 64, borderBottom: '1px solid var(--rule)', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 14, padding: '12px clamp(16px, 3vw, 32px)', background: 'linear-gradient(180deg, var(--panel) 0%, var(--stone) 100%)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: '1 1 auto' }}>
+    <div className={s.page}>
+      <header className={s.header}>
+        <div className={s.headerMain}>
           <BackLink to={`/campaigns/${campaignId}`} label={t('camp.backToDashboard')} />
           <Diamond size={9} />
           <div>
-            <div style={{ fontFamily: 'var(--font-display)', fontSize: 15, letterSpacing: 'var(--track-eng)', textTransform: 'uppercase', color: 'var(--ink-bright)' }}>{t('best.cmp.title')}</div>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--ink-faint)' }}>{t('best.cmp.subtitle', { view: isGM ? t('best.cmp.viewGm') : t('best.cmp.viewPlayer'), n: isGM ? monsters.length : visible.length })}</div>
+            <div className={s.headerTitle}>{t('best.cmp.title')}</div>
+            <div className={s.headerSub}>{t('best.cmp.subtitle', { view: isGM ? t('best.cmp.viewGm') : t('best.cmp.viewPlayer'), n: isGM ? monsters.length : visible.length })}</div>
           </div>
         </div>
         {isGM && tab === 'campaign' && (
@@ -129,7 +131,7 @@ export default function CampaignBestiaryPage() {
 
       {/* Tabs (GM only) */}
       {isGM && (
-        <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid var(--rule)', padding: '0 clamp(16px, 3vw, 32px)', background: 'var(--panel)' }}>
+        <div className={s.tabs}>
           {([
             { v: 'campaign' as const, label: t('best.cmp.tabCampaign') },
             { v: 'system' as const, label: t('best.cmp.tabSystem') },
@@ -137,18 +139,7 @@ export default function CampaignBestiaryPage() {
             <button
               key={tb.v}
               onClick={() => setTab(tb.v)}
-              style={{
-                padding: '12px 18px',
-                background: 'transparent',
-                border: 'none',
-                borderBottom: tab === tb.v ? '2px solid var(--gold)' : '2px solid transparent',
-                cursor: 'pointer',
-                fontFamily: 'var(--font-display)',
-                fontSize: 12,
-                letterSpacing: 'var(--track-eng)',
-                textTransform: 'uppercase',
-                color: tab === tb.v ? 'var(--ink-bright)' : 'var(--ink-faint)',
-              }}
+              className={cn(s.tab, tab === tb.v && s.active)}
             >
               {tb.label}
             </button>
@@ -156,47 +147,47 @@ export default function CampaignBestiaryPage() {
         </div>
       )}
 
-      <div style={{ padding: 'clamp(16px, 3vw, 28px)' }}>
+      <div className={s.body}>
         {systemActive ? (
           <>
-            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-              <div style={{ position: 'relative', flex: '1 1 240px', maxWidth: 340 }}>
-                <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--ink-faint)', display: 'flex' }}><Search size={15} /></span>
-                <input className="ao-input" placeholder={t('best.mon.searchPh')} value={query} onChange={(e) => setQuery(e.target.value)} style={{ paddingLeft: 36 }} />
+            <div className={s.filterBar}>
+              <div className={s.searchWrap}>
+                <span className={s.searchIcon}><Search size={15} /></span>
+                <input className={cn('ao-input', s.searchInput)} placeholder={t('best.mon.searchPh')} value={query} onChange={(e) => setQuery(e.target.value)} />
               </div>
               <Select value={sizeFilter} onChange={setSizeFilter} options={sizeOptions} />
               <Select value={crFilter} onChange={setCrFilter} options={crOptions} />
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, marginLeft: 'auto', fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--ink-faint)', letterSpacing: '0.06em' }}>
+              <span className={s.countBadge}>
                 <SlidersHorizontal size={13} /> {t('best.mon.countOf', { n: filteredSystem.length, total: systemRows.length })}
               </span>
             </div>
 
-            <div className="ao-panel" style={{ padding: 0, overflowX: 'auto' }}>
-              <table className="ao-table bd-table" style={{ minWidth: 720 }}>
+            <div className={cn('ao-panel', s.tableWrap)}>
+              <table className={cn('ao-table bd-table', s.tableSystem)}>
                 <thead>
                   <tr>
                     <th>{t('best.mon.colMonster')}</th>
-                    <th style={{ width: 130 }}>{t('best.mon.colSize')}</th>
-                    <th style={{ width: 80, textAlign: 'center' }}>{t('best.mon.colCr')}</th>
-                    <th style={{ width: 180, textAlign: 'right' }}>{t('best.mon.colActions')}</th>
+                    <th className={s.colSize}>{t('best.mon.colSize')}</th>
+                    <th className={s.colCr}>{t('best.mon.colCr')}</th>
+                    <th className={s.colActions}>{t('best.mon.colActions')}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredSystem.map((m) => (
                     <tr key={m.id}>
                       <td>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <div className={s.nameCell}>
                           <Diamond size={7} color="var(--bronze)" />
-                          <div style={{ minWidth: 0 }}>
-                            <div style={{ fontFamily: 'var(--font-serif)', fontSize: 17, fontWeight: 600, color: 'var(--ink-bright)' }}>{m.nameRusloc}</div>
-                            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--ink-faint)', letterSpacing: '0.06em' }}>{m.nameEngloc ?? '—'} · {m.slug}</div>
+                          <div className={s.nameInner}>
+                            <div className={s.monName}>{m.nameRusloc}</div>
+                            <div className={s.monSub}>{m.nameEngloc ?? '—'} · {m.slug}</div>
                           </div>
                         </div>
                       </td>
                       <td><SizeBadge size={m.size} lang={lang} /></td>
-                      <td style={{ textAlign: 'center' }}><span style={{ fontFamily: 'var(--font-serif)', fontSize: 20, fontWeight: 600, color: 'var(--gold-pale)' }}>{m.crRating}</span></td>
+                      <td className={s.centerCell}><span className={s.crValue}>{m.crRating}</span></td>
                       <td>
-                        <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
+                        <div className={s.actionsCell}>
                           <button className="ao-btn ao-btn--ghost ao-btn--sm" disabled={clone.isPending} onClick={() => clone.mutate(m.id, { onSuccess: () => setTab('campaign') })}>
                             <Copy size={13} /> {t('best.cmp.cloneInto')}
                           </button>
@@ -205,10 +196,10 @@ export default function CampaignBestiaryPage() {
                     </tr>
                   ))}
                   {!systemQ.isLoading && filteredSystem.length === 0 && (
-                    <tr><td colSpan={4} style={{ textAlign: 'center', padding: '40px 0', fontFamily: 'var(--font-serif)', fontStyle: 'italic', color: 'var(--ink-quiet)' }}>{systemQ.isError ? t('best.mon.loadError') : t('best.mon.empty')}</td></tr>
+                    <tr><td colSpan={4} className={s.emptyCell}>{systemQ.isError ? t('best.mon.loadError') : t('best.mon.empty')}</td></tr>
                   )}
                   {systemQ.isLoading && (
-                    <tr><td colSpan={4} style={{ textAlign: 'center', padding: '40px 0', fontFamily: 'var(--font-serif)', fontStyle: 'italic', color: 'var(--ink-quiet)' }}>{t('best.com.loading')}</td></tr>
+                    <tr><td colSpan={4} className={s.emptyCell}>{t('best.com.loading')}</td></tr>
                   )}
                 </tbody>
               </table>
@@ -216,15 +207,15 @@ export default function CampaignBestiaryPage() {
           </>
         ) : (
           <>
-            <div className="ao-panel" style={{ padding: 0, overflowX: 'auto' }}>
-              <table className="ao-table" style={{ minWidth: isGM ? 760 : 520 }}>
+            <div className={cn('ao-panel', s.tableWrap)}>
+              <table className={cn('ao-table', s.tableCampaign, isGM && s.gm)}>
                 <thead>
                   <tr>
                     <th>{t('best.mon.colMonster')}</th>
-                    <th style={{ width: 80, textAlign: 'center' }}>{t('best.mon.colCr')}</th>
-                    <th style={{ width: 130 }}>{t('best.mon.colSize')}</th>
-                    <th style={{ width: 130, textAlign: 'center' }}>{t('best.cmp.colVisibility')}</th>
-                    {isGM && <th style={{ width: 160, textAlign: 'right' }}>{t('best.mon.colActions')}</th>}
+                    <th className={s.colCr}>{t('best.mon.colCr')}</th>
+                    <th className={s.colSize}>{t('best.mon.colSize')}</th>
+                    <th className={s.colVis}>{t('best.cmp.colVisibility')}</th>
+                    {isGM && <th className={s.colActions160}>{t('best.mon.colActions')}</th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -232,32 +223,32 @@ export default function CampaignBestiaryPage() {
                     const isOpen = expandedId === m.id;
                     return (
                     <Fragment key={m.id}>
-                    <tr style={{ cursor: 'pointer', background: isOpen ? 'rgba(176,141,78,0.06)' : undefined }}>
+                    <tr className={cn(s.rowClickable, isOpen && s.rowOpen)}>
                       <td onClick={() => setExpandedId(isOpen ? null : m.id)}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                          <ChevronDown size={15} style={{ flexShrink: 0, color: isOpen ? 'var(--gold-pale)' : 'var(--ink-faint)', transform: isOpen ? 'rotate(0deg)' : 'rotate(-90deg)', transition: 'transform 300ms cubic-bezier(0.4, 0, 0.2, 1)' }} />
+                        <div className={s.nameCell}>
+                          <ChevronDown size={15} className={cn(s.chevron, isOpen && s.open)} />
                           <Diamond size={7} color="var(--bronze)" />
                           <div>
-                            <div style={{ fontFamily: 'var(--font-serif)', fontSize: 17, fontWeight: 600, color: 'var(--ink-bright)' }}>{m.nameRusloc}</div>
-                            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--ink-faint)' }}>{m.nameEngloc ?? '—'}{m.sourceMonsterId ? ` · ${t('best.cmp.cloneTag')}` : ''}</div>
+                            <div className={s.monName}>{m.nameRusloc}</div>
+                            <div className={s.monSubPlain}>{m.nameEngloc ?? '—'}{m.sourceMonsterId ? ` · ${t('best.cmp.cloneTag')}` : ''}</div>
                           </div>
                         </div>
                       </td>
-                      <td style={{ textAlign: 'center' }} onClick={() => setExpandedId(isOpen ? null : m.id)}><span style={{ fontFamily: 'var(--font-serif)', fontSize: 20, fontWeight: 600, color: 'var(--gold-pale)' }}>{m.crRating}</span></td>
+                      <td className={s.centerCell} onClick={() => setExpandedId(isOpen ? null : m.id)}><span className={s.crValue}>{m.crRating}</span></td>
                       <td onClick={() => setExpandedId(isOpen ? null : m.id)}><SizeBadge size={m.size} lang={lang} /></td>
-                      <td style={{ textAlign: 'center' }} onClick={() => setExpandedId(isOpen ? null : m.id)}>
+                      <td className={s.centerCell} onClick={() => setExpandedId(isOpen ? null : m.id)}>
                         {m.isVisibleToPlayers
-                          ? <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, color: 'var(--gold-pale)', fontFamily: 'var(--font-mono)', fontSize: 11 }}><Eye size={14} /> {t('best.cmp.open')}</span>
-                          : <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, color: 'var(--ink-faint)', fontFamily: 'var(--font-mono)', fontSize: 11 }}><EyeOff size={14} /> {t('best.cmp.hidden')}</span>}
+                          ? <span className={cn(s.visState, s.visOpen)}><Eye size={14} /> {t('best.cmp.open')}</span>
+                          : <span className={cn(s.visState, s.visHidden)}><EyeOff size={14} /> {t('best.cmp.hidden')}</span>}
                       </td>
                       {isGM && (
                         <td>
-                          <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
-                            <button className="ao-iconbtn" disabled={toggleVis.isPending} title={m.isVisibleToPlayers ? t('best.cmp.hide') : t('best.cmp.show')} onClick={() => toggleVis.mutate(m.id)} style={{ color: m.isVisibleToPlayers ? 'var(--gold-pale)' : 'var(--ink-faint)', borderColor: m.isVisibleToPlayers ? 'var(--brass)' : 'var(--rule)' }}>
+                          <div className={s.actionsCell}>
+                            <button className={cn('ao-iconbtn', m.isVisibleToPlayers ? s.iconVisOn : s.iconVisOff)} disabled={toggleVis.isPending} title={m.isVisibleToPlayers ? t('best.cmp.hide') : t('best.cmp.show')} onClick={() => toggleVis.mutate(m.id)}>
                               {m.isVisibleToPlayers ? <Eye size={14} /> : <EyeOff size={14} />}
                             </button>
                             <button className="ao-iconbtn" title={t('best.com.edit')} onClick={() => navigate(`monsters/${m.id}/edit`)}><Pencil size={14} /></button>
-                            <button className="ao-iconbtn" title={t('best.com.delete')} onClick={() => setConfirmDel(m)} style={{ borderColor: 'rgba(179,70,26,0.4)', color: '#d8896a' }}><Trash2 size={14} /></button>
+                            <button className={cn('ao-iconbtn', s.iconDanger)} title={t('best.com.delete')} onClick={() => setConfirmDel(m)}><Trash2 size={14} /></button>
                           </div>
                         </td>
                       )}
@@ -267,15 +258,15 @@ export default function CampaignBestiaryPage() {
                     );
                   })}
                   {!monstersQ.isLoading && monsters.length === 0 && (
-                    <tr><td colSpan={isGM ? 5 : 4} style={{ textAlign: 'center', padding: '40px 0', fontFamily: 'var(--font-serif)', fontStyle: 'italic', color: 'var(--ink-quiet)' }}>{isGM ? t('best.cmp.emptyGm') : t('best.cmp.emptyPlayer')}</td></tr>
+                    <tr><td colSpan={isGM ? 5 : 4} className={s.emptyCell}>{isGM ? t('best.cmp.emptyGm') : t('best.cmp.emptyPlayer')}</td></tr>
                   )}
-                  {monstersQ.isLoading && <tr><td colSpan={isGM ? 5 : 4} style={{ textAlign: 'center', padding: '40px 0', fontFamily: 'var(--font-serif)', fontStyle: 'italic', color: 'var(--ink-quiet)' }}>{t('best.com.loading')}</td></tr>}
+                  {monstersQ.isLoading && <tr><td colSpan={isGM ? 5 : 4} className={s.emptyCell}>{t('best.com.loading')}</td></tr>}
                 </tbody>
               </table>
             </div>
 
             {!isGM && (
-              <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--ink-faint)', marginTop: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <p className={s.playerNote}>
                 <EyeOff size={13} /> {t('best.cmp.note404')}
               </p>
             )}
@@ -284,17 +275,17 @@ export default function CampaignBestiaryPage() {
       </div>
 
       {confirmDel && (
-        <div onClick={() => setConfirmDel(null)} style={{ position: 'fixed', inset: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, background: 'radial-gradient(60% 50% at 50% 45%, rgba(0,0,0,0.7), rgba(0,0,0,0.88))' }}>
-          <div onClick={(e) => e.stopPropagation()} className="ao-panel ao-frame ao-rise" style={{ width: 460, maxWidth: '100%', padding: 0, boxShadow: 'var(--shadow-high)' }}>
+        <div onClick={() => setConfirmDel(null)} className={s.modalOverlay}>
+          <div onClick={(e) => e.stopPropagation()} className={cn('ao-panel ao-frame ao-rise', s.modalCard)}>
             <span className="ao-frame-c" />
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '20px 24px', borderBottom: '1px solid var(--rule)' }}>
-              <AlertTriangle size={20} style={{ color: '#d8896a', marginTop: 2 }} />
-              <div style={{ flex: 1, fontFamily: 'var(--font-display)', fontSize: 15, letterSpacing: 'var(--track-wide)', textTransform: 'uppercase', color: 'var(--ink-bright)' }}>{t('best.cmp.delTitle')}</div>
+            <div className={s.modalHead}>
+              <AlertTriangle size={20} className={s.modalIcon} />
+              <div className={s.modalTitle}>{t('best.cmp.delTitle')}</div>
               <button className="ao-iconbtn" onClick={() => setConfirmDel(null)} title={t('best.com.close')}><X size={14} /></button>
             </div>
-            <div style={{ padding: 24 }}>
-              <p style={{ fontFamily: 'var(--font-serif)', fontSize: 16, color: 'var(--ink)', margin: 0, lineHeight: 1.6 }}>{t('best.cmp.delBody', { name: confirmDel.nameRusloc })}</p>
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 22 }}>
+            <div className={s.modalBody}>
+              <p className={s.modalText}>{t('best.cmp.delBody', { name: confirmDel.nameRusloc })}</p>
+              <div className={s.modalActions}>
                 <button className="ao-btn ao-btn--ghost" onClick={() => setConfirmDel(null)}>{t('best.com.cancel')}</button>
                 <button className="ao-btn ao-btn--danger" disabled={del.isPending} onClick={() => del.mutate(confirmDel.id, { onSuccess: () => setConfirmDel(null) })}><Trash2 size={13} /> {t('best.com.delete')}</button>
               </div>
@@ -302,8 +293,6 @@ export default function CampaignBestiaryPage() {
           </div>
         </div>
       )}
-
-      <style>{`@media (max-width: 600px) { .bd-table thead { display: none; } }`}</style>
     </div>
   );
 }

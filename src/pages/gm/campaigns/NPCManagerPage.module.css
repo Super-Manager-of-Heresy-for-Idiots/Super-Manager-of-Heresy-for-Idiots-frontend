@@ -1,0 +1,50 @@
+.backLink { margin-bottom: 12px; }
+
+.header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px; }
+.overlineGold { color: var(--gold); }
+.title { margin-top: 4px; }
+.subtitle { color: var(--ink-faint); font-size: 13px; margin-top: 4px; }
+.ml6 { margin-left: 6px; }
+
+/* ── loading / error ── */
+.skelList { display: flex; flex-direction: column; gap: 16px; }
+.skelPanel { padding: 24px; min-height: 120px; }
+.phW40H14 { width: 40%; height: 14px; margin-bottom: 12px; }
+.phW60H18 { width: 60%; height: 18px; margin-bottom: 10px; }
+.phW30H14 { width: 30%; height: 14px; }
+.errorBox { text-align: center; padding: 48px 0; }
+.errorText { color: var(--ink-faint); margin-bottom: 16px; }
+
+/* ── list ── */
+.list { display: flex; flex-direction: column; gap: 16px; }
+.cardPad { padding: 18px; }
+.topRow { display: flex; align-items: flex-start; gap: 14px; }
+.iconBox {
+  width: 48px; height: 48px; flex-shrink: 0;
+  border: 1px solid var(--rule); background: var(--abyss);
+  display: flex; align-items: center; justify-content: center;
+}
+.iconBox.dimmed { filter: grayscale(1); opacity: 0.5; }
+.nameBlock { flex: 1; min-width: 0; }
+.idRow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.npcName { margin-top: 4px; color: var(--ink-bright); }
+
+.descGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; }
+.descBox { padding: 12px; background: rgba(0, 0, 0, 0.2); border: 1px solid var(--rule); }
+.descBoxPrivate { padding: 12px; background: rgba(100, 20, 30, 0.08); border: 1px solid rgba(140, 40, 50, 0.25); }
+.descHead { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
+.descLabel { font-size: 8px; color: var(--ink-faint); }
+.descLabelPrivate { font-size: 8px; color: rgba(180, 80, 80, 0.6); }
+.descText { font-size: 13px; color: var(--ink); line-height: 1.5; margin: 0; }
+.descEmpty { color: var(--ink-ghost); }
+
+.cardFooter {
+  display: flex; gap: 6px; padding: 12px 18px;
+  border-top: 1px solid var(--hairline); background: var(--abyss);
+}
+
+/* ── dialog ── */
+.dialogCol { display: flex; flex-direction: column; gap: 16px; }
+.resizeV { resize: vertical; }
+.checkRow { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+.checkLabel { margin-bottom: 0; }

@@ -1,0 +1,113 @@
+/* ── primitives ──────────────────────────────────────────────── */
+.diamond { width: var(--dsz); height: var(--dsz); transform: rotate(45deg); background: var(--c); display: inline-block; flex-shrink: 0; }
+.sizeBadge {
+  display: inline-flex; align-items: center; gap: 6px; padding: 3px 9px;
+  background: rgba(0,0,0,0.4); border: 1px solid var(--hairline); font-family: var(--font-mono);
+  font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-quiet);
+}
+
+/* ── shell ───────────────────────────────────────────────────── */
+.page { min-height: 100%; background: var(--stone); }
+.header {
+  border-bottom: 1px solid var(--rule); padding: 16px clamp(16px, 3vw, 32px);
+  background: linear-gradient(180deg, var(--panel) 0%, var(--stone) 100%);
+}
+.headRow { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; }
+.headIcon {
+  width: 44px; height: 44px; border: 1px solid var(--brass); background: var(--abyss);
+  display: flex; align-items: center; justify-content: center; color: var(--gold); flex-shrink: 0;
+}
+.headTitleWrap { flex: 1 1 auto; min-width: 0; }
+.headTitle { font-family: var(--font-display); font-size: 18px; letter-spacing: var(--track-wide); text-transform: uppercase; color: var(--ink-bright); }
+.headSub { font-family: var(--font-mono); font-size: 11px; color: var(--ink-faint); margin-top: 4px; }
+
+.tabBar { display: flex; gap: 0; margin-top: 16px; margin-bottom: -16px; }
+.tabBtn {
+  position: relative; padding: 12px 18px; background: transparent; border: none;
+  border-bottom: 2px solid transparent; color: var(--ink-faint);
+  font-family: var(--font-display); font-size: 12px; letter-spacing: var(--track-eng);
+  text-transform: uppercase; cursor: pointer;
+}
+.tabBtn.on { border-bottom-color: var(--gold); color: var(--gold-pale); }
+
+.body { padding: clamp(16px, 3vw, 28px); }
+
+/* ── monsters toolbar ────────────────────────────────────────── */
+.toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 16px; }
+.toolCount { font-family: var(--font-serif); font-style: italic; font-size: 15px; color: var(--ink-quiet); }
+.grow { flex: 1; }
+
+/* ── tables ──────────────────────────────────────────────────── */
+.tableWrap { padding: 0; overflow-x: auto; }
+.monTable { min-width: 620px; }
+.dictTable { min-width: 480px; }
+.colCenter { text-align: center; }
+.colW80 { width: 80px; text-align: center; }
+.colW130 { width: 130px; }
+.colW110 { width: 110px; }
+.colW96 { width: 96px; text-align: right; }
+.colW180 { width: 180px; }
+.colW100 { width: 100px; }
+.colW88 { width: 88px; text-align: right; }
+
+.clickRow { cursor: pointer; }
+.monNameCell { display: flex; align-items: center; gap: 12px; }
+.monName { font-family: var(--font-serif); font-size: 17px; font-weight: 600; color: var(--ink-bright); }
+.monSlug { font-family: var(--font-mono); font-size: 11px; color: var(--ink-faint); }
+.crValue { font-family: var(--font-serif); font-size: 20px; font-weight: 600; color: var(--gold-pale); }
+.rowActions { display: flex; gap: 6px; justify-content: flex-end; }
+.dangerIcon { border-color: rgba(179,70,26,0.4); color: #d8896a; }
+.emptyCell { text-align: center; padding: 36px 0; font-family: var(--font-serif); font-style: italic; color: var(--ink-quiet); }
+
+/* ── dictionaries ────────────────────────────────────────────── */
+.dictsCaption { font-family: var(--font-serif); font-style: italic; font-size: 15px; color: var(--ink-quiet); margin: 0 0 16px; }
+.kindRow { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.kindBtn {
+  display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px;
+  background: var(--abyss); border: 1px solid var(--rule); color: var(--ink-quiet);
+  font-family: var(--font-display); font-size: 11px; letter-spacing: var(--track-eng);
+  text-transform: uppercase; cursor: pointer;
+}
+.kindBtn.on { background: rgba(176,141,78,0.1); border-color: var(--brass); color: var(--gold-pale); }
+.dictCode { font-family: var(--font-mono); font-size: 12px; color: var(--gold-pale); }
+.chipGap { margin-left: 6px; }
+.dictRu { color: var(--ink-bright); font-family: var(--font-serif); font-size: 16px; }
+.dictEn { color: var(--ink-quiet); }
+.dictBook { font-family: var(--font-mono); font-size: 12px; color: var(--arcane); }
+
+/* ── fork modal ──────────────────────────────────────────────── */
+.overlay {
+  position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center;
+  padding: 20px; background: radial-gradient(60% 50% at 50% 45%, rgba(0,0,0,0.7), rgba(0,0,0,0.88));
+}
+.forkCard { width: 500px; max-width: 100%; padding: 0; box-shadow: var(--shadow-high); }
+.modalCard { width: 460px; max-width: 100%; padding: 0; box-shadow: var(--shadow-high); }
+.modalHead { display: flex; align-items: center; gap: 12px; padding: 20px 24px; border-bottom: 1px solid var(--rule); }
+.modalHeadDanger { align-items: flex-start; }
+.iconGold { color: var(--gold); }
+.modalHeadMain { flex: 1; }
+.modalHeadTitle { font-family: var(--font-display); font-size: 15px; letter-spacing: var(--track-wide); text-transform: uppercase; color: var(--ink-bright); }
+.modalHeadSub { font-family: var(--font-mono); font-size: 11px; color: var(--ink-faint); margin-top: 3px; }
+.modalTitleFull { flex: 1; font-family: var(--font-display); font-size: 15px; letter-spacing: var(--track-wide); text-transform: uppercase; color: var(--ink-bright); }
+.modalAccentIcon { color: var(--c); margin-top: 2px; }
+.modalAccentDiamond { width: 18px; height: 18px; transform: rotate(45deg); background: var(--c); margin-top: 4px; }
+.modalContent { padding: 24px; }
+
+.searchRel { position: relative; margin-bottom: 14px; }
+.searchIcon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--ink-faint); display: flex; }
+.searchInput { padding-left: 34px; }
+.forkList { display: flex; flex-direction: column; gap: 8px; max-height: 300px; overflow-y: auto; }
+.forkItem { display: flex; align-items: center; gap: 12px; padding: 12px 14px; cursor: pointer; text-align: left; border: 1px solid var(--rule); }
+.forkItemMain { flex: 1; }
+.forkItemName { font-family: var(--font-serif); font-size: 16px; font-weight: 600; color: var(--ink-bright); }
+.forkItemCr { font-family: var(--font-mono); font-size: 10px; color: var(--ink-faint); }
+.iconFaint { color: var(--ink-faint); }
+.forkLoading { text-align: center; padding: 24px 0; font-family: var(--font-serif); font-style: italic; color: var(--ink-quiet); }
+
+/* ── dict form ───────────────────────────────────────────────── */
+.fields { display: flex; flex-direction: column; gap: 14px; }
+.mono { font-family: var(--font-mono); }
+.modalActions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px; }
+.confirmText { font-family: var(--font-serif); font-size: 16px; color: var(--ink); margin: 0; line-height: 1.6; }
+.label { margin-bottom: 6px; }
+.reqMark { color: var(--ember); }

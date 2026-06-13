@@ -1,0 +1,22 @@
+.switch {
+  display: flex;
+  border: 1px solid var(--rule-strong);
+}
+
+.btn {
+  flex: 1;
+  padding: 9px 14px;
+  font-family: var(--font-display);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  background: transparent;
+  color: var(--ink-faint);
+  border: none;
+  cursor: pointer;
+}
+.btn:not(:first-child) { border-left: 1px solid var(--hairline); }
+.btn.on {
+  background: color-mix(in srgb, var(--gold) 12%, transparent);
+  color: var(--gold-pale);
+}

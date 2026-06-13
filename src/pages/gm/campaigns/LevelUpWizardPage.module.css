@@ -1,0 +1,199 @@
+/* ── loading / gate ──────────────────────────────────────────── */
+.loadingPanel { padding: 24px; min-height: 200px; }
+.phTitle { width: 40%; height: 22px; margin-bottom: 12px; }
+.phLine { width: 60%; height: 14px; }
+.gateBody { padding: 56px 24px; text-align: center; }
+.gateIcon { display: flex; justify-content: center; margin-bottom: 18px; }
+.gateMsg { color: var(--ink-quiet); margin-bottom: 20px; font-size: 15px; }
+
+/* ── shared layout helpers ───────────────────────────────────── */
+.mb16 { margin-bottom: 16px; }
+.colGap8 { display: flex; flex-direction: column; gap: 8px; }
+.navRow { display: flex; justify-content: space-between; align-items: center; }
+.navEnd { display: flex; justify-content: flex-end; }
+
+/* ── ceremonial header ───────────────────────────────────────── */
+.ceremonyHead { display: flex; flex-direction: column; align-items: center; margin-bottom: 18px; }
+.ceremonyCodex { margin-top: 10px; color: var(--gold-pale); }
+.ceremonySub { color: var(--ink-quiet); font-size: 13px; margin-top: 4px; }
+
+/* ── step rail ───────────────────────────────────────────────── */
+.rail { margin-bottom: 22px; }
+.railStep { flex: 1; display: flex; align-items: center; gap: 8px; cursor: default; }
+.railStep.done { color: var(--ink-quiet); }
+.railMarker {
+  width: 22px; height: 22px; flex-shrink: 0;
+  border: 1px solid var(--rule);
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 11px; font-family: var(--font-mono);
+  transform: rotate(45deg); color: var(--ink-faint);
+}
+.railMarker.active { border-color: var(--brass); color: var(--gold-pale); }
+.railMarkerInner { transform: rotate(-45deg); display: inline-flex; }
+
+/* ── pick class ──────────────────────────────────────────────── */
+.pickBody { padding: 16px; display: flex; flex-direction: column; gap: 18px; }
+.noClasses { padding: 12px; }
+.groupTitle { margin-bottom: 8px; }
+.classGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px; }
+.classCardName { font-size: 16px; flex: 1; }
+.classCardLevel { font-size: 11px; }
+.classCardPreview { font-size: 13px; color: var(--ink-quiet); }
+.classCardPreview.faint { color: var(--ink-faint); }
+
+/* ── rewards: ceremony scroll ────────────────────────────────── */
+.scroll {
+  position: relative; margin-bottom: 16px; padding: 0;
+  background: linear-gradient(180deg, #221d1a 0%, #14110f 100%);
+  box-shadow: 0 4px 0 rgba(0,0,0,0.6), 0 24px 60px rgba(0,0,0,0.7), 0 0 60px rgba(176, 141, 78, 0.06);
+}
+.scrollBand { padding: 24px 48px 0; text-align: center; }
+.scrollFolio { color: var(--ink-faint); }
+.scrollByOrdo { font-size: 13px; color: var(--ink-quiet); margin-top: 6px; }
+.scrollReveal { padding: 0 48px; text-align: center; }
+.revealRow { display: flex; align-items: center; justify-content: center; gap: 32px; }
+.revealBefore { text-align: right; }
+.revealBeforeNum { font-family: var(--font-serif); font-size: 64px; color: var(--ink-faint); line-height: 1; font-style: italic; }
+.revealAfterNum { font-family: var(--font-display); font-size: 120px; font-weight: 700; color: var(--gold-pale); line-height: 1; text-shadow: 0 0 32px rgba(176, 141, 78, 0.4); }
+.revealClassLine { margin-top: 18px; font-style: italic; }
+.revealBlessing { font-size: 16px; color: var(--ink); max-width: 540px; margin: 8px auto 0; line-height: 1.5; }
+.grantsBody { padding: 32px; padding-top: 24px; }
+.grantsGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-top: 14px; }
+
+/* rites checklist */
+.riteRow { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: var(--abyss); border: 1px solid var(--hairline); }
+.riteRow.complete { border-color: rgba(176, 141, 78, 0.4); }
+.riteMark { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--rule); background: transparent; }
+.riteMark.complete { border-color: var(--brass); background: var(--bronze); }
+.riteName { flex: 1; color: var(--ink-bright); }
+.riteName.complete { color: var(--ink-quiet); text-decoration: line-through; }
+.riteStatus { color: var(--ember); }
+.riteStatus.complete { color: var(--gold-pale); }
+
+/* ── grant card ──────────────────────────────────────────────── */
+.grantCard { padding: 16px; background: var(--abyss); border: 1px solid var(--rule-strong); text-align: center; position: relative; }
+.grantValue { font-family: var(--font-serif); font-size: 32px; color: var(--ink-bright); line-height: 1.1; margin-top: 6px; word-break: break-word; }
+.grantLabel { margin-top: 4px; }
+.grantSub { font-size: 10px; margin-top: 2px; color: var(--ink-faint); }
+
+/* ── oath group / card ───────────────────────────────────────── */
+.oathBody { padding: 16px; }
+.oathGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; }
+.offeringGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 22px; }
+.oathCard { position: relative; padding: 0; cursor: pointer; transition: border-color 200ms; }
+.oathCard.disabled { cursor: not-allowed; opacity: 0.5; }
+.oathCard.selected { border-color: var(--c); background: linear-gradient(180deg, rgba(176, 141, 78, 0.06) 0%, var(--panel) 100%); }
+.oathBanner { position: relative; height: 140px; border-bottom: 1px solid var(--rule); overflow: hidden; }
+.oathBannerPh { position: absolute; inset: 0; }
+.oathBannerFade { position: absolute; inset: 0; background: linear-gradient(180deg, transparent 0%, var(--panel) 100%); }
+.oathSigil { position: absolute; top: 14px; left: 14px; }
+.oathBannerText { position: absolute; bottom: 14px; left: 14px; right: 14px; }
+.oathSacred { color: var(--c); }
+.oathName { font-size: 22px; margin-top: 2px; }
+.oathChipPos { position: absolute; top: 14px; right: 14px; }
+.oathDescBody { padding: 16px; }
+.oathDesc { font-size: 14px; color: var(--ink); line-height: 1.45; }
+.oathFoot { padding: 12px 16px; background: var(--abyss); border-top: 1px solid var(--rule); display: flex; justify-content: space-between; align-items: center; }
+.oathFootText { font-size: 11px; color: var(--ink-faint); }
+
+/* ── offering card ───────────────────────────────────────────── */
+.offeringCard { position: relative; padding: 0; transition: transform 300ms cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 300ms; }
+.offeringCard.clickable { cursor: pointer; }
+.offeringCard.disabled { cursor: not-allowed; opacity: 0.5; }
+.offeringCard.selected {
+  transform: translateY(-6px);
+  border-color: var(--c);
+  background: linear-gradient(180deg, #2a241f 0%, var(--panel) 100%);
+  box-shadow: var(--shadow-inset), 0 8px 0 rgba(0,0,0,0.6), 0 24px 60px rgba(0,0,0,0.65), 0 0 24px var(--glow);
+}
+.offeringHead { padding: 14px 18px; border-bottom: 1px solid var(--rule); display: flex; justify-content: space-between; align-items: center; }
+.offeringHeadNote { font-size: 11px; }
+.offeringBody { padding: 20px; text-align: center; }
+.relic {
+  width: 130px; height: 130px; margin: 0 auto; position: relative;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid var(--c);
+  background: radial-gradient(circle at 50% 30%, rgba(20,17,15,0.5), var(--abyss));
+  box-shadow: inset 0 0 24px rgba(0,0,0,0.5);
+}
+.relic.selected { box-shadow: inset 0 0 24px var(--c); }
+.relicInner { position: absolute; inset: 6px; border: 1px solid var(--hairline); }
+.offeringType { margin-top: 16px; color: var(--c); }
+.offeringName { margin-top: 4px; font-size: 22px; }
+.offeringDivider { padding: 0 18px; }
+.offeringInsc { padding: 12px 18px; background: var(--abyss); border-top: 1px solid var(--rule); }
+.offeringInscLabel { margin-bottom: 4px; }
+.offeringInscText { font-size: 12px; color: var(--ink); line-height: 1.45; }
+
+.emptyNote { color: var(--ink-faint); font-size: 13px; }
+
+/* ── tags / detail badges ────────────────────────────────────── */
+.tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 10.5px; font-family: var(--font-mono); letter-spacing: 0.04em;
+  padding: 2px 7px; border: 1px solid var(--c); color: var(--c);
+  background: var(--abyss); text-transform: uppercase; white-space: nowrap;
+}
+.tagWrap { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+
+/* ── auto grant row ──────────────────────────────────────────── */
+.autoRow { padding: 12px 14px; background: var(--abyss); border: 1px solid var(--rule); }
+.autoRowHead { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.autoRowType { font-size: 10px; color: var(--ink-faint); }
+.autoRowName { font-size: 15px; }
+.autoRowDesc { font-size: 12.5px; color: var(--ink); margin-top: 4px; line-height: 1.45; }
+
+/* ── ASI ─────────────────────────────────────────────────────── */
+.asiRemaining { font-size: 11px; color: var(--ink-quiet); }
+.asiRemaining.done { color: var(--gold-pale); }
+.asiBody { padding: 16px; display: flex; flex-direction: column; gap: 8px; }
+.asiRow { display: grid; grid-template-columns: 1fr auto auto auto; gap: 12px; align-items: center; padding: 8px 12px; background: var(--abyss); border: 1px solid var(--hairline); }
+.asiRow.active { background: rgba(176,141,78,0.06); border-color: var(--bronze-warm); }
+.asiName { display: flex; flex-direction: column; gap: 2px; }
+.asiNameRow { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.asiStatName { font-size: 14px; }
+.asiScore { font-size: 12px; color: var(--gold); }
+.asiMod { font-size: 11px; color: var(--arcane); }
+.asiCap { color: var(--ember); }
+.asiValue { min-width: 28px; text-align: center; font-family: var(--font-mono); color: var(--gold); }
+
+/* ── confirm ─────────────────────────────────────────────────── */
+.confirmBody { padding: 16px; }
+.confirmCalling { font-size: 13px; margin-bottom: 8px; }
+.goldStrong { color: var(--gold); }
+.confirmVitae { font-size: 13px; margin-bottom: 8px; color: var(--ember); }
+.confirmProf { font-size: 13px; margin-bottom: 8px; color: var(--arcane); }
+.confirmGifts { margin-top: 10px; margin-bottom: 8px; }
+.confirmEmpty { color: var(--ink-faint); }
+.confirmLine { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--hairline); }
+.confirmLineType { font-size: 11px; color: var(--ink-faint); min-width: 120px; }
+.confirmLineName { color: var(--ink-bright); }
+.warnBox { display: flex; align-items: center; gap: 12px; padding: 14px 20px; background: var(--abyss); border: 1px solid var(--rule-strong); margin-bottom: 16px; }
+.warnText { font-size: 13px; }
+
+/* footer step indicator */
+.stepInd { display: flex; gap: 8px; align-items: center; }
+.stepDots { display: flex; gap: 4px; }
+.stepDot { width: 16px; height: 4px; background: var(--rule); }
+.stepDot.on { background: var(--gold); }
+.noChoosable { padding: 18px; }
+
+/* ── result ──────────────────────────────────────────────────── */
+.resultBanner {
+  position: relative; padding: 28px; margin-bottom: 16px; overflow: hidden; text-align: center;
+  background: linear-gradient(180deg, #221d1a 0%, #14110f 100%);
+  box-shadow: 0 0 60px rgba(176, 141, 78, 0.08);
+}
+.resultSigilWrap { display: flex; justify-content: center; margin-bottom: 14px; }
+.resultComplete { color: var(--gold-pale); }
+.resultBreathe { margin-top: 10px; }
+.resultBigNum { font-family: var(--font-display); font-size: 72px; font-weight: 700; color: var(--gold-pale); line-height: 1; text-shadow: 0 0 32px rgba(176, 141, 78, 0.4); }
+.resultClassLine { margin-top: 12px; font-style: italic; }
+.resultBody { padding: 18px; }
+.resultGrantsGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.resultDash { color: var(--ink-faint); margin-top: 8px; }
+.resultAcqGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px; margin-top: 12px; }
+.resultAcqCard { padding: 8px 10px; border: 1px solid var(--hairline); background: var(--abyss); display: flex; flex-direction: column; }
+.resultAcqType { font-size: 10px; color: var(--ink-faint); }
+.resultAcqName { color: var(--ink-bright); }
+.resultAcqDesc { font-size: 11px; color: var(--ink-quiet); margin-top: 2px; line-height: 1.4; }

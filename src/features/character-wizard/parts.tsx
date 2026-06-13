@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { Rune } from '@/components/ordo';
 import { useT } from '@/i18n/I18nContext';
+import { cn } from '@/lib/utils';
 import type { ASI, CharClass, Race } from '@/data/wizard5e';
 import { ABILITIES } from '@/data/wizard5e';
 import type {
@@ -12,6 +13,7 @@ import type {
   StatTypeResponse,
 } from '@/types';
 import type { ReferenceCurrencyType } from '@/api/reference.api';
+import s from './parts.module.css';
 
 // ── Shared availability + step props ───────────────────────
 export interface WizardClassOption {
@@ -63,14 +65,14 @@ export function WizCard({ active, onClick, glyph, title, sub, disabled, children
     >
       <div className="wiz-card-top">
         <Rune kind={glyph} size={18} color={active ? 'var(--gold)' : 'var(--ink-quiet)'} />
-        <span className="ao-engraved" style={{ fontSize: 13 }}>{title}</span>
+        <span className={cn('ao-engraved', s.cardTitle)}>{title}</span>
         {active && (
           <span className="wiz-card-check">
             <Rune kind="check" size={11} color="var(--gold-pale)" />
           </span>
         )}
       </div>
-      {sub && <div className="ao-codex" style={{ fontSize: 10 }}>{sub}</div>}
+      {sub && <div className={cn('ao-codex', s.cardSub)}>{sub}</div>}
       {children}
     </button>
   );
@@ -90,8 +92,8 @@ export function StepHead({ n, total, title, sub }: StepHeadProps) {
       <div className="wiz-step-eyebrow">
         <Rune kind="diamond-fill" size={8} color="var(--gold)" /> {t('wiz.parts.stepOf', { n, total })}
       </div>
-      <div className="ao-h4" style={{ fontSize: 26 }}>{title}</div>
-      {sub && <div className="ao-italic" style={{ fontSize: 15, marginTop: 2 }}>{sub}</div>}
+      <div className={cn('ao-h4', s.stepTitle)}>{title}</div>
+      {sub && <div className={cn('ao-italic', s.stepSub)}>{sub}</div>}
     </div>
   );
 }

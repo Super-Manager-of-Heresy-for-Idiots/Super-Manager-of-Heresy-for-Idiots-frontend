@@ -30,6 +30,8 @@ import {
 import { ALIGNMENTS } from '@/data/wizard5e';
 import { useT } from '@/i18n/I18nContext';
 import { useGameTerms } from '@/i18n/gameTerms';
+import { cn } from '@/lib/utils';
+import css from './steps.module.css';
 import type { WizardActions, WizardChar, ScoreMethod } from './wizardState';
 import {
   CLASS_GLYPH,
@@ -70,16 +72,15 @@ export function StepBasics({ c, A, n, total }: StepProps) {
     <div className="wiz-narrow">
       <StepHead n={n} total={total} title={t('wiz.basics.title')} sub={t('wiz.basics.sub')} />
       <OrdoPanel frame padding={0}>
-        <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <div className={css.colPad24}>
           <div>
             <label className="ao-label">{t('wiz.forge.characterName')} <span className="wiz-req">{t('wiz.basics.required')}</span></label>
             <input
-              className="ao-input"
+              className={cn('ao-input', css.nameInput)}
               autoFocus
               value={c.name}
               placeholder={t('wiz.forge.nameSoul')}
               onChange={(e) => A.patch({ name: e.target.value })}
-              style={{ fontFamily: 'var(--font-serif)', fontSize: 26, color: 'var(--ink-bright)' }}
             />
           </div>
           <div>
@@ -150,22 +151,21 @@ export function StepRace({ c, A, n, total, availability }: StepProps) {
         <div className="wiz-side">
           <OrdoPanel frame padding={0}>
             <PanelHeader title={selectedRaceDetail?.name || race?.label || selectedRace?.entry.name || t('wiz.race.selectRace')} glyph="hex" />
-            <div style={{ padding: 16 }}>
+            <div className={css.pad16}>
               {selectedRaceDetail ? (
                 <>
-                  <div className="ao-italic" style={{ fontSize: 14, marginBottom: 12 }}>{selectedRaceDetail.description}</div>
+                  <div className={cn('ao-italic', css.desc14)}>{selectedRaceDetail.description}</div>
                   <DetailLine label={t('wiz.race.source')}>{selectedRace?.entry.homebrewTitle || selectedRace?.entry.source}</DetailLine>
                   <DetailLine label={t('wiz.race.abilityBonus')}>{dbAsiText(selectedDbSubrace?.abilityScoreIncreases || selectedRaceDetail.abilityScoreIncreases, gt.abilityAbbr)}</DetailLine>
                   <DetailLine label={t('wiz.race.speed')}>{selectedDbSubrace?.speedOverride || selectedRaceDetail.speed || 30} {t('wiz.race.ft')}</DetailLine>
                   <DetailLine label={t('wiz.race.traits')}>{(selectedDbSubrace?.traits?.length ? selectedDbSubrace.traits : selectedRaceDetail.traits || []).join(' \u00b7 ') || '\u2014'}</DetailLine>
                   {!!selectedRaceDetail.subraces?.length && (
-                    <div style={{ marginTop: 14 }}>
+                    <div className={css.mt14}>
                       <label className="ao-label">{t('wiz.race.subrace')} <span className="wiz-req">{t('wiz.basics.required')}</span></label>
                       <select
-                        className="ao-input"
+                        className={cn('ao-input', css.inkInput)}
                         value={c.subraceKey || ''}
                         onChange={(e) => A.setSubrace(e.target.value)}
-                        style={{ color: 'var(--ink-bright)' }}
                       >
                         <option value="">{t('wiz.race.chooseSubrace')}</option>
                         {selectedRaceDetail.subraces.map((s) => (
@@ -173,7 +173,7 @@ export function StepRace({ c, A, n, total, availability }: StepProps) {
                         ))}
                       </select>
                       {selectedDbSubrace && (
-                        <div className="ao-italic" style={{ fontSize: 13, marginTop: 8 }}>
+                        <div className={cn('ao-italic', css.sub13)}>
                           {selectedDbSubrace.description}
                         </div>
                       )}
@@ -182,18 +182,17 @@ export function StepRace({ c, A, n, total, availability }: StepProps) {
                 </>
               ) : race ? (
                 <>
-                  <div className="ao-italic" style={{ fontSize: 14, marginBottom: 12 }}>{race.desc}</div>
+                  <div className={cn('ao-italic', css.desc14)}>{race.desc}</div>
                   <DetailLine label={t('wiz.race.abilityBonus')}>{asiText(combinedASI(race, c.subraceKey), gt.abilityAbbr)}</DetailLine>
                   <DetailLine label={t('wiz.race.speed')}>{(race.subraces.find((s) => s.key === c.subraceKey) || {}).speed || race.speed} {t('wiz.race.ft')}</DetailLine>
                   <DetailLine label={t('wiz.race.traits')}>{race.traits.join(' \u00b7 ')}</DetailLine>
                   {race.subraces.length > 0 && (
-                    <div style={{ marginTop: 14 }}>
+                    <div className={css.mt14}>
                       <label className="ao-label">{t('wiz.race.subrace')} <span className="wiz-req">{t('wiz.basics.required')}</span></label>
                       <select
-                        className="ao-input"
+                        className={cn('ao-input', css.inkInput)}
                         value={c.subraceKey || ''}
                         onChange={(e) => A.setSubrace(e.target.value)}
-                        style={{ color: 'var(--ink-bright)' }}
                       >
                         <option value="">{t('wiz.race.chooseSubrace')}</option>
                         {race.subraces.map((s) => (
@@ -201,7 +200,7 @@ export function StepRace({ c, A, n, total, availability }: StepProps) {
                         ))}
                       </select>
                       {c.subraceKey && (
-                        <div className="ao-italic" style={{ fontSize: 13, marginTop: 8 }}>
+                        <div className={cn('ao-italic', css.sub13)}>
                           {race.subraces.find((s) => s.key === c.subraceKey)?.desc}
                         </div>
                       )}
@@ -210,7 +209,7 @@ export function StepRace({ c, A, n, total, availability }: StepProps) {
                 </>
               ) : selectedRace ? (
                 <>
-                  <div className="ao-italic" style={{ fontSize: 14, marginBottom: 12 }}>
+                  <div className={cn('ao-italic', css.desc14)}>
                     {t('wiz.race.dbLoaded')}
                   </div>
                   <DetailLine label={t('wiz.race.source')}>{selectedRace.entry.homebrewTitle || selectedRace.entry.source}</DetailLine>
@@ -225,24 +224,24 @@ export function StepRace({ c, A, n, total, availability }: StepProps) {
 
           <OrdoPanel frame padding={0}>
             <PanelHeader title={t('wiz.race.portrait')} sub={t('wiz.race.portraitSub')} glyph="eye" />
-            <div style={{ padding: 16 }}>
+            <div className={css.pad16}>
               <div className="wiz-avatar-row">
                 <div className="wiz-avatar-preview">
                   {c.avatar
                     ? <img src={c.avatar} alt={t('wiz.race.portraitAlt')} />
-                    : <span className="ao-codex" style={{ fontSize: 10 }}>{t('wiz.race.noPortrait')}</span>}
+                    : <span className={cn('ao-codex', css.fs10)}>{t('wiz.race.noPortrait')}</span>}
                 </div>
-                <div style={{ flex: 1 }}>
-                  <label className="ao-btn ao-btn--block" style={{ cursor: 'pointer', marginBottom: 8 }}>
+                <div className="ao-grow">
+                  <label className={cn('ao-btn ao-btn--block', css.uploadBtn)}>
                     <Rune kind="arrow-up" size={11} /> {t('wiz.race.uploadImage')}
-                    <input type="file" accept="image/*" onChange={onFile} style={{ display: 'none' }} />
+                    <input type="file" accept="image/*" onChange={onFile} className={css.hidden} />
                   </label>
                   {c.avatar && (
                     <button className="ao-btn ao-btn--ghost ao-btn--block" onClick={() => A.setAvatar(null)}>{t('wiz.race.clear')}</button>
                   )}
                 </div>
               </div>
-              <div className="ao-overline" style={{ marginTop: 14, marginBottom: 8 }}>{t('wiz.race.gallery')}</div>
+              <div className={cn('ao-overline', css.galleryLabel)}>{t('wiz.race.gallery')}</div>
               <div className="wiz-gallery">
                 {PORTRAIT_GALLERY.map((g, i) => {
                   const src = makePortrait(g.hue, g.glyph);
@@ -317,17 +316,17 @@ export function StepClass({ c, A, n, total, availability }: StepProps) {
         <div className="wiz-side">
           <OrdoPanel frame padding={0}>
             <PanelHeader title={selectedClassDetail?.name || cls?.label || selectedClass?.entry.name || t('wiz.class.selectClass')} glyph={cls ? CLASS_GLYPH[cls.key] : 'sword'} />
-            <div style={{ padding: 16 }}>
+            <div className={css.pad16}>
               {selectedClassDetail ? (
                 <>
-                  <div className="ao-italic" style={{ fontSize: 14, marginBottom: 12 }}>{selectedClassDetail.description}</div>
+                  <div className={cn('ao-italic', css.desc14)}>{selectedClassDetail.description}</div>
                   <DetailLine label={t('wiz.class.source')}>{selectedClass?.entry.homebrewTitle || selectedClass?.entry.source}</DetailLine>
                   <DetailLine label={t('wiz.class.hitDie')}>d{selectedClassDetail.hitDie || 8}</DetailLine>
                   <DetailLine label={t('wiz.class.primary')}><StatName id={selectedClassDetail.primaryAbilityStatId} /></DetailLine>
                   <DetailLine label={t('wiz.class.saves')}>{selectedClassDetail.savingThrowStatNames?.map((nm) => gt.abilityAbbr(shortStatName(nm))).join(' \u00b7 ') || '\u2014'}</DetailLine>
                   <DetailLine label={t('wiz.class.proficiencies')}>{selectedClassDetail.armorWeaponProficiencies || '\u2014'}</DetailLine>
                   {selectedClassDetail.spellcasting?.isSpellcaster && (
-                    <div style={{ marginTop: 10 }}>
+                    <div className={css.mt10}>
                       <OrdoChip tone="arcane" glyph="sigil-1">
                         {t('wiz.class.spellcaster')}{selectedClassDetail.spellcasting.isHalfCaster ? ' \u00b7 ' + t('wiz.class.half') : ''}{!selectedClassDetail.spellcasting.hasCantrips ? ' \u00b7 ' + t('wiz.class.noCantrips') : ''}
                       </OrdoChip>
@@ -336,21 +335,20 @@ export function StepClass({ c, A, n, total, availability }: StepProps) {
                   <OrdoDivider glyph="diamond-fill" />
                   <div className="wiz-level">
                     <div>
-                      <label className="ao-label" style={{ margin: 0 }}>{t('wiz.class.level')}</label>
-                      <div className="ao-codex" style={{ fontSize: 10 }}>{t('wiz.class.profBonus', { prof: fmtMod(prof) })}</div>
+                      <label className={cn('ao-label', css.label0)}>{t('wiz.class.level')}</label>
+                      <div className={cn('ao-codex', css.fs10)}>{t('wiz.class.profBonus', { prof: fmtMod(prof) })}</div>
                     </div>
                     <div className="wiz-level-ctrl">
                       <button className="ao-iconbtn" onClick={() => A.setLevel(clamp(c.level - 1, 1, 20))}>
                         <Rune kind="minus" size={12} />
                       </button>
                       <input
-                        className="ao-input"
+                        className={cn('ao-input', css.lvlInput)}
                         type="number"
                         min={1}
                         max={20}
                         value={c.level}
                         onChange={(e) => A.setLevel(clamp(Number(e.target.value || 1), 1, 20))}
-                        style={{ width: 64, textAlign: 'center', fontFamily: 'var(--font-serif)', fontSize: 22, color: 'var(--gold-pale)' }}
                       />
                       <button className="ao-iconbtn" onClick={() => A.setLevel(clamp(c.level + 1, 1, 20))}>
                         <Rune kind="plus" size={12} />
@@ -360,13 +358,13 @@ export function StepClass({ c, A, n, total, availability }: StepProps) {
                 </>
               ) : cls ? (
                 <>
-                  <div className="ao-italic" style={{ fontSize: 14, marginBottom: 12 }}>{cls.desc}</div>
+                  <div className={cn('ao-italic', css.desc14)}>{cls.desc}</div>
                   <DetailLine label={t('wiz.class.hitDie')}>d{cls.hitDie}</DetailLine>
                   <DetailLine label={t('wiz.class.primary')}>{gt.ability(ABILITIES.find((a) => a.key === cls.primary)?.label)}</DetailLine>
                   <DetailLine label={t('wiz.class.saves')}>{cls.saves.map((s) => gt.abilityAbbr(ABILITIES.find((a) => a.key === s)?.abbr)).join(' \u00b7 ')}</DetailLine>
                   <DetailLine label={t('wiz.class.proficiencies')}>{cls.profs}</DetailLine>
                   {cls.spellcaster && (
-                    <div style={{ marginTop: 10 }}>
+                    <div className={css.mt10}>
                       <OrdoChip tone="arcane" glyph="sigil-1">
                         {t('wiz.class.spellcaster')}{cls.halfCaster ? ' \u00b7 ' + t('wiz.class.half') : ''}{!cls.cantrips ? ' \u00b7 ' + t('wiz.class.noCantrips') : ''}
                       </OrdoChip>
@@ -375,21 +373,20 @@ export function StepClass({ c, A, n, total, availability }: StepProps) {
                   <OrdoDivider glyph="diamond-fill" />
                   <div className="wiz-level">
                     <div>
-                      <label className="ao-label" style={{ margin: 0 }}>{t('wiz.class.level')}</label>
-                      <div className="ao-codex" style={{ fontSize: 10 }}>{t('wiz.class.profBonus', { prof: fmtMod(prof) })}</div>
+                      <label className={cn('ao-label', css.label0)}>{t('wiz.class.level')}</label>
+                      <div className={cn('ao-codex', css.fs10)}>{t('wiz.class.profBonus', { prof: fmtMod(prof) })}</div>
                     </div>
                     <div className="wiz-level-ctrl">
                       <button className="ao-iconbtn" onClick={() => A.setLevel(clamp(c.level - 1, 1, 20))}>
                         <Rune kind="minus" size={12} />
                       </button>
                       <input
-                        className="ao-input"
+                        className={cn('ao-input', css.lvlInput)}
                         type="number"
                         min={1}
                         max={20}
                         value={c.level}
                         onChange={(e) => A.setLevel(clamp(Number(e.target.value || 1), 1, 20))}
-                        style={{ width: 64, textAlign: 'center', fontFamily: 'var(--font-serif)', fontSize: 22, color: 'var(--gold-pale)' }}
                       />
                       <button className="ao-iconbtn" onClick={() => A.setLevel(clamp(c.level + 1, 1, 20))}>
                         <Rune kind="plus" size={12} />
@@ -399,7 +396,7 @@ export function StepClass({ c, A, n, total, availability }: StepProps) {
                 </>
               ) : selectedClass ? (
                 <>
-                  <div className="ao-italic" style={{ fontSize: 14, marginBottom: 12 }}>
+                  <div className={cn('ao-italic', css.desc14)}>
                     {t('wiz.class.dbLoaded')}
                   </div>
                   <DetailLine label={t('wiz.class.source')}>{selectedClass.entry.homebrewTitle || selectedClass.entry.source}</DetailLine>
@@ -407,21 +404,20 @@ export function StepClass({ c, A, n, total, availability }: StepProps) {
                   <OrdoDivider glyph="diamond-fill" />
                   <div className="wiz-level">
                     <div>
-                      <label className="ao-label" style={{ margin: 0 }}>{t('wiz.class.level')}</label>
-                      <div className="ao-codex" style={{ fontSize: 10 }}>{t('wiz.class.profBonus', { prof: fmtMod(prof) })}</div>
+                      <label className={cn('ao-label', css.label0)}>{t('wiz.class.level')}</label>
+                      <div className={cn('ao-codex', css.fs10)}>{t('wiz.class.profBonus', { prof: fmtMod(prof) })}</div>
                     </div>
                     <div className="wiz-level-ctrl">
                       <button className="ao-iconbtn" onClick={() => A.setLevel(clamp(c.level - 1, 1, 20))}>
                         <Rune kind="minus" size={12} />
                       </button>
                       <input
-                        className="ao-input"
+                        className={cn('ao-input', css.lvlInput)}
                         type="number"
                         min={1}
                         max={20}
                         value={c.level}
                         onChange={(e) => A.setLevel(clamp(Number(e.target.value || 1), 1, 20))}
-                        style={{ width: 64, textAlign: 'center', fontFamily: 'var(--font-serif)', fontSize: 22, color: 'var(--gold-pale)' }}
                       />
                       <button className="ao-iconbtn" onClick={() => A.setLevel(clamp(c.level + 1, 1, 20))}>
                         <Rune kind="plus" size={12} />
@@ -479,8 +475,8 @@ export function StepAbilities({ c, A, n, total }: StepProps) {
       className={'wiz-method' + (c.scoreMethod === id ? ' is-active' : '')}
       onClick={() => A.setMethod(id)}
     >
-      <span className="ao-engraved" style={{ fontSize: 12 }}>{label}</span>
-      <span className="ao-codex" style={{ fontSize: 10 }}>{sub}</span>
+      <span className={cn('ao-engraved', css.eng12)}>{label}</span>
+      <span className={cn('ao-codex', css.fs10)}>{sub}</span>
     </button>
   );
 
@@ -497,7 +493,7 @@ export function StepAbilities({ c, A, n, total }: StepProps) {
       {c.scoreMethod === 'pointbuy' && (
         <div className={'wiz-budget' + (remaining < 0 ? ' is-over' : '')}>
           <Rune kind="coin" size={14} color={remaining < 0 ? 'var(--ember)' : 'var(--gold)'} />
-          <span className="ao-engraved" style={{ fontSize: 12 }}>{t('wiz.abil.pointsRemaining')}</span>
+          <span className={cn('ao-engraved', css.eng12)}>{t('wiz.abil.pointsRemaining')}</span>
           <span className="wiz-budget-num">{remaining}</span>
           <span className="ao-codex">{t('wiz.abil.spentBudget', { spent, budget: POINT_BUY_BUDGET })}</span>
         </div>
@@ -526,10 +522,10 @@ export function StepAbilities({ c, A, n, total }: StepProps) {
       <OrdoPanel frame padding={0}>
         <div className="wiz-abil-head">
           <span className="ao-overline">{t('wiz.abil.colAbility')}</span>
-          <span className="ao-overline" style={{ textAlign: 'center' }}>{t('wiz.abil.colBase')}</span>
-          <span className="ao-overline" style={{ textAlign: 'center' }}>{t('wiz.abil.colRacial')}</span>
-          <span className="ao-overline" style={{ textAlign: 'center' }}>{t('wiz.abil.colTotal')}</span>
-          <span className="ao-overline" style={{ textAlign: 'center' }}>{t('wiz.abil.colMod')}</span>
+          <span className={cn('ao-overline', css.taCenter)}>{t('wiz.abil.colBase')}</span>
+          <span className={cn('ao-overline', css.taCenter)}>{t('wiz.abil.colRacial')}</span>
+          <span className={cn('ao-overline', css.taCenter)}>{t('wiz.abil.colTotal')}</span>
+          <span className={cn('ao-overline', css.taCenter)}>{t('wiz.abil.colMod')}</span>
         </div>
         {ABILITIES.map((a) => {
           const b = base[a.key] || 0;
@@ -538,8 +534,8 @@ export function StepAbilities({ c, A, n, total }: StepProps) {
           return (
             <div className="wiz-abil-row" key={a.key}>
               <div className="wiz-abil-name">
-                <span className="ao-engraved" style={{ fontSize: 13 }}>{gt.abilityAbbr(a.abbr)}</span>
-                <span className="ao-codex" style={{ fontSize: 10 }}>{gt.ability(a.label)}</span>
+                <span className={cn('ao-engraved', css.eng13)}>{gt.abilityAbbr(a.abbr)}</span>
+                <span className={cn('ao-codex', css.fs10)}>{gt.ability(a.label)}</span>
               </div>
               <div className="wiz-abil-ctrl">
                 {c.scoreMethod === 'pointbuy' ? (
@@ -570,7 +566,7 @@ export function StepAbilities({ c, A, n, total }: StepProps) {
                   </select>
                 )}
               </div>
-              <div className="wiz-abil-cell" style={{ color: bonus ? 'var(--gold-pale)' : 'var(--ink-faint)' }}>{bonus ? '+' + bonus : '\u2014'}</div>
+              <div className={cn('wiz-abil-cell', bonus ? css.goldPale : css.inkFaint)}>{bonus ? '+' + bonus : '\u2014'}</div>
               <div className="wiz-abil-cell wiz-abil-total">{tot || '\u2014'}</div>
               <div className="wiz-abil-cell wiz-abil-mod">{tot ? fmtMod(abilityMod(tot)) : '\u2014'}</div>
             </div>
@@ -614,7 +610,7 @@ export function StepBackground({ c, A, n, total, availability }: StepProps) {
       <StepHead n={n} total={total} title={t('wiz.bg.title')} sub={t('wiz.bg.sub')} />
       <div className="wiz-split">
         <div>
-          <div className="ao-overline" style={{ marginBottom: 10 }}>{t('wiz.bg.background')}</div>
+          <div className={cn('ao-overline', css.mb10)}>{t('wiz.bg.background')}</div>
           <div className="wiz-grid wiz-grid--bg">
             {backgroundOptions.map((option) => {
               const grantedSkillKeys = option.local
@@ -638,10 +634,10 @@ export function StepBackground({ c, A, n, total, availability }: StepProps) {
         <div className="wiz-side">
           <OrdoPanel frame padding={0}>
             <PanelHeader title={t('wiz.bg.grants')} glyph="scroll" />
-            <div style={{ padding: 16 }}>
+            <div className={css.pad16}>
               {bg || dbBackground ? (
                 <>
-                  <div className="ao-italic" style={{ fontSize: 14, marginBottom: 12 }}>{bg?.desc || dbBackground?.description}</div>
+                  <div className={cn('ao-italic', css.desc14)}>{bg?.desc || dbBackground?.description}</div>
                   <DetailLine label={t('wiz.bg.skillProficiencies')}>
                     {bg
                       ? bg.skills.map((s) => gt.skill(SKILLS.find((x) => x.key === s)?.label)).join(' \u00b7 ')
@@ -660,11 +656,11 @@ export function StepBackground({ c, A, n, total, availability }: StepProps) {
               title={t('wiz.bg.classSkills')}
               sub={selectedClass ? t('wiz.bg.chooseFrom', { limit, class: selectedClass.entry.name }) : t('wiz.bg.selectClassFirst')}
               glyph="diamond-fill"
-              right={<span className="ao-codex" style={{ color: chosen.length === limit ? 'var(--gold-pale)' : 'var(--ink-quiet)' }}>{chosen.length} / {limit}</span>}
+              right={<span className={cn('ao-codex', chosen.length === limit ? css.goldPale : css.inkQuiet)}>{chosen.length} / {limit}</span>}
             />
-            <div style={{ padding: 12 }}>
+            <div className={css.pad12}>
               {!selectedClass ? (
-                <div className="ao-codex" style={{ padding: 8 }}>{t('wiz.bg.noClassChosen')}</div>
+                <div className={cn('ao-codex', css.pad8)}>{t('wiz.bg.noClassChosen')}</div>
               ) : (
                 <div className="wiz-skill-grid">
                   {classSkillKeys.map((sk) => {
@@ -680,9 +676,9 @@ export function StepBackground({ c, A, n, total, availability }: StepProps) {
                         disabled={granted || (atLimit && !on)}
                         onClick={() => A.toggleClassSkill(sk)}
                       >
-                        <span style={{ width: 12, height: 12, flexShrink: 0, transform: 'rotate(45deg)', border: '1px solid ' + (on ? 'var(--brass)' : 'var(--rule)'), background: on ? 'var(--gold)' : 'transparent' }} />
-                        <span style={{ flex: 1, textAlign: 'left' }}>{label}</span>
-                        {granted && <span className="ao-codex" style={{ fontSize: 9 }}>{t('wiz.bg.bgTag')}</span>}
+                        <span className={cn(css.pip12, on && css.pipOn)} />
+                        <span className={css.skillName}>{label}</span>
+                        {granted && <span className={cn('ao-codex', css.fs9)}>{t('wiz.bg.bgTag')}</span>}
                       </button>
                     );
                   })}
@@ -736,12 +732,12 @@ export function StepSpells({ c, A, n, total }: StepProps) {
           disabled={atLimit}
           onClick={() => A.toggleSpell(isCantrip ? 'cantrips' : 'known', s.name)}
         >
-          <span style={{ width: 13, height: 13, flexShrink: 0, transform: 'rotate(45deg)', border: '1px solid ' + (on ? 'var(--brass)' : 'var(--rule)'), background: on ? 'var(--gold)' : 'transparent' }} />
+          <span className={cn(css.pip13, on && css.pipOn)} />
         </button>
         <button type="button" className="wiz-spell-body" onClick={() => setOpen(open === s.name ? null : s.name)}>
           <div className="wiz-spell-main">
             <span className="wiz-spell-name">{s.name}</span>
-            <span className="ao-codex" style={{ fontSize: 10 }}>{isCantrip ? t('wiz.spells.cantrip') : t('wiz.spells.lvl', { level: s.level })} · {s.school}</span>
+            <span className={cn('ao-codex', css.fs10)}>{isCantrip ? t('wiz.spells.cantrip') : t('wiz.spells.lvl', { level: s.level })} · {s.school}</span>
           </div>
           <Rune kind={open === s.name ? 'chev-d' : 'chev-r'} size={12} color="var(--ink-faint)" />
         </button>
@@ -778,14 +774,14 @@ export function StepSpells({ c, A, n, total }: StepProps) {
             title={t('wiz.spells.cantrips')}
             glyph="flame"
             tone="arcane"
-            right={<span className="ao-codex" style={{ color: cantripsChosen.length === limits.cantrips ? 'var(--gold-pale)' : 'var(--ink-quiet)' }}>{cantripsChosen.length} / {limits.cantrips}</span>}
+            right={<span className={cn('ao-codex', cantripsChosen.length === limits.cantrips ? css.goldPale : css.inkQuiet)}>{cantripsChosen.length} / {limits.cantrips}</span>}
           />
           <div className="wiz-spell-list ao-scroll">
             {limits.cantrips === 0
-              ? <div className="ao-codex" style={{ padding: 14 }}>{t('wiz.spells.noCantrips')}</div>
+              ? <div className={cn('ao-codex', css.pad14)}>{t('wiz.spells.noCantrips')}</div>
               : cantrips.length
                 ? cantrips.map((s) => <SpellRow key={s.name} s={s} />)
-                : <div className="ao-codex" style={{ padding: 14 }}>{t('wiz.spells.noCantripsMatch')}</div>}
+                : <div className={cn('ao-codex', css.pad14)}>{t('wiz.spells.noCantripsMatch')}</div>}
           </div>
         </OrdoPanel>
         <OrdoPanel frame padding={0}>
@@ -793,12 +789,12 @@ export function StepSpells({ c, A, n, total }: StepProps) {
             title={t('wiz.spells.spells')}
             glyph="book"
             tone="arcane"
-            right={<span className="ao-codex" style={{ color: knownChosen.length === limits.spells ? 'var(--gold-pale)' : 'var(--ink-quiet)' }}>{knownChosen.length} / {limits.spells}</span>}
+            right={<span className={cn('ao-codex', knownChosen.length === limits.spells ? css.goldPale : css.inkQuiet)}>{knownChosen.length} / {limits.spells}</span>}
           />
           <div className="wiz-spell-list ao-scroll">
             {leveled.length
               ? leveled.map((s) => <SpellRow key={s.name} s={s} />)
-              : <div className="ao-codex" style={{ padding: 14 }}>{t('wiz.spells.noSpellsMatch')}</div>}
+              : <div className={cn('ao-codex', css.pad14)}>{t('wiz.spells.noSpellsMatch')}</div>}
           </div>
         </OrdoPanel>
       </div>

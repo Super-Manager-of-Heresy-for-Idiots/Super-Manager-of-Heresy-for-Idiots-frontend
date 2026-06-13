@@ -187,6 +187,49 @@
 .ao-num    { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
 
 /* ============================================================
+   Layout utilities — for the common inline flex repeats.
+   Compose: className="ao-row ao-between ao-gap-12".
+   Use these instead of style={{ display:'flex', ... }} for
+   static layouts. Real dynamic layout (computed widths,
+   dynamic gridTemplateColumns) still stays inline.
+   ------------------------------------------------------------
+   .ao-row            flex + center vertically (most common)
+   .ao-row-start      flex + align-items: flex-start
+   .ao-row-end        flex + align-items: flex-end
+   .ao-row-baseline   flex + align-items: baseline
+   .ao-col            flex column
+   .ao-center         flex + center both axes
+   .ao-between        justify-content: space-between (combine w/ row)
+   .ao-justify-end    justify-content: flex-end
+   .ao-justify-center justify-content: center
+   .ao-wrap           flex-wrap: wrap
+   .ao-grow           flex: 1
+   .ao-gap-N          gap: N px (N ∈ 2,4,6,8,10,12,14,16,18,24)
+   ============================================================ */
+.ao-row          { display: flex; align-items: center; }
+.ao-row-start    { display: flex; align-items: flex-start; }
+.ao-row-end      { display: flex; align-items: flex-end; }
+.ao-row-baseline { display: flex; align-items: baseline; }
+.ao-col          { display: flex; flex-direction: column; }
+.ao-center       { display: flex; align-items: center; justify-content: center; }
+.ao-between        { justify-content: space-between; }
+.ao-justify-end    { justify-content: flex-end; }
+.ao-justify-center { justify-content: center; }
+.ao-wrap         { flex-wrap: wrap; }
+.ao-grow         { flex: 1; }
+
+.ao-gap-2  { gap: 2px; }
+.ao-gap-4  { gap: 4px; }
+.ao-gap-6  { gap: 6px; }
+.ao-gap-8  { gap: 8px; }
+.ao-gap-10 { gap: 10px; }
+.ao-gap-12 { gap: 12px; }
+.ao-gap-14 { gap: 14px; }
+.ao-gap-16 { gap: 16px; }
+.ao-gap-18 { gap: 18px; }
+.ao-gap-24 { gap: 24px; }
+
+/* ============================================================
    Panels (framed cards with bronze corners)
    ============================================================ */
 .ao-panel {
@@ -1010,6 +1053,224 @@
    RESPONSIVE — global adaptivity for phones & tablets
    ════════════════════════════════════════════════════════════ */
 
+/* ============================================================
+   APP SHELL — desktop rail (left navigation)
+   ============================================================ */
+.ao-rail {
+  width: 68px;
+  min-width: 68px;
+  background: var(--abyss);
+  border-right: 1px solid var(--rule);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px 0;
+  gap: 4px;
+}
+.ao-rail-brand { margin-bottom: 20px; }
+.ao-rail-items {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  overflow-y: auto;
+  scrollbar-width: none;
+  padding-bottom: 8px;
+}
+.ao-rail-btn {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--ink-faint);
+  cursor: pointer;
+  transition: all 150ms;
+  position: relative;
+}
+.ao-rail-btn:hover:not(.is-active) {
+  color: var(--ink-quiet);
+  border-color: var(--rule);
+}
+.ao-rail-btn.is-active {
+  background: rgba(176, 141, 78, 0.12);
+  border-color: var(--brass);
+  color: var(--gold-pale);
+}
+.ao-rail-dot {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ember);
+}
+.ao-rail-logout {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--ink-faint);
+  cursor: pointer;
+  transition: all 150ms;
+}
+.ao-rail-logout:hover {
+  color: var(--ember);
+  border-color: var(--rule);
+}
+
+/* ============================================================
+   APP SHELL — mobile drawer
+   ============================================================ */
+.ao-drawer { position: fixed; inset: 0; z-index: 60; }
+.ao-drawer.is-closed { pointer-events: none; }
+
+.ao-drawer-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(5, 4, 3, 0.6);
+  opacity: 0;
+  transition: opacity 240ms;
+}
+.ao-drawer.is-open .ao-drawer-backdrop {
+  opacity: 1;
+  backdrop-filter: blur(2px);
+}
+
+.ao-drawer-panel {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 290px;
+  max-width: 86%;
+  background: linear-gradient(180deg, var(--stone), var(--abyss));
+  border-right: 1px solid var(--rule-strong);
+  box-shadow: var(--shadow-high);
+  transform: translateX(-104%);
+  transition: transform 280ms cubic-bezier(0.3, 0, 0.2, 1);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+.ao-drawer.is-open .ao-drawer-panel { transform: translateX(0); }
+
+.ao-drawer-head {
+  padding: 20px 18px 16px;
+  border-bottom: 1px solid var(--rule);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  z-index: 2;
+}
+.ao-drawer-head-meta { flex: 1; min-width: 0; }
+.ao-drawer-head-name { font-size: 13px; }
+.ao-drawer-head-role { margin-top: 2px; }
+.ao-drawer-head .ao-iconbtn { border: none; }
+
+.ao-drawer-nav { padding: 10px 0 16px; position: relative; z-index: 2; flex: 1; }
+.ao-drawer-link {
+  width: 100%;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 18px;
+  background: transparent;
+  border: none;
+  border-left: 2px solid transparent;
+  color: var(--ink-quiet);
+  cursor: pointer;
+  font-family: var(--font-serif);
+  font-size: 15px;
+}
+.ao-drawer-link.is-active {
+  background: rgba(176, 141, 78, 0.08);
+  border-left-color: var(--gold);
+  color: var(--gold-pale);
+}
+
+.ao-drawer-foot {
+  padding: 14px 18px 20px;
+  border-top: 1px solid var(--rule);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  position: relative;
+  z-index: 2;
+}
+.ao-drawer-foot-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.ao-drawer-foot-row .ao-overline { font-size: 9px; }
+.ao-drawer-logout { justify-content: flex-start; gap: 10px; }
+
+/* ============================================================
+   APP SHELL — top bar + root layout
+   ============================================================ */
+.ao-shell {
+  display: flex;
+  height: 100vh;
+  background: var(--stone);
+  position: relative;
+  overflow: hidden;
+}
+.ao-shell-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.ao-shell-main {
+  flex: 1;
+  overflow: auto;
+  position: relative;
+  background: var(--stone);
+}
+.ao-shell-content { position: relative; z-index: 2; }
+
+.ao-topbar {
+  height: 56px;
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  gap: 10px;
+  border-bottom: 1px solid var(--rule);
+  background: var(--abyss);
+}
+@media (max-width: 768px) {
+  .ao-topbar { padding: 0 12px; }
+}
+.ao-topbar-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.ao-topbar-right { display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
+.ao-topbar-burger { border: none; width: 36px; height: 36px; flex-shrink: 0; }
+.ao-topbar-title {
+  font-size: var(--t-body-lg);
+  color: var(--ink-bright);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ao-topbar-sep { color: var(--rule); }
+.ao-topbar-path { color: var(--ink-faint); }
+.ao-topbar-user { color: var(--ink-quiet); }
+.ao-topbar-role { font-size: 9px; }
+
 /* App shell main scroll area — padding scales down on small screens. */
 .app-main { padding: 24px; }
 @media (max-width: 768px) {
@@ -1042,6 +1303,23 @@
   display: grid;
   grid-template-columns: 1.1fr 1fr;
   height: 100vh;
+  background: var(--void);
+}
+.auth-hero {
+  position: relative;
+  overflow: hidden;
+  border-right: 1px solid var(--rule);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 56px 64px;
+}
+.auth-form-side {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 56px;
+  background: linear-gradient(180deg, var(--stone), var(--abyss));
 }
 @media (max-width: 860px) {
   .auth-split { grid-template-columns: 1fr; }
@@ -1187,3 +1465,260 @@ input[type="number"].ao-input::-webkit-inner-spin-button { opacity: 0.3; }
 
 /* Full-screen combat shells own the whole viewport (standalone routes). */
 .cb-screen { display: flex; flex-direction: column; height: 100%; }
+
+/* Standalone combat backdrop + top bar (shell.tsx) */
+.cb-backdrop {
+  position: fixed;
+  inset: 0;
+  background: var(--stone);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.cb-backdrop-inner {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.cb-topbar {
+  height: 56px;
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 18px;
+  gap: 12px;
+  border-bottom: 1px solid var(--rule);
+  background: var(--abyss);
+}
+.cb-topbar-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.cb-topbar-back { border: 1px solid var(--rule); width: 34px; height: 34px; flex-shrink: 0; }
+.cb-topbar-titles { min-width: 0; }
+.cb-topbar-title { font-size: var(--t-body-lg); color: var(--ink-bright); line-height: 1.1; }
+.cb-topbar-crumb {
+  color: var(--ink-faint);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cb-topbar-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+
+/* ============================================================
+   ORDO PRIMITIVES — component classes
+   (PanelHeader, OrdoField, OrdoDivider, Bar, StatBlock,
+    DamageBadge, ModifierTag, RoleBadge, EmptyVault,
+    Placeholder, Sigil, ModalScene)
+   Accent/role colors are passed in via the `--accent` /
+   `--role-color` custom properties on the element.
+   ============================================================ */
+
+/* PanelHeader */
+.ao-phead {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--rule);
+  background: var(--abyss);
+}
+.ao-phead-body { flex: 1; }
+.ao-phead-title { font-size: var(--t-micro); color: var(--accent, var(--gold)); }
+.ao-phead-sub { font-size: var(--t-micro); margin-top: 2px; }
+
+/* OrdoField */
+.ao-field { display: flex; flex-direction: column; gap: 6px; }
+.ao-field-top { display: flex; align-items: center; justify-content: space-between; }
+.ao-field .ao-label { margin-bottom: 0; }
+.ao-field-req { color: var(--ember); margin-left: 4px; }
+.ao-field-hint { color: var(--ink-faint); }
+
+/* OrdoDivider */
+.ao-divide-line { flex: 1; height: 1px; background: var(--line-color, var(--rule)); }
+.ao-divide-label { display: inline-flex; align-items: center; gap: 8px; }
+
+/* Bar */
+.ao-bar-row { display: flex; align-items: center; gap: 8px; }
+.ao-bar-row .ao-bar { flex: 1; }
+.ao-bar-num { font-size: 11px; color: var(--ink-quiet); flex-shrink: 0; }
+
+/* StatBlock */
+.ao-statblock { text-align: center; }
+.ao-statblock-label { margin-bottom: 4px; }
+.ao-statblock-mod { color: var(--ink-quiet); margin-top: 2px; }
+.ao-statblock-mod.is-neg { color: #d8896a; }
+
+/* DamageBadge */
+.ao-dmgbadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 10px;
+  background: var(--abyss);
+  border: 1px solid var(--rule-strong);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink-bright);
+}
+.ao-dmgbadge-type { color: var(--ink-faint); text-transform: lowercase; }
+
+/* ModifierTag */
+.ao-modtag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 7px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+.ao-modtag--sm { gap: 4px; padding: 2px 6px; font-size: 10px; }
+.ao-modtag-value { font-weight: 600; }
+.ao-modtag.is-pos {
+  color: #7a9866;
+  background: rgba(122, 152, 102, 0.08);
+  border: 1px solid #7a986655;
+}
+.ao-modtag.is-neg {
+  color: #d8896a;
+  background: rgba(179, 70, 26, 0.08);
+  border: 1px solid #d8896a55;
+}
+
+/* RoleBadge */
+.ao-rolebadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 9px 3px 7px;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid color-mix(in srgb, var(--role-color, var(--gold)) 33%, transparent);
+  border-left: 2px solid var(--role-color, var(--gold));
+  font-family: var(--font-display);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  color: var(--role-color, var(--gold));
+  text-transform: uppercase;
+}
+
+/* EmptyVault */
+.ao-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 48px 32px;
+  text-align: center;
+}
+.ao-empty-overline { color: var(--ink-faint); }
+.ao-empty-title { color: var(--ink-quiet); }
+.ao-empty-body { font-size: 14px; color: var(--ink-faint); max-width: 320px; }
+.ao-empty-action { margin-top: 8px; }
+
+/* Placeholder */
+.ao-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--abyss);
+  border: 1px solid var(--rule);
+  color: var(--ink-ghost);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  overflow: hidden;
+}
+
+/* Sigil (round wax seal) */
+.ao-sigil { border-radius: 50%; }
+
+/* ModalScene — compound selector beats Tailwind utilities on DialogContent.
+   Radix/shadcn DialogContent ships `fixed grid gap-4 p-6 bg-card border shadow-lg
+   sm:rounded-lg`. `.ao-panel { position: relative }` collides with `.fixed` at equal
+   specificity, so the dialog could drop out of fixed-centering into normal flow
+   (slides to the bottom). The (0,2,0) compound selector wins deterministically and
+   neutralises the layout utilities. */
+.ao-panel.ao-modal {
+  position: fixed;
+  display: block;
+  gap: 0;
+  padding: 0;
+  background: var(--panel);
+  border: 1px solid color-mix(in srgb, var(--accent, var(--gold)) 27%, transparent);
+  border-radius: 0;
+  box-shadow: var(--shadow-high);
+}
+.ao-modal-head {
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--rule);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent, var(--gold)) 5%, transparent), transparent);
+}
+.ao-modal-codex { font-size: 10px; color: var(--ink-faint); margin-bottom: 6px; }
+.ao-modal-overline { color: var(--accent, var(--gold)); margin-bottom: 6px; }
+.ao-modal-titlerow { display: flex; align-items: center; gap: 10px; }
+.ao-modal-rune {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--accent, var(--gold));
+  background: var(--abyss);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.ao-modal-title { font-size: 22px; }
+.ao-modal-sub { font-size: 13px; color: var(--ink-quiet); margin-top: 2px; }
+.ao-modal-body { padding: 18px 24px; }
+.ao-modal-foot { padding: 0 24px 20px; }
+
+/* ============================================================
+   SHARED WIDGETS — framed icon box, step button, accent action
+   Reused across characters/items/campaigns panels.
+   Size via --box / --step custom props; accent via --accent.
+   ============================================================ */
+
+/* Square framed icon container (class/currency/lock icons). */
+.ao-iconbox {
+  width: var(--box, 36px);
+  height: var(--box, 36px);
+  flex-shrink: 0;
+  border: 1px solid var(--rule);
+  background: var(--abyss);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Small square +/- stepper button. */
+.ao-stepbtn {
+  width: var(--step, 28px);
+  height: var(--step, 28px);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--abyss);
+  border: 1px solid var(--rule);
+  cursor: pointer;
+}
+.ao-stepbtn:disabled { opacity: 0.5; cursor: default; }
+
+/* Tinted accent action button (damage/heal/confirm). --accent drives color. */
+.ao-actionbtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  font-family: var(--font-display);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  color: var(--accent, var(--gold));
+  background: color-mix(in srgb, var(--accent, var(--gold)) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent, var(--gold)) 40%, transparent);
+}
+.ao-actionbtn:disabled { opacity: 0.5; cursor: not-allowed; }

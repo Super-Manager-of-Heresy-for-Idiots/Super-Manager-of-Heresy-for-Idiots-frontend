@@ -30,7 +30,9 @@ import {
 } from '@/hooks/useLocations';
 import { BackLink } from '@/components/campaigns';
 import { useT } from '@/i18n/I18nContext';
+import { cn } from '@/lib/utils';
 import type { LocationResponse } from '@/types';
+import s from './LocationsPage.module.css';
 
 /* ── page ────────────────────────────────────────────────────── */
 
@@ -121,20 +123,20 @@ export default function LocationsPage() {
   if (isLoading) {
     return (
       <div>
-        <BackLink to={backTo} label={t('camp2.back.campaign')} style={{ marginBottom: 12 }} />
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 32 }}>
+        <BackLink to={backTo} label={t('camp2.back.campaign')} className={s.backLink} />
+        <div className={s.header}>
           <div>
-            <p className="ao-overline" style={{ color: 'var(--gold)' }}>{t('camp2.loc.overline')}</p>
-            <h3 className="ao-h3" style={{ marginTop: 4 }}>{t('camp2.loc.title')}</h3>
+            <p className={cn('ao-overline', s.overlineGold)}>{t('camp2.loc.overline')}</p>
+            <h3 className={cn('ao-h3', s.title)}>{t('camp2.loc.title')}</h3>
           </div>
         </div>
-        <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
+        <div className={cn('ao-rgrid', s.grid)}>
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="ao-panel ao-frame ao-breathe" style={{ padding: 24, minHeight: 180 }}>
+            <div key={i} className={cn('ao-panel ao-frame ao-breathe', s.skelPanel)}>
               <span className="ao-frame-c" />
-              <div className="ao-ph" style={{ width: '100%', height: 100, marginBottom: 12 }} />
-              <div className="ao-ph" style={{ width: '50%', height: 14, marginBottom: 8 }} />
-              <div className="ao-ph" style={{ width: '70%', height: 14 }} />
+              <div className={cn('ao-ph', s.phMap)} />
+              <div className={cn('ao-ph', s.phW50H14)} />
+              <div className={cn('ao-ph', s.phW70H14)} />
             </div>
           ))}
         </div>
@@ -147,9 +149,9 @@ export default function LocationsPage() {
   if (error) {
     return (
       <div>
-        <BackLink to={backTo} label={t('camp2.back.campaign')} style={{ marginBottom: 12 }} />
-        <div style={{ textAlign: 'center', padding: '48px 0' }}>
-          <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginBottom: 16 }}>
+        <BackLink to={backTo} label={t('camp2.back.campaign')} className={s.backLink} />
+        <div className={s.errorBox}>
+          <p className={cn('ao-italic', s.errorText)}>
             {t('camp2.loc.loadError')}
           </p>
           <button className="ao-btn" onClick={() => refetch()}>{t('common.retry')}</button>
@@ -162,19 +164,19 @@ export default function LocationsPage() {
 
   return (
     <div>
-      <BackLink to={backTo} label={t('camp2.back.campaign')} style={{ marginBottom: 12 }} />
+      <BackLink to={backTo} label={t('camp2.back.campaign')} className={s.backLink} />
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 32 }}>
+      <div className={s.header}>
         <div>
-          <p className="ao-overline" style={{ color: 'var(--gold)' }}>{t('camp2.loc.overline')}</p>
-          <h3 className="ao-h3" style={{ marginTop: 4 }}>{t('camp2.loc.title')}</h3>
-          <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 13, marginTop: 4 }}>
+          <p className={cn('ao-overline', s.overlineGold)}>{t('camp2.loc.overline')}</p>
+          <h3 className={cn('ao-h3', s.title)}>{t('camp2.loc.title')}</h3>
+          <p className={cn('ao-italic', s.subtitle)}>
             {t('camp2.loc.subtitle')}
           </p>
         </div>
         <button className="ao-btn ao-btn--primary" onClick={handleOpenCreate}>
           <Rune kind="plus" size={14} color="currentColor" />
-          <span style={{ marginLeft: 6 }}>{t('camp2.loc.newLocation')}</span>
+          <span className={s.ml6}>{t('camp2.loc.newLocation')}</span>
         </button>
       </div>
 
@@ -187,75 +189,41 @@ export default function LocationsPage() {
           action={
             <button className="ao-btn ao-btn--primary" onClick={handleOpenCreate}>
               <Rune kind="plus" size={14} color="currentColor" />
-              <span style={{ marginLeft: 6 }}>{t('camp2.loc.newLocation')}</span>
+              <span className={s.ml6}>{t('camp2.loc.newLocation')}</span>
             </button>
           }
         />
       ) : (
-        <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
+        <div className={cn('ao-rgrid', s.grid)}>
           {locations.map((loc) => (
             <OrdoPanel key={loc.id} frame padding={0}>
-              <div style={{ padding: 18 }}>
+              <div className={s.cardPad}>
                 {/* Map vignette placeholder */}
-                <Placeholder
-                  style={{
-                    width: '100%',
-                    height: 110,
-                    marginBottom: 14,
-                    opacity: loc.isVisibleToPlayers ? 1 : 0.5,
-                  }}
-                >
+                <Placeholder className={cn(s.mapVignette, !loc.isVisibleToPlayers && s.dimmed)}>
                   {t('camp2.loc.mapVignette')}
                 </Placeholder>
 
                 {/* ID + Visibility */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 6 }}>
+                <div className={s.idRow}>
                   <CodexID>{loc.id.slice(0, 8).toUpperCase()}</CodexID>
                   <VisibilityToggle visible={loc.isVisibleToPlayers} onToggle={() => toggleVisibility(loc)} />
                 </div>
 
                 {/* Name */}
-                <h5
-                  className="ao-h5"
-                  style={{
-                    color: 'var(--ink-bright)',
-                    marginTop: 4,
-                    opacity: loc.isVisibleToPlayers ? 1 : 0.6,
-                  }}
-                >
+                <h5 className={cn('ao-h5', s.locName, !loc.isVisibleToPlayers && s.dimmed60)}>
                   {loc.name}
                 </h5>
 
                 {/* Description */}
                 {loc.description && (
-                  <p
-                    className="ao-italic"
-                    style={{
-                      fontSize: 13,
-                      color: 'var(--ink)',
-                      lineHeight: 1.5,
-                      marginTop: 6,
-                      display: '-webkit-box',
-                      WebkitLineClamp: 3,
-                      WebkitBoxOrient: 'vertical' as const,
-                      overflow: 'hidden',
-                    }}
-                  >
+                  <p className={cn('ao-italic', s.locDesc)}>
                     {loc.description}
                   </p>
                 )}
               </div>
 
               {/* Actions footer */}
-              <div
-                style={{
-                  display: 'flex',
-                  gap: 6,
-                  padding: '12px 18px',
-                  borderTop: '1px solid var(--hairline)',
-                  background: 'var(--abyss)',
-                }}
-              >
+              <div className={s.cardFooter}>
                 <button className="ao-btn ao-btn--sm" onClick={() => handleOpenEdit(loc)}>
                   <Rune kind="scroll" size={10} /> {t('camp2.loc.edit')}
                 </button>
@@ -285,7 +253,7 @@ export default function LocationsPage() {
           <DialogHeader>
             <DialogTitle>{editing ? t('camp2.loc.dialog.editTitle') : t('camp2.loc.dialog.createTitle')}</DialogTitle>
           </DialogHeader>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div className={s.dialogCol}>
             <OrdoField label={t('camp2.loc.field.name')} required>
               <input
                 className="ao-input"
@@ -297,22 +265,21 @@ export default function LocationsPage() {
 
             <OrdoField label={t('camp2.loc.field.description')}>
               <textarea
-                className="ao-input"
                 value={formDescription}
                 onChange={(e) => setFormDescription(e.target.value)}
                 placeholder={t('camp2.loc.field.descriptionPlaceholder')}
                 rows={4}
-                style={{ resize: 'vertical' }}
+                className={cn('ao-input', s.resizeV)}
               />
             </OrdoField>
 
-            <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+            <label className={s.checkRow}>
               <input
                 type="checkbox"
                 checked={formVisible}
                 onChange={(e) => setFormVisible(e.target.checked)}
               />
-              <span className="ao-label" style={{ marginBottom: 0 }}>{t('camp2.loc.field.visible')}</span>
+              <span className={cn('ao-label', s.checkLabel)}>{t('camp2.loc.field.visible')}</span>
             </label>
           </div>
           <DialogFooter>

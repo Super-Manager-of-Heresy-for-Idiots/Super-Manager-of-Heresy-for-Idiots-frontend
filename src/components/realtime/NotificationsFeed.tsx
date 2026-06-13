@@ -1,8 +1,11 @@
+import type { CSSProperties } from 'react';
 import { Rune, OrdoPanel, PanelHeader } from '@/components/ordo';
 import { useWsStore, type Notification } from '@/store/wsStore';
 import { formatTimeAgo } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import { useT } from '@/i18n/I18nContext';
 import type { WsEventType } from '@/types';
+import s from './NotificationsFeed.module.css';
 
 /* ── visual config per event type ────────────────────────── */
 
@@ -74,68 +77,25 @@ function NotificationRow({ notif }: { notif: Notification }) {
       onKeyDown={(e) => {
         if (e.key === 'Enter' && !notif.read) markRead(notif.id);
       }}
-      style={{
-        display: 'flex',
-        gap: 10,
-        padding: '10px 14px',
-        borderBottom: '1px solid var(--hairline)',
-        borderLeft: notif.read ? '3px solid transparent' : '3px solid var(--gold)',
-        cursor: notif.read ? 'default' : 'pointer',
-        transition: 'background 150ms',
-        background: notif.read ? 'transparent' : 'rgba(176, 141, 78, 0.03)',
-      }}
+      className={cn(s.row, !notif.read && s.unread)}
+      style={{ '--tone': visual.color } as CSSProperties}
     >
-      {/* icon */}
-      <div
-        style={{
-          width: 28,
-          height: 28,
-          flexShrink: 0,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          background: 'var(--abyss)',
-          border: `1px solid ${visual.color}`,
-        }}
-      >
+      <div className={s.icon}>
         <Rune kind={visual.glyph} size={14} color={visual.color} />
       </div>
 
-      {/* text */}
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span
-            className="ao-engraved"
-            style={{ fontSize: 'var(--t-micro)', color: visual.color }}
-          >
-            {label}
-          </span>
+      <div className={s.text}>
+        <div className={s.head}>
+          <span className={cn('ao-engraved', s.label)}>{label}</span>
 
           {!notif.read && (
             <Rune kind="diamond-fill" size={6} color="var(--gold)" />
           )}
         </div>
 
-        <div
-          className="ao-italic"
-          style={{
-            fontSize: 'var(--t-small)',
-            color: 'var(--ink)',
-            marginTop: 2,
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-          }}
-        >
-          {body}
-        </div>
+        <div className={cn('ao-italic', s.body)}>{body}</div>
 
-        <div
-          className="ao-codex"
-          style={{ fontSize: 10, color: 'var(--ink-faint)', marginTop: 3 }}
-        >
-          {formatTimeAgo(notif.receivedAt)}
-        </div>
+        <div className={cn('ao-codex', s.time)}>{formatTimeAgo(notif.receivedAt)}</div>
       </div>
     </div>
   );
@@ -155,7 +115,7 @@ export function NotificationsFeed() {
         glyph="scroll"
         tone="gold"
         right={
-          <div style={{ display: 'flex', gap: 8 }}>
+          <div className="ao-row ao-gap-8">
             {unreadCount > 0 && (
               <button
                 className="ao-btn ao-btn--sm ao-btn--ghost"
@@ -176,26 +136,11 @@ export function NotificationsFeed() {
         }
       />
 
-      <div
-        className="ao-scroll"
-        style={{ maxHeight: 420, overflowY: 'auto' }}
-      >
+      <div className={cn('ao-scroll', s.scroll)}>
         {notifications.length === 0 ? (
-          <div
-            style={{
-              padding: '32px 16px',
-              textAlign: 'center',
-            }}
-          >
+          <div className={s.empty}>
             <Rune kind="scroll" size={28} color="var(--ink-ghost)" />
-            <div
-              className="ao-italic"
-              style={{
-                marginTop: 10,
-                fontSize: 'var(--t-small)',
-                color: 'var(--ink-faint)',
-              }}
-            >
+            <div className={cn('ao-italic', s.emptyText)}>
               {t('cmp2.notif.empty')}
             </div>
           </div>

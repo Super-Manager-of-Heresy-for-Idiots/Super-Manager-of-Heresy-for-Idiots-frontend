@@ -1,0 +1,76 @@
+/* ── loading ─────────────────────────────────────────────────── */
+.loadHead { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 18px; }
+.loadTitle { margin-top: 4px; }
+.loadList { display: flex; flex-direction: column; gap: 8px; }
+.loadPh { width: 100%; height: 48px; }
+
+/* ── top bar ─────────────────────────────────────────────────── */
+.topBar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.topRight { display: flex; align-items: center; gap: 8px; }
+.codexLine { margin-bottom: 16px; color: var(--ink-faint); }
+
+/* ── layout ──────────────────────────────────────────────────── */
+.grid { display: grid; grid-template-columns: 1fr 1.4fr; gap: 16px; }
+.leftCol { display: flex; flex-direction: column; gap: 16px; }
+.panelBody { padding: 16px; display: flex; flex-direction: column; gap: 16px; }
+.lifecycleBody { padding: 16px; display: flex; flex-direction: column; gap: 8px; }
+.fullInput { width: 100%; }
+.titleInput { font-family: var(--font-serif); font-size: 17px; width: 100%; }
+.descInput { width: 100%; resize: vertical; }
+
+/* ── tags ────────────────────────────────────────────────────── */
+.tagBox { padding: 8px; background: var(--abyss); border: 1px solid var(--hairline); display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.tag {
+  display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px;
+  background: rgba(var(--gold-rgb, 201,176,120), 0.1); border: 1px solid rgba(var(--gold-rgb, 201,176,120), 0.3);
+  font-size: 11px; font-family: var(--font-mono); color: var(--gold);
+}
+.tagRemove { margin-left: 2px; background: none; border: none; cursor: pointer; color: var(--ink-faint); padding: 0; display: flex; }
+.tagInput { flex: 1; min-width: 60px; background: transparent; border: none; color: var(--ink); outline: none; font-family: var(--font-mono); font-size: 11px; padding: 2px 4px; }
+
+/* ── folio header right ──────────────────────────────────────── */
+.folioActions { display: flex; gap: 8px; }
+
+/* ── add panel ───────────────────────────────────────────────── */
+.addPanel { padding: 12px 16px; border-bottom: 1px solid var(--rule); background: var(--abyss); }
+.addOverline { margin-bottom: 8px; }
+.addTypeRow { display: grid; grid-template-columns: 140px 1fr; gap: 8px; align-items: center; margin-bottom: 10px; }
+.inputSm { padding: 6px 10px; }
+.inputSm2 { padding: 6px 12px; }
+.modeRow { display: flex; gap: 6px; }
+.modeBtn { flex: 1; }
+.existRow { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; align-items: center; }
+.existHint { color: var(--ink-faint); font-size: 12px; margin-top: 8px; }
+.newGrid { display: grid; gap: 10px; }
+.newNameRow { display: grid; gap: 8px; }
+.buffGrid { display: grid; gap: 8px; }
+.buffPair { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+.depBox { border: 1px solid var(--rule); background: rgba(0,0,0,0.18); padding: 12px; display: grid; gap: 12px; }
+.depTitle { color: var(--gold-pale); }
+.depHint { color: var(--ink-faint); font-size: 12px; margin: 0; }
+.depNote { color: var(--ink-faint); font-size: 12px; margin: 4px 0 0; }
+.chipWrap { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.chipBtn { cursor: pointer; }
+
+.createRow { display: flex; justify-content: space-between; gap: 8px; align-items: center; }
+.createNote { color: var(--ink-faint); font-size: 12px; }
+
+/* ── content groups ──────────────────────────────────────────── */
+.sectionHead {
+  display: flex; align-items: center; gap: 8px; padding: 10px 16px; background: var(--abyss);
+  border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule);
+}
+.sectionTitle { font-size: 12px; font-weight: 500; color: var(--ink-bright); }
+.sectionCount { color: var(--ink-faint); }
+.grow { flex: 1; }
+.sectionHint { color: var(--ink-ghost); font-size: 9px; }
+.emptyRow { padding: 16px; text-align: center; color: var(--ink-faint); font-size: 13px; }
+
+.contentRow { display: flex; align-items: center; gap: 12px; padding: 10px 16px; border-bottom: 1px solid var(--hairline); }
+.iconSlot { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.rowMain { flex: 1; min-width: 0; }
+.rowName { font-family: var(--font-serif); font-weight: 500; font-size: 15px; color: var(--ink-bright); }
+.rowDesc { color: var(--ink-faint); font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.iconBtnSm { width: 28px; height: 28px; }
+.iconBtnSm.ember { color: var(--ember); }

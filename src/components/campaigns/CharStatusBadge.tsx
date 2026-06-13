@@ -1,5 +1,7 @@
+import type { CSSProperties } from 'react';
 import { Rune } from '@/components/ordo';
 import { useT } from '@/i18n/I18nContext';
+import s from './CharStatusBadge.module.css';
 
 interface CharStatusBadgeProps {
   status: string;
@@ -16,12 +18,7 @@ export function CharStatusBadge({ status }: CharStatusBadgeProps) {
   const t = useT();
   const m = MAP[status as keyof typeof MAP] || MAP.ACTIVE;
   return (
-    <span style={{
-      display: 'inline-flex', alignItems: 'center', gap: 5,
-      padding: '2px 8px', background: 'rgba(0,0,0,0.45)',
-      border: `1px solid ${m.color}44`, fontFamily: 'var(--font-display)',
-      fontSize: 9, letterSpacing: '0.16em', color: m.color, textTransform: 'uppercase',
-    }}>
+    <span className={s.badge} style={{ '--tone': m.color } as CSSProperties}>
       <Rune kind={m.glyph} size={8} color={m.color} />{t(m.labelKey)}
     </span>
   );

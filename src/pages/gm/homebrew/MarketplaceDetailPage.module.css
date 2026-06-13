@@ -1,0 +1,100 @@
+/* ── states ──────────────────────────────────────────────────── */
+.loadingPanel { height: 480px; }
+.loadingPh { height: 100%; }
+
+/* ── top actions ─────────────────────────────────────────────── */
+.topActions { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+.topRight { display: flex; gap: 8px; }
+
+/* ── hero grid ───────────────────────────────────────────────── */
+.heroGrid { display: grid; grid-template-columns: 1.6fr 1fr; border-bottom: 1px solid var(--rule); }
+.heroLeft { padding: 24px; border-right: 1px solid var(--rule); }
+.heroRight { padding: 24px; }
+
+.idRow { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.heroTitle { font-size: 44px; line-height: 1.1; }
+.authorRow { display: flex; align-items: center; gap: 14px; margin-top: 16px; }
+.authorName { font-size: 14px; color: var(--ink-bright); font-family: var(--font-serif); }
+.authorRole { font-size: 10px; color: var(--ink-faint); margin-top: 2px; }
+.vDivider { width: 1px; height: 32px; background: var(--rule); flex-shrink: 0; }
+.dateLabel { font-size: 9px; }
+.dateValue { font-size: 12px; margin-top: 2px; }
+
+.desc { font-size: 14px; color: var(--ink); line-height: 1.6; margin-top: 16px; }
+.caveat {
+  margin-top: 16px; padding: 10px 14px; background: rgba(176,141,78,0.05);
+  border: 1px solid var(--hairline); border-left: 2px solid var(--brass);
+}
+.caveatLabel { font-size: 9px; color: var(--gold); margin-bottom: 4px; }
+.caveatBody { font-size: 12px; color: var(--ink-quiet); }
+.tagsRow { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 16px; }
+
+/* ── right column ────────────────────────────────────────────── */
+.editionRow { display: flex; align-items: center; gap: 14px; }
+.editionLabel { font-size: 9px; }
+.editionVer { margin-top: 2px; }
+.editionResealed { font-size: 11px; color: var(--ink-faint); margin-top: 4px; }
+
+.statsGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
+.statBox { padding: 12px; background: var(--abyss); border: 1px solid var(--hairline); }
+.statLabel { font-size: 9px; }
+.statValue { margin-top: 6px; color: var(--ink-bright); }
+.statValue.gold { color: var(--gold); }
+.statNote { font-size: 10px; color: var(--ink-faint); margin-top: 2px; }
+
+.pillsWrap { margin-top: 16px; }
+.authorizeBtn { margin-top: 18px; }
+.grantsNote { text-align: center; font-size: 10px; color: var(--ink-faint); margin-top: 8px; }
+
+/* ── content tabs ────────────────────────────────────────────── */
+.tabsBar { display: flex; border-bottom: 1px solid var(--rule); }
+.tab { display: flex; align-items: center; gap: 8px; padding: 12px 20px; }
+.tabCount { font-size: 10px; color: var(--ink-faint); }
+
+/* ── tab content ─────────────────────────────────────────────── */
+.tabBody { padding: 20px; }
+.emptyTab { text-align: center; padding: 36px 0; }
+.emptyTabText { margin-top: 12px; color: var(--ink-faint); font-size: 14px; }
+
+.featTable { width: 100%; }
+.featName { font-family: var(--font-serif); font-weight: 600; }
+.featDesc { color: var(--ink-quiet); font-size: 13px; }
+
+.itemsGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.itemCard { display: flex; gap: 12px; padding: 12px; }
+.iconSlot {
+  width: 48px; height: 48px; flex-shrink: 0; display: flex; align-items: center;
+  justify-content: center; background: var(--abyss); border: 1px solid var(--hairline);
+}
+.itemMain { flex: 1; min-width: 0; }
+.itemHead { display: flex; justify-content: space-between; align-items: baseline; }
+.itemName { font-size: 14px; }
+.itemSlot { font-size: 10px; color: var(--ink-faint); }
+.itemDesc { font-size: 12px; color: var(--ink-quiet); margin-top: 4px; }
+
+.classGrid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+.classRow { display: flex; gap: 14px; align-items: center; }
+.classMain { flex: 1; }
+.classDesc { font-size: 13px; color: var(--ink-quiet); margin-top: 4px; }
+
+.skillGrid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+.skillHead { display: flex; justify-content: space-between; align-items: baseline; }
+.skillName { font-size: 14px; }
+.skillType { font-size: 10px; color: var(--ink-faint); }
+.skillDesc { font-size: 12px; color: var(--ink-quiet); margin-top: 4px; }
+
+/* ── install modal ───────────────────────────────────────────── */
+.modal { background: var(--obsidian); border: 1px solid var(--rule-strong); padding: 0; max-width: 520px; }
+.modalHead { text-align: center; padding: 28px 32px 0; }
+.modalOverline { margin-top: 14px; color: var(--gold); letter-spacing: 0.2em; }
+.modalTitle { margin-top: 8px; }
+.modalBody { padding: 0 32px; }
+.modalPkgRow { display: flex; align-items: center; gap: 14px; padding: 14px 0; }
+.modalPkgMain { flex: 1; }
+.modalPkgTitle { font-size: 16px; }
+.modalPkgMeta { font-size: 11px; color: var(--ink-faint); margin-top: 4px; }
+.modalPkgSep { margin: 0 4px; }
+.modalHeader { margin-top: 14px; }
+.modalDescHidden { display: none; }
+.modalDesc { font-size: 13px; line-height: 1.6; color: var(--ink-quiet); }
+.modalFooter { display: flex; gap: 10px; padding: 18px 32px 24px; justify-content: flex-end; }

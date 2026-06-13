@@ -23,7 +23,9 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useCampaigns, useCreateCampaign, useDeleteCampaign, useJoinCampaign } from '@/hooks/useCampaigns';
 import { useT } from '@/i18n/I18nContext';
+import { cn } from '@/lib/utils';
 import type { CampaignResponse } from '@/types';
+import s from './CampaignListPage.module.css';
 
 /* ── page ────────────────────────────────────────────────────── */
 
@@ -86,18 +88,18 @@ export default function CampaignListPage() {
   if (isPlayer) {
     return (
       <div>
-        <div style={{ textAlign: 'center', marginBottom: 32 }}>
-          <p className="ao-overline" style={{ color: 'var(--gold)' }}>
+        <div className={s.header}>
+          <p className={cn('ao-overline', s.overlineGold)}>
             {t('camp.list.access.overline')}
           </p>
-          <h3 className="ao-h3" style={{ marginTop: 4 }}>{t('camp.list.title')}</h3>
-          <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 13, marginTop: 4 }}>
+          <h3 className={cn('ao-h3', s.title)}>{t('camp.list.title')}</h3>
+          <p className={cn('ao-italic', s.sub)}>
             {t('camp.list.access.sub')}
           </p>
         </div>
 
-        <OrdoPanel frame padding={24} style={{ maxWidth: 560, margin: '0 auto 28px' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <OrdoPanel frame padding={24} className={s.joinPanel}>
+          <div className={s.joinCol}>
             <OrdoField label={t('camp.list.inviteCode')} required>
               <input
                 className="ao-input"
@@ -114,38 +116,37 @@ export default function CampaignListPage() {
 
             <button
               type="button"
-              className="ao-btn ao-btn--primary"
+              className={cn('ao-btn ao-btn--primary', s.joinBtn)}
               onClick={handleJoin}
               disabled={!inviteCode.trim() || joinMutation.isPending}
-              style={{ alignSelf: 'flex-end' }}
             >
               {joinMutation.isPending ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (
                 <Rune kind="cross-pat" size={14} color="currentColor" />
               )}
-              <span style={{ marginLeft: 6 }}>{t('camp.list.join')}</span>
+              <span className={s.ml6}>{t('camp.list.join')}</span>
             </button>
           </div>
         </OrdoPanel>
 
         <OrdoDivider glyph="diamond" color="var(--rule)" />
 
-        <div style={{ marginTop: 24 }}>
+        <div className={s.section}>
           {error ? (
-            <div style={{ textAlign: 'center', padding: '32px 0' }}>
-              <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginBottom: 16 }}>
+            <div className={s.errorBlock}>
+              <p className={cn('ao-italic', s.errorText)}>
                 {t('camp.list.loadError')}
               </p>
               <button className="ao-btn" onClick={() => refetch()}>{t('camp.retry')}</button>
             </div>
           ) : isLoading ? (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
+            <div className={s.cardGrid}>
               {Array.from({ length: 2 }).map((_, i) => (
-                <div key={i} className="ao-panel ao-frame ao-breathe" style={{ padding: 24, minHeight: 150 }}>
+                <div key={i} className={cn('ao-panel ao-frame ao-breathe', s.skel)}>
                   <span className="ao-frame-c" />
-                  <div className="ao-ph" style={{ width: '60%', height: 20, marginBottom: 12 }} />
-                  <div className="ao-ph" style={{ width: '40%', height: 14 }} />
+                  <div className={cn('ao-ph', s.phWide)} />
+                  <div className={cn('ao-ph', s.phNarrow)} />
                 </div>
               ))}
             </div>
@@ -156,52 +157,34 @@ export default function CampaignListPage() {
               body={t('camp.list.empty.player.body')}
             />
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
+            <div className={s.cardGrid}>
               {campaigns.map((campaign: CampaignResponse) => (
                 <OrdoPanel key={campaign.id} frame padding={0}>
-                  <div style={{ padding: 20 }}>
-                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
+                  <div className={s.cardBody}>
+                    <div className={s.cardHead}>
                       <Sigil size={44} glyph="shield" color="var(--gold)" />
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <h4 className="ao-h4" style={{ margin: 0 }}>{campaign.name}</h4>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6 }}>
+                      <div className={s.cardHeadMain}>
+                        <h4 className={cn('ao-h4', s.cardTitle)}>{campaign.name}</h4>
+                        <div className={s.statusRow}>
                           <CampaignStatusPill status={campaign.status} />
                         </div>
                       </div>
                     </div>
 
                     {campaign.description && (
-                      <p
-                        className="ao-italic"
-                        style={{
-                          fontSize: 12,
-                          color: 'var(--ink-faint)',
-                          marginTop: 12,
-                          display: '-webkit-box',
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: 'vertical' as const,
-                          overflow: 'hidden',
-                        }}
-                      >
+                      <p className={cn('ao-italic', s.clamp, s.clampMt12)}>
                         {campaign.description}
                       </p>
                     )}
                   </div>
 
-                  <div style={{
-                    display: 'flex',
-                    gap: 6,
-                    padding: '12px 20px',
-                    borderTop: '1px solid var(--rule)',
-                    background: 'var(--abyss)',
-                  }}>
+                  <div className={s.cardFooter}>
                     <button
-                      className="ao-btn ao-btn--primary ao-btn--sm"
-                      style={{ flex: 1 }}
+                      className={cn('ao-btn ao-btn--primary ao-btn--sm', s.footerBtn)}
                       onClick={() => navigate(`/campaigns/${campaign.id}`)}
                     >
                       <Rune kind="eye" size={12} color="currentColor" />
-                      <span style={{ marginLeft: 4 }}>{t('camp.list.enter')}</span>
+                      <span className={s.ml4}>{t('camp.list.enter')}</span>
                     </button>
                   </div>
                 </OrdoPanel>
@@ -223,8 +206,8 @@ export default function CampaignListPage() {
 
   if (error) {
     return (
-      <div style={{ textAlign: 'center', padding: '48px 0' }}>
-        <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginBottom: 16 }}>
+      <div className={s.errorBlockLg}>
+        <p className={cn('ao-italic', s.errorText)}>
           {t('camp.list.loadError')}
         </p>
         <button className="ao-btn" onClick={() => refetch()}>{t('camp.retry')}</button>
@@ -237,12 +220,12 @@ export default function CampaignListPage() {
   return (
     <div>
       {/* Header */}
-      <div style={{ textAlign: 'center', marginBottom: 32 }}>
-        <p className="ao-overline" style={{ color: 'var(--gold)' }}>
+      <div className={s.header}>
+        <p className={cn('ao-overline', s.overlineGold)}>
           {t('camp.list.sworn.overline')}
         </p>
-        <h3 className="ao-h3" style={{ marginTop: 4 }}>{t('camp.list.title')}</h3>
-        <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 13, marginTop: 4 }}>
+        <h3 className={cn('ao-h3', s.title)}>{t('camp.list.title')}</h3>
+        <p className={cn('ao-italic', s.sub)}>
           {t('camp.list.gm.sub')}
         </p>
       </div>
@@ -250,21 +233,21 @@ export default function CampaignListPage() {
       <OrdoDivider glyph="diamond" color="var(--rule)" />
 
       {/* Stats row */}
-      <div style={{ display: 'flex', justifyContent: 'center', gap: 48, margin: '24px 0' }}>
-        <div className="ao-stat" style={{ textAlign: 'center' }}>
-          <span className="ao-stat-value" style={{ color: 'var(--gold)' }}>
+      <div className={s.statsRow}>
+        <div className={cn('ao-stat', s.stat)}>
+          <span className={cn('ao-stat-value', s.valGold)}>
             {isLoading ? '\u2014' : (campaigns?.length || 0)}
           </span>
           <span className="ao-stat-label">{t('camp.list.stat.total')}</span>
         </div>
-        <div className="ao-stat" style={{ textAlign: 'center' }}>
-          <span className="ao-stat-value" style={{ color: '#7a9866' }}>
+        <div className={cn('ao-stat', s.stat)}>
+          <span className={cn('ao-stat-value', s.valGreen)}>
             {isLoading ? '\u2014' : activeCampaigns.length}
           </span>
           <span className="ao-stat-label">{t('camp.list.stat.active')}</span>
         </div>
-        <div className="ao-stat" style={{ textAlign: 'center' }}>
-          <span className="ao-stat-value" style={{ color: 'var(--arcane)' }}>
+        <div className={cn('ao-stat', s.stat)}>
+          <span className={cn('ao-stat-value', s.valArcane)}>
             {isLoading ? '\u2014' : totalMembers}
           </span>
           <span className="ao-stat-label">{t('camp.list.stat.members')}</span>
@@ -274,24 +257,24 @@ export default function CampaignListPage() {
       <OrdoDivider glyph="diamond" color="var(--rule)" />
 
       {/* Action bar */}
-      <div style={{ display: 'flex', justifyContent: 'flex-end', margin: '20px 0' }}>
+      <div className={s.actionBar}>
         <button
           className="ao-btn ao-btn--primary"
           onClick={() => { resetForm(); setDialogOpen(true); }}
         >
           <Rune kind="plus" size={14} color="currentColor" />
-          <span style={{ marginLeft: 6 }}>{t('camp.list.forge')}</span>
+          <span className={s.ml6}>{t('camp.list.forge')}</span>
         </button>
       </div>
 
       {/* Loading */}
       {isLoading ? (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
+        <div className={s.cardGrid}>
           {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="ao-panel ao-frame ao-breathe" style={{ padding: 24, minHeight: 180 }}>
+            <div key={i} className={cn('ao-panel ao-frame ao-breathe', s.skelLg)}>
               <span className="ao-frame-c" />
-              <div className="ao-ph" style={{ width: '60%', height: 20, marginBottom: 12 }} />
-              <div className="ao-ph" style={{ width: '40%', height: 14 }} />
+              <div className={cn('ao-ph', s.phWide)} />
+              <div className={cn('ao-ph', s.phNarrow)} />
             </div>
           ))}
         </div>
@@ -306,65 +289,47 @@ export default function CampaignListPage() {
               onClick={() => { resetForm(); setDialogOpen(true); }}
             >
               <Rune kind="plus" size={14} color="currentColor" />
-              <span style={{ marginLeft: 6 }}>{t('camp.list.forgeFirst')}</span>
+              <span className={s.ml6}>{t('camp.list.forgeFirst')}</span>
             </button>
           }
         />
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
+        <div className={s.cardGrid}>
           {campaigns.map((campaign: CampaignResponse) => (
             <OrdoPanel key={campaign.id} frame padding={0}>
-              <div style={{ padding: 20 }}>
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
+              <div className={s.cardBody}>
+                <div className={s.cardHead}>
                   <Sigil size={44} glyph="shield" color="var(--gold)" />
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <h4 className="ao-h4" style={{ margin: 0 }}>{campaign.name}</h4>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6 }}>
+                  <div className={s.cardHeadMain}>
+                    <h4 className={cn('ao-h4', s.cardTitle)}>{campaign.name}</h4>
+                    <div className={s.statusRow}>
                       <CampaignStatusPill status={campaign.status} />
                     </div>
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 14 }}>
+                <div className={s.memberRow}>
                   <Rune kind="helm" size={14} color="var(--ink-quiet)" />
-                  <span className="ao-codex" style={{ color: 'var(--ink-quiet)' }}>
+                  <span className={cn('ao-codex', s.memberText)}>
                     {campaign.members?.length || 0} {(campaign.members?.length || 0) === 1 ? t('camp.list.memberOne') : t('camp.list.memberMany')}
                   </span>
                 </div>
 
                 {campaign.description && (
-                  <p
-                    className="ao-italic"
-                    style={{
-                      fontSize: 12,
-                      color: 'var(--ink-faint)',
-                      marginTop: 8,
-                      display: '-webkit-box',
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: 'vertical' as const,
-                      overflow: 'hidden',
-                    }}
-                  >
+                  <p className={cn('ao-italic', s.clamp, s.clampMt8)}>
                     {campaign.description}
                   </p>
                 )}
               </div>
 
               {/* Footer */}
-              <div style={{
-                display: 'flex',
-                gap: 6,
-                padding: '12px 20px',
-                borderTop: '1px solid var(--rule)',
-                background: 'var(--abyss)',
-              }}>
+              <div className={s.cardFooter}>
                 <button
-                  className="ao-btn ao-btn--primary ao-btn--sm"
-                  style={{ flex: 1 }}
+                  className={cn('ao-btn ao-btn--primary ao-btn--sm', s.footerBtn)}
                   onClick={() => navigate(`/campaigns/${campaign.id}`)}
                 >
                   <Rune kind="eye" size={12} color="currentColor" />
-                  <span style={{ marginLeft: 4 }}>{t('camp.list.view')}</span>
+                  <span className={s.ml4}>{t('camp.list.view')}</span>
                 </button>
                 <button
                   className="ao-btn ao-btn--danger ao-btn--sm"
@@ -385,7 +350,7 @@ export default function CampaignListPage() {
           <DialogHeader>
             <DialogTitle>{t('camp.list.create.title')}</DialogTitle>
           </DialogHeader>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div className={s.dialogCol}>
             <OrdoField label={t('camp.list.field.name')} required>
               <input
                 className="ao-input"
@@ -397,12 +362,11 @@ export default function CampaignListPage() {
 
             <OrdoField label={t('camp.list.field.description')}>
               <textarea
-                className="ao-input"
+                className={cn('ao-input', s.resizeV)}
                 value={formDescription}
                 onChange={(e) => setFormDescription(e.target.value)}
                 placeholder={t('camp.list.field.descriptionPlaceholder')}
                 rows={3}
-                style={{ resize: 'vertical' }}
               />
             </OrdoField>
           </div>

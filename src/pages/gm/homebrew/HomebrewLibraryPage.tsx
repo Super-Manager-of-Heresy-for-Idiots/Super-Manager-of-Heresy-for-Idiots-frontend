@@ -20,7 +20,9 @@ import {
 import { useHomebrewLibrary, useAttachHomebrew, useRateHomebrew } from '@/hooks/useHomebrewCampaign';
 import { useCampaigns } from '@/hooks/useCampaigns';
 import { useT } from '@/i18n/I18nContext';
+import { cn } from '@/lib/utils';
 import type { CampaignResponse } from '@/types';
+import s from './HomebrewLibraryPage.module.css';
 
 /* ── types for library entries ────────────────────────────────── */
 
@@ -95,17 +97,17 @@ export default function HomebrewLibraryPage() {
   if (isLoading) {
     return (
       <div>
-        <div style={{ marginBottom: 32 }}>
-          <p className="ao-overline" style={{ color: 'var(--gold)' }}>{t('hb.library.overline')}</p>
-          <h3 className="ao-h3" style={{ marginTop: 4 }}>{t('hb.library.heading')}</h3>
+        <div className={s.headerLg}>
+          <p className={cn('ao-overline', s.overline)}>{t('hb.library.overline')}</p>
+          <h3 className={cn('ao-h3', s.heading)}>{t('hb.library.heading')}</h3>
         </div>
-        <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 18 }}>
+        <div className={cn('ao-rgrid', s.skelGrid)}>
           {[0, 1].map((i) => (
-            <div key={i} className="ao-panel ao-frame ao-breathe" style={{ padding: 24, minHeight: 300 }}>
+            <div key={i} className={cn('ao-panel ao-frame ao-breathe', s.skelCard)}>
               <span className="ao-frame-c" />
-              <div className="ao-ph" style={{ width: '50%', height: 16, marginBottom: 16 }} />
-              <div className="ao-ph" style={{ width: '80%', height: 14, marginBottom: 8 }} />
-              <div className="ao-ph" style={{ width: '60%', height: 14 }} />
+              <div className={cn('ao-ph', s.skelLine1)} />
+              <div className={cn('ao-ph', s.skelLine2)} />
+              <div className={cn('ao-ph', s.skelLine3)} />
             </div>
           ))}
         </div>
@@ -117,8 +119,8 @@ export default function HomebrewLibraryPage() {
 
   if (error) {
     return (
-      <div style={{ textAlign: 'center', padding: '48px 0' }}>
-        <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginBottom: 16 }}>
+      <div className={s.errorBox}>
+        <p className={cn('ao-italic', s.errorText)}>
           {t('hb.library.error')}
         </p>
         <button className="ao-btn" onClick={() => refetch()}>{t('common.retry')}</button>
@@ -131,22 +133,22 @@ export default function HomebrewLibraryPage() {
   return (
     <div>
       {/* Header */}
-      <div style={{ marginBottom: 28 }}>
-        <p className="ao-overline" style={{ color: 'var(--gold)' }}>{t('hb.library.overline')}</p>
-        <h3 className="ao-h3" style={{ marginTop: 4 }}>{t('hb.library.heading')}</h3>
-        <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 13, marginTop: 4 }}>
+      <div className={s.header}>
+        <p className={cn('ao-overline', s.overline)}>{t('hb.library.overline')}</p>
+        <h3 className={cn('ao-h3', s.heading)}>{t('hb.library.heading')}</h3>
+        <p className={cn('ao-italic', s.subtitle)}>
           {t('hb.library.subtitle')}
         </p>
       </div>
 
       {/* Main Grid */}
-      <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 18, alignItems: 'start' }}>
+      <div className={cn('ao-rgrid', s.mainGrid)}>
         {/* Library List */}
         <OrdoPanel frame padding={0}>
           <PanelHeader title={t('hb.library.libraryTitle')} glyph="scroll" tone="gold" sub={t('hb.library.doctrinesCount', { count: libraryEntries.length })} />
 
           {libraryEntries.length === 0 ? (
-            <div style={{ padding: '36px 20px', textAlign: 'center' }}>
+            <div className={s.emptyWrap}>
               <EmptyVault
                 glyph="scroll"
                 title={t('hb.library.emptyTitle')}
@@ -158,45 +160,29 @@ export default function HomebrewLibraryPage() {
               {libraryEntries.map((entry: LibraryEntry, idx: number) => (
                 <div
                   key={entry.id}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    gap: 14,
-                    padding: '16px 18px',
-                    borderBottom: idx < libraryEntries.length - 1 ? '1px solid var(--hairline)' : 'none',
-                  }}
+                  className={cn(s.entryRow, idx < libraryEntries.length - 1 && s.divided)}
                 >
                   <VersionSeal version={entry.version} size={40} />
 
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                      <span style={{ fontSize: 14, color: 'var(--ink-bright)', fontWeight: 500 }}>
+                  <div className={s.entryMain}>
+                    <div className={s.entryHead}>
+                      <span className={s.entryTitle}>
                         {entry.title}
                       </span>
                       {entry.isAttached && (
-                        <span
-                          style={{
-                            fontSize: 9,
-                            letterSpacing: '0.14em',
-                            textTransform: 'uppercase',
-                            padding: '2px 7px',
-                            background: 'rgba(122,152,102,0.15)',
-                            color: '#7a9866',
-                            fontFamily: 'var(--font-mono)',
-                          }}
-                        >
+                        <span className={s.attachedTag}>
                           {t('hb.library.attached')}
                         </span>
                       )}
                     </div>
 
-                    <div className="ao-codex" style={{ fontSize: 11, color: 'var(--ink-faint)', marginTop: 3 }}>
+                    <div className={cn('ao-codex', s.entryBy)}>
                       {t('hb.library.byVersion', { author: entry.authorUsername, version: entry.version })}
                     </div>
 
                     {/* Rating */}
                     {entry.rating && (
-                      <div style={{ marginTop: 8 }}>
+                      <div className={s.ratingWrap}>
                         <RatingControl
                           likes={Math.max(0, Math.ceil((entry.rating.total + entry.rating.net) / 2))}
                           dislikes={Math.max(0, Math.ceil((entry.rating.total - entry.rating.net) / 2))}
@@ -226,17 +212,16 @@ export default function HomebrewLibraryPage() {
         <OrdoPanel frame padding={0}>
           <PanelHeader title={t('hb.library.attachHeading')} glyph="sigil-1" tone="arcane" sub={t('hb.library.attachSub')} />
 
-          <div style={{ padding: 18 }}>
-            <p className="ao-italic" style={{ color: 'var(--ink-quiet)', fontSize: 13, marginBottom: 16 }}>
+          <div className={s.attachBody}>
+            <p className={cn('ao-italic', s.attachIntro)}>
               {t('hb.library.attachBody')}
             </p>
 
             <OrdoField label={t('hb.library.campaign')} hint={t('hb.library.targetCampaign')}>
               <select
-                className="ao-input"
+                className={cn('ao-input', s.fieldSelect)}
                 value={attachCampaignId}
                 onChange={(e) => setAttachCampaignId(e.target.value)}
-                style={{ width: '100%' }}
               >
                 <option value="">{t('hb.library.selectCampaign')}</option>
                 {campaignList.map((c) => (
@@ -245,13 +230,12 @@ export default function HomebrewLibraryPage() {
               </select>
             </OrdoField>
 
-            <div style={{ marginTop: 12 }}>
+            <div className={s.fieldSpacer}>
               <OrdoField label={t('hb.library.package')} hint={t('hb.library.doctrineToAttach')}>
                 <select
-                  className="ao-input"
+                  className={cn('ao-input', s.fieldSelect)}
                   value={attachPackageId}
                   onChange={(e) => setAttachPackageId(e.target.value)}
-                  style={{ width: '100%' }}
                 >
                   <option value="">{t('hb.library.selectDoctrine')}</option>
                   {libraryEntries.map((entry) => (
@@ -263,7 +247,7 @@ export default function HomebrewLibraryPage() {
               </OrdoField>
             </div>
 
-            <div style={{ marginTop: 12 }}>
+            <div className={s.fieldSpacer}>
               <OrdoField label={t('hb.library.pinnedVersion')} hint={t('hb.library.leaveEmptyLatest')}>
                 <input
                   className="ao-input"
@@ -278,7 +262,7 @@ export default function HomebrewLibraryPage() {
 
             <OrdoDivider glyph="diamond" />
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
+            <div className={s.attachFooter}>
               <button
                 className="ao-btn ao-btn--primary"
                 onClick={handleAttach}
@@ -289,7 +273,7 @@ export default function HomebrewLibraryPage() {
                 ) : (
                   <>
                     <Rune kind="sigil-1" size={14} color="currentColor" />
-                    <span style={{ marginLeft: 6 }}>{t('hb.library.attach')}</span>
+                    <span className={s.attachBtnLabel}>{t('hb.library.attach')}</span>
                   </>
                 )}
               </button>
@@ -304,13 +288,12 @@ export default function HomebrewLibraryPage() {
           <DialogHeader>
             <DialogTitle>{t('hb.library.dialogTitle')}</DialogTitle>
           </DialogHeader>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div className={s.dialogFields}>
             <OrdoField label={t('hb.library.campaign')} required>
               <select
-                className="ao-input"
+                className={cn('ao-input', s.fieldSelect)}
                 value={attachCampaignId}
                 onChange={(e) => setAttachCampaignId(e.target.value)}
-                style={{ width: '100%' }}
               >
                 <option value="">{t('hb.library.selectCampaign')}</option>
                 {campaignList.map((c) => (

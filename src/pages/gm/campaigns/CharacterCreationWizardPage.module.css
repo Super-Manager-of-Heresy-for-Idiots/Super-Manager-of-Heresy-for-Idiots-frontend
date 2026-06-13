@@ -1,0 +1,5 @@
+.loadingPanel { padding: 24px; min-height: 160px; }
+.phTitle { width: 40%; height: 24px; margin-bottom: 12px; }
+.phLine { width: 60%; height: 14px; }
+.stateBox { text-align: center; padding: 48px 0; }
+.stateText { color: var(--ink-faint); margin-bottom: 16px; }

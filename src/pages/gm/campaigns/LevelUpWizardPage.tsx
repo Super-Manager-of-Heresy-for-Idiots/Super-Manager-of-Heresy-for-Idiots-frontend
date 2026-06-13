@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react';
+import { useState, type ReactNode, type CSSProperties } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Sparkles, Heart, Loader2 } from 'lucide-react';
 import {
@@ -25,6 +25,8 @@ import type {
   RewardSelection,
 } from '@/types';
 import { REWARD_TYPE_LABELS } from '@/types';
+import { cn } from '@/lib/utils';
+import s from './LevelUpWizardPage.module.css';
 
 type WizardStep = 'pick-class' | 'rewards' | 'confirm' | 'result';
 
@@ -55,10 +57,10 @@ export default function LevelUpWizardPage() {
 
   if (isLoading) {
     return (
-      <div className="ao-panel ao-frame ao-breathe" style={{ padding: 24, minHeight: 200 }}>
+      <div className={cn('ao-panel ao-frame ao-breathe', s.loadingPanel)}>
         <span className="ao-frame-c" />
-        <div className="ao-ph" style={{ width: '40%', height: 22, marginBottom: 12 }} />
-        <div className="ao-ph" style={{ width: '60%', height: 14 }} />
+        <div className={cn('ao-ph', s.phTitle)} />
+        <div className={cn('ao-ph', s.phLine)} />
       </div>
     );
   }
@@ -93,13 +95,13 @@ export default function LevelUpWizardPage() {
   return (
     <div>
       {/* Ceremonial header */}
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 18 }}>
+      <div className={s.ceremonyHead}>
         <Sigil size={72} glyph="sigil-2" />
-        <div className="ao-codex ao-flicker" style={{ marginTop: 10, color: 'var(--gold-pale)' }}>
+        <div className={cn('ao-codex ao-flicker', s.ceremonyCodex)}>
           {t('camp.lvl.riteOfAscent')}
         </div>
         {character && (
-          <div className="ao-italic" style={{ color: 'var(--ink-quiet)', fontSize: 13, marginTop: 4 }}>
+          <div className={cn('ao-italic', s.ceremonySub)}>
             {character.name} · {character.classLevels?.map((cl) => `${cl.className} ${cl.classLevel}`).join(' / ') || `LVL ${character.totalLevel}`}
           </div>
         )}
@@ -174,11 +176,11 @@ function RiteGate({ glyph, message, onBack }: { glyph: string; message: string; 
   const t = useT();
   return (
     <OrdoPanel frame padding={0}>
-      <div style={{ padding: '56px 24px', textAlign: 'center' }}>
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 18 }}>
+      <div className={s.gateBody}>
+        <div className={s.gateIcon}>
           <Sigil size={56} glyph={glyph} color="var(--gold)" />
         </div>
-        <p className="ao-italic" style={{ color: 'var(--ink-quiet)', marginBottom: 20, fontSize: 15 }}>
+        <p className={cn('ao-italic', s.gateMsg)}>
           {message}
         </p>
         <button className="ao-btn" onClick={onBack}>
@@ -199,45 +201,23 @@ function StepRail({ step, hasResult }: { step: WizardStep; hasResult: boolean })
     { id: 'confirm', label: t('camp.lvl.step.confirm') },
     { id: 'result', label: t('camp.lvl.step.result') },
   ];
-  const activeIdx = steps.findIndex((s) => s.id === step);
+  const activeIdx = steps.findIndex((st) => st.id === step);
   return (
-    <div className="ao-tabs" style={{ marginBottom: 22 }}>
-      {steps.map((s, idx) => {
+    <div className={cn('ao-tabs', s.rail)}>
+      {steps.map((st, idx) => {
         const isActive = idx === activeIdx;
         const isDone = idx < activeIdx || (hasResult && idx <= 3);
         return (
           <div
-            key={s.id}
-            className={`ao-tab${isActive ? ' is-active' : ''}`}
-            style={{
-              flex: 1,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8,
-              cursor: 'default',
-              color: isActive ? undefined : isDone ? 'var(--ink-quiet)' : undefined,
-            }}
+            key={st.id}
+            className={cn('ao-tab', isActive && 'is-active', s.railStep, !isActive && isDone && s.done)}
           >
-            <span
-              style={{
-                width: 22,
-                height: 22,
-                flexShrink: 0,
-                border: `1px solid ${isActive ? 'var(--brass)' : 'var(--rule)'}`,
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: 11,
-                fontFamily: 'var(--font-mono)',
-                transform: 'rotate(45deg)',
-                color: isActive ? 'var(--gold-pale)' : 'var(--ink-faint)',
-              }}
-            >
-              <span style={{ transform: 'rotate(-45deg)', display: 'inline-flex' }}>
+            <span className={cn(s.railMarker, isActive && s.active)}>
+              <span className={s.railMarkerInner}>
                 {isDone ? <Rune kind="check" size={11} color="var(--gold-pale)" /> : idx + 1}
               </span>
             </span>
-            {s.label}
+            {st.label}
           </div>
         );
       })}
@@ -267,13 +247,13 @@ function StepPickClass({
   const multi = options.filter((o) => o.currentLevelInClass === 0);
   return (
     <div>
-      <OrdoPanel frame padding={0} style={{ marginBottom: 16 }}>
+      <OrdoPanel frame padding={0} className={s.mb16}>
         <PanelHeader
           title={t('camp.lvl.chooseClass')}
           glyph="helm"
           sub={t('camp.lvl.totalLevel', { from: roman(currentTotal), to: roman(currentTotal + 1) })}
         />
-        <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 18 }}>
+        <div className={s.pickBody}>
           {existing.length > 0 && (
             <ClassGroup
               title={t('camp.lvl.deepenPath')}
@@ -291,12 +271,12 @@ function StepPickClass({
             />
           )}
           {options.length === 0 && (
-            <div className="ao-codex" style={{ padding: 12 }}>{t('camp.lvl.noClasses')}</div>
+            <div className={cn('ao-codex', s.noClasses)}>{t('camp.lvl.noClasses')}</div>
           )}
         </div>
       </OrdoPanel>
 
-      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+      <div className={s.navRow}>
         <button className="ao-btn ao-btn--ghost" onClick={onBack}>
           <ArrowLeft className="h-3 w-3" /> {t('camp.lvl.postpone')}
         </button>
@@ -322,8 +302,8 @@ function ClassGroup({
   const t = useT();
   return (
     <div>
-      <div className="ao-overline" style={{ marginBottom: 8 }}>{title}</div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 10 }}>
+      <div className={cn('ao-overline', s.groupTitle)}>{title}</div>
+      <div className={s.classGrid}>
         {options.map((opt) => {
           const isMulti = opt.currentLevelInClass === 0;
           const isActive = selectedClassId === opt.classId;
@@ -340,19 +320,19 @@ function ClassGroup({
               className={`wiz-card${isActive ? ' is-active' : ''}`}
             >
               <div className="wiz-card-top">
-                <span className="ao-h5" style={{ fontSize: 16, flex: 1 }}>{opt.className}</span>
+                <span className={cn('ao-h5', s.classCardName)}>{opt.className}</span>
                 {isMulti && <span className="ao-chip ao-chip--arcane">{t('camp.lvl.oathChip')}</span>}
                 {isActive && <Rune kind="check" size={14} color="var(--gold-pale)" />}
               </div>
-              <div className="ao-codex" style={{ fontSize: 11 }}>
+              <div className={cn('ao-codex', s.classCardLevel)}>
                 {roman(opt.currentLevelInClass)} → {roman(opt.newLevelInClass)}
               </div>
               {previewRewards ? (
-                <div className="ao-italic" style={{ fontSize: 13, color: 'var(--ink-quiet)' }}>
+                <div className={cn('ao-italic', s.classCardPreview)}>
                   {previewRewards}
                 </div>
               ) : (
-                <div className="ao-italic" style={{ fontSize: 13, color: 'var(--ink-faint)' }}>
+                <div className={cn('ao-italic', s.classCardPreview, s.faint)}>
                   {t('camp.lvl.noChoosableRewards')}
                 </div>
               )}
@@ -484,59 +464,50 @@ function StepRewards({
   return (
     <div>
       {/* The ceremony scroll — dramatic reveal */}
-      <div
-        className="ao-panel ao-frame"
-        style={{
-          position: 'relative',
-          marginBottom: 16,
-          padding: 0,
-          background: 'linear-gradient(180deg, #221d1a 0%, #14110f 100%)',
-          boxShadow: '0 4px 0 rgba(0,0,0,0.6), 0 24px 60px rgba(0,0,0,0.7), 0 0 60px rgba(176, 141, 78, 0.06)',
-        }}
-      >
+      <div className={cn('ao-panel ao-frame', s.scroll)}>
         <span className="ao-frame-c" />
 
         {/* Top band */}
-        <div style={{ padding: '24px 48px 0', textAlign: 'center' }}>
-          <div className="ao-codex" style={{ color: 'var(--ink-faint)' }}>
+        <div className={s.scrollBand}>
+          <div className={cn('ao-codex', s.scrollFolio)}>
             {option.className} · Folio V-{String(option.newLevelInClass).padStart(3, '0')}
           </div>
-          <div className="ao-engraved" style={{ fontSize: 13, color: 'var(--ink-quiet)', marginTop: 6 }}>
+          <div className={cn('ao-engraved', s.scrollByOrdo)}>
             {t('camp.lvl.byOrdo')}
           </div>
           <OrdoDivider glyph="diamond-fill" />
         </div>
 
         {/* Number reveal */}
-        <div style={{ padding: '0 48px', textAlign: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 32 }}>
-            <div style={{ textAlign: 'right' }}>
+        <div className={s.scrollReveal}>
+          <div className={s.revealRow}>
+            <div className={s.revealBefore}>
               <div className="ao-overline">{t('camp.lvl.before')}</div>
-              <div style={{ fontFamily: 'var(--font-serif)', fontSize: 64, color: 'var(--ink-faint)', lineHeight: 1, fontStyle: 'italic' }}>
+              <div className={s.revealBeforeNum}>
                 {roman(currentTotal)}
               </div>
             </div>
             <Rune kind="arrow-r" size={28} color="var(--gold)" />
             <div className="ao-breathe">
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: 120, fontWeight: 700, color: 'var(--gold-pale)', lineHeight: 1, textShadow: '0 0 32px rgba(176, 141, 78, 0.4)' }}>
+              <div className={s.revealAfterNum}>
                 {roman(currentTotal + 1)}
               </div>
             </div>
           </div>
-          <div className="ao-h4" style={{ marginTop: 18, fontStyle: 'italic' }}>
+          <div className={cn('ao-h4', s.revealClassLine)}>
             {option.className} · {roman(option.currentLevelInClass)} → {roman(option.newLevelInClass)}
           </div>
           {characterName && (
-            <p className="ao-italic" style={{ fontSize: 16, marginTop: 8, color: 'var(--ink)', maxWidth: 540, margin: '8px auto 0', lineHeight: 1.5 }}>
+            <p className={cn('ao-italic', s.revealBlessing)}>
               {t('camp.lvl.charBlessing', { name: characterName })}
             </p>
           )}
         </div>
 
         {/* Grants summary */}
-        <div style={{ padding: 32, paddingTop: 24 }}>
+        <div className={s.grantsBody}>
           <OrdoDivider glyph="diamond-fill">{t('camp.lvl.grantedByAscent')}</OrdoDivider>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12, marginTop: 14 }}>
+          <div className={s.grantsGrid}>
             {grants.map((g, i) => (
               <GrantCard key={i} glyph={g.glyph} label={g.label} value={g.value} sub={g.sub} tone={g.tone} />
             ))}
@@ -545,7 +516,7 @@ function StepRewards({
           {autoRewards.length > 0 && (
             <>
               <OrdoDivider glyph="diamond">{t('camp.lvl.autoFeatures')}</OrdoDivider>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div className={s.colGap8}>
                 {autoRewards.map((a, i) => (
                   <AutoGrantRow key={i} typeLabel={a.typeLabel} reward={a.reward} />
                 ))}
@@ -556,36 +527,16 @@ function StepRewards({
           {rites.length > 0 && (
             <>
               <OrdoDivider glyph="cross-pat">{t('camp.lvl.ritesToChoose')}</OrdoDivider>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div className={s.colGap8}>
                 {rites.map((r, i) => (
-                  <div
-                    key={i}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 12,
-                      padding: '10px 14px',
-                      background: 'var(--abyss)',
-                      border: `1px solid ${r.complete ? 'rgba(176, 141, 78, 0.4)' : 'var(--hairline)'}`,
-                    }}
-                  >
-                    <span
-                      style={{
-                        width: 22,
-                        height: 22,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        border: `1px solid ${r.complete ? 'var(--brass)' : 'var(--rule)'}`,
-                        background: r.complete ? 'var(--bronze)' : 'transparent',
-                      }}
-                    >
+                  <div key={i} className={cn(s.riteRow, r.complete && s.complete)}>
+                    <span className={cn(s.riteMark, r.complete && s.complete)}>
                       <Rune kind={r.complete ? 'check' : 'diamond'} size={10} color={r.complete ? 'var(--ink-bright)' : 'var(--ink-faint)'} />
                     </span>
-                    <span style={{ flex: 1, color: r.complete ? 'var(--ink-quiet)' : 'var(--ink-bright)', textDecoration: r.complete ? 'line-through' : 'none' }}>
+                    <span className={cn(s.riteName, r.complete && s.complete)}>
                       {r.name}
                     </span>
-                    <span className="ao-overline" style={{ color: r.complete ? 'var(--gold-pale)' : 'var(--ember)' }}>
+                    <span className={cn('ao-overline', s.riteStatus, r.complete && s.complete)}>
                       {r.complete ? t('camp.lvl.sealed') : t('camp.lvl.open')}
                     </span>
                   </div>
@@ -619,24 +570,24 @@ function StepRewards({
       {asiGroup && <AsiGroup options={asiOptions} pointsTotal={asiPointsTotal} asi={asi} setAsi={setAsi} />}
 
       {rites.length === 0 && (
-        <OrdoPanel frame padding={0} style={{ marginBottom: 16 }}>
-          <div style={{ padding: 18 }} className="ao-italic">
+        <OrdoPanel frame padding={0} className={s.mb16}>
+          <div className={cn('ao-italic', s.noChoosable)}>
             {t('camp.lvl.noChoosableThisStep')}
           </div>
         </OrdoPanel>
       )}
 
       {/* Footer ribbon */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
+      <div className={s.navRow}>
         <button className="ao-btn ao-btn--ghost" onClick={onBack}>
           <ArrowLeft className="h-3 w-3" /> {t('camp.lvl.backToAscent')}
         </button>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+        <div className={s.stepInd}>
           <span className="ao-codex">{t('camp.lvl.stepIndicator')}</span>
-          <span style={{ display: 'flex', gap: 4 }}>
-            <span style={{ width: 16, height: 4, background: 'var(--gold)' }} />
-            <span style={{ width: 16, height: 4, background: 'var(--gold)' }} />
-            <span style={{ width: 16, height: 4, background: 'var(--rule)' }} />
+          <span className={s.stepDots}>
+            <span className={cn(s.stepDot, s.on)} />
+            <span className={cn(s.stepDot, s.on)} />
+            <span className={s.stepDot} />
           </span>
         </div>
         <button className="ao-btn ao-btn--primary ao-btn--lg" onClick={onNext} disabled={!choicesValid || !asiValid}>
@@ -662,13 +613,13 @@ function GrantCard({
 }) {
   const color = toneVar(tone);
   return (
-    <div style={{ padding: 16, background: 'var(--abyss)', border: '1px solid var(--rule-strong)', textAlign: 'center', position: 'relative' }}>
+    <div className={s.grantCard}>
       <Rune kind={glyph} size={22} color={color} />
-      <div style={{ fontFamily: 'var(--font-serif)', fontSize: 32, color: 'var(--ink-bright)', lineHeight: 1.1, marginTop: 6, wordBreak: 'break-word' }}>
+      <div className={s.grantValue}>
         {value}
       </div>
-      <div className="ao-overline" style={{ marginTop: 4 }}>{label}</div>
-      {sub && <div className="ao-codex" style={{ fontSize: 10, marginTop: 2, color: 'var(--ink-faint)' }}>{sub}</div>}
+      <div className={cn('ao-overline', s.grantLabel)}>{label}</div>
+      {sub && <div className={cn('ao-codex', s.grantSub)}>{sub}</div>}
     </div>
   );
 }
@@ -687,20 +638,20 @@ function OathGroup({
   const t = useT();
   const allAlready = group.rewards.length > 0 && group.rewards.every((r) => r.alreadyAcquired);
   return (
-    <OrdoPanel frame padding={0} style={{ marginBottom: 16 }}>
+    <OrdoPanel frame padding={0} className={s.mb16}>
       <PanelHeader
         title={t('camp.lvl.oath.title')}
         glyph="shield"
         sub={t('camp.lvl.oath.sub')}
         tone="arcane"
       />
-      <div style={{ padding: 16 }}>
+      <div className={s.oathBody}>
         {group.rewards.length === 0 ? (
           <EmptyChoiceNote text={t('camp.lvl.oath.noList')} />
         ) : allAlready ? (
           <EmptyChoiceNote text={t('camp.lvl.oath.allTaken')} />
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 18 }}>
+          <div className={s.oathGrid}>
             {group.rewards.map((r, i) => (
               <OathCard
                 key={r.rewardEntryId}
@@ -734,47 +685,39 @@ function OathCard({
   return (
     <div
       onClick={onSelect}
-      className="ao-panel ao-frame"
-      style={{
-        position: 'relative',
-        padding: 0,
-        cursor: disabled ? 'not-allowed' : 'pointer',
-        opacity: disabled ? 0.5 : 1,
-        borderColor: selected ? color : undefined,
-        background: selected ? 'linear-gradient(180deg, rgba(176, 141, 78, 0.06) 0%, var(--panel) 100%)' : undefined,
-        transition: 'border-color 200ms',
-      }}
+      className={cn('ao-panel ao-frame', s.oathCard, disabled && s.disabled, selected && s.selected)}
+      style={{ '--c': color } as CSSProperties}
     >
       <span className="ao-frame-c" />
       {/* Banner area */}
-      <div style={{ position: 'relative', height: 140, borderBottom: '1px solid var(--rule)', overflow: 'hidden' }}>
-        <Placeholder style={{ position: 'absolute', inset: 0 }}>{t('camp.lvl.oath.banner', { name: reward.name })}</Placeholder>
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, transparent 0%, var(--panel) 100%)' }} />
-        <div style={{ position: 'absolute', top: 14, left: 14 }}>
+      <div className={s.oathBanner}>
+        <Placeholder className={s.oathBannerPh}>{t('camp.lvl.oath.banner', { name: reward.name })}</Placeholder>
+        <div className={s.oathBannerFade} />
+        <div className={s.oathSigil}>
           <Sigil size={36} glyph="shield" color={color} />
         </div>
-        <div style={{ position: 'absolute', bottom: 14, left: 14, right: 14 }}>
-          <div className="ao-overline" style={{ color }}>{t('camp.lvl.oath.sacred')}</div>
-          <div className="ao-h5" style={{ fontSize: 22, marginTop: 2 }}>{reward.name}</div>
+        <div className={s.oathBannerText}>
+          <div className={cn('ao-overline', s.oathSacred)}>{t('camp.lvl.oath.sacred')}</div>
+          <div className={cn('ao-h5', s.oathName)}>{reward.name}</div>
         </div>
         {selected && (
-          <div style={{ position: 'absolute', top: 14, right: 14 }}>
+          <div className={s.oathChipPos}>
             <OrdoChip glyph="diamond-fill" tone={tone}>{t('camp.lvl.oath.considered')}</OrdoChip>
           </div>
         )}
       </div>
 
       {(reward.description || reward.detail) && (
-        <div style={{ padding: 16 }}>
+        <div className={s.oathDescBody}>
           {reward.description && (
-            <p className="ao-italic" style={{ fontSize: 14, color: 'var(--ink)', lineHeight: 1.45 }}>«{reward.description}»</p>
+            <p className={cn('ao-italic', s.oathDesc)}>«{reward.description}»</p>
           )}
           <DetailBadges detail={reward.detail} />
         </div>
       )}
 
-      <div style={{ padding: '12px 16px', background: 'var(--abyss)', borderTop: '1px solid var(--rule)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <span className="ao-codex" style={{ fontSize: 11, color: 'var(--ink-faint)' }}>
+      <div className={s.oathFoot}>
+        <span className={cn('ao-codex', s.oathFootText)}>
           {disabled ? t('camp.lvl.oath.alreadyTaken') : selected ? t('camp.lvl.oath.chosenToSeal') : t('camp.lvl.oath.acceptOath')}
         </span>
         <Rune kind="chev-r" size={12} color={selected ? color : 'var(--ink-faint)'} />
@@ -797,20 +740,20 @@ function ChoiceGroup({
   const t = useT();
   const allAlready = group.rewards.length > 0 && group.rewards.every((r) => r.alreadyAcquired);
   return (
-    <OrdoPanel frame padding={0} style={{ marginBottom: 16 }}>
+    <OrdoPanel frame padding={0} className={s.mb16}>
       <PanelHeader
         title={t('camp.lvl.offering.title', { label: REWARD_TYPE_LABELS[group.rewardType] || group.rewardType })}
         glyph="sigil-1"
         sub={t('camp.lvl.offering.sub')}
         tone="arcane"
       />
-      <div style={{ padding: 16 }}>
+      <div className={s.oathBody}>
         {group.rewards.length === 0 ? (
           <EmptyChoiceNote text={t('camp.lvl.offering.noList')} />
         ) : allAlready ? (
           <EmptyChoiceNote text={t('camp.lvl.offering.allTaken')} />
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 22 }}>
+          <div className={s.offeringGrid}>
             {group.rewards.map((r, i) => (
               <OfferingCard
                 key={r.rewardEntryId}
@@ -849,64 +792,39 @@ function OfferingCard({
   return (
     <div
       onClick={onSelect}
-      className="ao-panel ao-frame"
-      style={{
-        position: 'relative',
-        padding: 0,
-        cursor: disabled ? 'not-allowed' : 'pointer',
-        opacity: disabled ? 0.5 : 1,
-        transform: selected ? 'translateY(-6px)' : 'none',
-        transition: 'transform 300ms cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 300ms',
-        boxShadow: selected
-          ? `var(--shadow-inset), 0 8px 0 rgba(0,0,0,0.6), 0 24px 60px rgba(0,0,0,0.65), 0 0 24px ${glow}`
-          : undefined,
-        borderColor: selected ? color : undefined,
-        background: selected ? 'linear-gradient(180deg, #2a241f 0%, var(--panel) 100%)' : undefined,
-      }}
+      className={cn('ao-panel ao-frame', s.offeringCard, disabled ? s.disabled : s.clickable, selected && s.selected)}
+      style={{ '--c': color, '--glow': glow } as CSSProperties}
     >
       <span className="ao-frame-c" />
-      <div style={{ padding: '14px 18px', borderBottom: '1px solid var(--rule)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div className={s.offeringHead}>
         <CodexID>{typeLabel}</CodexID>
         {selected ? (
           <OrdoChip glyph="check" tone={tone}>{t('camp.lvl.offering.sealing')}</OrdoChip>
         ) : (
-          <span className="ao-codex" style={{ fontSize: 11 }}>{disabled ? t('camp.lvl.offering.alreadyReceived') : t('camp.lvl.offering.clickToSeal')}</span>
+          <span className={cn('ao-codex', s.offeringHeadNote)}>{disabled ? t('camp.lvl.offering.alreadyReceived') : t('camp.lvl.offering.clickToSeal')}</span>
         )}
       </div>
 
-      <div style={{ padding: 20, textAlign: 'center' }}>
-        <div
-          style={{
-            width: 130,
-            height: 130,
-            margin: '0 auto',
-            position: 'relative',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            border: `1px solid ${color}`,
-            background: 'radial-gradient(circle at 50% 30%, rgba(20,17,15,0.5), var(--abyss))',
-            boxShadow: `inset 0 0 24px ${selected ? color : 'rgba(0,0,0,0.5)'}`,
-          }}
-        >
-          <div style={{ position: 'absolute', inset: 6, border: '1px solid var(--hairline)' }} />
+      <div className={s.offeringBody}>
+        <div className={cn(s.relic, selected && s.selected)}>
+          <div className={s.relicInner} />
           <Rune kind={glyphFor(tone)} size={56} color={color} />
         </div>
 
-        <div className="ao-overline" style={{ marginTop: 16, color }}>{typeLabel}</div>
-        <div className="ao-h5" style={{ marginTop: 4, fontSize: 22 }}>{reward.name}</div>
+        <div className={cn('ao-overline', s.offeringType)}>{typeLabel}</div>
+        <div className={cn('ao-h5', s.offeringName)}>{reward.name}</div>
       </div>
 
-      <div style={{ padding: '0 18px' }}>
+      <div className={s.offeringDivider}>
         <OrdoDivider glyph="diamond" color={color} />
       </div>
 
       {(reward.description || reward.detail) && (
-        <div style={{ padding: '12px 18px', background: 'var(--abyss)', borderTop: '1px solid var(--rule)' }}>
+        <div className={s.offeringInsc}>
           {reward.description && (
             <>
-              <div className="ao-overline" style={{ marginBottom: 4 }}>{t('camp.lvl.offering.inscription')}</div>
-              <div className="ao-italic" style={{ fontSize: 12, color: 'var(--ink)', lineHeight: 1.45 }}>«{reward.description}»</div>
+              <div className={cn('ao-overline', s.offeringInscLabel)}>{t('camp.lvl.offering.inscription')}</div>
+              <div className={cn('ao-italic', s.offeringInscText)}>«{reward.description}»</div>
             </>
           )}
           <DetailBadges detail={reward.detail} />
@@ -918,7 +836,7 @@ function OfferingCard({
 
 function EmptyChoiceNote({ text }: { text: string }) {
   return (
-    <div className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 13 }}>{text}</div>
+    <div className={cn('ao-italic', s.emptyNote)}>{text}</div>
   );
 }
 
@@ -927,22 +845,7 @@ function EmptyChoiceNote({ text }: { text: string }) {
 function Tag({ children, tone }: { children: ReactNode; tone?: Tone }) {
   const color = tone ? toneVar(tone) : 'var(--ink-quiet)';
   return (
-    <span
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: 4,
-        fontSize: 10.5,
-        fontFamily: 'var(--font-mono)',
-        letterSpacing: '0.04em',
-        padding: '2px 7px',
-        border: `1px solid ${color}`,
-        color,
-        background: 'var(--abyss)',
-        textTransform: 'uppercase',
-        whiteSpace: 'nowrap',
-      }}
-    >
+    <span className={s.tag} style={{ '--c': color } as CSSProperties}>
       {children}
     </span>
   );
@@ -978,7 +881,7 @@ function DetailBadges({ detail }: { detail?: RewardDetail }) {
   if (!hasContent) return null;
 
   return (
-    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 8 }}>
+    <div className={s.tagWrap}>
       {tags.map((tg, i) => (
         <Tag key={`t${i}`} tone={tg.tone}>{tg.label}</Tag>
       ))}
@@ -1008,13 +911,13 @@ function DetailBadges({ detail }: { detail?: RewardDetail }) {
 
 function AutoGrantRow({ typeLabel, reward }: { typeLabel: string; reward: RewardEntry }) {
   return (
-    <div style={{ padding: '12px 14px', background: 'var(--abyss)', border: '1px solid var(--rule)' }}>
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
-        <span className="ao-codex" style={{ fontSize: 10, color: 'var(--ink-faint)' }}>{typeLabel}</span>
-        <span className="ao-h5" style={{ fontSize: 15 }}>{reward.name}</span>
+    <div className={s.autoRow}>
+      <div className={s.autoRowHead}>
+        <span className={cn('ao-codex', s.autoRowType)}>{typeLabel}</span>
+        <span className={cn('ao-h5', s.autoRowName)}>{reward.name}</span>
       </div>
       {reward.description && (
-        <p className="ao-italic" style={{ fontSize: 12.5, color: 'var(--ink)', marginTop: 4, lineHeight: 1.45 }}>
+        <p className={cn('ao-italic', s.autoRowDesc)}>
           {reward.description}
         </p>
       )}
@@ -1047,19 +950,19 @@ function AsiGroup({
     setAsi({ points: { ...asi.points, [statTypeId]: next } });
   };
   return (
-    <OrdoPanel frame padding={0} style={{ marginBottom: 16 }}>
+    <OrdoPanel frame padding={0} className={s.mb16}>
       <PanelHeader
         title={t('camp.lvl.asi.title')}
         glyph="sigil-2"
         sub={t('camp.lvl.asi.sub')}
         tone="arcane"
         right={
-          <span className="ao-codex" style={{ fontSize: 11, color: remaining === 0 ? 'var(--gold-pale)' : 'var(--ink-quiet)' }}>
+          <span className={cn('ao-codex', s.asiRemaining, remaining === 0 && s.done)}>
             {t('camp.lvl.asi.remaining', { count: remaining })}
           </span>
         }
       />
-      <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div className={s.asiBody}>
         {options.length === 0 && (
           <EmptyChoiceNote text={t('camp.lvl.asi.noAspects')} />
         )}
@@ -1074,37 +977,28 @@ function AsiGroup({
           return (
             <div
               key={o.statTypeId}
-              className="ao-rgrid"
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr auto auto auto',
-                gap: 12,
-                alignItems: 'center',
-                padding: '8px 12px',
-                background: value > 0 ? 'rgba(176,141,78,0.06)' : 'var(--abyss)',
-                border: `1px solid ${value > 0 ? 'var(--bronze-warm)' : 'var(--hairline)'}`,
-              }}
+              className={cn('ao-rgrid', s.asiRow, value > 0 && s.active)}
             >
-              <span style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <span style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
-                  <span className="ao-h5" style={{ fontSize: 14 }}>{o.name}</span>
-                  <span className="ao-codex" style={{ fontSize: 12, color: 'var(--gold)' }}>
+              <span className={s.asiName}>
+                <span className={s.asiNameRow}>
+                  <span className={cn('ao-h5', s.asiStatName)}>{o.name}</span>
+                  <span className={cn('ao-codex', s.asiScore)}>
                     {t('camp.lvl.asi.score', { from: cur, to: after })}
                   </span>
                   {modBefore !== modAfter && (
-                    <span className="ao-codex" style={{ fontSize: 11, color: 'var(--arcane)' }}>
+                    <span className={cn('ao-codex', s.asiMod)}>
                       {t('camp.lvl.asi.mod', { from: fmtMod(modBefore), to: fmtMod(modAfter) })}
                     </span>
                   )}
                   {atCap && (
-                    <span className="ao-overline" style={{ color: 'var(--ember)' }}>{t('camp.lvl.asi.atCap')}</span>
+                    <span className={cn('ao-overline', s.asiCap)}>{t('camp.lvl.asi.atCap')}</span>
                   )}
                 </span>
               </span>
               <button className="ao-iconbtn" disabled={value <= 0} onClick={() => change(o.statTypeId, -1)}>
                 <Rune kind="minus" size={11} />
               </button>
-              <span style={{ minWidth: 28, textAlign: 'center', fontFamily: 'var(--font-mono)', color: 'var(--gold)' }}>+{value}</span>
+              <span className={s.asiValue}>+{value}</span>
               <button className="ao-iconbtn" disabled={remaining <= 0 || value >= pointsTotal || atCap} onClick={() => change(o.statTypeId, 1)}>
                 <Rune kind="plus" size={11} />
               </button>
@@ -1157,15 +1051,15 @@ function StepConfirm({
 
   return (
     <div>
-      <OrdoPanel frame padding={0} style={{ marginBottom: 16 }}>
+      <OrdoPanel frame padding={0} className={s.mb16}>
         <PanelHeader title={t('camp.lvl.confirm.title')} glyph="diamond" sub={t('camp.lvl.confirm.sub')} />
-        <div style={{ padding: 16 }}>
-          <div className="ao-codex" style={{ fontSize: 13, marginBottom: 8 }}>
-            {t('camp.lvl.confirm.calling')} <strong style={{ color: 'var(--gold)' }}>{option.className}</strong>{' '}
+        <div className={s.confirmBody}>
+          <div className={cn('ao-codex', s.confirmCalling)}>
+            {t('camp.lvl.confirm.calling')} <strong className={s.goldStrong}>{option.className}</strong>{' '}
             {roman(option.currentLevelInClass)} → {roman(option.newLevelInClass)}
           </div>
           {option.hpGain?.average != null && (
-            <div className="ao-codex" style={{ fontSize: 13, marginBottom: 8, color: 'var(--ember)' }}>
+            <div className={cn('ao-codex', s.confirmVitae)}>
               {t('camp.lvl.confirm.vitaeGain', { hp: option.hpGain.average })}
               {option.hpGain.rolledMin != null && option.hpGain.rolledMax != null
                 ? ` · ${t('camp.lvl.vitaeRange', { min: option.hpGain.rolledMin, max: option.hpGain.rolledMax })}`
@@ -1175,46 +1069,36 @@ function StepConfirm({
           {option.derived?.proficiencyBonusAfter != null
             && option.derived.proficiencyBonusAfter !== option.derived.proficiencyBonusBefore
             && option.derived.proficiencyBonusBefore != null && (
-            <div className="ao-codex" style={{ fontSize: 13, marginBottom: 8, color: 'var(--arcane)' }}>
+            <div className={cn('ao-codex', s.confirmProf)}>
               {t('camp.lvl.result.profGain', { from: option.derived.proficiencyBonusBefore, to: option.derived.proficiencyBonusAfter })}
             </div>
           )}
           <OrdoDivider glyph="diamond" />
-          <div className="ao-overline" style={{ marginTop: 10, marginBottom: 8 }}>{t('camp.lvl.confirm.giftsToSeal')}</div>
+          <div className={cn('ao-overline', s.confirmGifts)}>{t('camp.lvl.confirm.giftsToSeal')}</div>
           {chosenLines.length === 0 ? (
-            <div className="ao-italic" style={{ color: 'var(--ink-faint)' }}>{t('camp.lvl.confirm.vitaeAndLevel')}</div>
+            <div className={cn('ao-italic', s.confirmEmpty)}>{t('camp.lvl.confirm.vitaeAndLevel')}</div>
           ) : (
             chosenLines.map((line, idx) => (
-              <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0', borderBottom: '1px solid var(--hairline)' }}>
+              <div key={idx} className={s.confirmLine}>
                 <Rune kind={line.tag === 'auto' ? 'diamond' : 'diamond-fill'} size={12} color={line.tag === 'auto' ? 'var(--ink-quiet)' : 'var(--gold)'} />
-                <span className="ao-codex" style={{ fontSize: 11, color: 'var(--ink-faint)', minWidth: 120 }}>
+                <span className={cn('ao-codex', s.confirmLineType)}>
                   {REWARD_TYPE_LABELS[line.type] || line.type}
                 </span>
-                <span style={{ color: 'var(--ink-bright)' }}>{line.name}</span>
+                <span className={s.confirmLineName}>{line.name}</span>
               </div>
             ))
           )}
         </div>
       </OrdoPanel>
 
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 12,
-          padding: '14px 20px',
-          background: 'var(--abyss)',
-          border: '1px solid var(--rule-strong)',
-          marginBottom: 16,
-        }}
-      >
+      <div className={s.warnBox}>
         <Rune kind="lock" size={14} color="var(--ember)" />
-        <span className="ao-italic" style={{ fontSize: 13 }}>
+        <span className={cn('ao-italic', s.warnText)}>
           {t('camp.lvl.confirm.warning')}
         </span>
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div className={s.navRow}>
         <button className="ao-btn ao-btn--ghost" onClick={onBack} disabled={submitting}>
           <ArrowLeft className="h-3 w-3" /> {t('camp.lvl.confirm.back')}
         </button>
@@ -1233,37 +1117,26 @@ function StepResult({ result, onDone }: { result: LevelUpResultResponse; onDone:
   const t = useT();
   return (
     <div>
-      <div
-        className="ao-panel ao-frame ao-grain"
-        style={{
-          position: 'relative',
-          padding: 28,
-          marginBottom: 16,
-          overflow: 'hidden',
-          textAlign: 'center',
-          background: 'linear-gradient(180deg, #221d1a 0%, #14110f 100%)',
-          boxShadow: '0 0 60px rgba(176, 141, 78, 0.08)',
-        }}
-      >
+      <div className={cn('ao-panel ao-frame ao-grain', s.resultBanner)}>
         <span className="ao-frame-c" />
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}>
+        <div className={s.resultSigilWrap}>
           <Sigil size={64} glyph="flame" color="var(--gold-pale)" />
         </div>
-        <div className="ao-codex ao-flicker" style={{ color: 'var(--gold-pale)' }}>{t('camp.lvl.result.ascentComplete')}</div>
-        <div className="ao-breathe" style={{ marginTop: 10 }}>
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: 72, fontWeight: 700, color: 'var(--gold-pale)', lineHeight: 1, textShadow: '0 0 32px rgba(176, 141, 78, 0.4)' }}>
+        <div className={cn('ao-codex ao-flicker', s.resultComplete)}>{t('camp.lvl.result.ascentComplete')}</div>
+        <div className={cn('ao-breathe', s.resultBreathe)}>
+          <div className={s.resultBigNum}>
             {roman(result.newTotalLevel)}
           </div>
         </div>
-        <div className="ao-h4" style={{ marginTop: 12, fontStyle: 'italic' }}>
+        <div className={cn('ao-h4', s.resultClassLine)}>
           {result.classLeveled} · {roman(result.newClassLevel)}
         </div>
       </div>
 
-      <OrdoPanel frame padding={0} style={{ marginBottom: 16 }}>
+      <OrdoPanel frame padding={0} className={s.mb16}>
         <PanelHeader title={t('camp.lvl.result.sealedGifts')} glyph="check" tone="gold" />
-        <div style={{ padding: 18 }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12, marginBottom: 16 }}>
+        <div className={s.resultBody}>
+          <div className={s.resultGrantsGrid}>
             <GrantCard glyph="helm" label={t('camp.lvl.result.calling')} value={`${result.classLeveled} ${roman(result.newClassLevel)}`} tone="gold" />
             <GrantCard glyph="sigil-2" label={t('camp.lvl.result.totalLevel')} value={roman(result.newTotalLevel)} tone="arcane" />
             {result.hpIncrease !== undefined && (
@@ -1288,17 +1161,17 @@ function StepResult({ result, onDone }: { result: LevelUpResultResponse; onDone:
           </div>
           <OrdoDivider glyph="diamond-fill">{t('camp.lvl.result.acquiredGifts')}</OrdoDivider>
           {result.rewardsAcquired.length === 0 ? (
-            <div className="ao-italic" style={{ color: 'var(--ink-faint)', marginTop: 8 }}>—</div>
+            <div className={cn('ao-italic', s.resultDash)}>—</div>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 8, marginTop: 12 }}>
+            <div className={s.resultAcqGrid}>
               {result.rewardsAcquired.map((r, idx) => (
-                <div key={idx} style={{ padding: '8px 10px', border: '1px solid var(--hairline)', background: 'var(--abyss)', display: 'flex', flexDirection: 'column' }}>
-                  <span className="ao-codex" style={{ fontSize: 10, color: 'var(--ink-faint)' }}>
+                <div key={idx} className={s.resultAcqCard}>
+                  <span className={cn('ao-codex', s.resultAcqType)}>
                     {REWARD_TYPE_LABELS[r.rewardType] || r.rewardType}
                   </span>
-                  <span style={{ color: 'var(--ink-bright)' }}>{r.name}</span>
+                  <span className={s.resultAcqName}>{r.name}</span>
                   {r.description && (
-                    <span className="ao-italic" style={{ fontSize: 11, color: 'var(--ink-quiet)', marginTop: 2, lineHeight: 1.4 }}>{r.description}</span>
+                    <span className={cn('ao-italic', s.resultAcqDesc)}>{r.description}</span>
                   )}
                   <DetailBadges detail={r.detail} />
                 </div>
@@ -1307,7 +1180,7 @@ function StepResult({ result, onDone }: { result: LevelUpResultResponse; onDone:
           )}
         </div>
       </OrdoPanel>
-      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+      <div className={s.navEnd}>
         <button className="ao-btn ao-btn--primary" onClick={onDone}>
           <Heart className="h-3 w-3" /> {t('camp.lvl.result.toCharacter')} <ArrowRight className="h-3 w-3" />
         </button>

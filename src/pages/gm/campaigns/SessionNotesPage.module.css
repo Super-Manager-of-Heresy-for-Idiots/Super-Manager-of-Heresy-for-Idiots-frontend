@@ -1,0 +1,48 @@
+.head { margin-bottom: 32px; }
+.overlineGold { color: var(--gold); }
+.title { margin-top: 4px; }
+.sub { color: var(--ink-faint); font-size: 13px; margin-top: 4px; }
+
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.skelCard { padding: 24px; min-height: 160px; }
+.phW50 { width: 50%; height: 16px; margin-bottom: 10px; }
+.phW80 { width: 80%; height: 14px; margin-bottom: 6px; }
+.phW60 { width: 60%; height: 14px; }
+
+.errorBlock { text-align: center; padding: 48px 0; }
+.errorText { color: var(--ink-faint); margin-bottom: 16px; }
+
+.backBtn { margin-bottom: 16px; }
+.ml4 { margin-left: 4px; }
+.ml6 { margin-left: 6px; }
+
+.privacyBanner {
+  display: flex; align-items: center; gap: 10px; padding: 10px 16px;
+  background: rgba(100, 20, 30, 0.12);
+  border: 1px solid rgba(140, 40, 50, 0.3);
+  border-left: 3px solid rgba(180, 80, 80, 0.6);
+  margin-bottom: 24px;
+}
+.privacyTitle { font-size: 12px; font-family: var(--font-display); color: rgba(220, 120, 120, 0.9); }
+.privacyNote { font-size: 11px; color: var(--ink-quiet); margin-left: 8px; }
+
+.header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px; }
+
+.noteCard.noteCard { border-color: rgba(140, 40, 50, 0.25); }
+.noteBody { padding: 18px; }
+.noteTitle { color: var(--ink-bright); margin-bottom: 6px; }
+.noteMeta { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; }
+.metaLabel { font-size: 8px; color: var(--ink-faint); }
+.metaEdited { font-size: 8px; color: var(--ink-ghost); }
+.notePreview {
+  font-size: 13px; color: var(--ink); line-height: 1.6; margin: 0;
+  display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden;
+}
+.noteFooter {
+  display: flex; gap: 6px; padding: 10px 18px;
+  border-top: 1px solid rgba(140, 40, 50, 0.2);
+  background: rgba(100, 20, 30, 0.04);
+}
+
+.dialogCol { display: flex; flex-direction: column; gap: 16px; }
+.resizeV { resize: vertical; }

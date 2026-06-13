@@ -1,0 +1,63 @@
+/* ── banner ──────────────────────────────────────────────────── */
+.bannerGrid { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr 1fr; }
+.authorCell { padding: 20px 24px; border-right: 1px solid var(--rule); display: flex; align-items: center; gap: 14px; }
+.authorOverline { color: var(--ink-faint); }
+.authorTitle { margin-top: 4px; }
+.authorSub { font-size: 12px; color: var(--ink-quiet); margin-top: 2px; }
+.statCell { padding: 20px 24px; }
+.statCell.divided { border-right: 1px solid var(--rule); }
+.statLabel { color: var(--ink-faint); }
+.statValue { font-family: var(--font-display); font-size: 32px; line-height: 1.1; margin-top: 6px; color: var(--c); }
+
+/* ── top actions ─────────────────────────────────────────────── */
+.topActions { display: flex; align-items: center; justify-content: space-between; margin-top: 18px; margin-bottom: 12px; }
+.searchWrap { display: flex; gap: 8px; align-items: center; }
+.searchRel { position: relative; }
+.searchInput { padding-left: 34px; width: 260px; }
+.searchIcon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--ink-faint); }
+
+/* ── tabs ────────────────────────────────────────────────────── */
+.tabsBar { display: flex; border-bottom: 1px solid var(--rule); margin-bottom: 18px; }
+
+/* ── ledger states ───────────────────────────────────────────── */
+.loadingPanel { height: 320px; }
+.loadingPh { height: 100%; }
+.emptyBox { text-align: center; padding: 60px; }
+.emptyOverline { margin-top: 14px; color: var(--ink-faint); }
+.emptyTitle { margin-top: 10px; color: var(--ink); }
+.emptyBody { font-size: 14px; color: var(--ink-quiet); max-width: 440px; margin: 8px auto 0; }
+.emptyAction { margin-top: 22px; display: flex; justify-content: center; }
+
+/* ── ledger table ────────────────────────────────────────────── */
+.headerRow {
+  display: grid; grid-template-columns: 60px 1fr 240px 200px 200px 60px;
+  padding: 10px 16px; border-bottom: 1px solid var(--rule);
+  background: rgba(0,0,0,0.25); align-items: center;
+}
+.row {
+  display: grid; grid-template-columns: 60px 1fr 240px 200px 200px 60px;
+  padding: 14px 16px; align-items: center; position: relative;
+}
+.row.divided { border-bottom: 1px solid var(--hairline); }
+.row.deleted { background: rgba(179,70,26,0.03); opacity: 0.85; }
+.deletedStripe {
+  position: absolute; inset: 0; pointer-events: none;
+  background-image: repeating-linear-gradient(135deg, transparent, transparent 10px, rgba(179,70,26,0.04) 10px, rgba(179,70,26,0.04) 11px);
+}
+
+.doctrineCell { min-width: 0; }
+.doctrineHead { display: flex; align-items: center; gap: 8px; }
+.doctrineTitle { font-size: 15px; }
+.doctrineTitle.deleted { text-decoration: line-through; text-decoration-color: var(--ember); color: var(--ink-quiet); }
+.redactedBadge { font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; padding: 2px 6px; background: rgba(179,70,26,0.18); color: var(--ember); font-family: var(--font-mono); }
+.doctrineMeta { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+.metaDot { color: var(--ink-faint); font-size: 11px; }
+.tagRow { display: flex; gap: 4px; }
+.tagMore { font-size: 11px; color: var(--ink-faint); }
+
+.dlWrap { margin-top: 6px; }
+.installsPersist { font-size: 11px; color: rgba(179,70,26,0.7); margin-top: 4px; }
+.lastInsc { font-size: 12px; color: var(--ink-quiet); }
+
+.actions { display: flex; gap: 4px; justify-content: flex-end; align-items: center; }
+.moreBtn { width: 28px; height: 28px; }

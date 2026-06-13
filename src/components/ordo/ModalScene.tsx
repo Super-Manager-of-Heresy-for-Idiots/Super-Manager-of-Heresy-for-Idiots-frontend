@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import { Rune, type GlyphKind } from './Rune';
 import {
   Dialog,
@@ -40,78 +40,35 @@ export function ModalScene({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="ao-panel ao-frame"
+        className="ao-panel ao-frame ao-modal"
         aria-describedby={undefined}
-        style={{
-          position: 'fixed',
-          left: '50%',
-          top: '50%',
-          transform: 'translate(-50%, -50%)',
-          maxWidth: width,
-          padding: 0,
-          border: `1px solid ${accentColor}44`,
-          background: 'var(--panel)',
-        }}
+        style={{ maxWidth: width, '--accent': accentColor } as CSSProperties}
       >
         <span className="ao-frame-c" />
         {/* Header */}
-        <div
-          style={{
-            padding: '20px 24px 16px',
-            borderBottom: '1px solid var(--rule)',
-            background: `linear-gradient(180deg, ${accentColor}08, transparent)`,
-          }}
-        >
-          {codexId && (
-            <div className="ao-codex" style={{ fontSize: 10, color: 'var(--ink-faint)', marginBottom: 6 }}>
-              {codexId}
-            </div>
-          )}
-          {overline && (
-            <div
-              className="ao-overline"
-              style={{ color: accentColor, marginBottom: 6 }}
-            >
-              {overline}
-            </div>
-          )}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div className="ao-modal-head">
+          {codexId && <div className="ao-codex ao-modal-codex">{codexId}</div>}
+          {overline && <div className="ao-overline ao-modal-overline">{overline}</div>}
+          <div className="ao-modal-titlerow">
             {rune && (
-              <div
-                style={{
-                  width: 36,
-                  height: 36,
-                  border: `1px solid ${accentColor}`,
-                  background: 'var(--abyss)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0,
-                }}
-              >
+              <div className="ao-modal-rune">
                 <Rune kind={rune} size={18} color={accentColor} />
               </div>
             )}
             <div>
               <DialogTitle asChild>
-                <div className="ao-h4" style={{ fontSize: 22 }}>{title}</div>
+                <div className="ao-h4 ao-modal-title">{title}</div>
               </DialogTitle>
-              {sub && <div className="ao-italic" style={{ fontSize: 13, color: 'var(--ink-quiet)', marginTop: 2 }}>{sub}</div>}
+              {sub && <div className="ao-italic ao-modal-sub">{sub}</div>}
             </div>
           </div>
         </div>
 
         {/* Body */}
-        <div style={{ padding: '18px 24px' }}>
-          {children}
-        </div>
+        <div className="ao-modal-body">{children}</div>
 
         {/* Footer */}
-        {footer && (
-          <div style={{ padding: '0 24px 20px' }}>
-            {footer}
-          </div>
-        )}
+        {footer && <div className="ao-modal-foot">{footer}</div>}
       </DialogContent>
     </Dialog>
   );

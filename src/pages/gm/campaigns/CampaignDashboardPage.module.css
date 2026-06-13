@@ -1,0 +1,56 @@
+.backLink { margin-bottom: 12px; }
+
+.skelHeader { padding: 24px; min-height: 120px; margin-bottom: 20px; }
+.phW40H24 { width: 40%; height: 24px; margin-bottom: 12px; }
+.phW60H14 { width: 60%; height: 14px; }
+
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.skelCell { padding: 24px; min-height: 80px; }
+.phW50H14 { width: 50%; height: 14px; margin-bottom: 8px; }
+.phW30H14 { width: 30%; height: 14px; }
+
+.errorBlock { text-align: center; padding: 48px 0; }
+.errorText { color: var(--ink-faint); margin-bottom: 16px; }
+
+.header {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  flex-wrap: wrap; gap: 16px; margin-bottom: 28px;
+}
+.overlineGold { color: var(--gold); }
+.titleRow { display: flex; align-items: center; gap: 12px; margin-top: 4px; }
+.desc { color: var(--ink-faint); font-size: 13px; margin-top: 6px; }
+.headerActions { display: flex; align-items: center; gap: 10px; }
+.ml6 { margin-left: 6px; }
+.ml4 { margin-left: 4px; }
+
+.statsRow { display: flex; justify-content: flex-start; gap: 36px; margin-bottom: 24px; }
+.stat { text-align: center; }
+.valGold { color: var(--gold); }
+.valArcane { color: var(--arcane); }
+.valGreen { color: #7a9866; }
+.valRed { color: #b06a6a; }
+.valFaint { color: var(--ink-faint); }
+
+.drillGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 24px; margin-bottom: 28px; }
+
+.rosterPanel { margin-top: 24px; }
+
+.rosterSkel { padding: 20px; }
+.skelRow { display: flex; gap: 12px; margin-bottom: 14px; }
+.phW30H14b { width: 30%; height: 14px; }
+.phW20H14 { width: 20%; height: 14px; }
+.phW50H8 { width: 50%; height: 8px; }
+
+.emptyRoster { padding: 24px 20px; text-align: center; }
+.emptyText { color: var(--ink-faint); font-size: 13px; }
+.createBtn { margin-top: 14px; }
+
+.charRow {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 16px; border-bottom: 1px solid var(--hairline);
+}
+.charMain { flex: 1; min-width: 0; }
+.charNameRow { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+.charName { font-size: 13px; }
+.charMeta { font-size: 10px; color: var(--ink-faint); }
+.charHp { font-size: 11px; color: var(--ink-quiet); flex-shrink: 0; }

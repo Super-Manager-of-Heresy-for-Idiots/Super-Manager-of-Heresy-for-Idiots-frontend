@@ -14,6 +14,8 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useCampaignInviteCode, useRegenerateCampaignInvite } from '@/hooks/useCampaigns';
 import { useT } from '@/i18n/I18nContext';
+import { cn } from '@/lib/utils';
+import s from './CampaignInvitePage.module.css';
 
 /* ── page ────────────────────────────────────────────────────── */
 
@@ -51,14 +53,14 @@ export default function CampaignInvitePage() {
   if (isLoading) {
     return (
       <div>
-        <div style={{ marginBottom: 32 }}>
-          <p className="ao-overline" style={{ color: 'var(--gold)' }}>{t('camp.invite.overline')}</p>
-          <h3 className="ao-h3" style={{ marginTop: 4 }}>{t('camp.invite.title')}</h3>
+        <div className={s.head}>
+          <p className={cn('ao-overline', s.overlineGold)}>{t('camp.invite.overline')}</p>
+          <h3 className={cn('ao-h3', s.title)}>{t('camp.invite.title')}</h3>
         </div>
-        <div className="ao-panel ao-frame ao-breathe" style={{ padding: 40, minHeight: 200, textAlign: 'center' }}>
+        <div className={cn('ao-panel ao-frame ao-breathe', s.skelPanel)}>
           <span className="ao-frame-c" />
-          <div className="ao-ph" style={{ width: '50%', height: 40, margin: '0 auto 16px' }} />
-          <div className="ao-ph" style={{ width: '30%', height: 14, margin: '0 auto' }} />
+          <div className={cn('ao-ph', s.phCode)} />
+          <div className={cn('ao-ph', s.phLabel)} />
         </div>
       </div>
     );
@@ -68,8 +70,8 @@ export default function CampaignInvitePage() {
 
   if (error) {
     return (
-      <div style={{ textAlign: 'center', padding: '48px 0' }}>
-        <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginBottom: 16 }}>
+      <div className={s.errorBlock}>
+        <p className={cn('ao-italic', s.errorText)}>
           {t('camp.invite.loadError')}
         </p>
         <button className="ao-btn" onClick={() => refetch()}>{t('camp.retry')}</button>
@@ -83,19 +85,18 @@ export default function CampaignInvitePage() {
     <div>
       {/* Back button */}
       <button
-        className="ao-btn ao-btn--ghost ao-btn--sm"
+        className={cn('ao-btn ao-btn--ghost ao-btn--sm', s.backBtn)}
         onClick={() => navigate(`/campaigns/${campaignId}`)}
-        style={{ marginBottom: 16 }}
       >
         <Rune kind="chev-l" size={12} color="currentColor" />
-        <span style={{ marginLeft: 4 }}>{t('camp.backToDashboard')}</span>
+        <span className={s.ml4}>{t('camp.backToDashboard')}</span>
       </button>
 
       {/* Header */}
-      <div style={{ marginBottom: 28 }}>
-        <p className="ao-overline" style={{ color: 'var(--gold)' }}>{t('camp.invite.overline')}</p>
-        <h3 className="ao-h3" style={{ marginTop: 4 }}>{t('camp.invite.title')}</h3>
-        <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 13, marginTop: 4 }}>
+      <div className={s.header}>
+        <p className={cn('ao-overline', s.overlineGold)}>{t('camp.invite.overline')}</p>
+        <h3 className={cn('ao-h3', s.title)}>{t('camp.invite.title')}</h3>
+        <p className={cn('ao-italic', s.sub)}>
           {t('camp.invite.sub')}
         </p>
       </div>
@@ -103,28 +104,10 @@ export default function CampaignInvitePage() {
       <OrdoPanel frame padding={0}>
         <PanelHeader title={t('camp.invite.sigilTitle')} glyph="cross-pat" tone="arcane" sub={t('camp.invite.sigilSub')} />
 
-        <div style={{ padding: '32px 24px', textAlign: 'center' }}>
+        <div className={s.body}>
           {/* Code display box */}
-          <div
-            style={{
-              display: 'inline-block',
-              padding: '20px 40px',
-              background: 'var(--abyss)',
-              border: '2px solid var(--brass)',
-              marginBottom: 20,
-              position: 'relative',
-            }}
-          >
-            <div
-              style={{
-                fontFamily: 'var(--font-mono)',
-                fontSize: 32,
-                letterSpacing: '0.12em',
-                color: 'var(--gold-pale)',
-                fontWeight: 600,
-                userSelect: 'all',
-              }}
-            >
+          <div className={s.codeBox}>
+            <div className={s.codeText}>
               {String(inviteCode)}
             </div>
           </div>
@@ -132,13 +115,13 @@ export default function CampaignInvitePage() {
           <OrdoDivider glyph="diamond" />
 
           {/* Actions */}
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 12, marginTop: 20 }}>
+          <div className={s.actions}>
             <button
               className="ao-btn ao-btn--primary"
               onClick={handleCopy}
             >
               <Rune kind={copied ? 'check' : 'scroll'} size={14} color="currentColor" />
-              <span style={{ marginLeft: 6 }}>{copied ? t('camp.invite.copied') : t('camp.invite.copy')}</span>
+              <span className={s.ml6}>{copied ? t('camp.invite.copied') : t('camp.invite.copy')}</span>
             </button>
 
             <button
@@ -146,30 +129,18 @@ export default function CampaignInvitePage() {
               onClick={() => setRegenOpen(true)}
             >
               <Rune kind="cross-pat" size={14} color="var(--arcane)" />
-              <span style={{ marginLeft: 6 }}>{t('camp.invite.regenerate')}</span>
+              <span className={s.ml6}>{t('camp.invite.regenerate')}</span>
             </button>
           </div>
 
           {/* Info box */}
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'flex-start',
-              gap: 10,
-              padding: 12,
-              background: 'rgba(176,141,78,0.06)',
-              border: '1px solid rgba(176,141,78,0.20)',
-              borderLeft: '3px solid var(--gold)',
-              marginTop: 24,
-              textAlign: 'left',
-            }}
-          >
+          <div className={s.infoBox}>
             <Rune kind="eye" size={14} color="var(--gold)" />
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 12, color: 'var(--gold-pale)', fontFamily: 'var(--font-display)' }}>
+            <div className={s.infoMain}>
+              <div className={s.infoTitle}>
                 {t('camp.invite.advisory')}
               </div>
-              <div className="ao-italic" style={{ fontSize: 11, marginTop: 3, color: 'var(--ink-quiet)' }}>
+              <div className={cn('ao-italic', s.infoBody)}>
                 {t('camp.invite.advisoryBody')}
               </div>
             </div>

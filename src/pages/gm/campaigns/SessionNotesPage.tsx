@@ -26,7 +26,9 @@ import {
   useDeleteSessionNote,
 } from '@/hooks/useSessionNotes';
 import { useT } from '@/i18n/I18nContext';
+import { cn } from '@/lib/utils';
 import type { GmSessionNoteResponse } from '@/types';
+import s from './SessionNotesPage.module.css';
 
 /* ── page ────────────────────────────────────────────────────── */
 
@@ -100,17 +102,17 @@ export default function SessionNotesPage() {
   if (isLoading) {
     return (
       <div>
-        <div style={{ marginBottom: 32 }}>
-          <p className="ao-overline" style={{ color: 'var(--gold)' }}>{t('camp2.session.overline')}</p>
-          <h3 className="ao-h3" style={{ marginTop: 4 }}>{t('camp2.session.title')}</h3>
+        <div className={s.head}>
+          <p className={cn('ao-overline', s.overlineGold)}>{t('camp2.session.overline')}</p>
+          <h3 className={cn('ao-h3', s.title)}>{t('camp2.session.title')}</h3>
         </div>
-        <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+        <div className={cn('ao-rgrid', s.grid2)}>
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="ao-panel ao-frame ao-breathe" style={{ padding: 24, minHeight: 160 }}>
+            <div key={i} className={cn('ao-panel ao-frame ao-breathe', s.skelCard)}>
               <span className="ao-frame-c" />
-              <div className="ao-ph" style={{ width: '50%', height: 16, marginBottom: 10 }} />
-              <div className="ao-ph" style={{ width: '80%', height: 14, marginBottom: 6 }} />
-              <div className="ao-ph" style={{ width: '60%', height: 14 }} />
+              <div className={cn('ao-ph', s.phW50)} />
+              <div className={cn('ao-ph', s.phW80)} />
+              <div className={cn('ao-ph', s.phW60)} />
             </div>
           ))}
         </div>
@@ -122,8 +124,8 @@ export default function SessionNotesPage() {
 
   if (error) {
     return (
-      <div style={{ textAlign: 'center', padding: '48px 0' }}>
-        <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginBottom: 16 }}>
+      <div className={s.errorBlock}>
+        <p className={cn('ao-italic', s.errorText)}>
           {t('camp2.session.loadError')}
         </p>
         <button className="ao-btn" onClick={() => refetch()}>{t('common.retry')}</button>
@@ -139,44 +141,32 @@ export default function SessionNotesPage() {
     <div>
       {/* Back button */}
       <button
-        className="ao-btn ao-btn--ghost ao-btn--sm"
+        className={cn('ao-btn ao-btn--ghost ao-btn--sm', s.backBtn)}
         onClick={() => navigate(`/campaigns/${campaignId}`)}
-        style={{ marginBottom: 16 }}
       >
         <Rune kind="chev-l" size={12} color="currentColor" />
-        <span style={{ marginLeft: 4 }}>{t('camp2.session.backToDashboard')}</span>
+        <span className={s.ml4}>{t('camp2.session.backToDashboard')}</span>
       </button>
 
       {/* Privacy banner */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 10,
-          padding: '10px 16px',
-          background: 'rgba(100,20,30,0.12)',
-          border: '1px solid rgba(140,40,50,0.3)',
-          borderLeft: '3px solid rgba(180,80,80,0.6)',
-          marginBottom: 24,
-        }}
-      >
+      <div className={s.privacyBanner}>
         <Rune kind="lock" size={16} color="rgba(180,80,80,0.6)" />
         <div>
-          <span style={{ fontSize: 12, fontFamily: 'var(--font-display)', color: 'rgba(220,120,120,0.9)' }}>
+          <span className={s.privacyTitle}>
             {t('camp2.session.gmEyesOnly')}
           </span>
-          <span className="ao-italic" style={{ fontSize: 11, color: 'var(--ink-quiet)', marginLeft: 8 }}>
+          <span className={cn('ao-italic', s.privacyNote)}>
             {t('camp2.session.privacyNote')}
           </span>
         </div>
       </div>
 
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 28 }}>
+      <div className={s.header}>
         <div>
-          <p className="ao-overline" style={{ color: 'var(--gold)' }}>{t('camp2.session.overline')}</p>
-          <h3 className="ao-h3" style={{ marginTop: 4 }}>{t('camp2.session.title')}</h3>
-          <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 13, marginTop: 4 }}>
+          <p className={cn('ao-overline', s.overlineGold)}>{t('camp2.session.overline')}</p>
+          <h3 className={cn('ao-h3', s.title)}>{t('camp2.session.title')}</h3>
+          <p className={cn('ao-italic', s.sub)}>
             {t('camp2.session.subtitle')}
           </p>
         </div>
@@ -185,7 +175,7 @@ export default function SessionNotesPage() {
           onClick={handleOpenCreate}
         >
           <Rune kind="plus" size={14} color="currentColor" />
-          <span style={{ marginLeft: 6 }}>{t('camp2.session.newNote')}</span>
+          <span className={s.ml6}>{t('camp2.session.newNote')}</span>
         </button>
       </div>
 
@@ -198,67 +188,41 @@ export default function SessionNotesPage() {
           action={
             <button className="ao-btn ao-btn--primary" onClick={handleOpenCreate}>
               <Rune kind="plus" size={14} color="currentColor" />
-              <span style={{ marginLeft: 6 }}>{t('camp2.session.newNote')}</span>
+              <span className={s.ml6}>{t('camp2.session.newNote')}</span>
             </button>
           }
         />
       ) : (
-        <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+        <div className={cn('ao-rgrid', s.grid2)}>
           {notesList.map((note: GmSessionNoteResponse) => (
-            <OrdoPanel
-              key={note.id}
-              frame
-              padding={0}
-              style={{
-                borderColor: 'rgba(140,40,50,0.25)',
-              }}
-            >
-              <div style={{ padding: 18 }}>
+            <OrdoPanel key={note.id} frame padding={0} className={s.noteCard}>
+              <div className={s.noteBody}>
                 {/* Title */}
-                <h5 className="ao-h5" style={{ color: 'var(--ink-bright)', marginBottom: 6 }}>
+                <h5 className={cn('ao-h5', s.noteTitle)}>
                   {note.title}
                 </h5>
 
                 {/* Author + date */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
+                <div className={s.noteMeta}>
                   <Rune kind="lock" size={9} color="rgba(180,80,80,0.5)" />
-                  <span className="ao-overline" style={{ fontSize: 8, color: 'var(--ink-faint)' }}>
+                  <span className={cn('ao-overline', s.metaLabel)}>
                     {note.authorUsername} &mdash; {new Date(note.createdAt).toLocaleDateString()}
                   </span>
                   {note.updatedAt !== note.createdAt && (
-                    <span className="ao-overline" style={{ fontSize: 8, color: 'var(--ink-ghost)' }}>
+                    <span className={cn('ao-overline', s.metaEdited)}>
                       {t('camp2.session.edited')}
                     </span>
                   )}
                 </div>
 
                 {/* Body preview */}
-                <p
-                  style={{
-                    fontSize: 13,
-                    color: 'var(--ink)',
-                    lineHeight: 1.6,
-                    margin: 0,
-                    display: '-webkit-box',
-                    WebkitLineClamp: 5,
-                    WebkitBoxOrient: 'vertical' as const,
-                    overflow: 'hidden',
-                  }}
-                >
+                <p className={s.notePreview}>
                   {note.content}
                 </p>
               </div>
 
               {/* Actions footer */}
-              <div
-                style={{
-                  display: 'flex',
-                  gap: 6,
-                  padding: '10px 18px',
-                  borderTop: '1px solid rgba(140,40,50,0.2)',
-                  background: 'rgba(100,20,30,0.04)',
-                }}
-              >
+              <div className={s.noteFooter}>
                 <button
                   className="ao-btn ao-btn--sm"
                   onClick={() => handleOpenEdit(note)}
@@ -283,7 +247,7 @@ export default function SessionNotesPage() {
           <DialogHeader>
             <DialogTitle>{editing ? t('camp2.session.dialog.editTitle') : t('camp2.session.dialog.createTitle')}</DialogTitle>
           </DialogHeader>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div className={s.dialogCol}>
             <OrdoField label={t('camp2.session.field.title')} required>
               <input
                 className="ao-input"
@@ -295,12 +259,11 @@ export default function SessionNotesPage() {
 
             <OrdoField label={t('camp2.session.field.content')} required>
               <textarea
-                className="ao-input"
+                className={cn('ao-input', s.resizeV)}
                 value={formContent}
                 onChange={(e) => setFormContent(e.target.value)}
                 placeholder={t('camp2.session.field.contentPlaceholder')}
                 rows={8}
-                style={{ resize: 'vertical' }}
               />
             </OrdoField>
           </div>

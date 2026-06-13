@@ -1,0 +1,44 @@
+.errorBox { text-align: center; padding: 48px 0; }
+.errorText { color: var(--ink-faint); margin-bottom: 16px; }
+
+.header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 28px; }
+.overline { color: var(--gold); margin-bottom: 2px; }
+.title { margin: 0; }
+.stats { display: flex; gap: 32px; }
+.stat { text-align: center; }
+.statValue { font-family: var(--font-serif, Georgia, serif); font-size: 28px; line-height: 1; color: var(--ink-bright); }
+.statLabel { font-size: 9px; margin-top: 4px; color: var(--c); }
+
+.searchWrap { position: relative; display: flex; align-items: center; }
+.searchInput { padding-left: 8px; width: 220px; font-size: 12px; background: transparent; border: none; border-bottom: 1px solid var(--rule); border-radius: 0; }
+
+.tabs { display: flex; gap: 4px; padding: 10px 16px; border-bottom: 1px solid var(--rule); }
+.tabCount { margin-left: 5px; opacity: 0.5; font-size: 0.85em; }
+
+.skelCol { display: flex; flex-direction: column; gap: 8px; padding: 16px; }
+.skelRow { width: 100%; height: 48px; }
+
+.table { width: 100%; }
+.th { text-align: left; padding: 12px 16px; }
+.thActions { width: 40px; padding: 12px 8px; }
+.td { padding: 10px 16px; }
+.userCell { display: flex; align-items: center; gap: 10px; }
+.avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--abyss); border: 1px solid var(--rule); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.username { font-family: var(--font-mono); color: var(--ink-bright); font-size: 13px; }
+.email { color: var(--ink-quiet); font-size: 13px; }
+.date { color: var(--ink-faint); font-size: 12px; }
+.actionsTd { padding: 10px 8px; text-align: center; }
+.dotsBtn { padding: 4px; line-height: 1; min-width: 0; }
+.emptyCell { padding: 32px 16px; text-align: center; }
+.emptyText { color: var(--ink-faint); }
+
+.footer { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; border-top: 1px solid var(--rule); font-size: 11px; color: var(--ink-faint); font-family: var(--font-display); letter-spacing: 0.06em; }
+.footerRight { opacity: 0.6; }
+
+/* role badge — accent via --c */
+.roleBadge {
+  display: inline-flex; align-items: center; gap: 7px; padding: 4px 10px 4px 7px;
+  background: rgba(0, 0, 0, 0.45); border: 1px solid color-mix(in srgb, var(--c) 40%, transparent);
+  border-left: 2px solid var(--c); font-family: var(--font-display); font-size: 10px;
+  letter-spacing: 0.18em; color: var(--c); text-transform: uppercase;
+}

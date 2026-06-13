@@ -1,0 +1,68 @@
+.headerRight { display: flex; align-items: center; gap: 8px; }
+
+.body { padding: 16px; }
+
+.display {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+.current {
+  font-size: 48px;
+  font-family: var(--font-display);
+  color: var(--ink-bright);
+  line-height: 1;
+}
+.display.down .current { color: var(--ember); }
+.slash { font-size: 18px; color: var(--ink-faint); font-family: var(--font-display); }
+.max {
+  font-size: 24px;
+  font-family: var(--font-display);
+  color: var(--ink-quiet);
+  line-height: 1;
+}
+
+.barWrap { margin-bottom: 16px; }
+.pct {
+  text-align: center;
+  font-size: 11px;
+  color: var(--ink-faint);
+  margin-top: 4px;
+  font-family: var(--font-mono, monospace);
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+}
+.hpBtn { flex: 1; }
+
+.amount {
+  width: 56px;
+  text-align: center;
+  padding: 8px 4px;
+  background: var(--abyss);
+  border: 1px solid var(--rule);
+  color: var(--ink-bright);
+  font-size: 18px;
+  font-family: var(--font-mono, monospace);
+}
+
+.advanced {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+  background: none;
+  border: none;
+  color: var(--ink-faint);
+  font-size: 11px;
+  font-family: var(--font-display);
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

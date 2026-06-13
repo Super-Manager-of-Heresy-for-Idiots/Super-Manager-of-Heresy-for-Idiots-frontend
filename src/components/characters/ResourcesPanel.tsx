@@ -1,6 +1,8 @@
+import type { CSSProperties } from 'react';
 import { OrdoPanel, PanelHeader, Rune, OrdoDivider } from '@/components/ordo';
 import { useT } from '@/i18n/I18nContext';
 import type { ResourceEntry } from '@/types';
+import s from './ResourcesPanel.module.css';
 
 interface ResourcesPanelProps {
   resources: ResourceEntry[];
@@ -27,19 +29,9 @@ export function ResourcesPanel({
       <PanelHeader title={t('cmp.resources.title')} glyph="hex" tone="arcane" />
 
       {resources.length === 0 ? (
-        <div
-          style={{
-            padding: '24px 16px',
-            textAlign: 'center',
-            color: 'var(--ink-faint)',
-            fontSize: 12,
-            fontStyle: 'italic',
-          }}
-        >
-          {t('cmp.resources.empty')}
-        </div>
+        <div className={s.empty}>{t('cmp.resources.empty')}</div>
       ) : (
-        <div style={{ padding: 16 }}>
+        <div className={s.list}>
           {resources.map((res, idx) => {
             const tone = res.color || DEFAULT_TONE;
             const hasMax = res.maxValue > 0;
@@ -49,36 +41,19 @@ export function ResourcesPanel({
 
             return (
               <div key={res.id}>
-                <div style={{ padding: '11px 0' }}>
+                <div className={s.item} style={{ '--tone': tone } as CSSProperties}>
                   {/* Name + counter + controls */}
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 10,
-                      marginBottom: 8,
-                    }}
-                  >
+                  <div className={s.head}>
                     <Rune kind="sigil-2" size={11} color={tone} />
-                    <span
-                      style={{
-                        flex: 1,
-                        fontSize: 13.5,
-                        fontFamily: 'var(--font-display)',
-                        color: 'var(--ink-bright)',
-                        letterSpacing: '0.04em',
-                      }}
-                    >
-                      {res.name}
-                    </span>
+                    <span className={s.name}>{res.name}</span>
 
-                    <span className="ao-num" style={{ fontSize: 14, color: tone }}>
+                    <span className={`ao-num ${s.count}`}>
                       {res.currentValue}
-                      <span style={{ color: 'var(--ink-faint)' }}> / {res.maxValue}</span>
+                      <span className={s.countMax}> / {res.maxValue}</span>
                     </span>
 
                     {editable && onModify && (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginLeft: 4 }}>
+                      <div className={s.controls}>
                         <StepButton
                           kind="minus"
                           label={t('cmp.resources.spend', { name: res.name })}
@@ -128,17 +103,8 @@ function StepButton({ kind, label, disabled, onClick }: StepButtonProps) {
       disabled={disabled}
       aria-label={label}
       title={label}
-      style={{
-        width: 26,
-        height: 26,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: 'var(--abyss)',
-        border: '1px solid var(--rule)',
-        cursor: disabled ? 'default' : 'pointer',
-        opacity: disabled ? 0.35 : 1,
-      }}
+      className="ao-stepbtn"
+      style={{ '--step': '26px' } as CSSProperties}
     >
       <Rune kind={kind} size={9} color="var(--ink-quiet)" />
     </button>

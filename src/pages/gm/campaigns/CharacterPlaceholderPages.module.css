@@ -1,0 +1,9 @@
+.backLink { margin-bottom: 12px; }
+.body { padding: 24px; }
+.overlineGold { color: var(--gold); margin-bottom: 8px; }
+.todoTitle { margin-bottom: 12px; }
+.detailGrid { display: grid; gap: 10px; max-width: 760px; }
+.detailRow {
+  display: flex; gap: 10px; align-items: flex-start;
+  color: var(--ink-quiet); font-size: 13px; line-height: 1.45;
+}

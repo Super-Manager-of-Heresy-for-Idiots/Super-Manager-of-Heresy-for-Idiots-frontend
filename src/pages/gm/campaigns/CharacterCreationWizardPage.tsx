@@ -7,6 +7,8 @@ import { useCreateFullCharacter } from '@/hooks/useCreateFullCharacter';
 import { useReferenceCurrencies } from '@/hooks/useTemplates';
 import { CharacterCreationWizard } from '@/features/character-wizard/CharacterCreationWizard';
 import type { CreateFullCharacterRequest } from '@/api/characters-full.api';
+import { cn } from '@/lib/utils';
+import s from './CharacterCreationWizardPage.module.css';
 
 export default function CharacterCreationWizardPage() {
   const t = useT();
@@ -23,18 +25,18 @@ export default function CharacterCreationWizardPage() {
 
   if (isLoading || contentLoading || referenceLoading) {
     return (
-      <div className="ao-panel ao-frame ao-breathe" style={{ padding: 24, minHeight: 160 }}>
+      <div className={cn('ao-panel ao-frame ao-breathe', s.loadingPanel)}>
         <span className="ao-frame-c" />
-        <div className="ao-ph" style={{ width: '40%', height: 24, marginBottom: 12 }} />
-        <div className="ao-ph" style={{ width: '60%', height: 14 }} />
+        <div className={cn('ao-ph', s.phTitle)} />
+        <div className={cn('ao-ph', s.phLine)} />
       </div>
     );
   }
 
   if (error || !campaign) {
     return (
-      <div style={{ textAlign: 'center', padding: '48px 0' }}>
-        <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginBottom: 16 }}>
+      <div className={s.stateBox}>
+        <p className={cn('ao-italic', s.stateText)}>
           {t('camp.create.loadError')}
         </p>
         <button className="ao-btn" onClick={backToDashboard}>{t('camp.create.return')}</button>
@@ -46,8 +48,8 @@ export default function CharacterCreationWizardPage() {
   const isPlayer = user?.role === 'PLAYER';
   if (!isPlayer || campaign.status !== 'ACTIVE') {
     return (
-      <div style={{ textAlign: 'center', padding: '48px 0' }}>
-        <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginBottom: 16 }}>
+      <div className={s.stateBox}>
+        <p className={cn('ao-italic', s.stateText)}>
           {t('camp.create.notAvailable')}
         </p>
         <button className="ao-btn" onClick={backToDashboard}>{t('camp.create.returnToCampaign')}</button>

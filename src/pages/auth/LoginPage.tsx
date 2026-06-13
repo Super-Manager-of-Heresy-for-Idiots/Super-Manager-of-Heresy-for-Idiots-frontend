@@ -9,6 +9,8 @@ import { getRoleRedirectPath } from '@/lib/utils';
 import { Rune, Sigil, OrdoDivider, OrdoPanel, OrdoField } from '@/components/ordo';
 import { useT } from '@/i18n/I18nContext';
 import { LanguageSwitcher } from '@/components/layout/LanguageSwitcher';
+import { cn } from '@/lib/utils';
+import s from './LoginPage.module.css';
 
 const loginSchema = z.object({
   username: z.string().min(1, 'auth.login.errUsername'),
@@ -41,50 +43,39 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="auth-split" style={{ background: 'var(--void)' }}>
+    <div className="auth-split">
       {/* Language switcher — fixed top-right, visible on desktop & mobile */}
       <div className="auth-lang">
         <LanguageSwitcher />
       </div>
 
       {/* ── LEFT — atmospheric panel ──────────────────── */}
-      <div
-        className="auth-hero"
-        style={{
-          position: 'relative',
-          overflow: 'hidden',
-          borderRight: '1px solid var(--rule)',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-between',
-          padding: '56px 64px',
-        }}
-      >
+      <div className="auth-hero">
         {/* Radial glow */}
-        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(60% 50% at 50% 35%, rgba(176, 141, 78, 0.10), transparent 60%)' }} />
+        <div className={s.heroGlow} />
         {/* Horizontal line pattern */}
-        <div style={{ position: 'absolute', inset: 0, background: 'repeating-linear-gradient(0deg, transparent 0 6px, rgba(176,141,78,0.025) 6px 7px)' }} />
+        <div className={s.heroLines} />
 
         {/* Top — branding */}
-        <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 14 }}>
+        <div className={cn('ao-row ao-gap-14', s.rel)}>
           <Sigil size={48} glyph="sigil-3" />
           <div>
-            <div className="ao-engraved" style={{ fontSize: 12, color: 'var(--gold-pale)' }}>{t('app.name')}</div>
+            <div className={cn('ao-engraved', s.brandName)}>{t('app.name')}</div>
             <div className="ao-codex">{t('auth.brandSub')}</div>
           </div>
         </div>
 
         {/* Middle — hero text */}
-        <div style={{ position: 'relative' }}>
-          <div className="ao-codex" style={{ marginBottom: 16, color: 'var(--ink-faint)' }}>{t('auth.login.sacramentum')}</div>
-          <div className="ao-h2" style={{ fontSize: 56, lineHeight: 1.05, maxWidth: 520 }}>{t('auth.login.heroTitle')}</div>
-          <p className="ao-italic" style={{ fontSize: 20, marginTop: 18, maxWidth: 480, color: 'var(--ink-quiet)' }}>
+        <div className={s.rel}>
+          <div className={cn('ao-codex', s.heroEyebrow)}>{t('auth.login.sacramentum')}</div>
+          <div className={cn('ao-h2', s.heroTitle)}>{t('auth.login.heroTitle')}</div>
+          <p className={cn('ao-italic', s.heroText)}>
             {t('auth.login.heroText')}
           </p>
 
           <OrdoDivider glyph="diamond-fill">{t('auth.login.sealOfEntry')}</OrdoDivider>
 
-          <div style={{ display: 'flex', gap: 28, marginTop: 28 }}>
+          <div className={s.statRow}>
             {[
               { label: t('auth.login.statChapters'), value: '148' },
               { label: t('auth.login.statSouls'), value: '3,402' },
@@ -92,37 +83,28 @@ export default function LoginPage() {
             ].map((stat) => (
               <div key={stat.label}>
                 <div className="ao-overline">{stat.label}</div>
-                <div className="ao-h4 ao-num" style={{ fontFamily: 'var(--font-mono)' }}>{stat.value}</div>
+                <div className={cn('ao-h4 ao-num', s.statNum)}>{stat.value}</div>
               </div>
             ))}
           </div>
         </div>
 
         {/* Bottom — version */}
-        <div style={{ position: 'relative', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', color: 'var(--ink-faint)' }}>
+        <div className={s.versionRow}>
           <div className="ao-codex">{t('auth.cohort')}</div>
           <div className="ao-codex">{t('auth.version')}</div>
         </div>
       </div>
 
       {/* ── RIGHT — sign-in panel ─────────────────────── */}
-      <div
-        className="auth-form-side"
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: 56,
-          background: 'linear-gradient(180deg, var(--stone), var(--abyss))',
-        }}
-      >
-        <div style={{ width: '100%', maxWidth: 400 }}>
-          <OrdoPanel frame padding={36} style={{ position: 'relative' }}>
+      <div className="auth-form-side">
+        <div className={s.formWrap}>
+          <OrdoPanel frame padding={36} className={s.rel}>
             {/* Top rune */}
-            <div style={{ textAlign: 'center', marginBottom: 28 }}>
+            <div className={s.sealHead}>
               <Rune kind="diamond" size={18} color="var(--gold)" />
-              <div className="ao-engraved ao-flicker" style={{ fontSize: 16, marginTop: 14 }}>{t('auth.login.presentSeal')}</div>
-              <div className="ao-italic" style={{ fontSize: 14, marginTop: 6 }}>{t('auth.login.awaits')}</div>
+              <div className={cn('ao-engraved ao-flicker', s.sealTitle)}>{t('auth.login.presentSeal')}</div>
+              <div className={cn('ao-italic', s.sealSub)}>{t('auth.login.awaits')}</div>
             </div>
 
             <OrdoDivider glyph="diamond-fill" />
@@ -130,7 +112,7 @@ export default function LoginPage() {
             {/* Form */}
             <form
               onSubmit={handleSubmit(onSubmit)}
-              style={{ display: 'flex', flexDirection: 'column', gap: 18, marginTop: 22 }}
+              className={s.form}
             >
               <div>
                 <label className="ao-label">{t('auth.login.sigilAddress')}</label>
@@ -141,7 +123,7 @@ export default function LoginPage() {
                   autoComplete="username"
                 />
                 {errors.username && (
-                  <span style={{ fontSize: 12, color: 'var(--ember)', display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
+                  <span className={s.errLine}>
                     <Rune kind="flame" size={11} color="var(--ember)" />
                     {t(errors.username.message ?? '')}
                   </span>
@@ -149,37 +131,30 @@ export default function LoginPage() {
               </div>
 
               <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                <div className="ao-row-baseline ao-between">
                   <label className="ao-label">{t('auth.login.cipherWord')}</label>
-                  <a className="ao-codex" style={{ cursor: 'pointer', color: 'var(--gold-pale)' }}>{t('auth.login.recover')}</a>
+                  <a className={cn('ao-codex', s.recoverLink)}>{t('auth.login.recover')}</a>
                 </div>
-                <div style={{ position: 'relative' }}>
+                <div className={s.rel}>
                   <input
-                    className="ao-input"
+                    className={cn('ao-input', s.pwInput)}
                     type={showPassword ? 'text' : 'password'}
                     {...register('password')}
                     placeholder="••••••••••••"
                     autoComplete="current-password"
-                    style={{ paddingRight: 40 }}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword((v) => !v)}
                     aria-label={showPassword ? t('auth.hidePassword') : t('auth.showPassword')}
                     title={showPassword ? t('auth.hidePassword') : t('auth.showPassword')}
-                    style={{
-                      position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)',
-                      display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                      width: 28, height: 28, padding: 0, zIndex: 2,
-                      background: 'none', border: 'none', cursor: 'pointer',
-                      color: showPassword ? 'var(--gold-pale)' : 'var(--ink-faint)',
-                    }}
+                    className={cn(s.pwToggle, showPassword && s.on)}
                   >
                     <Rune kind={showPassword ? 'eye-off' : 'eye'} size={14} />
                   </button>
                 </div>
                 {errors.password && (
-                  <span style={{ fontSize: 12, color: 'var(--ember)', display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
+                  <span className={s.errLine}>
                     <Rune kind="flame" size={11} color="var(--ember)" />
                     {t(errors.password.message ?? '')}
                   </span>
@@ -187,20 +162,14 @@ export default function LoginPage() {
               </div>
 
               {/* Remember me */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--ink-quiet)', fontSize: 12 }}>
+              <div className={s.rememberRow}>
                 <span
                   onClick={() => setRemember(!remember)}
-                  style={{
-                    width: 14, height: 14,
-                    border: `1px solid ${remember ? 'var(--brass)' : 'var(--rule-strong)'}`,
-                    background: remember ? 'var(--gold)' : 'var(--abyss)',
-                    display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                    cursor: 'pointer',
-                  }}
+                  className={cn(s.checkbox, remember && s.on)}
                 >
                   {remember && <Rune kind="check" size={10} color="var(--abyss)" />}
                 </span>
-                <span className="ao-italic" style={{ cursor: 'pointer' }} onClick={() => setRemember(!remember)}>
+                <span className={cn('ao-italic', s.pointer)} onClick={() => setRemember(!remember)}>
                   {t('auth.login.remember')}
                 </span>
               </div>
@@ -208,9 +177,8 @@ export default function LoginPage() {
               {/* Primary submit */}
               <button
                 type="submit"
-                className="ao-btn ao-btn--primary ao-btn--lg ao-btn--block"
+                className={cn('ao-btn ao-btn--primary ao-btn--lg ao-btn--block', s.mt4)}
                 disabled={loginMutation.isPending}
-                style={{ marginTop: 4 }}
               >
                 <Rune kind="diamond-fill" size={9} />
                 {loginMutation.isPending ? t('auth.login.submitting') : t('auth.login.submit')}
@@ -223,15 +191,14 @@ export default function LoginPage() {
             {/* Accept Invitation */}
             <Link
               to="/register"
-              className="ao-btn ao-btn--ghost ao-btn--block"
-              style={{ textDecoration: 'none', textAlign: 'center', marginTop: 8 }}
+              className={cn('ao-btn ao-btn--ghost ao-btn--block', s.inviteLink)}
             >
               <Rune kind="scroll" size={12} />
               {t('auth.login.acceptInvite')}
             </Link>
           </OrdoPanel>
 
-          <div style={{ textAlign: 'center', marginTop: 20, color: 'var(--ink-faint)' }}>
+          <div className={s.footer}>
             <span className="ao-codex">{t('auth.login.footer')}</span>
           </div>
         </div>

@@ -1,0 +1,64 @@
+/* ── heading band ────────────────────────────────────────────── */
+.headBand { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 18px; }
+.headTitle { margin-top: 4px; }
+.headSub { margin-top: 4px; max-width: 620px; }
+.statsRow { display: flex; align-items: flex-end; gap: 20px; }
+.statBox { text-align: right; }
+.statNum { font-family: var(--font-serif); font-size: 28px; color: var(--ink-bright); line-height: 1; }
+.statNum.red { color: #d8896a; }
+.statNum.gold { color: var(--gold-pale); }
+.statDivider { width: 1px; height: 36px; background: var(--rule); }
+
+/* ── redacted warning ────────────────────────────────────────── */
+.warnBand {
+  display: flex; align-items: center; gap: 12px; padding: 12px 18px; margin-bottom: 18px;
+  background: linear-gradient(90deg, rgba(179,70,26,0.12) 0%, rgba(179,70,26,0.04) 100%);
+  border: 1px solid rgba(179,70,26,0.25); border-left: 3px solid var(--ember);
+}
+.warnGrow { flex: 1; }
+.warnTitle { font-size: 13px; color: #d8896a; font-family: var(--font-display); letter-spacing: 0.03em; }
+.warnNote { font-size: 12px; color: var(--ink-quiet); margin-left: 8px; }
+
+/* ── states ──────────────────────────────────────────────────── */
+.loadingPanel { height: 320px; }
+.loadingPh { height: 100%; }
+.emptyBox { text-align: center; padding: 60px; }
+.emptyOverline { margin-top: 14px; color: var(--ink-faint); }
+.emptyTitle { margin-top: 10px; color: var(--ink); }
+.emptyBody { font-size: 16px; color: var(--ink-quiet); max-width: 480px; margin: 8px auto 0; }
+.emptyActions { display: flex; gap: 10px; margin-top: 22px; justify-content: center; }
+
+/* ── list footer ─────────────────────────────────────────────── */
+.listFooter { text-align: center; padding: 10px 0; border-top: 1px solid var(--hairline); background: var(--abyss); }
+.listFooterText { font-size: 11px; color: var(--ink-faint); }
+
+/* ── pagination ──────────────────────────────────────────────── */
+.pager { display: flex; justify-content: space-between; align-items: center; margin-top: 26px; padding-top: 18px; border-top: 1px solid var(--rule); }
+.pagerBtns { display: flex; gap: 4px; }
+.pagerBtn { width: 30px; height: 30px; }
+.revokeAction { background: var(--ember); color: #fff; }
+
+/* ── row ─────────────────────────────────────────────────────── */
+.row {
+  display: grid; grid-template-columns: 56px 1.2fr 200px 1fr 200px 240px;
+  align-items: center; gap: 12px; padding: 14px 18px; position: relative; overflow: hidden;
+}
+.row.divided { border-bottom: 1px solid var(--hairline); }
+.row.deleted { background: rgba(179,70,26,0.03); }
+.deletedStripe {
+  position: absolute; inset: 0; pointer-events: none;
+  background-image: repeating-linear-gradient(135deg, transparent, transparent 10px, rgba(179,70,26,0.03) 10px, rgba(179,70,26,0.03) 11px);
+}
+.titleCell { position: relative; }
+.titleHead { display: flex; align-items: center; gap: 8px; }
+.title { font-size: 15px; }
+.title.deleted { color: var(--ink-quiet); text-decoration: line-through; text-decoration-color: rgba(179,70,26,0.6); }
+.redactedBadge { font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; padding: 2px 6px; background: rgba(179,70,26,0.18); color: #d8896a; font-family: var(--font-mono); }
+.byRow { display: flex; align-items: center; gap: 6px; margin-top: 4px; }
+.byText { font-size: 12px; color: var(--ink-faint); }
+.byName { color: var(--ink); }
+.byDot { color: var(--ink-faint); font-size: 10px; }
+.stateText { font-size: 10px; margin-top: 5px; color: var(--ink-faint); }
+.dateLabel { font-size: 9px; }
+.dateValue { font-size: 12px; margin-top: 3px; }
+.actions { display: flex; gap: 6px; justify-content: flex-end; }

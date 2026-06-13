@@ -1,6 +1,9 @@
+import type { CSSProperties } from 'react';
 import { Rune, ModifierTag } from '@/components/ordo';
 import { useT } from '@/i18n/I18nContext';
+import { cn } from '@/lib/utils';
 import type { CharacterActiveEffectResponse } from '@/types';
+import s from './EffectRow.module.css';
 
 interface EffectRowProps {
   effect: CharacterActiveEffectResponse;
@@ -9,74 +12,24 @@ interface EffectRowProps {
 
 export function EffectRow({ effect, onRemove }: EffectRowProps) {
   const t = useT();
-  const borderColor = effect.isBuff ? '#7a9866' : '#c9803a';
-  const iconColor = effect.isBuff ? '#7a9866' : '#c9803a';
+  const tone = effect.isBuff ? '#7a9866' : '#c9803a';
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 12,
-        padding: '10px 14px',
-        borderLeft: `3px solid ${borderColor}`,
-        background: effect.isBuff
-          ? 'rgba(122,152,102,0.04)'
-          : 'rgba(201,128,58,0.04)',
-        borderBottom: '1px solid var(--hairline)',
-      }}
-    >
-      {/* Icon */}
-      <div
-        style={{
-          width: 28,
-          height: 28,
-          flexShrink: 0,
-          border: `1px solid ${iconColor}44`,
-          background: 'var(--abyss)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <Rune
-          kind={effect.isBuff ? 'arrow-up' : 'minus'}
-          size={14}
-          color={iconColor}
-        />
+    <div className={s.row} style={{ '--tone': tone } as CSSProperties}>
+      <div className={s.icon}>
+        <Rune kind={effect.isBuff ? 'arrow-up' : 'minus'} size={14} color={tone} />
       </div>
 
-      {/* Name + type label */}
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-            flexWrap: 'wrap',
-          }}
-        >
-          <span
-            className="ao-h5"
-            style={{ fontSize: 13, color: 'var(--ink-bright)' }}
-          >
-            {effect.buffDebuffName}
-          </span>
-          <span
-            className="ao-overline"
-            style={{
-              fontSize: 8,
-              color: iconColor,
-              letterSpacing: '0.14em',
-            }}
-          >
+      <div className={s.main}>
+        <div className={s.nameRow}>
+          <span className={cn('ao-h5', s.name)}>{effect.buffDebuffName}</span>
+          <span className={cn('ao-overline', s.typeLabel)}>
             {effect.isBuff ? t('cmp.effect.buff') : t('cmp.effect.debuff')}
           </span>
         </div>
 
-        {/* Modifier tags */}
         {effect.targetStatName && effect.modifierValue != null && (
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 4 }}>
+          <div className={s.tags}>
             <ModifierTag
               stat={effect.targetStatName}
               value={effect.modifierValue}
@@ -86,58 +39,24 @@ export function EffectRow({ effect, onRemove }: EffectRowProps) {
         )}
       </div>
 
-      {/* Rounds counter or permanent label */}
-      <div
-        style={{
-          flexShrink: 0,
-          textAlign: 'center',
-          minWidth: 60,
-        }}
-      >
+      <div className={s.rounds}>
         {effect.remainingRounds != null ? (
           <div>
-            <span
-              className="ao-num"
-              style={{
-                fontSize: 18,
-                fontFamily: 'var(--font-mono)',
-                color: effect.remainingRounds <= 1 ? 'var(--ember)' : 'var(--ink-bright)',
-              }}
-            >
+            <span className={cn('ao-num', s.roundNum, effect.remainingRounds <= 1 && s.urgent)}>
               {effect.remainingRounds}
             </span>
-            <div
-              className="ao-overline"
-              style={{ fontSize: 8, color: 'var(--ink-faint)', marginTop: 1 }}
-            >
+            <div className={cn('ao-overline', s.roundLabel)}>
               {effect.remainingRounds === 1 ? t('cmp.effect.round') : t('cmp.effect.rounds')}
             </div>
           </div>
         ) : (
-          <span
-            className="ao-overline"
-            style={{
-              fontSize: 9,
-              color: 'var(--ink-quiet)',
-              letterSpacing: '0.12em',
-            }}
-          >
-            {t('cmp.effect.permanent')}
-          </span>
+          <span className={cn('ao-overline', s.perm)}>{t('cmp.effect.permanent')}</span>
         )}
       </div>
 
       {onRemove && (
         <button
-          className="ao-btn ao-btn--ghost ao-btn--sm"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 4,
-            flexShrink: 0,
-            color: 'var(--ember)',
-            borderColor: 'var(--ember)',
-          }}
+          className={cn('ao-btn ao-btn--ghost ao-btn--sm', s.removeBtn)}
           onClick={onRemove}
           title={t('cmp.effect.liftTitle')}
         >

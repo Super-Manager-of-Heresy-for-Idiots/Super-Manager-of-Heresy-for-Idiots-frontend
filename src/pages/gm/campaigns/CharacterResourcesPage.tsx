@@ -6,7 +6,9 @@ import { ResourcesPanel } from '@/components/characters';
 import { useCharacter, useCharacterResources, useModifyResource } from '@/hooks/useCharacter';
 import { useAuthStore } from '@/store/authStore';
 import { useT } from '@/i18n/I18nContext';
+import { cn } from '@/lib/utils';
 import type { ResourceEntry } from '@/types';
+import s from './CharacterResourcesPage.module.css';
 
 export default function CharacterResourcesPage() {
   const t = useT();
@@ -34,27 +36,27 @@ export default function CharacterResourcesPage() {
 
   return (
     <div>
-      <BackLink to={backTo} label={t('camp.backToCharacter')} style={{ marginBottom: 12 }} />
+      <BackLink to={backTo} label={t('camp.backToCharacter')} className={s.backLink} />
 
       {/* Header */}
-      <div style={{ marginBottom: 18 }}>
-        <p className="ao-overline" style={{ color: 'var(--arcane)' }}>{t('camp.resources.overline')}</p>
-        <h3 className="ao-h3" style={{ marginTop: 4 }}>{t('camp.resources.title')}</h3>
-        <p className="ao-italic" style={{ color: 'var(--ink-quiet)', fontSize: 13, marginTop: 6 }}>
+      <div className={s.header}>
+        <p className={cn('ao-overline', s.overlineArcane)}>{t('camp.resources.overline')}</p>
+        <h3 className={cn('ao-h3', s.title)}>{t('camp.resources.title')}</h3>
+        <p className={cn('ao-italic', s.subtitle)}>
           {character ? character.name : t('camp.resources.sub')}
         </p>
       </div>
 
       {isLoading ? (
         <OrdoPanel frame>
-          <div style={{ padding: 24, textAlign: 'center', color: 'var(--ink-faint)', fontSize: 13 }}>
+          <div className={s.loadingBox}>
             {t('camp.resources.loading')}
           </div>
         </OrdoPanel>
       ) : error ? (
         <OrdoPanel frame padding={0}>
           <EmptyVault glyph="hex" title={t('camp.resources.error.title')} body={t('camp.resources.error.body')} />
-          <div style={{ padding: '0 24px 24px', textAlign: 'center' }}>
+          <div className={s.retryBox}>
             <button className="ao-btn ao-btn--ghost ao-btn--sm" onClick={() => refetch()}>
               {t('camp.retry')}
             </button>
@@ -65,7 +67,7 @@ export default function CharacterResourcesPage() {
           <EmptyVault glyph="hex" title={t('camp.resources.empty.title')} body={t('camp.resources.empty.body')} />
         </OrdoPanel>
       ) : (
-        <div style={{ maxWidth: 640 }}>
+        <div className={s.body}>
           <ResourcesPanel
             resources={resources}
             editable={canWrite}
@@ -73,10 +75,7 @@ export default function CharacterResourcesPage() {
             pending={modifyResource.isPending}
           />
           {!canWrite && (
-            <p
-              className="ao-italic"
-              style={{ color: 'var(--ink-faint)', fontSize: 12, marginTop: 10, textAlign: 'center' }}
-            >
+            <p className={cn('ao-italic', s.readonlyNote)}>
               {isDead ? t('camp.resources.readonly.dead') : t('camp.resources.readonly.viewer')}
             </p>
           )}

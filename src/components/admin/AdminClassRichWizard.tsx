@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { FileUp, Loader2, Plus, Save, Trash2 } from 'lucide-react';
 import { Rune, OrdoChip } from '@/components/ordo';
 import { useT } from '@/i18n/I18nContext';
+import { cn } from '@/lib/utils';
 import {
   Dialog,
   DialogContent,
@@ -28,6 +29,7 @@ import type {
   RichCharacterClassResponse,
   SkillEffectRole,
 } from '@/types';
+import s from './AdminClassRichWizard.module.css';
 
 type TFn = (key: string, vars?: Record<string, string | number>) => string;
 
@@ -510,10 +512,10 @@ export function AdminClassRichWizard({ open, onOpenChange, editingClass }: Admin
     onChange: (next: DraftBuffDebuff) => void,
     lockNature?: SkillEffectRole,
   ) => (
-    <div style={{ display: 'grid', gap: 10 }}>
+    <div className={s.grid10}>
       <input className="ao-input" value={value.name} onChange={(event) => onChange({ ...value, name: event.target.value })} placeholder={t('cmp2.rich.buffName')} />
       <textarea className="ao-input" value={value.description} onChange={(event) => onChange({ ...value, description: event.target.value })} rows={3} placeholder={t('cmp2.rich.description')} />
-      <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+      <div className={cn('ao-rgrid', s.cols2)}>
         <select className="ao-input" value={value.effectType} onChange={(event) => onChange({ ...value, effectType: event.target.value })}>
           {EFFECT_TYPES.map((type) => <option key={type} value={type}>{type.replace(/_/g, ' ')}</option>)}
         </select>
@@ -533,7 +535,7 @@ export function AdminClassRichWizard({ open, onOpenChange, editingClass }: Admin
           {(statTypes || []).map((stat) => <option key={stat.id} value={stat.id}>{stat.name}</option>)}
         </select>
       )}
-      <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+      <div className={cn('ao-rgrid', s.cols2)}>
         <input className="ao-input" type="number" value={value.modifierValue} onChange={(event) => onChange({ ...value, modifierValue: event.target.value })} placeholder={t('cmp2.rich.modifier')} />
         <input className="ao-input" type="number" value={value.durationRounds} onChange={(event) => onChange({ ...value, durationRounds: event.target.value })} placeholder={t('cmp2.rich.durationRounds')} />
       </div>
@@ -543,23 +545,23 @@ export function AdminClassRichWizard({ open, onOpenChange, editingClass }: Admin
   const renderInlineForm = (reward: DraftReward) => {
     if (reward.rewardType === 'SKILL') {
       return (
-        <div style={{ display: 'grid', gap: 12 }}>
+        <div className={s.grid12}>
           <input className="ao-input" value={reward.skill.name} onChange={(event) => updateSelectedReward((item) => ({ ...item, skill: { ...item.skill, name: event.target.value } }))} placeholder={t('cmp2.rich.skillName')} />
           <textarea className="ao-input" value={reward.skill.description} onChange={(event) => updateSelectedReward((item) => ({ ...item, skill: { ...item.skill, description: event.target.value } }))} rows={3} placeholder={t('cmp2.rich.skillDescription')} />
-          <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+          <div className={cn('ao-rgrid', s.cols2)}>
             <input className="ao-input" value={reward.skill.skillType} onChange={(event) => updateSelectedReward((item) => ({ ...item, skill: { ...item.skill, skillType: event.target.value } }))} placeholder={t('cmp2.rich.skillType')} />
             <select className="ao-input" value={reward.skill.damageType} onChange={(event) => updateSelectedReward((item) => ({ ...item, skill: { ...item.skill, damageType: event.target.value } }))}>
               <option value="">{t('cmp2.rich.noDamageType')}</option>
               {DAMAGE_TYPES.map((type) => <option key={type} value={type}>{type}</option>)}
             </select>
           </div>
-          <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+          <div className={cn('ao-rgrid', s.cols2)}>
             <input className="ao-input" value={reward.skill.damageDice} onChange={(event) => updateSelectedReward((item) => ({ ...item, skill: { ...item.skill, damageDice: event.target.value } }))} placeholder={t('cmp2.rich.damageDice')} />
             <input className="ao-input" type="number" value={reward.skill.damageBonus} onChange={(event) => updateSelectedReward((item) => ({ ...item, skill: { ...item.skill, damageBonus: event.target.value } }))} placeholder={t('cmp2.rich.damageBonus')} />
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div className="ao-row ao-between">
             <div>
-              <div className="ao-label" style={{ marginBottom: 0 }}>{t('cmp2.rich.effects')}</div>
+              <div className={cn('ao-label', s.labelTight)}>{t('cmp2.rich.effects')}</div>
               <div className="ao-codex">{t('cmp2.rich.effectsHint')}</div>
             </div>
             <button
@@ -573,8 +575,8 @@ export function AdminClassRichWizard({ open, onOpenChange, editingClass }: Admin
             </button>
           </div>
           {reward.skill.effects.map((effect, index) => (
-            <div key={effect.localId} className="ao-panel--inset" style={{ padding: 10, display: 'grid', gap: 10 }}>
-              <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: 8 }}>
+            <div key={effect.localId} className={cn('ao-panel--inset', s.effectCard)}>
+              <div className={cn('ao-rgrid', s.cols2auto)}>
                 <select
                   className="ao-input"
                   value={effect.effectRole}
@@ -615,8 +617,7 @@ export function AdminClassRichWizard({ open, onOpenChange, editingClass }: Admin
                   placeholder={t('cmp2.rich.chancePercent')}
                 />
                 <button
-                  className="ao-iconbtn"
-                  style={{ width: 40, height: 40, color: 'var(--ember)' }}
+                  className={cn('ao-iconbtn', s.iconDanger40)}
                   onClick={() => updateSelectedReward((item) => ({
                     ...item,
                     skill: { ...item.skill, effects: item.skill.effects.filter((row) => row.localId !== effect.localId) },
@@ -626,12 +627,11 @@ export function AdminClassRichWizard({ open, onOpenChange, editingClass }: Admin
                   <Trash2 size={15} />
                 </button>
               </div>
-              <div style={{ display: 'flex', gap: 6 }}>
+              <div className="ao-row ao-gap-6">
                 {(['existing', 'new'] as SourceMode[]).map((mode) => (
                   <button
                     key={mode}
-                    className={`ao-btn ao-btn--sm ${effect.sourceMode === mode ? 'ao-btn--primary' : 'ao-btn--ghost'}`}
-                    style={{ flex: 1 }}
+                    className={cn('ao-btn ao-btn--sm ao-grow', effect.sourceMode === mode ? 'ao-btn--primary' : 'ao-btn--ghost')}
                     onClick={() => updateSelectedReward((item) => ({
                       ...item,
                       skill: {
@@ -687,7 +687,7 @@ export function AdminClassRichWizard({ open, onOpenChange, editingClass }: Admin
 
     if (reward.rewardType === 'FEAT') {
       return (
-        <div style={{ display: 'grid', gap: 10 }}>
+        <div className={s.grid10}>
           <input className="ao-input" value={reward.feat.name} onChange={(event) => updateSelectedReward((item) => ({ ...item, feat: { ...item.feat, name: event.target.value } }))} placeholder={t('cmp2.rich.featName')} />
           <textarea className="ao-input" value={reward.feat.description} onChange={(event) => updateSelectedReward((item) => ({ ...item, feat: { ...item.feat, description: event.target.value } }))} rows={3} placeholder={t('cmp2.rich.description')} />
           <input className="ao-input" value={reward.feat.prerequisites} onChange={(event) => updateSelectedReward((item) => ({ ...item, feat: { ...item.feat, prerequisites: event.target.value } }))} placeholder={t('cmp2.rich.prerequisites')} />
@@ -697,7 +697,7 @@ export function AdminClassRichWizard({ open, onOpenChange, editingClass }: Admin
 
     if (reward.rewardType === 'SUBCLASS') {
       return (
-        <div style={{ display: 'grid', gap: 10 }}>
+        <div className={s.grid10}>
           <input className="ao-input" value={reward.subclass.name} onChange={(event) => updateSelectedReward((item) => ({ ...item, subclass: { ...item.subclass, name: event.target.value } }))} placeholder={t('cmp2.rich.subclassName')} />
           <textarea className="ao-input" value={reward.subclass.description} onChange={(event) => updateSelectedReward((item) => ({ ...item, subclass: { ...item.subclass, description: event.target.value } }))} rows={4} placeholder={t('cmp2.rich.description')} />
         </div>
@@ -723,25 +723,25 @@ export function AdminClassRichWizard({ open, onOpenChange, editingClass }: Admin
           <DialogHeader>
             <DialogTitle>{t('cmp2.rich.savedTitle')}</DialogTitle>
           </DialogHeader>
-          <div style={{ display: 'grid', gap: 16 }}>
-            <div className="ao-panel" style={{ padding: 16 }}>
+          <div className={s.grid16}>
+            <div className={cn('ao-panel', s.panelPad16)}>
               <div className="ao-h5">{result.characterClass.name}</div>
-              <div className="ao-codex" style={{ marginTop: 4 }}>{t('cmp2.rich.rewardsSaved', { count: result.rewards.length })}</div>
+              <div className={cn('ao-codex', s.mt4)}>{t('cmp2.rich.rewardsSaved', { count: result.rewards.length })}</div>
             </div>
-            <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: 8 }}>
+            <div className={cn('ao-rgrid', s.cols5)}>
               {(['CHARACTER_CLASS', 'SKILL', 'FEAT', 'SUBCLASS', 'BUFF_DEBUFF'] as const).map((type) => (
-                <div key={type} className="ao-panel--inset" style={{ padding: 12, minHeight: 96 }}>
-                  <div className="ao-overline" style={{ fontSize: 9 }}>{type.replace(/_/g, ' ')}</div>
-                  <div className="ao-h6" style={{ marginTop: 4 }}>{(groups[type] || []).length}</div>
+                <div key={type} className={cn('ao-panel--inset', s.summaryTile)}>
+                  <div className={cn('ao-overline', s.fs9)}>{type.replace(/_/g, ' ')}</div>
+                  <div className={cn('ao-h6', s.mt4)}>{(groups[type] || []).length}</div>
                   {(groups[type] || []).slice(0, 3).map((item) => (
-                    <div key={item.id} className="ao-codex" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    <div key={item.id} className={cn('ao-codex', s.ellipsis)}>
                       {item.name}
                     </div>
                   ))}
                 </div>
               ))}
             </div>
-            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <div className="ao-row ao-justify-end">
               <button className="ao-btn ao-btn--primary" onClick={() => handleClose(false)}>{t('cmp2.rich.done')}</button>
             </div>
           </div>
@@ -754,15 +754,15 @@ export function AdminClassRichWizard({ open, onOpenChange, editingClass }: Admin
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-[96vw] h-[90vh] p-0 overflow-hidden">
         <DialogHeader className="px-5 py-4 border-b border-border">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, paddingRight: 36 }}>
-            <div style={{ minWidth: 0, flex: 1 }}>
+          <div className={s.headerRow}>
+            <div className={s.headerInfo}>
               <DialogTitle>{editingClass ? t('cmp2.rich.editTitleAdmin') : t('cmp2.rich.createTitleAdmin')}</DialogTitle>
-              <div className="ao-codex" style={{ marginTop: 5 }}>
+              <div className={cn('ao-codex', s.mt5)}>
                 {t('cmp2.rich.adminSubtitle')}
               </div>
             </div>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <label className="ao-btn ao-btn--ghost" style={{ cursor: saving ? 'not-allowed' : 'pointer' }}>
+            <div className="ao-row ao-gap-8">
+              <label className={cn('ao-btn ao-btn--ghost', s.fileLabel, saving && s.notAllowed)}>
                 <FileUp size={14} />
                 {t('cmp2.rich.importJson')}
                 <input
@@ -773,7 +773,7 @@ export function AdminClassRichWizard({ open, onOpenChange, editingClass }: Admin
                     handleImportJson(event.target.files?.[0]);
                     event.currentTarget.value = '';
                   }}
-                  style={{ display: 'none' }}
+                  className={s.hidden}
                 />
               </label>
               <button className="ao-btn ao-btn--ghost" onClick={() => handleClose(false)} disabled={saving}>{t('common.cancel')}</button>
@@ -785,9 +785,9 @@ export function AdminClassRichWizard({ open, onOpenChange, editingClass }: Admin
           </div>
         </DialogHeader>
 
-        <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: '180px minmax(360px, 1fr) 380px', height: 'calc(90vh - 76px)' }}>
-          <aside className="ao-scroll" style={{ borderRight: '1px solid var(--rule)', overflow: 'auto', background: 'var(--abyss)' }}>
-            <div style={{ padding: 12, display: 'grid', gap: 6 }}>
+        <div className={cn('ao-rgrid', s.layout)}>
+          <aside className={cn('ao-scroll', s.railAside)}>
+            <div className={s.railList}>
               {LEVELS.map((level) => {
                 const count = (levelsByNumber[level] || []).length;
                 const active = selectedLevel === level;
@@ -795,8 +795,7 @@ export function AdminClassRichWizard({ open, onOpenChange, editingClass }: Admin
                 return (
                   <button
                     key={level}
-                    className={`ao-btn ao-btn--sm ${active ? 'ao-btn--primary' : 'ao-btn--ghost'}`}
-                    style={{ justifyContent: 'space-between', width: '100%', borderColor: hasError ? 'var(--ember)' : undefined }}
+                    className={cn('ao-btn ao-btn--sm', active ? 'ao-btn--primary' : 'ao-btn--ghost', s.levelBtn, hasError && s.hasError)}
                     onClick={() => {
                       setSelectedLevel(level);
                       setSelectedRewardId((levelsByNumber[level] || [])[0]?.localId || null);
@@ -810,9 +809,9 @@ export function AdminClassRichWizard({ open, onOpenChange, editingClass }: Admin
             </div>
           </aside>
 
-          <main className="ao-scroll" style={{ overflow: 'auto', padding: 18, display: 'grid', alignContent: 'start', gap: 16 }}>
-            <div className="ao-panel" style={{ padding: 16, display: 'grid', gap: 12 }}>
-              <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: 'minmax(220px, 360px) 1fr', gap: 10 }}>
+          <main className={cn('ao-scroll', s.mainPane)}>
+            <div className={cn('ao-panel', s.classPanel)}>
+              <div className={cn('ao-rgrid', s.classCols)}>
                 <div>
                   <label className="ao-label">{t('cmp2.rich.className')}</label>
                   <input className="ao-input" value={className} maxLength={50} onChange={(event) => setClassName(event.target.value.slice(0, 50))} placeholder={t('cmp2.rich.classNamePlaceholder')} />
@@ -823,17 +822,17 @@ export function AdminClassRichWizard({ open, onOpenChange, editingClass }: Admin
                 </div>
               </div>
               {validation.errors.length > 0 && (
-                <div style={{ display: 'grid', gap: 4 }}>
+                <div className={s.grid4}>
                   {validation.errors.slice(0, 5).map((error, index) => (
-                    <div key={`${error}-${index}`} className="ao-codex" style={{ color: 'var(--ember)' }}>{error}</div>
+                    <div key={`${error}-${index}`} className={cn('ao-codex', s.err)}>{error}</div>
                   ))}
                   {validation.errors.length > 5 && <div className="ao-codex">{t('cmp2.rich.moreIssues', { count: validation.errors.length - 5 })}</div>}
                 </div>
               )}
-              {importError && <div className="ao-codex" style={{ color: 'var(--ember)' }}>{importError}</div>}
+              {importError && <div className={cn('ao-codex', s.err)}>{importError}</div>}
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div className="ao-row ao-between">
               <div>
                 <div className="ao-h5">{t('cmp2.rich.levelRewards', { level: selectedLevel })}</div>
                 <div className="ao-codex">{t('cmp2.rich.levelRewardsHint')}</div>
@@ -844,43 +843,36 @@ export function AdminClassRichWizard({ open, onOpenChange, editingClass }: Admin
             </div>
 
             {currentRewards.length === 0 ? (
-              <div className="ao-panel--inset" style={{ padding: 28, textAlign: 'center' }}>
+              <div className={cn('ao-panel--inset', s.emptyRewards)}>
                 <div className="ao-italic">{t('cmp2.rich.noRewards')}</div>
               </div>
             ) : (
-              <div style={{ display: 'grid', gap: 8 }}>
+              <div className={s.grid8}>
                 {currentRewards.map((reward, index) => {
                   const selected = selectedReward?.localId === reward.localId;
                   const rowErrors = validation.rewardErrors[reward.localId] || [];
                   return (
                     <button
                       key={reward.localId}
-                      className="ao-panel"
-                      style={{
-                        padding: 12,
-                        textAlign: 'left',
-                        borderColor: rowErrors.length ? 'var(--ember)' : selected ? 'var(--brass)' : 'var(--rule)',
-                        cursor: 'pointer',
-                      }}
+                      className={cn('ao-panel', s.rewardRow, rowErrors.length ? s.error : selected && s.selected)}
                       onClick={() => setSelectedRewardId(reward.localId)}
                     >
-                      <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: '34px 1fr auto', gap: 10, alignItems: 'center' }}>
-                        <div className="ao-slot" style={{ width: 32, height: 32 }}>
+                      <div className={cn('ao-rgrid', s.rewardGrid)}>
+                        <div className={cn('ao-slot', s.slot32)}>
                           <Rune kind={reward.rewardType === 'SKILL' ? 'eye' : reward.rewardType === 'FEAT' ? 'sigil-3' : reward.rewardType === 'SUBCLASS' ? 'cross-pat' : 'hex'} size={14} />
                         </div>
-                        <div style={{ minWidth: 0 }}>
-                          <div style={{ fontFamily: 'var(--font-serif)', fontSize: 16, color: 'var(--ink-bright)' }}>
+                        <div className={s.min0}>
+                          <div className={s.rewardName}>
                             {index + 1}. {renderRewardTitle(reward)}
                           </div>
-                          <div className="ao-codex" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          <div className={cn('ao-codex', s.ellipsis)}>
                             {typeLabel(reward.rewardType, t)} / {reward.sourceMode === 'existing' ? t('cmp2.rich.sourceExisting') : t('cmp2.rich.sourceInline')}
                           </div>
                         </div>
-                        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                        <div className="ao-row ao-gap-6">
                           {reward.isChoice && <OrdoChip tone="arcane">{t('cmp2.rich.choice')}</OrdoChip>}
                           {rowErrors.length > 0 && <OrdoChip tone="ember">{t('cmp2.rich.issue', { count: rowErrors.length })}</OrdoChip>}
                           <span
-                            className="ao-iconbtn"
                             role="button"
                             tabIndex={0}
                             onClick={(event) => {
@@ -894,7 +886,7 @@ export function AdminClassRichWizard({ open, onOpenChange, editingClass }: Admin
                                 removeReward(reward.localId);
                               }
                             }}
-                            style={{ color: 'var(--ember)' }}
+                            className={cn('ao-iconbtn', s.iconDanger)}
                             title={t('cmp2.rich.removeReward')}
                           >
                             <Trash2 size={14} />
@@ -908,16 +900,16 @@ export function AdminClassRichWizard({ open, onOpenChange, editingClass }: Admin
             )}
           </main>
 
-          <aside className="ao-scroll" style={{ borderLeft: '1px solid var(--rule)', overflow: 'auto', padding: 16, background: 'var(--stone)' }}>
+          <aside className={cn('ao-scroll', s.inspectAside)}>
             {!selectedReward ? (
-              <div className="ao-panel--inset" style={{ padding: 18 }}>
+              <div className={cn('ao-panel--inset', s.inspectEmpty)}>
                 <div className="ao-italic">{t('cmp2.rich.selectOrAdd')}</div>
               </div>
             ) : (
-              <div style={{ display: 'grid', gap: 14 }}>
+              <div className={s.grid14}>
                 <div>
                   <div className="ao-overline">{t('cmp2.rich.rewardType')}</div>
-                  <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, marginTop: 8 }}>
+                  <div className={cn('ao-rgrid', s.typeGrid)}>
                     {REWARD_TYPES.map((type) => (
                       <button
                         key={type.value}
@@ -935,19 +927,18 @@ export function AdminClassRichWizard({ open, onOpenChange, editingClass }: Admin
                   </div>
                 </div>
 
-                <label style={{ display: 'flex', gap: 8, alignItems: 'center', color: 'var(--ink)' }}>
+                <label className={s.choiceLabel}>
                   <input type="checkbox" checked={selectedReward.isChoice} onChange={(event) => updateSelectedReward((reward) => ({ ...reward, isChoice: event.target.checked }))} />
                   <span>{t('cmp2.rich.playerChooses')}</span>
                 </label>
 
                 <div>
                   <div className="ao-overline">{t('cmp2.rich.source')}</div>
-                  <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
+                  <div className={s.sourceRow}>
                     {(['existing', 'new'] as SourceMode[]).map((mode) => (
                       <button
                         key={mode}
-                        className={`ao-btn ao-btn--sm ${selectedReward.sourceMode === mode ? 'ao-btn--primary' : 'ao-btn--ghost'}`}
-                        style={{ flex: 1 }}
+                        className={cn('ao-btn ao-btn--sm ao-grow', selectedReward.sourceMode === mode ? 'ao-btn--primary' : 'ao-btn--ghost')}
                         onClick={() => updateSelectedReward((reward) => ({ ...reward, sourceMode: mode }))}
                       >
                         {mode === 'existing' ? t('cmp2.rich.existing') : t('cmp2.rich.new')}
@@ -966,15 +957,15 @@ export function AdminClassRichWizard({ open, onOpenChange, editingClass }: Admin
                   </div>
                 ) : (
                   <div>
-                    <div className="ao-overline" style={{ marginBottom: 8 }}>{t('cmp2.rich.inline', { type: typeLabel(selectedReward.rewardType, t) })}</div>
+                    <div className={cn('ao-overline', s.mb8)}>{t('cmp2.rich.inline', { type: typeLabel(selectedReward.rewardType, t) })}</div>
                     {renderInlineForm(selectedReward)}
                   </div>
                 )}
 
                 {(validation.rewardErrors[selectedReward.localId] || []).length > 0 && (
-                  <div className="ao-panel--inset" style={{ padding: 10, borderColor: 'var(--ember)' }}>
+                  <div className={cn('ao-panel--inset', s.errorBox)}>
                     {(validation.rewardErrors[selectedReward.localId] || []).map((error, index) => (
-                      <div key={`${error}-${index}`} className="ao-codex" style={{ color: 'var(--ember)' }}>{error}</div>
+                      <div key={`${error}-${index}`} className={cn('ao-codex', s.err)}>{error}</div>
                     ))}
                   </div>
                 )}

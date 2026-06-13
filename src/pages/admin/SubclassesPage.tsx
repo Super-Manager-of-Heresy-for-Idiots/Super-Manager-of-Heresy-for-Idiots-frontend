@@ -35,6 +35,8 @@ import {
 } from '@/hooks/useAdmin';
 import type { SubclassResponse } from '@/types';
 import { useT } from '@/i18n/I18nContext';
+import { cn } from '@/lib/utils';
+import s from './AdminCrud.module.css';
 
 export default function SubclassesPage() {
   const t = useT();
@@ -89,22 +91,22 @@ export default function SubclassesPage() {
     }
   };
 
-  const filtered = (data || []).filter((s) =>
-    s.name.toLowerCase().includes(search.toLowerCase())
+  const filtered = (data || []).filter((sc) =>
+    sc.name.toLowerCase().includes(search.toLowerCase())
   );
 
   if (isLoading) {
     return (
       <div>
-        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 18 }}>
+        <div className={s.header}>
           <div>
             <div className="ao-overline">{t('adm.subclasses.overline')}</div>
-            <div className="ao-h3" style={{ marginTop: 4 }}>{t('adm.subclasses.title')}</div>
+            <div className={cn('ao-h3', s.titleH3)}>{t('adm.subclasses.title')}</div>
           </div>
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div className={s.skelCol}>
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="ao-ph" style={{ width: '100%', height: 48 }} />
+            <div key={i} className={cn('ao-ph', s.skelRow)} />
           ))}
         </div>
       </div>
@@ -113,8 +115,8 @@ export default function SubclassesPage() {
 
   if (error) {
     return (
-      <div style={{ textAlign: 'center', padding: '48px 0' }}>
-        <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginBottom: 16 }}>
+      <div className={s.errorBox}>
+        <p className={cn('ao-italic', s.errorText)}>
           {t('adm.shared.tomeUnavailable')}
         </p>
         <button className="ao-btn" onClick={() => refetch()}>{t('common.retry')}</button>
@@ -125,12 +127,12 @@ export default function SubclassesPage() {
   return (
     <div>
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 18 }}>
+      <div className={s.header}>
         <div>
           <div className="ao-overline">{t('adm.subclasses.overline')}</div>
-          <div className="ao-h3" style={{ marginTop: 4 }}>{t('adm.subclasses.title')}</div>
+          <div className={cn('ao-h3', s.titleH3)}>{t('adm.subclasses.title')}</div>
         </div>
-        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+        <div className={s.headerActions}>
           <OrdoChip tone="ember" glyph="lock">{t('adm.shared.inquisitorPrivileges')}</OrdoChip>
           <button className="ao-btn ao-btn--primary" onClick={handleAdd}>
             <Rune kind="plus" size={11} /> {t('adm.shared.newEntry')}
@@ -145,11 +147,10 @@ export default function SubclassesPage() {
           sub={t('adm.subclasses.entries', { count: data?.length || 0 })}
           glyph="hex"
           right={
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <div className={s.panelSearch}>
               <input
-                className="ao-input"
+                className={cn('ao-input', s.searchInput)}
                 placeholder={t('adm.subclasses.searchPlaceholder')}
-                style={{ width: 220, padding: '6px 12px' }}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
@@ -163,43 +164,30 @@ export default function SubclassesPage() {
               <th>{t('adm.shared.colName')}</th>
               <th>{t('adm.subclasses.colClass')}</th>
               <th>{t('adm.shared.colDescription')}</th>
-              <th style={{ width: 80 }}></th>
+              <th className={s.colNarrow}></th>
             </tr>
           </thead>
           <tbody>
-            {filtered.map((s) => (
-              <tr key={s.id}>
-                <td style={{ color: 'var(--ink-bright)' }}>{s.name}</td>
+            {filtered.map((sc) => (
+              <tr key={sc.id}>
+                <td className={s.cellName}>{sc.name}</td>
                 <td>
-                  <span style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: 6,
-                    padding: '3px 8px',
-                    background: 'rgba(154,126,192,0.08)',
-                    border: '1px solid rgba(154,126,192,0.3)',
-                    borderLeft: '2px solid #9a7ec0',
-                    fontFamily: 'var(--font-display)',
-                    fontSize: 10,
-                    letterSpacing: '0.16em',
-                    color: '#9a7ec0',
-                    textTransform: 'uppercase',
-                  }}>
+                  <span className={s.classBadge}>
                     <Rune kind="hex" size={10} color="#9a7ec0" />
-                    {s.className || '—'}
+                    {sc.className || '—'}
                   </span>
                 </td>
-                <td className="ao-italic" style={{ color: 'var(--ink-quiet)', maxWidth: 300, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {s.description || '—'}
+                <td className={cn('ao-italic', s.descCell)}>
+                  {sc.description || '—'}
                 </td>
                 <td>
-                  <div style={{ display: 'inline-flex', gap: 4 }}>
-                    <button className="ao-iconbtn" style={{ width: 26, height: 26 }} onClick={() => handleEdit(s)} title={t('adm.shared.edit')}>
+                  <div className={s.iconGroup}>
+                    <button className={cn('ao-iconbtn', s.iconSm)} onClick={() => handleEdit(sc)} title={t('adm.shared.edit')}>
                       <Rune kind="scroll" size={11} />
                     </button>
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <button className="ao-iconbtn" style={{ width: 26, height: 26, color: '#d8896a' }} title={t('adm.shared.delete')}>
+                        <button className={cn('ao-iconbtn', s.iconSm, s.iconDanger)} title={t('adm.shared.delete')}>
                           <Rune kind="x" size={11} />
                         </button>
                       </AlertDialogTrigger>
@@ -212,7 +200,7 @@ export default function SubclassesPage() {
                         </AlertDialogHeader>
                         <AlertDialogFooter>
                           <AlertDialogCancel>{t('adm.shared.withhold')}</AlertDialogCancel>
-                          <AlertDialogAction onClick={() => deleteMutation.mutate(s.id)}>{t('adm.shared.unmake')}</AlertDialogAction>
+                          <AlertDialogAction onClick={() => deleteMutation.mutate(sc.id)}>{t('adm.shared.unmake')}</AlertDialogAction>
                         </AlertDialogFooter>
                       </AlertDialogContent>
                     </AlertDialog>
@@ -222,15 +210,15 @@ export default function SubclassesPage() {
             ))}
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={4} style={{ textAlign: 'center', padding: '32px 16px' }}>
-                  <span className="ao-italic" style={{ color: 'var(--ink-faint)' }}>{t('adm.subclasses.emptyTable')}</span>
+                <td colSpan={4} className={s.emptyCell}>
+                  <span className={cn('ao-italic', s.emptyText)}>{t('adm.subclasses.emptyTable')}</span>
                 </td>
               </tr>
             )}
           </tbody>
         </table>
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 18px', borderTop: '1px solid var(--rule)', background: 'var(--abyss)' }}>
+        <div className={s.footer}>
           <span className="ao-codex">{t('adm.subclasses.countOf', { filtered: filtered.length, total: data?.length || 0 })}</span>
           <span className="ao-codex">{t('adm.subclasses.sortedByClass')}</span>
         </div>
@@ -242,14 +230,13 @@ export default function SubclassesPage() {
           <DialogHeader>
             <DialogTitle>{editing ? t('adm.subclasses.dialogEdit') : t('adm.subclasses.dialogCreate')}</DialogTitle>
           </DialogHeader>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div className={s.dialogCol}>
             <OrdoField label={t('adm.shared.fieldName')} required>
               <input
-                className="ao-input"
+                className={cn('ao-input', s.nameInput)}
                 value={formName}
                 onChange={(e) => setFormName(e.target.value)}
                 placeholder={t('adm.subclasses.namePlaceholder')}
-                style={{ fontFamily: 'var(--font-serif)', fontSize: 17 }}
               />
             </OrdoField>
             <OrdoField label={t('adm.subclasses.parentClassLabel')} required>
@@ -266,12 +253,11 @@ export default function SubclassesPage() {
             </OrdoField>
             <OrdoField label={t('adm.shared.fieldDescription')}>
               <textarea
-                className="ao-input"
+                className={cn('ao-input', s.descArea)}
                 value={formDescription}
                 onChange={(e) => setFormDescription(e.target.value)}
                 placeholder={t('adm.subclasses.descriptionPlaceholder')}
                 rows={3}
-                style={{ resize: 'vertical', fontSize: 14 }}
               />
             </OrdoField>
           </div>

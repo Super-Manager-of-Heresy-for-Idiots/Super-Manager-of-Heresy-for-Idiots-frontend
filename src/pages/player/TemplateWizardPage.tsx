@@ -2,6 +2,8 @@ import { useNavigate } from 'react-router-dom';
 import { CharacterCreationWizard } from '@/features/character-wizard/CharacterCreationWizard';
 import { useCreateTemplate, useGlobalReferenceContent } from '@/hooks/useTemplates';
 import type { CreateFullCharacterRequest } from '@/api/characters-full.api';
+import { cn } from '@/lib/utils';
+import s from './TemplateWizardPage.module.css';
 
 export default function TemplateWizardPage() {
   const navigate = useNavigate();
@@ -12,10 +14,10 @@ export default function TemplateWizardPage() {
 
   if (isLoading || !reference) {
     return (
-      <div className="ao-panel ao-frame ao-breathe" style={{ padding: 24, minHeight: 200 }}>
+      <div className={cn('ao-panel ao-frame ao-breathe', s.skel)}>
         <span className="ao-frame-c" />
-        <div className="ao-ph" style={{ width: '40%', height: 24, marginBottom: 12 }} />
-        <div className="ao-ph" style={{ width: '60%', height: 14 }} />
+        <div className={cn('ao-ph', s.skelTitle)} />
+        <div className={cn('ao-ph', s.skelLine)} />
       </div>
     );
   }

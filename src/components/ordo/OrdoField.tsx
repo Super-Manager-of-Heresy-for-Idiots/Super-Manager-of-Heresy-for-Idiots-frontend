@@ -16,24 +16,16 @@ export function OrdoField({
   children,
 }: OrdoFieldProps) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <label className="ao-label" style={{ marginBottom: 0 }}>
+    <div className="ao-field">
+      <div className="ao-field-top">
+        <label className="ao-label">
           {label}
-          {required && (
-            <span style={{ color: 'var(--ember)', marginLeft: 4 }}>*</span>
-          )}
+          {required && <span className="ao-field-req">*</span>}
         </label>
-        {count && (
-          <span className="ao-codex">{count}</span>
-        )}
+        {count && <span className="ao-codex">{count}</span>}
       </div>
       {children}
-      {hint && (
-        <span className="ao-codex" style={{ color: 'var(--ink-faint)' }}>
-          {hint}
-        </span>
-      )}
+      {hint && <span className="ao-codex ao-field-hint">{hint}</span>}
     </div>
   );
 }

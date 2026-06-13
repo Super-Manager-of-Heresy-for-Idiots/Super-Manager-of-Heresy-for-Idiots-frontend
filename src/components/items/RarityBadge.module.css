@@ -1,0 +1,23 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 7px 2px 6px;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid var(--rar);
+  border-left: 2px solid var(--rar);
+  font-family: var(--font-display);
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  color: var(--rar);
+  text-transform: uppercase;
+}
+.badge.md {
+  padding: 3px 9px 3px 8px;
+  font-size: 10px;
+}
+.badge.legendary {
+  box-shadow:
+    0 0 10px color-mix(in srgb, var(--rar) 33%, transparent),
+    inset 0 0 8px color-mix(in srgb, var(--rar) 13%, transparent);
+}

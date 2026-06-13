@@ -1,0 +1,41 @@
+.backLink { margin-bottom: 12px; }
+
+.header { margin-bottom: 24px; }
+.overlineGold { color: var(--gold); }
+.title { margin-top: 4px; }
+.metaLine { color: var(--ink-quiet); font-size: 13px; margin-top: 4px; }
+
+.choiceGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+
+.pickHeader { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+
+.moveLabel {
+  display: flex; align-items: center; gap: 10px; padding: 10px 14px; margin-bottom: 14px;
+  border: 1px solid var(--hairline); background: var(--panel); cursor: pointer;
+}
+.moveMain { flex: 1; }
+.moveTitle { color: var(--ink-bright); font-size: 13px; }
+.moveHint { display: block; font-size: 11px; color: var(--ink-quiet); }
+
+.skelPanel { padding: 24px; min-height: 160px; }
+.phTitle { width: 40%; height: 20px; margin-bottom: 12px; }
+.phSub { width: 60%; height: 14px; }
+
+.emptyBody { padding: 18px; display: flex; flex-direction: column; gap: 12px; }
+.emptyText { color: var(--ink-faint); }
+.ml6 { margin-left: 6px; }
+
+.templateGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+
+.choiceCard {
+  text-align: left; padding: 20px; border: 1px solid var(--hairline); background: var(--panel);
+  cursor: pointer; display: flex; flex-direction: column; gap: 10px; min-height: 160px;
+}
+.choiceCardHead { display: flex; align-items: center; gap: 10px; }
+.choiceCardTitle { font-size: 15px; }
+.choiceCardBody { color: var(--ink-quiet); font-size: 13px; margin: 0; }
+.iconGold { color: var(--gold); }
+.iconArcane { color: var(--arcane); }
+
+.tplBody { padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+.tplMeta { font-size: 11px; color: var(--ink-faint); }

@@ -13,21 +13,11 @@ export function ModifierTag({ stat, value, size = 'md' }: ModifierTagProps) {
 
   return (
     <span
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: sm ? 4 : 5,
-        padding: sm ? '2px 6px' : '2px 7px',
-        background: positive ? 'rgba(122,152,102,0.08)' : 'rgba(179,70,26,0.08)',
-        border: `1px solid ${color}55`,
-        fontFamily: 'var(--font-mono)',
-        fontSize: sm ? 10 : 11,
-        color,
-      }}
+      className={`ao-modtag ${positive ? 'is-pos' : 'is-neg'}${sm ? ' ao-modtag--sm' : ''}`}
     >
       <Rune kind={positive ? 'arrow-up' : 'minus'} size={sm ? 7 : 8} color={color} />
       <span>{stat}</span>
-      <span style={{ fontWeight: 600 }}>{positive ? `+${value}` : value}</span>
+      <span className="ao-modtag-value">{positive ? `+${value}` : value}</span>
     </span>
   );
 }

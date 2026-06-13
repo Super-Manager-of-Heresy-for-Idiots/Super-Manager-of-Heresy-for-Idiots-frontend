@@ -1,0 +1,40 @@
+.body { display: flex; flex-direction: column; gap: 16px; }
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 220px;
+  overflow-y: auto;
+  border: 1px solid var(--rule);
+  background: var(--abyss);
+  padding: 4px;
+}
+.empty { padding: 16px 12px; text-align: center; color: var(--ink-faint); font-size: 13px; }
+
+.opt {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid transparent;
+  transition: all 0.12s;
+}
+.opt.selected { background: rgba(255, 255, 255, 0.04); border-color: var(--gold); }
+.radio { accent-color: var(--gold); }
+.optInfo { flex: 1; }
+.optName { font-size: 13px; color: var(--ink-bright); }
+.optRole { font-size: 9px; color: var(--ink-faint); margin-top: 2px; }
+
+.warn {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  background: color-mix(in srgb, var(--ember) 8%, transparent);
+  border: 1px solid var(--ember);
+}
+.warnLabel { margin-bottom: 2px; font-size: 11px; color: var(--ember); }
+.warnText { font-size: 12px; color: var(--ink-faint); }

@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import type { CSSProperties } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Rune, Sigil, OrdoPanel, OrdoField, OrdoChip } from '@/components/ordo';
 import {
@@ -37,6 +38,8 @@ import {
 } from '@/hooks/useAdmin';
 import type { ClassLevelRewardResponse } from '@/types';
 import { useT } from '@/i18n/I18nContext';
+import { cn } from '@/lib/utils';
+import s from './LevelRewardsPage.module.css';
 
 const LEVELS = Array.from({ length: 20 }, (_, i) => i + 1);
 const REWARD_TYPES = ['SKILL', 'SUBCLASS', 'FEAT'] as const;
@@ -59,32 +62,10 @@ const REWARD_TYPE_CONFIG: Record<string, { c: string; glyph: string }> = {
 function RewardChip({ reward }: { reward: ClassLevelRewardResponse }) {
   const cfg = REWARD_TYPE_CONFIG[reward.rewardType] || { c: 'var(--gold)', glyph: 'diamond' };
   return (
-    <span style={{
-      display: 'inline-flex',
-      alignItems: 'center',
-      gap: 7,
-      padding: '5px 11px',
-      background: 'rgba(0,0,0,0.4)',
-      border: `1px solid ${cfg.c}66`,
-      borderLeft: `2px solid ${cfg.c}`,
-    }}>
+    <span className={s.rewardChip} style={{ '--c': cfg.c } as CSSProperties}>
       <Rune kind={cfg.glyph} size={11} color={cfg.c} />
-      <span style={{
-        fontFamily: 'var(--font-display)',
-        fontSize: 9,
-        letterSpacing: '0.16em',
-        color: cfg.c,
-        textTransform: 'uppercase',
-      }}>
-        {reward.rewardType}
-      </span>
-      <span style={{
-        color: 'var(--ink-bright)',
-        fontFamily: 'var(--font-serif)',
-        fontSize: 13,
-      }}>
-        {reward.rewardName}
-      </span>
+      <span className={s.rewardType}>{reward.rewardType}</span>
+      <span className={s.rewardName}>{reward.rewardName}</span>
     </span>
   );
 }
@@ -93,29 +74,13 @@ function ChoiceFlag({ isChoice }: { isChoice: boolean }) {
   const t = useT();
   if (isChoice) {
     return (
-      <span style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: 5,
-        color: 'var(--gold-pale)',
-        fontFamily: 'var(--font-mono)',
-        fontSize: 10,
-        letterSpacing: '0.08em',
-      }}>
+      <span className={s.flagChoice}>
         <Rune kind="sword" size={11} color="var(--gold-pale)" /> {t('adm.rewards.chooseOne')}
       </span>
     );
   }
   return (
-    <span style={{
-      display: 'inline-flex',
-      alignItems: 'center',
-      gap: 5,
-      color: 'var(--arcane)',
-      fontFamily: 'var(--font-mono)',
-      fontSize: 10,
-      letterSpacing: '0.08em',
-    }}>
+    <span className={s.flagAuto}>
       <Rune kind="diamond-fill" size={9} color="var(--arcane)" /> {t('adm.rewards.autoGranted')}
     </span>
   );
@@ -148,8 +113,8 @@ export default function LevelRewardsPage() {
   const className = classes?.find((c) => c.id === classId)?.name || t('adm.rewards.unknownClass');
 
   const rewardOptions = useMemo(() => {
-    if (formRewardType === 'SKILL') return (skills || []).map((s) => ({ value: s.id, label: s.name }));
-    if (formRewardType === 'SUBCLASS') return (subclasses || []).filter((s) => s.classId === classId).map((s) => ({ value: s.id, label: s.name }));
+    if (formRewardType === 'SKILL') return (skills || []).map((sk) => ({ value: sk.id, label: sk.name }));
+    if (formRewardType === 'SUBCLASS') return (subclasses || []).filter((sub) => sub.classId === classId).map((sub) => ({ value: sub.id, label: sub.name }));
     if (formRewardType === 'FEAT') return (feats || []).map((f) => ({ value: f.id, label: f.name }));
     return [];
   }, [formRewardType, skills, subclasses, feats, classId]);
@@ -191,13 +156,13 @@ export default function LevelRewardsPage() {
   if (isLoading) {
     return (
       <div>
-        <div style={{ textAlign: 'center', marginBottom: 32 }}>
-          <p className="ao-overline" style={{ color: 'var(--gold)' }}>{t('adm.rewards.loadingOverline')}</p>
-          <h3 className="ao-h3" style={{ marginTop: 4 }}>{t('adm.rewards.loadingTitle')}</h3>
+        <div className={s.loadingHead}>
+          <p className={cn('ao-overline', s.loadingOverline)}>{t('adm.rewards.loadingOverline')}</p>
+          <h3 className={cn('ao-h3', s.titleH3)}>{t('adm.rewards.loadingTitle')}</h3>
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div className={s.skelCol}>
           {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="ao-ph" style={{ width: '100%', height: 64 }} />
+            <div key={i} className={cn('ao-ph', s.skelRow)} />
           ))}
         </div>
       </div>
@@ -207,8 +172,8 @@ export default function LevelRewardsPage() {
   /* ---- Error state ---- */
   if (error) {
     return (
-      <div style={{ textAlign: 'center', padding: '48px 0' }}>
-        <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginBottom: 16 }}>
+      <div className={s.errorBox}>
+        <p className={cn('ao-italic', s.errorText)}>
           {t('adm.rewards.errorBody')}
         </p>
         <button className="ao-btn" onClick={() => refetch()}>{t('common.retry')}</button>
@@ -220,62 +185,60 @@ export default function LevelRewardsPage() {
   return (
     <div>
       {/* ── Breadcrumb ── */}
-      <nav style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 24, flexWrap: 'wrap' }}>
+      <nav className={s.breadcrumb}>
         <button
-          className="ao-btn ao-btn--ghost ao-btn--sm"
+          className={cn('ao-btn ao-btn--ghost ao-btn--sm', s.crumbBtn)}
           onClick={() => navigate('/admin')}
-          style={{ padding: '2px 0', fontSize: 12, color: 'var(--ink-quiet)' }}
         >
           {t('adm.rewards.breadcrumbAdmin')}
         </button>
         <Rune kind="chev-r" size={10} color="var(--ink-ghost)" />
         <button
-          className="ao-btn ao-btn--ghost ao-btn--sm"
+          className={cn('ao-btn ao-btn--ghost ao-btn--sm', s.crumbBtn)}
           onClick={() => navigate('/admin/homebrew')}
-          style={{ padding: '2px 0', fontSize: 12, color: 'var(--ink-quiet)' }}
         >
           {t('adm.rewards.breadcrumbClasses')}
         </button>
         <Rune kind="chev-r" size={10} color="var(--ink-ghost)" />
-        <span style={{ fontSize: 12, color: 'var(--ink-quiet)' }}>{className}</span>
+        <span className={s.crumbCurrent}>{className}</span>
         <Rune kind="chev-r" size={10} color="var(--ink-ghost)" />
-        <span style={{ fontSize: 12, color: 'var(--gold-pale)', fontFamily: 'var(--font-display)', letterSpacing: '0.06em' }}>
+        <span className={s.crumbActive}>
           {t('adm.rewards.breadcrumbLevelRewards')}
         </span>
       </nav>
 
       {/* ── Header row ── */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 28, flexWrap: 'wrap', gap: 16 }}>
+      <div className={s.header}>
 
         {/* Left: Sigil + titles */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+        <div className={s.headLeft}>
           <Sigil size={52} glyph="sigil-3" />
           <div>
-            <p className="ao-overline" style={{ color: 'var(--gold)', marginBottom: 2 }}>
+            <p className={cn('ao-overline', s.headOverline)}>
               {t('adm.rewards.classLabel', { name: className })}
             </p>
-            <h3 className="ao-h3" style={{ margin: 0 }}>
+            <h3 className={cn('ao-h3', s.headTitle)}>
               {t('adm.rewards.headerTitle', { name: className })}
             </h3>
-            <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 13, marginTop: 4 }}>
+            <p className={cn('ao-italic', s.headSub)}>
               {t('adm.rewards.headerSubtitle')}
             </p>
           </div>
         </div>
 
         {/* Right: legend */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'flex-end' }}>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, color: 'var(--gold-pale)', fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.08em' }}>
+        <div className={s.legend}>
+          <span className={s.flagChoice}>
             <Rune kind="sword" size={11} color="var(--gold-pale)" /> {t('adm.rewards.chooseOne')}
           </span>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, color: 'var(--arcane)', fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.08em' }}>
+          <span className={s.flagAuto}>
             <Rune kind="diamond-fill" size={9} color="var(--arcane)" /> {t('adm.rewards.autoGranted')}
           </span>
         </div>
       </div>
 
       {/* ── Top buttons row ── */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
+      <div className={s.topButtons}>
         <button
           className="ao-btn ao-btn--ghost"
           onClick={() => navigate(`/admin/homebrew`)}
@@ -288,7 +251,7 @@ export default function LevelRewardsPage() {
       </div>
 
       {/* ── Timeline panel ── */}
-      <OrdoPanel frame padding={0} style={{ overflow: 'auto' }}>
+      <OrdoPanel frame padding={0} className={s.panelScroll}>
         {LEVELS.map((level) => {
           const levelRewards = rewardsByLevel[level] || [];
           const hasRewards = levelRewards.length > 0;
@@ -296,56 +259,29 @@ export default function LevelRewardsPage() {
           return (
             <div
               key={level}
-              className="ao-rgrid"
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '92px 1fr 130px',
-                minHeight: 52,
-                background: hasRewards ? 'transparent' : 'rgba(0,0,0,0.12)',
-                borderBottom: level < 20 ? '1px solid var(--hairline)' : 'none',
-              }}
+              className={cn('ao-rgrid', s.levelRow, !hasRewards && s.empty, level === 20 && s.last)}
             >
               {/* ─ Level marker column ─ */}
-              <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                background: 'var(--abyss)',
-                borderRight: '1px solid var(--hairline)',
-                padding: '8px 0',
-                gap: 2,
-              }}>
-                <span className="ao-overline" style={{ fontSize: 8, letterSpacing: '0.14em', color: 'var(--ink-faint)' }}>
+              <div className={s.levelMarker}>
+                <span className={cn('ao-overline', s.levelAbbr)}>
                   {t('adm.rewards.levelAbbr')}
                 </span>
-                <span style={{
-                  fontFamily: 'var(--font-display)',
-                  fontSize: 26,
-                  color: hasRewards ? 'var(--gold-pale)' : 'var(--ink-faint)',
-                  lineHeight: 1,
-                }}>
+                <span className={cn(s.levelNum, hasRewards && s.active)}>
                   {ROMAN_NUMERALS[level]}
                 </span>
               </div>
 
               {/* ─ Rewards column ─ */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                padding: '8px 14px',
-                gap: 8,
-                flexWrap: 'wrap',
-              }}>
+              <div className={s.rewardsCol}>
                 {hasRewards ? (
                   levelRewards.map((reward) => (
-                    <div key={reward.id} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                    <div key={reward.id} className={s.rewardItem}>
                       <RewardChip reward={reward} />
                       <ChoiceFlag isChoice={reward.isChoice} />
                       {/* Delete trigger */}
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
-                          <button className="ao-iconbtn" title={t('adm.rewards.remove')} style={{ marginLeft: 2 }}>
+                          <button className={cn('ao-iconbtn', s.removeBtn)} title={t('adm.rewards.remove')}>
                             <Rune kind="x" size={12} color="var(--ember)" />
                           </button>
                         </AlertDialogTrigger>
@@ -370,13 +306,8 @@ export default function LevelRewardsPage() {
                     </div>
                   ))
                 ) : (
-                  <div style={{
-                    flex: 1,
-                    padding: '8px 14px',
-                    border: '1px dashed var(--rule)',
-                    textAlign: 'center',
-                  }}>
-                    <span className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 13 }}>
+                  <div className={s.emptyLevel}>
+                    <span className={cn('ao-italic', s.emptyLevelText)}>
                       {t('adm.rewards.emptyLevel')}
                     </span>
                   </div>
@@ -384,12 +315,7 @@ export default function LevelRewardsPage() {
               </div>
 
               {/* ─ Add column ─ */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '8px 0',
-              }}>
+              <div className={s.addCol}>
                 <button
                   className="ao-btn ao-btn--ghost ao-btn--sm"
                   onClick={() => {
@@ -398,7 +324,7 @@ export default function LevelRewardsPage() {
                   }}
                 >
                   <Rune kind="plus" size={12} color="var(--gold)" />
-                  <span style={{ marginLeft: 4 }}>{t('adm.rewards.addReward')}</span>
+                  <span className={s.addLabel}>{t('adm.rewards.addReward')}</span>
                 </button>
               </div>
             </div>
@@ -412,7 +338,7 @@ export default function LevelRewardsPage() {
           <DialogHeader>
             <DialogTitle>{t('adm.rewards.dialogTitle')}</DialogTitle>
           </DialogHeader>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div className={s.dialogCol}>
             <OrdoField label={t('adm.rewards.fieldLevel')} required>
               <Select value={formLevel} onValueChange={setFormLevel}>
                 <SelectTrigger>

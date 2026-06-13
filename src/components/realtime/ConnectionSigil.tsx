@@ -1,5 +1,8 @@
+import type { CSSProperties } from 'react';
 import { Rune } from '@/components/ordo';
 import { useT } from '@/i18n/I18nContext';
+import { cn } from '@/lib/utils';
+import s from './ConnectionSigil.module.css';
 
 type SigilState = 'connected' | 'reconnecting' | 'offline';
 
@@ -19,33 +22,12 @@ export function ConnectionSigil({ state = 'offline' }: ConnectionSigilProps) {
   const label = t(cfg.labelKey);
 
   return (
-    <div
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: 6,
-      }}
-      title={label}
-    >
-      <div
-        className={state === 'reconnecting' ? 'ao-breathe' : undefined}
-        style={{
-          width: 24,
-          height: 24,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
+    <div className={s.sigil} style={{ '--tone': cfg.color } as CSSProperties} title={label}>
+      <div className={cn(s.iconbox, state === 'reconnecting' && 'ao-breathe')}>
         <Rune kind={cfg.glyph} size={14} color={cfg.color} />
       </div>
 
-      <span
-        className="ao-overline"
-        style={{ color: cfg.color, fontSize: 10 }}
-      >
-        {label}
-      </span>
+      <span className={cn('ao-overline', s.label)}>{label}</span>
     </div>
   );
 }

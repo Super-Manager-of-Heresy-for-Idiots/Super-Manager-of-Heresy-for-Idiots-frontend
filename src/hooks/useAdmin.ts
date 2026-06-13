@@ -15,6 +15,8 @@ import type {
   CreateBuffDebuffRequest,
   CreateEnchantmentTypeRequest,
   SetSkillEffectsRequest,
+  UserResponse,
+  Page,
 } from '@/types';
 import { AxiosError } from 'axios';
 
@@ -624,9 +626,11 @@ export function useDeleteEnchantmentType() {
 export function useUsers() {
   return useQuery({
     queryKey: ['admin-users'],
-    queryFn: async () => {
+    queryFn: async (): Promise<UserResponse[]> => {
       const response = await adminApi.getUsers();
-      return response.data;
+      const data = response.data as UserResponse[] | Page<UserResponse> | undefined;
+      if (Array.isArray(data)) return data;
+      return data?.content ?? [];
     },
   });
 }

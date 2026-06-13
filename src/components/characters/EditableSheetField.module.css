@@ -1,0 +1,23 @@
+.display { cursor: pointer; }
+.display.empty { min-height: 96px; }
+
+.emptyInner { padding: 32px 24px; text-align: center; }
+.placeholder { color: var(--ink-faint); font-size: 12px; margin-top: 12px; line-height: 1.5; }
+
+.text {
+  padding: 14px;
+  font-size: 13px;
+  color: var(--ink-quiet);
+  line-height: 1.55;
+  white-space: pre-wrap;
+  margin: 0;
+}
+
+.editor { padding: 14px; display: flex; flex-direction: column; gap: 8px; }
+
+.row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+
+.counter { font-size: 10px; color: var(--ink-faint); }
+.counter.over { color: var(--ember); }
+
+.actions { display: flex; gap: 8px; }

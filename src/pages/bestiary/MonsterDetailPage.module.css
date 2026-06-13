@@ -1,0 +1,6 @@
+.frame { min-height: 100vh; background: var(--stone); padding: clamp(16px, 4vw, 48px) clamp(12px, 4vw, 40px); }
+.inner { max-width: 920px; margin: 0 auto; }
+.toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 18px; }
+.spacer { flex: 1; }
+.status { text-align: center; padding: 60px 0; font-family: var(--font-serif); font-style: italic; color: var(--ink-quiet); }
+.notFound { padding: 40px; text-align: center; font-family: var(--font-serif); font-style: italic; color: var(--ink-quiet); }

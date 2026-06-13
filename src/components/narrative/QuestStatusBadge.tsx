@@ -1,6 +1,8 @@
+import type { CSSProperties } from 'react';
 import { Rune } from '@/components/ordo';
 import { useT } from '@/i18n/I18nContext';
 import type { QuestStatus } from '@/types';
+import s from './QuestStatusBadge.module.css';
 
 const STATUS_MAP: Record<QuestStatus, { labelKey: string; color: string; glyph: string }> = {
   ACTIVE:    { labelKey: 'cmp.quest.ACTIVE',    color: '#d4b478', glyph: 'diamond-fill' },
@@ -19,22 +21,7 @@ export function QuestStatusBadge({ status }: QuestStatusBadgeProps) {
   const meta = STATUS_MAP[status] ?? STATUS_MAP.ACTIVE;
 
   return (
-    <span
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: 6,
-        padding: '2px 7px 2px 6px',
-        background: 'rgba(0,0,0,0.45)',
-        border: `1px solid ${meta.color}`,
-        borderLeft: `2px solid ${meta.color}`,
-        fontFamily: 'var(--font-display)',
-        fontSize: 9,
-        letterSpacing: '0.2em',
-        color: meta.color,
-        textTransform: 'uppercase',
-      }}
-    >
+    <span className={s.badge} style={{ '--tone': meta.color } as CSSProperties}>
       <Rune kind={meta.glyph} size={8} color={meta.color} />
       {t(meta.labelKey)}
     </span>

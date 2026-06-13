@@ -7,6 +7,8 @@ import type { CSSProperties } from 'react';
 import { OrdoPanel, PanelHeader, Rune, OrdoDivider } from '@/components/ordo';
 import { useT } from '@/i18n/I18nContext';
 import { useGameTerms } from '@/i18n/gameTerms';
+import { cn } from '@/lib/utils';
+import css from './ForgeSheetBody.module.css';
 import {
   ABILITIES,
   SKILLS,
@@ -72,14 +74,13 @@ export function ForgeSheetBody({ c, onChange }: ForgeSheetBodyProps) {
                 <img src={c.avatar} alt={t('wiz.forge.portraitAlt')} />
               </div>
             )}
-            <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+            <div className={css.nameWrap}>
               <label className="ao-label">{t('wiz.forge.characterName')}</label>
               <input
-                className="ao-input"
+                className={cn('ao-input', css.nameInput)}
                 value={c.name}
                 placeholder={t('wiz.forge.nameSoul')}
                 onChange={(e) => set({ name: e.target.value })}
-                style={{ fontFamily: 'var(--font-serif)', fontSize: 30, color: 'var(--ink-bright)', letterSpacing: '-0.01em' }}
               />
             </div>
           </div>
@@ -101,17 +102,13 @@ export function ForgeSheetBody({ c, onChange }: ForgeSheetBodyProps) {
             <ProfBadge label={t('wiz.forge.proficiencyBonus')} value={fmtMod(prof)} sub={t('wiz.forge.level', { level: c.level })} />
             <button
               type="button"
-              className="forge-insp"
+              className={cn('forge-insp', c.inspiration && css.inspOn)}
               onClick={() => set({ inspiration: !c.inspiration })}
-              style={{
-                borderColor: c.inspiration ? 'var(--brass)' : 'var(--rule)',
-                background: c.inspiration ? 'linear-gradient(180deg, rgba(176,141,78,0.12), transparent)' : 'var(--abyss)',
-              }}
             >
               <Rune kind="diamond-fill" size={16} color={c.inspiration ? 'var(--gold)' : 'var(--ink-ghost)'} />
-              <div style={{ textAlign: 'left' }}>
-                <div className="ao-overline" style={{ color: c.inspiration ? 'var(--gold-pale)' : 'var(--ink-quiet)' }}>{t('wiz.forge.inspiration')}</div>
-                <div className="ao-codex" style={{ fontSize: 10 }}>{c.inspiration ? t('wiz.forge.granted') : t('wiz.forge.tapToGrant')}</div>
+              <div className={css.taLeft}>
+                <div className={cn('ao-overline', c.inspiration ? css.goldPale : css.inkQuiet)}>{t('wiz.forge.inspiration')}</div>
+                <div className={cn('ao-codex', css.fs10)}>{c.inspiration ? t('wiz.forge.granted') : t('wiz.forge.tapToGrant')}</div>
               </div>
             </button>
           </div>
@@ -135,7 +132,7 @@ export function ForgeSheetBody({ c, onChange }: ForgeSheetBodyProps) {
             <div className="forge-passive">
               <div>
                 <div className="ao-overline">{t('wiz.forge.passiveWisdom')}</div>
-                <div className="ao-codex" style={{ fontSize: 10 }}>{t('wiz.forge.tenPlusPerception')}</div>
+                <div className={cn('ao-codex', css.fs10)}>{t('wiz.forge.tenPlusPerception')}</div>
               </div>
               <div className="forge-passive-num">{passivePerception}</div>
             </div>
@@ -143,7 +140,7 @@ export function ForgeSheetBody({ c, onChange }: ForgeSheetBodyProps) {
 
           <OrdoPanel frame padding={0}>
             <PanelHeader title={t('wiz.forge.profsLanguages')} glyph="scroll" />
-            <div style={{ padding: 14 }}>
+            <div className={css.pad14}>
               <FForgeArea value={c.proficiencies} onChange={(v) => set({ proficiencies: v })} rows={5} placeholder={t('wiz.forge.profsPh')} />
             </div>
           </OrdoPanel>
@@ -164,24 +161,23 @@ export function ForgeSheetBody({ c, onChange }: ForgeSheetBodyProps) {
               tone="ember"
               right={<span className="ao-codex">{c.hp.cur} / {c.hp.max}{c.hp.temp > 0 ? ' (+' + c.hp.temp + ')' : ''}</span>}
             />
-            <div style={{ padding: 16 }}>
+            <div className={css.pad16}>
               <div className="forge-hp-fields">
                 <NumField label={t('wiz.forge.maximum')} value={c.hp.max} onChange={(v) => setHp('max', Number(onlyDigits(v)) || 0)} />
                 <NumField label={t('wiz.forge.current')} value={c.hp.cur} onChange={(v) => setHp('cur', Number(digitsAllowMinus(v)) || 0)} />
                 <NumField label={t('wiz.forge.temporary')} value={c.hp.temp} onChange={(v) => setHp('temp', Number(onlyDigits(v)) || 0)} />
               </div>
-              <div className="ao-bar" style={{ marginTop: 14, height: 8 }}>
+              <div className={cn('ao-bar', css.hpBar)}>
                 <div className="ao-bar-fill ao-bar-fill--gold" style={{ width: hpPct + '%' }} />
               </div>
               <div className="forge-hp-foot">
                 <div className="forge-hd">
-                  <label className="ao-label" style={{ margin: 0 }}>{t('wiz.forge.hitDice')}</label>
+                  <label className={cn('ao-label', css.label0)}>{t('wiz.forge.hitDice')}</label>
                   <input
-                    className="ao-input"
+                    className={cn('ao-input', css.hdInput)}
                     value={c.hitDiceTotal}
                     placeholder="8d10"
                     onChange={(e) => set({ hitDiceTotal: e.target.value })}
-                    style={{ fontFamily: 'var(--font-mono)', textAlign: 'center', color: 'var(--ink-bright)' }}
                   />
                 </div>
                 <DeathSaves succ={c.deathSucc} fail={c.deathFail} onSucc={(n) => setDeath('succ', n)} onFail={(n) => setDeath('fail', n)} />
@@ -205,7 +201,7 @@ export function ForgeSheetBody({ c, onChange }: ForgeSheetBodyProps) {
               {c.attacks.map((atk, i) => (
                 <div className="forge-attack-row" key={i}>
                   <input className="forge-cell" value={atk.name} placeholder={t('wiz.forge.attackNamePh')} onChange={(e) => setAttack(i, { name: e.target.value })} />
-                  <input className="forge-cell forge-cell--c" value={atk.hit} placeholder="+0" onChange={(e) => setAttack(i, { hit: e.target.value })} style={{ fontFamily: 'var(--font-mono)', color: 'var(--gold-pale)' }} />
+                  <input className={cn('forge-cell forge-cell--c', css.cellMono)} value={atk.hit} placeholder="+0" onChange={(e) => setAttack(i, { hit: e.target.value })} />
                   <input className="forge-cell" value={atk.dmg} placeholder={t('wiz.forge.attackDmgPh')} onChange={(e) => setAttack(i, { dmg: e.target.value })} />
                   <button type="button" className="forge-del" title={t('wiz.forge.remove')} onClick={() => delAttack(i)}><Rune kind="x" size={11} /></button>
                 </div>
@@ -215,12 +211,12 @@ export function ForgeSheetBody({ c, onChange }: ForgeSheetBodyProps) {
 
           <OrdoPanel frame padding={0}>
             <PanelHeader title={t('wiz.forge.equipmentCoin')} glyph="coin" />
-            <div style={{ padding: 14 }}>
+            <div className={css.pad14}>
               <div className="forge-coins">
                 {COIN.map((co) => (
                   <div className="forge-coin" key={co.key}>
                     <input className="forge-coin-in" value={c.coins[co.key]} onChange={(e) => setCoin(co.key, onlyDigits(e.target.value))} />
-                    <span className="ao-overline" style={{ fontSize: 9 }}>{co.label}</span>
+                    <span className={cn('ao-overline', css.fs9)}>{co.label}</span>
                   </div>
                 ))}
               </div>
@@ -233,7 +229,7 @@ export function ForgeSheetBody({ c, onChange }: ForgeSheetBodyProps) {
         <div className="forge-col">
           <OrdoPanel frame padding={0}>
             <PanelHeader title={t('wiz.forge.character')} sub={t('wiz.forge.characterSub')} glyph="eye" />
-            <div style={{ padding: 14, display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <div className={css.colPad14}>
               <FForgeArea label={t('wiz.forge.personalityTraits')} value={c.traits} onChange={(v) => set({ traits: v })} rows={3} />
               <FForgeArea label={t('wiz.forge.ideals')} value={c.ideals} onChange={(v) => set({ ideals: v })} rows={2} />
               <FForgeArea label={t('wiz.forge.bonds')} value={c.bonds} onChange={(v) => set({ bonds: v })} rows={2} />
@@ -243,7 +239,7 @@ export function ForgeSheetBody({ c, onChange }: ForgeSheetBodyProps) {
 
           <OrdoPanel frame padding={0}>
             <PanelHeader title={t('wiz.forge.featuresTraits')} sub={t('wiz.forge.featuresSub')} glyph="sigil-3" />
-            <div style={{ padding: 14 }}>
+            <div className={css.pad14}>
               <FForgeArea value={c.features} onChange={(v) => set({ features: v })} rows={12} placeholder={t('wiz.forge.featuresPh')} />
             </div>
           </OrdoPanel>
@@ -273,11 +269,10 @@ function FForgeField({
     <div style={style}>
       {label && <label className="ao-label">{label}</label>}
       <input
-        className="ao-input"
+        className={cn('ao-input', css.fieldInput, mono && css.mono)}
         value={value}
         placeholder={placeholder}
         onChange={(e) => onChange(e.target.value)}
-        style={{ fontFamily: mono ? 'var(--font-mono)' : 'var(--font-sans)', color: 'var(--ink-bright)' }}
       />
     </div>
   );
@@ -296,18 +291,17 @@ function FForgeArea({
   return (
     <div>
       {(label || sub) && (
-        <div style={{ marginBottom: 6 }}>
-          {label && <span className="ao-label" style={{ display: 'inline', letterSpacing: '0.14em' }}>{label}</span>}
-          {sub && <span className="ao-codex" style={{ fontSize: 10, marginLeft: 8 }}>{sub}</span>}
+        <div className={css.mb6}>
+          {label && <span className={cn('ao-label', css.labelInline)}>{label}</span>}
+          {sub && <span className={cn('ao-codex', css.subText)}>{sub}</span>}
         </div>
       )}
       <textarea
-        className="ao-input ao-scroll"
+        className={cn('ao-input ao-scroll', css.area)}
         value={value}
         rows={rows}
         placeholder={placeholder}
         onChange={(e) => onChange(e.target.value)}
-        style={{ fontFamily: 'var(--font-serif)', fontSize: 15, lineHeight: 1.5, color: 'var(--ink)', resize: 'vertical', minHeight: 64 }}
       />
     </div>
   );
@@ -317,14 +311,7 @@ function FProfPip({ on, title }: { on: boolean; title: string }) {
   return (
     <span
       title={title}
-      style={{
-        width: 14, height: 14, flexShrink: 0, display: 'block', pointerEvents: 'none',
-        background: on ? 'var(--gold)' : 'transparent',
-        border: '1px solid ' + (on ? 'var(--brass)' : 'var(--rule)'),
-        transform: 'rotate(45deg)',
-        boxShadow: on ? '0 0 6px rgba(176,141,78,0.5)' : 'none',
-        transition: 'all 150ms',
-      }}
+      className={cn(css.pip, on && css.on)}
     />
   );
 }
@@ -335,22 +322,20 @@ function ClassLevelField({ c, set }: { c: WizardChar; set: (patch: Partial<Wizar
   return (
     <div>
       <label className="ao-label">{t('wiz.forge.classLevel')}</label>
-      <div style={{ display: 'flex', gap: 8 }}>
+      <div className="ao-row ao-gap-8">
         <input
-          className="ao-input"
+          className={cn('ao-input', css.clsInput)}
           value={c.cls}
           placeholder={t('wiz.forge.classPh')}
           onChange={(e) => set({ cls: e.target.value })}
-          style={{ color: 'var(--ink-bright)', flex: 1 }}
         />
         <input
-          className="ao-input"
+          className={cn('ao-input', css.lvlInput)}
           type="number"
           min={1}
           max={20}
           value={c.level}
           onChange={(e) => set({ level: clamp(Number(e.target.value || 1), 1, 20) })}
-          style={{ width: 64, textAlign: 'center', fontFamily: 'var(--font-mono)', color: 'var(--gold-pale)' }}
         />
       </div>
     </div>
@@ -365,7 +350,7 @@ function ProfBadge({ label, value, sub }: { label: string; value: string; sub: s
       <div className="forge-prof-num">{value}</div>
       <div>
         <div className="ao-overline">{label}</div>
-        <div className="ao-codex" style={{ fontSize: 10 }}>{sub}</div>
+        <div className={cn('ao-codex', css.fs10)}>{sub}</div>
       </div>
     </div>
   );
@@ -403,7 +388,7 @@ function AbilityBlock({
       <div className="forge-skills">
         <button type="button" className="forge-skill" onClick={onToggleSave}>
           <FProfPip on={saveOn} title={t('wiz.forge.saveProficiency')} />
-          <span className="forge-skill-label" style={{ color: 'var(--ink)' }}>{t('wiz.forge.savingThrow')}</span>
+          <span className={cn('forge-skill-label', css.inkLabel)}>{t('wiz.forge.savingThrow')}</span>
           <span className="forge-skill-num">{fmtMod(saveBonus)}</span>
         </button>
         {skills.map((s) => {
@@ -436,13 +421,13 @@ function DefenseBox({
   return (
     <div className={'forge-defbox ao-frame' + (shield ? ' forge-defbox--shield' : '')}>
       <span className="ao-frame-c" />
-      <div className="ao-overline" style={{ fontSize: 9, textAlign: 'center' }}>{label}</div>
+      <div className={cn('ao-overline', css.defLabel)}>{label}</div>
       {readOnly || !onChange ? (
         <div className="forge-defnum">{value}</div>
       ) : (
         <input className="forge-defnum forge-defnum--in" value={value} onChange={(e) => onChange(e.target.value)} />
       )}
-      {sub && <div className="ao-codex" style={{ fontSize: 9 }}>{sub}</div>}
+      {sub && <div className={cn('ao-codex', css.fs9)}>{sub}</div>}
     </div>
   );
 }
@@ -451,12 +436,11 @@ function DefenseBox({
 function NumField({ label, value, onChange }: { label: string; value: number; onChange: (v: string) => void }) {
   return (
     <div className="forge-numfield">
-      <label className="ao-label" style={{ textAlign: 'center', margin: '0 0 6px' }}>{label}</label>
+      <label className={cn('ao-label', css.numLabel)}>{label}</label>
       <input
-        className="ao-input"
+        className={cn('ao-input', css.numInput)}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        style={{ textAlign: 'center', fontFamily: 'var(--font-serif)', fontSize: 22, color: 'var(--ink-bright)' }}
       />
     </div>
   );
@@ -474,15 +458,15 @@ function DeathSaves({
   const t = useT();
   const Row = ({ label, n, on, color }: { label: string; n: number; on: (i: number) => void; color: string }) => (
     <div className="forge-death-row">
-      <span className="ao-overline" style={{ fontSize: 9, width: 64 }}>{label}</span>
-      <div style={{ display: 'flex', gap: 6 }}>
+      <span className={cn('ao-overline', css.deathLabel)}>{label}</span>
+      <div className="ao-row ao-gap-6">
         {[1, 2, 3].map((i) => (
           <button
             key={i}
             type="button"
-            className="forge-death-pip"
+            className={cn('forge-death-pip', i <= n && css.deathPipOn)}
             onClick={() => on(i)}
-            style={{ background: i <= n ? color : 'transparent', borderColor: i <= n ? color : 'var(--rule)' }}
+            style={{ '--pip-color': color } as CSSProperties}
           />
         ))}
       </div>
@@ -490,7 +474,7 @@ function DeathSaves({
   );
   return (
     <div className="forge-death">
-      <div className="ao-overline" style={{ fontSize: 9, marginBottom: 6 }}>{t('wiz.forge.deathSaves')}</div>
+      <div className={cn('ao-overline', css.deathHead)}>{t('wiz.forge.deathSaves')}</div>
       <Row label={t('wiz.forge.successes')} n={succ} on={onSucc} color="var(--verdigris)" />
       <Row label={t('wiz.forge.failures')} n={fail} on={onFail} color="var(--ember)" />
     </div>

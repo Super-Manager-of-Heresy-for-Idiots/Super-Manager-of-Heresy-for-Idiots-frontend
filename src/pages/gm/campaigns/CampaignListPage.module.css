@@ -1,0 +1,56 @@
+.header { text-align: center; margin-bottom: 32px; }
+.overlineGold { color: var(--gold); }
+.title { margin-top: 4px; }
+.sub { color: var(--ink-faint); font-size: 13px; margin-top: 4px; }
+
+.joinPanel { max-width: 560px; margin: 0 auto 28px; }
+.joinCol { display: flex; flex-direction: column; gap: 16px; }
+.joinBtn { align-self: flex-end; }
+.ml6 { margin-left: 6px; }
+.ml4 { margin-left: 4px; }
+
+.section { margin-top: 24px; }
+
+.errorBlock { text-align: center; padding: 32px 0; }
+.errorBlockLg { text-align: center; padding: 48px 0; }
+.errorText { color: var(--ink-faint); margin-bottom: 16px; }
+
+.cardGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+
+.skel { padding: 24px; min-height: 150px; }
+.skelLg { padding: 24px; min-height: 180px; }
+.phWide { width: 60%; height: 20px; margin-bottom: 12px; }
+.phNarrow { width: 40%; height: 14px; }
+
+.cardBody { padding: 20px; }
+.cardHead { display: flex; align-items: flex-start; gap: 14px; }
+.cardHeadMain { flex: 1; min-width: 0; }
+.cardTitle { margin: 0; }
+.statusRow { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+
+.memberRow { display: flex; align-items: center; gap: 6px; margin-top: 14px; }
+.memberText { color: var(--ink-quiet); }
+
+.clamp {
+  font-size: 12px; color: var(--ink-faint);
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.clampMt8 { margin-top: 8px; }
+.clampMt12 { margin-top: 12px; }
+
+.cardFooter {
+  display: flex; gap: 6px; padding: 12px 20px;
+  border-top: 1px solid var(--rule); background: var(--abyss);
+}
+.footerBtn { flex: 1; }
+
+.statsRow { display: flex; justify-content: center; gap: 48px; margin: 24px 0; }
+.stat { text-align: center; }
+.valGold { color: var(--gold); }
+.valGreen { color: #7a9866; }
+.valArcane { color: var(--arcane); }
+
+.actionBar { display: flex; justify-content: flex-end; margin: 20px 0; }
+
+.dialogCol { display: flex; flex-direction: column; gap: 16px; }
+.resizeV { resize: vertical; }

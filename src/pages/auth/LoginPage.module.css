@@ -1,0 +1,50 @@
+.rel { position: relative; }
+.pointer { cursor: pointer; }
+.mt4 { margin-top: 4px; }
+
+.heroGlow { position: absolute; inset: 0; background: radial-gradient(60% 50% at 50% 35%, color-mix(in srgb, var(--gold) 10%, transparent), transparent 60%); }
+.heroLines { position: absolute; inset: 0; background: repeating-linear-gradient(0deg, transparent 0 6px, color-mix(in srgb, var(--gold) 2.5%, transparent) 6px 7px); }
+
+.brandName { font-size: 12px; color: var(--gold-pale); }
+
+.heroEyebrow { margin-bottom: 16px; color: var(--ink-faint); }
+.heroTitle { font-size: 56px; line-height: 1.05; max-width: 520px; }
+.heroText { font-size: 20px; margin-top: 18px; max-width: 480px; color: var(--ink-quiet); }
+
+.statRow { display: flex; gap: 28px; margin-top: 28px; }
+.statNum { font-family: var(--font-mono); }
+
+.versionRow { position: relative; display: flex; justify-content: space-between; align-items: flex-end; color: var(--ink-faint); }
+
+.formWrap { width: 100%; max-width: 400px; }
+
+.sealHead { text-align: center; margin-bottom: 28px; }
+.sealTitle { font-size: 16px; margin-top: 14px; }
+.sealSub { font-size: 14px; margin-top: 6px; }
+
+.form { display: flex; flex-direction: column; gap: 18px; margin-top: 22px; }
+.errLine { font-size: 12px; color: var(--ember); display: flex; align-items: center; gap: 6px; margin-top: 4px; }
+.recoverLink { cursor: pointer; color: var(--gold-pale); }
+
+.pwInput { padding-right: 40px; }
+.pwToggle {
+  position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; padding: 0; z-index: 2;
+  background: none; border: none; cursor: pointer;
+  color: var(--ink-faint);
+}
+.pwToggle.on { color: var(--gold-pale); }
+
+.rememberRow { display: flex; align-items: center; gap: 8px; color: var(--ink-quiet); font-size: 12px; }
+.checkbox {
+  width: 14px; height: 14px;
+  border: 1px solid var(--rule-strong);
+  background: var(--abyss);
+  display: inline-flex; align-items: center; justify-content: center;
+  cursor: pointer;
+}
+.checkbox.on { border-color: var(--brass); background: var(--gold); }
+
+.inviteLink { text-decoration: none; text-align: center; margin-top: 8px; }
+.footer { text-align: center; margin-top: 20px; color: var(--ink-faint); }

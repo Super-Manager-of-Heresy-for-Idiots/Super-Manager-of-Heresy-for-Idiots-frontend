@@ -1,0 +1,18 @@
+.wrap { display: flex; gap: 8px; flex-wrap: wrap; }
+.wrap.compact { gap: 6px; }
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  background: var(--abyss);
+  border: 1px solid var(--hairline);
+}
+.wrap.compact .pill { padding: 3px 8px; }
+
+.num { font-size: 12px; color: var(--ink-bright); }
+.num.zero { color: var(--ink-ghost); }
+.wrap.compact .num { font-size: 11px; }
+
+.label { font-size: 9px; color: var(--ink-faint); }

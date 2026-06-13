@@ -1,0 +1,32 @@
+.seal {
+  width: var(--seal);
+  height: var(--seal);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.hexOuter {
+  position: absolute;
+  inset: 0;
+  border: 1px solid var(--brass);
+  background: radial-gradient(circle at 30% 30%, #2a241f, var(--abyss));
+  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+}
+.hexInner {
+  position: absolute;
+  inset: 4px;
+  border: 1px solid var(--hairline);
+  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+}
+
+.center { position: relative; text-align: center; line-height: 1; }
+.ver { font-size: 8px; color: var(--ink-faint); }
+.num {
+  font-family: var(--font-serif);
+  font-size: calc(var(--seal) * 0.42);
+  color: var(--gold-pale);
+  font-weight: 600;
+}

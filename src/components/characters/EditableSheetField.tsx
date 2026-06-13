@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Sigil } from '@/components/ordo';
 import { useT } from '@/i18n/I18nContext';
+import { cn } from '@/lib/utils';
+import s from './EditableSheetField.module.css';
 
 interface EditableSheetFieldProps {
   /** Current persisted value (null/empty → placeholder). */
@@ -44,20 +46,16 @@ export function EditableSheetField({
         role="button"
         tabIndex={0}
         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setEditing(true); } }}
-        style={{ cursor: 'pointer', minHeight: empty ? 96 : undefined }}
+        className={cn(s.display, empty && s.empty)}
         title={t('common.edit') as string}
       >
         {empty ? (
-          <div style={{ padding: '32px 24px', textAlign: 'center' }}>
+          <div className={s.emptyInner}>
             <Sigil size={36} glyph="sigil-1" color="var(--ink-faint)" />
-            <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 12, marginTop: 12, lineHeight: 1.5 }}>
-              {placeholder}
-            </p>
+            <p className={cn('ao-italic', s.placeholder)}>{placeholder}</p>
           </div>
         ) : (
-          <p className="ao-italic" style={{ padding: 14, fontSize: 13, color: 'var(--ink-quiet)', lineHeight: 1.55, whiteSpace: 'pre-wrap', margin: 0 }}>
-            {value}
-          </p>
+          <p className={cn('ao-italic', s.text)}>{value}</p>
         )}
       </div>
     );
@@ -82,7 +80,7 @@ export function EditableSheetField({
   };
 
   return (
-    <div style={{ padding: 14, display: 'flex', flexDirection: 'column', gap: 8 }}>
+    <div className={s.editor}>
       {variant === 'multiline' ? (
         <textarea
           autoFocus
@@ -104,13 +102,13 @@ export function EditableSheetField({
           onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); commit(); } else if (e.key === 'Escape') { e.preventDefault(); cancel(); } }}
         />
       )}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+      <div className={s.row}>
         {maxLength != null ? (
-          <span className="ao-codex" style={{ fontSize: 10, color: overflow ? 'var(--ember)' : 'var(--ink-faint)' }}>
+          <span className={cn('ao-codex', s.counter, overflow && s.over)}>
             {draft.length} / {maxLength}
           </span>
         ) : <span />}
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div className={s.actions}>
           <button className="ao-btn ao-btn--ghost ao-btn--sm" onClick={cancel} disabled={saving}>
             {t('common.cancel')}
           </button>

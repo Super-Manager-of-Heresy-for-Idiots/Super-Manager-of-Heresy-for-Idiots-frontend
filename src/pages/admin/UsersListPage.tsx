@@ -1,8 +1,10 @@
 import { useState, useMemo } from 'react';
-import { Rune, OrdoPanel, OrdoChip, PanelHeader } from '@/components/ordo';
-import { formatDate } from '@/lib/utils';
+import type { CSSProperties } from 'react';
+import { Rune, OrdoPanel, PanelHeader } from '@/components/ordo';
+import { formatDate, cn } from '@/lib/utils';
 import { useUsers } from '@/hooks/useAdmin';
 import { useT } from '@/i18n/I18nContext';
+import s from './UsersListPage.module.css';
 
 /* ── role config ─────────────────────────────────────────────── */
 const ROLE_CFG: Record<string, { c: string; glyph: string; labelKey: string }> = {
@@ -21,22 +23,7 @@ function RoleBadge({ role }: { role: string }) {
   const label = cfg.labelKey ? t(cfg.labelKey) : role;
 
   return (
-    <span
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: 7,
-        padding: '4px 10px 4px 7px',
-        background: 'rgba(0,0,0,0.45)',
-        border: `1px solid ${color}66`,
-        borderLeft: `2px solid ${color}`,
-        fontFamily: 'var(--font-display)',
-        fontSize: 10,
-        letterSpacing: '0.18em',
-        color: color,
-        textTransform: 'uppercase',
-      }}
-    >
+    <span className={s.roleBadge} style={{ '--c': color } as CSSProperties}>
       <Rune kind={cfg.glyph} size={10} color={color} />
       {label}
     </span>
@@ -74,8 +61,8 @@ export default function UsersListPage() {
   /* ── error state ────────────────────────────────────────────── */
   if (error) {
     return (
-      <div style={{ textAlign: 'center', padding: '48px 0' }}>
-        <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginBottom: 16 }}>
+      <div className={s.errorBox}>
+        <p className={cn('ao-italic', s.errorText)}>
           {t('adm.users.errorBody')}
         </p>
         <button className="ao-btn" onClick={() => refetch()}>{t('common.retry')}</button>
@@ -95,44 +82,27 @@ export default function UsersListPage() {
   return (
     <div>
       {/* ── header row ──────────────────────────────────────── */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'flex-end',
-          justifyContent: 'space-between',
-          marginBottom: 28,
-        }}
-      >
+      <div className={s.header}>
         {/* left: overline + title */}
         <div>
-          <p className="ao-overline" style={{ color: 'var(--gold)', marginBottom: 2 }}>
+          <p className={cn('ao-overline', s.overline)}>
             {t('adm.users.overline')}
           </p>
-          <h3 className="ao-h3" style={{ margin: 0 }}>{t('adm.users.title')}</h3>
+          <h3 className={cn('ao-h3', s.title)}>{t('adm.users.title')}</h3>
         </div>
 
         {/* right: stat counters */}
-        <div style={{ display: 'flex', gap: 32 }}>
+        <div className={s.stats}>
           {([
             { label: t('adm.users.statPlayers'),      value: roleCounts.PLAYER,      color: '#7a9866' },
             { label: t('adm.users.statChroniclers'),   value: roleCounts.GAME_MASTER, color: '#c9a84c' },
             { label: t('adm.users.statInquisitors'),   value: roleCounts.ADMIN,       color: '#c0584a' },
           ] as const).map((stat) => (
-            <div key={stat.label} style={{ textAlign: 'center' }}>
-              <div
-                style={{
-                  fontFamily: 'var(--font-serif, Georgia, serif)',
-                  fontSize: 28,
-                  lineHeight: 1,
-                  color: 'var(--ink-bright)',
-                }}
-              >
-                {isLoading ? '\u2014' : stat.value}
+            <div key={stat.label} className={s.stat}>
+              <div className={s.statValue}>
+                {isLoading ? '—' : stat.value}
               </div>
-              <div
-                className="ao-overline"
-                style={{ fontSize: 9, marginTop: 4, color: stat.color }}
-              >
+              <div className={cn('ao-overline', s.statLabel)} style={{ '--c': stat.color } as CSSProperties}>
                 {stat.label}
               </div>
             </div>
@@ -147,24 +117,10 @@ export default function UsersListPage() {
           title={t('adm.users.panelTitle')}
           glyph="scroll"
           right={
-            <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-              <Rune
-                kind="search"
-                size={13}
-                color="var(--ink-faint)"
-                className=""
-              />
+            <div className={s.searchWrap}>
+              <Rune kind="search" size={13} color="var(--ink-faint)" />
               <input
-                className="ao-input"
-                style={{
-                  paddingLeft: 8,
-                  width: 220,
-                  fontSize: 12,
-                  background: 'transparent',
-                  border: 'none',
-                  borderBottom: '1px solid var(--rule)',
-                  borderRadius: 0,
-                }}
+                className={cn('ao-input', s.searchInput)}
                 placeholder={t('adm.users.searchPlaceholder')}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -174,29 +130,16 @@ export default function UsersListPage() {
         />
 
         {/* ── role filter tabs ──────────────────────────────── */}
-        <div
-          style={{
-            display: 'flex',
-            gap: 4,
-            padding: '10px 16px',
-            borderBottom: '1px solid var(--rule)',
-          }}
-        >
+        <div className={s.tabs}>
           {tabs.map((tab) => (
             <button
               key={tab.key}
-              className={`ao-tab ${roleFilter === tab.key ? 'ao-tab--active' : ''}`}
+              className={cn('ao-tab', roleFilter === tab.key && 'ao-tab--active')}
               onClick={() => setRoleFilter(tab.key)}
             >
               {tab.label}
-              <span
-                style={{
-                  marginLeft: 5,
-                  opacity: 0.5,
-                  fontSize: '0.85em',
-                }}
-              >
-                {isLoading ? '\u2014' : tab.count}
+              <span className={s.tabCount}>
+                {isLoading ? '—' : tab.count}
               </span>
             </button>
           ))}
@@ -204,82 +147,54 @@ export default function UsersListPage() {
 
         {/* ── table ─────────────────────────────────────────── */}
         {isLoading ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: 16 }}>
+          <div className={s.skelCol}>
             {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="ao-ph" style={{ width: '100%', height: 48 }} />
+              <div key={i} className={cn('ao-ph', s.skelRow)} />
             ))}
           </div>
         ) : (
-          <table className="ao-table" style={{ width: '100%' }}>
+          <table className={cn('ao-table', s.table)}>
             <thead>
               <tr>
-                <th style={{ textAlign: 'left', padding: '12px 16px' }}>{t('adm.users.colUsername')}</th>
-                <th style={{ textAlign: 'left', padding: '12px 16px' }}>{t('adm.users.colSigilAddress')}</th>
-                <th style={{ textAlign: 'left', padding: '12px 16px' }}>{t('adm.users.colOffice')}</th>
-                <th style={{ textAlign: 'left', padding: '12px 16px' }}>{t('adm.users.colInscribed')}</th>
-                <th style={{ width: 40, padding: '12px 8px' }} />
+                <th className={s.th}>{t('adm.users.colUsername')}</th>
+                <th className={s.th}>{t('adm.users.colSigilAddress')}</th>
+                <th className={s.th}>{t('adm.users.colOffice')}</th>
+                <th className={s.th}>{t('adm.users.colInscribed')}</th>
+                <th className={s.thActions} />
               </tr>
             </thead>
             <tbody>
               {filteredUsers?.map((user) => (
                 <tr key={user.id}>
                   {/* username with placeholder avatar */}
-                  <td style={{ padding: '10px 16px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <div
-                        style={{
-                          width: 28,
-                          height: 28,
-                          borderRadius: '50%',
-                          background: 'var(--abyss)',
-                          border: '1px solid var(--rule)',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          flexShrink: 0,
-                        }}
-                      >
+                  <td className={s.td}>
+                    <div className={s.userCell}>
+                      <div className={s.avatar}>
                         <Rune kind="sigil-1" size={14} color="var(--ink-faint)" />
                       </div>
-                      <span
-                        style={{
-                          fontFamily: 'var(--font-mono)',
-                          color: 'var(--ink-bright)',
-                          fontSize: 13,
-                        }}
-                      >
-                        {user.username}
-                      </span>
+                      <span className={s.username}>{user.username}</span>
                     </div>
                   </td>
 
                   {/* email / sigil address */}
-                  <td style={{ padding: '10px 16px' }}>
-                    <span
-                      className="ao-italic"
-                      style={{ color: 'var(--ink-quiet)', fontSize: 13 }}
-                    >
-                      {user.email}
-                    </span>
+                  <td className={s.td}>
+                    <span className={cn('ao-italic', s.email)}>{user.email}</span>
                   </td>
 
                   {/* office / role badge */}
-                  <td style={{ padding: '10px 16px' }}>
+                  <td className={s.td}>
                     <RoleBadge role={user.role} />
                   </td>
 
                   {/* inscribed / created date */}
-                  <td style={{ padding: '10px 16px' }}>
-                    <span className="ao-codex" style={{ color: 'var(--ink-faint)', fontSize: 12 }}>
-                      {formatDate(user.createdAt)}
-                    </span>
+                  <td className={s.td}>
+                    <span className={cn('ao-codex', s.date)}>{formatDate(user.createdAt)}</span>
                   </td>
 
                   {/* dots menu */}
-                  <td style={{ padding: '10px 8px', textAlign: 'center' }}>
+                  <td className={s.actionsTd}>
                     <button
-                      className="ao-btn ao-btn--ghost"
-                      style={{ padding: 4, lineHeight: 1, minWidth: 0 }}
+                      className={cn('ao-btn ao-btn--ghost', s.dotsBtn)}
                       aria-label={t('adm.users.actions')}
                     >
                       <Rune kind="dots" size={16} color="var(--ink-quiet)" />
@@ -290,10 +205,8 @@ export default function UsersListPage() {
 
               {filteredUsers?.length === 0 && (
                 <tr>
-                  <td colSpan={5} style={{ padding: '32px 16px', textAlign: 'center' }}>
-                    <span className="ao-italic" style={{ color: 'var(--ink-faint)' }}>
-                      {t('adm.users.noSouls')}
-                    </span>
+                  <td colSpan={5} className={s.emptyCell}>
+                    <span className={cn('ao-italic', s.emptyText)}>{t('adm.users.noSouls')}</span>
                   </td>
                 </tr>
               )}
@@ -302,25 +215,13 @@ export default function UsersListPage() {
         )}
 
         {/* ── footer ────────────────────────────────────────── */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '10px 16px',
-            borderTop: '1px solid var(--rule)',
-            fontSize: 11,
-            color: 'var(--ink-faint)',
-            fontFamily: 'var(--font-display)',
-            letterSpacing: '0.06em',
-          }}
-        >
+        <div className={s.footer}>
           <span>
             {isLoading
-              ? '\u2014'
+              ? '—'
               : t('adm.users.soulsCount', { filtered: filteredUsers?.length ?? 0, total: roleCounts.total })}
           </span>
-          <span style={{ opacity: 0.6 }}>{t('adm.users.sortedRecent')}</span>
+          <span className={s.footerRight}>{t('adm.users.sortedRecent')}</span>
         </div>
       </OrdoPanel>
     </div>

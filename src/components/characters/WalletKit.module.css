@@ -1,0 +1,238 @@
+/* ── CurrencyRow ─────────────────────────────────────────────── */
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--hairline);
+}
+.coin {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  border: 1px solid var(--rule);
+  background: var(--abyss);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.5);
+}
+.info { flex: 1; min-width: 0; }
+.name { color: var(--ink-bright); font-size: 13.5px; }
+.eq { font-size: 10px; margin-top: 2px; color: var(--ink-faint); }
+
+.rowControls { display: flex; align-items: center; gap: 8px; }
+.rowControls.tight { gap: 0; }
+.amount {
+  min-width: 72px;
+  text-align: right;
+  color: var(--ink-bright);
+  font-size: 22px;
+  line-height: 1;
+}
+
+/* ── CurrencyPanel ───────────────────────────────────────────── */
+.headTotal { color: var(--gold-pale); font-size: 12px; }
+.empty { padding: 24px 16px; text-align: center; color: var(--ink-faint); font-size: 12px; }
+
+.totalRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  background: linear-gradient(180deg, rgba(176, 141, 78, 0.1), transparent);
+  border-top: 1px solid var(--rule);
+}
+.totalCoin {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border: 1px solid var(--brass);
+  background: radial-gradient(circle at 30% 30%, #2a241f, #0d0a08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.totalInfo { flex: 1; }
+.totalLabel { color: var(--ink-quiet); }
+.totalSub { margin-top: 2px; font-size: 10px; color: var(--ink-faint); }
+.totalVal { display: flex; align-items: baseline; gap: 6px; }
+.totalNum { color: var(--gold-pale); font-size: 28px; line-height: 1; }
+.totalUnit { color: var(--brass); font-size: 13px; }
+
+/* ── TopupForm ───────────────────────────────────────────────── */
+.formPad { padding: 20px; }
+.muted { color: var(--ink-faint); font-size: 13px; }
+.body { padding: 18px; display: flex; flex-direction: column; gap: 14px; }
+
+.modeToggle { display: flex; border: 1px solid var(--rule); }
+.modeBtn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px;
+  font-family: var(--font-display);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  color: var(--ink-faint);
+}
+.modeBtn.first { border-right: 1px solid var(--rule); }
+.modeBtn.on {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--col) 13%, transparent), transparent);
+  color: var(--col);
+  box-shadow: inset 0 -2px 0 var(--col);
+}
+
+.select {
+  width: 100%;
+  padding: 9px 10px;
+  background: var(--abyss);
+  border: 1px solid var(--rule);
+  color: var(--ink-bright);
+  font-size: 13px;
+  font-family: var(--font-display);
+  cursor: pointer;
+}
+
+.amountWrap { position: relative; }
+.amountSign {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: var(--font-display);
+  font-size: 24px;
+  color: var(--accent);
+  pointer-events: none;
+}
+.amountInput {
+  width: 100%;
+  background: var(--abyss);
+  border: 1px solid var(--accent);
+  color: var(--ink-bright);
+  font-family: var(--font-mono, monospace);
+  font-size: 26px;
+  text-align: right;
+  padding: 12px 14px;
+  outline: none;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 20%, transparent);
+}
+
+.presets { display: flex; gap: 6px; }
+.preset {
+  flex: 1;
+  padding: 6px 0;
+  background: transparent;
+  border: 1px solid var(--rule);
+  color: var(--ink-quiet);
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.reasonInput {
+  width: 100%;
+  padding: 9px 10px;
+  background: var(--abyss);
+  border: 1px solid var(--rule);
+  color: var(--ink-bright);
+  font-size: 13px;
+}
+
+.preview {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  background: var(--abyss);
+  border: 1px solid var(--rule);
+}
+.previewCol { flex: 1; }
+.previewColRight { flex: 1; text-align: right; }
+.previewLabel { font-size: 9px; color: var(--ink-faint); }
+.previewCur { color: var(--ink-quiet); font-size: 18px; margin-top: 2px; }
+.previewNext { font-size: 22px; margin-top: 2px; }
+
+.warn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: color-mix(in srgb, var(--ember) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ember) 40%, transparent);
+  border-left: 2px solid var(--ember);
+}
+.warnText { font-size: 12.5px; color: var(--ink); }
+
+.submitLabel { margin-left: 6px; }
+
+/* ── WalletJournal ───────────────────────────────────────────── */
+.right { text-align: right; }
+.when { color: var(--ink-faint); white-space: nowrap; }
+.curName { color: var(--ink-bright); }
+.balance { text-align: right; color: var(--ink-quiet); }
+.reason { color: var(--ink-faint); }
+.by { color: var(--ink-quiet); }
+.delta {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  justify-content: flex-end;
+}
+.deltaPos { color: #7a9866; }
+.deltaNeg { color: #d8896a; }
+.journalFoot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  border-top: 1px solid var(--rule);
+}
+
+/* ── WalletSkeleton ──────────────────────────────────────────── */
+.skelList { padding: 4px 0; }
+.skelRow {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--hairline);
+}
+.skelCoin { width: 30px; height: 30px; flex-shrink: 0; }
+.skelInfo { flex: 1; }
+.skelLine1 { height: 13px; margin-bottom: 7px; }
+.skelLine2 { width: 30%; height: 10px; }
+.skelAmount { width: 72px; height: 22px; }
+
+/* ── WalletErrorBanner ───────────────────────────────────────── */
+.errPanel.errPanel { border-color: color-mix(in srgb, var(--ember) 50%, transparent); }
+.errBox {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 22px;
+  background: color-mix(in srgb, var(--ember) 8%, transparent);
+}
+.errInfo { flex: 1; min-width: 0; }
+.errOverline { color: #d8896a; }
+.errTitle { margin-top: 3px; color: var(--ink-bright); }
+.errBody { margin-top: 3px; font-size: 13px; color: var(--ink-quiet); }
+.errBtn { flex-shrink: 0; }
+
+/* ── WalletReadOnlyBanner ────────────────────────────────────── */
+.roBanner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 16px;
+  background: color-mix(in srgb, var(--burgundy) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--burgundy) 40%, transparent);
+  border-left: 2px solid var(--burgundy);
+}
+.roText { font-size: 13px; color: var(--ink); }

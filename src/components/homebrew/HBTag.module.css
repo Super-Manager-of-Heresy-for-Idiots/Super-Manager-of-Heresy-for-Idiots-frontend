@@ -1,0 +1,28 @@
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 9px;
+  background: var(--abyss);
+  border: 1px solid var(--hairline);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-quiet);
+}
+.tag.active {
+  background: color-mix(in srgb, var(--gold) 10%, transparent);
+  border-color: var(--brass);
+  color: var(--gold-pale);
+}
+.tag.clickable { cursor: pointer; }
+
+.dot {
+  width: 4px;
+  height: 4px;
+  background: var(--bronze);
+  transform: rotate(45deg);
+  flex-shrink: 0;
+}
+.tag.active .dot { background: var(--gold); }
+
+.count { color: var(--ink-faint); font-size: 10px; }

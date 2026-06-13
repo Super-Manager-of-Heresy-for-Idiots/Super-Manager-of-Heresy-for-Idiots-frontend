@@ -1,0 +1,43 @@
+/* ── header ──────────────────────────────────────────────────── */
+.header { margin-bottom: 28px; }
+.headerLg { margin-bottom: 32px; }
+.overline { color: var(--gold); }
+.heading { margin-top: 4px; }
+.subtitle { color: var(--ink-faint); font-size: 13px; margin-top: 4px; }
+
+/* ── loading / error ─────────────────────────────────────────── */
+.skelGrid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 18px; }
+.skelCard { padding: 24px; min-height: 300px; }
+.skelLine1 { width: 50%; height: 16px; margin-bottom: 16px; }
+.skelLine2 { width: 80%; height: 14px; margin-bottom: 8px; }
+.skelLine3 { width: 60%; height: 14px; }
+.errorBox { text-align: center; padding: 48px 0; }
+.errorText { color: var(--ink-faint); margin-bottom: 16px; }
+
+/* ── main grid ───────────────────────────────────────────────── */
+.mainGrid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 18px; align-items: start; }
+
+/* ── library list ────────────────────────────────────────────── */
+.emptyWrap { padding: 36px 20px; text-align: center; }
+.entryRow { display: flex; align-items: flex-start; gap: 14px; padding: 16px 18px; }
+.entryRow.divided { border-bottom: 1px solid var(--hairline); }
+.entryMain { flex: 1; min-width: 0; }
+.entryHead { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.entryTitle { font-size: 14px; color: var(--ink-bright); font-weight: 500; }
+.attachedTag {
+  font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; padding: 2px 7px;
+  background: rgba(122,152,102,0.15); color: #7a9866; font-family: var(--font-mono);
+}
+.entryBy { font-size: 11px; color: var(--ink-faint); margin-top: 3px; }
+.ratingWrap { margin-top: 8px; }
+
+/* ── attach panel ────────────────────────────────────────────── */
+.attachBody { padding: 18px; }
+.attachIntro { color: var(--ink-quiet); font-size: 13px; margin-bottom: 16px; }
+.fieldSelect { width: 100%; }
+.fieldSpacer { margin-top: 12px; }
+.attachFooter { display: flex; justify-content: flex-end; margin-top: 16px; }
+.attachBtnLabel { margin-left: 6px; }
+
+/* ── dialog ──────────────────────────────────────────────────── */
+.dialogFields { display: flex; flex-direction: column; gap: 16px; }

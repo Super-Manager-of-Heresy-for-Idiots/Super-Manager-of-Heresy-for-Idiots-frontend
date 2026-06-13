@@ -21,6 +21,8 @@ import { useCharacter } from '@/hooks/useCharacter';
 import { useBuffsDebuffs } from '@/hooks/useAdmin';
 import { useAuthStore } from '@/store/authStore';
 import { useT } from '@/i18n/I18nContext';
+import { cn } from '@/lib/utils';
+import s from './ApplyEffectPage.module.css';
 
 /* ================================================================== */
 /*  ApplyEffectPage                                                   */
@@ -107,42 +109,22 @@ export default function ApplyEffectPage() {
   if (isLoading) {
     return (
       <div>
-        <BackLink to={backTo} label={t('camp2.back.character')} style={{ marginBottom: 12 }} />
-        <div style={{ marginBottom: 32 }}>
-          <p className="ao-overline" style={{ color: 'var(--gold)' }}>
+        <BackLink to={backTo} label={t('camp2.back.character')} className={s.backLink} />
+        <div className={s.headerBlock}>
+          <p className={cn('ao-overline', s.overlineGold)}>
             {t('camp2.effect.charEffectsOverline')}
           </p>
-          <h3 className="ao-h3" style={{ marginTop: 4 }}>
+          <h3 className={cn('ao-h3', s.title)}>
             {t('camp2.effect.activeEffectsTitle')}
           </h3>
         </div>
-        <div
-          className="ao-rgrid"
-          style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr 1.2fr',
-            gap: 20,
-          }}
-        >
+        <div className={cn('ao-rgrid', s.skelGrid)}>
           {[0, 1].map((i) => (
-            <div
-              key={i}
-              className="ao-panel ao-frame ao-breathe"
-              style={{ padding: 24, minHeight: 320 }}
-            >
+            <div key={i} className={cn('ao-panel ao-frame ao-breathe', s.skelPanel)}>
               <span className="ao-frame-c" />
-              <div
-                className="ao-ph"
-                style={{ width: '50%', height: 16, marginBottom: 16 }}
-              />
-              <div
-                className="ao-ph"
-                style={{ width: '80%', height: 14, marginBottom: 8 }}
-              />
-              <div
-                className="ao-ph"
-                style={{ width: '60%', height: 14 }}
-              />
+              <div className={cn('ao-ph', s.phW50H16)} />
+              <div className={cn('ao-ph', s.phW80H14)} />
+              <div className={cn('ao-ph', s.phW60H14)} />
             </div>
           ))}
         </div>
@@ -154,12 +136,9 @@ export default function ApplyEffectPage() {
   if (charError || effectsError) {
     return (
       <div>
-        <BackLink to={backTo} label={t('camp2.back.character')} style={{ marginBottom: 12 }} />
-        <div style={{ textAlign: 'center', padding: '48px 0' }}>
-          <p
-            className="ao-italic"
-            style={{ color: 'var(--ink-faint)', marginBottom: 16 }}
-          >
+        <BackLink to={backTo} label={t('camp2.back.character')} className={s.backLink} />
+        <div className={s.errorBlock}>
+          <p className={cn('ao-italic', s.errorText)}>
             {t('camp2.effect.loadError')}
           </p>
           <button className="ao-btn" onClick={() => refetchEffects()}>
@@ -173,34 +152,18 @@ export default function ApplyEffectPage() {
   /* ---- render ---- */
   return (
     <div>
-      <BackLink to={backTo} label={t('camp2.back.character')} style={{ marginBottom: 12 }} />
+      <BackLink to={backTo} label={t('camp2.back.character')} className={s.backLink} />
       {/* Header */}
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'flex-start',
-          flexWrap: 'wrap',
-          gap: 16,
-          marginBottom: 28,
-        }}
-      >
+      <div className={s.header}>
         <div>
-          <p className="ao-overline" style={{ color: 'var(--gold)' }}>
+          <p className={cn('ao-overline', s.overlineGold)}>
             {t('camp2.effect.gmTools')}
           </p>
-          <h3 className="ao-h3" style={{ marginTop: 4 }}>
+          <h3 className={cn('ao-h3', s.title)}>
             {t('camp2.effect.applyTitle')}
           </h3>
           {character && (
-            <p
-              className="ao-italic"
-              style={{
-                color: 'var(--ink-quiet)',
-                fontSize: 13,
-                marginTop: 4,
-              }}
-            >
+            <p className={cn('ao-italic', s.subtitle)}>
               {t('camp2.effect.effectsFor')}{' '}
               <strong>{character.name}</strong>
             </p>
@@ -214,17 +177,9 @@ export default function ApplyEffectPage() {
       </div>
 
       {/* Main Grid: Picker + Active Ledger */}
-      <div
-        className="ao-rgrid"
-        style={{
-          display: 'grid',
-          gridTemplateColumns: canManageEffects ? '1fr 1.2fr' : '1fr',
-          gap: 20,
-          alignItems: 'start',
-        }}
-      >
+      <div className={cn('ao-rgrid', s.mainGrid, !canManageEffects && s.single)}>
         {/* ════════════ Picker Panel ════════════ */}
-        <OrdoPanel frame padding={0} style={{ display: canManageEffects ? undefined : 'none' }}>
+        <OrdoPanel frame padding={0} className={canManageEffects ? undefined : s.hidden}>
           <PanelHeader
             title={t('camp2.effect.picker')}
             sub={t('camp2.effect.available', { count: filteredBd.length })}
@@ -233,28 +188,11 @@ export default function ApplyEffectPage() {
           />
 
           {/* Search */}
-          <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--rule)' }}>
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-                padding: '6px 10px',
-                border: '1px solid var(--rule)',
-                background: 'var(--abyss)',
-              }}
-            >
+          <div className={s.searchWrap}>
+            <div className={s.searchBox}>
               <Rune kind="search" size={14} color="var(--ink-faint)" />
               <input
-                style={{
-                  flex: 1,
-                  background: 'transparent',
-                  border: 'none',
-                  outline: 'none',
-                  color: 'var(--ink)',
-                  fontFamily: 'var(--font-body)',
-                  fontSize: 13,
-                }}
+                className={s.searchInput}
                 placeholder={t('camp2.effect.searchPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -263,25 +201,14 @@ export default function ApplyEffectPage() {
           </div>
 
           {/* List */}
-          <div style={{ maxHeight: 340, overflowY: 'auto' }}>
+          <div className={s.list}>
             {bdLoading ? (
-              <div
-                style={{
-                  padding: 24,
-                  textAlign: 'center',
-                }}
-              >
-                <Loader2
-                  className="h-5 w-5 animate-spin"
-                  style={{ color: 'var(--ink-faint)', margin: '0 auto' }}
-                />
+              <div className={s.loadingBox}>
+                <Loader2 className={cn('h-5 w-5 animate-spin', s.spinnerInk)} />
               </div>
             ) : filteredBd.length === 0 ? (
-              <div style={{ padding: '24px 16px', textAlign: 'center' }}>
-                <p
-                  className="ao-italic"
-                  style={{ color: 'var(--ink-faint)', fontSize: 13 }}
-                >
+              <div className={s.emptyBox}>
+                <p className={cn('ao-italic', s.emptyText)}>
                   {t('camp2.effect.noMatch')}
                 </p>
               </div>
@@ -291,17 +218,7 @@ export default function ApplyEffectPage() {
                 return (
                   <div
                     key={bd.id}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 10,
-                      padding: '10px 16px',
-                      borderBottom: '1px solid var(--hairline)',
-                      background: isActive
-                        ? 'rgba(212,180,120,0.08)'
-                        : 'transparent',
-                      cursor: 'pointer',
-                    }}
+                    className={cn(s.bdRow, isActive && s.active)}
                     onClick={() =>
                       setSelectedBdId(isActive ? null : bd.id)
                     }
@@ -311,39 +228,18 @@ export default function ApplyEffectPage() {
                       size={14}
                       color={bd.isBuff ? '#7a9866' : '#c9803a'}
                     />
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 6,
-                        }}
-                      >
-                        <span
-                          className="ao-h5"
-                          style={{ fontSize: 12 }}
-                        >
+                    <div className={s.bdMain}>
+                      <div className={s.bdNameRow}>
+                        <span className={cn('ao-h5', s.bdName)}>
                           {bd.name}
                         </span>
-                        <span
-                          className="ao-overline"
-                          style={{
-                            fontSize: 8,
-                            color: bd.isBuff
-                              ? '#7a9866'
-                              : '#c9803a',
-                          }}
-                        >
+                        <span className={cn('ao-overline', s.bdTag, bd.isBuff ? s.tagBuff : s.tagDebuff)}>
                           {bd.isBuff ? t('camp2.effect.buff') : t('camp2.effect.debuff')}
                         </span>
                       </div>
                       {bd.targetStatName &&
                         bd.modifierValue != null && (
-                          <div
-                            style={{
-                              marginTop: 3,
-                            }}
-                          >
+                          <div className={s.modTagWrap}>
                             <ModifierTag
                               stat={bd.targetStatName}
                               value={bd.modifierValue}
@@ -367,29 +263,13 @@ export default function ApplyEffectPage() {
 
           {/* Duration + Apply */}
           {selectedBdId && (
-            <div
-              style={{
-                padding: '14px 16px',
-                borderTop: '1px solid var(--rule)',
-                background: 'var(--abyss)',
-              }}
-            >
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 10,
-                  marginBottom: 12,
-                }}
-              >
-                <label
-                  className="ao-label"
-                  style={{ marginBottom: 0, fontSize: 11 }}
-                >
+            <div className={s.applyBar}>
+              <div className={s.durationRow}>
+                <label className={cn('ao-label', s.durationLabel)}>
                   {t('camp2.effect.durationRounds')}
                 </label>
                 <input
-                  className="ao-input"
+                  className={cn('ao-input', s.durationInput)}
                   type="number"
                   min="0"
                   value={durationRounds}
@@ -397,17 +277,10 @@ export default function ApplyEffectPage() {
                     setDurationRounds(e.target.value)
                   }
                   placeholder={t('camp2.effect.permanent')}
-                  style={{
-                    width: 100,
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: 13,
-                    textAlign: 'center',
-                  }}
                 />
               </div>
               <button
-                className="ao-btn ao-btn--primary"
-                style={{ width: '100%' }}
+                className={cn('ao-btn ao-btn--primary', s.applyBtn)}
                 onClick={handleApply}
                 disabled={applyMutation.isPending}
               >
@@ -420,7 +293,7 @@ export default function ApplyEffectPage() {
                       size={14}
                       color="currentColor"
                     />
-                    <span style={{ marginLeft: 6 }}>
+                    <span className={s.ml6}>
                       {t('camp2.effect.impose')}
                     </span>
                   </>
@@ -440,19 +313,8 @@ export default function ApplyEffectPage() {
 
           {/* Effect Rows */}
           {!effects || effects.length === 0 ? (
-            <div
-              style={{
-                padding: '36px 20px',
-                textAlign: 'center',
-              }}
-            >
-              <p
-                className="ao-italic"
-                style={{
-                  color: 'var(--ink-faint)',
-                  fontSize: 13,
-                }}
-              >
+            <div className={s.ledgerEmpty}>
+              <p className={cn('ao-italic', s.emptyText)}>
                 {t('camp2.effect.noneActive')}
               </p>
             </div>
@@ -461,20 +323,8 @@ export default function ApplyEffectPage() {
               {/* Buffs section */}
               {buffCount > 0 && (
                 <>
-                  <div
-                    style={{
-                      padding: '6px 16px',
-                      background: 'rgba(122,152,102,0.04)',
-                      borderBottom: '1px solid var(--hairline)',
-                    }}
-                  >
-                    <span
-                      className="ao-overline"
-                      style={{
-                        fontSize: 9,
-                        color: '#7a9866',
-                      }}
-                    >
+                  <div className={cn(s.sectionHead, s.sectionHeadBuff)}>
+                    <span className={cn('ao-overline', s.sectionLabel, s.tagBuff)}>
                       {t('camp2.effect.boons', { count: buffCount })}
                     </span>
                   </div>
@@ -493,20 +343,8 @@ export default function ApplyEffectPage() {
               {/* Debuffs section */}
               {debuffCount > 0 && (
                 <>
-                  <div
-                    style={{
-                      padding: '6px 16px',
-                      background: 'rgba(201,128,58,0.04)',
-                      borderBottom: '1px solid var(--hairline)',
-                    }}
-                  >
-                    <span
-                      className="ao-overline"
-                      style={{
-                        fontSize: 9,
-                        color: '#c9803a',
-                      }}
-                    >
+                  <div className={cn(s.sectionHead, s.sectionHeadDebuff)}>
+                    <span className={cn('ao-overline', s.sectionLabel, s.tagDebuff)}>
                       {t('camp2.effect.banes', { count: debuffCount })}
                     </span>
                   </div>

@@ -1,0 +1,35 @@
+.body { display: flex; flex-direction: column; gap: 16px; }
+
+.modes { display: flex; flex-direction: column; gap: 6px; }
+.opt {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid var(--rule);
+  transition: all 0.12s;
+}
+.opt.selected { background: rgba(255, 255, 255, 0.04); border-color: var(--gold); }
+.radio { margin-top: 2px; accent-color: var(--gold); }
+
+.optInfo { flex: 1; }
+.optHead { display: flex; align-items: center; gap: 6px; }
+.optLabel { font-size: 13px; color: var(--ink); font-weight: 400; }
+.optLabel.on { color: var(--ink-bright); font-weight: 600; }
+.optDesc { font-size: 11px; color: var(--ink-faint); margin-top: 4px; line-height: 1.4; }
+
+.preview {
+  padding: 8px 12px;
+  background: var(--abyss);
+  border: 1px solid var(--rule);
+}
+.previewLabel { font-size: 9px; color: var(--ink-faint); }
+.previewName {
+  font-size: 14px;
+  color: var(--ink-bright);
+  margin-top: 4px;
+  font-family: var(--font-display);
+}
+.previewOrig { font-size: 11px; color: var(--ink-faint); margin-top: 2px; }

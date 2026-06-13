@@ -2,6 +2,7 @@ import { useEffect, useMemo, useReducer } from 'react';
 import toast from 'react-hot-toast';
 import { Rune, Sigil } from '@/components/ordo';
 import { useT } from '@/i18n/I18nContext';
+import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/store/authStore';
 import type { AvailableContentEntry } from '@/types';
 import type { CreateFullCharacterRequest } from '@/api/characters-full.api';
@@ -35,6 +36,7 @@ import {
 } from './steps';
 import { type WizardAvailability } from './parts';
 import { ForgeSheetBody } from './ForgeSheetBody';
+import css from './CharacterCreationWizard.module.css';
 import type {
   BackgroundResponse,
   CharacterClassDetailResponse,
@@ -425,8 +427,8 @@ export function CharacterCreationWizard({
         <div className="wiz-brand">
           <Sigil size={34} glyph="sigil-2" />
           <div>
-            <div className="ao-engraved" style={{ fontSize: 13 }}>{t('wiz.rite')}</div>
-            <div className="ao-codex" style={{ fontSize: 10 }}>
+            <div className={cn('ao-engraved', css.eng13)}>{t('wiz.rite')}</div>
+            <div className={cn('ao-codex', css.codex10)}>
               {c.name || t('wiz.newSoul')}{c.cls ? ' · ' + c.cls + ' ' + c.level : ''}
             </div>
           </div>
@@ -457,7 +459,7 @@ export function CharacterCreationWizard({
         </ol>
 
         <div className="wiz-compact">
-          <span className="ao-engraved" style={{ fontSize: 12 }}>{t(current.labelKey)}</span>
+          <span className={cn('ao-engraved', css.eng12)}>{t(current.labelKey)}</span>
           <span className="ao-codex">{t('wiz.stepOf', { current: stepIdx + 1, total: steps.length })}</span>
           <div className="wiz-compact-bar"><span style={{ width: ((stepIdx + 1) / steps.length * 100) + '%' }} /></div>
         </div>
@@ -514,14 +516,14 @@ function SummaryReview({
   return (
     <div className="wiz-summary">
       <div className="wiz-summary-bar">
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div className="ao-row ao-gap-12">
           <Sigil size={42} glyph="sigil-2" />
           <div>
-            <div className="ao-engraved" style={{ fontSize: 14 }}>{t('wiz.summary.title')}</div>
+            <div className={cn('ao-engraved', css.eng14)}>{t('wiz.summary.title')}</div>
             <div className="ao-codex">{t('wiz.summary.sub')}</div>
           </div>
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div className="ao-row ao-gap-8">
           <button className="ao-btn ao-btn--ghost" onClick={onEdit}>
             <Rune kind="arrow-l" size={11} /> {t('wiz.summary.editSteps')}
           </button>

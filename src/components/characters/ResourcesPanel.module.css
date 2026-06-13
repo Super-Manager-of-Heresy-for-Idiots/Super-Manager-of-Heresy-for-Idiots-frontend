@@ -1,0 +1,35 @@
+.empty {
+  padding: 24px 16px;
+  text-align: center;
+  color: var(--ink-faint);
+  font-size: 12px;
+  font-style: italic;
+}
+
+.list { padding: 16px; }
+.item { padding: 11px 0; }
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.name {
+  flex: 1;
+  font-size: 13.5px;
+  font-family: var(--font-display);
+  color: var(--ink-bright);
+  letter-spacing: 0.04em;
+}
+
+.count { font-size: 14px; color: var(--tone); }
+.countMax { color: var(--ink-faint); }
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 4px;
+}

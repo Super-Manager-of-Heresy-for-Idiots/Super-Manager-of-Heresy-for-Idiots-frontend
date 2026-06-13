@@ -5,6 +5,8 @@ import { OrdoPanel, PanelHeader, OrdoDivider } from '@/components/ordo';
 import { useCharacterRewards } from '@/hooks/useLevelUp';
 import { useCharacter } from '@/hooks/useCharacter';
 import { REWARD_TYPE_LABELS } from '@/types';
+import { cn } from '@/lib/utils';
+import s from './CharacterRewardsPage.module.css';
 
 function formatDate(value: string): string {
   if (!value) return '';
@@ -24,18 +26,18 @@ export default function CharacterRewardsPage() {
 
   if (isLoading) {
     return (
-      <div className="ao-panel ao-frame ao-breathe" style={{ padding: 24, minHeight: 200 }}>
+      <div className={cn('ao-panel ao-frame ao-breathe', s.skelPanel)}>
         <span className="ao-frame-c" />
-        <div className="ao-ph" style={{ width: '40%', height: 22, marginBottom: 12 }} />
-        <div className="ao-ph" style={{ width: '60%', height: 14 }} />
+        <div className={cn('ao-ph', s.phTitle)} />
+        <div className={cn('ao-ph', s.phSub)} />
       </div>
     );
   }
 
   if (error || !data) {
     return (
-      <div style={{ textAlign: 'center', padding: '48px 0' }}>
-        <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginBottom: 16 }}>
+      <div className={s.errorBlock}>
+        <p className={cn('ao-italic', s.errorText)}>
           {t('camp.rewards.loadError')}
         </p>
         <button className="ao-btn" onClick={back}>{t('camp.back')}</button>
@@ -45,12 +47,12 @@ export default function CharacterRewardsPage() {
 
   return (
     <div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
+      <div className={s.header}>
         <div>
-          <p className="ao-overline" style={{ color: 'var(--gold)' }}>{t('camp.rewards.overline')}</p>
-          <h3 className="ao-h3" style={{ marginTop: 4 }}>{t('camp.rewards.title')}</h3>
+          <p className={cn('ao-overline', s.overlineGold)}>{t('camp.rewards.overline')}</p>
+          <h3 className={cn('ao-h3', s.title)}>{t('camp.rewards.title')}</h3>
           {character && (
-            <p className="ao-italic" style={{ color: 'var(--ink-quiet)', fontSize: 13, marginTop: 4 }}>
+            <p className={cn('ao-italic', s.metaLine)}>
               {character.name} · {t('camp.rewards.totalLvl', { level: data.totalLevel })}
             </p>
           )}
@@ -61,51 +63,42 @@ export default function CharacterRewardsPage() {
       </div>
 
       {data.classBreakdown.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '48px 0' }} className="ao-italic">
+        <div className={cn('ao-italic', s.emptyBlock)}>
           {t('camp.rewards.empty')}
         </div>
       ) : (
         data.classBreakdown.map((cls) => (
-          <OrdoPanel key={cls.classId} frame padding={0} style={{ marginBottom: 16 }}>
+          <OrdoPanel key={cls.classId} frame padding={0} className={s.classPanel}>
             <PanelHeader
               title={cls.className}
               glyph="helm"
               tone="gold"
               sub={`${t('camp.rewards.classLevel', { level: cls.classLevel })}${cls.subclass ? ` · ${cls.subclass.name}` : ''}`}
             />
-            <div style={{ padding: 16 }}>
+            <div className={s.classBody}>
               {cls.subclass && (
                 <>
-                  <div className="ao-codex" style={{ fontSize: 12, color: 'var(--ink-quiet)', marginBottom: 10 }}>
+                  <div className={cn('ao-codex', s.subclassDesc)}>
                     {cls.subclass.description}
                   </div>
                   <OrdoDivider glyph="diamond" />
                 </>
               )}
               {Object.keys(cls.rewardsByType || {}).length === 0 ? (
-                <div className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 13 }}>
+                <div className={cn('ao-italic', s.noRewards)}>
                   {t('camp.rewards.noClassRewards')}
                 </div>
               ) : (
                 Object.entries(cls.rewardsByType).map(([type, rewards]) => (
-                  <div key={type} style={{ marginTop: 12 }}>
-                    <div className="ao-overline" style={{ marginBottom: 6 }}>
+                  <div key={type} className={s.rewardGroup}>
+                    <div className={cn('ao-overline', s.rewardGroupLabel)}>
                       {REWARD_TYPE_LABELS[type] || type}
                     </div>
                     {rewards.map((r, idx) => (
-                      <div
-                        key={`${r.name}-${idx}`}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 10,
-                          padding: '6px 0',
-                          borderBottom: '1px solid var(--hairline)',
-                        }}
-                      >
-                        <Trophy className="h-3 w-3" style={{ color: 'var(--gold)' }} />
-                        <span style={{ flex: 1, color: 'var(--ink-bright)' }}>{r.name}</span>
-                        <span className="ao-codex" style={{ fontSize: 11, color: 'var(--ink-faint)' }}>
+                      <div key={`${r.name}-${idx}`} className={s.rewardRow}>
+                        <Trophy className={cn('h-3 w-3', s.trophyIcon)} />
+                        <span className={s.rewardName}>{r.name}</span>
+                        <span className={cn('ao-codex', s.rewardDate)}>
                           {formatDate(r.acquiredAt)}
                         </span>
                       </div>

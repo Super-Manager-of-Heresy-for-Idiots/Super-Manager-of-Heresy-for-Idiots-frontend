@@ -14,7 +14,9 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useMyTemplates, useDeleteTemplate } from '@/hooks/useTemplates';
 import { useT } from '@/i18n/I18nContext';
+import { cn } from '@/lib/utils';
 import type { CharacterResponse } from '@/types';
+import s from './MyCharactersPage.module.css';
 
 export default function MyCharactersPage() {
   const navigate = useNavigate();
@@ -35,10 +37,10 @@ export default function MyCharactersPage() {
     return (
       <div>
         <Header onCreate={() => navigate('/characters/templates/new')} />
-        <div className="ao-panel ao-frame ao-breathe" style={{ padding: 24, minHeight: 200 }}>
+        <div className={cn('ao-panel ao-frame ao-breathe', s.skel)}>
           <span className="ao-frame-c" />
-          <div className="ao-ph" style={{ width: '40%', height: 22, marginBottom: 12 }} />
-          <div className="ao-ph" style={{ width: '60%', height: 14 }} />
+          <div className={cn('ao-ph', s.skelTitle)} />
+          <div className={cn('ao-ph', s.skelLine)} />
         </div>
       </div>
     );
@@ -48,8 +50,8 @@ export default function MyCharactersPage() {
     return (
       <div>
         <Header onCreate={() => navigate('/characters/templates/new')} />
-        <div style={{ textAlign: 'center', padding: '48px 0' }}>
-          <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginBottom: 16 }}>
+        <div className={s.errorBox}>
+          <p className={cn('ao-italic', s.errorText)}>
             {t('chars.loadError')}
           </p>
           <button className="ao-btn" onClick={() => refetch()}>{t('common.retry')}</button>
@@ -75,7 +77,7 @@ export default function MyCharactersPage() {
           }
         />
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 12 }}>
+        <div className={s.grid}>
           {templates.map((char) => (
             <TemplateCard
               key={char.id}
@@ -111,20 +113,11 @@ export default function MyCharactersPage() {
 function Header({ onCreate }: { onCreate: () => void }) {
   const t = useT();
   return (
-    <div
-      style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'flex-start',
-        flexWrap: 'wrap',
-        gap: 16,
-        marginBottom: 24,
-      }}
-    >
+    <div className={s.header}>
       <div>
-        <p className="ao-overline" style={{ color: 'var(--gold)' }}>{t('chars.overline')}</p>
-        <h3 className="ao-h3" style={{ marginTop: 4 }}>{t('chars.title')}</h3>
-        <p className="ao-italic" style={{ color: 'var(--ink-quiet)', fontSize: 13, marginTop: 4 }}>
+        <p className={cn('ao-overline', s.overlineGold)}>{t('chars.overline')}</p>
+        <h3 className={cn('ao-h3', s.title)}>{t('chars.title')}</h3>
+        <p className={cn('ao-italic', s.subtitle)}>
           {t('chars.subtitle')}
         </p>
       </div>
@@ -153,20 +146,20 @@ function TemplateCard({
   return (
     <OrdoPanel frame padding={0}>
       <PanelHeader title={character.name} glyph="helm" tone="gold" sub={inCampaign ? t('chars.inCampaign') : t('chars.template')} />
-      <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
-        <div className="ao-codex" style={{ fontSize: 12, color: 'var(--ink-quiet)' }}>
+      <div className={s.cardBody}>
+        <div className={cn('ao-codex', s.cardClass)}>
           {classLabel} · {raceLabel}
         </div>
         <Bar value={character.currentHp ?? 0} max={Math.max(1, character.maxHp ?? 0)} tone="ember" height={5} />
-        <div className="ao-codex" style={{ fontSize: 11, color: 'var(--ink-faint)' }}>
+        <div className={cn('ao-codex', s.cardHp)}>
           HP {character.currentHp ?? 0}/{character.maxHp ?? 0} · XP {character.experience.toLocaleString()}
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, marginTop: 4 }}>
+        <div className={s.cardActions}>
           <button className="ao-btn ao-btn--ghost ao-btn--sm" onClick={onOpen}>
-            <Eye className="h-3 w-3" /> <span style={{ marginLeft: 4 }}>{t('common.open')}</span>
+            <Eye className="h-3 w-3" /> <span className={s.openLabel}>{t('common.open')}</span>
           </button>
           <button className="ao-btn ao-btn--ghost ao-btn--sm" onClick={onDelete} title={t('chars.deleteTemplateTitle')}>
-            <Trash2 className="h-3 w-3" style={{ color: 'var(--ember)' }} />
+            <Trash2 className={cn('h-3 w-3', s.trashIcon)} />
           </button>
         </div>
       </div>

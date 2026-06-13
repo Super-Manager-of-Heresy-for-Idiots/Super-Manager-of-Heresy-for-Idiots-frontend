@@ -1,6 +1,8 @@
 import { useState, useMemo } from 'react';
+import type { CSSProperties } from 'react';
 import { useParams } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { BackLink } from '@/components/campaigns';
 import {
   OrdoPanel,
@@ -39,6 +41,7 @@ import type {
   EquipmentSlot,
   ItemTemplateResponse,
 } from '@/types';
+import s from './InventoryPage.module.css';
 
 /* ── helpers ─────────────────────────────────────────────────── */
 
@@ -332,13 +335,13 @@ export default function InventoryPage() {
   if (isLoading) {
     return (
       <div>
-        <BackLink to={backTo} label={t('camp2.back.character')} style={{ marginBottom: 12 }} />
+        <BackLink to={backTo} label={t('camp2.back.character')} className={s.backLink} />
         <PageHeader name={character?.name} slotsFilled={0} held={0} />
-        <div className="ao-panel ao-frame ao-breathe" style={{ padding: 24, minHeight: 360 }}>
+        <div className={cn('ao-panel ao-frame ao-breathe', s.skelPanel)}>
           <span className="ao-frame-c" />
-          <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 6 }}>
+          <div className={cn('ao-rgrid', s.cellGrid)}>
             {Array.from({ length: 18 }).map((_, i) => (
-              <div key={i} className="ao-ph" style={{ aspectRatio: '1' }} />
+              <div key={i} className={cn('ao-ph', s.phCell)} />
             ))}
           </div>
         </div>
@@ -349,9 +352,9 @@ export default function InventoryPage() {
   if (error) {
     return (
       <div>
-        <BackLink to={backTo} label={t('camp2.back.character')} style={{ marginBottom: 12 }} />
-        <div style={{ textAlign: 'center', padding: '48px 0' }}>
-          <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginBottom: 16 }}>
+        <BackLink to={backTo} label={t('camp2.back.character')} className={s.backLink} />
+        <div className={s.errorBox}>
+          <p className={cn('ao-italic', s.errorText)}>
             {t('camp2.inv.loadError')}
           </p>
           <button className="ao-btn" onClick={() => refetch()}>{t('common.retry')}</button>
@@ -364,13 +367,13 @@ export default function InventoryPage() {
 
   return (
     <div>
-      <BackLink to={backTo} label={t('camp2.back.character')} style={{ marginBottom: 12 }} />
+      <BackLink to={backTo} label={t('camp2.back.character')} className={s.backLink} />
       <PageHeader
         name={character?.name}
         slotsFilled={slotsFilled}
         held={items.length}
         right={
-          <div style={{ display: 'flex', gap: 10 }}>
+          <div className={s.headerActions}>
             <button
               className="ao-btn ao-btn--ghost"
               onClick={() => setShowSearch((s) => !s)}
@@ -393,7 +396,7 @@ export default function InventoryPage() {
         }
       />
 
-      <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: '1fr 1.3fr 1fr', gap: 18, alignItems: 'start' }}>
+      <div className={cn('ao-rgrid', s.mainGrid)}>
         {/* ── LEFT: equipped slots (paper-doll) ──────────── */}
         <OrdoPanel frame padding={0}>
           <PanelHeader
@@ -401,9 +404,9 @@ export default function InventoryPage() {
             sub={t('camp2.inv.boundSub', { slots: SLOT_LAYOUT.length, attuned: attunedCount })}
             glyph="shield"
           />
-          <div style={{ padding: 16 }}>
-            <div style={{ position: 'relative', height: 320, marginBottom: 12 }}>
-              <Placeholder style={{ position: 'absolute', inset: 0 }}>
+          <div className={s.panelPad}>
+            <div className={s.dollWrap}>
+              <Placeholder className={s.dollFill}>
                 {t('camp2.inv.silhouette')} · {character?.name ?? t('camp2.inv.vellan')}
               </Placeholder>
               {[
@@ -413,13 +416,8 @@ export default function InventoryPage() {
               ].map((p, i) => (
                 <div
                   key={i}
-                  style={{
-                    position: 'absolute', width: 36, height: 36,
-                    transform: 'translate(-50%, 0)', top: p.t, left: p.l, right: p.r,
-                    border: '1px solid var(--brass)', background: 'rgba(20,17,15,0.85)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    boxShadow: '0 0 10px rgba(0,0,0,0.6)',
-                  }}
+                  className={s.dollSlot}
+                  style={{ top: p.t, left: p.l, right: p.r }}
                 >
                   <Rune
                     kind={['helm', 'shield', 'sword', 'flame', 'square', 'tri-inv', 'cir-dot'][i] || 'square'}
@@ -432,7 +430,7 @@ export default function InventoryPage() {
 
             <OrdoDivider glyph="diamond-fill" color="var(--rule)">{t('camp2.inv.loadout')}</OrdoDivider>
 
-            <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
+            <div className={cn('ao-rgrid', s.quad)}>
               {SLOT_LAYOUT.map(({ slot, glyph }) => {
                 const it = equippedBySlot.get(slot);
                 const isSel = it != null && it.id === selectedId;
@@ -442,17 +440,12 @@ export default function InventoryPage() {
                     key={slot}
                     title={it ? `${label}: ${it.displayName}` : label}
                     onClick={() => (it ? setSelectedId(it.id) : null)}
-                    className={it ? slotClass(it.rarity) : 'ao-slot'}
-                    style={{
-                      aspectRatio: '1', padding: 0, position: 'relative',
-                      cursor: it ? 'pointer' : 'default',
-                      outline: isSel ? '1px solid var(--brass)' : 'none', outlineOffset: 1,
-                    }}
+                    className={cn(it ? slotClass(it.rarity) : 'ao-slot', s.slotCell, !it && s.empty, isSel && s.selected)}
                   >
                     {it ? (
                       <Rune kind={glyph} size={20} color={rarityColor(it.rarity)} />
                     ) : (
-                      <span style={{ color: 'var(--ink-ghost)', fontSize: 16 }}>+</span>
+                      <span className={s.slotPlus}>+</span>
                     )}
                   </button>
                 );
@@ -468,19 +461,17 @@ export default function InventoryPage() {
             sub={t('camp2.inv.bagSub', { held: backpackItems.length, max: BAG_MIN_CELLS })}
             glyph="scroll"
             right={
-              <div style={{ display: 'flex', gap: 4 }}>
+              <div className={s.iconRow}>
                 <button
-                  className="ao-iconbtn"
-                  style={{ width: 28, height: 28 }}
-                  onClick={() => setShowSearch((s) => !s)}
+                  className={cn('ao-iconbtn', s.iconBtn28)}
+                  onClick={() => setShowSearch((v) => !v)}
                   title={t('camp2.inv.search')}
                 >
                   <Rune kind="search" size={12} />
                 </button>
                 {isGm && (
                   <button
-                    className="ao-iconbtn"
-                    style={{ width: 28, height: 28 }}
+                    className={cn('ao-iconbtn', s.iconBtn28)}
                     onClick={() => setGrantOpen(true)}
                     title={t('camp2.inv.grantItem')}
                   >
@@ -490,18 +481,13 @@ export default function InventoryPage() {
               </div>
             }
           />
-          <div style={{ padding: 16 }}>
+          <div className={s.panelPad}>
             {showSearch && (
-              <div
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12,
-                  padding: '6px 10px', border: '1px solid var(--rule)', background: 'var(--abyss)',
-                }}
-              >
+              <div className={s.searchBar}>
                 <Rune kind="search" size={13} color="var(--ink-faint)" />
                 <input
                   autoFocus
-                  style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', color: 'var(--ink)', fontFamily: 'var(--font-body)', fontSize: 13 }}
+                  className={s.searchInput}
                   placeholder={t('camp2.inv.searchBag')}
                   value={filterText}
                   onChange={(e) => setFilterText(e.target.value)}
@@ -509,7 +495,7 @@ export default function InventoryPage() {
                 {filterText && (
                   <button
                     onClick={() => setFilterText('')}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex' }}
+                    className={s.searchClear}
                     title={t('camp2.inv.clear')}
                   >
                     <Rune kind="x" size={11} color="var(--ink-faint)" />
@@ -518,28 +504,21 @@ export default function InventoryPage() {
               </div>
             )}
 
-            <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 6 }}>
+            <div className={cn('ao-rgrid', s.cellGrid)}>
               {Array.from({ length: Math.max(BAG_MIN_CELLS, filteredBag.length) }).map((_, i) => {
                 const item = filteredBag[i];
-                if (!item) return <div key={i} className="ao-slot" style={{ aspectRatio: '1' }} />;
+                if (!item) return <div key={i} className={cn('ao-slot', s.phCell)} />;
                 const isSel = item.id === selectedId;
                 return (
                   <button
                     key={item.id}
-                    className={slotClass(item.rarity)}
+                    className={cn(slotClass(item.rarity), s.slotCell, isSel && s.selected)}
                     onClick={() => setSelectedId(item.id)}
                     title={item.displayName}
-                    style={{
-                      aspectRatio: '1', position: 'relative', padding: 0, cursor: 'pointer',
-                      outline: isSel ? '1px solid var(--brass)' : 'none', outlineOffset: 1,
-                    }}
                   >
                     <Rune kind={itemGlyph(item)} size={18} color={rarityColor(item.rarity)} />
                     {item.quantity > 1 && (
-                      <span
-                        className="ao-num"
-                        style={{ position: 'absolute', bottom: 2, right: 4, fontSize: 10, color: 'var(--ink-bright)', textShadow: '0 1px 2px #000' }}
-                      >
+                      <span className={cn('ao-num', s.qtyBadge)}>
                         {item.quantity}
                       </span>
                     )}
@@ -549,12 +528,12 @@ export default function InventoryPage() {
             </div>
 
             {backpackItems.length === 0 && (
-              <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 12, textAlign: 'center', marginTop: 14 }}>
+              <p className={cn('ao-italic', s.bagEmpty)}>
                 {t('camp2.inv.bagEmpty')}
               </p>
             )}
             {backpackItems.length > 0 && filteredBag.length === 0 && (
-              <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 12, textAlign: 'center', marginTop: 14 }}>
+              <p className={cn('ao-italic', s.bagEmpty)}>
                 {t('camp2.inv.noMatch')}
               </p>
             )}
@@ -562,25 +541,22 @@ export default function InventoryPage() {
             <OrdoDivider glyph="diamond-fill" color="var(--rule)">{t('camp2.inv.coinWealth')}</OrdoDivider>
 
             {wallet && wallet.length > 0 ? (
-              <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
+              <div className={cn('ao-rgrid', s.quad)}>
                 {wallet.map((c) => {
                   const color = COIN_COLOR[c.currencyName.toLowerCase()] ?? 'var(--gold-pale)';
                   return (
-                    <div
-                      key={c.currencyTypeId}
-                      style={{ padding: 10, background: 'var(--abyss)', border: '1px solid var(--rule)', display: 'flex', alignItems: 'center', gap: 10 }}
-                    >
+                    <div key={c.currencyTypeId} className={s.coinCard}>
                       <Rune kind="coin" size={16} color={color} />
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div className="ao-overline" style={{ fontSize: 9 }}>{c.currencyName}</div>
-                        <div className="ao-num" style={{ color, fontSize: 18, fontFamily: 'var(--font-serif)' }}>{c.amount}</div>
+                      <div className={s.coinMain}>
+                        <div className={cn('ao-overline', s.coinLabel)}>{c.currencyName}</div>
+                        <div className={cn('ao-num', s.coinAmount)} style={{ '--coin': color } as CSSProperties}>{c.amount}</div>
                       </div>
                     </div>
                   );
                 })}
               </div>
             ) : (
-              <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 12, textAlign: 'center', padding: '8px 0' }}>
+              <p className={cn('ao-italic', s.noCoin)}>
                 {t('camp2.inv.noCoin')}
               </p>
             )}
@@ -596,9 +572,9 @@ export default function InventoryPage() {
             tone="ember"
           />
           {!selected ? (
-            <div style={{ padding: '40px 20px', textAlign: 'center' }}>
+            <div className={s.folioEmpty}>
               <Rune kind="diamond" size={26} color="var(--ink-faint)" />
-              <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 12, marginTop: 12 }}>
+              <p className={cn('ao-italic', s.folioEmptyText)}>
                 {t('camp2.inv.selectToInspect')}
               </p>
             </div>
@@ -627,16 +603,15 @@ export default function InventoryPage() {
       >
         <DialogContent>
           <DialogHeader><DialogTitle>{t('camp2.inv.dialog.grantTitle')}</DialogTitle></DialogHeader>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div className={s.dialogCol}>
             <div>
               <label className="ao-label">{t('camp2.inv.field.itemTemplate')}</label>
               <input
-                className="ao-input"
+                className={cn('ao-input', s.mb8)}
                 value={grantTemplateSearch}
                 onChange={(e) => setGrantTemplateSearch(e.target.value)}
                 placeholder={t('camp2.inv.field.templateSearch')}
                 disabled={itemTemplatesLoading}
-                style={{ marginBottom: 8 }}
               />
               <select
                 className="ao-input"
@@ -661,7 +636,7 @@ export default function InventoryPage() {
                 ))}
               </select>
               {selectedGrantTemplate && (
-                <div className="ao-codex" style={{ marginTop: 8 }}>
+                <div className={cn('ao-codex', s.mt8)}>
                   {selectedGrantTemplate.description || selectedGrantTemplate.sourceHomebrewTitle || t('camp2.inv.campaignTemplate')}
                 </div>
               )}
@@ -674,9 +649,9 @@ export default function InventoryPage() {
               <label className="ao-label">{t('camp2.inv.field.customName')}</label>
               <input className="ao-input" value={grantCustomName} onChange={(e) => setGrantCustomName(e.target.value)} placeholder={t('camp2.inv.field.overrideName')} />
             </div>
-            <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+            <label className={s.checkRow}>
               <input type="checkbox" checked={grantUnique} onChange={(e) => setGrantUnique(e.target.checked)} />
-              <span className="ao-label" style={{ marginBottom: 0 }}>{t('camp2.inv.field.uniqueItem')}</span>
+              <span className={cn('ao-label', s.checkLabel)}>{t('camp2.inv.field.uniqueItem')}</span>
             </label>
           </div>
           <DialogFooter>
@@ -693,12 +668,12 @@ export default function InventoryPage() {
       <Dialog open={equipOpen} onOpenChange={setEquipOpen}>
         <DialogContent>
           <DialogHeader><DialogTitle>{t('camp2.inv.dialog.equipTitle')}</DialogTitle></DialogHeader>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div className={s.dialogCol}>
             <div>
               <label className="ao-label">{t('camp2.inv.field.slot')}</label>
               <select className="ao-input" value={equipSlot} onChange={(e) => setEquipSlot(e.target.value as EquipmentSlot)}>
-                {SLOT_LAYOUT.map((s) => (
-                  <option key={s.slot} value={s.slot}>{t(`camp2.inv.slotLabel.${s.slot}`)}</option>
+                {SLOT_LAYOUT.map((sl) => (
+                  <option key={sl.slot} value={sl.slot}>{t(`camp2.inv.slotLabel.${sl.slot}`)}</option>
                 ))}
               </select>
             </div>
@@ -717,14 +692,14 @@ export default function InventoryPage() {
       <Dialog open={transferOpen} onOpenChange={setTransferOpen}>
         <DialogContent>
           <DialogHeader><DialogTitle>{t('camp2.inv.dialog.transferTitle')}</DialogTitle></DialogHeader>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div className={s.dialogCol12}>
             <label className="ao-label">{t('camp2.inv.field.chooseRecipient')}</label>
             {transferCandidates.length === 0 ? (
-              <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 13, textAlign: 'center', padding: '12px 0' }}>
+              <p className={cn('ao-italic', s.recipientEmpty)}>
                 {t('camp2.inv.field.noActiveChars')}
               </p>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 260, overflowY: 'auto' }}>
+              <div className={s.recipientList}>
                 {transferCandidates.map((c) => {
                   const isSel = c.id === transferToCharId;
                   return (
@@ -732,18 +707,12 @@ export default function InventoryPage() {
                       key={c.id}
                       type="button"
                       onClick={() => setTransferToCharId(c.id)}
-                      style={{
-                        display: 'flex', alignItems: 'center', gap: 10,
-                        padding: '8px 12px', cursor: 'pointer', textAlign: 'left',
-                        background: isSel ? 'rgba(var(--gold-rgb, 180,155,100), 0.15)' : 'var(--abyss)',
-                        border: isSel ? '1px solid var(--brass)' : '1px solid var(--rule)',
-                        transition: 'border-color 0.15s, background 0.15s',
-                      }}
+                      className={cn(s.recipient, isSel && s.selected)}
                     >
                       <Rune kind="cir-dot" size={14} color={isSel ? 'var(--gold)' : 'var(--ink-faint)'} />
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: 14, color: isSel ? 'var(--ink-bright)' : 'var(--ink)' }}>{c.name}</div>
-                        <div style={{ fontSize: 11, color: 'var(--ink-quiet)' }}>
+                      <div className={s.recipientMain}>
+                        <div className={s.recipientName}>{c.name}</div>
+                        <div className={s.recipientMeta}>
                           {c.classLevels?.[0]?.className ?? ''} · {t('camp2.inv.field.ownerLabel', { owner: c.ownerUsername })}
                         </div>
                       </div>
@@ -767,7 +736,7 @@ export default function InventoryPage() {
       <Dialog open={renameOpen} onOpenChange={setRenameOpen}>
         <DialogContent>
           <DialogHeader><DialogTitle>{t('camp2.inv.dialog.renameTitle')}</DialogTitle></DialogHeader>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div className={s.dialogCol}>
             <div>
               <label className="ao-label">{t('camp2.inv.field.customName')}</label>
               <input className="ao-input" value={renameCustomName} onChange={(e) => setRenameCustomName(e.target.value)} placeholder={t('camp2.inv.field.newName')} />
@@ -801,11 +770,11 @@ function PageHeader({
 }) {
   const t = useT();
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16, marginBottom: 20 }}>
+    <div className={s.pageHeader}>
       <div>
-        <p className="ao-overline" style={{ color: 'var(--gold)' }}>{t('camp2.inv.armaments')}</p>
-        <h3 className="ao-h3" style={{ marginTop: 4 }}>{t('camp2.inv.arsenalReliquary')}</h3>
-        <p className="ao-italic" style={{ color: 'var(--ink-quiet)', fontSize: 13, marginTop: 4 }}>
+        <p className={cn('ao-overline', s.headerOverline)}>{t('camp2.inv.armaments')}</p>
+        <h3 className={cn('ao-h3', s.headerTitle)}>{t('camp2.inv.arsenalReliquary')}</h3>
+        <p className={cn('ao-italic', s.headerSub)}>
           {t('camp2.inv.headerSub', { name: name ?? t('camp2.inv.headerLoadout'), slots: slotsFilled, held })}
         </p>
       </div>
@@ -856,12 +825,12 @@ function RelicDetail({
   ];
 
   return (
-    <div style={{ padding: 18 }}>
-      <Placeholder style={{ width: '100%', height: 180, border: '1px solid var(--rule)' }}>
+    <div className={s.relicBox}>
+      <Placeholder className={s.relicImg}>
         {item.displayName}
       </Placeholder>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 14, flexWrap: 'wrap' }}>
+      <div className={s.chipRow}>
         {rarity && (
           <OrdoChip tone={rarity === 'RARE' ? 'arcane' : 'gold'} glyph="diamond-fill">
             {rarity.replace('_', ' ')}
@@ -871,18 +840,18 @@ function RelicDetail({
         {item.isUnique && <OrdoChip tone="arcane" glyph="diamond">{t('camp2.inv.relic.unique')}</OrdoChip>}
       </div>
 
-      <div className="ao-h5" style={{ marginTop: 12 }}>{item.artifactName ?? item.displayName}</div>
-      <div className="ao-italic" style={{ marginTop: 2 }}>
+      <div className={cn('ao-h5', s.relicName)}>{item.artifactName ?? item.displayName}</div>
+      <div className={cn('ao-italic', s.relicType)}>
         {item.itemTypeName ?? item.templateName}
       </div>
 
       <OrdoDivider glyph="diamond-fill" color="var(--rule)" />
 
-      <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
-        {stats.map((s) => (
-          <div key={s.label}>
-            <div className="ao-overline">{s.label}</div>
-            <div className="ao-num" style={{ color: s.color ?? 'var(--ink-quiet)', fontSize: 15 }}>{s.value}</div>
+      <div className={cn('ao-rgrid', s.statGrid)}>
+        {stats.map((st) => (
+          <div key={st.label}>
+            <div className="ao-overline">{st.label}</div>
+            <div className={cn('ao-num', s.statValue)} style={st.color ? { color: st.color } : undefined}>{st.value}</div>
           </div>
         ))}
       </div>
@@ -890,14 +859,14 @@ function RelicDetail({
       <OrdoDivider glyph="cross-pat" color="var(--rule)">{t('camp2.inv.relic.inscription')}</OrdoDivider>
 
       {item.enchantments && item.enchantments.length > 0 ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div className={s.enchList}>
           {item.enchantments.map((e) => (
-            <div key={e.id} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+            <div key={e.id} className={s.enchRow}>
               <Rune kind="diamond" size={8} color="var(--arcane)" />
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 13, color: 'var(--ink-bright)' }}>{e.enchantmentType.name}</div>
+              <div className={s.enchMain}>
+                <div className={s.enchName}>{e.enchantmentType.name}</div>
                 {(e.notes ?? e.enchantmentType.description) && (
-                  <div className="ao-italic" style={{ fontSize: 12, color: 'var(--ink-quiet)' }}>
+                  <div className={cn('ao-italic', s.enchDesc)}>
                     {e.notes ?? e.enchantmentType.description}
                   </div>
                 )}
@@ -906,39 +875,39 @@ function RelicDetail({
           ))}
         </div>
       ) : (
-        <p className="ao-italic" style={{ fontSize: 13, color: 'var(--ink-faint)' }}>
+        <p className={cn('ao-italic', s.noEnch)}>
           {t('camp2.inv.relic.noInscriptions')}
         </p>
       )}
 
       <OrdoDivider glyph="diamond-fill" color="var(--rule)">{t('camp2.inv.relic.provenance')}</OrdoDivider>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 12, color: 'var(--ink-quiet)' }}>
-        <div style={{ display: 'flex', gap: 10 }}>
+      <div className={s.provList}>
+        <div className={s.provRow}>
           <Rune kind="diamond" size={8} color="var(--bronze)" />
           <span>{t('camp2.inv.relic.template')} · {item.templateName}</span>
         </div>
         {item.customName && item.customName !== item.templateName && (
-          <div style={{ display: 'flex', gap: 10 }}>
+          <div className={s.provRow}>
             <Rune kind="diamond" size={8} color="var(--bronze)" />
             <span>{t('camp2.inv.relic.renamed')} · {item.customName}</span>
           </div>
         )}
         {item.notes && (
-          <div style={{ display: 'flex', gap: 10 }}>
+          <div className={s.provRow}>
             <Rune kind="diamond" size={8} color="var(--bronze)" />
             <span>{item.notes}</span>
           </div>
         )}
       </div>
 
-      <div style={{ display: 'flex', gap: 8, marginTop: 18 }}>
+      <div className={s.relicActions}>
         {item.slot ? (
-          <button className="ao-btn ao-btn--primary" style={{ flex: 1 }} onClick={onUnequip} disabled={busy}>
+          <button className={cn('ao-btn ao-btn--primary', s.grow)} onClick={onUnequip} disabled={busy}>
             <Rune kind="x" size={10} /> {t('camp2.inv.relic.unequip')}
           </button>
         ) : (
-          <button className="ao-btn ao-btn--primary" style={{ flex: 1 }} onClick={onEquip} disabled={busy}>
+          <button className={cn('ao-btn ao-btn--primary', s.grow)} onClick={onEquip} disabled={busy}>
             <Rune kind="check" size={10} /> {t('camp2.inv.relic.equip')}
           </button>
         )}

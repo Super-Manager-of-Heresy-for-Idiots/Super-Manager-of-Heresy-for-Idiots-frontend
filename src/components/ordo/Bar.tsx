@@ -12,12 +12,12 @@ export function Bar({ value, max, tone = 'gold', height = 8, showNumbers = true,
   const fillClass = tone === 'arcane' ? 'ao-bar-fill--arcane' : tone === 'ember' ? 'ao-bar-fill--ember' : '';
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-      <div className={`ao-bar ${className || ''}`} style={{ flex: 1, height }}>
+    <div className="ao-bar-row">
+      <div className={`ao-bar ${className || ''}`} style={{ height }}>
         <div className={`ao-bar-fill ${fillClass}`} style={{ width: `${pct}%` }} />
       </div>
       {showNumbers && (
-        <span className="ao-num" style={{ fontSize: 11, color: 'var(--ink-quiet)', flexShrink: 0 }}>
+        <span className="ao-num ao-bar-num">
           {value.toLocaleString()} / {max.toLocaleString()}
         </span>
       )}

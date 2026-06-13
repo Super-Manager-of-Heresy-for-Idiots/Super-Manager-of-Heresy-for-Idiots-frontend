@@ -1,0 +1,62 @@
+.backLink { margin-bottom: 12px; }
+
+/* ── loading / error ── */
+.skelRow { display: flex; gap: 24px; }
+.skelLeft { flex: 1.5 1 0; }
+.skelRight { flex: 1 1 0; }
+.skelPanelLg { padding: 24px; min-height: 300px; }
+.skelPanelSm { padding: 24px; min-height: 200px; }
+.phW30H14 { width: 30%; height: 14px; margin-bottom: 12px; }
+.phW50H24 { width: 50%; height: 24px; margin-bottom: 16px; }
+.phW80H14 { width: 80%; height: 14px; margin-bottom: 8px; }
+.phW60H14 { width: 60%; height: 14px; }
+.phW60H14mb { width: 60%; height: 14px; margin-bottom: 12px; }
+.phW40H14 { width: 40%; height: 14px; }
+.phW70H14 { width: 70%; height: 14px; margin-bottom: 8px; }
+.phW50H14 { width: 50%; height: 14px; }
+.errorBox { text-align: center; padding: 48px 0; }
+.errorText { color: var(--ink-faint); margin-bottom: 16px; }
+
+/* ── layout ── */
+.cols { display: flex; gap: 24px; align-items: flex-start; }
+.colLeft { flex: 1.5 1 0; display: flex; flex-direction: column; gap: 20px; }
+.colRight { flex: 1 1 0; display: flex; flex-direction: column; gap: 20px; }
+
+/* ── identity ── */
+.identityRow { display: flex; align-items: flex-start; gap: 16px; }
+.portrait { width: 80px; height: 80px; flex-shrink: 0; }
+.identityMain { flex: 1; min-width: 0; }
+.idRow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.npcName { margin-top: 6px; color: var(--ink-bright); }
+.revealWrap { margin-top: 16px; }
+.ml6 { margin-left: 6px; }
+
+/* ── account boxes ── */
+.boxPad { padding: 16px; }
+.accountText { font-size: 14px; color: var(--ink); line-height: 1.6; margin: 0; }
+.ghost { color: var(--ink-ghost); }
+.privatePanel { border-color: rgba(140, 40, 50, 0.3); background: rgba(100, 20, 30, 0.06); }
+
+/* ── notes ── */
+.notesBody { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.notesEmpty { color: var(--ink-ghost); font-size: 13px; }
+.note {
+  padding: 12px; background: transparent;
+  border: 1px solid rgba(180, 140, 80, 0.25);
+  border-left: 3px solid rgba(180, 140, 80, 0.4);
+}
+.noteHead { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+.noteMeta { font-size: 8px; }
+.noteText { font-size: 13px; color: var(--ink); line-height: 1.5; margin: 0; }
+.addNoteRow { display: flex; gap: 8px; }
+.grow { flex: 1; }
+
+/* ── linked entities ── */
+.linkEmpty { color: var(--ink-ghost); font-size: 13px; }
+.linkList { display: flex; flex-direction: column; gap: 8px; }
+.linkRow {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 10px; background: rgba(0, 0, 0, 0.2); border: 1px solid var(--rule);
+}
+.linkName { font-size: 13px; color: var(--ink-bright); }
+.linkNameGrow { flex: 1; font-size: 13px; color: var(--ink-bright); }

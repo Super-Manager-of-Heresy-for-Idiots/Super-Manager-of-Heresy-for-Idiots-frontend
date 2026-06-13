@@ -9,12 +9,14 @@ import {
   useHomebrewMonster,
   usePublicMonster,
 } from '@/hooks/useBestiary';
+import { cn } from '@/lib/utils';
+import s from './MonsterDetailPage.module.css';
 
 type Source = 'admin' | 'homebrew' | 'campaign' | 'public';
 
 const Frame = ({ children }: { children: React.ReactNode }) => (
-  <div style={{ minHeight: '100vh', background: 'var(--stone)', padding: 'clamp(16px, 4vw, 48px) clamp(12px, 4vw, 40px)' }}>
-    <div style={{ maxWidth: 920, margin: '0 auto' }}>{children}</div>
+  <div className={s.frame}>
+    <div className={s.inner}>{children}</div>
   </div>
 );
 
@@ -38,19 +40,19 @@ export default function MonsterDetailPage({ source }: { source: Source }) {
 
   return (
     <Frame>
-      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 10, marginBottom: 18 }}>
+      <div className={s.toolbar}>
         <button className="ao-btn ao-btn--ghost ao-btn--sm" onClick={() => navigate(-1)}><ChevronLeft size={14} /> {t('best.com.back')}</button>
-        <div style={{ flex: 1 }} />
+        <div className={s.spacer} />
         {canEdit && monster && (
           <button className="ao-btn ao-btn--primary ao-btn--sm" onClick={() => navigate('edit')}><Pencil size={13} /> {t('best.com.edit')}</button>
         )}
       </div>
 
       {query.isLoading && (
-        <div style={{ textAlign: 'center', padding: '60px 0', fontFamily: 'var(--font-serif)', fontStyle: 'italic', color: 'var(--ink-quiet)' }}>{t('best.detail.loading')}</div>
+        <div className={s.status}>{t('best.detail.loading')}</div>
       )}
       {query.isError && (
-        <div className="ao-panel" style={{ padding: 40, textAlign: 'center', fontFamily: 'var(--font-serif)', fontStyle: 'italic', color: 'var(--ink-quiet)' }}>
+        <div className={cn('ao-panel', s.notFound)}>
           {t('best.detail.notFound')}
         </div>
       )}

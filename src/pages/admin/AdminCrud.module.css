@@ -1,0 +1,43 @@
+/* Shared styles for admin CRUD pages (Skills, Feats, Subclasses, etc.) */
+
+.header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 18px; }
+.titleH3 { margin-top: 4px; }
+.headerActions { display: flex; gap: 10px; align-items: center; }
+
+.skelCol { display: flex; flex-direction: column; gap: 8px; }
+.skelRow { width: 100%; height: 48px; }
+
+.errorBox { text-align: center; padding: 48px 0; }
+.errorText { color: var(--ink-faint); margin-bottom: 16px; }
+
+.searchInput { width: 220px; padding: 6px 12px; }
+.panelSearch { display: flex; gap: 8px; align-items: center; }
+
+.colNarrow { width: 80px; }
+.cellName { color: var(--ink-bright); }
+.typeChip { font-size: 11px; }
+.dash { color: var(--ink-faint); }
+.descCell { color: var(--ink-quiet); max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.iconGroup { display: inline-flex; gap: 4px; }
+.iconSm { width: 26px; height: 26px; }
+.iconDanger { color: #d8896a; }
+
+.emptyCell { text-align: center; padding: 32px 16px; }
+.emptyText { color: var(--ink-faint); }
+
+.footer {
+  display: flex; justify-content: space-between; padding: 12px 18px;
+  border-top: 1px solid var(--rule); background: var(--abyss);
+}
+
+.classBadge {
+  display: inline-flex; align-items: center; gap: 6px; padding: 3px 8px;
+  background: rgba(154, 126, 192, 0.08); border: 1px solid rgba(154, 126, 192, 0.3);
+  border-left: 2px solid #9a7ec0; font-family: var(--font-display);
+  font-size: 10px; letter-spacing: 0.16em; color: #9a7ec0; text-transform: uppercase;
+}
+
+.dialogCol { display: flex; flex-direction: column; gap: 16px; }
+.nameInput { font-family: var(--font-serif); font-size: 17px; }
+.descArea { resize: vertical; font-size: 14px; }

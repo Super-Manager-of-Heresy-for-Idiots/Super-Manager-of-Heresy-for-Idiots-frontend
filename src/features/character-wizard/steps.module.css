@@ -1,0 +1,39 @@
+.colPad24 { padding: 24px; display: flex; flex-direction: column; gap: 20px; }
+.nameInput { font-family: var(--font-serif); font-size: 26px; color: var(--ink-bright); }
+
+.pad16 { padding: 16px; }
+.pad14 { padding: 14px; }
+.pad12 { padding: 12px; }
+.pad8 { padding: 8px; }
+
+.desc14 { font-size: 14px; margin-bottom: 12px; }
+.sub13 { font-size: 13px; margin-top: 8px; }
+
+.mt14 { margin-top: 14px; }
+.mt10 { margin-top: 10px; }
+.mb10 { margin-bottom: 10px; }
+
+.inkInput { color: var(--ink-bright); }
+
+.fs10 { font-size: 10px; }
+.fs9 { font-size: 9px; }
+.eng12 { font-size: 12px; }
+.eng13 { font-size: 13px; }
+
+.label0 { margin: 0; }
+.lvlInput { width: 64px; text-align: center; font-family: var(--font-serif); font-size: 22px; color: var(--gold-pale); }
+
+.uploadBtn { cursor: pointer; margin-bottom: 8px; }
+.hidden { display: none; }
+.galleryLabel { margin-top: 14px; margin-bottom: 8px; }
+
+.taCenter { text-align: center; }
+.goldPale { color: var(--gold-pale); }
+.inkQuiet { color: var(--ink-quiet); }
+.inkFaint { color: var(--ink-faint); }
+
+.skillName { flex: 1; text-align: left; }
+
+.pip12 { width: 12px; height: 12px; flex-shrink: 0; transform: rotate(45deg); border: 1px solid var(--rule); background: transparent; }
+.pip13 { width: 13px; height: 13px; flex-shrink: 0; transform: rotate(45deg); border: 1px solid var(--rule); background: transparent; }
+.pipOn { border-color: var(--brass); background: var(--gold); }

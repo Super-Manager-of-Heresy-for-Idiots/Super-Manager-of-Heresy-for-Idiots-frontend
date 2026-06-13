@@ -1,0 +1,121 @@
+/* Diamond bullet — size/color come from props via CSS vars */
+.diamond {
+  width: var(--d-size);
+  height: var(--d-size);
+  transform: rotate(45deg);
+  background: var(--d-color);
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+/* Divider */
+.divider { display: flex; align-items: center; gap: 12px; margin: 18px 0; }
+.lineL { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, var(--rule) 40%, var(--rule)); }
+.lineR { flex: 1; height: 1px; background: linear-gradient(90deg, var(--rule), var(--rule) 60%, transparent); }
+.dividerLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-family: var(--font-display);
+  font-size: 13px;
+  letter-spacing: var(--track-eng);
+  text-transform: uppercase;
+  color: var(--gold-pale);
+}
+
+/* PropLine */
+.propLine { font-size: 14px; line-height: 1.6; color: var(--ink); margin: 0 0 7px; }
+.propLabel {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 11px;
+  color: var(--gold-pale);
+}
+
+/* DefenseTile */
+.defTile { display: flex; align-items: center; gap: 12px; }
+.defTile.defTile { padding: 12px 14px; }
+.defIcon { color: var(--gold); flex-shrink: 0; display: flex; }
+.min0 { min-width: 0; }
+.defValue { font-family: var(--font-serif); font-size: 22px; font-weight: 600; color: var(--ink-bright); line-height: 1.1; }
+.defLabel {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-faint);
+  letter-spacing: 0.04em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* FeatureCard */
+.feature { font-size: 14px; line-height: 1.62; color: var(--ink); padding-left: 14px; border-left: 1px solid var(--hairline); }
+.featName { font-family: var(--font-serif); font-style: italic; font-weight: 600; font-size: 16px; color: var(--ink-bright); }
+.featEng { font-weight: 400; font-style: normal; color: var(--ink-faint); font-size: 13px; }
+.featAttack { font-family: var(--font-serif); font-style: italic; color: var(--ink-quiet); }
+.featDmg { font-family: var(--font-mono); font-size: 12px; color: var(--gold-pale); }
+.featNote { color: var(--ink-faint); }
+
+/* Article + header */
+.statblock.statblock { padding: 0; }
+.header {
+  padding: clamp(20px, 3vw, 30px) clamp(18px, 3vw, 34px);
+  border-bottom: 1px solid var(--rule);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--gold) 5%, transparent), transparent);
+}
+.headerRow { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; justify-content: space-between; }
+.headerMain { min-width: 0; flex: 1 1 260px; }
+.title {
+  font-size: clamp(30px, 5vw, 46px);
+  color: var(--gold-pale);
+  margin: 0;
+  text-shadow: 0 0 24px color-mix(in srgb, var(--gold) 18%, transparent);
+}
+.titleEng { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.14em; color: var(--ink-faint); margin-top: 6px; text-transform: uppercase; }
+.subtitle { font-family: var(--font-serif); font-style: italic; font-size: 16px; color: var(--ink-quiet); margin: 10px 0 0; }
+
+.crWrap { display: flex; gap: 12px; flex-shrink: 0; }
+.crTile.crTile { padding: 10px 18px; text-align: center; border-color: var(--brass); }
+.xpTile.xpTile { padding: 10px 18px; text-align: center; }
+.tileLabel { font-family: var(--font-display); font-size: 10px; letter-spacing: var(--track-eng); text-transform: uppercase; color: var(--ink-faint); }
+.crValue { font-family: var(--font-serif); font-size: 34px; font-weight: 600; color: var(--gold-pale); line-height: 1.05; }
+.xpValue { font-family: var(--font-mono); font-size: 16px; color: var(--ink-bright); margin-top: 8px; }
+
+/* Body */
+.body { padding: clamp(18px, 3vw, 30px) clamp(18px, 3vw, 34px); }
+.defGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+.initScore { font-size: 14px; color: var(--ink-faint); }
+.speedText { font-size: 14px; font-family: var(--font-sans); }
+.abilGrid { margin-top: 14px; display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
+.statCell.statCell { padding: 12px 6px; }
+.statValue.statValue { font-size: 30px; }
+.saveLine {
+  margin-top: 7px;
+  padding-top: 6px;
+  border-top: 1px solid var(--hairline);
+  width: 100%;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-faint);
+}
+.saveLine.hasSave { color: var(--gold-pale); }
+
+.legendaryText { font-family: var(--font-serif); font-style: italic; font-size: 15px; line-height: 1.6; color: var(--ink-quiet); margin: 0 0 14px; }
+.featureCol { display: flex; flex-direction: column; gap: 14px; }
+.lore { font-family: var(--font-serif); font-size: 16px; line-height: 1.7; color: var(--ink); margin: 0; }
+
+/* Footer */
+.footer { border-top: 1px solid var(--rule); background: var(--abyss); padding: 16px clamp(18px, 3vw, 34px); }
+.footerRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 18px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--ink-faint);
+}
+.footChip { display: inline-flex; align-items: center; gap: 6px; }
+.footChip.visible { color: var(--gold-pale); }

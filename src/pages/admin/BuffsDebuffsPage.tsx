@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import type { CSSProperties } from 'react';
 import { Loader2 } from 'lucide-react';
 import { Rune, OrdoPanel, OrdoField, OrdoChip, PanelHeader } from '@/components/ordo';
 import {
@@ -35,6 +36,8 @@ import {
 } from '@/hooks/useAdmin';
 import type { BuffDebuffResponse, CreateBuffDebuffRequest } from '@/types';
 import { useT } from '@/i18n/I18nContext';
+import { cn } from '@/lib/utils';
+import s from './BuffsDebuffsPage.module.css';
 
 const EFFECT_TYPES = [
   'STAT_MODIFIER',
@@ -47,30 +50,13 @@ const EFFECT_TYPES = [
 
 type FilterTab = 'ALL' | 'BUFF' | 'DEBUFF';
 
-const GRID_COLS = '1.4fr 120px 1fr 1fr 150px 90px';
-
 /* ---------- inline sub-components ---------- */
 
 function BuffBadge({ isBuff }: { isBuff: boolean }) {
   const t = useT();
   const c = isBuff ? '#7a9866' : '#c0584a';
   return (
-    <span
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: 6,
-        padding: '4px 10px 4px 7px',
-        background: 'rgba(0,0,0,0.45)',
-        border: `1px solid ${c}66`,
-        borderLeft: `2px solid ${c}`,
-        fontFamily: 'var(--font-display)',
-        fontSize: 10,
-        letterSpacing: '0.18em',
-        color: c,
-        textTransform: 'uppercase',
-      }}
-    >
+    <span className={s.buffBadge} style={{ '--c': c } as CSSProperties}>
       <Rune kind={isBuff ? 'arrow-up' : 'tri-inv'} size={9} color={c} />
       {isBuff ? t('adm.buffs.buff') : t('adm.buffs.debuff')}
     </span>
@@ -79,29 +65,8 @@ function BuffBadge({ isBuff }: { isBuff: boolean }) {
 
 function EffectTypeBadge({ type }: { type: string }) {
   return (
-    <span
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: 6,
-        padding: '3px 8px',
-        background: 'var(--abyss)',
-        border: '1px solid var(--hairline)',
-        fontFamily: 'var(--font-mono)',
-        fontSize: 10,
-        letterSpacing: '0.06em',
-        color: 'var(--ink-quiet)',
-        textTransform: 'uppercase',
-      }}
-    >
-      <span
-        style={{
-          width: 4,
-          height: 4,
-          background: 'var(--bronze)',
-          transform: 'rotate(45deg)',
-        }}
-      />
+    <span className={s.effectTypeBadge}>
+      <span className={s.effectDot} />
       {type.replace(/_/g, ' ')}
     </span>
   );
@@ -111,16 +76,7 @@ function DurationDisplay({ rounds }: { rounds?: number | null }) {
   const t = useT();
   const isPermanent = rounds == null;
   return (
-    <span
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: 6,
-        color: isPermanent ? 'var(--gold-pale)' : 'var(--ink-quiet)',
-        fontFamily: 'var(--font-mono)',
-        fontSize: 11,
-      }}
-    >
+    <span className={cn(s.duration, isPermanent && s.permanent)}>
       <Rune
         kind={isPermanent ? 'cir' : 'hex'}
         size={11}
@@ -142,29 +98,12 @@ function ModifierTag({
   const c = pos ? '#7a9866' : '#d8896a';
   return (
     <span
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: 5,
-        padding: '2px 7px',
-        background: pos
-          ? 'rgba(122,152,102,0.08)'
-          : 'rgba(179,70,26,0.08)',
-        border: `1px solid ${c}55`,
-        fontFamily: 'var(--font-mono)',
-        fontSize: 10,
-        color: c,
-      }}
+      className={cn(s.modTag, pos ? s.pos : s.neg)}
+      style={{ '--c': c } as CSSProperties}
     >
       <Rune kind={pos ? 'arrow-up' : 'minus'} size={8} color={c} />
-      {stat && (
-        <span style={{ letterSpacing: '0.08em', color: 'var(--ink)' }}>
-          {stat}
-        </span>
-      )}
-      <span style={{ color: c, fontWeight: 600 }}>
-        {pos ? `+${value}` : value}
-      </span>
+      {stat && <span className={s.modStat}>{stat}</span>}
+      <span className={s.modValue}>{pos ? `+${value}` : value}</span>
     </span>
   );
 }
@@ -263,15 +202,15 @@ export default function BuffsDebuffsPage() {
   if (isLoading) {
     return (
       <div>
-        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 18 }}>
+        <div className={s.header}>
           <div>
             <div className="ao-overline">{t('adm.buffs.overline')}</div>
-            <div className="ao-h3" style={{ marginTop: 4 }}>{t('adm.buffs.title')}</div>
+            <div className={cn('ao-h3', s.titleH3)}>{t('adm.buffs.title')}</div>
           </div>
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div className={s.skelCol}>
           {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="ao-ph" style={{ width: '100%', height: 48 }} />
+            <div key={i} className={cn('ao-ph', s.skelRow)} />
           ))}
         </div>
       </div>
@@ -281,8 +220,8 @@ export default function BuffsDebuffsPage() {
   /* ---------- error state ---------- */
   if (error) {
     return (
-      <div style={{ textAlign: 'center', padding: '48px 0' }}>
-        <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginBottom: 16 }}>
+      <div className={s.errorBox}>
+        <p className={cn('ao-italic', s.errorText)}>
           {t('adm.buffs.errorBody')}
         </p>
         <button className="ao-btn" onClick={() => refetch()}>{t('common.retry')}</button>
@@ -300,55 +239,26 @@ export default function BuffsDebuffsPage() {
   return (
     <div>
       {/* Header row */}
-      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 18 }}>
+      <div className={s.header}>
         {/* Left: overline + title */}
         <div>
           <div className="ao-overline">{t('adm.buffs.overline')}</div>
-          <div className="ao-h3" style={{ marginTop: 4 }}>{t('adm.buffs.title')}</div>
+          <div className={cn('ao-h3', s.titleH3)}>{t('adm.buffs.title')}</div>
         </div>
 
         {/* Right: tabs */}
-        <div style={{ display: 'flex', gap: 2 }}>
+        <div className={s.tabRow}>
           {tabs.map((tab) => {
             const active = filter === tab.key;
             return (
               <button
                 key={tab.key}
-                className="ao-tab"
+                className={cn('ao-tab', s.tab, active && s.active)}
                 onClick={() => setFilter(tab.key)}
-                style={{
-                  padding: '10px 20px',
-                  background: active ? 'var(--panel)' : 'transparent',
-                  color: active ? tab.accent : 'var(--ink-quiet)',
-                  borderBottom: active ? `2px solid ${tab.accent}` : '2px solid transparent',
-                  fontFamily: 'var(--font-display)',
-                  fontSize: 11,
-                  letterSpacing: '0.14em',
-                  textTransform: 'uppercase',
-                  cursor: 'pointer',
-                  border: 'none',
-                  borderBottomStyle: 'solid',
-                  borderBottomWidth: 2,
-                  borderBottomColor: active ? tab.accent : 'transparent',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 8,
-                }}
+                style={{ '--c': tab.accent } as CSSProperties}
               >
                 {tab.label}
-                <span
-                  style={{
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: 9,
-                    padding: '1px 6px',
-                    background: active ? `${tab.accent}22` : 'rgba(255,255,255,0.04)',
-                    border: `1px solid ${active ? `${tab.accent}44` : 'var(--hairline)'}`,
-                    color: active ? tab.accent : 'var(--ink-faint)',
-                    letterSpacing: '0.04em',
-                  }}
-                >
-                  {tab.count}
-                </span>
+                <span className={s.tabCount}>{tab.count}</span>
               </button>
             );
           })}
@@ -356,7 +266,7 @@ export default function BuffsDebuffsPage() {
       </div>
 
       {/* Action row */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 10, marginBottom: 18 }}>
+      <div className={s.actionRow}>
         <OrdoChip tone="ember" glyph="lock">{t('adm.shared.inquisitorPrivileges')}</OrdoChip>
         <button className="ao-btn ao-btn--primary" onClick={handleAdd}>
           <Rune kind="plus" size={11} /> {t('adm.buffs.inscribeNew')}
@@ -365,76 +275,34 @@ export default function BuffsDebuffsPage() {
 
       {/* Data panel */}
       {filteredData.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '48px 0' }}>
-          <p className="ao-italic" style={{ color: 'var(--ink-faint)' }}>
+        <div className={s.emptyBox}>
+          <p className={cn('ao-italic', s.emptyText)}>
             {t('adm.buffs.emptyBody')}
           </p>
         </div>
       ) : (
         <OrdoPanel frame padding={0}>
           {/* Grid header */}
-          <div
-            className="ao-rgrid"
-            style={{
-              display: 'grid',
-              gridTemplateColumns: GRID_COLS,
-              padding: '10px 16px',
-              borderBottom: '1px solid var(--rule)',
-              background: 'var(--abyss)',
-            }}
-          >
-            <span className="ao-overline" style={{ fontSize: 9 }}>{t('adm.buffs.colEffect')}</span>
-            <span className="ao-overline" style={{ fontSize: 9 }}>{t('adm.buffs.colNature')}</span>
-            <span className="ao-overline" style={{ fontSize: 9 }}>{t('adm.buffs.colType')}</span>
-            <span className="ao-overline" style={{ fontSize: 9 }}>{t('adm.buffs.colModifier')}</span>
-            <span className="ao-overline" style={{ fontSize: 9 }}>{t('adm.buffs.colDuration')}</span>
+          <div className={cn('ao-rgrid', s.gridHead)}>
+            <span className={cn('ao-overline', s.colHead)}>{t('adm.buffs.colEffect')}</span>
+            <span className={cn('ao-overline', s.colHead)}>{t('adm.buffs.colNature')}</span>
+            <span className={cn('ao-overline', s.colHead)}>{t('adm.buffs.colType')}</span>
+            <span className={cn('ao-overline', s.colHead)}>{t('adm.buffs.colModifier')}</span>
+            <span className={cn('ao-overline', s.colHead)}>{t('adm.buffs.colDuration')}</span>
             <span />
           </div>
 
           {/* Rows */}
           {filteredData.map((item) => (
-            <div
-              key={item.id}
-              className="ao-rgrid"
-              style={{
-                display: 'grid',
-                gridTemplateColumns: GRID_COLS,
-                alignItems: 'center',
-                padding: '12px 16px',
-                borderBottom: '1px solid var(--hairline)',
-              }}
-            >
+            <div key={item.id} className={cn('ao-rgrid', s.gridRow)}>
               {/* Effect */}
-              <div style={{ minWidth: 0 }}>
-                <div
-                  style={{
-                    fontFamily: 'var(--font-serif)',
-                    fontSize: 14,
-                    fontWeight: 600,
-                    color: 'var(--ink-bright)',
-                    lineHeight: 1.3,
-                  }}
-                >
-                  {item.name}
-                </div>
-                <div
-                  className="ao-codex"
-                  style={{ fontSize: 9, color: 'var(--ink-faint)', marginTop: 2 }}
-                >
+              <div className={s.effectCell}>
+                <div className={s.effectName}>{item.name}</div>
+                <div className={cn('ao-codex', s.effectId)}>
                   {item.id.slice(0, 8).toUpperCase()}
                 </div>
                 {item.description && (
-                  <div
-                    className="ao-italic"
-                    style={{
-                      fontSize: 11,
-                      color: 'var(--ink-quiet)',
-                      marginTop: 3,
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
+                  <div className={cn('ao-italic', s.effectDesc)}>
                     {item.description}
                   </div>
                 )}
@@ -458,15 +326,7 @@ export default function BuffsDebuffsPage() {
                     stat={item.targetStatName}
                   />
                 ) : (
-                  <span
-                    style={{
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: 14,
-                      color: 'var(--ink-ghost)',
-                    }}
-                  >
-                    &mdash;
-                  </span>
+                  <span className={s.modEmpty}>&mdash;</span>
                 )}
               </div>
 
@@ -476,10 +336,9 @@ export default function BuffsDebuffsPage() {
               </div>
 
               {/* Actions */}
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 4 }}>
+              <div className={s.actions}>
                 <button
-                  className="ao-iconbtn"
-                  style={{ width: 26, height: 26 }}
+                  className={cn('ao-iconbtn', s.iconBtn)}
                   onClick={() => handleEdit(item)}
                   title={t('adm.buffs.editTooltip')}
                 >
@@ -488,8 +347,7 @@ export default function BuffsDebuffsPage() {
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
                     <button
-                      className="ao-iconbtn"
-                      style={{ width: 26, height: 26, color: '#d8896a' }}
+                      className={cn('ao-iconbtn', s.iconDanger)}
                       title={t('adm.buffs.unmakeTooltip')}
                     >
                       <Rune kind="x" size={11} color="var(--ember)" />
@@ -518,15 +376,7 @@ export default function BuffsDebuffsPage() {
           ))}
 
           {/* Footer */}
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              padding: '12px 18px',
-              borderTop: '1px solid var(--rule)',
-              background: 'var(--abyss)',
-            }}
-          >
+          <div className={s.footer}>
             <span className="ao-codex">
               {t('adm.buffs.countOf', { filtered: filteredData.length, total: data?.length || 0 })}
             </span>
@@ -541,7 +391,7 @@ export default function BuffsDebuffsPage() {
           <DialogHeader>
             <DialogTitle>{editing ? t('adm.buffs.dialogEdit') : t('adm.buffs.dialogCreate')}</DialogTitle>
           </DialogHeader>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div className={s.dialogCol}>
             <OrdoField label={t('adm.shared.fieldName')} required>
               <input
                 className="ao-input"
@@ -553,12 +403,11 @@ export default function BuffsDebuffsPage() {
 
             <OrdoField label={t('adm.shared.fieldDescription')}>
               <textarea
-                className="ao-input"
+                className={cn('ao-input', s.descArea)}
                 value={formDescription}
                 onChange={(e) => setFormDescription(e.target.value)}
                 placeholder={t('adm.buffs.descriptionPlaceholder')}
                 rows={3}
-                style={{ resize: 'vertical' }}
               />
             </OrdoField>
 

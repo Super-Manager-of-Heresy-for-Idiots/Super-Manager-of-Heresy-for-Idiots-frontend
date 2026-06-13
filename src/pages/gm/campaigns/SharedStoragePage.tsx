@@ -11,7 +11,9 @@ import {
 } from '@/components/ui/dialog';
 import { useCampaignStorage, useCreateStorageContainer } from '@/hooks/useCampaigns';
 import { useT } from '@/i18n/I18nContext';
+import { cn } from '@/lib/utils';
 import type { StorageContainerResponse, StorageItemResponse } from '@/types';
+import s from './SharedStoragePage.module.css';
 
 /* ── page ────────────────────────────────────────────────────── */
 
@@ -53,16 +55,16 @@ export default function SharedStoragePage() {
   if (isLoading) {
     return (
       <div>
-        <div style={{ marginBottom: 32 }}>
-          <p className="ao-overline" style={{ color: 'var(--gold)' }}>{t('camp2.storage.overline')}</p>
-          <h3 className="ao-h3" style={{ marginTop: 4 }}>{t('camp2.storage.title')}</h3>
+        <div className={s.head}>
+          <p className={cn('ao-overline', s.overlineGold)}>{t('camp2.storage.overline')}</p>
+          <h3 className={cn('ao-h3', s.title)}>{t('camp2.storage.title')}</h3>
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div className={s.skelCol}>
           {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="ao-panel ao-frame ao-breathe" style={{ padding: 24, minHeight: 100 }}>
+            <div key={i} className={cn('ao-panel ao-frame ao-breathe', s.skelCard)}>
               <span className="ao-frame-c" />
-              <div className="ao-ph" style={{ width: '40%', height: 16, marginBottom: 10 }} />
-              <div className="ao-ph" style={{ width: '60%', height: 14 }} />
+              <div className={cn('ao-ph', s.phW40)} />
+              <div className={cn('ao-ph', s.phW60)} />
             </div>
           ))}
         </div>
@@ -74,8 +76,8 @@ export default function SharedStoragePage() {
 
   if (error) {
     return (
-      <div style={{ textAlign: 'center', padding: '48px 0' }}>
-        <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginBottom: 16 }}>
+      <div className={s.errorBlock}>
+        <p className={cn('ao-italic', s.errorText)}>
           {t('camp2.storage.loadError')}
         </p>
         <button className="ao-btn" onClick={() => refetch()}>{t('common.retry')}</button>
@@ -91,20 +93,19 @@ export default function SharedStoragePage() {
     <div>
       {/* Back button */}
       <button
-        className="ao-btn ao-btn--ghost ao-btn--sm"
+        className={cn('ao-btn ao-btn--ghost ao-btn--sm', s.backBtn)}
         onClick={() => navigate(`/campaigns/${campaignId}`)}
-        style={{ marginBottom: 16 }}
       >
         <Rune kind="chev-l" size={12} color="currentColor" />
-        <span style={{ marginLeft: 4 }}>{t('camp2.storage.backToDashboard')}</span>
+        <span className={s.ml4}>{t('camp2.storage.backToDashboard')}</span>
       </button>
 
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 28 }}>
+      <div className={s.header}>
         <div>
-          <p className="ao-overline" style={{ color: 'var(--gold)' }}>{t('camp2.storage.overline')}</p>
-          <h3 className="ao-h3" style={{ marginTop: 4 }}>{t('camp2.storage.title')}</h3>
-          <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 13, marginTop: 4 }}>
+          <p className={cn('ao-overline', s.overlineGold)}>{t('camp2.storage.overline')}</p>
+          <h3 className={cn('ao-h3', s.title)}>{t('camp2.storage.title')}</h3>
+          <p className={cn('ao-italic', s.sub)}>
             {t('camp2.storage.subtitle')}
           </p>
         </div>
@@ -113,7 +114,7 @@ export default function SharedStoragePage() {
           onClick={() => { setFormName(''); setDialogOpen(true); }}
         >
           <Rune kind="plus" size={14} color="currentColor" />
-          <span style={{ marginLeft: 6 }}>{t('camp2.storage.newContainer')}</span>
+          <span className={s.ml6}>{t('camp2.storage.newContainer')}</span>
         </button>
       </div>
 
@@ -129,12 +130,12 @@ export default function SharedStoragePage() {
               onClick={() => { setFormName(''); setDialogOpen(true); }}
             >
               <Rune kind="plus" size={14} color="currentColor" />
-              <span style={{ marginLeft: 6 }}>{t('camp2.storage.newContainer')}</span>
+              <span className={s.ml6}>{t('camp2.storage.newContainer')}</span>
             </button>
           }
         />
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div className={s.list}>
           {storageList.map((container: StorageContainerResponse) => {
             const isExpanded = expandedIds.has(container.id);
             const items: StorageItemResponse[] = container.items ?? [];
@@ -142,37 +143,15 @@ export default function SharedStoragePage() {
             return (
               <OrdoPanel key={container.id} frame padding={0}>
                 {/* Container header */}
-                <button
-                  onClick={() => toggleExpanded(container.id)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 12,
-                    width: '100%',
-                    padding: '14px 18px',
-                    background: 'transparent',
-                    border: 'none',
-                    cursor: 'pointer',
-                    textAlign: 'left',
-                  }}
-                >
-                  <div style={{
-                    width: 36,
-                    height: 36,
-                    border: '1px solid var(--rule)',
-                    background: 'var(--abyss)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0,
-                  }}>
+                <button onClick={() => toggleExpanded(container.id)} className={s.containerBtn}>
+                  <div className={s.containerIcon}>
                     <Rune kind="sword" size={16} color="var(--brass)" />
                   </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 14, color: 'var(--ink-bright)', fontWeight: 500 }}>
+                  <div className={s.containerMain}>
+                    <div className={s.containerName}>
                       {container.name}
                     </div>
-                    <div className="ao-codex" style={{ fontSize: 11, color: 'var(--ink-faint)', marginTop: 2 }}>
+                    <div className={cn('ao-codex', s.containerCount)}>
                       {items.length} {items.length === 1 ? t('camp2.storage.itemOne') : t('camp2.storage.itemMany')}
                     </div>
                   </div>
@@ -185,41 +164,32 @@ export default function SharedStoragePage() {
 
                 {/* Expanded items */}
                 {isExpanded && (
-                  <div style={{ borderTop: '1px solid var(--hairline)' }}>
+                  <div className={s.itemsWrap}>
                     {items.length === 0 ? (
-                      <div style={{ padding: '16px 18px', textAlign: 'center' }}>
-                        <p className="ao-italic" style={{ color: 'var(--ink-ghost)', fontSize: 13 }}>
+                      <div className={s.emptyItems}>
+                        <p className={cn('ao-italic', s.emptyItemsText)}>
                           {t('camp2.storage.containerEmpty')}
                         </p>
                       </div>
                     ) : (
                       items.map((item: StorageItemResponse) => (
-                        <div
-                          key={item.id}
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 10,
-                            padding: '10px 18px 10px 66px',
-                            borderBottom: '1px solid var(--hairline)',
-                          }}
-                        >
+                        <div key={item.id} className={s.itemRow}>
                           <Rune kind="diamond" size={8} color="var(--brass)" />
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <span style={{ fontSize: 13, color: 'var(--ink-bright)' }}>
+                          <div className={s.itemMain}>
+                            <span className={s.itemName}>
                               {item.name}
                             </span>
                             {item.rarity && (
-                              <span className="ao-overline" style={{ fontSize: 8, marginLeft: 8, color: 'var(--ink-faint)' }}>
+                              <span className={cn('ao-overline', s.itemRarity)}>
                                 {item.rarity}
                               </span>
                             )}
                           </div>
-                          <span className="ao-codex" style={{ fontSize: 12, color: 'var(--ink-quiet)' }}>
+                          <span className={cn('ao-codex', s.itemQty)}>
                             x{item.quantity}
                           </span>
                           {item.isUnique && (
-                            <span className="ao-overline" style={{ fontSize: 8, color: 'var(--gold)' }}>
+                            <span className={cn('ao-overline', s.itemUnique)}>
                               {t('camp2.storage.unique')}
                             </span>
                           )}
@@ -240,7 +210,7 @@ export default function SharedStoragePage() {
           <DialogHeader>
             <DialogTitle>{t('camp2.storage.dialog.title')}</DialogTitle>
           </DialogHeader>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div className={s.dialogCol}>
             <OrdoField label={t('camp2.storage.field.name')} required>
               <input
                 className="ao-input"

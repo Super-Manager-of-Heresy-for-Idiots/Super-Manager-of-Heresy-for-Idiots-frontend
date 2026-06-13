@@ -20,7 +20,9 @@ import {
 import { useCampaignQuests, useCreateQuest } from '@/hooks/useQuests';
 import { BackLink } from '@/components/campaigns';
 import { useT } from '@/i18n/I18nContext';
+import { cn } from '@/lib/utils';
 import type { QuestResponse, QuestStatus } from '@/types';
+import css from './QuestManagerPage.module.css';
 
 /* ── constants ───────────────────────────────────────────────── */
 
@@ -74,20 +76,20 @@ export default function QuestManagerPage() {
   if (isLoading) {
     return (
       <div>
-        <BackLink to={backTo} label={t('camp2.back.campaign')} style={{ marginBottom: 12 }} />
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 32 }}>
+        <BackLink to={backTo} label={t('camp2.back.campaign')} className={css.backLink} />
+        <div className={css.header}>
           <div>
-            <p className="ao-overline" style={{ color: 'var(--gold)' }}>{t('camp2.questMgr.overline')}</p>
-            <h3 className="ao-h3" style={{ marginTop: 4 }}>{t('camp2.questMgr.title')}</h3>
+            <p className={cn('ao-overline', css.overlineGold)}>{t('camp2.questMgr.overline')}</p>
+            <h3 className={cn('ao-h3', css.title)}>{t('camp2.questMgr.title')}</h3>
           </div>
         </div>
-        <div className="ao-panel ao-frame ao-breathe" style={{ padding: 24, minHeight: 200 }}>
+        <div className={cn('ao-panel ao-frame ao-breathe', css.skelPanel)}>
           <span className="ao-frame-c" />
           {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} style={{ display: 'flex', gap: 16, marginBottom: 16 }}>
-              <div className="ao-ph" style={{ width: '40%', height: 14 }} />
-              <div className="ao-ph" style={{ width: '15%', height: 14 }} />
-              <div className="ao-ph" style={{ width: '10%', height: 14 }} />
+            <div key={i} className={css.skelRow}>
+              <div className={cn('ao-ph', css.phW40)} />
+              <div className={cn('ao-ph', css.phW15)} />
+              <div className={cn('ao-ph', css.phW10)} />
             </div>
           ))}
         </div>
@@ -100,9 +102,9 @@ export default function QuestManagerPage() {
   if (error) {
     return (
       <div>
-        <BackLink to={backTo} label={t('camp2.back.campaign')} style={{ marginBottom: 12 }} />
-        <div style={{ textAlign: 'center', padding: '48px 0' }}>
-          <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginBottom: 16 }}>
+        <BackLink to={backTo} label={t('camp2.back.campaign')} className={css.backLink} />
+        <div className={css.errorBlock}>
+          <p className={cn('ao-italic', css.errorText)}>
             {t('camp2.questMgr.loadError')}
           </p>
           <button className="ao-btn" onClick={() => refetch()}>{t('common.retry')}</button>
@@ -123,13 +125,13 @@ export default function QuestManagerPage() {
 
   return (
     <div>
-      <BackLink to={backTo} label={t('camp2.back.campaign')} style={{ marginBottom: 12 }} />
+      <BackLink to={backTo} label={t('camp2.back.campaign')} className={css.backLink} />
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 32 }}>
+      <div className={css.header}>
         <div>
-          <p className="ao-overline" style={{ color: 'var(--gold)' }}>{t('camp2.questMgr.overline')}</p>
-          <h3 className="ao-h3" style={{ marginTop: 4 }}>{t('camp2.questMgr.title')}</h3>
-          <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 13, marginTop: 4 }}>
+          <p className={cn('ao-overline', css.overlineGold)}>{t('camp2.questMgr.overline')}</p>
+          <h3 className={cn('ao-h3', css.title)}>{t('camp2.questMgr.title')}</h3>
+          <p className={cn('ao-italic', css.sub)}>
             {t('camp2.questMgr.subtitle')}
           </p>
         </div>
@@ -138,7 +140,7 @@ export default function QuestManagerPage() {
           onClick={() => { resetForm(); setDialogOpen(true); }}
         >
           <Rune kind="plus" size={14} color="currentColor" />
-          <span style={{ marginLeft: 6 }}>{t('camp2.questMgr.newQuest')}</span>
+          <span className={css.ml6}>{t('camp2.questMgr.newQuest')}</span>
         </button>
       </div>
 
@@ -151,27 +153,17 @@ export default function QuestManagerPage() {
           action={
             <button className="ao-btn ao-btn--primary" onClick={() => { resetForm(); setDialogOpen(true); }}>
               <Rune kind="plus" size={14} color="currentColor" />
-              <span style={{ marginLeft: 6 }}>{t('camp2.questMgr.newQuest')}</span>
+              <span className={css.ml6}>{t('camp2.questMgr.newQuest')}</span>
             </button>
           }
         />
       ) : (
         <OrdoPanel frame padding={0}>
           {/* Column headers */}
-          <div
-            className="ao-rgrid"
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 140px 120px 80px',
-              gap: 12,
-              padding: '10px 18px',
-              borderBottom: '1px solid var(--rule)',
-              background: 'var(--abyss)',
-            }}
-          >
-            <span className="ao-overline" style={{ fontSize: 9, color: 'var(--ink-faint)' }}>{t('camp2.questMgr.col.quest')}</span>
-            <span className="ao-overline" style={{ fontSize: 9, color: 'var(--ink-faint)' }}>{t('camp2.questMgr.col.status')}</span>
-            <span className="ao-overline" style={{ fontSize: 9, color: 'var(--ink-faint)' }}>{t('camp2.questMgr.col.visibility')}</span>
+          <div className={cn('ao-rgrid', css.questGrid, css.colHead)}>
+            <span className={cn('ao-overline', css.colLabel)}>{t('camp2.questMgr.col.quest')}</span>
+            <span className={cn('ao-overline', css.colLabel)}>{t('camp2.questMgr.col.status')}</span>
+            <span className={cn('ao-overline', css.colLabel)}>{t('camp2.questMgr.col.visibility')}</span>
             <span />
           </div>
 
@@ -179,39 +171,16 @@ export default function QuestManagerPage() {
           {sorted.map((quest: QuestResponse) => {
             const isArchived = quest.status === 'ARCHIVED';
             return (
-              <div
-                key={quest.id}
-                className="ao-rgrid"
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: '1fr 140px 120px 80px',
-                  gap: 12,
-                  padding: '14px 18px',
-                  borderBottom: '1px solid var(--hairline)',
-                  alignItems: 'center',
-                  opacity: isArchived ? 0.5 : 1,
-                  transition: 'opacity 0.15s ease',
-                }}
-              >
+              <div key={quest.id} className={cn('ao-rgrid', css.questGrid, css.row, isArchived && css.archived)}>
                 {/* Quest name + subtitle */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+                <div className={css.nameCell}>
                   <Rune kind="scroll" size={16} color="var(--brass)" />
-                  <div style={{ minWidth: 0 }}>
-                    <div style={{ fontSize: 14, color: 'var(--ink-bright)', fontWeight: 500 }}>
+                  <div className={css.nameMain}>
+                    <div className={css.questTitle}>
                       {quest.title}
                     </div>
                     {quest.description && (
-                      <div
-                        className="ao-italic"
-                        style={{
-                          fontSize: 12,
-                          color: 'var(--ink-faint)',
-                          marginTop: 2,
-                          whiteSpace: 'nowrap',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                        }}
-                      >
+                      <div className={cn('ao-italic', css.questDesc)}>
                         {quest.description}
                       </div>
                     )}
@@ -252,7 +221,7 @@ export default function QuestManagerPage() {
           <DialogHeader>
             <DialogTitle>{t('camp2.questMgr.dialog.title')}</DialogTitle>
           </DialogHeader>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div className={css.dialogCol}>
             <OrdoField label={t('camp2.questMgr.field.name')} required>
               <input
                 className="ao-input"
@@ -264,12 +233,11 @@ export default function QuestManagerPage() {
 
             <OrdoField label={t('camp2.questMgr.field.description')} hint={t('camp2.questMgr.field.descriptionHint')}>
               <textarea
-                className="ao-input"
+                className={cn('ao-input', css.resizeV)}
                 value={formDescription}
                 onChange={(e) => setFormDescription(e.target.value)}
                 placeholder={t('camp2.questMgr.field.descriptionPlaceholder')}
                 rows={3}
-                style={{ resize: 'vertical' }}
               />
             </OrdoField>
 
@@ -288,13 +256,13 @@ export default function QuestManagerPage() {
               </Select>
             </OrdoField>
 
-            <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+            <label className={css.checkRow}>
               <input
                 type="checkbox"
                 checked={formVisible}
                 onChange={(e) => setFormVisible(e.target.checked)}
               />
-              <span className="ao-label" style={{ marginBottom: 0 }}>{t('camp2.questMgr.field.visible')}</span>
+              <span className={cn('ao-label', css.labelNoMb)}>{t('camp2.questMgr.field.visible')}</span>
             </label>
           </div>
           <DialogFooter>

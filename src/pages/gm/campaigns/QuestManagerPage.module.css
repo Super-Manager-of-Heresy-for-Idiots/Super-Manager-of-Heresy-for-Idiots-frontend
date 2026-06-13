@@ -1,0 +1,37 @@
+.backLink { margin-bottom: 12px; }
+.header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px; }
+.overlineGold { color: var(--gold); }
+.title { margin-top: 4px; }
+.sub { color: var(--ink-faint); font-size: 13px; margin-top: 4px; }
+.ml6 { margin-left: 6px; }
+
+.skelPanel { padding: 24px; min-height: 200px; }
+.skelRow { display: flex; gap: 16px; margin-bottom: 16px; }
+.phW40 { width: 40%; height: 14px; }
+.phW15 { width: 15%; height: 14px; }
+.phW10 { width: 10%; height: 14px; }
+
+.errorBlock { text-align: center; padding: 48px 0; }
+.errorText { color: var(--ink-faint); margin-bottom: 16px; }
+
+.questGrid { display: grid; grid-template-columns: 1fr 140px 120px 80px; gap: 12px; }
+.colHead { padding: 10px 18px; border-bottom: 1px solid var(--rule); background: var(--abyss); }
+.colLabel { font-size: 9px; color: var(--ink-faint); }
+.row {
+  padding: 14px 18px; border-bottom: 1px solid var(--hairline);
+  align-items: center; opacity: 1; transition: opacity 0.15s ease;
+}
+.row.archived { opacity: 0.5; }
+
+.nameCell { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.nameMain { min-width: 0; }
+.questTitle { font-size: 14px; color: var(--ink-bright); font-weight: 500; }
+.questDesc {
+  font-size: 12px; color: var(--ink-faint); margin-top: 2px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.dialogCol { display: flex; flex-direction: column; gap: 16px; }
+.resizeV { resize: vertical; }
+.checkRow { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+.labelNoMb { margin-bottom: 0; }

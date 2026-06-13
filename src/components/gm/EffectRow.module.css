@@ -1,0 +1,41 @@
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-left: 3px solid var(--tone);
+  background: color-mix(in srgb, var(--tone) 4%, transparent);
+  border-bottom: 1px solid var(--hairline);
+}
+
+.icon {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border: 1px solid color-mix(in srgb, var(--tone) 27%, transparent);
+  background: var(--abyss);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.main { flex: 1; min-width: 0; }
+.nameRow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.name { font-size: 13px; color: var(--ink-bright); }
+.typeLabel { font-size: 8px; color: var(--tone); letter-spacing: 0.14em; }
+.tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+
+.rounds { flex-shrink: 0; text-align: center; min-width: 60px; }
+.roundNum { font-size: 18px; font-family: var(--font-mono); color: var(--ink-bright); }
+.roundNum.urgent { color: var(--ember); }
+.roundLabel { font-size: 8px; color: var(--ink-faint); margin-top: 1px; }
+.perm { font-size: 9px; color: var(--ink-quiet); letter-spacing: 0.12em; }
+
+.removeBtn.removeBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  color: var(--ember);
+  border-color: var(--ember);
+}

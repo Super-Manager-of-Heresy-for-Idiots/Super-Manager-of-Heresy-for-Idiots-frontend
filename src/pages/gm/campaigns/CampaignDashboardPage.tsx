@@ -18,7 +18,9 @@ import { useAuthStore } from '@/store/authStore';
 import { useCampaign, useSetCampaignStatus } from '@/hooks/useCampaigns';
 import { useCampaignCharacters } from '@/hooks/useCharacter';
 import { useT } from '@/i18n/I18nContext';
+import { cn } from '@/lib/utils';
 import type { CampaignStatus, CharacterV2Response } from '@/types';
+import s from './CampaignDashboardPage.module.css';
 
 /* ── page ────────────────────────────────────────────────────── */
 
@@ -66,18 +68,18 @@ export default function CampaignDashboardPage() {
   if (isLoading) {
     return (
       <div>
-        <BackLink to="/campaigns" label={t('camp.backToCampaigns')} style={{ marginBottom: 12 }} />
-        <div className="ao-panel ao-frame ao-breathe" style={{ padding: 24, minHeight: 120, marginBottom: 20 }}>
+        <BackLink to="/campaigns" label={t('camp.backToCampaigns')} className={s.backLink} />
+        <div className={cn('ao-panel ao-frame ao-breathe', s.skelHeader)}>
           <span className="ao-frame-c" />
-          <div className="ao-ph" style={{ width: '40%', height: 24, marginBottom: 12 }} />
-          <div className="ao-ph" style={{ width: '60%', height: 14 }} />
+          <div className={cn('ao-ph', s.phW40H24)} />
+          <div className={cn('ao-ph', s.phW60H14)} />
         </div>
-        <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+        <div className={cn('ao-rgrid', s.grid2)}>
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="ao-panel ao-frame ao-breathe" style={{ padding: 24, minHeight: 80 }}>
+            <div key={i} className={cn('ao-panel ao-frame ao-breathe', s.skelCell)}>
               <span className="ao-frame-c" />
-              <div className="ao-ph" style={{ width: '50%', height: 14, marginBottom: 8 }} />
-              <div className="ao-ph" style={{ width: '30%', height: 14 }} />
+              <div className={cn('ao-ph', s.phW50H14)} />
+              <div className={cn('ao-ph', s.phW30H14)} />
             </div>
           ))}
         </div>
@@ -90,9 +92,9 @@ export default function CampaignDashboardPage() {
   if (error || !campaign) {
     return (
       <div>
-        <BackLink to="/campaigns" label={t('camp.backToCampaigns')} style={{ marginBottom: 12 }} />
-        <div style={{ textAlign: 'center', padding: '48px 0' }}>
-          <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginBottom: 16 }}>
+        <BackLink to="/campaigns" label={t('camp.backToCampaigns')} className={s.backLink} />
+        <div className={s.errorBlock}>
+          <p className={cn('ao-italic', s.errorText)}>
             {t('camp.dash.loadError')}
           </p>
           <button className="ao-btn" onClick={() => refetch()}>{t('camp.retry')}</button>
@@ -108,29 +110,29 @@ export default function CampaignDashboardPage() {
 
   return (
     <div>
-      <BackLink to="/campaigns" label={t('camp.backToCampaigns')} style={{ marginBottom: 12 }} />
+      <BackLink to="/campaigns" label={t('camp.backToCampaigns')} className={s.backLink} />
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16, marginBottom: 28 }}>
+      <div className={s.header}>
         <div>
-          <p className="ao-overline" style={{ color: 'var(--gold)' }}>{t('camp.dash.overline')}</p>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 4 }}>
+          <p className={cn('ao-overline', s.overlineGold)}>{t('camp.dash.overline')}</p>
+          <div className={s.titleRow}>
             <h3 className="ao-h3">{campaign.name}</h3>
             <CampaignStatusPill status={campaign.status} />
           </div>
           {campaign.description && (
-            <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 13, marginTop: 6 }}>
+            <p className={cn('ao-italic', s.desc)}>
               {campaign.description}
             </p>
           )}
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div className={s.headerActions}>
           {canCreateCharacter && (
             <button
               className="ao-btn ao-btn--primary"
               onClick={openCharacterWizard}
             >
               <Rune kind="plus" size={14} color="currentColor" />
-              <span style={{ marginLeft: 6 }}>{t('camp.dash.addCharacter')}</span>
+              <span className={s.ml6}>{t('camp.dash.addCharacter')}</span>
             </button>
           )}
           {campaign.isCreator && (
@@ -143,33 +145,33 @@ export default function CampaignDashboardPage() {
       </div>
 
       {/* Stat blocks */}
-      <div style={{ display: 'flex', justifyContent: 'flex-start', gap: 36, marginBottom: 24 }}>
-        <div className="ao-stat" style={{ textAlign: 'center' }}>
-          <span className="ao-stat-value" style={{ color: 'var(--gold)' }}>
+      <div className={s.statsRow}>
+        <div className={cn('ao-stat', s.stat)}>
+          <span className={cn('ao-stat-value', s.valGold)}>
             {campaign.members?.length || 0}
           </span>
           <span className="ao-stat-label">{t('camp.dash.stat.members')}</span>
         </div>
-        <div className="ao-stat" style={{ textAlign: 'center' }}>
-          <span className="ao-stat-value" style={{ color: 'var(--arcane)' }}>
+        <div className={cn('ao-stat', s.stat)}>
+          <span className={cn('ao-stat-value', s.valArcane)}>
             {charsLoading ? '\u2014' : charCounts.total}
           </span>
           <span className="ao-stat-label">{t('camp.dash.stat.characters')}</span>
         </div>
-        <div className="ao-stat" style={{ textAlign: 'center' }}>
-          <span className="ao-stat-value" style={{ color: '#7a9866' }}>
+        <div className={cn('ao-stat', s.stat)}>
+          <span className={cn('ao-stat-value', s.valGreen)}>
             {charsLoading ? '\u2014' : charCounts.active}
           </span>
           <span className="ao-stat-label">{t('camp.dash.stat.active')}</span>
         </div>
-        <div className="ao-stat" style={{ textAlign: 'center' }}>
-          <span className="ao-stat-value" style={{ color: '#b06a6a' }}>
+        <div className={cn('ao-stat', s.stat)}>
+          <span className={cn('ao-stat-value', s.valRed)}>
             {charsLoading ? '\u2014' : charCounts.dead}
           </span>
           <span className="ao-stat-label">{t('camp.dash.stat.dead')}</span>
         </div>
-        <div className="ao-stat" style={{ textAlign: 'center' }}>
-          <span className="ao-stat-value" style={{ color: 'var(--ink-faint)' }}>
+        <div className={cn('ao-stat', s.stat)}>
+          <span className={cn('ao-stat-value', s.valFaint)}>
             {charsLoading ? '\u2014' : charCounts.reserve}
           </span>
           <span className="ao-stat-label">{t('camp.dash.stat.reserve')}</span>
@@ -179,7 +181,7 @@ export default function CampaignDashboardPage() {
       <OrdoDivider glyph="diamond" />
 
       {/* DrillBlock grid */}
-      <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 24, marginBottom: 28 }}>
+      <div className={cn('ao-rgrid', s.drillGrid)}>
         <DrillBlock label={t('camp.dash.drill.roster')} glyph="helm" count={charCounts.total} to={`/campaigns/${campaignId}/roster`} />
         {canManageCampaign && (
           <>
@@ -205,7 +207,7 @@ export default function CampaignDashboardPage() {
       <OrdoDivider glyph="diamond" />
 
       {/* Roster Summary */}
-      <OrdoPanel frame padding={0} style={{ marginTop: 24 }}>
+      <OrdoPanel frame padding={0} className={s.rosterPanel}>
         <PanelHeader
           title={t('camp.dash.roster.title')}
           glyph="helm"
@@ -214,30 +216,29 @@ export default function CampaignDashboardPage() {
         />
 
         {charsLoading ? (
-          <div className="ao-breathe" style={{ padding: 20 }}>
+          <div className={cn('ao-breathe', s.rosterSkel)}>
             {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} style={{ display: 'flex', gap: 12, marginBottom: 14 }}>
-                <div className="ao-ph" style={{ width: '30%', height: 14 }} />
-                <div className="ao-ph" style={{ width: '20%', height: 14 }} />
-                <div className="ao-ph" style={{ width: '50%', height: 8 }} />
+              <div key={i} className={s.skelRow}>
+                <div className={cn('ao-ph', s.phW30H14b)} />
+                <div className={cn('ao-ph', s.phW20H14)} />
+                <div className={cn('ao-ph', s.phW50H8)} />
               </div>
             ))}
           </div>
         ) : rosterCharacters.length === 0 ? (
-          <div style={{ padding: '24px 20px', textAlign: 'center' }}>
-            <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 13 }}>
+          <div className={s.emptyRoster}>
+            <p className={cn('ao-italic', s.emptyText)}>
               {isPlayer
                 ? t('camp.dash.roster.emptyPlayer')
                 : t('camp.dash.roster.emptyGm')}
             </p>
             {canCreateCharacter && (
               <button
-                className="ao-btn ao-btn--primary"
+                className={cn('ao-btn ao-btn--primary', s.createBtn)}
                 onClick={openCharacterWizard}
-                style={{ marginTop: 14 }}
               >
                 <Rune kind="plus" size={14} color="currentColor" />
-                <span style={{ marginLeft: 6 }}>{t('camp.dash.createCharacter')}</span>
+                <span className={s.ml6}>{t('camp.dash.createCharacter')}</span>
               </button>
             )}
           </div>
@@ -246,32 +247,23 @@ export default function CampaignDashboardPage() {
             {rosterCharacters.map((ch: CharacterV2Response) => {
               const className = ch.classLevels?.[0]?.className ?? t('camp.dash.unknownClass');
               return (
-                <div
-                  key={ch.id}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 12,
-                    padding: '10px 16px',
-                    borderBottom: '1px solid var(--hairline)',
-                  }}
-                >
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                      <span className="ao-h5" style={{ fontSize: 13 }}>{ch.name}</span>
+                <div key={ch.id} className={s.charRow}>
+                  <div className={s.charMain}>
+                    <div className={s.charNameRow}>
+                      <span className={cn('ao-h5', s.charName)}>{ch.name}</span>
                       <CharStatusBadge status={ch.status ?? ''} />
-                      <span className="ao-codex" style={{ fontSize: 10, color: 'var(--ink-faint)' }}>
+                      <span className={cn('ao-codex', s.charMeta)}>
                         {className} &middot; LVL {ch.totalLevel}
                       </span>
                       {!isPlayer && (
-                        <span className="ao-codex" style={{ fontSize: 10, color: 'var(--ink-faint)' }}>
+                        <span className={cn('ao-codex', s.charMeta)}>
                           {t('camp.dash.owner', { name: ch.ownerUsername })}
                         </span>
                       )}
                     </div>
                     <Bar value={ch.currentHp ?? 0} max={ch.maxHp ?? 0} tone="ember" height={5} />
                   </div>
-                  <span className="ao-codex" style={{ fontSize: 11, color: 'var(--ink-quiet)', flexShrink: 0 }}>
+                  <span className={cn('ao-codex', s.charHp)}>
                     {ch.currentHp}/{ch.maxHp} HP
                   </span>
                   <button
@@ -280,7 +272,7 @@ export default function CampaignDashboardPage() {
                     title={t('camp.dash.openManagement')}
                   >
                     <Rune kind="menu" size={10} color="currentColor" />
-                    <span style={{ marginLeft: 4 }}>{t('camp.dash.manage')}</span>
+                    <span className={s.ml4}>{t('camp.dash.manage')}</span>
                   </button>
                 </div>
               );

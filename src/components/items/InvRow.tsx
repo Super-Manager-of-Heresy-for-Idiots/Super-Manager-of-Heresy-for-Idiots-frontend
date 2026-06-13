@@ -1,7 +1,10 @@
+import type { CSSProperties } from 'react';
 import { Rune, OrdoChip } from '@/components/ordo';
 import { RarityBadge, RARITY_HUE } from './RarityBadge';
 import { useT } from '@/i18n/I18nContext';
+import { cn } from '@/lib/utils';
 import type { ItemInstanceResponse } from '@/types';
+import s from './InvRow.module.css';
 
 /* ── Slot icon label mapping ───────────────────────────────────── */
 
@@ -51,75 +54,24 @@ export function InvRow({ item, onRename, onTransfer, onMore }: InvRowProps) {
   const displayName = item.displayName;
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 14,
-        padding: '12px 16px',
-        borderBottom: '1px solid var(--hairline)',
-        transition: 'background 0.15s',
-      }}
-      className="ao-row-hover"
-    >
+    <div className={cn('ao-row-hover', s.row)}>
       {/* ── Slot icon with rarity tint & stack overlay ── */}
-      <div style={{ position: 'relative', flexShrink: 0 }}>
-        <div
-          className="ao-slot"
-          style={{
-            width: 40,
-            height: 40,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            border: `1px solid ${rarityColor}`,
-            background: 'var(--abyss)',
-            boxShadow: `inset 0 0 10px ${rarityColor}18`,
-          }}
-        >
+      <div className={s.iconWrap}>
+        <div className={s.slot} style={{ '--rar': rarityColor } as CSSProperties}>
           <Rune kind={slotGlyph} size={18} color={rarityColor} />
         </div>
 
         {/* Stack quantity overlay */}
         {item.quantity > 1 && (
-          <span
-            style={{
-              position: 'absolute',
-              bottom: -4,
-              right: -4,
-              minWidth: 18,
-              height: 18,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              background: 'var(--panel)',
-              border: '1px solid var(--rule)',
-              fontFamily: 'var(--font-mono)',
-              fontSize: 9,
-              color: 'var(--ink-bright)',
-              padding: '0 4px',
-            }}
-          >
-            x{item.quantity}
-          </span>
+          <span className={s.stack}>x{item.quantity}</span>
         )}
       </div>
 
       {/* ── Name + chips + meta line ── */}
-      <div style={{ flex: 1, minWidth: 0 }}>
+      <div className={s.main}>
         {/* Name row */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-          <span
-            className="ao-h5"
-            style={{
-              fontSize: 14,
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-            }}
-          >
-            {displayName}
-          </span>
+        <div className={s.nameRow}>
+          <span className={cn('ao-h5', s.name)}>{displayName}</span>
 
           {item.isUnique && (
             <OrdoChip tone="arcane" glyph="sigil-1">{t('cmp.inv.unique')}</OrdoChip>
@@ -130,39 +82,23 @@ export function InvRow({ item, onRename, onTransfer, onMore }: InvRowProps) {
         </div>
 
         {/* Meta line: rarity + slot */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-            marginTop: 4,
-            flexWrap: 'wrap',
-          }}
-        >
+        <div className={s.meta}>
           <RarityBadge rarity={rarity} size="sm" />
           {slotLabel && (
-            <span
-              className="ao-codex"
-              style={{ fontSize: 10, color: 'var(--ink-faint)' }}
-            >
-              {slotLabel}
-            </span>
+            <span className={cn('ao-codex', s.slotLabel)}>{slotLabel}</span>
           )}
         </div>
 
         {/* Custom name note (show original name if renamed) */}
         {item.customName && (
-          <div
-            className="ao-italic"
-            style={{ fontSize: 12, color: 'var(--ink-faint)', marginTop: 2 }}
-          >
+          <div className={cn('ao-italic', s.note)}>
             {t('cmp.inv.originally', { name: item.templateName })}
           </div>
         )}
       </div>
 
       {/* ── Action buttons ── */}
-      <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+      <div className={s.actions}>
         {onRename && (
           <button
             className="ao-btn ao-btn--sm"

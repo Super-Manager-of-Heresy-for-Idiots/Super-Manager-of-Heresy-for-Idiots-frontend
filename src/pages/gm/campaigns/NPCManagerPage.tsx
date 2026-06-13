@@ -18,7 +18,9 @@ import {
 } from '@/hooks/useNpcs';
 import { BackLink } from '@/components/campaigns';
 import { useT } from '@/i18n/I18nContext';
+import { cn } from '@/lib/utils';
 import type { NpcResponse } from '@/types';
+import s from './NPCManagerPage.module.css';
 
 /* ── helpers ─────────────────────────────────────────────────── */
 
@@ -85,20 +87,20 @@ export default function NPCManagerPage() {
   if (isLoading) {
     return (
       <div>
-        <BackLink to={backTo} label={t('camp2.back.campaign')} style={{ marginBottom: 12 }} />
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 32 }}>
+        <BackLink to={backTo} label={t('camp2.back.campaign')} className={s.backLink} />
+        <div className={s.header}>
           <div>
-            <p className="ao-overline" style={{ color: 'var(--gold)' }}>{t('camp2.npcMgr.overline')}</p>
-            <h3 className="ao-h3" style={{ marginTop: 4 }}>{t('camp2.npcMgr.title')}</h3>
+            <p className={cn('ao-overline', s.overlineGold)}>{t('camp2.npcMgr.overline')}</p>
+            <h3 className={cn('ao-h3', s.title)}>{t('camp2.npcMgr.title')}</h3>
           </div>
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div className={s.skelList}>
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="ao-panel ao-frame ao-breathe" style={{ padding: 24, minHeight: 120 }}>
+            <div key={i} className={cn('ao-panel ao-frame ao-breathe', s.skelPanel)}>
               <span className="ao-frame-c" />
-              <div className="ao-ph" style={{ width: '40%', height: 14, marginBottom: 12 }} />
-              <div className="ao-ph" style={{ width: '60%', height: 18, marginBottom: 10 }} />
-              <div className="ao-ph" style={{ width: '30%', height: 14 }} />
+              <div className={cn('ao-ph', s.phW40H14)} />
+              <div className={cn('ao-ph', s.phW60H18)} />
+              <div className={cn('ao-ph', s.phW30H14)} />
             </div>
           ))}
         </div>
@@ -111,9 +113,9 @@ export default function NPCManagerPage() {
   if (error) {
     return (
       <div>
-        <BackLink to={backTo} label={t('camp2.back.campaign')} style={{ marginBottom: 12 }} />
-        <div style={{ textAlign: 'center', padding: '48px 0' }}>
-          <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginBottom: 16 }}>
+        <BackLink to={backTo} label={t('camp2.back.campaign')} className={s.backLink} />
+        <div className={s.errorBox}>
+          <p className={cn('ao-italic', s.errorText)}>
             {t('camp2.npcMgr.loadError')}
           </p>
           <button className="ao-btn" onClick={() => refetch()}>{t('common.retry')}</button>
@@ -126,13 +128,13 @@ export default function NPCManagerPage() {
 
   return (
     <div>
-      <BackLink to={backTo} label={t('camp2.back.campaign')} style={{ marginBottom: 12 }} />
+      <BackLink to={backTo} label={t('camp2.back.campaign')} className={s.backLink} />
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 32 }}>
+      <div className={s.header}>
         <div>
-          <p className="ao-overline" style={{ color: 'var(--gold)' }}>{t('camp2.npcMgr.overline')}</p>
-          <h3 className="ao-h3" style={{ marginTop: 4 }}>{t('camp2.npcMgr.title')}</h3>
-          <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 13, marginTop: 4 }}>
+          <p className={cn('ao-overline', s.overlineGold)}>{t('camp2.npcMgr.overline')}</p>
+          <h3 className={cn('ao-h3', s.title)}>{t('camp2.npcMgr.title')}</h3>
+          <p className={cn('ao-italic', s.subtitle)}>
             {t('camp2.npcMgr.subtitle')}
           </p>
         </div>
@@ -141,7 +143,7 @@ export default function NPCManagerPage() {
           onClick={() => { resetForm(); setDialogOpen(true); }}
         >
           <Rune kind="plus" size={14} color="currentColor" />
-          <span style={{ marginLeft: 6 }}>{t('camp2.npcMgr.newNpc')}</span>
+          <span className={s.ml6}>{t('camp2.npcMgr.newNpc')}</span>
         </button>
       </div>
 
@@ -154,104 +156,71 @@ export default function NPCManagerPage() {
           action={
             <button className="ao-btn ao-btn--primary" onClick={() => { resetForm(); setDialogOpen(true); }}>
               <Rune kind="plus" size={14} color="currentColor" />
-              <span style={{ marginLeft: 6 }}>{t('camp2.npcMgr.newNpc')}</span>
+              <span className={s.ml6}>{t('camp2.npcMgr.newNpc')}</span>
             </button>
           }
         />
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div className={s.list}>
           {npcs.map((npc) => {
             const glyph = glyphForNpc(npc.id);
             return (
               <OrdoPanel key={npc.id} frame padding={0}>
-                <div style={{ padding: 18 }}>
+                <div className={s.cardPad}>
                   {/* Top row: icon box + name block + visibility */}
-                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
+                  <div className={s.topRow}>
                     {/* Icon box */}
-                    <div
-                      style={{
-                        width: 48,
-                        height: 48,
-                        flexShrink: 0,
-                        border: '1px solid var(--rule)',
-                        background: 'var(--abyss)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        filter: npc.isVisibleToPlayers ? 'none' : 'grayscale(1)',
-                        opacity: npc.isVisibleToPlayers ? 1 : 0.5,
-                      }}
-                    >
+                    <div className={cn(s.iconBox, !npc.isVisibleToPlayers && s.dimmed)}>
                       <Rune kind={glyph} size={22} color="var(--gold)" />
                     </div>
 
                     {/* Name block */}
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                    <div className={s.nameBlock}>
+                      <div className={s.idRow}>
                         <CodexID>{npc.id.slice(0, 8).toUpperCase()}</CodexID>
                         <VisibilityToggle
                           visible={npc.isVisibleToPlayers}
                           onToggle={() => toggleVisibility(npc)}
                         />
                       </div>
-                      <h5 className="ao-h5" style={{ marginTop: 4, color: 'var(--ink-bright)' }}>
+                      <h5 className={cn('ao-h5', s.npcName)}>
                         {npc.name}
                       </h5>
                     </div>
                   </div>
 
                   {/* Two-column description grid */}
-                  <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginTop: 14 }}>
+                  <div className={cn('ao-rgrid', s.descGrid)}>
                     {/* Public description */}
-                    <div
-                      style={{
-                        padding: 12,
-                        background: 'rgba(0,0,0,0.2)',
-                        border: '1px solid var(--rule)',
-                      }}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+                    <div className={s.descBox}>
+                      <div className={s.descHead}>
                         <Rune kind="eye" size={10} color="var(--ink-faint)" />
-                        <span className="ao-overline" style={{ fontSize: 8, color: 'var(--ink-faint)' }}>
+                        <span className={cn('ao-overline', s.descLabel)}>
                           {t('camp2.npcMgr.publicLabel')}
                         </span>
                       </div>
-                      <p style={{ fontSize: 13, color: 'var(--ink)', lineHeight: 1.5, margin: 0 }}>
-                        {npc.publicDescription || <span className="ao-italic" style={{ color: 'var(--ink-ghost)' }}>{t('camp2.npcMgr.noPublicDescription')}</span>}
+                      <p className={s.descText}>
+                        {npc.publicDescription || <span className={cn('ao-italic', s.descEmpty)}>{t('camp2.npcMgr.noPublicDescription')}</span>}
                       </p>
                     </div>
 
                     {/* Private description */}
-                    <div
-                      style={{
-                        padding: 12,
-                        background: 'rgba(100,20,30,0.08)',
-                        border: '1px solid rgba(140,40,50,0.25)',
-                      }}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+                    <div className={s.descBoxPrivate}>
+                      <div className={s.descHead}>
                         <Rune kind="lock" size={10} color="rgba(180,80,80,0.6)" />
-                        <span className="ao-overline" style={{ fontSize: 8, color: 'rgba(180,80,80,0.6)' }}>
+                        <span className={cn('ao-overline', s.descLabelPrivate)}>
                           {t('camp2.npcMgr.privateLabel')}
                         </span>
                       </div>
-                      <p style={{ fontSize: 13, color: 'var(--ink)', lineHeight: 1.5, margin: 0 }}>
-                        {npc.privateDescription || <span className="ao-italic" style={{ color: 'var(--ink-ghost)' }}>{t('camp2.npcMgr.noPrivateNotes')}</span>}
+                      <p className={s.descText}>
+                        {npc.privateDescription || <span className={cn('ao-italic', s.descEmpty)}>{t('camp2.npcMgr.noPrivateNotes')}</span>}
                       </p>
                     </div>
                   </div>
                 </div>
 
                 {/* Actions footer */}
-                <div
-                  style={{
-                    display: 'flex',
-                    gap: 6,
-                    padding: '12px 18px',
-                    borderTop: '1px solid var(--hairline)',
-                    background: 'var(--abyss)',
-                  }}
-                >
+                <div className={s.cardFooter}>
                   <button
                     className="ao-btn ao-btn--sm"
                     onClick={() => navigate(`/campaigns/${campaignId}/npcs/${npc.id}`)}
@@ -279,7 +248,7 @@ export default function NPCManagerPage() {
           <DialogHeader>
             <DialogTitle>{t('camp2.npcMgr.dialog.title')}</DialogTitle>
           </DialogHeader>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div className={s.dialogCol}>
             <OrdoField label={t('camp2.npcMgr.field.name')} required>
               <input
                 className="ao-input"
@@ -291,33 +260,31 @@ export default function NPCManagerPage() {
 
             <OrdoField label={t('camp2.npcMgr.field.publicDesc')} hint={t('camp2.npcMgr.field.publicDescHint')}>
               <textarea
-                className="ao-input"
                 value={formPublicDesc}
                 onChange={(e) => setFormPublicDesc(e.target.value)}
                 placeholder={t('camp2.npcMgr.field.publicDescPlaceholder')}
                 rows={3}
-                style={{ resize: 'vertical' }}
+                className={cn('ao-input', s.resizeV)}
               />
             </OrdoField>
 
             <OrdoField label={t('camp2.npcMgr.field.privateDesc')} hint={t('camp2.npcMgr.field.privateDescHint')}>
               <textarea
-                className="ao-input"
                 value={formPrivateDesc}
                 onChange={(e) => setFormPrivateDesc(e.target.value)}
                 placeholder={t('camp2.npcMgr.field.privateDescPlaceholder')}
                 rows={3}
-                style={{ resize: 'vertical' }}
+                className={cn('ao-input', s.resizeV)}
               />
             </OrdoField>
 
-            <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+            <label className={s.checkRow}>
               <input
                 type="checkbox"
                 checked={formVisible}
                 onChange={(e) => setFormVisible(e.target.checked)}
               />
-              <span className="ao-label" style={{ marginBottom: 0 }}>{t('camp2.npcMgr.field.visible')}</span>
+              <span className={cn('ao-label', s.checkLabel)}>{t('camp2.npcMgr.field.visible')}</span>
             </label>
           </div>
           <DialogFooter>

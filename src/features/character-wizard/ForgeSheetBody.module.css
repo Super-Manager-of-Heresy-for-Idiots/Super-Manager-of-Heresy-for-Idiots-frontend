@@ -1,0 +1,57 @@
+.fs9 { font-size: 9px; }
+.fs10 { font-size: 10px; }
+
+.nameWrap { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; }
+.nameInput { font-family: var(--font-serif); font-size: 30px; color: var(--ink-bright); letter-spacing: -0.01em; }
+
+.inspOn.inspOn { border-color: var(--brass); background: linear-gradient(180deg, color-mix(in srgb, var(--gold) 12%, transparent), transparent); }
+.taLeft { text-align: left; }
+.goldPale { color: var(--gold-pale); }
+.inkQuiet { color: var(--ink-quiet); }
+
+.pad14 { padding: 14px; }
+.pad16 { padding: 16px; }
+.colPad14 { padding: 14px; display: flex; flex-direction: column; gap: 14px; }
+
+.hpBar { margin-top: 14px; height: 8px; }
+.label0 { margin: 0; }
+.hdInput { font-family: var(--font-mono); text-align: center; color: var(--ink-bright); }
+.cellMono { font-family: var(--font-mono); color: var(--gold-pale); }
+
+.fieldInput { font-family: var(--font-sans); color: var(--ink-bright); }
+.mono { font-family: var(--font-mono); }
+
+.mb6 { margin-bottom: 6px; }
+.labelInline { display: inline; letter-spacing: 0.14em; }
+.subText { font-size: 10px; margin-left: 8px; }
+.area { font-family: var(--font-serif); font-size: 15px; line-height: 1.5; color: var(--ink); resize: vertical; min-height: 64px; }
+
+.pip {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  display: block;
+  pointer-events: none;
+  background: transparent;
+  border: 1px solid var(--rule);
+  transform: rotate(45deg);
+  transition: all 150ms;
+}
+.pip.on {
+  background: var(--gold);
+  border-color: var(--brass);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--gold) 50%, transparent);
+}
+
+.clsInput { color: var(--ink-bright); flex: 1; }
+.lvlInput { width: 64px; text-align: center; font-family: var(--font-mono); color: var(--gold-pale); }
+
+.defLabel { font-size: 9px; text-align: center; }
+.numLabel { text-align: center; margin: 0 0 6px; }
+.numInput { text-align: center; font-family: var(--font-serif); font-size: 22px; color: var(--ink-bright); }
+
+.deathLabel { font-size: 9px; width: 64px; }
+.deathHead { font-size: 9px; margin-bottom: 6px; }
+.deathPipOn.deathPipOn { background: var(--pip-color); border-color: var(--pip-color); }
+
+.inkLabel { color: var(--ink); }

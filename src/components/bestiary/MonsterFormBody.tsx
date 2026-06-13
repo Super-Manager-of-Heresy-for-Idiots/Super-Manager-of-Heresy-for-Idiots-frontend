@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, type CSSProperties } from 'react';
 import { Plus, X, Save, Ban, GripVertical, ChevronLeft, ChevronRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useT } from '@/i18n/I18nContext';
+import { cn } from '@/lib/utils';
 import type { DictionaryEntryResponse, DictionaryKind, MonsterRequest, MonsterScope } from '@/types';
 import {
   ABILITY_SCORE_FIELDS,
@@ -17,6 +18,7 @@ import {
   type FeatureFormRow,
   type MonsterFormState,
 } from './serialize';
+import s from './MonsterFormBody.module.css';
 
 type Dicts = Record<DictionaryKind, DictionaryEntryResponse[]>;
 type SkillOpt = { id: string; name: string };
@@ -34,45 +36,44 @@ interface Props {
 
 // ===== Ordo primitives =====
 function Diamond({ size = 8, color = 'var(--gold)' }: { size?: number; color?: string }) {
-  return <span style={{ width: size, height: size, transform: 'rotate(45deg)', background: color, display: 'inline-block', flexShrink: 0 }} />;
+  return <span className={s.diamond} style={{ '--d-size': `${size}px`, '--d-color': color } as CSSProperties} />;
 }
 function Label({ children, required }: { children: React.ReactNode; required?: boolean }) {
-  return <label className="ao-label" style={{ marginBottom: 6 }}>{children}{required && <span style={{ color: 'var(--ember)' }}> *</span>}</label>;
+  return <label className={cn('ao-label', s.label)}>{children}{required && <span className={s.req}> *</span>}</label>;
 }
 function Text({ value, onChange, placeholder, mono }: { value: string; onChange: (v: string) => void; placeholder?: string; mono?: boolean }) {
-  return <input className="ao-input" value={value ?? ''} placeholder={placeholder} onChange={(e) => onChange(e.target.value)} style={mono ? { fontFamily: 'var(--font-mono)' } : undefined} />;
+  return <input className={cn('ao-input', mono && s.mono)} value={value ?? ''} placeholder={placeholder} onChange={(e) => onChange(e.target.value)} />;
 }
 function Num({ value, onChange, w }: { value: string; onChange: (v: string) => void; w?: number }) {
-  return <input className="ao-input" type="number" value={value ?? ''} onChange={(e) => onChange(e.target.value)} style={{ fontFamily: 'var(--font-mono)', textAlign: 'center', width: w }} />;
+  return <input className={cn('ao-input', s.num)} type="number" value={value ?? ''} onChange={(e) => onChange(e.target.value)} style={w != null ? ({ '--w': `${w}px` } as CSSProperties) : undefined} />;
 }
 function Sel({ value, onChange, options, placeholder }: { value: string; onChange: (v: string) => void; options: { v: string; label: string }[]; placeholder?: string }) {
   return (
-    <select className="ao-input" value={value ?? ''} onChange={(e) => onChange(e.target.value)}
-      style={{ appearance: 'none', cursor: 'pointer', paddingRight: 30, backgroundImage: "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23968c75' stroke-width='2'><path d='M6 9l6 6 6-6'/></svg>\")", backgroundRepeat: 'no-repeat', backgroundPosition: 'right 10px center' }}>
-      {placeholder && <option value="" style={{ background: 'var(--abyss)' }}>{placeholder}</option>}
-      {options.map((o) => <option key={o.v} value={o.v} style={{ background: 'var(--abyss)' }}>{o.label}</option>)}
+    <select className={cn('ao-input', s.sel)} value={value ?? ''} onChange={(e) => onChange(e.target.value)}>
+      {placeholder && <option value="" className={s.opt}>{placeholder}</option>}
+      {options.map((o) => <option key={o.v} value={o.v} className={s.opt}>{o.label}</option>)}
     </select>
   );
 }
 function Check({ on, onChange, label }: { on: boolean; onChange: () => void; label: string }) {
   return (
-    <button type="button" onClick={onChange} style={{ display: 'inline-flex', alignItems: 'center', gap: 9, background: 'transparent', border: 'none', cursor: 'pointer', padding: 0 }}>
-      <span style={{ width: 18, height: 18, border: `1px solid ${on ? 'var(--brass)' : 'var(--rule)'}`, background: on ? 'var(--gold-deep)' : 'var(--abyss)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+    <button type="button" onClick={onChange} className={s.check}>
+      <span className={cn(s.box, on && s.on)}>
         {on && <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--void)" strokeWidth="3"><path d="M4 12l5 5L20 6" /></svg>}
       </span>
-      <span style={{ fontSize: 14, color: 'var(--ink)' }}>{label}</span>
+      <span className={s.checkLabel}>{label}</span>
     </button>
   );
 }
 function ChipMulti({ ids, onChange, options, emptyLabel }: { ids: string[]; onChange: (v: string[]) => void; options: { id: string; nameRusloc: string }[]; emptyLabel: string }) {
   const toggle = (id: string) => onChange(ids.includes(id) ? ids.filter((x) => x !== id) : [...ids, id]);
-  if (options.length === 0) return <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--ink-faint)' }}>{emptyLabel}</div>;
+  if (options.length === 0) return <div className={s.empty}>{emptyLabel}</div>;
   return (
-    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7 }}>
+    <div className={s.chips}>
       {options.map((o) => {
         const on = ids.includes(o.id);
         return (
-          <button type="button" key={o.id} onClick={() => toggle(o.id)} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '6px 11px', background: on ? 'rgba(176,141,78,0.1)' : 'var(--abyss)', border: `1px solid ${on ? 'var(--brass)' : 'var(--rule)'}`, color: on ? 'var(--gold-pale)' : 'var(--ink-quiet)', fontSize: 13, cursor: 'pointer', transition: 'all 150ms' }}>
+          <button type="button" key={o.id} onClick={() => toggle(o.id)} className={cn(s.chip, on && s.on)}>
             {on ? <X size={11} /> : <Plus size={11} />}{o.nameRusloc}
           </button>
         );
@@ -81,31 +82,31 @@ function ChipMulti({ ids, onChange, options, emptyLabel }: { ids: string[]; onCh
   );
 }
 function AddBtn({ onClick, children }: { onClick: () => void; children: React.ReactNode }) {
-  return <button type="button" onClick={onClick} className="ao-btn ao-btn--ghost ao-btn--sm" style={{ marginTop: 10 }}><Plus size={11} /> {children}</button>;
+  return <button type="button" onClick={onClick} className={cn('ao-btn ao-btn--ghost ao-btn--sm', s.addBtn)}><Plus size={11} /> {children}</button>;
 }
 function RowShell({ onRemove, removeTitle, children }: { onRemove: () => void; removeTitle: string; children: React.ReactNode }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-      <GripVertical size={14} style={{ color: 'var(--ink-ghost)', flexShrink: 0 }} />
-      <div style={{ display: 'flex', gap: 8, flex: 1, flexWrap: 'wrap', alignItems: 'center' }}>{children}</div>
-      <button type="button" className="ao-iconbtn" title={removeTitle} onClick={onRemove} style={{ borderColor: 'rgba(179,70,26,0.4)', color: '#d8896a', flexShrink: 0 }}><X size={13} /></button>
+    <div className={s.rowShell}>
+      <GripVertical size={14} className={s.grip} />
+      <div className={s.rowFields}>{children}</div>
+      <button type="button" className={cn('ao-iconbtn', s.rmBtn)} title={removeTitle} onClick={onRemove}><X size={13} /></button>
     </div>
   );
 }
 function Grid({ children, min = 200 }: { children: React.ReactNode; min?: number }) {
-  return <div style={{ display: 'grid', gridTemplateColumns: `repeat(auto-fit, minmax(${min}px, 1fr))`, gap: 14, marginTop: 14 }}>{children}</div>;
+  return <div className={s.grid} style={{ '--min': `${min}px` } as CSSProperties}>{children}</div>;
 }
 function FieldBlock({ label, required, hint, children }: { label: string; required?: boolean; hint?: string; children: React.ReactNode }) {
   return (
     <div>
       <Label required={required}>{label}</Label>
       {children}
-      {hint && <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--ink-faint)', marginTop: 5 }}>{hint}</div>}
+      {hint && <div className={s.hint}>{hint}</div>}
     </div>
   );
 }
 function SubHead({ children }: { children: React.ReactNode }) {
-  return <div style={{ fontFamily: 'var(--font-display)', fontSize: 11, letterSpacing: 'var(--track-eng)', textTransform: 'uppercase', color: 'var(--gold-pale)', margin: '18px 0 10px', display: 'flex', alignItems: 'center', gap: 8 }}><Diamond size={6} color="var(--bronze)" />{children}</div>;
+  return <div className={s.subHead}><Diamond size={6} color="var(--bronze)" />{children}</div>;
 }
 
 const dictOpts = (list: DictionaryEntryResponse[]) => list.map((x) => ({ v: x.id, label: x.nameRusloc }));
@@ -123,16 +124,16 @@ const STEPS: { key: StepKey; index: string; titleKey: string; subKey: string }[]
 
 function StepPanel({ index, title, sub, children }: { index: string; title: string; sub?: string; children: React.ReactNode }) {
   return (
-    <div className="ao-panel" style={{ padding: 0 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '18px 20px', borderBottom: '1px solid var(--rule)', background: 'linear-gradient(180deg, rgba(176,141,78,0.05), transparent)' }}>
-        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--gold-deep)', width: 24 }}>{index}</span>
+    <div className={cn('ao-panel', s.stepPanel)}>
+      <div className={s.stepHead}>
+        <span className={s.stepIndex}>{index}</span>
         <Diamond size={8} color="var(--gold)" />
-        <div style={{ flex: 1 }}>
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: 15, letterSpacing: 'var(--track-eng)', textTransform: 'uppercase', color: 'var(--ink-bright)' }}>{title}</div>
-          {sub && <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--ink-faint)', marginTop: 3 }}>{sub}</div>}
+        <div className="ao-grow">
+          <div className={s.stepTitle}>{title}</div>
+          {sub && <div className={s.stepSub}>{sub}</div>}
         </div>
       </div>
-      <div style={{ padding: '4px 20px 24px' }}>{children}</div>
+      <div className={s.stepBody}>{children}</div>
     </div>
   );
 }
@@ -171,59 +172,49 @@ export default function MonsterFormBody({ initial, dictionaries, skills, scope, 
     onSubmit(buildMonsterRequest(m));
   };
 
-  const stepIndex = STEPS.findIndex((s) => s.key === step);
+  const stepIndex = STEPS.findIndex((st) => st.key === step);
   const goPrev = () => { if (stepIndex > 0) setStep(STEPS[stepIndex - 1].key); };
   const goNext = () => { if (stepIndex < STEPS.length - 1) setStep(STEPS[stepIndex + 1].key); };
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--stone)' }}>
-      <header style={{ position: 'sticky', top: 0, zIndex: 10, minHeight: 64, borderBottom: '1px solid var(--rule)', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 14, padding: '12px clamp(16px, 3vw, 32px)', background: 'linear-gradient(180deg, var(--panel) 0%, var(--stone) 100%)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: '1 1 auto' }}>
+    <div className={s.page}>
+      <header className={s.header}>
+        <div className={s.headTitle}>
           <Diamond size={9} />
           <div>
-            <div style={{ fontFamily: 'var(--font-display)', fontSize: 15, letterSpacing: 'var(--track-eng)', textTransform: 'uppercase', color: 'var(--ink-bright)' }}>{t('best.form.title')}</div>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--ink-faint)' }}>{m.nameRusloc || t('best.form.newMonster')} · {contextLabel}</div>
+            <div className={s.appTitle}>{t('best.form.title')}</div>
+            <div className={s.appSub}>{m.nameRusloc || t('best.form.newMonster')} · {contextLabel}</div>
           </div>
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div className="ao-row ao-gap-8">
           <button type="button" className="ao-btn ao-btn--ghost" onClick={onCancel}><Ban size={13} /> {t('best.com.cancel')}</button>
           <button type="button" className="ao-btn ao-btn--primary" onClick={submit} disabled={submitting}><Save size={13} /> {submitting ? t('best.com.saving') : t('best.com.save')}</button>
         </div>
       </header>
 
-      <div className="bd-wizard" style={{ maxWidth: 1080, margin: '0 auto', padding: 'clamp(16px, 3vw, 28px)', display: 'grid', gridTemplateColumns: '220px 1fr', gap: 20, alignItems: 'start' }}>
+      <div className={cn('bd-wizard', s.wizard)}>
         {/* Left rail */}
-        <nav className="ao-panel bd-rail" style={{ padding: 10, position: 'sticky', top: 84, display: 'flex', flexDirection: 'column', gap: 2 }}>
-          {STEPS.map((s) => {
-            const active = s.key === step;
-            const err = stepErrors[s.key];
+        <nav className={cn('ao-panel', 'bd-rail', s.rail)}>
+          {STEPS.map((st) => {
+            const active = st.key === step;
+            const err = stepErrors[st.key];
             return (
               <button
-                key={s.key}
+                key={st.key}
                 type="button"
-                onClick={() => setStep(s.key)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 11,
-                  padding: '11px 12px',
-                  background: active ? 'linear-gradient(90deg, rgba(176,141,78,0.12), transparent)' : 'transparent',
-                  border: 'none',
-                  borderLeft: `2px solid ${active ? 'var(--gold)' : 'transparent'}`,
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                }}
+                onClick={() => setStep(st.key)}
+                className={cn(s.railBtn, active && s.active)}
               >
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: active ? 'var(--gold-deep)' : 'var(--ink-faint)', width: 18 }}>{s.index}</span>
-                <span style={{ width: 7, height: 7, borderRadius: '50%', flexShrink: 0, background: err ? 'var(--ember)' : active ? 'var(--gold)' : 'var(--bronze)', boxShadow: err ? '0 0 7px var(--ember)' : 'none' }} />
-                <span style={{ flex: 1, fontFamily: 'var(--font-display)', fontSize: 11, letterSpacing: 'var(--track-eng)', textTransform: 'uppercase', color: active ? 'var(--ink-bright)' : 'var(--ink-quiet)' }}>{t(s.titleKey)}</span>
+                <span className={s.railIndex}>{st.index}</span>
+                <span className={cn(s.railDot, err && s.err)} />
+                <span className={s.railLabel}>{t(st.titleKey)}</span>
               </button>
             );
           })}
         </nav>
 
         {/* Main */}
-        <div className="bd-main" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div className={s.main}>
         {step === 'basic' && (
         <StepPanel index="01" title={t('best.form.s01')} sub={t('best.form.s01sub')}>
           <Grid>
@@ -234,9 +225,9 @@ export default function MonsterFormBody({ initial, dictionaries, skills, scope, 
             <FieldBlock label={t('best.form.size')} required><Sel value={m.sizeId} onChange={(v) => set('sizeId', v)} options={sizeOpts} placeholder={t('best.form.pickSize')} /></FieldBlock>
             <FieldBlock label={t('best.form.sizeSecondary')}><Sel value={m.sizeSecondaryId} onChange={(v) => set('sizeSecondaryId', v)} options={sizeOpts} placeholder={t('best.form.none')} /></FieldBlock>
           </Grid>
-          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-end', gap: 18, marginTop: 14 }}>
+          <div className={s.rowEnd}>
             <Check on={m.isSwarm} onChange={() => set('isSwarm', !m.isSwarm)} label={t('best.form.isSwarm')} />
-            {m.isSwarm && <div style={{ width: 200 }}><Label>{t('best.form.swarmSize')}</Label><Sel value={m.swarmSizeId} onChange={(v) => set('swarmSizeId', v)} options={sizeOpts} placeholder={t('best.form.pickSize')} /></div>}
+            {m.isSwarm && <div className={s.w200}><Label>{t('best.form.swarmSize')}</Label><Sel value={m.swarmSizeId} onChange={(v) => set('swarmSizeId', v)} options={sizeOpts} placeholder={t('best.form.pickSize')} /></div>}
           </div>
           <Grid min={150}>
             <FieldBlock label={t('best.form.crRating')} required><Text value={m.crRating} onChange={(v) => set('crRating', v)} placeholder="1/4" mono /></FieldBlock>
@@ -245,7 +236,7 @@ export default function MonsterFormBody({ initial, dictionaries, skills, scope, 
             <FieldBlock label={t('best.form.xpLair')}><Num value={m.xpLair} onChange={(v) => set('xpLair', v)} /></FieldBlock>
             <FieldBlock label={t('best.form.profBonus')}><Num value={m.proficiencyBonus} onChange={(v) => set('proficiencyBonus', v)} /></FieldBlock>
           </Grid>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 24, marginTop: 18 }}>
+          <div className={s.rowChecks}>
             {scope === 'SYSTEM' && <Check on={m.isActive} onChange={() => set('isActive', !m.isActive)} label={t('best.form.isActive')} />}
             {scope === 'CAMPAIGN' && <Check on={m.isVisibleToPlayers} onChange={() => set('isVisibleToPlayers', !m.isVisibleToPlayers)} label={t('best.form.isVisible')} />}
           </div>
@@ -272,9 +263,9 @@ export default function MonsterFormBody({ initial, dictionaries, skills, scope, 
         {step === 'abilities' && (
         <StepPanel index="03" title={t('best.form.s03')} sub={t('best.form.s03sub')}>
           <SubHead>{t('best.form.abilityScores')}</SubHead>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 10 }} className="bd-abil">
+          <div className={cn(s.abil, 'bd-abil')}>
             {ABILITY_SCORE_FIELDS.map((a) => (
-              <div key={a.key} style={{ textAlign: 'center' }}>
+              <div key={a.key} className={s.center}>
                 <Label required>{t(abilityShortKey(a.full))}</Label>
                 <Num value={m[a.key]} onChange={(v) => set(a.key, v)} />
               </div>
@@ -301,7 +292,7 @@ export default function MonsterFormBody({ initial, dictionaries, skills, scope, 
           <SubHead>{t('best.form.speeds')}</SubHead>
           {m.speeds.map((r) => (
             <RowShell key={r._id} removeTitle={t('best.form.removeRow')} onRemove={() => rmRow('speeds', r._id)}>
-              <div style={{ flex: '1 1 160px' }}><Sel value={r.movementTypeId} onChange={(v) => setRow('speeds', r._id, { movementTypeId: v })} options={dictOpts(dictionaries['movement-types'])} placeholder={t('best.form.pickType')} /></div>
+              <div className={s.f160}><Sel value={r.movementTypeId} onChange={(v) => setRow('speeds', r._id, { movementTypeId: v })} options={dictOpts(dictionaries['movement-types'])} placeholder={t('best.form.pickType')} /></div>
               <Num value={r.ft} onChange={(v) => setRow('speeds', r._id, { ft: v })} w={80} />
               <Check on={r.hover} onChange={() => setRow('speeds', r._id, { hover: !r.hover })} label={t('best.form.hover')} />
             </RowShell>
@@ -311,7 +302,7 @@ export default function MonsterFormBody({ initial, dictionaries, skills, scope, 
           <SubHead>{t('best.form.senses')}</SubHead>
           {m.senses.map((r) => (
             <RowShell key={r._id} removeTitle={t('best.form.removeRow')} onRemove={() => rmRow('senses', r._id)}>
-              <div style={{ flex: '1 1 160px' }}><Sel value={r.senseTypeId} onChange={(v) => setRow('senses', r._id, { senseTypeId: v })} options={dictOpts(dictionaries['sense-types'])} placeholder={t('best.form.pickType')} /></div>
+              <div className={s.f160}><Sel value={r.senseTypeId} onChange={(v) => setRow('senses', r._id, { senseTypeId: v })} options={dictOpts(dictionaries['sense-types'])} placeholder={t('best.form.pickType')} /></div>
               <Num value={r.ft} onChange={(v) => setRow('senses', r._id, { ft: v })} w={80} />
             </RowShell>
           ))}
@@ -320,7 +311,7 @@ export default function MonsterFormBody({ initial, dictionaries, skills, scope, 
           <SubHead>{t('best.form.saves')}</SubHead>
           {m.savingThrows.map((r) => (
             <RowShell key={r._id} removeTitle={t('best.form.removeRow')} onRemove={() => rmRow('savingThrows', r._id)}>
-              <div style={{ flex: '1 1 160px' }}><Sel value={r.abilityId} onChange={(v) => setRow('savingThrows', r._id, { abilityId: v })} options={abilityOpts} placeholder={t('best.form.pickType')} /></div>
+              <div className={s.f160}><Sel value={r.abilityId} onChange={(v) => setRow('savingThrows', r._id, { abilityId: v })} options={abilityOpts} placeholder={t('best.form.pickType')} /></div>
               <Num value={r.bonus} onChange={(v) => setRow('savingThrows', r._id, { bonus: v })} w={80} />
             </RowShell>
           ))}
@@ -329,7 +320,7 @@ export default function MonsterFormBody({ initial, dictionaries, skills, scope, 
           <SubHead>{t('best.form.skills')}</SubHead>
           {m.skillProficiencies.map((r) => (
             <RowShell key={r._id} removeTitle={t('best.form.removeRow')} onRemove={() => rmRow('skillProficiencies', r._id)}>
-              <div style={{ flex: '1 1 160px' }}><Sel value={r.proficiencySkillId} onChange={(v) => setRow('skillProficiencies', r._id, { proficiencySkillId: v })} options={skillOpts} placeholder={t('best.form.pickSkill')} /></div>
+              <div className={s.f160}><Sel value={r.proficiencySkillId} onChange={(v) => setRow('skillProficiencies', r._id, { proficiencySkillId: v })} options={skillOpts} placeholder={t('best.form.pickSkill')} /></div>
               <Num value={r.bonus} onChange={(v) => setRow('skillProficiencies', r._id, { bonus: v })} w={80} />
             </RowShell>
           ))}
@@ -342,8 +333,8 @@ export default function MonsterFormBody({ initial, dictionaries, skills, scope, 
                 <SubHead>{title}</SubHead>
                 {m[key].map((r) => (
                   <RowShell key={r._id} removeTitle={t('best.form.removeRow')} onRemove={() => rmRow(key, r._id)}>
-                    <div style={{ flex: '1 1 160px' }}><Sel value={r.damageTypeId} onChange={(v) => setRow(key, r._id, { damageTypeId: v })} options={damageOpts} placeholder={t('best.form.pickDmg')} /></div>
-                    <div style={{ flex: '2 1 180px' }}><Text value={r.note} onChange={(v) => setRow(key, r._id, { note: v })} placeholder={t('best.form.notePh')} /></div>
+                    <div className={s.f160}><Sel value={r.damageTypeId} onChange={(v) => setRow(key, r._id, { damageTypeId: v })} options={damageOpts} placeholder={t('best.form.pickDmg')} /></div>
+                    <div className={s.f180x2}><Text value={r.note} onChange={(v) => setRow(key, r._id, { note: v })} placeholder={t('best.form.notePh')} /></div>
                   </RowShell>
                 ))}
                 <AddBtn onClick={() => addRow(key, { damageTypeId: '', note: '' })}>{t('best.form.addRow')}</AddBtn>
@@ -354,7 +345,7 @@ export default function MonsterFormBody({ initial, dictionaries, skills, scope, 
           <SubHead>{t('best.form.gear')}</SubHead>
           {m.gear.map((r) => (
             <RowShell key={r._id} removeTitle={t('best.form.removeRow')} onRemove={() => rmRow('gear', r._id)}>
-              <div style={{ flex: '1 1 160px' }}><Sel value={r.itemId} onChange={(v) => setRow('gear', r._id, { itemId: v })} options={dictOpts(dictionaries['gear-items'])} placeholder={t('best.form.pickItem')} /></div>
+              <div className={s.f160}><Sel value={r.itemId} onChange={(v) => setRow('gear', r._id, { itemId: v })} options={dictOpts(dictionaries['gear-items'])} placeholder={t('best.form.pickItem')} /></div>
               <Num value={r.qty} onChange={(v) => setRow('gear', r._id, { qty: v })} w={70} />
             </RowShell>
           ))}
@@ -363,13 +354,13 @@ export default function MonsterFormBody({ initial, dictionaries, skills, scope, 
         )}
         {step === 'features' && (
         <StepPanel index="06" title={t('best.form.s06')} sub={t('best.form.s06sub')}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginTop: 10 }}>
+          <div className={s.featCol}>
             {m.features.map((f) => {
               const patchFeature = (patch: Partial<FeatureFormRow>) => setRow('features', f._id, patch);
               const setDamages = (damages: FeatureDamageFormRow[]) => patchFeature({ damages });
               return (
-                <div key={f._id} className="ao-panel--inset" style={{ padding: 16, position: 'relative' }}>
-                  <button type="button" className="ao-iconbtn" title={t('best.form.removeFeature')} onClick={() => rmRow('features', f._id)} style={{ position: 'absolute', top: 12, right: 12, borderColor: 'rgba(179,70,26,0.4)', color: '#d8896a' }}><X size={13} /></button>
+                <div key={f._id} className={cn('ao-panel--inset', s.featPanel)}>
+                  <button type="button" className={cn('ao-iconbtn', s.featRm)} title={t('best.form.removeFeature')} onClick={() => rmRow('features', f._id)}><X size={13} /></button>
                   <Grid min={150}>
                     <FieldBlock label={t('best.form.fSection')}><Sel value={f.section} onChange={(v) => patchFeature({ section: v })} options={sectionOpts} /></FieldBlock>
                     <FieldBlock label={t('best.form.fSort')}><Num value={f.sortOrder} onChange={(v) => patchFeature({ sortOrder: v })} /></FieldBlock>
@@ -383,8 +374,8 @@ export default function MonsterFormBody({ initial, dictionaries, skills, scope, 
                     <FieldBlock label={t('best.form.fRechargeMin')}><Num value={f.rechargeMin} onChange={(v) => patchFeature({ rechargeMin: v })} /></FieldBlock>
                     <FieldBlock label={t('best.form.fRechargeMax')}><Num value={f.rechargeMax} onChange={(v) => patchFeature({ rechargeMax: v })} /></FieldBlock>
                   </Grid>
-                  <div style={{ marginTop: 14 }}><Label>{t('best.form.fDescRu')}</Label><textarea className="ao-input" rows={2} value={f.descriptionRusloc} onChange={(e) => patchFeature({ descriptionRusloc: e.target.value })} style={{ resize: 'vertical', fontFamily: 'var(--font-sans)' }} /></div>
-                  <div style={{ marginTop: 12 }}><Label>{t('best.form.fDescEn')}</Label><textarea className="ao-input" rows={2} value={f.descriptionEngloc} onChange={(e) => patchFeature({ descriptionEngloc: e.target.value })} style={{ resize: 'vertical', fontFamily: 'var(--font-sans)' }} /></div>
+                  <div className={s.mt14}><Label>{t('best.form.fDescRu')}</Label><textarea className={cn('ao-input', s.taVert)} rows={2} value={f.descriptionRusloc} onChange={(e) => patchFeature({ descriptionRusloc: e.target.value })} /></div>
+                  <div className={s.mt12}><Label>{t('best.form.fDescEn')}</Label><textarea className={cn('ao-input', s.taVert)} rows={2} value={f.descriptionEngloc} onChange={(e) => patchFeature({ descriptionEngloc: e.target.value })} /></div>
 
                   <SubHead>{t('best.form.attack')}</SubHead>
                   <Grid min={120}>
@@ -405,9 +396,9 @@ export default function MonsterFormBody({ initial, dictionaries, skills, scope, 
                     <RowShell key={d._id} removeTitle={t('best.form.removeRow')} onRemove={() => setDamages(f.damages.filter((x) => x._id !== d._id))}>
                       <Num value={d.sortOrder} onChange={(v) => setDamages(f.damages.map((x) => x._id === d._id ? { ...x, sortOrder: v } : x))} w={56} />
                       <Num value={d.average} onChange={(v) => setDamages(f.damages.map((x) => x._id === d._id ? { ...x, average: v } : x))} w={64} />
-                      <div style={{ flex: '1 1 90px' }}><Text value={d.dice} onChange={(v) => setDamages(f.damages.map((x) => x._id === d._id ? { ...x, dice: v } : x))} placeholder="1d6+2" mono /></div>
-                      <div style={{ flex: '1 1 130px' }}><Sel value={d.damageTypeId} onChange={(v) => setDamages(f.damages.map((x) => x._id === d._id ? { ...x, damageTypeId: v } : x))} options={damageOpts} placeholder={t('best.form.pickType')} /></div>
-                      <div style={{ flex: '1 1 120px' }}><Text value={d.note} onChange={(v) => setDamages(f.damages.map((x) => x._id === d._id ? { ...x, note: v } : x))} placeholder={t('best.form.shortNotePh')} /></div>
+                      <div className={s.f90}><Text value={d.dice} onChange={(v) => setDamages(f.damages.map((x) => x._id === d._id ? { ...x, dice: v } : x))} placeholder="1d6+2" mono /></div>
+                      <div className={s.f130}><Sel value={d.damageTypeId} onChange={(v) => setDamages(f.damages.map((x) => x._id === d._id ? { ...x, damageTypeId: v } : x))} options={damageOpts} placeholder={t('best.form.pickType')} /></div>
+                      <div className={s.f120}><Text value={d.note} onChange={(v) => setDamages(f.damages.map((x) => x._id === d._id ? { ...x, note: v } : x))} placeholder={t('best.form.shortNotePh')} /></div>
                     </RowShell>
                   ))}
                   <AddBtn onClick={() => setDamages([...f.damages, { _id: rowUid(), sortOrder: String(f.damages.length), average: '', dice: '', damageTypeId: '', note: '' }])}>{t('best.form.addDamage')}</AddBtn>
@@ -420,8 +411,8 @@ export default function MonsterFormBody({ initial, dictionaries, skills, scope, 
         )}
         {step === 'lore' && (
         <StepPanel index="07" title={t('best.form.s07')} sub={t('best.form.s07sub')}>
-          <div style={{ marginTop: 14 }}><Label>{t('best.form.lore')}</Label><textarea className="ao-input" rows={4} value={m.loreText} onChange={(e) => set('loreText', e.target.value)} style={{ resize: 'vertical', fontFamily: 'var(--font-serif)', fontSize: 16 }} /></div>
-          <div style={{ marginTop: 14 }}><Label>{t('best.form.legendaryText')}</Label><textarea className="ao-input" rows={3} value={m.legendaryText} onChange={(e) => set('legendaryText', e.target.value)} style={{ resize: 'vertical', fontFamily: 'var(--font-serif)', fontSize: 16 }} /></div>
+          <div className={s.mt14}><Label>{t('best.form.lore')}</Label><textarea className={cn('ao-input', s.taLore)} rows={4} value={m.loreText} onChange={(e) => set('loreText', e.target.value)} /></div>
+          <div className={s.mt14}><Label>{t('best.form.legendaryText')}</Label><textarea className={cn('ao-input', s.taLore)} rows={3} value={m.legendaryText} onChange={(e) => set('legendaryText', e.target.value)} /></div>
           <Grid min={180}>
             <FieldBlock label={t('best.form.legendaryBase')}><Num value={m.legendaryUsesBase} onChange={(v) => set('legendaryUsesBase', v)} /></FieldBlock>
             <FieldBlock label={t('best.form.legendaryLair')}><Num value={m.legendaryUsesLair} onChange={(v) => set('legendaryUsesLair', v)} /></FieldBlock>
@@ -429,10 +420,10 @@ export default function MonsterFormBody({ initial, dictionaries, skills, scope, 
         </StepPanel>
         )}
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 4, paddingBottom: 20 }}>
+        <div className={s.footNav}>
           <button type="button" className="ao-btn ao-btn--ghost" onClick={goPrev} disabled={stepIndex === 0}><ChevronLeft size={14} /> {t('best.form.prevStep')}</button>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--ink-faint)' }}>{t('best.form.stepOf', { n: stepIndex + 1, total: STEPS.length })}</span>
-          <div style={{ flex: 1 }} />
+          <span className={s.stepCount}>{t('best.form.stepOf', { n: stepIndex + 1, total: STEPS.length })}</span>
+          <div className="ao-grow" />
           {stepIndex < STEPS.length - 1
             ? <button type="button" className="ao-btn ao-btn--primary" onClick={goNext}>{t('best.form.nextStep')} <ChevronRight size={14} /></button>
             : <button type="button" className="ao-btn ao-btn--primary ao-btn--lg" onClick={submit} disabled={submitting}><Save size={14} /> {submitting ? t('best.com.saving') : t('best.form.save')}</button>}

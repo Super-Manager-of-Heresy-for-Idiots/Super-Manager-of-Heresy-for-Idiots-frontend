@@ -12,22 +12,12 @@ interface EmptyVaultProps {
 
 export function EmptyVault({ glyph = 'sigil-1', overline, title, body, action }: EmptyVaultProps) {
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 14,
-        padding: '48px 32px',
-        textAlign: 'center',
-      }}
-    >
+    <div className="ao-empty">
       <Sigil size={56} glyph={glyph} color="var(--ink-faint)" />
-      {overline && <div className="ao-overline" style={{ color: 'var(--ink-faint)' }}>{overline}</div>}
-      <div className="ao-h5" style={{ color: 'var(--ink-quiet)' }}>{title}</div>
-      {body && <div className="ao-italic" style={{ fontSize: 14, color: 'var(--ink-faint)', maxWidth: 320 }}>{body}</div>}
-      {action && <div style={{ marginTop: 8 }}>{action}</div>}
+      {overline && <div className="ao-overline ao-empty-overline">{overline}</div>}
+      <div className="ao-h5 ao-empty-title">{title}</div>
+      {body && <div className="ao-italic ao-empty-body">{body}</div>}
+      {action && <div className="ao-empty-action">{action}</div>}
     </div>
   );
 }

@@ -5,12 +5,13 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useRegister } from '@/hooks/useAuth';
 import { useAuthStore } from '@/store/authStore';
-import { getRoleRedirectPath } from '@/lib/utils';
+import { getRoleRedirectPath, cn } from '@/lib/utils';
 import type { ApiError } from '@/types';
 import { AxiosError } from 'axios';
 import { Rune, Sigil, OrdoDivider, OrdoPanel, OrdoField } from '@/components/ordo';
 import { useT } from '@/i18n/I18nContext';
 import { LanguageSwitcher } from '@/components/layout/LanguageSwitcher';
+import s from './RegisterPage.module.css';
 
 const registerSchema = z
   .object({
@@ -35,7 +36,7 @@ function FieldError({ message }: { message?: string }) {
   const t = useT();
   if (!message) return null;
   return (
-    <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', gap: 7, color: '#d8896a', fontSize: 12 }}>
+    <div className={s.fieldError}>
       <Rune kind="flame" size={11} color="var(--ember)" />
       <span className="ao-italic">{t(message)}</span>
     </div>
@@ -50,13 +51,7 @@ function PasswordToggle({ shown, onToggle }: { shown: boolean; onToggle: () => v
       onClick={onToggle}
       aria-label={shown ? t('auth.hidePassword') : t('auth.showPassword')}
       title={shown ? t('auth.hidePassword') : t('auth.showPassword')}
-      style={{
-        position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)',
-        display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-        width: 28, height: 28, padding: 0, zIndex: 2,
-        background: 'none', border: 'none', cursor: 'pointer',
-        color: shown ? 'var(--gold-pale)' : 'var(--ink-faint)',
-      }}
+      className={cn(s.pwToggle, shown && s.on)}
     >
       <Rune kind={shown ? 'eye-off' : 'eye'} size={14} />
     </button>
@@ -106,50 +101,39 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="auth-split" style={{ background: 'var(--void)' }}>
+    <div className="auth-split">
       {/* Language switcher — fixed top-right, visible on desktop & mobile */}
       <div className="auth-lang">
         <LanguageSwitcher />
       </div>
 
       {/* ── LEFT — atmospheric panel ──────────────────── */}
-      <div
-        className="auth-hero"
-        style={{
-          position: 'relative',
-          overflow: 'hidden',
-          borderRight: '1px solid var(--rule)',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-between',
-          padding: '56px 64px',
-        }}
-      >
+      <div className="auth-hero">
         {/* Radial glow */}
-        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(60% 50% at 50% 35%, rgba(176, 141, 78, 0.10), transparent 60%)' }} />
+        <div className={s.heroGlow} />
         {/* Horizontal line pattern */}
-        <div style={{ position: 'absolute', inset: 0, background: 'repeating-linear-gradient(0deg, transparent 0 6px, rgba(176,141,78,0.025) 6px 7px)' }} />
+        <div className={s.heroLines} />
 
         {/* Top — branding */}
-        <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 14 }}>
+        <div className={cn('ao-row ao-gap-14', s.rel)}>
           <Sigil size={48} glyph="sigil-3" />
           <div>
-            <div className="ao-engraved" style={{ fontSize: 12, color: 'var(--gold-pale)' }}>{t('app.name')}</div>
+            <div className={cn('ao-engraved', s.brandName)}>{t('app.name')}</div>
             <div className="ao-codex">{t('auth.brandSub')}</div>
           </div>
         </div>
 
         {/* Middle — hero text */}
-        <div style={{ position: 'relative' }}>
-          <div className="ao-codex" style={{ marginBottom: 16, color: 'var(--ink-faint)' }}>{t('auth.register.inscriptio')}</div>
-          <div className="ao-h2" style={{ fontSize: 56, lineHeight: 1.05, maxWidth: 520 }}>{t('auth.register.heroTitle')}</div>
-          <p className="ao-italic" style={{ fontSize: 20, marginTop: 18, maxWidth: 480, color: 'var(--ink-quiet)' }}>
+        <div className={s.rel}>
+          <div className={cn('ao-codex', s.heroEyebrow)}>{t('auth.register.inscriptio')}</div>
+          <div className={cn('ao-h2', s.heroTitle)}>{t('auth.register.heroTitle')}</div>
+          <p className={cn('ao-italic', s.heroText)}>
             {t('auth.register.heroText')}
           </p>
 
           <OrdoDivider glyph="diamond-fill">{t('auth.register.riteOfEnrolment')}</OrdoDivider>
 
-          <div style={{ display: 'flex', gap: 28, marginTop: 28 }}>
+          <div className={s.statRow}>
             {[
               { label: t('auth.register.statHands'), value: '2,118' },
               { label: t('auth.register.statChroniclers'), value: '284' },
@@ -157,52 +141,41 @@ export default function RegisterPage() {
             ].map((stat) => (
               <div key={stat.label}>
                 <div className="ao-overline">{stat.label}</div>
-                <div className="ao-h4 ao-num" style={{ fontFamily: 'var(--font-mono)' }}>{stat.value}</div>
+                <div className={cn('ao-h4 ao-num', s.statNum)}>{stat.value}</div>
               </div>
             ))}
           </div>
         </div>
 
         {/* Bottom — version */}
-        <div style={{ position: 'relative', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', color: 'var(--ink-faint)' }}>
+        <div className={s.versionRow}>
           <div className="ao-codex">{t('auth.cohort')}</div>
           <div className="ao-codex">{t('auth.version')}</div>
         </div>
       </div>
 
       {/* ── RIGHT — registration form ─────────────────── */}
-      <div
-        className="ao-scroll auth-form-side"
-        style={{
-          overflow: 'auto',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '40px 56px',
-          background: 'linear-gradient(180deg, var(--stone), var(--abyss))',
-        }}
-      >
-        <div style={{ width: '100%', maxWidth: 460 }}>
-          <OrdoPanel frame padding={32} style={{ position: 'relative' }}>
-            <div style={{ textAlign: 'center', marginBottom: 18 }}>
+      <div className={cn('ao-scroll auth-form-side', s.formSideScroll)}>
+        <div className={s.formWrap}>
+          <OrdoPanel frame padding={32} className={s.rel}>
+            <div className={s.sealHead}>
               <Rune kind="diamond" size={18} color="var(--gold)" />
-              <div className="ao-engraved" style={{ fontSize: 16, marginTop: 12 }}>{t('auth.register.riteTitle')}</div>
-              <div className="ao-italic" style={{ fontSize: 14, marginTop: 6 }}>{t('auth.register.riteSub')}</div>
+              <div className={cn('ao-engraved', s.sealTitle)}>{t('auth.register.riteTitle')}</div>
+              <div className={cn('ao-italic', s.sealSub)}>{t('auth.register.riteSub')}</div>
             </div>
 
             <OrdoDivider glyph="diamond-fill" />
 
             <form
               onSubmit={handleSubmit(onSubmit)}
-              style={{ display: 'flex', flexDirection: 'column', gap: 16, marginTop: 18 }}
+              className={s.form}
             >
               {/* Username */}
               <div>
                 <OrdoField label={t('auth.register.chosenName')} required hint={!errors.username ? t('auth.register.chosenNameHint') : undefined}>
                   <input
-                    className="ao-input"
+                    className={cn('ao-input', errors.username && s.inputError)}
                     {...register('username')}
-                    style={{ borderColor: errors.username ? 'var(--ember)' : undefined, boxShadow: errors.username ? 'inset 0 1px 0 rgba(0,0,0,0.5), 0 0 0 1px rgba(179,70,26,0.25)' : undefined }}
                   />
                 </OrdoField>
                 <FieldError message={errors.username?.message} />
@@ -215,17 +188,17 @@ export default function RegisterPage() {
               </OrdoField>
 
               {/* Passwords side by side */}
-              <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div className={cn('ao-rgrid', s.pwGrid)}>
                 <OrdoField label={t('auth.register.cipherWord')} required hint={t('auth.register.cipherHint')}>
-                  <div style={{ position: 'relative' }}>
-                    <input className="ao-input" type={showPassword ? 'text' : 'password'} {...register('password')} placeholder="••••••••" style={{ paddingRight: 40 }} />
+                  <div className={s.rel}>
+                    <input className={cn('ao-input', s.pwInput)} type={showPassword ? 'text' : 'password'} {...register('password')} placeholder="••••••••" />
                     <PasswordToggle shown={showPassword} onToggle={() => setShowPassword((v) => !v)} />
                   </div>
                   <FieldError message={errors.password?.message} />
                 </OrdoField>
                 <OrdoField label={t('auth.register.repeatCipher')} required>
-                  <div style={{ position: 'relative' }}>
-                    <input className="ao-input" type={showConfirm ? 'text' : 'password'} {...register('confirmPassword')} placeholder="••••••••" style={{ paddingRight: 40 }} />
+                  <div className={s.rel}>
+                    <input className={cn('ao-input', s.pwInput)} type={showConfirm ? 'text' : 'password'} {...register('confirmPassword')} placeholder="••••••••" />
                     <PasswordToggle shown={showConfirm} onToggle={() => setShowConfirm((v) => !v)} />
                   </div>
                   <FieldError message={errors.confirmPassword?.message} />
@@ -235,30 +208,24 @@ export default function RegisterPage() {
               <OrdoDivider glyph="cross-pat">{t('auth.register.chooseOffice')}</OrdoDivider>
 
               {/* Role selection — ChoiceCard style */}
-              <div style={{ display: 'flex', gap: 12 }}>
+              <div className={s.roleRow}>
                 {/* Player */}
                 <button
                   type="button"
                   onClick={() => setValue('role', 'PLAYER', { shouldValidate: true })}
-                  style={{
-                    flex: 1, textAlign: 'left', cursor: 'pointer',
-                    background: selectedRole === 'PLAYER' ? 'linear-gradient(180deg, rgba(176,141,78,0.08), var(--panel))' : 'linear-gradient(180deg, var(--panel-raised), var(--panel))',
-                    border: `1px solid ${selectedRole === 'PLAYER' ? 'var(--gold)' : 'var(--rule)'}`,
-                    boxShadow: selectedRole === 'PLAYER' ? 'var(--shadow-inset), 0 0 16px rgba(176,141,78,0.13)' : 'var(--shadow-inset)',
-                    padding: 18, display: 'flex', flexDirection: 'column', gap: 10, transition: 'all 180ms',
-                  }}
+                  className={cn(s.roleCard, selectedRole === 'PLAYER' && s.activeGold)}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <span style={{ width: 44, height: 44, border: `1px solid ${selectedRole === 'PLAYER' ? 'var(--gold)' : 'var(--rule)'}`, background: 'var(--abyss)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: selectedRole === 'PLAYER' ? 'inset 0 0 12px rgba(176,141,78,0.2)' : 'inset 0 0 10px rgba(0,0,0,0.5)' }}>
+                  <div className="ao-row ao-between">
+                    <span className={cn(s.roleIcon, selectedRole === 'PLAYER' && s.activeGold)}>
                       <Rune kind="shield" size={22} color={selectedRole === 'PLAYER' ? 'var(--gold)' : 'var(--ink-quiet)'} />
                     </span>
-                    <span style={{ width: 18, height: 18, border: `1px solid ${selectedRole === 'PLAYER' ? 'var(--gold)' : 'var(--rule)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', background: selectedRole === 'PLAYER' ? 'var(--gold)' : 'var(--abyss)' }}>
+                    <span className={cn(s.roleCheck, selectedRole === 'PLAYER' && s.activeGold)}>
                       {selectedRole === 'PLAYER' && <Rune kind="check" size={10} color="var(--abyss)" />}
                     </span>
                   </div>
                   <div>
-                    <div className="ao-h6" style={{ fontSize: 16, color: selectedRole === 'PLAYER' ? 'var(--ink-bright)' : 'var(--ink)' }}>{t('auth.register.player')}</div>
-                    <div className="ao-italic" style={{ fontSize: 13, marginTop: 3, color: 'var(--ink-quiet)' }}>{t('auth.register.playerDesc')}</div>
+                    <div className={cn('ao-h6', s.roleTitle, selectedRole === 'PLAYER' && s.on)}>{t('auth.register.player')}</div>
+                    <div className={cn('ao-italic', s.roleDesc)}>{t('auth.register.playerDesc')}</div>
                   </div>
                 </button>
 
@@ -266,47 +233,40 @@ export default function RegisterPage() {
                 <button
                   type="button"
                   onClick={() => setValue('role', 'GAME_MASTER', { shouldValidate: true })}
-                  style={{
-                    flex: 1, textAlign: 'left', cursor: 'pointer',
-                    background: selectedRole === 'GAME_MASTER' ? 'linear-gradient(180deg, rgba(90,142,148,0.08), var(--panel))' : 'linear-gradient(180deg, var(--panel-raised), var(--panel))',
-                    border: `1px solid ${selectedRole === 'GAME_MASTER' ? 'var(--arcane)' : 'var(--rule)'}`,
-                    boxShadow: selectedRole === 'GAME_MASTER' ? 'var(--shadow-inset), 0 0 16px rgba(90,142,148,0.13)' : 'var(--shadow-inset)',
-                    padding: 18, display: 'flex', flexDirection: 'column', gap: 10, transition: 'all 180ms',
-                  }}
+                  className={cn(s.roleCard, selectedRole === 'GAME_MASTER' && s.activeArcane)}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <span style={{ width: 44, height: 44, border: `1px solid ${selectedRole === 'GAME_MASTER' ? 'var(--arcane)' : 'var(--rule)'}`, background: 'var(--abyss)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: selectedRole === 'GAME_MASTER' ? 'inset 0 0 12px rgba(90,142,148,0.2)' : 'inset 0 0 10px rgba(0,0,0,0.5)' }}>
+                  <div className="ao-row ao-between">
+                    <span className={cn(s.roleIcon, selectedRole === 'GAME_MASTER' && s.activeArcane)}>
                       <Rune kind="helm" size={22} color={selectedRole === 'GAME_MASTER' ? 'var(--arcane)' : 'var(--ink-quiet)'} />
                     </span>
-                    <span style={{ width: 18, height: 18, border: `1px solid ${selectedRole === 'GAME_MASTER' ? 'var(--arcane)' : 'var(--rule)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', background: selectedRole === 'GAME_MASTER' ? 'var(--arcane)' : 'var(--abyss)' }}>
+                    <span className={cn(s.roleCheck, selectedRole === 'GAME_MASTER' && s.activeArcane)}>
                       {selectedRole === 'GAME_MASTER' && <Rune kind="check" size={10} color="var(--abyss)" />}
                     </span>
                   </div>
                   <div>
-                    <div className="ao-h6" style={{ fontSize: 16, color: selectedRole === 'GAME_MASTER' ? 'var(--ink-bright)' : 'var(--ink)' }}>{t('auth.register.gm')}</div>
-                    <div className="ao-italic" style={{ fontSize: 13, marginTop: 3, color: 'var(--ink-quiet)' }}>{t('auth.register.gmDesc')}</div>
+                    <div className={cn('ao-h6', s.roleTitle, selectedRole === 'GAME_MASTER' && s.on)}>{t('auth.register.gm')}</div>
+                    <div className={cn('ao-italic', s.roleDesc)}>{t('auth.register.gmDesc')}</div>
                   </div>
                 </button>
               </div>
 
               <button
                 type="submit"
-                className="ao-btn ao-btn--primary ao-btn--lg ao-btn--block"
+                className={cn('ao-btn ao-btn--primary ao-btn--lg ao-btn--block', s.mt4)}
                 disabled={registerMutation.isPending}
-                style={{ marginTop: 4 }}
               >
                 <Rune kind="diamond-fill" size={9} />
                 {registerMutation.isPending ? t('auth.register.submitting') : t('auth.register.submit')}
               </button>
             </form>
 
-            <div style={{ textAlign: 'center', marginTop: 16 }}>
-              <span className="ao-codex" style={{ color: 'var(--ink-quiet)' }}>{t('auth.register.already')}</span>
-              <Link to="/login" className="ao-codex" style={{ color: 'var(--gold-pale)', textDecoration: 'none' }}>{t('auth.register.enterVigil')}</Link>
+            <div className={s.loginPrompt}>
+              <span className={cn('ao-codex', s.inkQuiet)}>{t('auth.register.already')}</span>
+              <Link to="/login" className={cn('ao-codex', s.enterLink)}>{t('auth.register.enterVigil')}</Link>
             </div>
           </OrdoPanel>
 
-          <div style={{ textAlign: 'center', marginTop: 18, color: 'var(--ink-faint)' }}>
+          <div className={s.footer}>
             <span className="ao-codex">{t('auth.register.charter')}</span>
           </div>
         </div>

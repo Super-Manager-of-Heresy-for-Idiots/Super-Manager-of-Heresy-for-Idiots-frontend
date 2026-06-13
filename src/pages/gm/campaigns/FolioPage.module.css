@@ -1,0 +1,182 @@
+/* ── shared helpers ──────────────────────────────────────────── */
+.colFlex { display: flex; flex-direction: column; }
+.colGap18 { display: flex; flex-direction: column; gap: 18px; }
+.mt2 { margin-top: 2px; }
+.mb6 { margin-bottom: 6px; }
+.mb8 { margin-bottom: 8px; }
+.mb10 { margin-bottom: 10px; }
+
+/* ── helper components ───────────────────────────────────────── */
+.idValue { font-size: 16px; }
+.idSub { margin-top: 2px; }
+
+.profRow { display: flex; align-items: center; gap: 8px; padding: 3px 0; }
+.profLabel { flex: 1; font-size: 12.5px; color: var(--ink-quiet); }
+.profLabel.on { color: var(--ink-bright); }
+.profValue { font-size: 12.5px; color: var(--ink-quiet); }
+.profValue.on { color: var(--gold-pale); }
+
+.voidBody { padding: 32px 24px; text-align: center; }
+.voidNote { color: var(--ink-faint); font-size: 12px; margin-top: 12px; line-height: 1.5; }
+
+/* ── loading / error ─────────────────────────────────────────── */
+.loadingPanel { padding: 24px; min-height: 200px; }
+.phTitle { width: 40%; height: 22px; margin-bottom: 18px; }
+.phLine1 { width: 70%; height: 12px; margin-bottom: 10px; }
+.phLine2 { width: 55%; height: 12px; }
+.errorBox { text-align: center; padding: 48px 0; }
+.errorText { color: var(--ink-faint); margin-bottom: 16px; }
+
+/* ── spells tab ──────────────────────────────────────────────── */
+.spellsKnown { padding: 14px 16px; border-bottom: 1px solid var(--hairline); }
+.spellList { display: flex; flex-direction: column; gap: 6px; }
+.spellRow { display: flex; align-items: center; gap: 10px; }
+.spellLevel { width: 30px; flex-shrink: 0; color: var(--arcane); font-size: 12px; }
+.spellName { flex: 1; color: var(--ink-bright); font-size: 13px; }
+.spellSchool { color: var(--ink-faint); font-size: 11px; }
+
+/* ── features tab ────────────────────────────────────────────── */
+.classRow { padding: 14px; }
+.classRow.divided { border-bottom: 1px solid var(--hairline); }
+.classRowHead { display: flex; justify-content: space-between; align-items: baseline; }
+.h6-15 { font-size: 15px; }
+.classLevel { color: var(--gold-pale); font-size: 13px; }
+.featuresBlock { padding: 16px; border-top: 1px solid var(--rule); }
+.featuresText { font-size: 13px; color: var(--ink-quiet); line-height: 1.55; white-space: pre-wrap; }
+
+/* ── skills tab ──────────────────────────────────────────────── */
+.thRight { text-align: right; }
+.skillName { color: var(--ink-bright); }
+.skillSource { color: var(--ink-faint); }
+.skillMod { text-align: right; color: var(--gold-pale); }
+.skillMod.na { color: var(--ink-ghost); }
+
+/* ── biography tab ───────────────────────────────────────────── */
+.bioBody { padding: 18px; display: flex; flex-direction: column; gap: 16px; }
+.grid2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+.bioText { font-size: 13px; color: var(--ink-quiet); line-height: 1.55; }
+.bioTextPre { font-size: 13px; color: var(--ink-quiet); line-height: 1.5; white-space: pre-wrap; }
+.chipWrap { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* ── rewards tab ─────────────────────────────────────────────── */
+.rewardClass { padding: 16px; }
+.rewardClass.divided { border-bottom: 1px solid var(--rule); }
+.rewardClassHead { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+.rewardNoClass { color: var(--ink-faint); font-size: 12px; }
+.rewardType { margin-top: 10px; }
+.rewardItem { display: flex; align-items: center; gap: 10px; padding: 6px 0; border-bottom: 1px solid var(--hairline); }
+.rewardName { flex: 1; color: var(--ink-bright); font-size: 13px; }
+
+/* ── page top bar ────────────────────────────────────────────── */
+.topBar { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 18px; flex-wrap: wrap; }
+.titleOverline { color: var(--gold); }
+.titleRow { display: flex; align-items: center; gap: 10px; margin-top: 4px; flex-wrap: wrap; }
+.titleCodex { margin-top: 6px; }
+.headerActions { display: flex; gap: 10px; align-items: center; }
+.btnLabel { margin-left: 6px; }
+
+/* ── header row grid ─────────────────────────────────────────── */
+.headerGrid { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 18px; }
+.idBody { display: flex; gap: 18px; padding: 20px; }
+.portrait { width: 140px; height: 180px; flex-shrink: 0; object-fit: cover; border: 1px solid var(--rule); background: var(--abyss); }
+.portraitPh { width: 140px; height: 180px; flex-shrink: 0; }
+.idMain { flex: 1; min-width: 0; }
+.idChips { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.idName { margin-top: 8px; font-size: 32px; }
+.idSubtitle { margin-top: 2px; font-size: 16px; color: var(--ink-quiet); }
+.idGrid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+
+/* level / xp / hp rail */
+.rail { display: grid; grid-template-columns: auto 1fr 1fr; border-top: 1px solid var(--rule); }
+.railLevel { padding: 18px; border-right: 1px solid var(--rule); display: flex; align-items: center; gap: 14px; }
+.levelNum { font-family: var(--font-serif); font-size: 44px; color: var(--ink-bright); line-height: 1; }
+.railHp { padding: 18px 20px; border-right: 1px solid var(--rule); border-top: none; border-left: none; border-bottom: none; background: transparent; text-align: left; cursor: pointer; }
+.railXp { padding: 18px 20px; }
+.railLine { display: flex; justify-content: space-between; margin-bottom: 4px; align-items: baseline; }
+.railLineFoot { display: flex; justify-content: space-between; margin-top: 10px; }
+.hpValue { color: var(--ink-bright); font-size: 13px; }
+.hpDenom { color: var(--ink-faint); }
+.xpValue { color: var(--gold-pale); font-size: 13px; }
+.xpBarFill { width: 100%; opacity: 0.35; }
+.inspirationOn { color: var(--gold-pale); }
+
+/* saves & tier */
+.savesPanel { display: flex; flex-direction: column; }
+.savesGrid { flex: 1; padding: 16px; display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr); gap: 10px; }
+.saveCell { padding: 12px; background: var(--abyss); border: 1px solid var(--rule); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; }
+.saveCellLabel { font-size: 9px; }
+.saveCellValue { font-family: var(--font-serif); font-size: 28px; color: var(--ink-bright); line-height: 1.1; }
+
+/* ── treasury / arsenal / resources ──────────────────────────── */
+.threeGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; margin-top: 18px; align-items: start; }
+.coinBody { padding: 16px; display: flex; flex-direction: column; gap: 8px; }
+.coinRow { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: var(--abyss); border: 1px solid var(--hairline); }
+.coinName { flex: 1; color: var(--ink-bright); font-size: 13px; }
+.coinAmount { color: var(--gold-pale); font-size: 14px; }
+.coinTotalRow { display: flex; align-items: center; justify-content: space-between; padding-top: 6px; margin-top: 2px; border-top: 1px solid var(--hairline); }
+.coinTotalLabel { color: var(--ink-faint); }
+.coinTotalValue { color: var(--gold); font-size: 14px; }
+
+.atkName { color: var(--ink-bright); }
+.atkHit { color: var(--gold-pale); }
+.atkDamage { color: var(--ink-bright); }
+.atkType { color: var(--ink-faint); }
+.weaponName { color: var(--ink-quiet); }
+.weaponNa { color: var(--ink-ghost); }
+.attunedChip { margin-left: 8px; }
+
+.resBody { padding: 16px; }
+.resRow { padding: 11px 0; }
+.resRow.divided { border-bottom: 1px solid var(--hairline); }
+.resHead { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.resName { flex: 1; color: var(--ink-bright); font-size: 13.5px; }
+.resValue { font-size: 14px; }
+.resDenom { color: var(--ink-faint); }
+
+/* ── abilities & combat ──────────────────────────────────────── */
+.dividerWrap { margin: 24px 0 0; }
+.statGrid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)) 280px; gap: 12px; margin-top: 12px; }
+.spanAll { grid-column: 1 / -1; text-align: center; padding: 12px 0; color: var(--ink-faint); font-size: 12px; }
+.statBtn { cursor: pointer; position: relative; }
+.statBtn.active { border-color: var(--brass); }
+.statMod { color: var(--gold-pale); }
+.statMod.neg { color: #d8896a; }
+
+.savesList { display: flex; flex-direction: column; gap: 6px; }
+.saveRow { display: flex; align-items: center; gap: 8px; padding: 6px 10px; background: var(--abyss); border: 1px solid var(--hairline); }
+.saveRowLabel { flex: 1; color: var(--ink-bright); font-size: 12.5px; }
+.saveRowValue { color: var(--gold-pale); font-size: 12.5px; }
+.smallNote { color: var(--ink-faint); font-size: 11px; line-height: 1.4; }
+
+.checkReveal { margin-top: 16px; display: flex; justify-content: flex-start; }
+.checkPanel { width: 380px; }
+.checkPanelBody { padding: 32px; text-align: center; }
+.checkPanelNote { color: var(--ink-faint); font-size: 12px; }
+
+/* ── proficiencies & skills mirror ───────────────────────────── */
+.profGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 12px; }
+.profPanelHead { display: flex; align-items: center; gap: 10px; padding: 11px 14px; border-bottom: 1px solid var(--rule); }
+.profPanelLabel { flex: 1; }
+.profStatValue { font-size: 18px; color: var(--ink-bright); }
+.profStatMod { font-size: 13px; color: var(--gold-pale); }
+.profStatMod.neg { color: #d8896a; }
+.profPanelBody { padding: 8px 14px 12px; }
+
+.midGrid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: 18px; margin-top: 18px; align-items: start; }
+.passiveRow { display: flex; align-items: center; justify-content: space-between; padding: 16px 18px; }
+.passiveSub { font-size: 10px; }
+.passiveValue { font-family: var(--font-serif); font-size: 34px; color: var(--ink-bright); line-height: 1; }
+
+/* ── tabs ────────────────────────────────────────────────────── */
+.tabsWrap { margin-top: 24px; }
+.bottomGrid { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 18px; margin-top: 18px; align-items: start; }
+
+/* ── sacred marks ────────────────────────────────────────────── */
+.marksBody { padding: 16px; }
+.marksEmpty { color: var(--ink-faint); font-size: 12px; text-align: center; padding: 12px 0; }
+.markRow { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: var(--abyss); border: 1px solid var(--hairline); border-left: 2px solid var(--c); }
+.markRow.spaced { margin-bottom: 8px; }
+.markMain { flex: 1; min-width: 0; }
+.markName { font-size: 13px; color: var(--ink-bright); }
+.markStat { display: block; font-size: 10px; color: var(--ink-faint); }
+.markRounds { font-size: 11px; color: var(--ink-quiet); }

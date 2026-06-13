@@ -14,7 +14,9 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useCampaign, useKickMember } from '@/hooks/useCampaigns';
 import { useT } from '@/i18n/I18nContext';
+import { cn } from '@/lib/utils';
 import type { CampaignMember } from '@/types';
+import s from './CampaignMembersPage.module.css';
 
 /* ── page ────────────────────────────────────────────────────── */
 
@@ -40,17 +42,17 @@ export default function CampaignMembersPage() {
   if (isLoading) {
     return (
       <div>
-        <div style={{ marginBottom: 32 }}>
-          <p className="ao-overline" style={{ color: 'var(--gold)' }}>{t('camp.members.overline')}</p>
-          <h3 className="ao-h3" style={{ marginTop: 4 }}>{t('camp.members.title')}</h3>
+        <div className={s.skelHead}>
+          <p className={cn('ao-overline', s.overlineGold)}>{t('camp.members.overline')}</p>
+          <h3 className={cn('ao-h3', s.title)}>{t('camp.members.title')}</h3>
         </div>
-        <div className="ao-panel ao-frame ao-breathe" style={{ padding: 24, minHeight: 200 }}>
+        <div className={cn('ao-panel ao-frame ao-breathe', s.skelPanel)}>
           <span className="ao-frame-c" />
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} style={{ display: 'flex', gap: 16, marginBottom: 16 }}>
-              <div className="ao-ph" style={{ width: '30%', height: 14 }} />
-              <div className="ao-ph" style={{ width: '15%', height: 14 }} />
-              <div className="ao-ph" style={{ width: '20%', height: 14 }} />
+            <div key={i} className={s.skelRow}>
+              <div className={cn('ao-ph', s.phW30)} />
+              <div className={cn('ao-ph', s.phW15)} />
+              <div className={cn('ao-ph', s.phW20)} />
             </div>
           ))}
         </div>
@@ -62,8 +64,8 @@ export default function CampaignMembersPage() {
 
   if (error || !campaign) {
     return (
-      <div style={{ textAlign: 'center', padding: '48px 0' }}>
-        <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginBottom: 16 }}>
+      <div className={s.errorBlock}>
+        <p className={cn('ao-italic', s.errorText)}>
           {t('camp.members.loadError')}
         </p>
         <button className="ao-btn" onClick={() => refetch()}>{t('camp.retry')}</button>
@@ -79,20 +81,19 @@ export default function CampaignMembersPage() {
     <div>
       {/* Back button */}
       <button
-        className="ao-btn ao-btn--ghost ao-btn--sm"
+        className={cn('ao-btn ao-btn--ghost ao-btn--sm', s.backBtn)}
         onClick={() => navigate(`/campaigns/${campaignId}`)}
-        style={{ marginBottom: 16 }}
       >
         <Rune kind="chev-l" size={12} color="currentColor" />
-        <span style={{ marginLeft: 4 }}>{t('camp.backToDashboard')}</span>
+        <span className={s.ml4}>{t('camp.backToDashboard')}</span>
       </button>
 
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 28 }}>
+      <div className={s.header}>
         <div>
-          <p className="ao-overline" style={{ color: 'var(--gold)' }}>{t('camp.members.overline')}</p>
-          <h3 className="ao-h3" style={{ marginTop: 4 }}>{t('camp.members.title')}</h3>
-          <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 13, marginTop: 4 }}>
+          <p className={cn('ao-overline', s.overlineGold)}>{t('camp.members.overline')}</p>
+          <h3 className={cn('ao-h3', s.title)}>{t('camp.members.title')}</h3>
+          <p className={cn('ao-italic', s.sub)}>
             {members.length} {members.length === 1 ? t('camp.members.soulOne') : t('camp.members.soulMany')} {t('camp.members.swornSuffix')}
           </p>
         </div>
@@ -114,45 +115,24 @@ export default function CampaignMembersPage() {
           />
 
           {/* Column headers */}
-          <div
-            className="ao-rgrid"
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 120px 140px 80px',
-              gap: 12,
-              padding: '10px 18px',
-              borderBottom: '1px solid var(--rule)',
-              background: 'var(--abyss)',
-            }}
-          >
-            <span className="ao-overline" style={{ fontSize: 9, color: 'var(--ink-faint)' }}>{t('camp.members.col.username')}</span>
-            <span className="ao-overline" style={{ fontSize: 9, color: 'var(--ink-faint)' }}>{t('camp.members.col.role')}</span>
-            <span className="ao-overline" style={{ fontSize: 9, color: 'var(--ink-faint)' }}>{t('camp.members.col.joined')}</span>
+          <div className={cn('ao-rgrid', s.memberGrid, s.colHead)}>
+            <span className={cn('ao-overline', s.colLabel)}>{t('camp.members.col.username')}</span>
+            <span className={cn('ao-overline', s.colLabel)}>{t('camp.members.col.role')}</span>
+            <span className={cn('ao-overline', s.colLabel)}>{t('camp.members.col.joined')}</span>
             <span />
           </div>
 
           {/* Rows */}
           {members.map((member: CampaignMember) => (
-            <div
-              key={member.userId}
-              className="ao-rgrid"
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 120px 140px 80px',
-                gap: 12,
-                padding: '14px 18px',
-                borderBottom: '1px solid var(--hairline)',
-                alignItems: 'center',
-              }}
-            >
+            <div key={member.userId} className={cn('ao-rgrid', s.memberGrid, s.memberRow)}>
               {/* Username */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+              <div className={s.nameCell}>
                 <Rune kind="helm" size={14} color="var(--brass)" />
-                <span style={{ fontSize: 14, color: 'var(--ink-bright)', fontWeight: 500 }}>
+                <span className={s.nameText}>
                   {member.username}
                 </span>
                 {member.isCreator && (
-                  <span className="ao-overline" style={{ fontSize: 8, color: 'var(--gold)' }}>
+                  <span className={cn('ao-overline', s.creatorTag)}>
                     {t('camp.members.creator')}
                   </span>
                 )}
@@ -170,7 +150,7 @@ export default function CampaignMembersPage() {
 
               {/* Joined date */}
               <div>
-                <span className="ao-codex" style={{ fontSize: 11, color: 'var(--ink-faint)' }}>
+                <span className={cn('ao-codex', s.joinedText)}>
                   {new Date(member.joinedAt).toLocaleDateString()}
                 </span>
               </div>

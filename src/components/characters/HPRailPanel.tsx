@@ -1,8 +1,11 @@
 import { useState } from 'react';
+import type { CSSProperties } from 'react';
 import { OrdoPanel, PanelHeader, Rune, OrdoChip, Bar } from '@/components/ordo';
 import { CharStatusBadge } from '@/components/campaigns';
 import { useUpdateHp } from '@/hooks/useCharacter';
 import { useT } from '@/i18n/I18nContext';
+import { cn } from '@/lib/utils';
+import s from './HPRailPanel.module.css';
 
 interface HPRailPanelProps {
   characterId: string;
@@ -43,7 +46,7 @@ export function HPRailPanel({
         glyph="flame"
         tone="ember"
         right={
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div className={s.headerRight}>
             {isDown ? (
               <CharStatusBadge status="DOWN" />
             ) : (
@@ -55,50 +58,16 @@ export function HPRailPanel({
         }
       />
 
-      <div style={{ padding: 16 }}>
+      <div className={s.body}>
         {/* Large HP display */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'baseline',
-            justifyContent: 'center',
-            gap: 4,
-            marginBottom: 12,
-          }}
-        >
-          <span
-            style={{
-              fontSize: 48,
-              fontFamily: 'var(--font-display)',
-              color: isDown ? 'var(--ember)' : 'var(--ink-bright)',
-              lineHeight: 1,
-            }}
-          >
-            {currentHp}
-          </span>
-          <span
-            style={{
-              fontSize: 18,
-              color: 'var(--ink-faint)',
-              fontFamily: 'var(--font-display)',
-            }}
-          >
-            /
-          </span>
-          <span
-            style={{
-              fontSize: 24,
-              fontFamily: 'var(--font-display)',
-              color: 'var(--ink-quiet)',
-              lineHeight: 1,
-            }}
-          >
-            {maxHp}
-          </span>
+        <div className={cn(s.display, isDown && s.down)}>
+          <span className={s.current}>{currentHp}</span>
+          <span className={s.slash}>/</span>
+          <span className={s.max}>{maxHp}</span>
         </div>
 
         {/* HP bar */}
-        <div style={{ marginBottom: 16 }}>
+        <div className={s.barWrap}>
           <Bar
             value={currentHp}
             max={maxHp}
@@ -106,49 +75,17 @@ export function HPRailPanel({
             height={10}
             showNumbers={false}
           />
-          <div
-            style={{
-              textAlign: 'center',
-              fontSize: 11,
-              color: 'var(--ink-faint)',
-              marginTop: 4,
-              fontFamily: 'var(--font-mono, monospace)',
-            }}
-          >
-            {hpPct}%
-          </div>
+          <div className={s.pct}>{hpPct}%</div>
         </div>
 
         {/* Damage / Heal controls */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-            justifyContent: 'center',
-          }}
-        >
+        <div className={s.controls}>
           {/* Damage button */}
           <button
             onClick={handleDamage}
             disabled={updateHp.isPending}
-            style={{
-              flex: 1,
-              padding: '8px 12px',
-              background: 'var(--ember)18',
-              border: '1px solid var(--ember)44',
-              color: 'var(--ember)',
-              fontSize: 11,
-              fontFamily: 'var(--font-display)',
-              letterSpacing: '0.12em',
-              textTransform: 'uppercase' as const,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 6,
-              opacity: updateHp.isPending ? 0.5 : 1,
-            }}
+            className={cn('ao-actionbtn', s.hpBtn)}
+            style={{ '--accent': 'var(--ember)' } as CSSProperties}
           >
             <Rune kind="minus" size={10} color="var(--ember)" />
             {t('cmp.hp.damage')}
@@ -160,39 +97,15 @@ export function HPRailPanel({
             min={1}
             value={amount}
             onChange={(e) => setAmount(Math.max(1, Number(e.target.value)))}
-            style={{
-              width: 56,
-              textAlign: 'center',
-              padding: '8px 4px',
-              background: 'var(--abyss)',
-              border: '1px solid var(--rule)',
-              color: 'var(--ink-bright)',
-              fontSize: 18,
-              fontFamily: 'var(--font-mono, monospace)',
-            }}
+            className={s.amount}
           />
 
           {/* Heal button */}
           <button
             onClick={handleHeal}
             disabled={updateHp.isPending}
-            style={{
-              flex: 1,
-              padding: '8px 12px',
-              background: 'rgba(122,152,102,0.1)',
-              border: '1px solid rgba(122,152,102,0.27)',
-              color: '#7a9866',
-              fontSize: 11,
-              fontFamily: 'var(--font-display)',
-              letterSpacing: '0.12em',
-              textTransform: 'uppercase' as const,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 6,
-              opacity: updateHp.isPending ? 0.5 : 1,
-            }}
+            className={cn('ao-actionbtn', s.hpBtn)}
+            style={{ '--accent': '#7a9866' } as CSSProperties}
           >
             <Rune kind="plus" size={10} color="#7a9866" />
             {t('cmp.hp.heal')}
@@ -201,23 +114,7 @@ export function HPRailPanel({
 
         {/* Open modal link */}
         {onOpenDamageHeal && (
-          <button
-            onClick={onOpenDamageHeal}
-            style={{
-              display: 'block',
-              width: '100%',
-              marginTop: 12,
-              background: 'none',
-              border: 'none',
-              color: 'var(--ink-faint)',
-              fontSize: 11,
-              fontFamily: 'var(--font-display)',
-              letterSpacing: '0.08em',
-              cursor: 'pointer',
-              textDecoration: 'underline',
-              textUnderlineOffset: 3,
-            }}
-          >
+          <button onClick={onOpenDamageHeal} className={s.advanced}>
             {t('cmp.hp.advanced')}
           </button>
         )}

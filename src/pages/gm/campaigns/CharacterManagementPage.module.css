@@ -1,0 +1,46 @@
+.skelPanel { padding: 24px; min-height: 160px; }
+.phTitle { width: 36%; height: 20px; margin-bottom: 16px; }
+.phSub { width: 64%; height: 12px; }
+
+.errorBlock { text-align: center; padding: 48px 0; }
+.errorText { color: var(--ink-faint); margin-bottom: 16px; }
+
+.header {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  gap: 16px; margin-bottom: 24px;
+}
+.overlineGold { color: var(--gold); }
+.titleRow { display: flex; align-items: center; gap: 10px; margin-top: 4px; flex-wrap: wrap; }
+.metaLine { color: var(--ink-quiet); font-size: 13px; margin-top: 6px; }
+.headActions { display: flex; align-items: center; gap: 10px; }
+.deleteBtn { color: var(--ember); border-color: var(--ember); }
+.ml6 { margin-left: 6px; }
+
+.statusPanel { margin-bottom: 24px; }
+.statusBody { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.barRow { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: center; }
+.hpLabel { font-size: 12px; color: var(--ink-quiet); }
+.xpLabel { font-size: 11px; color: var(--ink-faint); }
+
+.levelUpBanner {
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  padding: 14px 18px; margin-bottom: 18px;
+  border: 1px solid var(--gold); background: rgba(212, 180, 120, 0.08);
+}
+.levelUpReady { color: var(--ink-bright); font-size: 13px; margin-top: 4px; }
+
+.tileGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.tile {
+  display: flex; align-items: flex-start; gap: 12px; padding: 16px;
+  border: 1px solid var(--hairline); background: var(--panel);
+  text-align: left; cursor: pointer;
+}
+.tileIcon {
+  width: 34px; height: 34px; border: 1px solid var(--rule); background: var(--abyss);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.tileMain { flex: 1; min-width: 0; }
+.tileTitleRow { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+.tileTitle { color: var(--ink-bright); font-size: 14px; }
+.tileTodo { font-size: 8px; color: var(--ink-faint); }
+.tileBody { color: var(--ink-faint); font-size: 12px; line-height: 1.35; }

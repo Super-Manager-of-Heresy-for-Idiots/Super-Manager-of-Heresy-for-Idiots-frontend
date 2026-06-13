@@ -1,0 +1,63 @@
+.backLink { margin-bottom: 12px; }
+.overlineGold { color: var(--gold); }
+.title { margin-top: 4px; }
+.subtitle { color: var(--ink-quiet); font-size: 13px; margin-top: 6px; }
+
+.navBtnDim { opacity: 0.4; }
+.pageLabel { color: var(--ink-faint); font-size: 11px; }
+
+.editorCol { display: flex; flex-direction: column; gap: 14px; }
+.charHeader { display: flex; align-items: center; gap: 14px; }
+.charAvatar {
+  width: 48px; height: 48px; flex-shrink: 0; border: 1px solid var(--rule);
+  background: var(--abyss); display: flex; align-items: center; justify-content: center;
+}
+.charMain { flex: 1; min-width: 0; }
+.charNameRow { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.charOwner { font-size: 11px; color: var(--ink-faint); }
+.totalCol { text-align: right; }
+.totalLabel { color: var(--ink-faint); }
+.totalValue { color: var(--gold-pale); font-size: 28px; line-height: 1.1; }
+.totalUnit { font-size: 14px; color: var(--brass); }
+
+.editorGrid { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+.editorLeft { display: flex; flex-direction: column; gap: 14px; }
+.editorRight { position: sticky; top: 0; }
+
+.headerBlock { margin-bottom: 18px; }
+.pageGrid { display: grid; grid-template-columns: minmax(0, 280px) minmax(0, 1fr); gap: 18px; align-items: start; }
+.pickerPanel { display: flex; flex-direction: column; }
+
+.skelBox { padding: 16px; }
+.skelRow { width: 80%; height: 14px; margin-bottom: 12px; }
+.errorBox { padding: 24px 16px; text-align: center; }
+.errorText { color: var(--ink-faint); margin-bottom: 14px; }
+.emptyBox { padding: 18px; }
+.emptyText { color: var(--ink-faint); font-size: 13px; }
+
+.pickerList { overflow-y: auto; }
+.pickerBtn {
+  width: 100%; text-align: left; display: flex; align-items: center; gap: 11px;
+  padding: 12px 14px; border-bottom: 1px solid var(--hairline);
+  border-left: 2px solid transparent; background: transparent; cursor: pointer;
+}
+.pickerBtn.active {
+  border-left-color: var(--gold);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--gold) 10%, transparent), transparent);
+}
+.pickerAvatar {
+  width: 36px; height: 36px; flex-shrink: 0; border: 1px solid var(--rule);
+  background: var(--abyss); display: flex; align-items: center; justify-content: center;
+}
+.pickerBtn.active .pickerAvatar { border-color: var(--brass); }
+.pickerMain { flex: 1; min-width: 0; }
+.pickerName {
+  font-size: 14px; color: var(--ink);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.pickerBtn.active .pickerName { color: var(--ink-bright); }
+.pickerMeta { display: flex; align-items: center; gap: 7px; margin-top: 4px; }
+.pickerOwner {
+  font-size: 10px; color: var(--ink-faint);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}

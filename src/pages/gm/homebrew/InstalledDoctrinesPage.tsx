@@ -8,8 +8,9 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useInstalledPackages, useUninstallPackage } from '@/hooks/useHomebrew';
 import { useT } from '@/i18n/I18nContext';
-import { formatDate } from '@/lib/utils';
+import { formatDate, cn } from '@/lib/utils';
 import type { InstalledHomebrewResponse } from '@/types';
+import s from './InstalledDoctrinesPage.module.css';
 
 export default function InstalledDoctrinesPage() {
   const t = useT();
@@ -37,33 +38,33 @@ export default function InstalledDoctrinesPage() {
   return (
     <div>
       {/* ── Heading band ── */}
-      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 18 }}>
+      <div className={s.headBand}>
         <div>
           <div className="ao-overline">{t('hb.installed.overline')}</div>
-          <div className="ao-h3" style={{ marginTop: 4 }}>{t('hb.installed.heading')}</div>
-          <div className="ao-italic" style={{ marginTop: 4, maxWidth: 620 }}>
+          <div className={cn('ao-h3', s.headTitle)}>{t('hb.installed.heading')}</div>
+          <div className={cn('ao-italic', s.headSub)}>
             {t('hb.installed.subtitle')}
           </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 20 }}>
-          <div style={{ textAlign: 'right' }}>
+        <div className={s.statsRow}>
+          <div className={s.statBox}>
             <div className="ao-overline">{t('hb.installed.active')}</div>
-            <div style={{ fontFamily: 'var(--font-serif)', fontSize: 28, color: 'var(--ink-bright)', lineHeight: 1 }}>
+            <div className={s.statNum}>
               {activeCount}
             </div>
           </div>
-          <div style={{ width: 1, height: 36, background: 'var(--rule)' }} />
-          <div style={{ textAlign: 'right' }}>
+          <div className={s.statDivider} />
+          <div className={s.statBox}>
             <div className="ao-overline">{t('hb.installed.redacted')}</div>
-            <div style={{ fontFamily: 'var(--font-serif)', fontSize: 28, color: '#d8896a', lineHeight: 1 }}>
+            <div className={cn(s.statNum, s.red)}>
               {redactedCount}
             </div>
           </div>
-          <div style={{ width: 1, height: 36, background: 'var(--rule)' }} />
-          <div style={{ textAlign: 'right' }}>
+          <div className={s.statDivider} />
+          <div className={s.statBox}>
             <div className="ao-overline">{t('hb.installed.behind')}</div>
-            <div style={{ fontFamily: 'var(--font-serif)', fontSize: 28, color: 'var(--gold-pale)', lineHeight: 1 }}>
+            <div className={cn(s.statNum, s.gold)}>
               {behindCount}
             </div>
           </div>
@@ -72,24 +73,15 @@ export default function InstalledDoctrinesPage() {
 
       {/* ── Redacted warning band ── */}
       {redactedCount > 0 && (
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 12,
-          padding: '12px 18px',
-          marginBottom: 18,
-          background: 'linear-gradient(90deg, rgba(179,70,26,0.12) 0%, rgba(179,70,26,0.04) 100%)',
-          border: '1px solid rgba(179,70,26,0.25)',
-          borderLeft: '3px solid var(--ember)',
-        }}>
+        <div className={s.warnBand}>
           <Rune kind="flame" size={16} color="var(--ember)" />
-          <div style={{ flex: 1 }}>
-            <span style={{ fontSize: 13, color: '#d8896a', fontFamily: 'var(--font-display)', letterSpacing: '0.03em' }}>
+          <div className={s.warnGrow}>
+            <span className={s.warnTitle}>
               {redactedCount > 1
                 ? t('hb.installed.warningMany', { count: redactedCount })
                 : t('hb.installed.warningOne', { count: redactedCount })}
             </span>
-            <span className="ao-italic" style={{ fontSize: 12, color: 'var(--ink-quiet)', marginLeft: 8 }}>
+            <span className={cn('ao-italic', s.warnNote)}>
               {t('hb.installed.warningNote')}
             </span>
           </div>
@@ -101,20 +93,20 @@ export default function InstalledDoctrinesPage() {
 
       {/* ── Content list ── */}
       {isLoading ? (
-        <OrdoPanel padding={0} frame style={{ height: 320 }}>
-          <div className="ao-ph" style={{ height: '100%' }} />
+        <OrdoPanel padding={0} frame className={s.loadingPanel}>
+          <div className={cn('ao-ph', s.loadingPh)} />
         </OrdoPanel>
       ) : packages.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: 60 }}>
+        <div className={s.emptyBox}>
           <Rune kind="book" size={64} color="var(--ink-quiet)" />
-          <div className="ao-codex" style={{ marginTop: 14, color: 'var(--ink-faint)' }}>
+          <div className={cn('ao-codex', s.emptyOverline)}>
             {t('hb.installed.emptyOverline')}
           </div>
-          <div className="ao-h3" style={{ marginTop: 10, color: 'var(--ink)' }}>{t('hb.installed.emptyTitle')}</div>
-          <p className="ao-italic" style={{ fontSize: 16, color: 'var(--ink-quiet)', maxWidth: 480, margin: '8px auto 0' }}>
+          <div className={cn('ao-h3', s.emptyTitle)}>{t('hb.installed.emptyTitle')}</div>
+          <p className={cn('ao-italic', s.emptyBody)}>
             {t('hb.installed.emptyBody')}
           </p>
-          <div style={{ display: 'flex', gap: 10, marginTop: 22, justifyContent: 'center' }}>
+          <div className={s.emptyActions}>
             <button className="ao-btn ao-btn--primary" onClick={() => navigate('/gm/homebrew/marketplace')}>
               <Rune kind="arrow-r" size={11} /> {t('hb.installed.browseCatalogue')}
             </button>
@@ -131,13 +123,8 @@ export default function InstalledDoctrinesPage() {
               onRevoke={() => setRevokeId(p.installationId)}
             />
           ))}
-          <div style={{
-            textAlign: 'center',
-            padding: '10px 0',
-            borderTop: '1px solid var(--hairline)',
-            background: 'var(--abyss)',
-          }}>
-            <span className="ao-codex" style={{ fontSize: 11, color: 'var(--ink-faint)' }}>
+          <div className={s.listFooter}>
+            <span className={cn('ao-codex', s.listFooterText)}>
               {totalElements !== 1
                 ? t('hb.installed.footerMany', { count: totalElements })
                 : t('hb.installed.footerOne', { count: totalElements })}
@@ -148,29 +135,20 @@ export default function InstalledDoctrinesPage() {
 
       {/* ── Pagination ── */}
       {totalPages > 1 && (
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginTop: 26,
-          paddingTop: 18,
-          borderTop: '1px solid var(--rule)',
-        }}>
+        <div className={s.pager}>
           <span className="ao-codex">
             {t('hb.installed.pageInfo', { page: page + 1, total: totalPages, shown: packages.length, total2: totalElements })}
           </span>
-          <div style={{ display: 'flex', gap: 4 }}>
+          <div className={s.pagerBtns}>
             <button
-              className="ao-iconbtn"
-              style={{ width: 30, height: 30 }}
+              className={cn('ao-iconbtn', s.pagerBtn)}
               disabled={page === 0}
               onClick={() => setPage(page - 1)}
             >
               <Rune kind="arrow-l" size={11} />
             </button>
             <button
-              className="ao-iconbtn"
-              style={{ width: 30, height: 30 }}
+              className={cn('ao-iconbtn', s.pagerBtn)}
               disabled={page >= totalPages - 1}
               onClick={() => setPage(page + 1)}
             >
@@ -193,7 +171,7 @@ export default function InstalledDoctrinesPage() {
             <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleRevoke}
-              style={{ background: 'var(--ember)', color: '#fff' }}
+              className={s.revokeAction}
             >
               {t('hb.installed.revoke')}
             </AlertDialogAction>
@@ -219,71 +197,33 @@ function InstalledRow({
 }) {
   const t = useT();
   const deleted = pkg.isDeleted;
-  const s = pkg.contentSummary;
-
-  const rowBg = deleted ? 'rgba(179,70,26,0.03)' : 'transparent';
+  const cs = pkg.contentSummary;
 
   return (
-    <div className="ao-rgrid" style={{
-      display: 'grid',
-      gridTemplateColumns: '56px 1.2fr 200px 1fr 200px 240px',
-      alignItems: 'center',
-      gap: 12,
-      padding: '14px 18px',
-      borderBottom: isLast ? 'none' : '1px solid var(--hairline)',
-      background: rowBg,
-      position: 'relative',
-      overflow: 'hidden',
-    }}>
+    <div className={cn('ao-rgrid', s.row, !isLast && s.divided, deleted && s.deleted)}>
       {/* Diagonal stripe overlay for deleted rows */}
-      {deleted && (
-        <div style={{
-          position: 'absolute',
-          inset: 0,
-          pointerEvents: 'none',
-          backgroundImage:
-            'repeating-linear-gradient(135deg, transparent, transparent 10px, rgba(179,70,26,0.03) 10px, rgba(179,70,26,0.03) 11px)',
-        }} />
-      )}
+      {deleted && <div className={s.deletedStripe} />}
 
       {/* Col 1: VersionSeal */}
       <VersionSeal version={pkg.sourceVersion} size={42} />
 
       {/* Col 2: Title + Author + CodexID */}
-      <div style={{ position: 'relative' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span
-            className="ao-h6"
-            style={{
-              fontSize: 15,
-              ...(deleted ? {
-                color: 'var(--ink-quiet)',
-                textDecoration: 'line-through',
-                textDecorationColor: 'rgba(179,70,26,0.6)',
-              } : {}),
-            }}
-          >
+      <div className={s.titleCell}>
+        <div className={s.titleHead}>
+          <span className={cn('ao-h6', s.title, deleted && s.deleted)}>
             {pkg.title}
           </span>
           {deleted && (
-            <span style={{
-              fontSize: 9,
-              letterSpacing: '0.14em',
-              textTransform: 'uppercase' as const,
-              padding: '2px 6px',
-              background: 'rgba(179,70,26,0.18)',
-              color: '#d8896a',
-              fontFamily: 'var(--font-mono)',
-            }}>
+            <span className={s.redactedBadge}>
               {t('hb.installed.redactedBadge')}
             </span>
           )}
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
-          <span className="ao-codex" style={{ fontSize: 12, color: 'var(--ink-faint)' }}>
-            {t('hb.installed.byLabel')} <span style={{ color: 'var(--ink)' }}>{pkg.authorUsername}</span>
+        <div className={s.byRow}>
+          <span className={cn('ao-codex', s.byText)}>
+            {t('hb.installed.byLabel')} <span className={s.byName}>{pkg.authorUsername}</span>
           </span>
-          <span style={{ color: 'var(--ink-faint)', fontSize: 10 }}>&middot;</span>
+          <span className={s.byDot}>&middot;</span>
           <CodexID>{pkg.packageId.substring(0, 8)}</CodexID>
         </div>
       </div>
@@ -291,30 +231,30 @@ function InstalledRow({
       {/* Col 3: StatusBadge + status text */}
       <div>
         <StatusBadge status={deleted ? 'DELETED' : 'INSTALLED'} />
-        <div className="ao-codex" style={{ fontSize: 10, marginTop: 5, color: 'var(--ink-faint)' }}>
+        <div className={cn('ao-codex', s.stateText)}>
           {deleted ? t('hb.installed.referencePersists') : t('hb.installed.liveLink')}
         </div>
       </div>
 
       {/* Col 4: ContentPills */}
       <ContentPills
-        items={s.itemTypeCount}
-        classes={s.classCount}
-        skills={s.skillCount}
-        feats={s.featCount}
+        items={cs.itemTypeCount}
+        classes={cs.classCount}
+        skills={cs.skillCount}
+        feats={cs.featCount}
         compact
       />
 
       {/* Col 5: Instated date */}
       <div>
-        <div className="ao-overline" style={{ fontSize: 9 }}>{t('hb.installed.instated')}</div>
-        <div className="ao-codex" style={{ fontSize: 12, marginTop: 3 }}>
+        <div className={cn('ao-overline', s.dateLabel)}>{t('hb.installed.instated')}</div>
+        <div className={cn('ao-codex', s.dateValue)}>
           {formatDate(pkg.installedAt)}
         </div>
       </div>
 
       {/* Col 6: Actions */}
-      <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
+      <div className={s.actions}>
         {!deleted && (
           <button className="ao-btn ao-btn--ghost ao-btn--sm" onClick={onView}>
             <Rune kind="book" size={10} /> {t('hb.installed.view')}

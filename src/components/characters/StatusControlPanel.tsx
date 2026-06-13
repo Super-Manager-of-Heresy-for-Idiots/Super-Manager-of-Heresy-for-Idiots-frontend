@@ -1,6 +1,9 @@
-import { OrdoPanel, PanelHeader, Rune } from '@/components/ordo';
+import type { CSSProperties } from 'react';
+import { OrdoPanel, PanelHeader } from '@/components/ordo';
 import { CharStatusBadge } from '@/components/campaigns';
 import { useT } from '@/i18n/I18nContext';
+import { cn } from '@/lib/utils';
+import s from './StatusControlPanel.module.css';
 
 type StatusOption = 'ACTIVE' | 'DEAD' | 'RESERVE';
 
@@ -43,7 +46,7 @@ export function StatusControlPanel({
     <OrdoPanel frame>
       <PanelHeader title={t('cmp.status.title')} glyph="sigil-1" />
 
-      <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div className={s.list}>
         {STATUS_OPTIONS.map((opt) => {
           const isSelected = currentStatus === opt.status;
 
@@ -51,63 +54,18 @@ export function StatusControlPanel({
             <button
               key={opt.status}
               onClick={() => onStatusChange(opt.status)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 12,
-                padding: '12px 14px',
-                background: isSelected
-                  ? `${opt.color}14`
-                  : 'transparent',
-                border: `1px solid ${isSelected ? `${opt.color}44` : 'var(--rule)'}`,
-                cursor: 'pointer',
-                textAlign: 'left',
-                width: '100%',
-                transition: 'background 0.15s, border-color 0.15s',
-              }}
+              className={cn(s.opt, isSelected && s.selected)}
+              style={{ '--opt': opt.color } as CSSProperties}
             >
-              {/* Badge */}
-              <div style={{ flexShrink: 0 }}>
+              <div className={s.badge}>
                 <CharStatusBadge status={opt.status} />
               </div>
 
-              {/* Description */}
-              <div style={{ flex: 1 }}>
-                <div
-                  style={{
-                    fontSize: 12,
-                    color: 'var(--ink-quiet)',
-                    lineHeight: 1.4,
-                  }}
-                >
-                  {t(opt.descriptionKey)}
-                </div>
+              <div className={s.desc}>
+                <div className={s.descText}>{t(opt.descriptionKey)}</div>
               </div>
 
-              {/* Radio indicator */}
-              <div
-                style={{
-                  width: 18,
-                  height: 18,
-                  borderRadius: '50%',
-                  border: `2px solid ${isSelected ? opt.color : 'var(--rule)'}`,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0,
-                }}
-              >
-                {isSelected && (
-                  <div
-                    style={{
-                      width: 8,
-                      height: 8,
-                      borderRadius: '50%',
-                      background: opt.color,
-                    }}
-                  />
-                )}
-              </div>
+              <div className={s.radio}>{isSelected && <div className={s.dot} />}</div>
             </button>
           );
         })}

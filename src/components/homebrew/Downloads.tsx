@@ -1,5 +1,7 @@
 import { Rune } from '@/components/ordo';
 import { useT } from '@/i18n/I18nContext';
+import { cn } from '@/lib/utils';
+import s from './Downloads.module.css';
 
 interface DownloadsProps {
   value: number;
@@ -8,10 +10,10 @@ interface DownloadsProps {
 export function Downloads({ value }: DownloadsProps) {
   const t = useT();
   return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: 'var(--ink-quiet)' }}>
+    <span className={s.wrap}>
       <Rune kind="arrow-up" size={11} color="var(--bronze)" />
-      <span className="ao-num" style={{ color: 'var(--ink-bright)', fontSize: 13 }}>{value.toLocaleString()}</span>
-      <span className="ao-overline" style={{ fontSize: 9 }}>{t('cmp2.downloads.instated')}</span>
+      <span className={cn('ao-num', s.num)}>{value.toLocaleString()}</span>
+      <span className={cn('ao-overline', s.label)}>{t('cmp2.downloads.instated')}</span>
     </span>
   );
 }

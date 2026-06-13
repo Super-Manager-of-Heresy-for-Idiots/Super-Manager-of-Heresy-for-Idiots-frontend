@@ -5,10 +5,12 @@
 // permissions and mutations are owned by the pages.
 // ============================================================
 import { useState } from 'react';
-import type { ReactNode } from 'react';
+import type { ReactNode, CSSProperties } from 'react';
 import { OrdoPanel, PanelHeader, Rune, OrdoField, Sigil } from '@/components/ordo';
 import { useT } from '@/i18n/I18nContext';
+import { cn } from '@/lib/utils';
 import type { WalletEntry, WalletHistoryEntry } from '@/types';
+import s from './WalletKit.module.css';
 
 /* ── semantic delta colours ─────────────────────────────────── */
 const POS = '#7a9866';
@@ -34,32 +36,32 @@ function CurrencyRow({
     ? `≈ ${t('cmp.wallet.gp', { amount: fmt(entry.goldEquivalent) })}`
     : t('camp.wallet.noExchange');
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '11px 16px', borderBottom: '1px solid var(--hairline)' }}>
-      <span style={{ width: 30, height: 30, flexShrink: 0, border: '1px solid var(--rule)', background: 'var(--abyss)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'inset 0 1px 0 rgba(0,0,0,0.5)' }}>
+    <div className={s.row}>
+      <span className={s.coin}>
         <Rune kind="coin" size={14} color="var(--gold-pale)" />
       </span>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ color: 'var(--ink-bright)', fontSize: 13.5 }}>{entry.currencyName}</div>
-        <div className="ao-num" style={{ fontSize: 10, marginTop: 2, color: 'var(--ink-faint)' }}>{eq}</div>
+      <div className={s.info}>
+        <div className={s.name}>{entry.currencyName}</div>
+        <div className={cn('ao-num', s.eq)}>{eq}</div>
       </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: editable ? 8 : 0 }}>
+      <div className={cn(s.rowControls, !editable && s.tight)}>
         {editable && onAdjust && (
           <button
             onClick={() => onAdjust(entry.currencyTypeId, -1)}
             disabled={pending}
             title="−1"
-            style={{ width: 28, height: 28, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--abyss)', border: '1px solid var(--rule)', cursor: pending ? 'default' : 'pointer', opacity: pending ? 0.5 : 1 }}
+            className="ao-stepbtn"
           >
             <Rune kind="minus" size={12} color={NEG_SOFT} />
           </button>
         )}
-        <span className="ao-num" style={{ minWidth: 72, textAlign: 'right', color: 'var(--ink-bright)', fontSize: 22, lineHeight: 1 }}>{fmt(entry.amount)}</span>
+        <span className={cn('ao-num', s.amount)}>{fmt(entry.amount)}</span>
         {editable && onAdjust && (
           <button
             onClick={() => onAdjust(entry.currencyTypeId, 1)}
             disabled={pending}
             title="+1"
-            style={{ width: 28, height: 28, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--abyss)', border: '1px solid var(--rule)', cursor: pending ? 'default' : 'pointer', opacity: pending ? 0.5 : 1 }}
+            className="ao-stepbtn"
           >
             <Rune kind="plus" size={12} color={POS} />
           </button>
@@ -86,10 +88,10 @@ export function CurrencyPanel({
         title={t('camp.wallet.currencies')}
         sub={editable ? t('camp.wallet.subEditable') : t('camp.wallet.subReadonly')}
         glyph="coin"
-        right={<span className="ao-num" style={{ color: 'var(--gold-pale)', fontSize: 12 }}>≈ {t('cmp.wallet.gp', { amount: fmt(total) })}</span>}
+        right={<span className={cn('ao-num', s.headTotal)}>≈ {t('cmp.wallet.gp', { amount: fmt(total) })}</span>}
       />
       {entries.length === 0 ? (
-        <div className="ao-italic" style={{ padding: '24px 16px', textAlign: 'center', color: 'var(--ink-faint)', fontSize: 12 }}>
+        <div className={cn('ao-italic', s.empty)}>
           {t('cmp.wallet.empty')}
         </div>
       ) : (
@@ -100,17 +102,17 @@ export function CurrencyPanel({
             ))}
           </div>
           {/* Total in gold */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 16px', background: 'linear-gradient(180deg, rgba(176,141,78,0.10), transparent)', borderTop: '1px solid var(--rule)' }}>
-            <span style={{ width: 34, height: 34, flexShrink: 0, border: '1px solid var(--brass)', background: 'radial-gradient(circle at 30% 30%, #2a241f, #0d0a08)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div className={s.totalRow}>
+            <span className={s.totalCoin}>
               <Rune kind="coin" size={16} color="var(--gold-pale)" />
             </span>
-            <div style={{ flex: 1 }}>
-              <div className="ao-overline" style={{ color: 'var(--ink-quiet)' }}>{t('camp.wallet.total')}</div>
-              <div className="ao-codex" style={{ marginTop: 2, fontSize: 10, color: 'var(--ink-faint)' }}>{t('camp.wallet.totalSub')}</div>
+            <div className={s.totalInfo}>
+              <div className={cn('ao-overline', s.totalLabel)}>{t('camp.wallet.total')}</div>
+              <div className={cn('ao-codex', s.totalSub)}>{t('camp.wallet.totalSub')}</div>
             </div>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
-              <span className="ao-num" style={{ color: 'var(--gold-pale)', fontSize: 28, lineHeight: 1 }}>{fmt(total)}</span>
-              <span className="ao-num" style={{ color: 'var(--brass)', fontSize: 13 }}>{t('camp.wallet.goldUnit')}</span>
+            <div className={s.totalVal}>
+              <span className={cn('ao-num', s.totalNum)}>{fmt(total)}</span>
+              <span className={cn('ao-num', s.totalUnit)}>{t('camp.wallet.goldUnit')}</span>
             </div>
           </div>
         </>
@@ -141,8 +143,8 @@ export function TopupForm({
     return (
       <OrdoPanel frame>
         <PanelHeader title={t('camp.wallet.form.title')} sub={t('camp.wallet.form.sub')} glyph="scroll" tone="gold" />
-        <div style={{ padding: 20 }}>
-          <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 13 }}>{t('camp.wallet.form.noCurrencies')}</p>
+        <div className={s.formPad}>
+          <p className={cn('ao-italic', s.muted)}>{t('camp.wallet.form.noCurrencies')}</p>
         </div>
       </OrdoPanel>
     );
@@ -168,16 +170,17 @@ export function TopupForm({
   return (
     <OrdoPanel frame>
       <PanelHeader title={t('camp.wallet.form.title')} sub={overline ?? t('camp.wallet.form.overlineOwner')} glyph="scroll" tone="gold" />
-      <div style={{ padding: 18, display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <div className={s.body}>
         {/* Mode toggle */}
-        <div style={{ display: 'flex', border: '1px solid var(--rule)' }}>
+        <div className={s.modeToggle}>
           {([['add', t('camp.wallet.form.modeAdd'), POS, 'plus'], ['deduct', t('camp.wallet.form.modeDeduct'), NEG, 'minus']] as const).map(([m, label, col, gl]) => {
             const on = mode === m;
             return (
               <button
                 key={m}
                 onClick={() => setMode(m as 'add' | 'deduct')}
-                style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '11px', fontFamily: 'var(--font-display)', fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', cursor: 'pointer', border: 'none', borderRight: m === 'add' ? '1px solid var(--rule)' : 'none', background: on ? `linear-gradient(180deg, ${col}22, transparent)` : 'transparent', color: on ? col : 'var(--ink-faint)', boxShadow: on ? `inset 0 -2px 0 ${col}` : 'none' }}
+                className={cn(s.modeBtn, m === 'add' && s.first, on && s.on)}
+                style={{ '--col': col } as CSSProperties}
               >
                 <Rune kind={gl} size={11} color={on ? col : 'var(--ink-faint)'} />{label}
               </button>
@@ -190,7 +193,7 @@ export function TopupForm({
           <select
             value={selectedCode}
             onChange={(e) => setCode(e.target.value)}
-            style={{ width: '100%', padding: '9px 10px', background: 'var(--abyss)', border: '1px solid var(--rule)', color: 'var(--ink-bright)', fontSize: 13, fontFamily: 'var(--font-display)', cursor: 'pointer' }}
+            className={s.select}
           >
             {options.map((o) => {
               const have = wallet.find((w) => w.currencyTypeId === o.id)?.amount ?? 0;
@@ -201,22 +204,22 @@ export function TopupForm({
 
         {/* Amount with sign prefix + colored frame */}
         <OrdoField label={t('camp.wallet.form.amount')}>
-          <div style={{ position: 'relative' }}>
-            <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', fontFamily: 'var(--font-display)', fontSize: 24, color: accent, pointerEvents: 'none' }}>{isAdd ? '+' : '−'}</span>
+          <div className={s.amountWrap} style={{ '--accent': accent } as CSSProperties}>
+            <span className={s.amountSign}>{isAdd ? '+' : '−'}</span>
             <input
               value={amount}
               onChange={(e) => setAmount(e.target.value.replace(/[^0-9]/g, ''))}
               inputMode="numeric"
               placeholder="0"
-              style={{ width: '100%', background: 'var(--abyss)', border: `1px solid ${accent}`, color: 'var(--ink-bright)', fontFamily: 'var(--font-mono, monospace)', fontSize: 26, textAlign: 'right', padding: '12px 14px', outline: 'none', boxShadow: `0 0 0 1px ${accent}33` }}
+              className={s.amountInput}
             />
           </div>
         </OrdoField>
 
         {/* Presets */}
-        <div style={{ display: 'flex', gap: 6 }}>
+        <div className={s.presets}>
           {[10, 50, 100, 500].map((p) => (
-            <button key={p} onClick={() => setAmount(String(p))} style={{ flex: 1, padding: '6px 0', background: 'transparent', border: '1px solid var(--rule)', color: 'var(--ink-quiet)', fontFamily: 'var(--font-mono, monospace)', fontSize: 12, cursor: 'pointer' }}>{p}</button>
+            <button key={p} onClick={() => setAmount(String(p))} className={s.preset}>{p}</button>
           ))}
         </div>
 
@@ -226,28 +229,28 @@ export function TopupForm({
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             placeholder={isAdd ? t('camp.wallet.form.reasonAddPh') : t('camp.wallet.form.reasonDeductPh')}
-            style={{ width: '100%', padding: '9px 10px', background: 'var(--abyss)', border: '1px solid var(--rule)', color: 'var(--ink-bright)', fontSize: 13 }}
+            className={s.reasonInput}
           />
         </OrdoField>
 
         {/* Preview: current → new */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 14px', background: 'var(--abyss)', border: '1px solid var(--rule)' }}>
-          <div style={{ flex: 1 }}>
-            <div className="ao-overline" style={{ fontSize: 9, color: 'var(--ink-faint)' }}>{t('camp.wallet.form.current')}</div>
-            <div className="ao-num" style={{ color: 'var(--ink-quiet)', fontSize: 18, marginTop: 2 }}>{fmt(cur)}</div>
+        <div className={s.preview} style={{ '--accent': accent } as CSSProperties}>
+          <div className={s.previewCol}>
+            <div className={cn('ao-overline', s.previewLabel)}>{t('camp.wallet.form.current')}</div>
+            <div className={cn('ao-num', s.previewCur)}>{fmt(cur)}</div>
           </div>
           <Rune kind="arrow-r" size={15} color={accent} />
-          <div style={{ flex: 1, textAlign: 'right' }}>
-            <div className="ao-overline" style={{ fontSize: 9, color: 'var(--ink-faint)' }}>{t('camp.wallet.form.preview')}</div>
-            <div className="ao-num" style={{ color: lack > 0 ? NEG_SOFT : 'var(--ink-bright)', fontSize: 22, marginTop: 2 }}>{fmt(next)}</div>
+          <div className={s.previewColRight}>
+            <div className={cn('ao-overline', s.previewLabel)}>{t('camp.wallet.form.preview')}</div>
+            <div className={cn('ao-num', s.previewNext)} style={{ color: lack > 0 ? NEG_SOFT : 'var(--ink-bright)' }}>{fmt(next)}</div>
           </div>
         </div>
 
         {/* Insufficient warning */}
         {lack > 0 && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', background: 'rgba(179,70,26,0.10)', border: '1px solid rgba(179,70,26,0.4)', borderLeft: '2px solid var(--ember)' }}>
+          <div className={s.warn}>
             <Rune kind="flame" size={13} color={NEG_SOFT} />
-            <div style={{ fontSize: 12.5, color: 'var(--ink)' }}>{t('camp.wallet.form.lacking', { amount: fmt(lack) })}</div>
+            <div className={s.warnText}>{t('camp.wallet.form.lacking', { amount: fmt(lack) })}</div>
           </div>
         )}
 
@@ -255,10 +258,9 @@ export function TopupForm({
           className={`ao-btn ${isAdd ? 'ao-btn--primary' : 'ao-btn--danger'}`}
           onClick={apply}
           disabled={disabled}
-          style={{ opacity: disabled ? 0.5 : 1, cursor: disabled ? 'not-allowed' : 'pointer' }}
         >
           <Rune kind={isAdd ? 'plus' : 'minus'} size={11} color="currentColor" />
-          <span style={{ marginLeft: 6 }}>{pending ? t('camp.wallet.form.submitting') : t('camp.wallet.form.submit')}</span>
+          <span className={s.submitLabel}>{pending ? t('camp.wallet.form.submitting') : t('camp.wallet.form.submit')}</span>
         </button>
       </div>
     </OrdoPanel>
@@ -269,7 +271,7 @@ export function TopupForm({
 function DeltaCell({ delta }: { delta: number }) {
   const pos = delta >= 0;
   return (
-    <span className="ao-num" style={{ display: 'inline-flex', alignItems: 'center', gap: 5, justifyContent: 'flex-end', color: pos ? POS : NEG_SOFT }}>
+    <span className={cn('ao-num', s.delta, pos ? s.deltaPos : s.deltaNeg)}>
       <Rune kind={pos ? 'arrow-up' : 'minus'} size={9} color={pos ? POS : NEG_SOFT} />
       {pos ? `+${fmt(delta)}` : `−${fmt(Math.abs(delta))}`}
     </span>
@@ -282,8 +284,8 @@ export function WalletJournal({ rows, footer }: { rows: WalletHistoryEntry[]; fo
     <OrdoPanel frame padding={0}>
       <PanelHeader title={t('camp.wallet.journal.title')} sub={t('camp.wallet.journal.sub')} glyph="book" />
       {rows.length === 0 ? (
-        <div style={{ padding: 20 }}>
-          <p className="ao-italic" style={{ color: 'var(--ink-faint)', fontSize: 13 }}>{t('camp.wallet.journal.empty')}</p>
+        <div className={s.formPad}>
+          <p className={cn('ao-italic', s.muted)}>{t('camp.wallet.journal.empty')}</p>
         </div>
       ) : (
         <>
@@ -292,8 +294,8 @@ export function WalletJournal({ rows, footer }: { rows: WalletHistoryEntry[]; fo
               <tr>
                 <th>{t('camp.wallet.journal.col.when')}</th>
                 <th>{t('camp.wallet.journal.col.currency')}</th>
-                <th style={{ textAlign: 'right' }}>{t('camp.wallet.journal.col.delta')}</th>
-                <th style={{ textAlign: 'right' }}>{t('camp.wallet.journal.col.balance')}</th>
+                <th className={s.right}>{t('camp.wallet.journal.col.delta')}</th>
+                <th className={s.right}>{t('camp.wallet.journal.col.balance')}</th>
                 <th>{t('camp.wallet.journal.col.reason')}</th>
                 <th>{t('camp.wallet.journal.col.by')}</th>
               </tr>
@@ -301,17 +303,17 @@ export function WalletJournal({ rows, footer }: { rows: WalletHistoryEntry[]; fo
             <tbody>
               {rows.map((row) => (
                 <tr key={row.id}>
-                  <td className="ao-italic" style={{ color: 'var(--ink-faint)', whiteSpace: 'nowrap' }}>{new Date(row.createdAt).toLocaleString()}</td>
-                  <td style={{ color: 'var(--ink-bright)' }}>{row.currencyName}</td>
-                  <td style={{ textAlign: 'right' }}><DeltaCell delta={row.delta} /></td>
-                  <td className="ao-num" style={{ textAlign: 'right', color: 'var(--ink-quiet)' }}>{fmt(row.balanceAfter)}</td>
-                  <td className="ao-italic" style={{ color: 'var(--ink-faint)' }}>{row.reason ?? '—'}</td>
-                  <td><span className="ao-codex" style={{ color: 'var(--ink-quiet)' }}>{row.performedBy}</span></td>
+                  <td className={cn('ao-italic', s.when)}>{new Date(row.createdAt).toLocaleString()}</td>
+                  <td className={s.curName}>{row.currencyName}</td>
+                  <td className={s.right}><DeltaCell delta={row.delta} /></td>
+                  <td className={cn('ao-num', s.balance)}>{fmt(row.balanceAfter)}</td>
+                  <td className={cn('ao-italic', s.reason)}>{row.reason ?? '—'}</td>
+                  <td><span className={cn('ao-codex', s.by)}>{row.performedBy}</span></td>
                 </tr>
               ))}
             </tbody>
           </table>
-          {footer && <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 16px', borderTop: '1px solid var(--rule)' }}>{footer}</div>}
+          {footer && <div className={s.journalFoot}>{footer}</div>}
         </>
       )}
     </OrdoPanel>
@@ -324,15 +326,15 @@ export function WalletSkeleton() {
   return (
     <OrdoPanel frame padding={0}>
       <PanelHeader title={t('camp.wallet.currencies')} glyph="coin" />
-      <div style={{ padding: '4px 0' }}>
+      <div className={s.skelList}>
         {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 13, padding: '13px 16px', borderBottom: '1px solid var(--hairline)' }}>
-            <span className="ao-ph" style={{ width: 30, height: 30, flexShrink: 0 }} />
-            <div style={{ flex: 1 }}>
-              <div className="ao-ph" style={{ width: `${42 + (i % 3) * 14}%`, height: 13, marginBottom: 7 }} />
-              <div className="ao-ph" style={{ width: '30%', height: 10 }} />
+          <div key={i} className={s.skelRow}>
+            <span className={cn('ao-ph', s.skelCoin)} />
+            <div className={s.skelInfo}>
+              <div className={cn('ao-ph', s.skelLine1)} style={{ width: `${42 + (i % 3) * 14}%` }} />
+              <div className={cn('ao-ph', s.skelLine2)} />
             </div>
-            <span className="ao-ph" style={{ width: 72, height: 22 }} />
+            <span className={cn('ao-ph', s.skelAmount)} />
           </div>
         ))}
       </div>
@@ -343,15 +345,15 @@ export function WalletSkeleton() {
 export function WalletErrorBanner({ onRetry }: { onRetry: () => void }) {
   const t = useT();
   return (
-    <OrdoPanel frame style={{ borderColor: 'rgba(179,70,26,0.5)' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '20px 22px', background: 'rgba(179,70,26,0.08)' }}>
+    <OrdoPanel frame className={s.errPanel}>
+      <div className={s.errBox}>
         <Sigil size={48} glyph="flame" color="var(--ember)" />
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div className="ao-overline" style={{ color: NEG_SOFT }}>{t('camp.wallet.errorOverline')}</div>
-          <div className="ao-h6" style={{ marginTop: 3, color: 'var(--ink-bright)' }}>{t('camp.wallet.loadError')}</div>
-          <div className="ao-italic" style={{ marginTop: 3, fontSize: 13, color: 'var(--ink-quiet)' }}>{t('camp.wallet.errorBody')}</div>
+        <div className={s.errInfo}>
+          <div className={cn('ao-overline', s.errOverline)}>{t('camp.wallet.errorOverline')}</div>
+          <div className={cn('ao-h6', s.errTitle)}>{t('camp.wallet.loadError')}</div>
+          <div className={cn('ao-italic', s.errBody)}>{t('camp.wallet.errorBody')}</div>
         </div>
-        <button onClick={onRetry} className="ao-btn ao-btn--danger" style={{ flexShrink: 0 }}>{t('common.retry')}</button>
+        <button onClick={onRetry} className={cn('ao-btn ao-btn--danger', s.errBtn)}>{t('common.retry')}</button>
       </div>
     </OrdoPanel>
   );
@@ -360,9 +362,9 @@ export function WalletErrorBanner({ onRetry }: { onRetry: () => void }) {
 export function WalletReadOnlyBanner() {
   const t = useT();
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '11px 16px', background: 'rgba(107,42,42,0.14)', border: '1px solid rgba(107,42,42,0.4)', borderLeft: '2px solid var(--burgundy, var(--ember))' }}>
+    <div className={s.roBanner}>
       <Rune kind="lock" size={14} color="#b06a6a" />
-      <div className="ao-italic" style={{ fontSize: 13, color: 'var(--ink)' }}>{t('camp.wallet.readonlyDead')}</div>
+      <div className={cn('ao-italic', s.roText)}>{t('camp.wallet.readonlyDead')}</div>
     </div>
   );
 }

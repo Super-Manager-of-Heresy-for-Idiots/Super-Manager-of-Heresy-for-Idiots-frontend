@@ -1,0 +1,20 @@
+.skel { padding: 24px; min-height: 200px; }
+.skelTitle { width: 40%; height: 22px; margin-bottom: 12px; }
+.skelLine { width: 60%; height: 14px; }
+
+.errorBox { text-align: center; padding: 48px 0; }
+.errorText { color: var(--ink-faint); margin-bottom: 16px; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+
+.header { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px; margin-bottom: 24px; }
+.overlineGold { color: var(--gold); }
+.title { margin-top: 4px; }
+.subtitle { color: var(--ink-quiet); font-size: 13px; margin-top: 4px; }
+
+.cardBody { padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+.cardClass { font-size: 12px; color: var(--ink-quiet); }
+.cardHp { font-size: 11px; color: var(--ink-faint); }
+.cardActions { display: flex; justify-content: space-between; gap: 8px; margin-top: 4px; }
+.openLabel { margin-left: 4px; }
+.trashIcon { color: var(--ember); }

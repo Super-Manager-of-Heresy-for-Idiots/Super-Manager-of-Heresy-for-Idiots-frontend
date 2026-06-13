@@ -3,7 +3,9 @@ import { Loader2 } from 'lucide-react';
 import { ModalScene, OrdoField, Rune } from '@/components/ordo';
 import { useRenameItem } from '@/hooks/useInventory';
 import { useT } from '@/i18n/I18nContext';
+import { cn } from '@/lib/utils';
 import type { ItemInstanceResponse } from '@/types';
+import s from './RenameStackModal.module.css';
 
 /* ── Props ─────────────────────────────────────────────────────── */
 
@@ -84,7 +86,7 @@ export function RenameStackModal({
   /* ── Footer ── */
 
   const footer = (
-    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+    <div className="ao-row ao-justify-end ao-gap-8">
       <button
         className="ao-btn ao-btn--ghost"
         onClick={() => handleOpenChange(false)}
@@ -117,27 +119,16 @@ export function RenameStackModal({
       rune="scroll"
       footer={footer}
     >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <div className={s.body}>
         {/* Mode selection */}
         <OrdoField label={t('cmp.rename.mode')}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <div className={s.modes}>
             {MODES.map((opt) => {
               const selected = renameEntireStack === opt.value;
               return (
                 <label
                   key={String(opt.value)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    gap: 10,
-                    padding: '10px 12px',
-                    cursor: 'pointer',
-                    background: selected
-                      ? 'rgba(255,255,255,0.04)'
-                      : 'transparent',
-                    border: `1px solid ${selected ? 'var(--gold)' : 'var(--rule)'}`,
-                    transition: 'all 0.12s',
-                  }}
+                  className={cn(s.opt, selected && s.selected)}
                 >
                   <input
                     type="radio"
@@ -145,33 +136,16 @@ export function RenameStackModal({
                     value={String(opt.value)}
                     checked={selected}
                     onChange={() => setRenameEntireStack(opt.value)}
-                    style={{
-                      marginTop: 2,
-                      accentColor: 'var(--gold)',
-                    }}
+                    className={s.radio}
                   />
-                  <div style={{ flex: 1 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <div className={s.optInfo}>
+                    <div className={s.optHead}>
                       <Rune kind={opt.glyph} size={10} color={selected ? 'var(--gold)' : 'var(--ink-quiet)'} />
-                      <span
-                        style={{
-                          fontSize: 13,
-                          color: selected ? 'var(--ink-bright)' : 'var(--ink)',
-                          fontWeight: selected ? 600 : 400,
-                        }}
-                      >
+                      <span className={cn(s.optLabel, selected && s.on)}>
                         {t(opt.labelKey)}
                       </span>
                     </div>
-                    <div
-                      className="ao-italic"
-                      style={{
-                        fontSize: 11,
-                        color: 'var(--ink-faint)',
-                        marginTop: 4,
-                        lineHeight: 1.4,
-                      }}
-                    >
+                    <div className={cn('ao-italic', s.optDesc)}>
                       {t(opt.descKey)}
                     </div>
                   </div>
@@ -193,34 +167,15 @@ export function RenameStackModal({
         </OrdoField>
 
         {/* Preview */}
-        <div
-          style={{
-            padding: '8px 12px',
-            background: 'var(--abyss)',
-            border: '1px solid var(--rule)',
-          }}
-        >
-          <span
-            className="ao-codex"
-            style={{ fontSize: 9, color: 'var(--ink-faint)' }}
-          >
+        <div className={s.preview}>
+          <span className={cn('ao-codex', s.previewLabel)}>
             {t('cmp.rename.preview')}
           </span>
-          <div
-            style={{
-              fontSize: 14,
-              color: 'var(--ink-bright)',
-              marginTop: 4,
-              fontFamily: 'var(--font-display)',
-            }}
-          >
+          <div className={s.previewName}>
             {newName.trim() || displayName}
           </div>
           {newName.trim() && (
-            <div
-              className="ao-italic"
-              style={{ fontSize: 11, color: 'var(--ink-faint)', marginTop: 2 }}
-            >
+            <div className={cn('ao-italic', s.previewOrig)}>
               {t('cmp.rename.originally', { name: item.templateName })}
             </div>
           )}

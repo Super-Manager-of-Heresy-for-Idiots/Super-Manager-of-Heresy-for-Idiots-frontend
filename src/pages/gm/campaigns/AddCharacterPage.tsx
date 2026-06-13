@@ -16,7 +16,9 @@ import {
 import { useCampaign } from '@/hooks/useCampaigns';
 import { useMyTemplates, useCloneTemplateToCampaign } from '@/hooks/useTemplates';
 import { useT } from '@/i18n/I18nContext';
+import { cn } from '@/lib/utils';
 import type { CharacterResponse } from '@/types';
+import s from './AddCharacterPage.module.css';
 
 type Mode = 'choice' | 'pick-template';
 
@@ -61,28 +63,28 @@ export default function AddCharacterPage() {
 
   return (
     <div>
-      <BackLink to={`/campaigns/${campaignId}`} label={t('camp.backToCampaign')} style={{ marginBottom: 12 }} />
+      <BackLink to={`/campaigns/${campaignId}`} label={t('camp.backToCampaign')} className={s.backLink} />
 
-      <div style={{ marginBottom: 24 }}>
-        <p className="ao-overline" style={{ color: 'var(--gold)' }}>{t('camp.add.overline')}</p>
-        <h3 className="ao-h3" style={{ marginTop: 4 }}>{t('camp.add.title')}</h3>
+      <div className={s.header}>
+        <p className={cn('ao-overline', s.overlineGold)}>{t('camp.add.overline')}</p>
+        <h3 className={cn('ao-h3', s.title)}>{t('camp.add.title')}</h3>
         {campaign && (
-          <p className="ao-italic" style={{ color: 'var(--ink-quiet)', fontSize: 13, marginTop: 4 }}>
+          <p className={cn('ao-italic', s.metaLine)}>
             {t('camp.add.campaign', { name: campaign.name })}
           </p>
         )}
       </div>
 
       {mode === 'choice' && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 14 }}>
+        <div className={s.choiceGrid}>
           <ChoiceCard
-            glyph={<Sparkles className="h-5 w-5" style={{ color: 'var(--gold)' }} />}
+            glyph={<Sparkles className={cn('h-5 w-5', s.iconGold)} />}
             title={t('camp.add.createNew.title')}
             body={t('camp.add.createNew.body')}
             onClick={() => navigate(`/campaigns/${campaignId}/characters/create`)}
           />
           <ChoiceCard
-            glyph={<BookOpen className="h-5 w-5" style={{ color: 'var(--arcane)' }} />}
+            glyph={<BookOpen className={cn('h-5 w-5', s.iconArcane)} />}
             title={t('camp.add.fromTemplate.title')}
             body={t('camp.add.fromTemplate.body')}
             onClick={() => setMode('pick-template')}
@@ -92,61 +94,50 @@ export default function AddCharacterPage() {
 
       {mode === 'pick-template' && (
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+          <div className={s.pickHeader}>
             <div>
-              <p className="ao-overline" style={{ color: 'var(--gold)' }}>{t('camp.add.vault')}</p>
+              <p className={cn('ao-overline', s.overlineGold)}>{t('camp.add.vault')}</p>
               <h4 className="ao-h4">{t('camp.add.chooseTemplate')}</h4>
             </div>
             <button className="ao-btn ao-btn--ghost" onClick={() => setMode('choice')}>{t('camp.add.backToChoice')}</button>
           </div>
 
-          <label
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 10,
-              padding: '10px 14px',
-              marginBottom: 14,
-              border: '1px solid var(--hairline)',
-              background: 'var(--panel)',
-              cursor: 'pointer',
-            }}
-          >
+          <label className={s.moveLabel}>
             <input
               type="checkbox"
               checked={moveOriginal}
               onChange={(e) => setMoveOriginal(e.target.checked)}
             />
-            <span style={{ flex: 1 }}>
-              <span style={{ color: 'var(--ink-bright)', fontSize: 13 }}>
+            <span className={s.moveMain}>
+              <span className={s.moveTitle}>
                 {t('camp.add.moveOriginal')}
               </span>
-              <span className="ao-italic" style={{ display: 'block', fontSize: 11, color: 'var(--ink-quiet)' }}>
+              <span className={cn('ao-italic', s.moveHint)}>
                 {t('camp.add.moveOriginal.hint')}
               </span>
             </span>
           </label>
 
           {tplLoading ? (
-            <div className="ao-panel ao-frame ao-breathe" style={{ padding: 24, minHeight: 160 }}>
+            <div className={cn('ao-panel ao-frame ao-breathe', s.skelPanel)}>
               <span className="ao-frame-c" />
-              <div className="ao-ph" style={{ width: '40%', height: 20, marginBottom: 12 }} />
-              <div className="ao-ph" style={{ width: '60%', height: 14 }} />
+              <div className={cn('ao-ph', s.phTitle)} />
+              <div className={cn('ao-ph', s.phSub)} />
             </div>
           ) : availableTemplates.length === 0 ? (
             <OrdoPanel frame padding={0}>
               <PanelHeader title={t('camp.add.noTemplates.title')} glyph="scroll" />
-              <div style={{ padding: 18, display: 'flex', flexDirection: 'column', gap: 12 }}>
-                <p className="ao-italic" style={{ color: 'var(--ink-faint)' }}>
+              <div className={s.emptyBody}>
+                <p className={cn('ao-italic', s.emptyText)}>
                   {t('camp.add.noTemplates.body')}
                 </p>
                 <button className="ao-btn ao-btn--primary" onClick={() => navigate('/characters/templates/new')}>
-                  <Plus className="h-3 w-3" /> <span style={{ marginLeft: 6 }}>{t('camp.add.createTemplate')}</span>
+                  <Plus className="h-3 w-3" /> <span className={s.ml6}>{t('camp.add.createTemplate')}</span>
                 </button>
               </div>
             </OrdoPanel>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 12 }}>
+            <div className={s.templateGrid}>
               {availableTemplates.map((tpl) => (
                 <TemplateChooserCard
                   key={tpl.id}
@@ -196,26 +187,12 @@ function ChoiceCard({
   onClick: () => void;
 }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      style={{
-        textAlign: 'left',
-        padding: 20,
-        border: '1px solid var(--hairline)',
-        background: 'var(--panel)',
-        cursor: 'pointer',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 10,
-        minHeight: 160,
-      }}
-    >
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+    <button type="button" onClick={onClick} className={s.choiceCard}>
+      <div className={s.choiceCardHead}>
         {glyph}
-        <span className="ao-h5" style={{ fontSize: 15 }}>{title}</span>
+        <span className={cn('ao-h5', s.choiceCardTitle)}>{title}</span>
       </div>
-      <p className="ao-italic" style={{ color: 'var(--ink-quiet)', fontSize: 13, margin: 0 }}>
+      <p className={cn('ao-italic', s.choiceCardBody)}>
         {body}
       </p>
     </button>
@@ -236,9 +213,9 @@ function TemplateChooserCard({
   return (
     <OrdoPanel frame padding={0}>
       <PanelHeader title={character.name} glyph="helm" tone="gold" sub={`${classLabel} · ${character.race?.name ?? '—'}`} />
-      <div style={{ padding: 14, display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <div className={s.tplBody}>
         <Bar value={character.currentHp ?? 0} max={Math.max(1, character.maxHp ?? 0)} tone="ember" height={5} />
-        <div className="ao-codex" style={{ fontSize: 11, color: 'var(--ink-faint)' }}>
+        <div className={cn('ao-codex', s.tplMeta)}>
           HP {character.currentHp ?? 0}/{character.maxHp ?? 0} · XP {character.experience.toLocaleString()}
         </div>
         <button className="ao-btn ao-btn--primary ao-btn--sm" onClick={onPick}>

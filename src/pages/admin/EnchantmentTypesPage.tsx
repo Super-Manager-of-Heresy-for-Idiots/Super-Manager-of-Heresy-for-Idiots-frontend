@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import type { CSSProperties } from 'react';
 import { Loader2 } from 'lucide-react';
 import { Rune, OrdoPanel, OrdoField, OrdoChip } from '@/components/ordo';
 import {
@@ -35,6 +36,8 @@ import {
 } from '@/hooks/useAdmin';
 import type { EnchantmentTypeResponse, CreateEnchantmentTypeRequest, DamageType } from '@/types';
 import { useT } from '@/i18n/I18nContext';
+import { cn } from '@/lib/utils';
+import s from './EnchantmentTypesPage.module.css';
 
 /* ------------------------------------------------------------------ */
 /*  Constants                                                          */
@@ -84,26 +87,13 @@ function DamageBadge({
   if (!dice && !bonus && !type) return null;
   const c = damageColor(type);
   return (
-    <span
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: 7,
-        padding: '4px 10px',
-        background: 'rgba(0,0,0,0.5)',
-        border: `1px solid ${c}66`,
-        fontFamily: 'var(--font-mono)',
-        fontSize: 11,
-        color: c,
-        boxShadow: glow ? `0 0 10px ${c}44` : 'none',
-      }}
-    >
+    <span className={cn(s.damageBadge, glow && s.glow)} style={{ '--c': c } as CSSProperties}>
       <Rune kind="diamond-fill" size={7} color={c} />
-      <span style={{ color: 'var(--ink-bright)' }}>
+      <span className={s.damageValue}>
         {dice}{bonus ? `+${bonus}` : ''}
       </span>
       {type && (
-        <span style={{ letterSpacing: '0.12em' }}>{type}</span>
+        <span className={s.damageType}>{type}</span>
       )}
     </span>
   );
@@ -117,34 +107,17 @@ function LinkedEffectBadge({
   const t = useT();
   if (!link) {
     return (
-      <span className="ao-codex" style={{ color: 'var(--ink-faint)' }}>
+      <span className={cn('ao-codex', s.noLink)}>
         {t('adm.ench.noLinkedEffect')}
       </span>
     );
   }
   const c = link.isBuff ? '#7a9866' : '#c0584a';
   return (
-    <span
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: 6,
-        color: 'var(--ink-quiet)',
-        fontSize: 12,
-      }}
-    >
+    <span className={s.linkWrap}>
       <Rune kind="arrow-r" size={11} color="var(--bronze)" />
-      <span style={{ color: 'var(--ink)' }}>{link.name}</span>
-      <span
-        style={{
-          padding: '1px 6px',
-          border: `1px solid ${c}66`,
-          color: c,
-          fontFamily: 'var(--font-mono)',
-          fontSize: 9,
-          letterSpacing: '0.1em',
-        }}
-      >
+      <span className={s.linkName}>{link.name}</span>
+      <span className={s.linkTag} style={{ '--c': c } as CSSProperties}>
         {link.isBuff ? t('adm.ench.buff') : t('adm.ench.debuff')}
       </span>
     </span>
@@ -225,27 +198,20 @@ export default function EnchantmentTypesPage() {
   /* ---- Header (shared across loading / error / ready) ---- */
 
   const header = (
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'flex-end',
-        justifyContent: 'space-between',
-        marginBottom: 18,
-      }}
-    >
+    <div className={s.header}>
       <div>
         <div className="ao-overline">{t('adm.ench.overline')}</div>
-        <h3 className="ao-h3" style={{ marginTop: 4 }}>{t('adm.ench.title')}</h3>
-        <p className="ao-italic" style={{ color: 'var(--ink-quiet)', fontSize: 13, marginTop: 4 }}>
+        <h3 className={cn('ao-h3', s.titleH3)}>{t('adm.ench.title')}</h3>
+        <p className={cn('ao-italic', s.subtitle)}>
           {t('adm.ench.subtitle')}
         </p>
       </div>
-      <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+      <div className={s.headerActions}>
         <button className="ao-btn ao-btn--primary" onClick={handleAdd}>
           <Rune kind="plus" size={11} /> {t('adm.ench.inscribeNew')}
         </button>
         <OrdoChip tone="ember" glyph="lock">{t('adm.shared.inquisitorPrivileges')}</OrdoChip>
-      </div>nr
+      </div>
     </div>
   );
 
@@ -255,17 +221,16 @@ export default function EnchantmentTypesPage() {
     return (
       <div>
         {header}
-        <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+        <div className={cn('ao-rgrid', s.grid)}>
           {Array.from({ length: 6 }).map((_, i) => (
             <div
               key={i}
-              className="ao-panel ao-frame ao-breathe"
-              style={{ padding: 24, minHeight: 160 }}
+              className={cn('ao-panel ao-frame ao-breathe', s.skelCard)}
             >
               <span className="ao-frame-c" />
-              <div className="ao-ph" style={{ width: '40%', height: 12, marginBottom: 10 }} />
-              <div className="ao-ph" style={{ width: '70%', height: 18, marginBottom: 8 }} />
-              <div className="ao-ph" style={{ width: '50%', height: 14 }} />
+              <div className={cn('ao-ph', s.phW40H12)} />
+              <div className={cn('ao-ph', s.phW70H18)} />
+              <div className={cn('ao-ph', s.phW50H14)} />
             </div>
           ))}
         </div>
@@ -279,8 +244,8 @@ export default function EnchantmentTypesPage() {
     return (
       <div>
         {header}
-        <div style={{ textAlign: 'center', padding: '48px 0' }}>
-          <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginBottom: 16 }}>
+        <div className={s.errorBox}>
+          <p className={cn('ao-italic', s.errorText)}>
             {t('adm.ench.errorBody')}
           </p>
           <button className="ao-btn" onClick={() => refetch()}>{t('common.retry')}</button>
@@ -297,13 +262,13 @@ export default function EnchantmentTypesPage() {
 
       {/* Card Grid */}
       {!data || data.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '48px 0' }}>
-          <p className="ao-italic" style={{ color: 'var(--ink-faint)' }}>
+        <div className={s.emptyBox}>
+          <p className={cn('ao-italic', s.emptyText)}>
             {t('adm.ench.emptyBody')}
           </p>
         </div>
       ) : (
-        <div className="ao-rgrid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+        <div className={cn('ao-rgrid', s.grid)}>
           {data.map((item) => {
             const c = damageColor(item.damageType);
 
@@ -312,76 +277,38 @@ export default function EnchantmentTypesPage() {
                 key={item.id}
                 frame
                 padding={0}
-                style={{
-                  position: 'relative',
-                  borderColor: `${c}55`,
-                  boxShadow: `var(--shadow-inset), var(--shadow-low), 0 0 18px ${c}14`,
-                }}
+                className={s.card}
+                style={{ '--c': c } as CSSProperties}
               >
                 {/* Card body */}
-                <div style={{ padding: 18 }}>
+                <div className={s.cardBody}>
                   {/* Top row: codex-id + name | icon box */}
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'flex-start',
-                    }}
-                  >
+                  <div className={s.cardTop}>
                     <div>
-                      <span
-                        className="ao-codex"
-                        style={{
-                          color: 'var(--ink-ghost)',
-                          fontSize: 10,
-                          fontFamily: 'var(--font-mono)',
-                          letterSpacing: '0.08em',
-                        }}
-                      >
+                      <span className={cn('ao-codex', s.codexId)}>
                         {item.id.slice(0, 8).toUpperCase()}
                       </span>
-                      <div
-                        className="ao-h5"
-                        style={{
-                          marginTop: 4,
-                          color: 'var(--ink-bright)',
-                          textShadow: `0 0 16px ${c}66`,
-                        }}
-                      >
+                      <div className={cn('ao-h5', s.cardName)}>
                         {item.name}
                       </div>
                     </div>
 
                     {/* Flame rune icon box */}
-                    <div
-                      style={{
-                        width: 40,
-                        height: 40,
-                        border: `1px solid ${c}`,
-                        background: 'var(--abyss)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        boxShadow: `inset 0 0 12px ${c}33`,
-                      }}
-                    >
+                    <div className={s.iconBox}>
                       <Rune kind="flame" size={18} color={c} />
                     </div>
                   </div>
 
                   {/* Description */}
                   {item.description && (
-                    <p
-                      className="ao-italic"
-                      style={{ color: 'var(--ink-quiet)', fontSize: 13, marginTop: 10 }}
-                    >
+                    <p className={cn('ao-italic', s.cardDesc)}>
                       {item.description}
                     </p>
                   )}
 
                   {/* Damage Badge */}
                   {(item.damageDice || item.damageBonus || item.damageType) && (
-                    <div style={{ marginTop: 12 }}>
+                    <div className={s.section}>
                       <DamageBadge
                         dice={item.damageDice}
                         bonus={item.damageBonus}
@@ -392,11 +319,8 @@ export default function EnchantmentTypesPage() {
                   )}
 
                   {/* Linked Effect */}
-                  <div style={{ marginTop: 12 }}>
-                    <span
-                      className="ao-overline"
-                      style={{ fontSize: 9, color: 'var(--brass)', display: 'block', marginBottom: 4 }}
-                    >
+                  <div className={s.section}>
+                    <span className={cn('ao-overline', s.linkedLabel)}>
                       {t('adm.ench.linkedEffect')}
                     </span>
                     <LinkedEffectBadge
@@ -410,18 +334,9 @@ export default function EnchantmentTypesPage() {
                 </div>
 
                 {/* Card footer */}
-                <div
-                  style={{
-                    display: 'flex',
-                    gap: 6,
-                    padding: '12px 18px',
-                    borderTop: '1px solid var(--hairline)',
-                    background: 'var(--abyss)',
-                  }}
-                >
+                <div className={s.cardFooter}>
                   <button
-                    className="ao-btn ao-btn--sm"
-                    style={{ flex: 1 }}
+                    className={cn('ao-btn ao-btn--sm', s.footerEdit)}
                     onClick={() => handleEdit(item)}
                   >
                     <Rune kind="scroll" size={10} /> {t('adm.shared.edit')}
@@ -467,7 +382,7 @@ export default function EnchantmentTypesPage() {
           <DialogHeader>
             <DialogTitle>{editing ? t('adm.ench.dialogEdit') : t('adm.ench.dialogCreate')}</DialogTitle>
           </DialogHeader>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div className={s.dialogCol}>
             <OrdoField label={t('adm.shared.fieldName')} required>
               <input
                 className="ao-input"
@@ -479,12 +394,11 @@ export default function EnchantmentTypesPage() {
 
             <OrdoField label={t('adm.shared.fieldDescription')}>
               <textarea
-                className="ao-input"
+                className={cn('ao-input', s.descArea)}
                 value={formDescription}
                 onChange={(e) => setFormDescription(e.target.value)}
                 placeholder={t('adm.ench.descriptionPlaceholder')}
                 rows={3}
-                style={{ resize: 'vertical' }}
               />
             </OrdoField>
 

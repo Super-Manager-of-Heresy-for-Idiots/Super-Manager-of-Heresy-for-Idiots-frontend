@@ -1,0 +1,14 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 9px 4px 6px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--rule-strong);
+  border-left: 2px solid var(--stripe);
+  font-family: var(--font-display);
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  color: var(--text-clr);
+  text-transform: uppercase;
+}

@@ -1,0 +1,5 @@
+.loader {
+  min-height: 100vh; background: var(--stone);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-serif); font-style: italic; color: var(--ink-quiet);
+}

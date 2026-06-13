@@ -17,9 +17,10 @@ import {
   useUpdateHomebrewMonster,
 } from '@/hooks/useBestiary';
 import type { MonsterRequest, MonsterScope } from '@/types';
+import s from './MonsterFormPage.module.css';
 
 const Loader = ({ label }: { label: string }) => (
-  <div style={{ minHeight: '100vh', background: 'var(--stone)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-serif)', fontStyle: 'italic', color: 'var(--ink-quiet)' }}>{label}</div>
+  <div className={s.loader}>{label}</div>
 );
 
 export default function MonsterFormPage() {

@@ -1,0 +1,9 @@
+.sigil { display: inline-flex; align-items: center; gap: 6px; }
+.iconbox {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.label { color: var(--tone); font-size: 10px; }

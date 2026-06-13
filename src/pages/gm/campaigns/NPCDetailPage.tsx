@@ -6,6 +6,7 @@ import { CodexID } from '@/components/homebrew/CodexID';
 import { VisibilityToggle, QuestStatusBadge } from '@/components/narrative';
 import { BackLink } from '@/components/campaigns';
 import { useT } from '@/i18n/I18nContext';
+import { cn } from '@/lib/utils';
 import {
   useNpc,
   useNpcNotes,
@@ -13,6 +14,7 @@ import {
   useSetNpcVisibility,
 } from '@/hooks/useNpcs';
 import type { NpcNoteResponse, QuestStatus } from '@/types';
+import s from './NPCDetailPage.module.css';
 
 /* ── page ────────────────────────────────────────────────────── */
 
@@ -52,22 +54,22 @@ export default function NPCDetailPage() {
   if (isLoading) {
     return (
       <div>
-        <BackLink to={backTo} label={t('camp2.back.npcs')} style={{ marginBottom: 12 }} />
-        <div style={{ display: 'flex', gap: 24 }}>
-          <div style={{ flex: '1.5 1 0' }}>
-            <div className="ao-panel ao-frame ao-breathe" style={{ padding: 24, minHeight: 300 }}>
+        <BackLink to={backTo} label={t('camp2.back.npcs')} className={s.backLink} />
+        <div className={s.skelRow}>
+          <div className={s.skelLeft}>
+            <div className={cn('ao-panel ao-frame ao-breathe', s.skelPanelLg)}>
               <span className="ao-frame-c" />
-              <div className="ao-ph" style={{ width: '30%', height: 14, marginBottom: 12 }} />
-              <div className="ao-ph" style={{ width: '50%', height: 24, marginBottom: 16 }} />
-              <div className="ao-ph" style={{ width: '80%', height: 14, marginBottom: 8 }} />
-              <div className="ao-ph" style={{ width: '60%', height: 14 }} />
+              <div className={cn('ao-ph', s.phW30H14)} />
+              <div className={cn('ao-ph', s.phW50H24)} />
+              <div className={cn('ao-ph', s.phW80H14)} />
+              <div className={cn('ao-ph', s.phW60H14)} />
             </div>
           </div>
-          <div style={{ flex: '1 1 0' }}>
-            <div className="ao-panel ao-frame ao-breathe" style={{ padding: 24, minHeight: 200 }}>
+          <div className={s.skelRight}>
+            <div className={cn('ao-panel ao-frame ao-breathe', s.skelPanelSm)}>
               <span className="ao-frame-c" />
-              <div className="ao-ph" style={{ width: '60%', height: 14, marginBottom: 12 }} />
-              <div className="ao-ph" style={{ width: '40%', height: 14 }} />
+              <div className={cn('ao-ph', s.phW60H14mb)} />
+              <div className={cn('ao-ph', s.phW40H14)} />
             </div>
           </div>
         </div>
@@ -80,9 +82,9 @@ export default function NPCDetailPage() {
   if (error || !npc) {
     return (
       <div>
-        <BackLink to={backTo} label={t('camp2.back.npcs')} style={{ marginBottom: 12 }} />
-        <div style={{ textAlign: 'center', padding: '48px 0' }}>
-          <p className="ao-italic" style={{ color: 'var(--ink-faint)', marginBottom: 16 }}>
+        <BackLink to={backTo} label={t('camp2.back.npcs')} className={s.backLink} />
+        <div className={s.errorBox}>
+          <p className={cn('ao-italic', s.errorText)}>
             {t('camp2.npcDetail.notFound')}
           </p>
           <button className="ao-btn" onClick={() => refetch()}>{t('common.retry')}</button>
@@ -101,31 +103,31 @@ export default function NPCDetailPage() {
 
   return (
     <div>
-      <BackLink to={backTo} label={t('camp2.back.npcs')} style={{ marginBottom: 12 }} />
-      <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start' }}>
+      <BackLink to={backTo} label={t('camp2.back.npcs')} className={s.backLink} />
+      <div className={s.cols}>
       {/* ═══ Left column ═══ */}
-      <div style={{ flex: '1.5 1 0', display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <div className={s.colLeft}>
         {/* Identity block */}
         <OrdoPanel frame padding={20}>
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
+          <div className={s.identityRow}>
             {/* Portrait placeholder */}
-            <Placeholder style={{ width: 80, height: 80, flexShrink: 0 }}>
+            <Placeholder className={s.portrait}>
               {t('camp2.npcDetail.portrait')}
             </Placeholder>
 
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+            <div className={s.identityMain}>
+              <div className={s.idRow}>
                 <CodexID>{npc.id.slice(0, 8).toUpperCase()}</CodexID>
                 <VisibilityToggle visible={npc.isVisibleToPlayers} onToggle={toggleVisibility} />
               </div>
-              <h3 className="ao-h3" style={{ marginTop: 6, color: 'var(--ink-bright)' }}>
+              <h3 className={cn('ao-h3', s.npcName)}>
                 {npc.name}
               </h3>
             </div>
           </div>
 
           {/* Reveal button */}
-          <div style={{ marginTop: 16 }}>
+          <div className={s.revealWrap}>
             <button
               className={`ao-btn ${npc.isVisibleToPlayers ? 'ao-btn--ghost' : 'ao-btn--primary'}`}
               onClick={toggleVisibility}
@@ -133,7 +135,7 @@ export default function NPCDetailPage() {
             >
               {visibilityMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               <Rune kind={npc.isVisibleToPlayers ? 'lock' : 'eye'} size={14} color="currentColor" />
-              <span style={{ marginLeft: 6 }}>{npc.isVisibleToPlayers ? t('camp2.npcDetail.hideFromPlayers') : t('camp2.npcDetail.revealToPlayers')}</span>
+              <span className={s.ml6}>{npc.isVisibleToPlayers ? t('camp2.npcDetail.hideFromPlayers') : t('camp2.npcDetail.revealToPlayers')}</span>
             </button>
           </div>
         </OrdoPanel>
@@ -141,10 +143,10 @@ export default function NPCDetailPage() {
         {/* Public account box */}
         <OrdoPanel frame padding={0}>
           <PanelHeader title={t('camp2.npcDetail.publicAccount')} glyph="eye" tone="gold" sub={t('camp2.npcDetail.publicSub')} />
-          <div style={{ padding: 16 }}>
-            <p style={{ fontSize: 14, color: 'var(--ink)', lineHeight: 1.6, margin: 0 }}>
+          <div className={s.boxPad}>
+            <p className={s.accountText}>
               {npc.publicDescription || (
-                <span className="ao-italic" style={{ color: 'var(--ink-ghost)' }}>
+                <span className={cn('ao-italic', s.ghost)}>
                   {t('camp2.npcDetail.noPublicAccount')}
                 </span>
               )}
@@ -153,19 +155,12 @@ export default function NPCDetailPage() {
         </OrdoPanel>
 
         {/* Private account box */}
-        <OrdoPanel
-          frame
-          padding={0}
-          style={{
-            borderColor: 'rgba(140,40,50,0.3)',
-            background: 'rgba(100,20,30,0.06)',
-          }}
-        >
+        <OrdoPanel frame padding={0} className={s.privatePanel}>
           <PanelHeader title={t('camp2.npcDetail.privateAccount')} glyph="lock" tone="ember" sub={t('camp2.npcDetail.privateSub')} />
-          <div style={{ padding: 16 }}>
-            <p style={{ fontSize: 14, color: 'var(--ink)', lineHeight: 1.6, margin: 0 }}>
+          <div className={s.boxPad}>
+            <p className={s.accountText}>
               {npc.privateDescription || (
-                <span className="ao-italic" style={{ color: 'var(--ink-ghost)' }}>
+                <span className={cn('ao-italic', s.ghost)}>
                   {t('camp2.npcDetail.noPrivateNotes')}
                 </span>
               )}
@@ -176,38 +171,30 @@ export default function NPCDetailPage() {
         {/* Notes feed */}
         <OrdoPanel frame padding={0}>
           <PanelHeader title={t('camp2.npcDetail.chronicleNotes')} glyph="scroll" tone="gold" />
-          <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div className={s.notesBody}>
             {notesLoading ? (
               <div className="ao-breathe">
-                <div className="ao-ph" style={{ width: '70%', height: 14, marginBottom: 8 }} />
-                <div className="ao-ph" style={{ width: '50%', height: 14 }} />
+                <div className={cn('ao-ph', s.phW70H14)} />
+                <div className={cn('ao-ph', s.phW50H14)} />
               </div>
             ) : !notes || notes.length === 0 ? (
-              <p className="ao-italic" style={{ color: 'var(--ink-ghost)', fontSize: 13 }}>
+              <p className={cn('ao-italic', s.notesEmpty)}>
                 {t('camp2.npcDetail.noNotes')}
               </p>
             ) : (
               notes.map((note: NpcNoteResponse) => (
-                <div
-                  key={note.id}
-                  style={{
-                    padding: 12,
-                    background: 'transparent',
-                    border: '1px solid rgba(180,140,80,0.25)',
-                    borderLeft: '3px solid rgba(180,140,80,0.4)',
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                <div key={note.id} className={s.note}>
+                  <div className={s.noteHead}>
                     <Rune
                       kind="scroll"
                       size={10}
                       color="var(--brass)"
                     />
-                    <span className="ao-overline" style={{ fontSize: 8 }}>
+                    <span className={cn('ao-overline', s.noteMeta)}>
                     {note.authorUsername} - {new Date(note.createdAt).toLocaleDateString()}
                     </span>
                   </div>
-                  <p style={{ fontSize: 13, color: 'var(--ink)', lineHeight: 1.5, margin: 0 }}>
+                  <p className={s.noteText}>
                     {note.content}
                   </p>
                 </div>
@@ -217,13 +204,12 @@ export default function NPCDetailPage() {
             <OrdoDivider glyph="diamond" />
 
             {/* Inline add-note */}
-            <div style={{ display: 'flex', gap: 8 }}>
+            <div className={s.addNoteRow}>
               <input
-                className="ao-input"
                 value={noteText}
                 onChange={(e) => setNoteText(e.target.value)}
                 placeholder={t('camp2.npcDetail.addNotePlaceholder')}
-                style={{ flex: 1 }}
+                className={cn('ao-input', s.grow)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') handleAddNote();
                 }}
@@ -245,31 +231,21 @@ export default function NPCDetailPage() {
       </div>
 
       {/* ═══ Right column ═══ */}
-      <div style={{ flex: '1 1 0', display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <div className={s.colRight}>
         {/* Linked Quests */}
         <OrdoPanel frame padding={0}>
           <PanelHeader title={t('camp2.npcDetail.linkedQuests')} glyph="scroll" tone="gold" />
-          <div style={{ padding: 16 }}>
+          <div className={s.boxPad}>
             {linkedQuests.length === 0 ? (
-              <p className="ao-italic" style={{ color: 'var(--ink-ghost)', fontSize: 13 }}>
+              <p className={cn('ao-italic', s.linkEmpty)}>
                 {t('camp2.npcDetail.noLinkedQuests')}
               </p>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div className={s.linkList}>
                 {linkedQuests.map((q) => (
-                  <div
-                    key={q.id}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 8,
-                      padding: '8px 10px',
-                      background: 'rgba(0,0,0,0.2)',
-                      border: '1px solid var(--rule)',
-                    }}
-                  >
+                  <div key={q.id} className={s.linkRow}>
                     <Rune kind="scroll" size={12} color="var(--brass)" />
-                    <span style={{ flex: 1, fontSize: 13, color: 'var(--ink-bright)' }}>
+                    <span className={s.linkNameGrow}>
                       {q.name}
                     </span>
                     {q.status && <QuestStatusBadge status={q.status} />}
@@ -283,27 +259,17 @@ export default function NPCDetailPage() {
         {/* Linked Locations */}
         <OrdoPanel frame padding={0}>
           <PanelHeader title={t('camp2.npcDetail.linkedLocations')} glyph="sigil-3" tone="arcane" />
-          <div style={{ padding: 16 }}>
+          <div className={s.boxPad}>
             {linkedLocations.length === 0 ? (
-              <p className="ao-italic" style={{ color: 'var(--ink-ghost)', fontSize: 13 }}>
+              <p className={cn('ao-italic', s.linkEmpty)}>
                 {t('camp2.npcDetail.noLinkedLocations')}
               </p>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div className={s.linkList}>
                 {linkedLocations.map((loc) => (
-                  <div
-                    key={loc.id}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 8,
-                      padding: '8px 10px',
-                      background: 'rgba(0,0,0,0.2)',
-                      border: '1px solid var(--rule)',
-                    }}
-                  >
+                  <div key={loc.id} className={s.linkRow}>
                     <Rune kind="sigil-3" size={12} color="var(--arcane)" />
-                    <span style={{ fontSize: 13, color: 'var(--ink-bright)' }}>
+                    <span className={s.linkName}>
                       {loc.name}
                     </span>
                   </div>

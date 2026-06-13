@@ -1,0 +1,65 @@
+.backLink { margin-bottom: 12px; }
+.overlineGold { color: var(--gold); }
+.title { margin-top: 4px; }
+.subtitle { color: var(--ink-quiet); font-size: 13px; margin-top: 4px; }
+
+.headerBlock { margin-bottom: 32px; }
+.header {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  flex-wrap: wrap; gap: 16px; margin-bottom: 28px;
+}
+
+.skelGrid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 20px; }
+.skelPanel { padding: 24px; min-height: 320px; }
+.phW50H16 { width: 50%; height: 16px; margin-bottom: 16px; }
+.phW80H14 { width: 80%; height: 14px; margin-bottom: 8px; }
+.phW60H14 { width: 60%; height: 14px; }
+
+.errorBlock { text-align: center; padding: 48px 0; }
+.errorText { color: var(--ink-faint); margin-bottom: 16px; }
+
+.mainGrid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 20px; align-items: start; }
+.mainGrid.single { grid-template-columns: 1fr; }
+.hidden { display: none; }
+
+.searchWrap { padding: 12px 16px; border-bottom: 1px solid var(--rule); }
+.searchBox {
+  display: flex; align-items: center; gap: 8px; padding: 6px 10px;
+  border: 1px solid var(--rule); background: var(--abyss);
+}
+.searchInput {
+  flex: 1; background: transparent; border: none; outline: none;
+  color: var(--ink); font-family: var(--font-body); font-size: 13px;
+}
+
+.list { max-height: 340px; overflow-y: auto; }
+.loadingBox { padding: 24px; text-align: center; }
+.spinnerInk { color: var(--ink-faint); margin: 0 auto; }
+.emptyBox { padding: 24px 16px; text-align: center; }
+.emptyText { color: var(--ink-faint); font-size: 13px; }
+
+.bdRow {
+  display: flex; align-items: center; gap: 10px; padding: 10px 16px;
+  border-bottom: 1px solid var(--hairline); background: transparent; cursor: pointer;
+}
+.bdRow.active { background: color-mix(in srgb, var(--gold) 8%, transparent); }
+.bdMain { flex: 1; min-width: 0; }
+.bdNameRow { display: flex; align-items: center; gap: 6px; }
+.bdName { font-size: 12px; }
+.bdTag { font-size: 8px; }
+.tagBuff { color: #7a9866; }
+.tagDebuff { color: #c9803a; }
+.modTagWrap { margin-top: 3px; }
+
+.applyBar { padding: 14px 16px; border-top: 1px solid var(--rule); background: var(--abyss); }
+.durationRow { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.durationLabel { margin-bottom: 0; font-size: 11px; }
+.durationInput { width: 100px; font-family: var(--font-mono); font-size: 13px; text-align: center; }
+.applyBtn { width: 100%; }
+.ml6 { margin-left: 6px; }
+
+.ledgerEmpty { padding: 36px 20px; text-align: center; }
+.sectionHead { padding: 6px 16px; border-bottom: 1px solid var(--hairline); }
+.sectionHeadBuff { background: rgba(122, 152, 102, 0.04); }
+.sectionHeadDebuff { background: rgba(201, 128, 58, 0.04); }
+.sectionLabel { font-size: 9px; }

@@ -1,5 +1,7 @@
+import type { CSSProperties } from 'react';
 import { Rune } from '@/components/ordo';
 import { useT } from '@/i18n/I18nContext';
+import s from './CampaignStatusPill.module.css';
 
 interface CampaignStatusPillProps {
   status: 'ACTIVE' | 'PAUSED' | 'COMPLETED';
@@ -15,13 +17,7 @@ export function CampaignStatusPill({ status }: CampaignStatusPillProps) {
   const t = useT();
   const m = STATUS_MAP[status] || STATUS_MAP.ACTIVE;
   return (
-    <span style={{
-      display: 'inline-flex', alignItems: 'center', gap: 6,
-      padding: '3px 9px 3px 7px', background: 'rgba(0,0,0,0.45)',
-      border: `1px solid ${m.color}55`, borderLeft: `2px solid ${m.color}`,
-      fontFamily: 'var(--font-display)', fontSize: 10, letterSpacing: '0.16em',
-      color: m.color, textTransform: 'uppercase',
-    }}>
+    <span className={s.pill} style={{ '--tone': m.color } as CSSProperties}>
       <Rune kind={m.glyph} size={9} color={m.color} />{t(m.labelKey)}
     </span>
   );

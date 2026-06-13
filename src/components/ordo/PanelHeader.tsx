@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import { Rune } from './Rune';
 
 interface PanelHeaderProps {
@@ -25,32 +25,11 @@ export function PanelHeader({
   const accentColor = toneColors[tone];
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 12,
-        padding: '12px 16px',
-        borderBottom: '1px solid var(--rule)',
-        background: 'var(--abyss)',
-      }}
-    >
+    <div className="ao-phead" style={{ '--accent': accentColor } as CSSProperties}>
       {glyph && <Rune kind={glyph} size={18} color={accentColor} />}
-      <div style={{ flex: 1 }}>
-        <div
-          className="ao-engraved"
-          style={{ fontSize: 'var(--t-micro)', color: accentColor }}
-        >
-          {title}
-        </div>
-        {sub && (
-          <div
-            className="ao-italic"
-            style={{ fontSize: 'var(--t-micro)', marginTop: 2 }}
-          >
-            {sub}
-          </div>
-        )}
+      <div className="ao-phead-body">
+        <div className="ao-engraved ao-phead-title">{title}</div>
+        {sub && <div className="ao-italic ao-phead-sub">{sub}</div>}
       </div>
       {right && <div>{right}</div>}
     </div>

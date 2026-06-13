@@ -3,6 +3,8 @@ import { OrdoPanel, PanelHeader, Rune } from '@/components/ordo';
 import { BackLink } from '@/components/campaigns';
 import { useCharacter } from '@/hooks/useCharacter';
 import { useT } from '@/i18n/I18nContext';
+import { cn } from '@/lib/utils';
+import s from './CharacterPlaceholderPages.module.css';
 
 interface PlaceholderSpec {
   overline: string;
@@ -22,7 +24,7 @@ function CharacterFeaturePlaceholder({ overline, title, glyph, todo, details }: 
 
   return (
     <div>
-      <BackLink to={backTo} label={t('camp.backToCharacter')} style={{ marginBottom: 12 }} />
+      <BackLink to={backTo} label={t('camp.backToCharacter')} className={s.backLink} />
       <OrdoPanel frame padding={0}>
         <PanelHeader
           title={title}
@@ -30,26 +32,16 @@ function CharacterFeaturePlaceholder({ overline, title, glyph, todo, details }: 
           tone="gold"
           sub={character ? character.name : t('camp.ph.scopedCharacter')}
         />
-      <div style={{ padding: 24 }}>
-        <p className="ao-overline" style={{ color: 'var(--gold)', marginBottom: 8 }}>
+      <div className={s.body}>
+        <p className={cn('ao-overline', s.overlineGold)}>
           {overline}
         </p>
-        <h3 className="ao-h3" style={{ marginBottom: 12 }}>
+        <h3 className={cn('ao-h3', s.todoTitle)}>
           {t('camp.ph.todoPrefix')}{todo}
         </h3>
-        <div style={{ display: 'grid', gap: 10, maxWidth: 760 }}>
+        <div className={s.detailGrid}>
           {details.map((detail) => (
-            <div
-              key={detail}
-              style={{
-                display: 'flex',
-                gap: 10,
-                alignItems: 'flex-start',
-                color: 'var(--ink-quiet)',
-                fontSize: 13,
-                lineHeight: 1.45,
-              }}
-            >
+            <div key={detail} className={s.detailRow}>
               <Rune kind="diamond-fill" size={8} color="var(--gold)" />
               <span>{detail}</span>
             </div>
@@ -67,15 +59,15 @@ function CampaignFeaturePlaceholder({ overline, title, glyph, todo, details }: P
   const { campaignId } = useParams<{ campaignId: string }>();
   return (
     <div>
-      <BackLink to={`/campaigns/${campaignId}`} label={t('camp.backToCampaign')} style={{ marginBottom: 12 }} />
+      <BackLink to={`/campaigns/${campaignId}`} label={t('camp.backToCampaign')} className={s.backLink} />
       <OrdoPanel frame padding={0}>
         <PanelHeader title={title} glyph={glyph} tone="gold" sub={t('camp.ph.scopedCampaign')} />
-        <div style={{ padding: 24 }}>
-          <p className="ao-overline" style={{ color: 'var(--gold)', marginBottom: 8 }}>{overline}</p>
-          <h3 className="ao-h3" style={{ marginBottom: 12 }}>{t('camp.ph.todoPrefix')}{todo}</h3>
-          <div style={{ display: 'grid', gap: 10, maxWidth: 760 }}>
+        <div className={s.body}>
+          <p className={cn('ao-overline', s.overlineGold)}>{overline}</p>
+          <h3 className={cn('ao-h3', s.todoTitle)}>{t('camp.ph.todoPrefix')}{todo}</h3>
+          <div className={s.detailGrid}>
             {details.map((detail) => (
-              <div key={detail} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', color: 'var(--ink-quiet)', fontSize: 13, lineHeight: 1.45 }}>
+              <div key={detail} className={s.detailRow}>
                 <Rune kind="diamond-fill" size={8} color="var(--gold)" />
                 <span>{detail}</span>
               </div>
