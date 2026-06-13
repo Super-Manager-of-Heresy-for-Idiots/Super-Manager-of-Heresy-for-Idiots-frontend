@@ -26,6 +26,8 @@ const EVENT_STYLE: Record<WsEventType, EventStyle> = {
   CHARACTER_UPDATED:        { glyph: 'scroll',   color: 'var(--ink)',       label: 'Character Updated' },
   NPC_REVEALED:             { glyph: 'eye',      color: 'var(--arcane)',    label: 'NPC Revealed' },
   NPC_HIDDEN:               { glyph: 'eye',      color: 'var(--ink-faint)', label: 'NPC Hidden' },
+  MONSTER_REVEALED:         { glyph: 'eye',      color: 'var(--ember)',     label: 'Monster Revealed' },
+  MONSTER_HIDDEN:           { glyph: 'eye',      color: 'var(--ink-faint)', label: 'Monster Hidden' },
   QUEST_UPDATED:            { glyph: 'book',     color: 'var(--gold)',      label: 'Quest Updated' },
   CAMPAIGN_STATUS_CHANGED:  { glyph: 'hex',      color: 'var(--gold-pale)', label: 'Campaign Status' },
   MEMBER_KICKED:            { glyph: 'lock',     color: 'var(--ember)',     label: 'Member Kicked' },
@@ -115,6 +117,16 @@ export function useWebSocket(campaignId: string | undefined): { connectionState:
           break;
         }
 
+        case 'MONSTER_REVEALED':
+        case 'MONSTER_HIDDEN': {
+          const data = event.data as { monsterId?: string };
+          queryClient.invalidateQueries({ queryKey: ['bestiary', 'campaign', cid, 'monsters'] });
+          if (data.monsterId) {
+            queryClient.invalidateQueries({ queryKey: ['bestiary', 'campaign', cid, 'monster', data.monsterId] });
+          }
+          break;
+        }
+
         case 'QUEST_UPDATED': {
           const data = event.data as { questId?: string };
           queryClient.invalidateQueries({ queryKey: ['campaigns', cid, 'quests'] });
@@ -158,6 +170,10 @@ export function useWebSocket(campaignId: string | undefined): { connectionState:
       }
 
       if (isOwn) return;
+
+      // Hiding a monster updates caches silently — don't surface a toast that
+      // would reveal to players that a (previously unseen) monster ever existed.
+      if (event.type === 'MONSTER_HIDDEN') return;
 
       const style = EVENT_STYLE[event.type];
       if (!style) return;

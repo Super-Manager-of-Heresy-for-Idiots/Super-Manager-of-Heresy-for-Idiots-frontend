@@ -1,14 +1,17 @@
-import { useMemo, useState } from 'react';
+import { Fragment, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Plus, Pencil, Trash2, Eye, EyeOff, Copy, X, Search, AlertTriangle, SlidersHorizontal } from 'lucide-react';
+import { Plus, Pencil, Trash2, Eye, EyeOff, Copy, X, Search, AlertTriangle, SlidersHorizontal, ChevronDown } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import {
+  useCampaignMonster,
   useCampaignMonsters,
   useCloneCampaignMonster,
   useDeleteCampaignMonster,
   usePublicMonsters,
   useToggleCampaignMonsterVisibility,
 } from '@/hooks/useBestiary';
+import MonsterStatblock from '@/components/bestiary/MonsterStatblock';
+import { BackLink } from '@/components/campaigns';
 import { SIZE_VALUES, dictName, sizeKey } from '@/components/bestiary/constants';
 import { useI18n, useT } from '@/i18n/I18nContext';
 import type { CreatureSize, DictionaryRef, MonsterSummaryResponse } from '@/types';
@@ -36,6 +39,33 @@ function Select<T extends string>({ value, onChange, options }: { value: T; onCh
   );
 }
 
+function MonsterDetailRow({ campaignId, monsterId, open, colSpan }: { campaignId: string; monsterId: string; open: boolean; colSpan: number }) {
+  const t = useT();
+  const [everOpened, setEverOpened] = useState(false);
+  useEffect(() => { if (open) setEverOpened(true); }, [open]);
+  const q = useCampaignMonster(campaignId, everOpened ? monsterId : undefined);
+
+  return (
+    <tr>
+      <td colSpan={colSpan} style={{ padding: 0, background: 'rgba(0,0,0,0.18)', borderBottom: open ? '1px solid var(--rule)' : 'none' }}>
+        <div style={{ display: 'grid', gridTemplateRows: open ? '1fr' : '0fr', transition: 'grid-template-rows 360ms cubic-bezier(0.4, 0, 0.2, 1)' }}>
+          <div style={{ overflow: 'hidden' }}>
+            <div style={{ padding: 'clamp(12px, 2vw, 20px)', opacity: open ? 1 : 0, transition: 'opacity 280ms ease' }}>
+              {q.isLoading && (
+                <div style={{ textAlign: 'center', padding: '24px 0', fontFamily: 'var(--font-serif)', fontStyle: 'italic', color: 'var(--ink-quiet)' }}>{t('best.com.loading')}</div>
+              )}
+              {q.isError && (
+                <div style={{ textAlign: 'center', padding: '24px 0', fontFamily: 'var(--font-serif)', fontStyle: 'italic', color: 'var(--ink-quiet)' }}>{t('best.mon.loadError')}</div>
+              )}
+              {q.data && <MonsterStatblock monster={q.data} />}
+            </div>
+          </div>
+        </div>
+      </td>
+    </tr>
+  );
+}
+
 type Tab = 'system' | 'campaign';
 
 export default function CampaignBestiaryPage() {
@@ -53,6 +83,7 @@ export default function CampaignBestiaryPage() {
 
   const [tab, setTab] = useState<Tab>('campaign');
   const [confirmDel, setConfirmDel] = useState<MonsterSummaryResponse | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   // System browse filters
   const [query, setQuery] = useState('');
@@ -84,6 +115,7 @@ export default function CampaignBestiaryPage() {
     <div style={{ minHeight: '100%', background: 'var(--stone)' }}>
       <header style={{ minHeight: 64, borderBottom: '1px solid var(--rule)', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 14, padding: '12px clamp(16px, 3vw, 32px)', background: 'linear-gradient(180deg, var(--panel) 0%, var(--stone) 100%)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: '1 1 auto' }}>
+          <BackLink to={`/campaigns/${campaignId}`} label={t('camp.backToDashboard')} />
           <Diamond size={9} />
           <div>
             <div style={{ fontFamily: 'var(--font-display)', fontSize: 15, letterSpacing: 'var(--track-eng)', textTransform: 'uppercase', color: 'var(--ink-bright)' }}>{t('best.cmp.title')}</div>
@@ -196,10 +228,14 @@ export default function CampaignBestiaryPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {monsters.map((m) => (
-                    <tr key={m.id} style={{ cursor: 'pointer' }}>
-                      <td onClick={() => navigate(`monsters/${m.id}`)}>
+                  {monsters.map((m) => {
+                    const isOpen = expandedId === m.id;
+                    return (
+                    <Fragment key={m.id}>
+                    <tr style={{ cursor: 'pointer', background: isOpen ? 'rgba(176,141,78,0.06)' : undefined }}>
+                      <td onClick={() => setExpandedId(isOpen ? null : m.id)}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                          <ChevronDown size={15} style={{ flexShrink: 0, color: isOpen ? 'var(--gold-pale)' : 'var(--ink-faint)', transform: isOpen ? 'rotate(0deg)' : 'rotate(-90deg)', transition: 'transform 300ms cubic-bezier(0.4, 0, 0.2, 1)' }} />
                           <Diamond size={7} color="var(--bronze)" />
                           <div>
                             <div style={{ fontFamily: 'var(--font-serif)', fontSize: 17, fontWeight: 600, color: 'var(--ink-bright)' }}>{m.nameRusloc}</div>
@@ -207,9 +243,9 @@ export default function CampaignBestiaryPage() {
                           </div>
                         </div>
                       </td>
-                      <td style={{ textAlign: 'center' }}><span style={{ fontFamily: 'var(--font-serif)', fontSize: 20, fontWeight: 600, color: 'var(--gold-pale)' }}>{m.crRating}</span></td>
-                      <td><SizeBadge size={m.size} lang={lang} /></td>
-                      <td style={{ textAlign: 'center' }}>
+                      <td style={{ textAlign: 'center' }} onClick={() => setExpandedId(isOpen ? null : m.id)}><span style={{ fontFamily: 'var(--font-serif)', fontSize: 20, fontWeight: 600, color: 'var(--gold-pale)' }}>{m.crRating}</span></td>
+                      <td onClick={() => setExpandedId(isOpen ? null : m.id)}><SizeBadge size={m.size} lang={lang} /></td>
+                      <td style={{ textAlign: 'center' }} onClick={() => setExpandedId(isOpen ? null : m.id)}>
                         {m.isVisibleToPlayers
                           ? <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, color: 'var(--gold-pale)', fontFamily: 'var(--font-mono)', fontSize: 11 }}><Eye size={14} /> {t('best.cmp.open')}</span>
                           : <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, color: 'var(--ink-faint)', fontFamily: 'var(--font-mono)', fontSize: 11 }}><EyeOff size={14} /> {t('best.cmp.hidden')}</span>}
@@ -226,7 +262,10 @@ export default function CampaignBestiaryPage() {
                         </td>
                       )}
                     </tr>
-                  ))}
+                    <MonsterDetailRow campaignId={campaignId} monsterId={m.id} open={isOpen} colSpan={isGM ? 5 : 4} />
+                    </Fragment>
+                    );
+                  })}
                   {!monstersQ.isLoading && monsters.length === 0 && (
                     <tr><td colSpan={isGM ? 5 : 4} style={{ textAlign: 'center', padding: '40px 0', fontFamily: 'var(--font-serif)', fontStyle: 'italic', color: 'var(--ink-quiet)' }}>{isGM ? t('best.cmp.emptyGm') : t('best.cmp.emptyPlayer')}</td></tr>
                   )}
