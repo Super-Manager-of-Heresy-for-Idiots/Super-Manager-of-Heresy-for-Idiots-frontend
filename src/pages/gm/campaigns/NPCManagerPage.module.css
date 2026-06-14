@@ -28,6 +28,13 @@
 .nameBlock { flex: 1; min-width: 0; }
 .idRow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .npcName { margin-top: 4px; color: var(--ink-bright); }
+.sourceBadge {
+  display: inline-flex; align-items: center; gap: 6px;
+  margin-top: 6px;
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: var(--track-eng); text-transform: uppercase;
+  color: var(--ink-quiet);
+}
 
 .descGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; }
 .descBox { padding: 12px; background: rgba(0, 0, 0, 0.2); border: 1px solid var(--rule); }
@@ -44,7 +51,4 @@
 }
 
 /* ── dialog ── */
-.dialogCol { display: flex; flex-direction: column; gap: 16px; }
-.resizeV { resize: vertical; }
-.checkRow { display: flex; align-items: center; gap: 8px; cursor: pointer; }
-.checkLabel { margin-bottom: 0; }
+.dialogScroll { max-height: 70vh; overflow-y: auto; padding-right: 4px; }

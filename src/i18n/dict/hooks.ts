@@ -250,6 +250,12 @@ export const hooks: DictModule = {
     'hk.quest.deleteFailed': 'Не удалось удалить задание',
     'hk.quest.noteAdded': 'Заметка добавлена!',
     'hk.quest.noteAddFailed': 'Не удалось добавить заметку',
+    'hk.quest.rewardAdded': 'Награда добавлена!',
+    'hk.quest.rewardAddFailed': 'Не удалось добавить награду',
+    'hk.quest.rewardDeleted': 'Награда удалена!',
+    'hk.quest.rewardDeleteFailed': 'Не удалось удалить награду',
+    'hk.quest.completed': 'Квест завершён — {name}: предметов {items}, опыт {xp}',
+    'hk.quest.completeFailed': 'Не удалось завершить квест',
 
     /* ── useRaces ────────────────────────────────────── */
     'hk.races.created': 'Раса создана!',
@@ -541,6 +547,12 @@ export const hooks: DictModule = {
     'hk.quest.deleteFailed': 'Failed to delete quest',
     'hk.quest.noteAdded': 'Note added!',
     'hk.quest.noteAddFailed': 'Failed to add note',
+    'hk.quest.rewardAdded': 'Reward added!',
+    'hk.quest.rewardAddFailed': 'Failed to add reward',
+    'hk.quest.rewardDeleted': 'Reward removed!',
+    'hk.quest.rewardDeleteFailed': 'Failed to remove reward',
+    'hk.quest.completed': 'Quest completed — {name}: {items} items, {xp} XP',
+    'hk.quest.completeFailed': 'Failed to complete quest',
 
     /* ── useRaces ────────────────────────────────────── */
     'hk.races.created': 'Race created!',

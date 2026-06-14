@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
-import { OrdoPanel, Rune, OrdoField, EmptyVault } from '@/components/ordo';
+import { OrdoPanel, Rune, EmptyVault } from '@/components/ordo';
 import { CodexID } from '@/components/homebrew/CodexID';
 import { VisibilityToggle } from '@/components/narrative';
 import {
@@ -16,10 +16,19 @@ import {
   useCreateNpc,
   useSetNpcVisibility,
 } from '@/hooks/useNpcs';
+import { useCampaignReferenceContent, useCampaignReferenceSpells } from '@/hooks/useHomebrewCampaign';
+import { useCampaignMonsters } from '@/hooks/useBestiary';
 import { BackLink } from '@/components/campaigns';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
 import type { NpcResponse } from '@/types';
+import {
+  NpcFormFields,
+  emptyNpcForm,
+  buildNpcPayload,
+  isNpcFormValid,
+  type NpcFormState,
+} from './NpcFormFields';
 import s from './NPCManagerPage.module.css';
 
 /* ── helpers ─────────────────────────────────────────────────── */
@@ -42,29 +51,20 @@ export default function NPCManagerPage() {
   const visibilityMutation = useSetNpcVisibility();
 
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [formName, setFormName] = useState('');
-  const [formPublicDesc, setFormPublicDesc] = useState('');
-  const [formPrivateDesc, setFormPrivateDesc] = useState('');
-  const [formVisible, setFormVisible] = useState(true);
+  const [form, setForm] = useState<NpcFormState>(emptyNpcForm);
+  const patch = (p: Partial<NpcFormState>) => setForm((prev) => ({ ...prev, ...p }));
+  const resetForm = () => setForm(emptyNpcForm());
 
-  const resetForm = () => {
-    setFormName('');
-    setFormPublicDesc('');
-    setFormPrivateDesc('');
-    setFormVisible(true);
-  };
+  const { data: refData } = useCampaignReferenceContent(campaignId!);
+  const { data: spells = [], isLoading: spellsLoading } = useCampaignReferenceSpells(
+    campaignId!,
+    form.classId || undefined,
+  );
+  const { data: monsters = [] } = useCampaignMonsters(campaignId!);
 
   const handleCreate = () => {
     createMutation.mutate(
-      {
-        campaignId: campaignId!,
-        data: {
-          name: formName,
-          publicDescription: formPublicDesc || undefined,
-          privateDescription: formPrivateDesc || undefined,
-          isVisibleToPlayers: formVisible,
-        },
-      },
+      { campaignId: campaignId!, data: buildNpcPayload(form) },
       {
         onSuccess: () => {
           setDialogOpen(false);
@@ -72,6 +72,18 @@ export default function NPCManagerPage() {
         },
       },
     );
+  };
+
+  const sourceLabel = (npc: NpcResponse): string | null => {
+    if (npc.sourceType === 'CLASS_BASED') {
+      const who = [npc.race?.name, npc.characterClass?.name].filter(Boolean).join(' ');
+      const lvl = npc.level != null ? t('camp2.npcForm.levelShort', { n: npc.level }) : '';
+      return [who, lvl].filter(Boolean).join(' · ') || null;
+    }
+    if (npc.sourceType === 'MONSTER_BASED') {
+      return npc.sourceMonster?.name ?? t('camp2.npcForm.source.monster');
+    }
+    return null;
   };
 
   const toggleVisibility = (npc: NpcResponse) => {
@@ -164,6 +176,7 @@ export default function NPCManagerPage() {
         <div className={s.list}>
           {npcs.map((npc) => {
             const glyph = glyphForNpc(npc.id);
+            const srcLabel = sourceLabel(npc);
             return (
               <OrdoPanel key={npc.id} frame padding={0}>
                 <div className={s.cardPad}>
@@ -186,6 +199,16 @@ export default function NPCManagerPage() {
                       <h5 className={cn('ao-h5', s.npcName)}>
                         {npc.name}
                       </h5>
+                      {srcLabel && (
+                        <div className={s.sourceBadge}>
+                          <Rune
+                            kind={npc.sourceType === 'MONSTER_BASED' ? 'flame' : 'helm'}
+                            size={10}
+                            color="var(--ink-faint)"
+                          />
+                          <span>{srcLabel}</span>
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -248,44 +271,16 @@ export default function NPCManagerPage() {
           <DialogHeader>
             <DialogTitle>{t('camp2.npcMgr.dialog.title')}</DialogTitle>
           </DialogHeader>
-          <div className={s.dialogCol}>
-            <OrdoField label={t('camp2.npcMgr.field.name')} required>
-              <input
-                className="ao-input"
-                value={formName}
-                onChange={(e) => setFormName(e.target.value)}
-                placeholder={t('camp2.npcMgr.field.namePlaceholder')}
-              />
-            </OrdoField>
-
-            <OrdoField label={t('camp2.npcMgr.field.publicDesc')} hint={t('camp2.npcMgr.field.publicDescHint')}>
-              <textarea
-                value={formPublicDesc}
-                onChange={(e) => setFormPublicDesc(e.target.value)}
-                placeholder={t('camp2.npcMgr.field.publicDescPlaceholder')}
-                rows={3}
-                className={cn('ao-input', s.resizeV)}
-              />
-            </OrdoField>
-
-            <OrdoField label={t('camp2.npcMgr.field.privateDesc')} hint={t('camp2.npcMgr.field.privateDescHint')}>
-              <textarea
-                value={formPrivateDesc}
-                onChange={(e) => setFormPrivateDesc(e.target.value)}
-                placeholder={t('camp2.npcMgr.field.privateDescPlaceholder')}
-                rows={3}
-                className={cn('ao-input', s.resizeV)}
-              />
-            </OrdoField>
-
-            <label className={s.checkRow}>
-              <input
-                type="checkbox"
-                checked={formVisible}
-                onChange={(e) => setFormVisible(e.target.checked)}
-              />
-              <span className={cn('ao-label', s.checkLabel)}>{t('camp2.npcMgr.field.visible')}</span>
-            </label>
+          <div className={s.dialogScroll}>
+            <NpcFormFields
+              value={form}
+              onChange={patch}
+              classes={refData?.classes ?? []}
+              races={refData?.races ?? []}
+              spells={spells}
+              monsters={monsters}
+              spellsLoading={spellsLoading}
+            />
           </div>
           <DialogFooter>
             <button
@@ -299,7 +294,7 @@ export default function NPCManagerPage() {
               type="button"
               className="ao-btn ao-btn--primary"
               onClick={handleCreate}
-              disabled={!formName || createMutation.isPending}
+              disabled={!isNpcFormValid(form) || createMutation.isPending}
             >
               {createMutation.isPending && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

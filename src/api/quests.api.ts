@@ -9,6 +9,8 @@ import type {
   UpdateNoteRequest,
   QuestRewardResponse,
   CreateQuestRewardRequest,
+  CompleteQuestRequest,
+  QuestCompletionResponse,
 } from '@/types';
 
 export const questsApi = {
@@ -88,6 +90,19 @@ export const questsApi = {
 
   deleteReward: async (campaignId: string, questId: string, rewardId: string): Promise<ApiResponse<void>> => {
     const response = await api.delete<ApiResponse<void>>(`/campaigns/${campaignId}/quests/${questId}/rewards/${rewardId}`);
+    return response.data;
+  },
+
+  // Completion (grants all rewards to the chosen recipient)
+  complete: async (
+    campaignId: string,
+    questId: string,
+    data: CompleteQuestRequest,
+  ): Promise<ApiResponse<QuestCompletionResponse>> => {
+    const response = await api.post<ApiResponse<QuestCompletionResponse>>(
+      `/campaigns/${campaignId}/quests/${questId}/complete`,
+      data,
+    );
     return response.data;
   },
 };

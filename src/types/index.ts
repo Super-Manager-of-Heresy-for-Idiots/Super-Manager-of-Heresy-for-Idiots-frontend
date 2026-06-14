@@ -1052,12 +1052,26 @@ export interface GrantXpRequest {
 
 // === NPC ===
 
+export type NpcSourceType = 'CLASS_BASED' | 'MONSTER_BASED';
+
+export interface NpcRef {
+  id: string;
+  name: string;
+}
+
 export interface NpcResponse {
   id: string;
   name: string;
   publicDescription?: string;
   privateDescription?: string;
   isVisibleToPlayers: boolean;
+  sourceType?: NpcSourceType | null;
+  race?: NpcRef;
+  characterClass?: NpcRef;
+  level?: number;
+  abilities?: string;
+  spells?: NpcRef[];
+  sourceMonster?: NpcRef;
   notes: NoteResponse[];
   createdAt: string;
   updatedAt: string;
@@ -1068,6 +1082,13 @@ export interface CreateNpcRequest {
   publicDescription?: string;
   privateDescription?: string;
   isVisibleToPlayers?: boolean;
+  sourceType?: NpcSourceType | null;
+  raceId?: string;
+  classId?: string;
+  level?: number;
+  abilities?: string;
+  spellIds?: string[];
+  sourceMonsterId?: string;
 }
 
 export interface UpdateNpcRequest {
@@ -1075,6 +1096,13 @@ export interface UpdateNpcRequest {
   publicDescription?: string;
   privateDescription?: string;
   isVisibleToPlayers?: boolean;
+  sourceType?: NpcSourceType | null;
+  raceId?: string;
+  classId?: string;
+  level?: number;
+  abilities?: string;
+  spellIds?: string[];
+  sourceMonsterId?: string;
 }
 
 export interface NoteResponse {
@@ -1119,6 +1147,7 @@ export interface QuestRewardResponse {
   currencyTypeId?: string;
   currencyTypeName?: string;
   currencyAmount?: number;
+  xpAmount?: number;
 }
 
 export interface CreateQuestRequest {
@@ -1140,6 +1169,24 @@ export interface CreateQuestRewardRequest {
   quantity?: number;
   currencyTypeId?: string;
   currencyAmount?: number;
+  xpAmount?: number;
+}
+
+/** POST /campaigns/{id}/quests/{questId}/complete — grant all rewards to a recipient. */
+export interface CompleteQuestRequest {
+  /** Required; must be a character of this campaign. */
+  recipientCharacterId: string;
+  /** Optional; overrides the summed reward XP. */
+  xpAmount?: number;
+}
+
+export interface QuestCompletionResponse {
+  questId: string;
+  status: QuestStatus;
+  recipientCharacterId: string;
+  recipientCharacterName: string;
+  itemsGranted: number;
+  xpGranted: number;
 }
 
 // === Locations ===

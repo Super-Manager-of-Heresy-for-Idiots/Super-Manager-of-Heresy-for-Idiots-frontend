@@ -6,6 +6,8 @@ import type {
   CreateQuestRequest,
   UpdateQuestRequest,
   CreateNoteRequest,
+  CreateQuestRewardRequest,
+  CompleteQuestRequest,
   ApiError,
 } from '@/types';
 import { AxiosError } from 'axios';
@@ -115,6 +117,96 @@ export function useAddQuestNote() {
     },
     onError: (error: AxiosError<ApiError>) => {
       toast.error(error.response?.data?.message || t('hk.quest.noteAddFailed'));
+    },
+  });
+}
+
+// Quest Rewards
+
+export function useAddQuestReward() {
+  const queryClient = useQueryClient();
+  const t = useT();
+
+  return useMutation({
+    mutationFn: ({
+      campaignId,
+      questId,
+      data,
+    }: {
+      campaignId: string;
+      questId: string;
+      data: CreateQuestRewardRequest;
+    }) => questsApi.addReward(campaignId, questId, data),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'quests', variables.questId] });
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'quests'] });
+      toast.success(t('hk.quest.rewardAdded'));
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error.response?.data?.message || t('hk.quest.rewardAddFailed'));
+    },
+  });
+}
+
+export function useDeleteQuestReward() {
+  const queryClient = useQueryClient();
+  const t = useT();
+
+  return useMutation({
+    mutationFn: ({
+      campaignId,
+      questId,
+      rewardId,
+    }: {
+      campaignId: string;
+      questId: string;
+      rewardId: string;
+    }) => questsApi.deleteReward(campaignId, questId, rewardId),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'quests', variables.questId] });
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'quests'] });
+      toast.success(t('hk.quest.rewardDeleted'));
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error.response?.data?.message || t('hk.quest.rewardDeleteFailed'));
+    },
+  });
+}
+
+export function useCompleteQuest() {
+  const queryClient = useQueryClient();
+  const t = useT();
+
+  return useMutation({
+    mutationFn: ({
+      campaignId,
+      questId,
+      data,
+    }: {
+      campaignId: string;
+      questId: string;
+      data: CompleteQuestRequest;
+    }) => questsApi.complete(campaignId, questId, data),
+    onSuccess: (response, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'quests', variables.questId] });
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'quests'] });
+      // Granted items/currency/XP land on the recipient — refresh their sheet, inventory and wallet.
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters'] });
+      const c = response.data;
+      if (c) {
+        toast.success(
+          t('hk.quest.completed', {
+            name: c.recipientCharacterName,
+            items: c.itemsGranted,
+            xp: c.xpGranted,
+          }),
+        );
+      } else {
+        toast.success(t('hk.quest.updated'));
+      }
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error.response?.data?.message || t('hk.quest.completeFailed'));
     },
   });
 }

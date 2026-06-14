@@ -116,6 +116,18 @@ export function useCampaignReferenceContent(campaignId: string) {
   });
 }
 
+export function useCampaignReferenceSpells(campaignId: string, classId?: string) {
+  const { lang } = useI18n();
+  return useQuery({
+    queryKey: ['campaigns', campaignId, 'reference-spells', classId ?? 'all', lang],
+    queryFn: async () => {
+      const response = await homebrewCampaignApi.getReferenceSpells(campaignId, classId);
+      return response.data ?? [];
+    },
+    enabled: !!campaignId,
+  });
+}
+
 export function useHomebrewLibrary() {
   return useQuery({
     queryKey: ['homebrew-library'],

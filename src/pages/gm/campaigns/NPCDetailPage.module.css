@@ -29,6 +29,8 @@
 .idRow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .npcName { margin-top: 6px; color: var(--ink-bright); }
 .revealWrap { margin-top: 16px; }
+.actionRow { display: flex; gap: 8px; margin-top: 12px; }
+.actionBtn { flex: 1; justify-content: center; }
 .ml6 { margin-left: 6px; }
 
 /* ── account boxes ── */
@@ -60,3 +62,35 @@
 }
 .linkName { font-size: 13px; color: var(--ink-bright); }
 .linkNameGrow { flex: 1; font-size: 13px; color: var(--ink-bright); }
+
+/* ── origin / statblock ── */
+.originType {
+  display: inline-block;
+  font-family: var(--font-display); font-size: 11px;
+  letter-spacing: var(--track-eng); text-transform: uppercase;
+  color: var(--gold-pale);
+  padding: 4px 10px; margin-bottom: 14px;
+  border: 1px solid var(--brass);
+  background: color-mix(in srgb, var(--brass) 10%, transparent);
+}
+.originList { display: flex; flex-direction: column; gap: 12px; }
+.originRow { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.originLabel { font-size: 9px; color: var(--ink-faint); }
+.originValue { font-size: 14px; color: var(--ink-bright); text-align: right; }
+.originBlock { display: flex; flex-direction: column; gap: 6px; }
+.originText { font-size: 13px; color: var(--ink); line-height: 1.6; margin: 0; white-space: pre-wrap; }
+.spellTags { display: flex; flex-wrap: wrap; gap: 6px; }
+.spellTag {
+  font-size: 12px; color: var(--ink-quiet);
+  padding: 3px 9px; background: var(--abyss); border: 1px solid var(--rule);
+}
+
+/* ── dialogs ── */
+.dialogScroll { max-height: 70vh; overflow-y: auto; padding-right: 4px; }
+.deleteBody { font-size: 14px; color: var(--ink); line-height: 1.6; margin: 0; }
+
+/* ── mobile: stack the two columns ── */
+@media (max-width: 768px) {
+  .cols { flex-direction: column; }
+  .colLeft, .colRight { width: 100%; }
+}
