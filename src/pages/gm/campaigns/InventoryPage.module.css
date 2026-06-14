@@ -8,7 +8,7 @@
 .errorText { color: var(--ink-faint); margin-bottom: 16px; }
 
 /* ── header ── */
-.headerActions { display: flex; gap: 10px; }
+.headerActions { display: flex; gap: 10px; flex-wrap: wrap; }
 .iconRow { display: flex; gap: 4px; }
 .pageHeader {
   display: flex; justify-content: space-between; align-items: flex-start;
@@ -77,7 +77,7 @@
 .noEnch { font-size: 13px; color: var(--ink-faint); }
 .provList { display: flex; flex-direction: column; gap: 8px; font-size: 12px; color: var(--ink-quiet); }
 .provRow { display: flex; gap: 10px; }
-.relicActions { display: flex; gap: 8px; margin-top: 18px; }
+.relicActions { display: flex; gap: 8px; margin-top: 18px; flex-wrap: wrap; }
 .grow { flex: 1; }
 
 /* ── dialogs ── */
@@ -105,3 +105,16 @@
 .recipientName { font-size: 14px; color: var(--ink); }
 .recipient.selected .recipientName { color: var(--ink-bright); }
 .recipientMeta { font-size: 11px; color: var(--ink-quiet); }
+
+/* ── mobile: keep slots compact instead of collapsing to 1 col ──
+   ao-rgrid forces 1fr !important at ≤768px, which blows square slots
+   up to full width. The compound .cellGrid.slotGrid / .quad.slotGrid
+   (specificity 0,2,0 + !important) wins and packs slots into an
+   auto-filled grid of ~48px+ cells (≥44px touch target). */
+@media (max-width: 768px) {
+  .cellGrid.slotGrid,
+  .quad.slotGrid {
+    grid-template-columns: repeat(auto-fill, minmax(48px, 1fr)) !important;
+    gap: 6px;
+  }
+}

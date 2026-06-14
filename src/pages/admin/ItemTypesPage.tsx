@@ -14,7 +14,7 @@ import { useT } from '@/i18n/I18nContext';
 
 export default function ItemTypesPage() {
   const t = useT();
-  const { data, isLoading } = useItemTypes();
+  const { data, isLoading, isError, refetch } = useItemTypes();
   const createMutation = useCreateItemType();
   const updateMutation = useUpdateItemType();
   const deleteMutation = useDeleteItemType();
@@ -52,6 +52,8 @@ export default function ItemTypesPage() {
         title={t('adm.itemTypes.title')}
         data={data}
         isLoading={isLoading}
+        isError={isError}
+        onRetry={refetch}
         onAdd={handleAdd}
         onEdit={handleEdit}
         onDelete={(id) => deleteMutation.mutate(id)}

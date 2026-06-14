@@ -29,3 +29,19 @@
 .nameText { font-size: 14px; color: var(--ink-bright); font-weight: 500; }
 .creatorTag { font-size: 8px; color: var(--gold); }
 .joinedText { font-size: 11px; color: var(--ink-faint); }
+
+/* ── mobile: compact 2-row card (overrides .ao-rgrid 1-col !important) ── */
+@media (max-width: 768px) {
+  .colHead { display: none; }
+  .memberGrid.memberRow {
+    grid-template-columns: 1fr auto !important;
+    grid-template-areas:
+      "name kick"
+      "role joined";
+    row-gap: 10px;
+  }
+  .memberRow > :nth-child(1) { grid-area: name; }
+  .memberRow > :nth-child(2) { grid-area: role; justify-self: start; }
+  .memberRow > :nth-child(3) { grid-area: joined; justify-self: end; }
+  .memberRow > :nth-child(4) { grid-area: kick; justify-self: end; }
+}

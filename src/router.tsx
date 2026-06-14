@@ -30,7 +30,6 @@ import TemplateWizardPage from '@/pages/player/TemplateWizardPage';
 import TemplateDetailPage from '@/pages/player/TemplateDetailPage';
 import {
   AbilityCheckPage,
-  CampaignRosterPage,
   CharacterEditPage,
   CharacterHpPage,
   CharacterStatsPage,
@@ -109,7 +108,6 @@ export const router = createBrowserRouter([
           { path: '/characters/templates', element: <MyCharactersPage /> },
           { path: '/characters/templates/new', element: <TemplateWizardPage /> },
           { path: '/characters/templates/:templateId', element: <TemplateDetailPage /> },
-          { path: '/campaigns/:campaignId/roster', element: <CampaignRosterPage /> },
           { path: '/campaigns/:campaignId/members', element: <CampaignMembersPage /> },
           { path: '/campaigns/:campaignId/invite', element: <CampaignInvitePage /> },
           { path: '/campaigns/:campaignId/storage', element: <SharedStoragePage /> },

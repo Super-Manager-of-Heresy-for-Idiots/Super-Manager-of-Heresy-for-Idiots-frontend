@@ -13,7 +13,7 @@ import { useT } from '@/i18n/I18nContext';
 
 export default function StatTypesPage() {
   const t = useT();
-  const { data, isLoading } = useStatTypes();
+  const { data, isLoading, isError, refetch } = useStatTypes();
   const createMutation = useCreateStatType();
   const updateMutation = useUpdateStatType();
   const deleteMutation = useDeleteStatType();
@@ -51,6 +51,8 @@ export default function StatTypesPage() {
         title={t('adm.statTypes.title')}
         data={data}
         isLoading={isLoading}
+        isError={isError}
+        onRetry={refetch}
         onAdd={handleAdd}
         onEdit={handleEdit}
         onDelete={(id) => deleteMutation.mutate(id)}

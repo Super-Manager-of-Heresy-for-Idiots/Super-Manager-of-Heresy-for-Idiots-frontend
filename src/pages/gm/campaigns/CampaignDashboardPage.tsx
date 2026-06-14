@@ -1,10 +1,9 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   OrdoPanel,
   PanelHeader,
   Rune,
-  OrdoDivider,
   Bar,
 } from '@/components/ordo';
 import {
@@ -33,6 +32,7 @@ export default function CampaignDashboardPage() {
   const { data: campaign, isLoading, error, refetch } = useCampaign(campaignId!);
   const { data: characters, isLoading: charsLoading } = useCampaignCharacters(campaignId!);
   const statusMutation = useSetCampaignStatus();
+  const [tab, setTab] = useState<'sections' | 'characters'>('sections');
 
   /* ── derived counts ────────────────────────────────────────── */
 
@@ -178,11 +178,36 @@ export default function CampaignDashboardPage() {
         </div>
       </div>
 
-      <OrdoDivider glyph="diamond" />
+      {/* Tabs */}
+      <div className="ao-tabs" role="tablist" aria-label={t('camp.dash.tabs.label')}>
+        <button
+          type="button"
+          role="tab"
+          id="camp-tab-sections"
+          aria-selected={tab === 'sections'}
+          aria-controls="camp-panel-sections"
+          className={cn('ao-tab', tab === 'sections' && 'is-active')}
+          onClick={() => setTab('sections')}
+        >
+          {t('camp.dash.tabs.sections')}
+        </button>
+        <button
+          type="button"
+          role="tab"
+          id="camp-tab-characters"
+          aria-selected={tab === 'characters'}
+          aria-controls="camp-panel-characters"
+          className={cn('ao-tab', tab === 'characters' && 'is-active')}
+          onClick={() => setTab('characters')}
+        >
+          {t('camp.dash.tabs.characters')}
+        </button>
+      </div>
 
-      {/* DrillBlock grid */}
-      <div className={cn('ao-rgrid', s.drillGrid)}>
-        <DrillBlock label={t('camp.dash.drill.roster')} glyph="helm" count={charCounts.total} to={`/campaigns/${campaignId}/roster`} />
+      {/* Sections tab — drill tiles */}
+      {tab === 'sections' && (
+      <div id="camp-panel-sections" role="tabpanel" aria-labelledby="camp-tab-sections" className={cn('ao-rgrid', s.drillGrid)}>
+        <DrillBlock label={t('camp.dash.drill.roster')} glyph="helm" count={campaign.members?.length || 0} to={`/campaigns/${campaignId}/members`} />
         {canManageCampaign && (
           <>
             <DrillBlock label={t('camp.dash.drill.npcs')} glyph="sigil-1" to={`/campaigns/${campaignId}/npcs`} />
@@ -203,10 +228,11 @@ export default function CampaignDashboardPage() {
           <DrillBlock label={t('camp.dash.drill.balances')} glyph="coin" to={`/campaigns/${campaignId}/wallet`} />
         )}
       </div>
+      )}
 
-      <OrdoDivider glyph="diamond" />
-
-      {/* Roster Summary */}
+      {/* Characters tab — roster summary */}
+      {tab === 'characters' && (
+      <div id="camp-panel-characters" role="tabpanel" aria-labelledby="camp-tab-characters">
       <OrdoPanel frame padding={0} className={s.rosterPanel}>
         <PanelHeader
           title={t('camp.dash.roster.title')}
@@ -280,6 +306,8 @@ export default function CampaignDashboardPage() {
           </div>
         )}
       </OrdoPanel>
+      </div>
+      )}
     </div>
   );
 }

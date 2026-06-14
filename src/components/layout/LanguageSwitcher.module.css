@@ -1,0 +1,25 @@
+.group {
+  display: inline-flex;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.btn {
+  padding: 3px 9px;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: transparent;
+  color: var(--ink-quiet);
+  border: none;
+  cursor: pointer;
+  transition: color 150ms, background 150ms;
+}
+.btn:hover:not(.active) { color: var(--ink-bright); }
+
+.active {
+  background: rgba(176, 141, 78, 0.16);
+  color: var(--gold-pale);
+  cursor: default;
+}

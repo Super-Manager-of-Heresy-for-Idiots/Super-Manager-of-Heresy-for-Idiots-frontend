@@ -25,6 +25,8 @@ interface CrudTableProps<T extends { id: string }> {
   data: T[] | undefined;
   columns: Column<T>[];
   isLoading: boolean;
+  isError?: boolean;
+  onRetry?: () => void;
   onAdd: () => void;
   onEdit?: (item: T) => void;
   onDelete?: (id: string) => void;
@@ -37,6 +39,8 @@ export function CrudTable<T extends { id: string }>({
   data,
   columns,
   isLoading,
+  isError,
+  onRetry,
   onAdd,
   onEdit,
   onDelete,
@@ -67,6 +71,15 @@ export function CrudTable<T extends { id: string }>({
           {Array.from({ length: 5 }).map((_, i) => (
             <Skeleton key={i} className="h-12 w-full" />
           ))}
+        </div>
+      ) : isError ? (
+        <div className="text-center py-12">
+          <p className="text-lg text-destructive">{t('cmp2.crud.loadError')}</p>
+          {onRetry && (
+            <Button variant="outline" className="mt-4" onClick={onRetry}>
+              {t('common.retry')}
+            </Button>
+          )}
         </div>
       ) : !data || data.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground">

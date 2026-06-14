@@ -10,7 +10,7 @@ import { useT } from '@/i18n/I18nContext';
 
 export default function CharacterClassesPage() {
   const t = useT();
-  const { data, isLoading } = useCharacterClasses();
+  const { data, isLoading, isError, refetch } = useCharacterClasses();
   const deleteMutation = useDeleteCharacterClass();
 
   const [wizardOpen, setWizardOpen] = useState(false);
@@ -32,6 +32,8 @@ export default function CharacterClassesPage() {
         title={t('adm.classes.title')}
         data={data}
         isLoading={isLoading}
+        isError={isError}
+        onRetry={refetch}
         onAdd={handleAdd}
         onEdit={handleEdit}
         onDelete={(id) => deleteMutation.mutate(id)}

@@ -44,6 +44,8 @@
   --arcane:        #5a8e94;
   --arcane-deep:   #2f5a60;
   --verdigris:     #4a6b53;
+  --ember-pale:    #d8896a;
+  --moss:          #7a9866;
 
   /* ── Type ─────────────────────────────────────────── */
   --font-display: 'Cinzel', 'Trajan Pro', 'Times New Roman', serif;
@@ -52,6 +54,8 @@
   --font-mono:    'JetBrains Mono', 'Menlo', 'Consolas', monospace;
 
   /* type scale */
+  --t-pico:     9px;
+  --t-nano:     10px;
   --t-overline: 11px;
   --t-micro:    12px;
   --t-small:    13px;
@@ -340,7 +344,7 @@
 .ao-btn--ghost:hover { color: var(--ink); }
 
 .ao-btn--lg { padding: 14px 28px; font-size: var(--t-small); }
-.ao-btn--sm { padding: 6px 12px; font-size: 10px; }
+.ao-btn--sm { padding: 6px 12px; font-size: var(--t-nano); }
 .ao-btn--block { width: 100%; }
 .ao-btn:disabled {
   opacity: 0.4;
@@ -408,12 +412,12 @@
   background: transparent;
   border: 0;
   border-bottom: 2px solid transparent;
-  color: var(--ink-faint);
+  color: var(--ink-quiet);
   cursor: pointer;
   transition: all 150ms;
   position: relative;
 }
-.ao-tab:hover { color: var(--ink-quiet); }
+.ao-tab:hover { color: var(--ink-bright); }
 .ao-tab.is-active {
   color: var(--gold-pale);
   border-bottom-color: var(--gold);
@@ -427,14 +431,14 @@
   background: rgba(0,0,0,0.4);
   border: 1px solid var(--hairline);
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: var(--t-nano);
   letter-spacing: 0.08em;
   color: var(--ink-quiet);
   text-transform: uppercase;
 }
 .ao-chip--arcane { color: var(--arcane); border-color: rgba(90, 142, 148, 0.4); }
 .ao-chip--gold   { color: var(--gold-pale); border-color: rgba(176, 141, 78, 0.4); }
-.ao-chip--ember  { color: #d8896a; border-color: rgba(179, 70, 26, 0.4); }
+.ao-chip--ember  { color: var(--ember-pale); border-color: rgba(179, 70, 26, 0.4); }
 .ao-chip--rune   { color: var(--ink-quiet); }
 
 /* ============================================================
@@ -450,7 +454,7 @@
   box-shadow: inset 0 1px 0 rgba(0,0,0,0.5);
   position: relative;
 }
-.ao-stat-label { font-family: var(--font-display); text-transform: uppercase; letter-spacing: var(--track-eng); font-size: 10px; color: var(--ink-faint); }
+.ao-stat-label { font-family: var(--font-display); text-transform: uppercase; letter-spacing: var(--track-eng); font-size: var(--t-nano); color: var(--ink-quiet); }
 .ao-stat-value { font-family: var(--font-serif); font-size: 36px; font-weight: 500; color: var(--ink-bright); line-height: 1; margin-top: 4px; }
 .ao-stat-mod { font-family: var(--font-mono); font-size: 11px; color: var(--gold-pale); margin-top: 2px; }
 
@@ -484,7 +488,7 @@
   text-transform: uppercase;
   letter-spacing: var(--track-eng);
   font-size: var(--t-overline);
-  color: var(--ink-faint);
+  color: var(--ink-quiet);
   text-align: left;
   padding: 10px 14px;
   border-bottom: 1px solid var(--rule);
@@ -526,7 +530,7 @@
   display: flex; align-items: center; justify-content: center;
   color: var(--ink-faint);
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: var(--t-nano);
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
@@ -603,6 +607,7 @@
   flex-direction: column;
   gap: 18px;
   min-height: calc(100vh - 140px);
+  min-height: calc(100dvh - 140px);
 }
 
 /* ── Progress header ──────────────────────────────────────── */
@@ -623,10 +628,10 @@
 .wiz-rail-btn {
   display: flex; align-items: center; gap: 8px;
   background: transparent; border: 0; cursor: pointer;
-  padding: 4px 6px; color: var(--ink-faint);
+  padding: 4px 6px; color: var(--ink-quiet);
   transition: color 150ms;
 }
-.wiz-rail-btn:hover:not(:disabled) { color: var(--ink-quiet); }
+.wiz-rail-btn:hover:not(:disabled) { color: var(--ink-bright); }
 .wiz-rail-btn.is-active { color: var(--gold-pale); }
 .wiz-rail-btn.is-done { color: var(--ink); }
 .wiz-rail-btn.is-locked { cursor: not-allowed; opacity: 0.5; }
@@ -659,11 +664,11 @@
 .wiz-step-eyebrow {
   display: inline-flex; align-items: center; gap: 6px;
   font-family: var(--font-display); text-transform: uppercase;
-  letter-spacing: var(--track-eng); font-size: 10px; color: var(--gold);
+  letter-spacing: var(--track-eng); font-size: var(--t-nano); color: var(--gold);
   margin-bottom: 6px;
 }
 .wiz-req {
-  font-family: var(--font-mono); font-size: 9px; text-transform: uppercase;
+  font-family: var(--font-mono); font-size: var(--t-pico); text-transform: uppercase;
   letter-spacing: 0.1em; color: var(--ember); margin-left: 6px;
 }
 
@@ -1215,7 +1220,7 @@
   justify-content: space-between;
   gap: 10px;
 }
-.ao-drawer-foot-row .ao-overline { font-size: 9px; }
+.ao-drawer-foot-row .ao-overline { font-size: var(--t-pico); }
 .ao-drawer-logout { justify-content: flex-start; gap: 10px; }
 
 /* ============================================================
@@ -1224,6 +1229,7 @@
 .ao-shell {
   display: flex;
   height: 100vh;
+  height: 100dvh;
   background: var(--stone);
   position: relative;
   overflow: hidden;
@@ -1269,7 +1275,7 @@
 .ao-topbar-sep { color: var(--rule); }
 .ao-topbar-path { color: var(--ink-faint); }
 .ao-topbar-user { color: var(--ink-quiet); }
-.ao-topbar-role { font-size: 9px; }
+.ao-topbar-role { font-size: var(--t-pico); }
 
 /* App shell main scroll area — padding scales down on small screens. */
 .app-main { padding: 24px; }
@@ -1303,6 +1309,7 @@
   display: grid;
   grid-template-columns: 1.1fr 1fr;
   height: 100vh;
+  height: 100dvh;
   background: var(--void);
 }
 .auth-hero {
@@ -1373,6 +1380,7 @@
   [role='dialog'] {
     max-width: calc(100vw - 20px) !important;
     max-height: calc(100vh - 32px) !important;
+    max-height: calc(100dvh - 32px) !important;
     overflow-y: auto;
   }
 }
@@ -1424,7 +1432,7 @@ div:hover > .cb-quick { opacity: 1; pointer-events: auto; }
 /* Small link button inside the log */
 .cb-linkbtn {
   background: none; border: none; cursor: pointer; padding: 2px 0 0;
-  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.06em;
+  font-family: var(--font-mono); font-size: var(--t-nano); letter-spacing: 0.06em;
   color: var(--ink-faint); text-transform: uppercase;
 }
 .cb-linkbtn:hover { color: var(--gold-pale); }
@@ -1547,7 +1555,7 @@ input[type="number"].ao-input::-webkit-inner-spin-button { opacity: 0.3; }
 .ao-statblock { text-align: center; }
 .ao-statblock-label { margin-bottom: 4px; }
 .ao-statblock-mod { color: var(--ink-quiet); margin-top: 2px; }
-.ao-statblock-mod.is-neg { color: #d8896a; }
+.ao-statblock-mod.is-neg { color: var(--ember-pale); }
 
 /* DamageBadge */
 .ao-dmgbadge {
@@ -1572,17 +1580,17 @@ input[type="number"].ao-input::-webkit-inner-spin-button { opacity: 0.3; }
   font-family: var(--font-mono);
   font-size: 11px;
 }
-.ao-modtag--sm { gap: 4px; padding: 2px 6px; font-size: 10px; }
+.ao-modtag--sm { gap: 4px; padding: 2px 6px; font-size: var(--t-nano); }
 .ao-modtag-value { font-weight: 600; }
 .ao-modtag.is-pos {
-  color: #7a9866;
+  color: var(--moss);
   background: rgba(122, 152, 102, 0.08);
-  border: 1px solid #7a986655;
+  border: 1px solid color-mix(in srgb, var(--moss) 33%, transparent);
 }
 .ao-modtag.is-neg {
-  color: #d8896a;
+  color: var(--ember-pale);
   background: rgba(179, 70, 26, 0.08);
-  border: 1px solid #d8896a55;
+  border: 1px solid color-mix(in srgb, var(--ember-pale) 33%, transparent);
 }
 
 /* RoleBadge */
@@ -1595,7 +1603,7 @@ input[type="number"].ao-input::-webkit-inner-spin-button { opacity: 0.3; }
   border: 1px solid color-mix(in srgb, var(--role-color, var(--gold)) 33%, transparent);
   border-left: 2px solid var(--role-color, var(--gold));
   font-family: var(--font-display);
-  font-size: 10px;
+  font-size: var(--t-nano);
   letter-spacing: 0.16em;
   color: var(--role-color, var(--gold));
   text-transform: uppercase;
@@ -1613,7 +1621,7 @@ input[type="number"].ao-input::-webkit-inner-spin-button { opacity: 0.3; }
 }
 .ao-empty-overline { color: var(--ink-faint); }
 .ao-empty-title { color: var(--ink-quiet); }
-.ao-empty-body { font-size: 14px; color: var(--ink-faint); max-width: 320px; }
+.ao-empty-body { font-size: 14px; color: var(--ink-quiet); max-width: 320px; }
 .ao-empty-action { margin-top: 8px; }
 
 /* Placeholder */
@@ -1625,7 +1633,7 @@ input[type="number"].ao-input::-webkit-inner-spin-button { opacity: 0.3; }
   border: 1px solid var(--rule);
   color: var(--ink-ghost);
   font-family: var(--font-mono);
-  font-size: 9px;
+  font-size: var(--t-pico);
   text-transform: uppercase;
   letter-spacing: 0.1em;
   overflow: hidden;
@@ -1655,7 +1663,7 @@ input[type="number"].ao-input::-webkit-inner-spin-button { opacity: 0.3; }
   border-bottom: 1px solid var(--rule);
   background: linear-gradient(180deg, color-mix(in srgb, var(--accent, var(--gold)) 5%, transparent), transparent);
 }
-.ao-modal-codex { font-size: 10px; color: var(--ink-faint); margin-bottom: 6px; }
+.ao-modal-codex { font-size: var(--t-nano); color: var(--ink-faint); margin-bottom: 6px; }
 .ao-modal-overline { color: var(--accent, var(--gold)); margin-bottom: 6px; }
 .ao-modal-titlerow { display: flex; align-items: center; gap: 10px; }
 .ao-modal-rune {
@@ -1722,3 +1730,65 @@ input[type="number"].ao-input::-webkit-inner-spin-button { opacity: 0.3; }
   border: 1px solid color-mix(in srgb, var(--accent, var(--gold)) 40%, transparent);
 }
 .ao-actionbtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ============================================================
+   ACCESSIBILITY — focus visibility, reduced motion, touch targets
+   Centralized layer so every interactive primitive inherits a
+   consistent, on-brand keyboard-focus ring without touching each
+   component. The ring reuses the heraldic gold accent.
+   ============================================================ */
+
+/* ── Keyboard focus ring ──────────────────────────────────────
+   Text inputs already show a box-shadow ring via :focus (.ao-input,
+   .forge-cell, .forge-coin-in), so they are excluded here to avoid a
+   doubled indicator. Everything else interactive — buttons, tabs,
+   nav, selectable cards, range slider, borderless number fields —
+   gets a clear outline on :focus-visible (keyboard only). */
+button:focus-visible,
+a:focus-visible,
+[role='button']:focus-visible,
+[role='tab']:focus-visible,
+[role='option']:focus-visible,
+[role='checkbox']:focus-visible,
+[role='radio']:focus-visible,
+[tabindex]:not([tabindex='-1']):focus-visible,
+.cb-range:focus-visible,
+.forge-score:focus-visible,
+.forge-defnum--in:focus-visible {
+  outline: 2px solid var(--gold-pale);
+  outline-offset: 2px;
+}
+
+/* Wrapper-level focus for the spell search (its input has no border). */
+.wiz-search:focus-within {
+  border-color: var(--brass);
+  box-shadow: 0 0 0 1px rgba(176, 141, 78, 0.2);
+}
+
+/* ── Respect reduced-motion globally ──────────────────────────
+   Users who ask for less motion get near-instant transitions and no
+   looping ambient animation (flicker, breathe, pulse, shimmer). */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ── Touch targets ≥44px on coarse pointers ───────────────────
+   Desktop visuals are unchanged; on touch devices the smallest
+   icon/step controls grow to a comfortable tap size. */
+@media (pointer: coarse) {
+  .ao-iconbtn,
+  .ao-stepbtn,
+  .forge-del,
+  .wiz-spell-pick,
+  .cb-topbar-back {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  .ao-btn--sm { min-height: 40px; }
+  .ao-tab { min-height: 44px; }
+}

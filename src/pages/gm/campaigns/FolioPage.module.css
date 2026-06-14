@@ -72,8 +72,30 @@
 .titleOverline { color: var(--gold); }
 .titleRow { display: flex; align-items: center; gap: 10px; margin-top: 4px; flex-wrap: wrap; }
 .titleCodex { margin-top: 6px; }
-.headerActions { display: flex; gap: 10px; align-items: center; }
+.headerActions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 .btnLabel { margin-left: 6px; }
+
+/* Mobile-only sticky section nav; hidden on desktop, revealed ≤768. */
+.sectionNav { display: none; }
+.sectionNavLink {
+  flex: 0 0 auto;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--track-eng);
+  font-size: var(--t-micro);
+  color: var(--ink-quiet);
+  text-decoration: none;
+  padding: 12px 14px;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+.sectionNavLink:active {
+  color: var(--gold-pale);
+  border-bottom-color: var(--gold);
+}
 
 /* ── header row grid ─────────────────────────────────────────── */
 .headerGrid { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 18px; }
@@ -180,3 +202,67 @@
 .markName { font-size: 13px; color: var(--ink-bright); }
 .markStat { display: block; font-size: 10px; color: var(--ink-faint); }
 .markRounds { font-size: 11px; color: var(--ink-quiet); }
+
+/* ── mobile reorganization ───────────────────────────────────────
+   The folio is one long scroll on phones. Desktop is left untouched;
+   we only retune the sub-grids that would otherwise stack into very
+   tall single columns, and fix a fixed-width panel that overflowed.
+   .idGrid4 / .savesGrid keep 2-up on mobile via the ao-rgrid--keep2
+   escape hatch (added in the markup), so no rule is needed here. */
+@media (max-width: 768px) {
+  /* Sticky section nav pins under the app header and lets players jump
+     across the long folio; mirrors the .ao-tabs look (horizontal scroll). */
+  .sectionNav {
+    display: flex;
+    overflow-x: auto;
+    scrollbar-width: none;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    margin: 0 0 16px;
+    background: var(--stone);
+    border-bottom: 1px solid var(--rule);
+  }
+  .sectionNav::-webkit-scrollbar { display: none; }
+
+  /* Keep jumped-to sections clear of the sticky nav strip. */
+  .headerGrid,
+  .threeGrid,
+  .dividerWrap,
+  .tabsWrap { scroll-margin-top: 60px; }
+
+  /* Abilities: 6 stat tiles in a compact 3-up grid; the saving-throws
+     panel (last grid child) spans full width beneath them. The
+     compound .statGrid.abilityGrid (0,2,0)+!important beats ao-rgrid. */
+  .statGrid.abilityGrid {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 8px;
+  }
+  .statGrid.abilityGrid > :last-child { grid-column: 1 / -1; }
+
+  /* Ability-check reveal panel had a fixed 380px width → overflow. */
+  .checkPanel { width: 100%; }
+}
+
+@media (max-width: 560px) {
+  /* Header actions take the full row and split it evenly; if both
+     buttons can't fit side-by-side they wrap to full-width rows
+     (≥44px tap targets) instead of running off-screen. */
+  .headerActions { width: 100%; }
+  .headerActions > button { flex: 1 1 auto; justify-content: center; }
+
+  /* Identity: stack the portrait above the details so the 2×2 id grid
+     and the name get the full width instead of being squeezed. */
+  .idBody { flex-direction: column; align-items: center; }
+  .idMain { width: 100%; }
+  /* The display name is a hardcoded 32px (not a token) → trim it so a
+     long name doesn't dominate or overflow the stacked card. */
+  .idName { font-size: 24px; }
+
+  /* Level/HP/XP rail stacks to one column: swap the vertical dividers
+     for horizontal ones so the rows read cleanly. */
+  .railLevel, .railHp {
+    border-right: none;
+    border-bottom: 1px solid var(--rule);
+  }
+}

@@ -19,11 +19,11 @@
 .overlineGold { color: var(--gold); }
 .titleRow { display: flex; align-items: center; gap: 12px; margin-top: 4px; }
 .desc { color: var(--ink-faint); font-size: 13px; margin-top: 6px; }
-.headerActions { display: flex; align-items: center; gap: 10px; }
+.headerActions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .ml6 { margin-left: 6px; }
 .ml4 { margin-left: 4px; }
 
-.statsRow { display: flex; justify-content: flex-start; gap: 36px; margin-bottom: 24px; }
+.statsRow { display: flex; flex-wrap: wrap; justify-content: flex-start; gap: 36px; margin-bottom: 24px; }
 .stat { text-align: center; }
 .valGold { color: var(--gold); }
 .valArcane { color: var(--arcane); }
@@ -50,7 +50,18 @@
   padding: 10px 16px; border-bottom: 1px solid var(--hairline);
 }
 .charMain { flex: 1; min-width: 0; }
-.charNameRow { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+.charNameRow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 4px; }
 .charName { font-size: 13px; }
 .charMeta { font-size: 10px; color: var(--ink-faint); }
 .charHp { font-size: 11px; color: var(--ink-quiet); flex-shrink: 0; }
+
+/* ── mobile ──────────────────────────────────────────────── */
+@media (max-width: 560px) {
+  .statsRow { gap: 16px 28px; }
+}
+
+@media (max-width: 420px) {
+  .charRow { flex-wrap: wrap; }
+  .charMain { flex-basis: 100%; }
+  .charHp { margin-left: auto; }
+}

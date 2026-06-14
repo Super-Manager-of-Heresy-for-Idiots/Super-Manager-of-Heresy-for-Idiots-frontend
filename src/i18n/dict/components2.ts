@@ -30,6 +30,7 @@ export const components2: DictModule = {
     'cmp2.crud.actions': 'Действия',
     'cmp2.crud.noItems': 'Записей не найдено',
     'cmp2.crud.clickToCreate': 'Нажмите «{label}», чтобы создать запись',
+    'cmp2.crud.loadError': 'Не удалось загрузить записи.',
     'cmp2.crud.areYouSure': 'Вы уверены?',
     'cmp2.crud.deleteWarning': 'Это действие нельзя отменить. Запись будет удалена безвозвратно.',
 
@@ -291,6 +292,7 @@ export const components2: DictModule = {
     'cmp2.crud.actions': 'Actions',
     'cmp2.crud.noItems': 'No items found',
     'cmp2.crud.clickToCreate': 'Click "{label}" to create one',
+    'cmp2.crud.loadError': 'Failed to load records.',
     'cmp2.crud.areYouSure': 'Are you sure?',
     'cmp2.crud.deleteWarning': 'This action cannot be undone. This will permanently delete this item.',
 

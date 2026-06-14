@@ -447,8 +447,17 @@ export default function FolioPage() {
         </div>
       </div>
 
+      {/* ── Mobile section nav (sticky in-page jumps) ──────────── */}
+      <nav className={s.sectionNav} aria-label={t('camp2.folio.nav.label')}>
+        <a className={s.sectionNavLink} href="#folio-identity">{t('camp2.folio.nav.identity')}</a>
+        <a className={s.sectionNavLink} href="#folio-holdings">{t('camp2.folio.nav.holdings')}</a>
+        <a className={s.sectionNavLink} href="#folio-abilities">{t('camp2.folio.nav.abilities')}</a>
+        <a className={s.sectionNavLink} href="#folio-proficiencies">{t('camp2.folio.nav.proficiencies')}</a>
+        <a className={s.sectionNavLink} href="#folio-codex">{t('camp2.folio.nav.codex')}</a>
+      </nav>
+
       {/* ── HEADER ROW: Identity + Oath ────────────────────────── */}
-      <div className={cn('ao-rgrid', s.headerGrid)}>
+      <div id="folio-identity" className={cn('ao-rgrid', s.headerGrid)}>
         {/* Identity */}
         <OrdoPanel frame padding={0}>
           <div className={s.idBody}>
@@ -474,7 +483,7 @@ export default function FolioPage() {
 
               <OrdoDivider glyph="diamond-fill" color="var(--bronze)" />
 
-              <div className={cn('ao-rgrid', s.idGrid4)}>
+              <div className={cn('ao-rgrid', 'ao-rgrid--keep2', s.idGrid4)}>
                 <IdentityField label={t('camp2.folio.id.label')} value={primaryClass?.className ?? t('camp2.folio.unclassed')} sub={primaryClass ? t('camp2.folio.id.level', { level: primaryClass.classLevel }) : NA} />
                 <IdentityField label={t('camp2.folio.id.race')} value={character.race?.name ?? t('camp2.folio.unknown')} sub={lineageName ?? (character.race?.description ? character.race.description.slice(0, 28) : NA)} />
                 <IdentityField label={t('camp2.folio.id.size')} value={snap ? gt.size(snap.size) : NA} sub={snap?.darkvisionRange ? t('camp2.folio.darkvision', { range: snap.darkvisionRange }) : t('camp2.folio.noDarkvision')} />
@@ -526,7 +535,7 @@ export default function FolioPage() {
         {/* Saves & Tier — not served by API */}
         <OrdoPanel frame padding={0} className={s.savesPanel}>
           <PanelHeader title={t('camp2.folio.savesTier')} glyph="helm" tone="gold" />
-          <div className={cn('ao-rgrid', s.savesGrid)}>
+          <div className={cn('ao-rgrid', 'ao-rgrid--keep2', s.savesGrid)}>
             {[
               { label: t('camp2.folio.armour'), value: armorClass != null ? `${armorClass}` : NA },
               { label: t('camp2.folio.init'), value: initiative != null ? fmtMod(initiative) : NA },
@@ -544,7 +553,7 @@ export default function FolioPage() {
       </div>
 
       {/* ── TREASURY · ARSENAL · RESOURCES ──────────────────────── */}
-      <div className={cn('ao-rgrid', s.threeGrid)}>
+      <div id="folio-holdings" className={cn('ao-rgrid', s.threeGrid)}>
         {/* Treasury · Coin */}
         <OrdoPanel frame padding={0}>
           <PanelHeader
@@ -664,11 +673,11 @@ export default function FolioPage() {
       </div>
 
       {/* ── ABILITIES & COMBAT ─────────────────────────────────── */}
-      <div className={s.dividerWrap}>
+      <div id="folio-abilities" className={s.dividerWrap}>
         <OrdoDivider glyph="diamond-fill" color="var(--bronze)">{t('camp2.folio.abilitiesCombat')}</OrdoDivider>
       </div>
 
-      <div className={cn('ao-rgrid', s.statGrid)}>
+      <div className={cn('ao-rgrid', s.statGrid, s.abilityGrid)}>
         {stats.length === 0 && (
           <p className={cn('ao-italic', s.spanAll)}>
             {t('camp2.folio.noAbilities')}
@@ -732,7 +741,7 @@ export default function FolioPage() {
       )}
 
       {/* ── PROFICIENCIES & SKILLS (read-only mirror of the forge) ─ */}
-      <div className={s.dividerWrap}>
+      <div id="folio-proficiencies" className={s.dividerWrap}>
         <OrdoDivider glyph="diamond-fill" color="var(--bronze)">{t('camp2.folio.profSection')}</OrdoDivider>
       </div>
 
@@ -810,7 +819,7 @@ export default function FolioPage() {
       </div>
 
       {/* ── TABS ───────────────────────────────────────────────── */}
-      <div className={s.tabsWrap}>
+      <div id="folio-codex" className={s.tabsWrap}>
         <div className="ao-tabs">
           {TABS.map((tabDef) => (
             <button key={tabDef.id} className={cn('ao-tab', tab === tabDef.id && 'is-active')} onClick={() => setTab(tabDef.id)}>

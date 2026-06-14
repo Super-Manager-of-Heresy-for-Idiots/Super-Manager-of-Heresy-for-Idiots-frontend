@@ -339,7 +339,7 @@ export default function InventoryPage() {
         <PageHeader name={character?.name} slotsFilled={0} held={0} />
         <div className={cn('ao-panel ao-frame ao-breathe', s.skelPanel)}>
           <span className="ao-frame-c" />
-          <div className={cn('ao-rgrid', s.cellGrid)}>
+          <div className={cn('ao-rgrid', s.cellGrid, s.slotGrid)}>
             {Array.from({ length: 18 }).map((_, i) => (
               <div key={i} className={cn('ao-ph', s.phCell)} />
             ))}
@@ -430,7 +430,7 @@ export default function InventoryPage() {
 
             <OrdoDivider glyph="diamond-fill" color="var(--rule)">{t('camp2.inv.loadout')}</OrdoDivider>
 
-            <div className={cn('ao-rgrid', s.quad)}>
+            <div className={cn('ao-rgrid', s.quad, s.slotGrid)}>
               {SLOT_LAYOUT.map(({ slot, glyph }) => {
                 const it = equippedBySlot.get(slot);
                 const isSel = it != null && it.id === selectedId;
@@ -504,7 +504,7 @@ export default function InventoryPage() {
               </div>
             )}
 
-            <div className={cn('ao-rgrid', s.cellGrid)}>
+            <div className={cn('ao-rgrid', s.cellGrid, s.slotGrid)}>
               {Array.from({ length: Math.max(BAG_MIN_CELLS, filteredBag.length) }).map((_, i) => {
                 const item = filteredBag[i];
                 if (!item) return <div key={i} className={cn('ao-slot', s.phCell)} />;
@@ -541,7 +541,7 @@ export default function InventoryPage() {
             <OrdoDivider glyph="diamond-fill" color="var(--rule)">{t('camp2.inv.coinWealth')}</OrdoDivider>
 
             {wallet && wallet.length > 0 ? (
-              <div className={cn('ao-rgrid', s.quad)}>
+              <div className={cn('ao-rgrid', 'ao-rgrid--keep2', s.quad)}>
                 {wallet.map((c) => {
                   const color = COIN_COLOR[c.currencyName.toLowerCase()] ?? 'var(--gold-pale)';
                   return (
@@ -847,7 +847,7 @@ function RelicDetail({
 
       <OrdoDivider glyph="diamond-fill" color="var(--rule)" />
 
-      <div className={cn('ao-rgrid', s.statGrid)}>
+      <div className={cn('ao-rgrid', 'ao-rgrid--keep2', s.statGrid)}>
         {stats.map((st) => (
           <div key={st.label}>
             <div className="ao-overline">{st.label}</div>

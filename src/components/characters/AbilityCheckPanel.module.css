@@ -1,5 +1,9 @@
 .panel { width: 380px; }
 
+@media (max-width: 768px) {
+  .panel { width: 100%; }
+}
+
 .empty {
   padding: 32px;
   text-align: center;

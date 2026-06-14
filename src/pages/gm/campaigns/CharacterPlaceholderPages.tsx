@@ -53,49 +53,6 @@ function CharacterFeaturePlaceholder({ overline, title, glyph, todo, details }: 
   );
 }
 
-// Roster page links to dashboard, not character.
-function CampaignFeaturePlaceholder({ overline, title, glyph, todo, details }: PlaceholderSpec) {
-  const t = useT();
-  const { campaignId } = useParams<{ campaignId: string }>();
-  return (
-    <div>
-      <BackLink to={`/campaigns/${campaignId}`} label={t('camp.backToCampaign')} className={s.backLink} />
-      <OrdoPanel frame padding={0}>
-        <PanelHeader title={title} glyph={glyph} tone="gold" sub={t('camp.ph.scopedCampaign')} />
-        <div className={s.body}>
-          <p className={cn('ao-overline', s.overlineGold)}>{overline}</p>
-          <h3 className={cn('ao-h3', s.todoTitle)}>{t('camp.ph.todoPrefix')}{todo}</h3>
-          <div className={s.detailGrid}>
-            {details.map((detail) => (
-              <div key={detail} className={s.detailRow}>
-                <Rune kind="diamond-fill" size={8} color="var(--gold)" />
-                <span>{detail}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </OrdoPanel>
-    </div>
-  );
-}
-
-export function CampaignRosterPage() {
-  const t = useT();
-  return (
-    <CampaignFeaturePlaceholder
-      overline={t('camp.ph.roster.overline')}
-      title={t('camp.ph.roster.title')}
-      glyph="helm"
-      todo={t('camp.ph.roster.todo')}
-      details={[
-        t('camp.ph.roster.d1'),
-        t('camp.ph.roster.d2'),
-        t('camp.ph.roster.d3'),
-      ]}
-    />
-  );
-}
-
 export function CharacterEditPage() {
   const t = useT();
   return (
