@@ -188,7 +188,7 @@ export default function BalanceManagementPage() {
 
   return (
     <div>
-      <BackLink to={`/campaigns/${campaignId}`} label={t('camp.backToDashboard')} className={s.backLink} />
+      <BackLink to={`/campaigns/${campaignId}`} label={t('camp2.back.campaign')} className={s.backLink} />
 
       {/* Header */}
       <div className={s.headerBlock}>

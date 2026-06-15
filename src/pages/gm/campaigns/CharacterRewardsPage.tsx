@@ -1,5 +1,6 @@
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Trophy } from 'lucide-react';
+import { Trophy } from 'lucide-react';
+import { BackLink } from '@/components/campaigns';
 import { useT } from '@/i18n/I18nContext';
 import { OrdoPanel, PanelHeader, OrdoDivider } from '@/components/ordo';
 import { useCharacterRewards } from '@/hooks/useLevelUp';
@@ -57,9 +58,7 @@ export default function CharacterRewardsPage() {
             </p>
           )}
         </div>
-        <button className="ao-btn ao-btn--ghost" onClick={back}>
-          <ArrowLeft className="h-3 w-3" /> {t('camp.backToCharacter')}
-        </button>
+        <BackLink to={`/campaigns/${campaignId}/characters/${characterId}`} label={t('camp2.back.character')} size="md" />
       </div>
 
       {data.classBreakdown.length === 0 ? (

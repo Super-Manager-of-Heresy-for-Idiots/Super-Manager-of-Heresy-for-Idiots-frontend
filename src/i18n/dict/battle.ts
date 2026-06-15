@@ -1,0 +1,236 @@
+import type { DictModule } from '../translations';
+
+/**
+ * "Бой" (Battle) feature — campaign battle tab: assembly wizard, initiative
+ * join, turn tracker, and the player action panel. UI chrome only.
+ */
+export const battle: DictModule = {
+  ru: {
+    /* ── Tab + status ───────────────────────────────────── */
+    'battle.tabLabel': 'Бой',
+    'battle.status.ASSEMBLING': 'Сбор',
+    'battle.status.ACTIVE': 'Идёт бой',
+    'battle.status.COMPLETED': 'Завершён',
+
+    /* ── Empty / start ──────────────────────────────────── */
+    'battle.empty.player.title': 'Боя пока нет',
+    'battle.empty.player.body': 'Когда Мастер начнёт сражение, оно появится здесь.',
+    'battle.empty.gm.title': 'Сражений нет',
+    'battle.empty.gm.body': 'Соберите отряд противников и начните новый бой.',
+    'battle.start': 'Начать бой',
+    'battle.create.title': 'Новый бой',
+    'battle.create.namePlaceholder': 'Название сражения',
+    'battle.create.confirm': 'Создать',
+    'battle.create.cancel': 'Отмена',
+    'battle.create.defaultName': 'Новое сражение',
+
+    /* ── Assembly (GM) ──────────────────────────────────── */
+    'battle.assembly.title': 'Сбор боя',
+    'battle.assembly.groupTitle': 'Отряд противников',
+    'battle.assembly.monstersTitle': 'Бестиарий',
+    'battle.assembly.empty': 'Добавьте монстров из списка справа.',
+    'battle.assembly.add': 'Добавить',
+    'battle.assembly.remove': 'Убрать',
+    'battle.assembly.confirmStart': 'Начать бой',
+    'battle.assembly.cancelBattle': 'Отменить сбор',
+    'battle.assembly.searchPlaceholder': 'Поиск монстра…',
+    'battle.assembly.campaignMonsters': 'Монстры кампании',
+    'battle.assembly.publicMonsters': 'Общий бестиарий',
+    'battle.assembly.noMonsters': 'Монстры не найдены.',
+    'battle.assembly.needMonsters': 'Добавьте хотя бы одного монстра',
+
+    /* ── Stats preview ──────────────────────────────────── */
+    'battle.stats.avgDanger': 'Ср. опасность',
+    'battle.stats.totalXp': 'Всего опыта',
+    'battle.stats.monsters': 'Монстров',
+    'battle.stats.xpOverride': 'Опыт за бой',
+    'battle.stats.xpAuto': 'Авто',
+    'battle.stats.xpEditHint': 'Можно изменить вручную',
+    'battle.stats.resetXp': 'Сбросить',
+    'battle.stats.cr': 'CR',
+
+    /* ── Tracker ────────────────────────────────────────── */
+    'battle.tracker.title': 'Очередь хода',
+    'battle.tracker.round': 'Раунд {n}',
+    'battle.tracker.current': 'Сейчас ходит',
+    'battle.tracker.init': 'Иниц.',
+    'battle.tracker.empty': 'Пока никто не присоединился к бою.',
+    'battle.tracker.you': 'Вы',
+    'battle.tracker.monster': 'Монстр',
+    'battle.tracker.waiting': 'Ожидание игроков…',
+    'battle.tracker.hp': 'ОЗ',
+
+    /* ── Join (player) ──────────────────────────────────── */
+    'battle.join.title': 'Вступить в бой',
+    'battle.join.pickCharacter': 'Выберите персонажа',
+    'battle.join.noCharacters': 'У вас нет персонажей в этой кампании.',
+    'battle.join.initiative': 'Инициатива',
+    'battle.join.rollDie': 'Бросить кубик',
+    'battle.join.manualHint': 'Введите результат или бросьте d20',
+    'battle.join.confirm': 'Вступить',
+    'battle.join.addAnother': 'Добавить ещё персонажа',
+    'battle.join.allJoined': 'Все ваши персонажи уже в бою.',
+
+    /* ── Player action panel ────────────────────────────── */
+    'battle.action.title': 'Ваш ход',
+    'battle.action.resources': 'Ресурсы',
+    'battle.action.abilities': 'Способности',
+    'battle.action.spells': 'Заклинания',
+    'battle.action.attacks': 'Атаки',
+    'battle.action.effects': 'Активные эффекты',
+    'battle.action.endTurn': 'Закончить ход',
+    'battle.action.noResources': 'Нет ресурсов',
+    'battle.action.noAbilities': 'Нет доступных способностей',
+    'battle.action.notYourTurn': 'Сейчас не ваш ход',
+    'battle.action.waitingTurn': 'Дождитесь своей очереди',
+    'battle.action.spell.level': 'Ур. {n}',
+    'battle.action.spell.cantrip': 'Заговор',
+
+    /* ── GM active controls ─────────────────────────────── */
+    'battle.gm.controls': 'Управление боем',
+    'battle.gm.endTurn': 'Следующий ход',
+    'battle.gm.endBattle': 'Завершить бой',
+    'battle.gm.currentTurnOf': 'Ходит: {name}',
+    'battle.gm.endBattleConfirm': 'Завершить бой? Отменить это действие нельзя.',
+
+    /* ── Completed ──────────────────────────────────────── */
+    'battle.completed.title': 'Бой завершён',
+    'battle.completed.body': 'Сражение окончено.',
+    'battle.completed.newBattle': 'Новый бой',
+
+    /* ── Mobile section switch ──────────────────────────── */
+    'battle.section.group': 'Отряд',
+    'battle.section.bestiary': 'Бестиарий',
+    'battle.section.tracker': 'Очередь',
+    'battle.section.action': 'Действия',
+
+    /* ── Toasts ─────────────────────────────────────────── */
+    'battle.toast.created': 'Бой создан',
+    'battle.toast.createFailed': 'Не удалось создать бой',
+    'battle.toast.monsterAddFailed': 'Не удалось добавить монстра',
+    'battle.toast.removeFailed': 'Не удалось убрать участника',
+    'battle.toast.xpFailed': 'Не удалось изменить опыт',
+    'battle.toast.started': 'Бой начался',
+    'battle.toast.startFailed': 'Не удалось начать бой',
+    'battle.toast.joined': 'Вы вступили в бой',
+    'battle.toast.joinFailed': 'Не удалось вступить в бой',
+    'battle.toast.turnEndFailed': 'Не удалось завершить ход',
+    'battle.toast.ended': 'Бой завершён',
+    'battle.toast.endFailed': 'Не удалось завершить бой',
+    'battle.toast.dieRolled': 'Выпало: {n}',
+  },
+  en: {
+    /* ── Tab + status ───────────────────────────────────── */
+    'battle.tabLabel': 'Battle',
+    'battle.status.ASSEMBLING': 'Assembling',
+    'battle.status.ACTIVE': 'In progress',
+    'battle.status.COMPLETED': 'Completed',
+
+    /* ── Empty / start ──────────────────────────────────── */
+    'battle.empty.player.title': 'No battle yet',
+    'battle.empty.player.body': 'When the GM starts an encounter, it will appear here.',
+    'battle.empty.gm.title': 'No battles',
+    'battle.empty.gm.body': 'Assemble an enemy group and start a new battle.',
+    'battle.start': 'Start battle',
+    'battle.create.title': 'New battle',
+    'battle.create.namePlaceholder': 'Battle name',
+    'battle.create.confirm': 'Create',
+    'battle.create.cancel': 'Cancel',
+    'battle.create.defaultName': 'New encounter',
+
+    /* ── Assembly (GM) ──────────────────────────────────── */
+    'battle.assembly.title': 'Assembling battle',
+    'battle.assembly.groupTitle': 'Enemy group',
+    'battle.assembly.monstersTitle': 'Bestiary',
+    'battle.assembly.empty': 'Add monsters from the list on the right.',
+    'battle.assembly.add': 'Add',
+    'battle.assembly.remove': 'Remove',
+    'battle.assembly.confirmStart': 'Start battle',
+    'battle.assembly.cancelBattle': 'Cancel assembly',
+    'battle.assembly.searchPlaceholder': 'Search monster…',
+    'battle.assembly.campaignMonsters': 'Campaign monsters',
+    'battle.assembly.publicMonsters': 'Public bestiary',
+    'battle.assembly.noMonsters': 'No monsters found.',
+    'battle.assembly.needMonsters': 'Add at least one monster',
+
+    /* ── Stats preview ──────────────────────────────────── */
+    'battle.stats.avgDanger': 'Avg. danger',
+    'battle.stats.totalXp': 'Total XP',
+    'battle.stats.monsters': 'Monsters',
+    'battle.stats.xpOverride': 'Battle XP',
+    'battle.stats.xpAuto': 'Auto',
+    'battle.stats.xpEditHint': 'Editable',
+    'battle.stats.resetXp': 'Reset',
+    'battle.stats.cr': 'CR',
+
+    /* ── Tracker ────────────────────────────────────────── */
+    'battle.tracker.title': 'Turn order',
+    'battle.tracker.round': 'Round {n}',
+    'battle.tracker.current': 'Current turn',
+    'battle.tracker.init': 'Init',
+    'battle.tracker.empty': 'No one has joined the battle yet.',
+    'battle.tracker.you': 'You',
+    'battle.tracker.monster': 'Monster',
+    'battle.tracker.waiting': 'Waiting for players…',
+    'battle.tracker.hp': 'HP',
+
+    /* ── Join (player) ──────────────────────────────────── */
+    'battle.join.title': 'Join battle',
+    'battle.join.pickCharacter': 'Choose a character',
+    'battle.join.noCharacters': 'You have no characters in this campaign.',
+    'battle.join.initiative': 'Initiative',
+    'battle.join.rollDie': 'Roll die',
+    'battle.join.manualHint': 'Enter a value or roll a d20',
+    'battle.join.confirm': 'Join',
+    'battle.join.addAnother': 'Add another character',
+    'battle.join.allJoined': 'All your characters are already in the battle.',
+
+    /* ── Player action panel ────────────────────────────── */
+    'battle.action.title': 'Your turn',
+    'battle.action.resources': 'Resources',
+    'battle.action.abilities': 'Abilities',
+    'battle.action.spells': 'Spells',
+    'battle.action.attacks': 'Attacks',
+    'battle.action.effects': 'Active effects',
+    'battle.action.endTurn': 'End turn',
+    'battle.action.noResources': 'No resources',
+    'battle.action.noAbilities': 'No abilities available',
+    'battle.action.notYourTurn': 'Not your turn',
+    'battle.action.waitingTurn': 'Wait for your turn',
+    'battle.action.spell.level': 'Lvl {n}',
+    'battle.action.spell.cantrip': 'Cantrip',
+
+    /* ── GM active controls ─────────────────────────────── */
+    'battle.gm.controls': 'Battle controls',
+    'battle.gm.endTurn': 'Next turn',
+    'battle.gm.endBattle': 'End battle',
+    'battle.gm.currentTurnOf': 'Current: {name}',
+    'battle.gm.endBattleConfirm': 'End the battle? This cannot be undone.',
+
+    /* ── Completed ──────────────────────────────────────── */
+    'battle.completed.title': 'Battle completed',
+    'battle.completed.body': 'The encounter is over.',
+    'battle.completed.newBattle': 'New battle',
+
+    /* ── Mobile section switch ──────────────────────────── */
+    'battle.section.group': 'Group',
+    'battle.section.bestiary': 'Bestiary',
+    'battle.section.tracker': 'Turn order',
+    'battle.section.action': 'Actions',
+
+    /* ── Toasts ─────────────────────────────────────────── */
+    'battle.toast.created': 'Battle created',
+    'battle.toast.createFailed': 'Failed to create battle',
+    'battle.toast.monsterAddFailed': 'Failed to add monster',
+    'battle.toast.removeFailed': 'Failed to remove combatant',
+    'battle.toast.xpFailed': 'Failed to update XP',
+    'battle.toast.started': 'Battle started',
+    'battle.toast.startFailed': 'Failed to start battle',
+    'battle.toast.joined': 'You joined the battle',
+    'battle.toast.joinFailed': 'Failed to join battle',
+    'battle.toast.turnEndFailed': 'Failed to end turn',
+    'battle.toast.ended': 'Battle ended',
+    'battle.toast.endFailed': 'Failed to end battle',
+    'battle.toast.dieRolled': 'Rolled: {n}',
+  },
+};

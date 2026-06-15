@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import { OrdoPanel, PanelHeader, Rune, OrdoDivider } from '@/components/ordo';
 import {
@@ -12,6 +12,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { BackLink } from '@/components/campaigns';
 import { useCampaignInviteCode, useRegenerateCampaignInvite } from '@/hooks/useCampaigns';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
@@ -22,7 +23,6 @@ import s from './CampaignInvitePage.module.css';
 export default function CampaignInvitePage() {
   const t = useT();
   const { campaignId } = useParams<{ campaignId: string }>();
-  const navigate = useNavigate();
   const { data: inviteData, isLoading, error, refetch } = useCampaignInviteCode(campaignId!);
   const regenerateMutation = useRegenerateCampaignInvite();
 
@@ -83,14 +83,7 @@ export default function CampaignInvitePage() {
 
   return (
     <div>
-      {/* Back button */}
-      <button
-        className={cn('ao-btn ao-btn--ghost ao-btn--sm', s.backBtn)}
-        onClick={() => navigate(`/campaigns/${campaignId}`)}
-      >
-        <Rune kind="chev-l" size={12} color="currentColor" />
-        <span className={s.ml4}>{t('camp.backToDashboard')}</span>
-      </button>
+      <BackLink to={`/campaigns/${campaignId}`} label={t('camp2.back.campaign')} className={s.backBtn} />
 
       {/* Header */}
       <div className={s.header}>

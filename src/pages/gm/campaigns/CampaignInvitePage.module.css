@@ -10,7 +10,7 @@
 .errorBlock { text-align: center; padding: 48px 0; }
 .errorText { color: var(--ink-faint); margin-bottom: 16px; }
 
-.backBtn { margin-bottom: 16px; }
+.backBtn { margin-bottom: 12px; }
 .ml4 { margin-left: 4px; }
 .ml6 { margin-left: 6px; }
 

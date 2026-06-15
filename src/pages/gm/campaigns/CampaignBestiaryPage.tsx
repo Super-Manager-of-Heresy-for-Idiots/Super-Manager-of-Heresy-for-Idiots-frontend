@@ -117,7 +117,7 @@ export default function CampaignBestiaryPage() {
     <div className={s.page}>
       <header className={s.header}>
         <div className={s.headerMain}>
-          <BackLink to={`/campaigns/${campaignId}`} label={t('camp.backToDashboard')} />
+          <BackLink to={`/campaigns/${campaignId}`} label={t('camp2.back.campaign')} />
           <Diamond size={9} />
           <div>
             <div className={s.headerTitle}>{t('best.cmp.title')}</div>

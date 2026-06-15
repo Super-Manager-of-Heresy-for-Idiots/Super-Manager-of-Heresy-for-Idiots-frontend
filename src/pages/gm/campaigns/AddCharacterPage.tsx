@@ -63,7 +63,7 @@ export default function AddCharacterPage() {
 
   return (
     <div>
-      <BackLink to={`/campaigns/${campaignId}`} label={t('camp.backToCampaign')} className={s.backLink} />
+      <BackLink to={`/campaigns/${campaignId}`} label={t('camp2.back.campaign')} className={s.backLink} />
 
       <div className={s.header}>
         <p className={cn('ao-overline', s.overlineGold)}>{t('camp.add.overline')}</p>

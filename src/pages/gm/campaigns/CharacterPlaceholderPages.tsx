@@ -24,7 +24,7 @@ function CharacterFeaturePlaceholder({ overline, title, glyph, todo, details }: 
 
   return (
     <div>
-      <BackLink to={backTo} label={t('camp.backToCharacter')} className={s.backLink} />
+      <BackLink to={backTo} label={t('camp2.back.character')} className={s.backLink} />
       <OrdoPanel frame padding={0}>
         <PanelHeader
           title={title}

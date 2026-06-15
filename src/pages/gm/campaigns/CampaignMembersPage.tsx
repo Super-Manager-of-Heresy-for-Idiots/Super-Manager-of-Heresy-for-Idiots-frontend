@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import { OrdoPanel, PanelHeader, Rune, OrdoChip, EmptyVault } from '@/components/ordo';
 import {
@@ -12,6 +12,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { BackLink } from '@/components/campaigns';
 import { useCampaign, useKickMember } from '@/hooks/useCampaigns';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
@@ -23,7 +24,6 @@ import s from './CampaignMembersPage.module.css';
 export default function CampaignMembersPage() {
   const t = useT();
   const { campaignId } = useParams<{ campaignId: string }>();
-  const navigate = useNavigate();
   const { data: campaign, isLoading, error, refetch } = useCampaign(campaignId!);
   const kickMutation = useKickMember();
 
@@ -79,14 +79,7 @@ export default function CampaignMembersPage() {
 
   return (
     <div>
-      {/* Back button */}
-      <button
-        className={cn('ao-btn ao-btn--ghost ao-btn--sm', s.backBtn)}
-        onClick={() => navigate(`/campaigns/${campaignId}`)}
-      >
-        <Rune kind="chev-l" size={12} color="currentColor" />
-        <span className={s.ml4}>{t('camp.backToDashboard')}</span>
-      </button>
+      <BackLink to={`/campaigns/${campaignId}`} label={t('camp2.back.campaign')} className={s.backBtn} />
 
       {/* Header */}
       <div className={s.header}>

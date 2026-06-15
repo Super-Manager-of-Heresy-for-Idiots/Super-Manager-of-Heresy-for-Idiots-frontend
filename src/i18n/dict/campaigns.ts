@@ -6,10 +6,6 @@ export const campaigns: DictModule = {
     /* ── Shared ─────────────────────────────────────── */
     'camp.retry': 'Повторить',
     'camp.back': '← Назад',
-    'camp.backToCampaign': 'К кампании',
-    'camp.backToCampaigns': 'К кампаниям',
-    'camp.backToCharacter': 'К персонажу',
-    'camp.backToDashboard': 'Назад к панели',
 
     /* ── CampaignListPage ───────────────────────────── */
     'camp.list.access.overline': 'Доступ к Кампании',
@@ -98,7 +94,6 @@ export const campaigns: DictModule = {
     'camp.mgmt.unknownClass': 'Неизвестно',
     'camp.mgmt.overline': 'Управление персонажем',
     'camp.mgmt.owner': 'Владелец: {name}',
-    'camp.mgmt.campaign': 'Кампания',
     'camp.mgmt.status': 'СОСТОЯНИЕ',
     'camp.mgmt.levelUpAvailable': 'Доступно Восхождение',
     'camp.mgmt.levelUpReady': 'Персонаж готов повысить уровень. Выберите класс и награды.',
@@ -336,10 +331,6 @@ export const campaigns: DictModule = {
     /* ── Shared ─────────────────────────────────────── */
     'camp.retry': 'Retry',
     'camp.back': '← Back',
-    'camp.backToCampaign': 'To campaign',
-    'camp.backToCampaigns': 'To campaigns',
-    'camp.backToCharacter': 'To character',
-    'camp.backToDashboard': 'Back to Dashboard',
 
     /* ── CampaignListPage ───────────────────────────── */
     'camp.list.access.overline': 'Campaign Access',
@@ -428,7 +419,6 @@ export const campaigns: DictModule = {
     'camp.mgmt.unknownClass': 'Unknown',
     'camp.mgmt.overline': 'Character Management',
     'camp.mgmt.owner': 'Owner: {name}',
-    'camp.mgmt.campaign': 'Campaign',
     'camp.mgmt.status': 'STATUS',
     'camp.mgmt.levelUpAvailable': 'Level Up Available',
     'camp.mgmt.levelUpReady': 'The character is ready to level up. Choose a class and rewards.',

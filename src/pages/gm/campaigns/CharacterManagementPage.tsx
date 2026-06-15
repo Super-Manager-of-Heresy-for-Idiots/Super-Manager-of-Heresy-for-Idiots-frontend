@@ -139,7 +139,7 @@ export default function CharacterManagementPage() {
           )}
           <button className="ao-btn ao-btn--ghost" onClick={() => navigate(`/campaigns/${campaignId}`)}>
             <Rune kind="arrow-l" size={14} color="currentColor" />
-            <span className={s.ml6}>{t('camp.mgmt.campaign')}</span>
+            <span className={s.ml6}>{t('camp2.back.campaign')}</span>
           </button>
         </div>
       </div>

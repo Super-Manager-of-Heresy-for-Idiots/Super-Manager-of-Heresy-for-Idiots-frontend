@@ -1,0 +1,11 @@
+.skel { padding: 32px; min-height: 160px; margin-top: 8px; }
+.skTitle { width: 36%; height: 22px; margin-bottom: 14px; }
+.skLine { width: 60%; height: 14px; }
+
+.empty { margin-top: 8px; }
+
+.createForm { max-width: 440px; margin: 16px auto 0; }
+.field { margin-bottom: 6px; display: block; }
+.createRow { display: flex; gap: 10px; margin-top: 14px; }
+
+.ml6 { margin-left: 6px; }

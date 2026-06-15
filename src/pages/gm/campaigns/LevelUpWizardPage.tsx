@@ -184,7 +184,7 @@ function RiteGate({ glyph, message, onBack }: { glyph: string; message: string; 
           {message}
         </p>
         <button className="ao-btn" onClick={onBack}>
-          <ArrowLeft className="h-3 w-3" /> {t('camp.backToCharacter')}
+          <ArrowLeft className="h-3 w-3" /> {t('camp2.back.character')}
         </button>
       </div>
     </OrdoPanel>

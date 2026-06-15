@@ -19,6 +19,7 @@ import { useCampaignCharacters } from '@/hooks/useCharacter';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
 import type { CampaignStatus, CharacterV2Response } from '@/types';
+import { BattlePanel } from './battle/BattlePanel';
 import s from './CampaignDashboardPage.module.css';
 
 /* ── page ────────────────────────────────────────────────────── */
@@ -32,7 +33,7 @@ export default function CampaignDashboardPage() {
   const { data: campaign, isLoading, error, refetch } = useCampaign(campaignId!);
   const { data: characters, isLoading: charsLoading } = useCampaignCharacters(campaignId!);
   const statusMutation = useSetCampaignStatus();
-  const [tab, setTab] = useState<'sections' | 'characters'>('sections');
+  const [tab, setTab] = useState<'sections' | 'characters' | 'battle'>('sections');
 
   /* ── derived counts ────────────────────────────────────────── */
 
@@ -68,7 +69,7 @@ export default function CampaignDashboardPage() {
   if (isLoading) {
     return (
       <div>
-        <BackLink to="/campaigns" label={t('camp.backToCampaigns')} className={s.backLink} />
+        <BackLink to="/campaigns" label={t('camp2.back.campaigns')} className={s.backLink} />
         <div className={cn('ao-panel ao-frame ao-breathe', s.skelHeader)}>
           <span className="ao-frame-c" />
           <div className={cn('ao-ph', s.phW40H24)} />
@@ -92,7 +93,7 @@ export default function CampaignDashboardPage() {
   if (error || !campaign) {
     return (
       <div>
-        <BackLink to="/campaigns" label={t('camp.backToCampaigns')} className={s.backLink} />
+        <BackLink to="/campaigns" label={t('camp2.back.campaigns')} className={s.backLink} />
         <div className={s.errorBlock}>
           <p className={cn('ao-italic', s.errorText)}>
             {t('camp.dash.loadError')}
@@ -110,7 +111,7 @@ export default function CampaignDashboardPage() {
 
   return (
     <div>
-      <BackLink to="/campaigns" label={t('camp.backToCampaigns')} className={s.backLink} />
+      <BackLink to="/campaigns" label={t('camp2.back.campaigns')} className={s.backLink} />
       {/* Header */}
       <div className={s.header}>
         <div>
@@ -201,6 +202,17 @@ export default function CampaignDashboardPage() {
           onClick={() => setTab('characters')}
         >
           {t('camp.dash.tabs.characters')}
+        </button>
+        <button
+          type="button"
+          role="tab"
+          id="camp-tab-battle"
+          aria-selected={tab === 'battle'}
+          aria-controls="camp-panel-battle"
+          className={cn('ao-tab', tab === 'battle' && 'is-active')}
+          onClick={() => setTab('battle')}
+        >
+          {t('battle.tabLabel')}
         </button>
       </div>
 
@@ -307,6 +319,13 @@ export default function CampaignDashboardPage() {
         )}
       </OrdoPanel>
       </div>
+      )}
+
+      {/* Battle tab — role/state-aware combat panel */}
+      {tab === 'battle' && (
+        <div id="camp-panel-battle" role="tabpanel" aria-labelledby="camp-tab-battle">
+          <BattlePanel campaignId={campaignId!} />
+        </div>
       )}
     </div>
   );

@@ -32,6 +32,11 @@ const EVENT_STYLE: Record<WsEventType, EventStyle> = {
   CAMPAIGN_STATUS_CHANGED:  { glyph: 'hex',      color: 'var(--gold-pale)', label: 'Campaign Status' },
   MEMBER_KICKED:            { glyph: 'lock',     color: 'var(--ember)',     label: 'Member Kicked' },
   WALLET_CHANGED:           { glyph: 'coin',     color: 'var(--gold)',      label: 'Wallet Changed' },
+  BATTLE_STARTED:           { glyph: 'sword',    color: 'var(--gold)',      label: 'Battle Started' },
+  BATTLE_UPDATED:           { glyph: 'sword',    color: 'var(--ink)',       label: 'Battle Updated' },
+  COMBATANT_JOINED:         { glyph: 'helm',     color: 'var(--arcane)',    label: 'Combatant Joined' },
+  BATTLE_TURN_CHANGED:      { glyph: 'arrow-r',  color: 'var(--gold-pale)', label: 'Turn Changed' },
+  BATTLE_ENDED:             { glyph: 'flame',    color: 'var(--ember)',     label: 'Battle Ended' },
 };
 
 /* ── the hook ────────────────────────────────────────────── */
@@ -151,6 +156,18 @@ export function useWebSocket(campaignId: string | undefined): { connectionState:
           break;
         }
 
+        case 'BATTLE_STARTED':
+        case 'BATTLE_UPDATED':
+        case 'COMBATANT_JOINED':
+        case 'BATTLE_TURN_CHANGED':
+        case 'BATTLE_ENDED': {
+          // The payload only carries { battleId }; the REST GET is the source
+          // of truth. A prefix invalidate refreshes the list, the active battle
+          // detail, and its current-turn query in one go.
+          queryClient.invalidateQueries({ queryKey: ['campaigns', cid, 'battles'] });
+          break;
+        }
+
         case 'MEMBER_KICKED': {
           // user-queue payload: { campaignId } — current user was kicked.
           // topic payload:      { userId }     — someone else in the roster was kicked.
@@ -174,6 +191,16 @@ export function useWebSocket(campaignId: string | undefined): { connectionState:
       // Hiding a monster updates caches silently — don't surface a toast that
       // would reveal to players that a (previously unseen) monster ever existed.
       if (event.type === 'MONSTER_HIDDEN') return;
+
+      // Battle realtime is high-frequency (every join / turn). Only the
+      // start and end milestones warrant a toast; the rest update silently.
+      if (
+        event.type === 'BATTLE_UPDATED' ||
+        event.type === 'COMBATANT_JOINED' ||
+        event.type === 'BATTLE_TURN_CHANGED'
+      ) {
+        return;
+      }
 
       const style = EVENT_STYLE[event.type];
       if (!style) return;

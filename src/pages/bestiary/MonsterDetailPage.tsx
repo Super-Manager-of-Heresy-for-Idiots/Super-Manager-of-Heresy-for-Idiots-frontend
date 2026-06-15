@@ -1,5 +1,6 @@
 import { useNavigate, useParams } from 'react-router-dom';
-import { ChevronLeft, Pencil } from 'lucide-react';
+import { Pencil } from 'lucide-react';
+import { BackLink } from '@/components/campaigns';
 import { useAuthStore } from '@/store/authStore';
 import { useT } from '@/i18n/I18nContext';
 import MonsterStatblock from '@/components/bestiary/MonsterStatblock';
@@ -41,7 +42,7 @@ export default function MonsterDetailPage({ source }: { source: Source }) {
   return (
     <Frame>
       <div className={s.toolbar}>
-        <button className="ao-btn ao-btn--ghost ao-btn--sm" onClick={() => navigate(-1)}><ChevronLeft size={14} /> {t('best.com.back')}</button>
+        <BackLink label={t('best.com.back')} />
         <div className={s.spacer} />
         {canEdit && monster && (
           <button className="ao-btn ao-btn--primary ao-btn--sm" onClick={() => navigate('edit')}><Pencil size={13} /> {t('best.com.edit')}</button>

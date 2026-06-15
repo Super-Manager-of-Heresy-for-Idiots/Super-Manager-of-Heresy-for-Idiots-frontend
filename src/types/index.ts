@@ -1325,7 +1325,13 @@ export type WsEventType =
   | 'QUEST_UPDATED'
   | 'CAMPAIGN_STATUS_CHANGED'
   | 'MEMBER_KICKED'
-  | 'WALLET_CHANGED';
+  | 'WALLET_CHANGED'
+  // Battle realtime — payloads carry { battleId }; REST GET is the source of truth.
+  | 'BATTLE_STARTED'
+  | 'BATTLE_UPDATED'
+  | 'COMBATANT_JOINED'
+  | 'BATTLE_TURN_CHANGED'
+  | 'BATTLE_ENDED';
 
 export interface WsEvent<T = unknown> {
   type: WsEventType;
@@ -1334,6 +1340,102 @@ export interface WsEvent<T = unknown> {
   data: T;
   timestamp: string;
   triggeredBy: string;
+}
+
+/** Payload shape shared by every battle WS event (notification only). */
+export interface BattleEventData {
+  battleId: string;
+}
+
+// === Battles ===
+
+/**
+ * Battle lifecycle:
+ *  - ASSEMBLING — GM adds/removes monsters, tweaks XP. Players see a neutral wait state.
+ *  - ACTIVE     — players join with initiative; turns advance; combat UI is live.
+ *  - COMPLETED  — read-only aftermath.
+ */
+export type BattleStatus = 'ASSEMBLING' | 'ACTIVE' | 'COMPLETED';
+
+export type BattleCombatantType = 'MONSTER' | 'CHARACTER';
+
+export interface BattleCombatantResponse {
+  id: string;
+  type: BattleCombatantType;
+  displayName: string;
+  monsterId: string | null;
+  characterId: string | null;
+  /** Owning player for CHARACTER combatants; `null` for monsters. */
+  ownerUserId: string | null;
+  /** 1-based copy number when several instances of the same monster are added. */
+  instanceIndex: number;
+  initiative: number;
+  initiativeRoll: number | null;
+  turnOrder: number;
+  currentHp: number | null;
+  maxHp: number | null;
+  currentTurn: boolean;
+}
+
+export interface BattleResponse {
+  id: string;
+  campaignId: string;
+  name: string;
+  status: BattleStatus;
+  roundNumber: number;
+  currentTurnIndex: number;
+  currentCombatantId: string | null;
+  monsterCount: number;
+  /** Average challenge rating across the assembled monsters. */
+  averageDanger: number;
+  /** Auto-summed XP across monsters. */
+  totalXp: number;
+  /** GM manual XP override; `null` while the auto value is used. */
+  overrideXp: number | null;
+  combatants: BattleCombatantResponse[];
+  startedAt: string | null;
+  endedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * Current-turn detail (GET /{battleId}/current-turn). `character`, `resources`
+ * and `activeEffects` are present only on a CHARACTER turn the requester may see;
+ * `monster` is GM-only.
+ */
+export interface CombatantTurnResponse {
+  combatant: BattleCombatantResponse;
+  character?: CharacterV2Response | null;
+  resources?: ResourceResponse[] | null;
+  activeEffects?: CharacterActiveEffectResponse[] | null;
+  monster?: MonsterResponse | null;
+}
+
+export interface CreateBattleRequest {
+  name: string;
+}
+
+/** A single monster line: which monster and how many instances (1–50). */
+export interface AddBattleMonsterEntry {
+  monsterId: string;
+  count: number;
+}
+
+/** Adds one or more monster instances to an ASSEMBLING battle. */
+export interface AddBattleMonsterRequest {
+  monsters: AddBattleMonsterEntry[];
+}
+
+export interface OverrideBattleXpRequest {
+  /** `null` clears the override and reverts to the auto-summed XP. */
+  overrideXp: number | null;
+}
+
+/** A player joins an ACTIVE battle with one of their characters + initiative. */
+export interface JoinBattleRequest {
+  characterId: string;
+  initiative: number;
 }
 
 // === Type Aliases (backward-compat) ===

@@ -1,0 +1,65 @@
+.cols {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+.single { display: block; }
+.tabs { margin-bottom: 14px; }
+
+.stack { display: flex; flex-direction: column; gap: 16px; }
+
+.body { padding: 14px; }
+
+/* ── stats preview ─────────────────────────────────────────── */
+.statRow { display: flex; flex-wrap: wrap; gap: 24px 32px; }
+.stat { text-align: left; }
+.statVal { font-family: var(--font-serif); font-size: 26px; font-weight: 500; color: var(--ink-bright); line-height: 1; }
+.statLbl {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 10px;
+  color: var(--ink-quiet);
+  margin-top: 5px;
+}
+.valGold { color: var(--gold-pale); }
+.valArcane { color: var(--arcane); }
+
+.xpWrap { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--hairline); }
+.xpRow { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
+.xpField { width: 150px; }
+.xpHint { font-size: 11px; color: var(--ink-faint); margin-top: 8px; }
+
+/* ── lists / rows ──────────────────────────────────────────── */
+.search { padding: 12px 14px; border-bottom: 1px solid var(--hairline); }
+.list { max-height: 56vh; overflow-y: auto; }
+.subHdr { padding: 12px 14px 6px; }
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--hairline);
+}
+.rowMain { flex: 1; min-width: 0; }
+.rowName {
+  font-size: 13px;
+  color: var(--ink-bright);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rowMeta { font-size: 11px; color: var(--ink-faint); margin-top: 2px; }
+.count { color: var(--gold-pale); font-family: var(--font-mono); font-size: 11px; }
+
+.startWrap { padding: 14px; border-top: 1px solid var(--hairline); }
+.muted { color: var(--ink-faint); font-size: 13px; padding: 18px 14px; text-align: center; }
+
+.ml6 { margin-left: 6px; }
+.mt12 { margin-top: 12px; }
+
+@media (max-width: 768px) {
+  .cols { grid-template-columns: 1fr; }
+}

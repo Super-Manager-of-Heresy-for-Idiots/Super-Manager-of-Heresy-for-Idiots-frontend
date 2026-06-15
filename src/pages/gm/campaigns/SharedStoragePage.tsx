@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import { OrdoPanel, PanelHeader, Rune, OrdoField, OrdoDivider, EmptyVault } from '@/components/ordo';
+import { BackLink } from '@/components/campaigns';
 import {
   Dialog,
   DialogContent,
@@ -20,7 +21,6 @@ import s from './SharedStoragePage.module.css';
 export default function SharedStoragePage() {
   const t = useT();
   const { campaignId } = useParams<{ campaignId: string }>();
-  const navigate = useNavigate();
   const { data: containers, isLoading, error, refetch } = useCampaignStorage(campaignId!);
   const createMutation = useCreateStorageContainer();
 
@@ -91,14 +91,7 @@ export default function SharedStoragePage() {
 
   return (
     <div>
-      {/* Back button */}
-      <button
-        className={cn('ao-btn ao-btn--ghost ao-btn--sm', s.backBtn)}
-        onClick={() => navigate(`/campaigns/${campaignId}`)}
-      >
-        <Rune kind="chev-l" size={12} color="currentColor" />
-        <span className={s.ml4}>{t('camp2.storage.backToDashboard')}</span>
-      </button>
+      <BackLink to={`/campaigns/${campaignId}`} label={t('camp2.back.campaign')} className={s.backBtn} />
 
       {/* Header */}
       <div className={s.header}>

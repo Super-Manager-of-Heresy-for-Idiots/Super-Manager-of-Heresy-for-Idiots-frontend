@@ -5,6 +5,7 @@ export const campaigns2: DictModule = {
   ru: {
     /* ── Shared back-links ──────────────────────────── */
     'camp2.back.quests': 'К квестам',
+    'camp2.back.campaigns': 'К кампаниям',
     'camp2.back.campaign': 'К кампании',
     'camp2.back.npcs': 'К NPC',
     'camp2.back.character': 'К персонажу',
@@ -174,7 +175,6 @@ export const campaigns2: DictModule = {
     /* ── SessionNotesPage ───────────────────────────── */
     'camp2.session.loadError':
       'Летопись сессий не удалось прочесть. Её переплёт остаётся запечатан.',
-    'camp2.session.backToDashboard': 'Назад к панели',
     'camp2.session.gmEyesOnly': 'Только для глаз Летописца',
     'camp2.session.privacyNote':
       'Заметки сессий приватны для Летописца и никогда не показываются игрокам.',
@@ -235,7 +235,6 @@ export const campaigns2: DictModule = {
     /* ── SharedStoragePage ──────────────────────────── */
     'camp2.storage.loadError':
       'Хранилище не удалось открыть. Его замки остаются неподатливы.',
-    'camp2.storage.backToDashboard': 'Назад к панели',
     'camp2.storage.overline': 'Общие хранилища',
     'camp2.storage.title': 'Хранилище',
     'camp2.storage.subtitle': 'Общие сундуки и арсеналы, разделённые меж присягнувшими.',
@@ -324,7 +323,6 @@ export const campaigns2: DictModule = {
     'camp2.folio.unsealed': 'Фолиант не удалось распечатать.',
     'camp2.folio.overline': 'Фолиант души',
     'camp2.folio.adjustVitae': 'Скорректировать витал',
-    'camp2.folio.management': 'Управление',
     'camp2.folio.nav.label': 'Разделы листа',
     'camp2.folio.nav.identity': 'Личность',
     'camp2.folio.nav.holdings': 'Имущество',
@@ -527,6 +525,7 @@ export const campaigns2: DictModule = {
   en: {
     /* ── Shared back-links ──────────────────────────── */
     'camp2.back.quests': 'To Quests',
+    'camp2.back.campaigns': 'To Campaigns',
     'camp2.back.campaign': 'To Campaign',
     'camp2.back.npcs': 'To NPCs',
     'camp2.back.character': 'To Character',
@@ -696,7 +695,6 @@ export const campaigns2: DictModule = {
     /* ── SessionNotesPage ───────────────────────────── */
     'camp2.session.loadError':
       'The session chronicle could not be read. Its bindings remain sealed.',
-    'camp2.session.backToDashboard': 'Back to Dashboard',
     'camp2.session.gmEyesOnly': 'Game Master Eyes Only',
     'camp2.session.privacyNote':
       'Session notes are private to the Game-Master and are never shown to players.',
@@ -757,7 +755,6 @@ export const campaigns2: DictModule = {
     /* ── SharedStoragePage ──────────────────────────── */
     'camp2.storage.loadError':
       'The vault could not be opened. Its locks remain unyielding.',
-    'camp2.storage.backToDashboard': 'Back to Dashboard',
     'camp2.storage.overline': 'Shared Vaults',
     'camp2.storage.title': 'Storage',
     'camp2.storage.subtitle': 'Communal coffers and armouries shared among the sworn.',
@@ -846,7 +843,6 @@ export const campaigns2: DictModule = {
     'camp2.folio.unsealed': 'The folio could not be unsealed.',
     'camp2.folio.overline': 'Folio of the Soul',
     'camp2.folio.adjustVitae': 'Adjust Vitae',
-    'camp2.folio.management': 'Management',
     'camp2.folio.nav.label': 'Sheet sections',
     'camp2.folio.nav.identity': 'Identity',
     'camp2.folio.nav.holdings': 'Holdings',

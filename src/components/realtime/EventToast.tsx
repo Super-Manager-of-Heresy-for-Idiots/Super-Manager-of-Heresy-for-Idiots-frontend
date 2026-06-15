@@ -29,6 +29,11 @@ const EVENT_STYLE: Record<WsEventType, EventVisual> = {
   CAMPAIGN_STATUS_CHANGED: { glyph: 'hex',     color: 'var(--gold-pale)', border: 'var(--gold-pale)' },
   MEMBER_KICKED:           { glyph: 'lock',    color: 'var(--ember)',     border: 'var(--ember)' },
   WALLET_CHANGED:          { glyph: 'coin',    color: 'var(--gold)',      border: 'var(--gold)' },
+  BATTLE_STARTED:          { glyph: 'sword',   color: 'var(--gold)',      border: 'var(--gold)' },
+  BATTLE_UPDATED:          { glyph: 'sword',   color: 'var(--ink)',       border: 'var(--bronze)' },
+  COMBATANT_JOINED:        { glyph: 'helm',    color: 'var(--arcane)',    border: 'var(--arcane)' },
+  BATTLE_TURN_CHANGED:     { glyph: 'arrow-r', color: 'var(--gold-pale)', border: 'var(--gold-pale)' },
+  BATTLE_ENDED:            { glyph: 'flame',   color: 'var(--ember)',     border: 'var(--ember)' },
 };
 
 /* ── component ───────────────────────────────────────────── */

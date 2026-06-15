@@ -240,7 +240,7 @@ export default function CharacterWalletPage() {
 
   return (
     <div>
-      <BackLink to={backTo} label={t('camp.backToCharacter')} className={s.backLink} />
+      <BackLink to={backTo} label={t('camp2.back.character')} className={s.backLink} />
 
       {/* Header */}
       <div className={s.header}>

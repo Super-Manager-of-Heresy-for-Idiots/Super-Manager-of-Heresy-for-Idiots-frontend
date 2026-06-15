@@ -1,0 +1,521 @@
+import { useEffect, useMemo, useState } from 'react';
+import toast from 'react-hot-toast';
+import { OrdoPanel, PanelHeader, Rune, Bar } from '@/components/ordo';
+import { useAuthStore } from '@/store/authStore';
+import { useCampaignCharacters } from '@/hooks/useCharacter';
+import {
+  useBattleCurrentTurn,
+  useEndTurn,
+  useEndBattle,
+  useJoinBattle,
+} from '@/hooks/useBattles';
+import { useIsMobile } from '@/hooks/useMediaQuery';
+import { useT } from '@/i18n/I18nContext';
+import { cn } from '@/lib/utils';
+import type {
+  BattleResponse,
+  BattleCombatantResponse,
+  CharacterV2Response,
+} from '@/types';
+import s from './BattleActive.module.css';
+
+interface BattleActiveProps {
+  battle: BattleResponse;
+  campaignId: string;
+}
+
+/**
+ * Live battle view (battle.status === 'ACTIVE').
+ *  - RIGHT : the initiative tracker (both roles).
+ *  - LEFT  : GM turn controls, or the player's join / action panel.
+ * On mobile the sides collapse to a single column with a tab switch.
+ */
+export function BattleActive({ battle, campaignId }: BattleActiveProps) {
+  const t = useT();
+  const { user } = useAuthStore();
+  const isGm = user?.role === 'GAME_MASTER' || user?.role === 'ADMIN';
+  const userId = user?.id;
+  const isMobile = useIsMobile();
+  const [section, setSection] = useState<'tracker' | 'side'>('tracker');
+
+  const ordered = useMemo(
+    () =>
+      [...battle.combatants].sort(
+        (a, b) => a.turnOrder - b.turnOrder || b.initiative - a.initiative,
+      ),
+    [battle.combatants],
+  );
+  const current = ordered.find((c) => c.currentTurn);
+
+  const tracker = <Tracker battle={battle} ordered={ordered} userId={userId} />;
+  const side = isGm ? (
+    <GmControls battle={battle} campaignId={campaignId} current={current} />
+  ) : (
+    <PlayerSide battle={battle} campaignId={campaignId} userId={userId} current={current} />
+  );
+
+  if (isMobile) {
+    return (
+      <div className={s.single}>
+        <div className={cn('ao-tabs', s.tabs)} role="tablist">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={section === 'tracker'}
+            className={cn('ao-tab', section === 'tracker' && 'is-active')}
+            onClick={() => setSection('tracker')}
+          >
+            {t('battle.section.tracker')}
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={section === 'side'}
+            className={cn('ao-tab', section === 'side' && 'is-active')}
+            onClick={() => setSection('side')}
+          >
+            {isGm ? t('battle.gm.controls') : t('battle.section.action')}
+          </button>
+        </div>
+        {section === 'tracker' ? tracker : side}
+      </div>
+    );
+  }
+
+  return (
+    <div className={s.cols}>
+      {side}
+      {tracker}
+    </div>
+  );
+}
+
+/* ── tracker ───────────────────────────────────────────────── */
+
+function Tracker({
+  battle,
+  ordered,
+  userId,
+}: {
+  battle: BattleResponse;
+  ordered: BattleCombatantResponse[];
+  userId?: string;
+}) {
+  const t = useT();
+  return (
+    <OrdoPanel frame padding={0}>
+      <PanelHeader
+        title={t('battle.tracker.title')}
+        glyph="sword"
+        sub={t('battle.tracker.round', { n: battle.roundNumber })}
+        right={<span className="ao-chip ao-chip--gold">{t('battle.status.ACTIVE')}</span>}
+      />
+      {ordered.length === 0 ? (
+        <div className={s.empty}>{t('battle.tracker.empty')}</div>
+      ) : (
+        <div className={s.list}>
+          {ordered.map((c) => (
+            <CombatantRow key={c.id} c={c} userId={userId} />
+          ))}
+        </div>
+      )}
+    </OrdoPanel>
+  );
+}
+
+function CombatantRow({ c, userId }: { c: BattleCombatantResponse; userId?: string }) {
+  const t = useT();
+  const isMonster = c.type === 'MONSTER';
+  const isYou = c.type === 'CHARACTER' && c.ownerUserId === userId;
+  const isDown = c.currentHp != null && c.currentHp <= 0;
+
+  return (
+    <div className={cn(s.row, c.currentTurn && s.rowActive, isDown && s.rowDown)}>
+      <div className={s.init}>
+        <div className={s.initVal}>{c.initiative}</div>
+        <div className={cn('ao-overline', s.initLbl)}>{t('battle.tracker.init')}</div>
+      </div>
+      <div className={s.portrait}>
+        <Rune
+          kind={isMonster ? 'flame' : 'helm'}
+          size={20}
+          color={isMonster ? 'var(--ember)' : 'var(--gold)'}
+        />
+      </div>
+      <div className={s.main}>
+        <div className={s.nameRow}>
+          <span className={s.name}>{c.displayName}</span>
+          {isYou && <span className="ao-chip ao-chip--gold">{t('battle.tracker.you')}</span>}
+          {isMonster && <span className="ao-chip">{t('battle.tracker.monster')}</span>}
+          {c.currentTurn && <Rune kind="sword" size={12} color="var(--gold)" />}
+        </div>
+        {c.currentHp != null && c.maxHp != null && (
+          <div className={s.mt6}>
+            <Bar value={c.currentHp} max={c.maxHp} tone="ember" height={5} showNumbers={false} />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ── GM controls ───────────────────────────────────────────── */
+
+function GmControls({
+  battle,
+  campaignId,
+  current,
+}: {
+  battle: BattleResponse;
+  campaignId: string;
+  current?: BattleCombatantResponse;
+}) {
+  const t = useT();
+  const endTurn = useEndTurn();
+  const endBattle = useEndBattle();
+  const [confirming, setConfirming] = useState(false);
+
+  return (
+    <OrdoPanel frame padding={0}>
+      <PanelHeader title={t('battle.gm.controls')} glyph="helm" />
+      <div className={s.body}>
+        <div className={s.currentTurn}>
+          <span className={s.lead}>{t('battle.tracker.current')}</span>
+          <span className={cn('ao-h5', s.currentName)}>
+            {current ? current.displayName : t('battle.tracker.waiting')}
+          </span>
+        </div>
+
+        <div className={s.btnRow}>
+          <button
+            className="ao-btn ao-btn--primary"
+            onClick={() => endTurn.mutate({ campaignId, battleId: battle.id })}
+            disabled={!current || endTurn.isPending}
+          >
+            <Rune kind="arrow-r" size={14} color="currentColor" />
+            <span className={s.ml6}>{t('battle.gm.endTurn')}</span>
+          </button>
+        </div>
+
+        {!confirming ? (
+          <div className={s.endConfirm}>
+            <button
+              className="ao-btn ao-btn--ghost"
+              onClick={() => setConfirming(true)}
+              disabled={endBattle.isPending}
+            >
+              {t('battle.gm.endBattle')}
+            </button>
+          </div>
+        ) : (
+          <div className={s.endConfirm}>
+            <div className={s.confirmText}>{t('battle.gm.endBattleConfirm')}</div>
+            <div className={s.confirmRow}>
+              <button
+                className="ao-btn ao-btn--danger"
+                onClick={() => endBattle.mutate({ campaignId, battleId: battle.id })}
+                disabled={endBattle.isPending}
+              >
+                {t('battle.gm.endBattle')}
+              </button>
+              <button className="ao-btn ao-btn--ghost" onClick={() => setConfirming(false)}>
+                {t('battle.create.cancel')}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </OrdoPanel>
+  );
+}
+
+/* ── player side ───────────────────────────────────────────── */
+
+function PlayerSide({
+  battle,
+  campaignId,
+  userId,
+  current,
+}: {
+  battle: BattleResponse;
+  campaignId: string;
+  userId?: string;
+  current?: BattleCombatantResponse;
+}) {
+  const t = useT();
+  const { data: characters } = useCampaignCharacters(campaignId);
+  const isMyTurn = current?.type === 'CHARACTER' && current.ownerUserId === userId;
+
+  const joinedCharIds = useMemo(
+    () =>
+      new Set(
+        battle.combatants
+          .filter((c) => c.type === 'CHARACTER')
+          .map((c) => c.characterId),
+      ),
+    [battle.combatants],
+  );
+
+  const myChars = (characters ?? []).filter((c) => c.ownerId === userId);
+  const available = myChars.filter((c) => !joinedCharIds.has(c.id));
+
+  return (
+    <div className={s.stack}>
+      {isMyTurn && current && (
+        <ActionPanel battle={battle} campaignId={campaignId} current={current} />
+      )}
+      {available.length > 0 && (
+        <JoinPanel battle={battle} campaignId={campaignId} chars={available} />
+      )}
+      {!isMyTurn && available.length === 0 && (
+        <OrdoPanel frame>
+          <div className={s.turnNote}>
+            {myChars.length === 0
+              ? t('battle.join.noCharacters')
+              : current
+                ? t('battle.gm.currentTurnOf', { name: current.displayName })
+                : t('battle.tracker.waiting')}
+          </div>
+        </OrdoPanel>
+      )}
+    </div>
+  );
+}
+
+/* ── player action panel (their turn) ──────────────────────── */
+
+function ActionPanel({
+  battle,
+  campaignId,
+  current,
+}: {
+  battle: BattleResponse;
+  campaignId: string;
+  current: BattleCombatantResponse;
+}) {
+  const t = useT();
+  const endTurn = useEndTurn();
+  const { data: turn, isLoading } = useBattleCurrentTurn(campaignId, battle.id, true);
+
+  const resources = turn?.resources ?? [];
+  const attacks = turn?.character?.attacks ?? [];
+  const spells = turn?.character?.knownSpells ?? [];
+  const effects = turn?.activeEffects ?? [];
+
+  return (
+    <OrdoPanel frame padding={0}>
+      <PanelHeader title={t('battle.action.title')} glyph="sword" sub={current.displayName} />
+      <div className={s.body}>
+        {isLoading ? (
+          <div className={cn('ao-breathe', s.skWrap)}>
+            <div className={cn('ao-ph', s.skLine)} />
+            <div className={cn('ao-ph', s.skLine)} />
+            <div className={cn('ao-ph', s.skLine)} />
+          </div>
+        ) : (
+          <>
+            <div className={s.section}>
+              <div className={cn('ao-overline', s.sectionHdr)}>
+                {t('battle.action.resources')}
+              </div>
+              {resources.length === 0 ? (
+                <div className={s.muted}>{t('battle.action.noResources')}</div>
+              ) : (
+                resources.map((r) => (
+                  <div key={r.id} className={s.resItem}>
+                    <div className={s.resName}>
+                      <span>{r.name}</span>
+                      <span className="ao-num">
+                        {r.currentValue} / {r.maxValue}
+                      </span>
+                    </div>
+                    <Bar
+                      value={r.currentValue}
+                      max={r.maxValue}
+                      tone="arcane"
+                      height={6}
+                      showNumbers={false}
+                    />
+                  </div>
+                ))
+              )}
+            </div>
+
+            <div className={s.section}>
+              <div className={cn('ao-overline', s.sectionHdr)}>
+                {t('battle.action.abilities')}
+              </div>
+              {attacks.length === 0 && spells.length === 0 ? (
+                <div className={s.muted}>{t('battle.action.noAbilities')}</div>
+              ) : (
+                <>
+                  {attacks.length > 0 && (
+                    <>
+                      <div className={cn(s.resName, s.mt8)}>{t('battle.action.attacks')}</div>
+                      <div className={s.chips}>
+                        {attacks.map((a, i) => (
+                          <span key={i} className={s.chip}>
+                            <Rune kind="sword" size={10} color="var(--ember)" />
+                            {a.name}
+                            <span className={s.chipMeta}>
+                              {a.damage} {a.damageType}
+                            </span>
+                          </span>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                  {spells.length > 0 && (
+                    <>
+                      <div className={cn(s.resName, s.mt12)}>{t('battle.action.spells')}</div>
+                      <div className={s.chips}>
+                        {spells.map((sp) => (
+                          <span key={sp.spellId} className={s.chip}>
+                            <Rune kind="book" size={10} color="var(--arcane)" />
+                            {sp.name}
+                            <span className={s.chipMeta}>
+                              {sp.level === 0
+                                ? t('battle.action.spell.cantrip')
+                                : t('battle.action.spell.level', { n: sp.level })}
+                            </span>
+                          </span>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </>
+              )}
+            </div>
+
+            {effects.length > 0 && (
+              <div className={s.section}>
+                <div className={cn('ao-overline', s.sectionHdr)}>
+                  {t('battle.action.effects')}
+                </div>
+                <div className={s.chips}>
+                  {effects.map((e) => (
+                    <span
+                      key={e.id}
+                      className={cn('ao-chip', e.isBuff ? 'ao-chip--gold' : 'ao-chip--ember')}
+                    >
+                      {e.buffDebuffName}
+                      {e.remainingRounds != null && (
+                        <span className={s.chipMeta}>{e.remainingRounds}</span>
+                      )}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
+        )}
+
+        <button
+          className={cn('ao-btn ao-btn--primary ao-btn--block', s.mt16)}
+          onClick={() => endTurn.mutate({ campaignId, battleId: battle.id })}
+          disabled={endTurn.isPending}
+        >
+          <Rune kind="check" size={14} color="currentColor" />
+          <span className={s.ml6}>{t('battle.action.endTurn')}</span>
+        </button>
+      </div>
+    </OrdoPanel>
+  );
+}
+
+/* ── player join panel ─────────────────────────────────────── */
+
+function JoinPanel({
+  battle,
+  campaignId,
+  chars,
+}: {
+  battle: BattleResponse;
+  campaignId: string;
+  chars: CharacterV2Response[];
+}) {
+  const t = useT();
+  const join = useJoinBattle();
+  const [charId, setCharId] = useState(chars[0]?.id ?? '');
+  const [initStr, setInitStr] = useState('');
+
+  // Keep the selection valid as characters join/leave the available list.
+  useEffect(() => {
+    if (!chars.some((c) => c.id === charId)) {
+      setCharId(chars[0]?.id ?? '');
+    }
+  }, [chars, charId]);
+
+  const roll = () => {
+    const n = Math.floor(Math.random() * 20) + 1;
+    setInitStr(String(n));
+    toast.success(t('battle.toast.dieRolled', { n }));
+  };
+
+  const initNum = parseInt(initStr, 10);
+  const valid = !!charId && Number.isFinite(initNum) && initNum >= 1 && initNum <= 20;
+
+  const submit = () => {
+    if (!valid) return;
+    join.mutate(
+      { campaignId, battleId: battle.id, data: { characterId: charId, initiative: initNum } },
+      { onSuccess: () => setInitStr('') },
+    );
+  };
+
+  return (
+    <OrdoPanel frame padding={0}>
+      <PanelHeader title={t('battle.join.title')} glyph="helm" />
+      <div className={s.body}>
+        <div className={s.joinField}>
+          <span className={s.lead}>{t('battle.join.pickCharacter')}</span>
+          <div className={s.charPick}>
+            {chars.map((c) => (
+              <button
+                key={c.id}
+                type="button"
+                className={cn(s.charBtn, charId === c.id && s.charBtnActive)}
+                onClick={() => setCharId(c.id)}
+              >
+                <span>{c.name}</span>
+                <span className={s.rowMeta}>
+                  {c.classLevels?.[0]?.className ?? ''} &middot; LVL {c.totalLevel}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className={s.joinField}>
+          <span className={s.lead}>{t('battle.join.initiative')}</span>
+          <div className={s.initRow}>
+            <input
+              className={cn('ao-input', s.initField)}
+              inputMode="numeric"
+              value={initStr}
+              placeholder="—"
+              onChange={(e) => setInitStr(e.target.value.replace(/[^0-9]/g, ''))}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') submit();
+              }}
+            />
+            <button className="ao-btn ao-btn--ghost" onClick={roll} type="button">
+              <Rune kind="diamond" size={14} color="currentColor" />
+              <span className={s.ml6}>{t('battle.join.rollDie')}</span>
+            </button>
+          </div>
+          <div className={s.hint}>{t('battle.join.manualHint')}</div>
+        </div>
+
+        <button
+          className="ao-btn ao-btn--primary ao-btn--block"
+          onClick={submit}
+          disabled={!valid || join.isPending}
+        >
+          <Rune kind="check" size={14} color="currentColor" />
+          <span className={s.ml6}>{t('battle.join.confirm')}</span>
+        </button>
+      </div>
+    </OrdoPanel>
+  );
+}

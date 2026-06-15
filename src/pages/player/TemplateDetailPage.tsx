@@ -1,5 +1,6 @@
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Trash2, Loader2 } from 'lucide-react';
+import { Trash2, Loader2 } from 'lucide-react';
+import { BackLink } from '@/components/campaigns';
 import { OrdoPanel, PanelHeader, Bar, OrdoDivider } from '@/components/ordo';
 import { EditableSheetField } from '@/components/characters';
 import { useTemplate, useDeleteTemplate, useUpdateTemplate } from '@/hooks/useTemplates';
@@ -55,9 +56,7 @@ export default function TemplateDetailPage() {
   return (
     <div>
       <div className={s.toolbar}>
-        <button className="ao-btn ao-btn--ghost" onClick={back}>
-          <ArrowLeft className="h-3 w-3" /> {t('player.template.backToListShort')}
-        </button>
+        <BackLink to="/characters/templates" label={t('player.template.backToListShort')} size="md" />
         <button className="ao-btn ao-btn--ghost" onClick={handleDelete} disabled={deleteMutation.isPending}>
           {deleteMutation.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Trash2 className={cn('h-3 w-3', s.trashIcon)} />}
           <span className={s.delLabel}>{t('player.template.delete')}</span>

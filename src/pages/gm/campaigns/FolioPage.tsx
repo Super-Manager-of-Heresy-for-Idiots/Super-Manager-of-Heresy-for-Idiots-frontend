@@ -442,7 +442,7 @@ export default function FolioPage() {
             <Rune kind="flame" size={11} /> <span className={s.btnLabel}>{t('camp2.folio.adjustVitae')}</span>
           </button>
           <button className="ao-btn ao-btn--ghost" onClick={() => navigate(`/campaigns/${campaignId}/characters/${characterId}`)}>
-            <Rune kind="arrow-l" size={13} /> <span className={s.btnLabel}>{t('camp2.folio.management')}</span>
+            <Rune kind="arrow-l" size={13} /> <span className={s.btnLabel}>{t('camp2.back.character')}</span>
           </button>
         </div>
       </div>

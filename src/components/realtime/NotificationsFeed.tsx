@@ -30,6 +30,11 @@ const EVENT_VISUAL: Record<WsEventType, EventVisual> = {
   CAMPAIGN_STATUS_CHANGED: { glyph: 'hex',     color: 'var(--gold-pale)' },
   MEMBER_KICKED:           { glyph: 'lock',    color: 'var(--ember)' },
   WALLET_CHANGED:          { glyph: 'coin',    color: 'var(--gold)' },
+  BATTLE_STARTED:          { glyph: 'sword',   color: 'var(--gold)' },
+  BATTLE_UPDATED:          { glyph: 'sword',   color: 'var(--ink)' },
+  COMBATANT_JOINED:        { glyph: 'helm',    color: 'var(--arcane)' },
+  BATTLE_TURN_CHANGED:     { glyph: 'arrow-r', color: 'var(--gold-pale)' },
+  BATTLE_ENDED:            { glyph: 'flame',   color: 'var(--ember)' },
 };
 
 /* human-readable label keys */
@@ -49,6 +54,11 @@ const EVENT_LABEL_KEY: Record<WsEventType, string> = {
   CAMPAIGN_STATUS_CHANGED: 'cmp2.event.CAMPAIGN_STATUS_CHANGED',
   MEMBER_KICKED:           'cmp2.event.MEMBER_KICKED',
   WALLET_CHANGED:          'cmp2.event.WALLET_CHANGED',
+  BATTLE_STARTED:          'cmp2.event.BATTLE_STARTED',
+  BATTLE_UPDATED:          'cmp2.event.BATTLE_UPDATED',
+  COMBATANT_JOINED:        'cmp2.event.COMBATANT_JOINED',
+  BATTLE_TURN_CHANGED:     'cmp2.event.BATTLE_TURN_CHANGED',
+  BATTLE_ENDED:            'cmp2.event.BATTLE_ENDED',
 };
 
 /* ── single notification row ─────────────────────────────── */

@@ -250,6 +250,11 @@ export const components2: DictModule = {
     'cmp2.event.QUEST_UPDATED': 'Задание обновлено',
     'cmp2.event.CAMPAIGN_STATUS_CHANGED': 'Статус кампании',
     'cmp2.event.MEMBER_KICKED': 'Участник изгнан',
+    'cmp2.event.BATTLE_STARTED': 'Бой начался',
+    'cmp2.event.BATTLE_UPDATED': 'Бой обновлён',
+    'cmp2.event.COMBATANT_JOINED': 'Боец присоединился',
+    'cmp2.event.BATTLE_TURN_CHANGED': 'Смена хода',
+    'cmp2.event.BATTLE_ENDED': 'Бой завершён',
 
     /* ── Realtime: ConnectionSigil ──────────────────── */
     'cmp2.conn.connected': 'Подключено',
@@ -512,6 +517,11 @@ export const components2: DictModule = {
     'cmp2.event.QUEST_UPDATED': 'Quest Updated',
     'cmp2.event.CAMPAIGN_STATUS_CHANGED': 'Campaign Status',
     'cmp2.event.MEMBER_KICKED': 'Member Kicked',
+    'cmp2.event.BATTLE_STARTED': 'Battle Started',
+    'cmp2.event.BATTLE_UPDATED': 'Battle Updated',
+    'cmp2.event.COMBATANT_JOINED': 'Combatant Joined',
+    'cmp2.event.BATTLE_TURN_CHANGED': 'Turn Changed',
+    'cmp2.event.BATTLE_ENDED': 'Battle Ended',
 
     /* ── Realtime: ConnectionSigil ──────────────────── */
     'cmp2.conn.connected': 'Connected',
