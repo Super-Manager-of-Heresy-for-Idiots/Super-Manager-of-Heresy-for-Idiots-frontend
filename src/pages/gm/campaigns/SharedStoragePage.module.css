@@ -33,6 +33,10 @@
 .containerCount { font-size: 11px; color: var(--ink-faint); margin-top: 2px; }
 
 .itemsWrap { border-top: 1px solid var(--hairline); }
+.itemsActions {
+  display: flex; justify-content: flex-end;
+  padding: 10px 18px; border-bottom: 1px solid var(--hairline);
+}
 .emptyItems { padding: 16px 18px; text-align: center; }
 .emptyItemsText { color: var(--ink-ghost); font-size: 13px; }
 
@@ -47,3 +51,5 @@
 .itemUnique { font-size: 8px; color: var(--gold); }
 
 .dialogCol { display: flex; flex-direction: column; gap: 16px; }
+.dialogHint { color: var(--ink-faint); font-size: 13px; }
+.dialogLoading { display: flex; align-items: center; color: var(--ink-faint); padding: 4px 0; }
