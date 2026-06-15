@@ -920,6 +920,8 @@ export interface ModifyWalletRequest {
 export interface ResourceResponse {
   id: string;
   name: string;
+  /** Server field name on the battle current-turn payload (mirrors `name`). */
+  resourceName?: string;
   currentValue: number;
   maxValue: number;
   resourceTypeId: string;
@@ -1432,10 +1434,16 @@ export interface OverrideBattleXpRequest {
   overrideXp: number | null;
 }
 
-/** A player joins an ACTIVE battle with one of their characters + initiative. */
-export interface JoinBattleRequest {
+/** One character entering an ACTIVE battle. */
+export interface JoinBattleCharacter {
   characterId: string;
-  initiative: number;
+  /** The d20 (1–20); omit to let the server roll. Initiative = d20 + DEX mod + buffs. */
+  d20?: number;
+}
+
+/** A player joins an ACTIVE battle with one or more of their characters. */
+export interface JoinBattleRequest {
+  characters: JoinBattleCharacter[];
 }
 
 // === Type Aliases (backward-compat) ===
@@ -1914,4 +1922,178 @@ export interface MonsterRequest {
   damageVulnerabilities?: MonsterDamageNoteRequest[];
   gear?: MonsterGearRequest[];
   features?: MonsterFeatureRequest[];
+}
+
+// ═══════════════════════════════════════════════════════════
+// Campaign Blueprints (UI: «Шаблоны кампаний»)
+// A reusable, publishable campaign skeleton: lore + universe + narrative
+// (NPCs / quests / locations) + attached homebrew + pre-built characters.
+// `template` is intentionally avoided — that term is taken by character
+// templates. The domain entity here is CampaignBlueprint.
+// ═══════════════════════════════════════════════════════════
+
+export interface UniverseResponse {
+  id: string;
+  slug: string;
+  name: string;
+  description?: string;
+  isSystem: boolean;
+  createdAt: string;
+}
+
+export interface CreateUniverseRequest {
+  slug: string;
+  name: string;
+  description?: string;
+}
+
+export type CampaignBlueprintStatus = 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
+
+export type CampaignBlueprintSort = 'downloads' | 'newest' | 'oldest';
+
+export interface CampaignBlueprintResponse {
+  id: string;
+  title: string;
+  loreDescription?: string;
+  universeSlug: string;
+  universeName: string;
+  status: CampaignBlueprintStatus;
+  version: number;
+  allowForks: boolean;
+  downloadCount: number;
+  authorUsername: string;
+  coverUrl?: string;
+  tags?: string[];
+  createdAt: string;
+  publishedAt?: string;
+  isDeleted: boolean;
+  /** Set on forked blueprints — the marketplace blueprint it was copied from. */
+  parentId?: string;
+  /** Version of the parent at the moment of the fork. */
+  originVersion?: number;
+}
+
+/* Blueprint sub-entities mirror the campaign Npc/Quest/Location DTOs but carry
+   no campaign_id — they live inside a blueprint, not a running campaign. */
+
+export interface BlueprintNpcResponse {
+  id: string;
+  name: string;
+  publicDescription?: string;
+  privateDescription?: string;
+  isVisibleToPlayers: boolean;
+  sourceType?: NpcSourceType | null;
+  race?: NpcRef;
+  characterClass?: NpcRef;
+  level?: number;
+  abilities?: string;
+  spells?: NpcRef[];
+  sourceMonster?: NpcRef;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateBlueprintNpcRequest {
+  name: string;
+  publicDescription?: string;
+  privateDescription?: string;
+  isVisibleToPlayers?: boolean;
+  sourceType?: NpcSourceType | null;
+  raceId?: string;
+  classId?: string;
+  level?: number;
+  abilities?: string;
+  spellIds?: string[];
+  sourceMonsterId?: string;
+}
+
+export interface UpdateBlueprintNpcRequest {
+  name?: string;
+  publicDescription?: string;
+  privateDescription?: string;
+  isVisibleToPlayers?: boolean;
+  sourceType?: NpcSourceType | null;
+  raceId?: string;
+  classId?: string;
+  level?: number;
+  abilities?: string;
+  spellIds?: string[];
+  sourceMonsterId?: string;
+}
+
+export interface BlueprintQuestResponse {
+  id: string;
+  title: string;
+  description?: string;
+  status: QuestStatus;
+  isVisibleToPlayers: boolean;
+  rewards: QuestRewardResponse[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateBlueprintQuestRequest {
+  title: string;
+  description?: string;
+  status?: QuestStatus;
+  isVisibleToPlayers?: boolean;
+}
+
+export interface UpdateBlueprintQuestRequest {
+  title?: string;
+  description?: string;
+  status?: string;
+  isVisibleToPlayers?: boolean;
+}
+
+export interface BlueprintLocationResponse {
+  id: string;
+  name: string;
+  description?: string;
+  isVisibleToPlayers: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateBlueprintLocationRequest {
+  name: string;
+  description?: string;
+  isVisibleToPlayers?: boolean;
+}
+
+export interface UpdateBlueprintLocationRequest {
+  name?: string;
+  description?: string;
+  isVisibleToPlayers?: boolean;
+}
+
+export interface CampaignBlueprintDetailResponse extends CampaignBlueprintResponse {
+  npcs: BlueprintNpcResponse[];
+  quests: BlueprintQuestResponse[];
+  locations: BlueprintLocationResponse[];
+  homebrew: CampaignHomebrewResponse[];
+  preBuiltCharacters: CharacterResponse[];
+}
+
+export interface CreateCampaignBlueprintRequest {
+  title: string;
+  loreDescription?: string;
+  universeId: string;
+  allowForks?: boolean;
+  coverUrl?: string;
+}
+
+export interface UpdateCampaignBlueprintRequest {
+  title?: string;
+  loreDescription?: string;
+  universeId?: string;
+  allowForks?: boolean;
+  coverUrl?: string;
+  tags?: string[];
+}
+
+/** POST /campaign-blueprints/{id}/instantiate → CampaignResponse. */
+export interface InstantiateBlueprintRequest {
+  name: string;
+  description?: string;
 }

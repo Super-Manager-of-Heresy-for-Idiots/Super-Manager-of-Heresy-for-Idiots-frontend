@@ -67,6 +67,12 @@ import EditDoctrinePage from '@/pages/gm/homebrew/EditDoctrinePage';
 import InstalledDoctrinesPage from '@/pages/gm/homebrew/InstalledDoctrinesPage';
 import HomebrewLibraryPage from '@/pages/gm/homebrew/HomebrewLibraryPage';
 
+// Campaign Blueprint pages
+import BlueprintMarketplacePage from '@/pages/gm/blueprints/BlueprintMarketplacePage';
+import BlueprintMarketplaceDetailPage from '@/pages/gm/blueprints/BlueprintMarketplaceDetailPage';
+import MyBlueprintsPage from '@/pages/gm/blueprints/MyBlueprintsPage';
+import BlueprintEditorPage from '@/pages/gm/blueprints/BlueprintEditorPage';
+
 // Bestiary (monsters + dictionaries) — wired to the bestiary API contract
 import BestiaryMonstersPage from '@/pages/admin/BestiaryMonstersPage';
 import BestiaryDictionariesPage from '@/pages/admin/BestiaryDictionariesPage';
@@ -125,6 +131,9 @@ export const router = createBrowserRouter([
           { path: '/campaigns/:campaignId/characters/:characterId/rewards', element: <CharacterRewardsPage /> },
           { path: '/marketplace', element: <MarketplacePage /> },
           { path: '/marketplace/:id', element: <MarketplaceDetailPage /> },
+          // Campaign blueprint marketplace — browse/read for every role (PLAYER read-only).
+          { path: '/blueprints/marketplace', element: <BlueprintMarketplacePage /> },
+          { path: '/blueprints/marketplace/:id', element: <BlueprintMarketplaceDetailPage /> },
           { path: '/combat-preview', element: <CombatPreviewIndexPage /> },
           // Campaign bestiary — read access for every member; mutations are GM-only (below).
           { path: '/campaigns/:campaignId/bestiary', element: <CampaignBestiaryPage /> },
@@ -194,6 +203,10 @@ export const router = createBrowserRouter([
         element: <AppLayout />,
         children: [
           { path: '/gm', element: <Navigate to="/campaigns" replace /> },
+          // Campaign blueprints — authoring (own drafts, forks, editor)
+          { path: '/blueprints/my', element: <MyBlueprintsPage /> },
+          { path: '/blueprints/my/new', element: <BlueprintEditorPage /> },
+          { path: '/blueprints/my/:id/edit', element: <BlueprintEditorPage /> },
           // Homebrew
           { path: '/gm/homebrew', element: <Navigate to="/gm/homebrew/my" replace /> },
           { path: '/gm/homebrew/marketplace', element: <Navigate to="/marketplace" replace /> },

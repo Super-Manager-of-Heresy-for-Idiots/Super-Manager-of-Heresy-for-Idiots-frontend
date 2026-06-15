@@ -1,0 +1,118 @@
+/* ── header ──────────────────────────────────────────────────── */
+.header { margin-bottom: 24px; }
+.headerLg { margin-bottom: 32px; }
+.overline { color: var(--gold); }
+.heading { margin-top: 4px; }
+.subtitle { color: var(--ink-faint); font-size: 13px; margin-top: 4px; max-width: 60ch; }
+.headRow { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+
+/* ── search / filter / sort bar ──────────────────────────────── */
+.barRow { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; align-items: center; }
+.searchBox { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border: 1px solid var(--rule); background: var(--abyss); flex: 1 1 240px; }
+.searchInput { flex: 1; background: transparent; border: none; outline: none; color: var(--ink); font-family: var(--font-body); font-size: 13px; }
+.filterSelect { flex: 0 1 200px; }
+.sortGroup { display: flex; border: 1px solid var(--rule); }
+.sortBtn {
+  padding: 8px 14px; font-family: var(--font-display); font-size: 10px;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  background: transparent; color: var(--ink-faint); border: none; cursor: pointer;
+}
+.sortBtn.active { background: rgba(176,141,78,0.12); color: var(--gold-pale); }
+.sortBtn.divided { border-left: 1px solid var(--hairline); }
+
+/* ── grid + cards ────────────────────────────────────────────── */
+.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.gridTop { margin-top: 20px; }
+@media (max-width: 1024px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 680px) { .grid { grid-template-columns: 1fr; } }
+
+.card { transition: opacity 0.15s ease; display: flex; flex-direction: column; }
+.card.archived { opacity: 0.5; }
+.cardClickable { cursor: pointer; }
+.cardBody { padding: 18px; flex: 1; }
+.cardHead { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
+.cardTitleWrap { flex: 1; min-width: 0; }
+.cardTitle { color: var(--ink-bright); margin: 0; }
+.cardBy { font-size: 11px; color: var(--ink-faint); margin-top: 3px; }
+.cardDesc {
+  font-size: 12px; color: var(--ink-quiet); line-height: 1.5; margin-bottom: 12px;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+.badgeRow { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; align-items: center; }
+.uniBadge {
+  display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px;
+  border: 1px solid rgba(90,142,148,0.4); color: var(--arcane);
+  font-family: var(--font-display); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;
+}
+.cardFoot { display: flex; align-items: center; justify-content: space-between; padding: 10px 18px; border-top: 1px solid var(--hairline); background: var(--abyss); }
+.cardActionsFoot { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; padding: 10px 18px; border-top: 1px solid var(--hairline); background: var(--abyss); }
+.delBtn { margin-left: auto; }
+.footStat { font-size: 11px; color: var(--ink-faint); display: inline-flex; align-items: center; gap: 5px; }
+.footVersion { font-size: 10px; color: var(--ink-ghost); }
+
+/* ── status chip ─────────────────────────────────────────────── */
+.statusChip {
+  display: inline-flex; align-items: center; padding: 3px 8px;
+  font-family: var(--font-display); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase;
+  border: 1px solid var(--hairline); color: var(--ink-faint);
+}
+.statusDRAFT { color: var(--ink-quiet); border-color: var(--hairline); }
+.statusPUBLISHED { color: var(--gold-pale); border-color: rgba(176,141,78,0.4); }
+.statusARCHIVED { color: var(--ember-pale); border-color: rgba(179,70,26,0.4); }
+
+/* ── skeleton / states ───────────────────────────────────────── */
+.skelCard { padding: 24px; min-height: 200px; }
+.skelLine1 { width: 60%; height: 16px; margin-bottom: 12px; }
+.skelLine2 { width: 40%; height: 14px; margin-bottom: 8px; }
+.skelLine3 { width: 80%; height: 14px; }
+.errorBox { text-align: center; padding: 48px 0; }
+.errorText { color: var(--ink-faint); margin-bottom: 16px; }
+
+/* ── pagination ──────────────────────────────────────────────── */
+.pager { display: flex; justify-content: center; gap: 8px; margin-top: 24px; }
+.pagerInfo { display: flex; align-items: center; font-size: 12px; color: var(--ink-quiet); padding: 0 12px; }
+.btnLabelL { margin-left: 4px; }
+.btnLabelR { margin-right: 4px; }
+
+/* ── detail page ─────────────────────────────────────────────── */
+.backBtn { margin-bottom: 16px; }
+.detailHead { display: flex; align-items: flex-start; gap: 16px; flex-wrap: wrap; margin-bottom: 8px; }
+.detailTitleWrap { flex: 1; min-width: 0; }
+.detailMeta { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 8px; }
+.detailActions { display: flex; gap: 8px; flex-shrink: 0; }
+.loreText { color: var(--ink-quiet); line-height: 1.7; white-space: pre-wrap; }
+.sectionTitle { margin-bottom: 12px; }
+.contentOverline { margin-top: 24px; }
+
+/* ── tabs ────────────────────────────────────────────────────── */
+.tabBar { display: flex; gap: 0; border-bottom: 1px solid var(--rule); margin: 20px 0 16px; overflow-x: auto; }
+.tabCount { margin-left: 6px; color: var(--ink-faint); font-size: 10px; }
+.tabPanel { min-height: 120px; }
+
+/* ── content / list rows ─────────────────────────────────────── */
+.rowList { display: flex; flex-direction: column; gap: 8px; }
+.row { display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; border: 1px solid var(--hairline); background: var(--abyss); }
+.rowMain { flex: 1; min-width: 0; }
+.rowTitle { color: var(--ink-bright); font-size: 13px; }
+.rowSub { color: var(--ink-quiet); font-size: 12px; margin-top: 3px; line-height: 1.5; }
+.rowActions { display: flex; gap: 6px; flex-shrink: 0; align-items: center; }
+.hiddenTag { color: var(--ink-faint); font-size: 10px; font-style: italic; }
+
+/* ── editor layout ───────────────────────────────────────────── */
+.editorRail { display: flex; gap: 0; border-bottom: 1px solid var(--rule); margin-bottom: 20px; overflow-x: auto; }
+.editorSection { max-width: 760px; }
+.formGrid { display: flex; flex-direction: column; gap: 16px; }
+.addBar { display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 16px; }
+.addBarField { flex: 1 1 220px; }
+.checkRow { display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; }
+.checkRow input { width: 16px; height: 16px; accent-color: var(--gold); }
+.noticeBox { padding: 14px 16px; border: 1px solid rgba(179,70,26,0.4); background: rgba(179,70,26,0.08); color: var(--ember-pale); font-size: 12px; line-height: 1.5; margin-bottom: 16px; }
+.inlineForm { display: flex; flex-direction: column; gap: 12px; padding: 16px; border: 1px solid var(--rule); background: var(--abyss); margin-bottom: 16px; }
+.twoCol { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 560px) { .twoCol { grid-template-columns: 1fr; } }
+
+/* ── modal ───────────────────────────────────────────────────── */
+.modalForm { display: flex; flex-direction: column; gap: 14px; margin-top: 8px; }
+.modalActions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
+.modalTitle { margin-bottom: 4px; }
+.modalSub { color: var(--ink-faint); font-size: 12px; margin-bottom: 8px; }

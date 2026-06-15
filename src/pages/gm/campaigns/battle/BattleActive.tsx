@@ -8,6 +8,7 @@ import {
   useEndTurn,
   useEndBattle,
   useJoinBattle,
+  useInitiativeBonus,
 } from '@/hooks/useBattles';
 import { useIsMobile } from '@/hooks/useMediaQuery';
 import { useT } from '@/i18n/I18nContext';
@@ -322,9 +323,9 @@ function ActionPanel({
                 <div className={s.muted}>{t('battle.action.noResources')}</div>
               ) : (
                 resources.map((r) => (
-                  <div key={r.id} className={s.resItem}>
+                  <div key={r.resourceTypeId} className={s.resItem}>
                     <div className={s.resName}>
-                      <span>{r.name}</span>
+                      <span>{r.resourceName ?? r.name}</span>
                       <span className="ao-num">
                         {r.currentValue} / {r.maxValue}
                       </span>
@@ -438,6 +439,7 @@ function JoinPanel({
   const join = useJoinBattle();
   const [charId, setCharId] = useState(chars[0]?.id ?? '');
   const [initStr, setInitStr] = useState('');
+  const { data: bonus } = useInitiativeBonus(campaignId, battle.id, charId || undefined);
 
   // Keep the selection valid as characters join/leave the available list.
   useEffect(() => {
@@ -453,12 +455,15 @@ function JoinPanel({
   };
 
   const initNum = parseInt(initStr, 10);
-  const valid = !!charId && Number.isFinite(initNum) && initNum >= 1 && initNum <= 20;
+  const d20Valid = Number.isFinite(initNum) && initNum >= 1 && initNum <= 20;
+  const valid = !!charId && d20Valid;
+  const total = d20Valid && bonus != null ? initNum + bonus : null;
+  const fmtSigned = (n: number) => (n >= 0 ? `+${n}` : `${n}`);
 
   const submit = () => {
     if (!valid) return;
     join.mutate(
-      { campaignId, battleId: battle.id, data: { characterId: charId, initiative: initNum } },
+      { campaignId, battleId: battle.id, data: { characters: [{ characterId: charId, d20: initNum }] } },
       { onSuccess: () => setInitStr('') },
     );
   };
@@ -505,6 +510,15 @@ function JoinPanel({
             </button>
           </div>
           <div className={s.hint}>{t('battle.join.manualHint')}</div>
+          {total != null && bonus != null && (
+            <div className={s.initResult}>
+              <span className={s.initResultLbl}>{t('battle.join.computed')}</span>
+              <span className={s.initResultVal}>{total}</span>
+              <span className={s.initResultBreakdown}>
+                {t('battle.join.formula', { d20: initNum, bonus: fmtSigned(bonus) })}
+              </span>
+            </div>
+          )}
         </div>
 
         <button

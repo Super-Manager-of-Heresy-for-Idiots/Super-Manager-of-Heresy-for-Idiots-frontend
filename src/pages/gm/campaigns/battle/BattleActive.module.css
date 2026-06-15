@@ -114,6 +114,31 @@
 .initRow { display: flex; align-items: center; gap: 10px; margin-top: 6px; }
 .initField { width: 110px; }
 .hint { font-size: 11px; color: var(--ink-faint); margin-top: 8px; }
+.initResult {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 8px 12px;
+  border: 1px solid var(--line, rgba(255, 255, 255, 0.12));
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+}
+.initResultLbl {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 10px;
+  color: var(--ink-faint);
+}
+.initResultVal {
+  font-family: var(--font-display);
+  font-size: 22px;
+  line-height: 1;
+  font-weight: 700;
+  margin-left: auto;
+}
+.initResultBreakdown { font-size: 11px; color: var(--ink-faint); width: 100%; }
 .turnNote { text-align: center; color: var(--ink-faint); font-size: 13px; padding: 22px 8px; }
 
 .skWrap { padding: 4px 0 8px; }

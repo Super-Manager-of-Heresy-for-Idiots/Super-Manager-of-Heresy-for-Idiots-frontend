@@ -244,8 +244,8 @@ export function useDepositItem() {
   const t = useT();
 
   return useMutation({
-    mutationFn: ({ campaignId, storageId, instanceId }: { campaignId: string; storageId: string; instanceId: string; characterId?: string }) =>
-      campaignsApi.depositItem(campaignId, storageId, instanceId),
+    mutationFn: ({ campaignId, storageId, instanceId, quantity }: { campaignId: string; storageId: string; instanceId: string; characterId?: string; quantity?: number }) =>
+      campaignsApi.depositItem(campaignId, storageId, instanceId, quantity),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'shared-storage'] });
       if (variables.characterId) {
@@ -266,8 +266,8 @@ export function useTakeItem() {
   const t = useT();
 
   return useMutation({
-    mutationFn: ({ campaignId, storageId, instanceId, characterId }: { campaignId: string; storageId: string; instanceId: string; characterId: string }) =>
-      campaignsApi.takeItem(campaignId, storageId, instanceId, characterId),
+    mutationFn: ({ campaignId, storageId, instanceId, characterId, quantity }: { campaignId: string; storageId: string; instanceId: string; characterId: string; quantity?: number }) =>
+      campaignsApi.takeItem(campaignId, storageId, instanceId, characterId, quantity),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'shared-storage'] });
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId, 'inventory'] });

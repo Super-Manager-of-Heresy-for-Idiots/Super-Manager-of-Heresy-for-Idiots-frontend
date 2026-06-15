@@ -98,14 +98,20 @@ export const campaignsApi = {
     return response.data;
   },
 
-  depositItem: async (id: string, storageId: string, instanceId: string): Promise<ApiResponse<void>> => {
-    const response = await api.post<ApiResponse<void>>(`/campaigns/${id}/shared-storage/${storageId}/items/${instanceId}/deposit`);
+  depositItem: async (id: string, storageId: string, instanceId: string, quantity?: number): Promise<ApiResponse<void>> => {
+    const response = await api.post<ApiResponse<void>>(
+      `/campaigns/${id}/shared-storage/${storageId}/items/${instanceId}/deposit`,
+      undefined,
+      quantity != null ? { params: { quantity } } : undefined,
+    );
     return response.data;
   },
 
-  takeItem: async (id: string, storageId: string, instanceId: string, characterId: string): Promise<ApiResponse<void>> => {
+  takeItem: async (id: string, storageId: string, instanceId: string, characterId: string, quantity?: number): Promise<ApiResponse<void>> => {
     const response = await api.post<ApiResponse<void>>(
       `/campaigns/${id}/shared-storage/${storageId}/items/${instanceId}/take/${characterId}`,
+      undefined,
+      quantity != null ? { params: { quantity } } : undefined,
     );
     return response.data;
   },

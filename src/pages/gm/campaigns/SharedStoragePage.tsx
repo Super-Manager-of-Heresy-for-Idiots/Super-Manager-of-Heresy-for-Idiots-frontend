@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react';
+import type { CSSProperties } from 'react';
 import { useParams } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
-import { OrdoPanel, Rune, OrdoField, EmptyVault } from '@/components/ordo';
+import { OrdoPanel, Rune, OrdoField, EmptyVault, OrdoChip, OrdoDivider, Placeholder } from '@/components/ordo';
 import { BackLink } from '@/components/campaigns';
 import {
   Dialog,
@@ -19,6 +20,7 @@ import {
 import { useCampaignCharacters } from '@/hooks/useCharacter';
 import { useCharacterInventory } from '@/hooks/useInventory';
 import { useAuthStore } from '@/store/authStore';
+import { rarityColor, slotClass, itemGlyph } from '@/lib/itemVisuals';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
 import type {
@@ -50,15 +52,21 @@ function DepositDialog({
   const t = useT();
   const [characterId, setCharacterId] = useState(characters[0]?.id ?? '');
   const [instanceId, setInstanceId] = useState('');
+  const [qty, setQty] = useState(1);
   const { data: inventory, isLoading } = useCharacterInventory(campaignId, characterId);
   const deposit = useDepositItem();
 
   const items = inventory ?? [];
+  const selectedItem = items.find((it) => it.id === instanceId);
+  const maxQty = selectedItem?.quantity ?? 1;
+  const showQty = maxQty > 1;
+
+  const clampQty = (n: number) => (Number.isNaN(n) ? 1 : Math.max(1, Math.min(maxQty, Math.floor(n))));
 
   const handleDeposit = () => {
     if (!instanceId || !characterId) return;
     deposit.mutate(
-      { campaignId, storageId, instanceId, characterId },
+      { campaignId, storageId, instanceId, characterId, quantity: showQty ? qty : undefined },
       { onSuccess: onClose },
     );
   };
@@ -78,7 +86,7 @@ function DepositDialog({
                 <select
                   className="ao-input"
                   value={characterId}
-                  onChange={(e) => { setCharacterId(e.target.value); setInstanceId(''); }}
+                  onChange={(e) => { setCharacterId(e.target.value); setInstanceId(''); setQty(1); }}
                 >
                   {characters.map((c) => (
                     <option key={c.id} value={c.id}>{c.name}</option>
@@ -96,7 +104,11 @@ function DepositDialog({
                   <select
                     className="ao-input"
                     value={instanceId}
-                    onChange={(e) => setInstanceId(e.target.value)}
+                    onChange={(e) => {
+                      setInstanceId(e.target.value);
+                      const sel = items.find((it) => it.id === e.target.value);
+                      setQty(sel?.quantity ?? 1);
+                    }}
                   >
                     <option value="">{t('camp2.storage.deposit.itemPlaceholder')}</option>
                     {items.map((it) => (
@@ -107,6 +119,18 @@ function DepositDialog({
                   </select>
                 )}
               </OrdoField>
+              {showQty && (
+                <OrdoField label={t('camp2.storage.quantity')}>
+                  <input
+                    type="number"
+                    className="ao-input"
+                    min={1}
+                    max={maxQty}
+                    value={qty}
+                    onChange={(e) => setQty(clampQty(Number(e.target.value)))}
+                  />
+                </OrdoField>
+              )}
             </>
           )}
         </div>
@@ -146,12 +170,17 @@ function TakeDialog({
 }) {
   const t = useT();
   const [characterId, setCharacterId] = useState(characters[0]?.id ?? '');
+  const maxQty = item.quantity ?? 1;
+  const showQty = maxQty > 1;
+  const [qty, setQty] = useState(maxQty);
   const take = useTakeItem();
+
+  const clampQty = (n: number) => (Number.isNaN(n) ? 1 : Math.max(1, Math.min(maxQty, Math.floor(n))));
 
   const handleTake = () => {
     if (!characterId) return;
     take.mutate(
-      { campaignId, storageId, instanceId: item.id, characterId },
+      { campaignId, storageId, instanceId: item.id, characterId, quantity: showQty ? qty : undefined },
       { onSuccess: onClose },
     );
   };
@@ -181,6 +210,18 @@ function TakeDialog({
               </select>
             </OrdoField>
           )}
+          {characters.length > 0 && showQty && (
+            <OrdoField label={t('camp2.storage.quantity')}>
+              <input
+                type="number"
+                className="ao-input"
+                min={1}
+                max={maxQty}
+                value={qty}
+                onChange={(e) => setQty(clampQty(Number(e.target.value)))}
+              />
+            </OrdoField>
+          )}
         </div>
         <DialogFooter>
           <button className="ao-btn ao-btn--ghost" onClick={onClose} disabled={take.isPending}>
@@ -201,6 +242,174 @@ function TakeDialog({
   );
 }
 
+/* ── item preview (storage folio) ────────────────────────────── */
+
+function StorageItemPreview({
+  item,
+  canInteract,
+  onTake,
+}: {
+  item: StorageItemResponse;
+  canInteract: boolean;
+  onTake: () => void;
+}) {
+  const t = useT();
+  const rarity = item.artifactRarity ?? item.rarity;
+  const NA = '—';
+  const stats: { label: string; value: string; color?: string }[] = [
+    { label: t('camp2.storage.preview.type'), value: item.itemTypeName ?? item.templateName ?? NA },
+    { label: t('camp2.storage.preview.rarity'), value: (rarity ?? 'COMMON').replace('_', ' '), color: rarityColor(rarity) },
+    { label: t('camp2.storage.preview.quantity'), value: `x${item.quantity}` },
+  ];
+
+  return (
+    <div className={s.previewBox}>
+      <Placeholder className={s.previewImg}>{itemLabel(item)}</Placeholder>
+
+      <div className={s.chipRow}>
+        {rarity && (
+          <OrdoChip tone={rarity === 'RARE' ? 'arcane' : 'gold'} glyph="diamond-fill">
+            {rarity.replace('_', ' ')}
+          </OrdoChip>
+        )}
+        {item.isUnique && (
+          <OrdoChip tone="arcane" glyph="diamond">{t('camp2.storage.unique')}</OrdoChip>
+        )}
+      </div>
+
+      <div className={cn('ao-h5', s.previewName)}>{item.artifactName ?? itemLabel(item)}</div>
+      <div className={cn('ao-italic', s.previewType)}>{item.itemTypeName ?? item.templateName}</div>
+
+      <OrdoDivider glyph="diamond-fill" color="var(--rule)" />
+
+      <div className={cn('ao-rgrid', 'ao-rgrid--keep2', s.statGrid)}>
+        {stats.map((st) => (
+          <div key={st.label}>
+            <div className="ao-overline">{st.label}</div>
+            <div
+              className={cn('ao-num', s.statValue)}
+              style={st.color ? ({ '--stat-c': st.color } as CSSProperties) : undefined}
+            >
+              {st.value}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {item.notes && (
+        <>
+          <OrdoDivider glyph="cross-pat" color="var(--rule)">{t('camp2.storage.preview.notes')}</OrdoDivider>
+          <p className={cn('ao-italic', s.previewNotes)}>{item.notes}</p>
+        </>
+      )}
+
+      {canInteract && (
+        <div className={s.previewActions}>
+          <button className={cn('ao-btn ao-btn--primary', s.grow)} onClick={onTake}>
+            <Rune kind="arrow-r" size={11} color="currentColor" />
+            <span className={s.ml6}>{t('camp2.storage.take.action')}</span>
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ── container card (tiles + preview) ────────────────────────── */
+
+function StorageContainerCard({
+  container,
+  canInteract,
+  onDeposit,
+  onTake,
+}: {
+  container: StorageContainerResponse;
+  canInteract: boolean;
+  onDeposit: (storageId: string) => void;
+  onTake: (storageId: string, item: StorageItemResponse) => void;
+}) {
+  const t = useT();
+  const [expanded, setExpanded] = useState(false);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  const items: StorageItemResponse[] = container.items ?? [];
+  const selected = items.find((it) => it.id === selectedId) ?? null;
+
+  return (
+    <OrdoPanel frame padding={0}>
+      <button onClick={() => setExpanded((v) => !v)} className={s.containerBtn}>
+        <div className={s.containerIcon}>
+          <Rune kind="sword" size={16} color="var(--brass)" />
+        </div>
+        <div className={s.containerMain}>
+          <div className={s.containerName}>{container.name}</div>
+          <div className={cn('ao-codex', s.containerCount)}>
+            {items.length} {items.length === 1 ? t('camp2.storage.itemOne') : t('camp2.storage.itemMany')}
+          </div>
+        </div>
+        <Rune kind={expanded ? 'chev-d' : 'chev-r'} size={14} color="var(--ink-faint)" />
+      </button>
+
+      {expanded && (
+        <div className={s.itemsWrap}>
+          {canInteract && (
+            <div className={s.itemsActions}>
+              <button
+                className="ao-btn ao-btn--ghost ao-btn--sm"
+                onClick={() => onDeposit(container.id)}
+              >
+                <Rune kind="plus" size={12} color="currentColor" />
+                <span className={s.ml6}>{t('camp2.storage.deposit.add')}</span>
+              </button>
+            </div>
+          )}
+          {items.length === 0 ? (
+            <div className={s.emptyItems}>
+              <p className={cn('ao-italic', s.emptyItemsText)}>
+                {t('camp2.storage.containerEmpty')}
+              </p>
+            </div>
+          ) : (
+            <div className={s.expandGrid}>
+              <div className={s.cellGrid}>
+                {items.map((item) => (
+                  <button
+                    key={item.id}
+                    className={cn(slotClass(item.rarity), s.slotCell, item.id === selectedId && s.selected)}
+                    onClick={() => setSelectedId(item.id)}
+                    title={itemLabel(item)}
+                  >
+                    <Rune kind={itemGlyph(item)} size={18} color={rarityColor(item.rarity)} />
+                    {item.quantity > 1 && (
+                      <span className={cn('ao-num', s.qtyBadge)}>{item.quantity}</span>
+                    )}
+                  </button>
+                ))}
+              </div>
+              <div className={s.previewPanel}>
+                {!selected ? (
+                  <div className={s.previewEmpty}>
+                    <Rune kind="diamond" size={24} color="var(--ink-faint)" />
+                    <p className={cn('ao-italic', s.previewEmptyText)}>
+                      {t('camp2.storage.preview.empty')}
+                    </p>
+                  </div>
+                ) : (
+                  <StorageItemPreview
+                    item={selected}
+                    canInteract={canInteract}
+                    onTake={() => onTake(container.id, selected)}
+                  />
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </OrdoPanel>
+  );
+}
+
 /* ── page ────────────────────────────────────────────────────── */
 
 export default function SharedStoragePage() {
@@ -213,7 +422,6 @@ export default function SharedStoragePage() {
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [formName, setFormName] = useState('');
-  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const [depositStorageId, setDepositStorageId] = useState<string | null>(null);
   const [takeTarget, setTakeTarget] = useState<{ storageId: string; item: StorageItemResponse } | null>(null);
 
@@ -225,15 +433,6 @@ export default function SharedStoragePage() {
   }, [characters, user?.id, user?.role]);
 
   const canInteract = eligibleCharacters.length > 0;
-
-  const toggleExpanded = (containerId: string) => {
-    setExpandedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(containerId)) next.delete(containerId);
-      else next.add(containerId);
-      return next;
-    });
-  };
 
   const handleCreate = () => {
     if (!campaignId || !formName) return;
@@ -327,91 +526,15 @@ export default function SharedStoragePage() {
         />
       ) : (
         <div className={s.list}>
-          {storageList.map((container: StorageContainerResponse) => {
-            const isExpanded = expandedIds.has(container.id);
-            const items: StorageItemResponse[] = container.items ?? [];
-
-            return (
-              <OrdoPanel key={container.id} frame padding={0}>
-                {/* Container header */}
-                <button onClick={() => toggleExpanded(container.id)} className={s.containerBtn}>
-                  <div className={s.containerIcon}>
-                    <Rune kind="sword" size={16} color="var(--brass)" />
-                  </div>
-                  <div className={s.containerMain}>
-                    <div className={s.containerName}>
-                      {container.name}
-                    </div>
-                    <div className={cn('ao-codex', s.containerCount)}>
-                      {items.length} {items.length === 1 ? t('camp2.storage.itemOne') : t('camp2.storage.itemMany')}
-                    </div>
-                  </div>
-                  <Rune
-                    kind={isExpanded ? 'chev-d' : 'chev-r'}
-                    size={14}
-                    color="var(--ink-faint)"
-                  />
-                </button>
-
-                {/* Expanded items */}
-                {isExpanded && (
-                  <div className={s.itemsWrap}>
-                    {canInteract && (
-                      <div className={s.itemsActions}>
-                        <button
-                          className="ao-btn ao-btn--ghost ao-btn--sm"
-                          onClick={() => setDepositStorageId(container.id)}
-                        >
-                          <Rune kind="plus" size={12} color="currentColor" />
-                          <span className={s.ml6}>{t('camp2.storage.deposit.add')}</span>
-                        </button>
-                      </div>
-                    )}
-                    {items.length === 0 ? (
-                      <div className={s.emptyItems}>
-                        <p className={cn('ao-italic', s.emptyItemsText)}>
-                          {t('camp2.storage.containerEmpty')}
-                        </p>
-                      </div>
-                    ) : (
-                      items.map((item: StorageItemResponse) => (
-                        <div key={item.id} className={s.itemRow}>
-                          <Rune kind="diamond" size={8} color="var(--brass)" />
-                          <div className={s.itemMain}>
-                            <span className={s.itemName}>
-                              {itemLabel(item)}
-                            </span>
-                            {item.rarity && (
-                              <span className={cn('ao-overline', s.itemRarity)}>
-                                {item.rarity}
-                              </span>
-                            )}
-                          </div>
-                          <span className={cn('ao-codex', s.itemQty)}>
-                            x{item.quantity}
-                          </span>
-                          {item.isUnique && (
-                            <span className={cn('ao-overline', s.itemUnique)}>
-                              {t('camp2.storage.unique')}
-                            </span>
-                          )}
-                          {canInteract && (
-                            <button
-                              className="ao-btn ao-btn--ghost ao-btn--sm"
-                              onClick={() => setTakeTarget({ storageId: container.id, item })}
-                            >
-                              <Rune kind="arrow-r" size={12} color="currentColor" />
-                              <span className={s.ml4}>{t('camp2.storage.take.action')}</span>
-                            </button>
-                          )}
-                        </div>
-                      ))
-                    )}
-                  </div>
-                )}
-              </OrdoPanel>
-            );
-          })}
+          {storageList.map((container: StorageContainerResponse) => (
+            <StorageContainerCard
+              key={container.id}
+              container={container}
+              canInteract={canInteract}
+              onDeposit={(storageId) => setDepositStorageId(storageId)}
+              onTake={(storageId, item) => setTakeTarget({ storageId, item })}
+            />
+          ))}
         </div>
       )}
 

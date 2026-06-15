@@ -12,7 +12,6 @@
 .errorText { color: var(--ink-faint); margin-bottom: 16px; }
 
 .backBtn { margin-bottom: 12px; }
-.ml4 { margin-left: 4px; }
 .ml6 { margin-left: 6px; }
 
 .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px; }
@@ -40,15 +39,39 @@
 .emptyItems { padding: 16px 18px; text-align: center; }
 .emptyItemsText { color: var(--ink-ghost); font-size: 13px; }
 
-.itemRow {
-  display: flex; align-items: center; gap: 10px;
-  padding: 10px 18px 10px 66px; border-bottom: 1px solid var(--hairline);
+/* ── expanded: tiles + preview ── */
+.expandGrid {
+  display: grid; grid-template-columns: 1.4fr 1fr; gap: 16px;
+  padding: 16px 18px; align-items: start;
 }
-.itemMain { flex: 1; min-width: 0; }
-.itemName { font-size: 13px; color: var(--ink-bright); }
-.itemRarity { font-size: 8px; margin-left: 8px; color: var(--ink-faint); }
-.itemQty { font-size: 12px; color: var(--ink-quiet); }
-.itemUnique { font-size: 8px; color: var(--gold); }
+.cellGrid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.slotCell { aspect-ratio: 1; padding: 0; position: relative; cursor: pointer; }
+.slotCell.selected { outline: 1px solid var(--brass); outline-offset: 1px; }
+.qtyBadge {
+  position: absolute; bottom: 2px; right: 4px; font-size: 10px;
+  color: var(--ink-bright); text-shadow: 0 1px 2px #000;
+}
+
+.previewPanel { border-left: 1px solid var(--hairline); min-height: 200px; }
+.previewEmpty { padding: 32px 16px; text-align: center; }
+.previewEmptyText { color: var(--ink-faint); font-size: 12px; margin-top: 12px; }
+.previewBox { padding: 0 0 0 16px; }
+.previewImg { width: 100%; height: 140px; border: 1px solid var(--rule); }
+.chipRow { display: flex; align-items: center; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+.previewName { margin-top: 12px; }
+.previewType { margin-top: 2px; }
+.statGrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.statValue { color: var(--stat-c, var(--ink-quiet)); font-size: 15px; }
+.previewNotes { color: var(--ink-quiet); font-size: 12px; }
+.previewActions { display: flex; gap: 8px; margin-top: 16px; }
+.grow { flex: 1; }
+
+@media (max-width: 768px) {
+  .expandGrid { grid-template-columns: 1fr; }
+  .previewPanel { border-left: none; border-top: 1px solid var(--hairline); }
+  .previewBox { padding: 16px 0 0; }
+  .cellGrid { grid-template-columns: repeat(auto-fill, minmax(48px, 1fr)); }
+}
 
 .dialogCol { display: flex; flex-direction: column; gap: 16px; }
 .dialogHint { color: var(--ink-faint); font-size: 13px; }

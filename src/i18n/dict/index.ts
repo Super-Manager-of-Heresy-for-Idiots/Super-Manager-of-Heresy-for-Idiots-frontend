@@ -13,6 +13,7 @@ import { wallet } from './wallet';
 import { combat } from './combat';
 import { bestiary } from './bestiary';
 import { battle } from './battle';
+import { blueprints } from './blueprints';
 
 /** Every feature dictionary module, merged into the final translations. */
 export const modules: DictModule[] = [
@@ -30,4 +31,5 @@ export const modules: DictModule[] = [
   combat,
   bestiary,
   battle,
+  blueprints,
 ];

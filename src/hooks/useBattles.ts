@@ -42,6 +42,20 @@ export function useBattle(campaignId: string, battleId: string | undefined) {
   });
 }
 
+/** A character's initiative bonus (DEX mod + buffs), for the live `d20 + bonus` join preview. */
+export function useInitiativeBonus(
+  campaignId: string,
+  battleId: string | undefined,
+  characterId: string | undefined,
+) {
+  return useQuery({
+    queryKey: ['campaigns', campaignId, 'battles', battleId ?? '', 'init-bonus', characterId ?? ''] as const,
+    queryFn: async () => (await battlesApi.initiativeBonus(campaignId, battleId!, characterId!)).data ?? 0,
+    enabled: !!campaignId && !!battleId && !!characterId,
+    staleTime: 30_000,
+  });
+}
+
 /** Current-turn detail (resources, abilities, effects). Active battles only. */
 export function useBattleCurrentTurn(
   campaignId: string,

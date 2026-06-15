@@ -81,6 +81,18 @@ export const battlesApi = {
     return response.data;
   },
 
+  /** Initiative bonus (DEX mod + buffs) for a character, so the join UI can show d20 + bonus live. */
+  initiativeBonus: async (
+    campaignId: string,
+    battleId: string,
+    characterId: string,
+  ): Promise<ApiResponse<number>> => {
+    const response = await api.get<ApiResponse<number>>(
+      `${base(campaignId)}/${battleId}/characters/${characterId}/initiative-bonus`,
+    );
+    return response.data;
+  },
+
   endTurn: async (campaignId: string, battleId: string): Promise<ApiResponse<BattleResponse>> => {
     const response = await api.post<ApiResponse<BattleResponse>>(`${base(campaignId)}/${battleId}/end-turn`);
     return response.data;

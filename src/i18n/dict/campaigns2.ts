@@ -266,6 +266,12 @@ export const campaigns2: DictModule = {
     'camp2.storage.take.character': 'Кому (персонаж)',
     'camp2.storage.take.noCharacters': 'Нет персонажей, которым можно забрать предмет.',
     'camp2.storage.take.submit': 'Забрать',
+    'camp2.storage.quantity': 'Количество',
+    'camp2.storage.preview.empty': 'Выберите предмет, чтобы посмотреть детали',
+    'camp2.storage.preview.type': 'Тип',
+    'camp2.storage.preview.rarity': 'Редкость',
+    'camp2.storage.preview.quantity': 'Количество',
+    'camp2.storage.preview.notes': 'Заметки',
 
     /* ── ApplyEffectPage ────────────────────────────── */
     'camp2.effect.charEffectsOverline': 'Эффекты персонажа',
@@ -800,6 +806,12 @@ export const campaigns2: DictModule = {
     'camp2.storage.take.character': 'To (character)',
     'camp2.storage.take.noCharacters': 'No characters that can receive the item.',
     'camp2.storage.take.submit': 'Take',
+    'camp2.storage.quantity': 'Quantity',
+    'camp2.storage.preview.empty': 'Select an item to inspect',
+    'camp2.storage.preview.type': 'Type',
+    'camp2.storage.preview.rarity': 'Rarity',
+    'camp2.storage.preview.quantity': 'Quantity',
+    'camp2.storage.preview.notes': 'Notes',
 
     /* ── ApplyEffectPage ────────────────────────────── */
     'camp2.effect.charEffectsOverline': 'Character Effects',

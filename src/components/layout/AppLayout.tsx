@@ -22,12 +22,15 @@ const playerNav: NavEntry[] = [
   { labelKey: 'nav.campaigns', path: '/campaigns', glyph: 'helm' },
   { labelKey: 'nav.myCharacters', path: '/characters/templates', glyph: 'shield' },
   { labelKey: 'nav.marketplace', path: '/marketplace', glyph: 'book' },
+  { labelKey: 'nav.blueprintMarket', path: '/blueprints/marketplace', glyph: 'hex' },
 ];
 
 const gmNav: NavEntry[] = [
   { labelKey: 'nav.campaigns', path: '/campaigns', glyph: 'helm' },
   { labelKey: 'nav.myCharacters', path: '/characters/templates', glyph: 'shield' },
   { labelKey: 'nav.marketplace', path: '/marketplace', glyph: 'book' },
+  { labelKey: 'nav.blueprintMarket', path: '/blueprints/marketplace', glyph: 'hex' },
+  { labelKey: 'nav.myBlueprints', path: '/blueprints/my', glyph: 'sigil-2' },
   { labelKey: 'nav.myDoctrines', path: '/gm/homebrew/my', glyph: 'scroll' },
   { labelKey: 'nav.installed', path: '/gm/homebrew/installed', glyph: 'check' },
   { labelKey: 'nav.library', path: '/gm/homebrew/library', glyph: 'book' },
