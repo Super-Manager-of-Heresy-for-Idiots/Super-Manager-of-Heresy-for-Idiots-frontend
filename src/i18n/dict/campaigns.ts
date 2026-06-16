@@ -45,6 +45,7 @@ export const campaigns: DictModule = {
     /* ── CampaignDashboardPage ──────────────────────── */
     'camp.dash.loadError': 'Хронику кампании не удалось развернуть. Её обереги остаются нерушимы.',
     'camp.dash.overline': 'Кампания',
+    'camp.nav.overview': 'Обзор',
     'camp.dash.tabs.label': 'Вкладки кампании',
     'camp.dash.tabs.sections': 'Разделы',
     'camp.dash.tabs.characters': 'Персонажи',
@@ -370,6 +371,7 @@ export const campaigns: DictModule = {
     /* ── CampaignDashboardPage ──────────────────────── */
     'camp.dash.loadError': 'The campaign chronicle could not be unfurled. Its wards remain unbroken.',
     'camp.dash.overline': 'Campaign',
+    'camp.nav.overview': 'Overview',
     'camp.dash.tabs.label': 'Campaign tabs',
     'camp.dash.tabs.sections': 'Sections',
     'camp.dash.tabs.characters': 'Characters',

@@ -12,7 +12,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { BackLink } from '@/components/campaigns';
 import { useCampaignInviteCode, useRegenerateCampaignInvite } from '@/hooks/useCampaigns';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
@@ -83,8 +82,6 @@ export default function CampaignInvitePage() {
 
   return (
     <div>
-      <BackLink to={`/campaigns/${campaignId}`} label={t('camp2.back.campaign')} className={s.backBtn} />
-
       {/* Header */}
       <div className={s.header}>
         <p className={cn('ao-overline', s.overlineGold)}>{t('camp.invite.overline')}</p>

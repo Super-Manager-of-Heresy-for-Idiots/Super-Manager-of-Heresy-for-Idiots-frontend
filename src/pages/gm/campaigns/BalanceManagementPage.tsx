@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { OrdoPanel, PanelHeader, Rune, EmptyVault } from '@/components/ordo';
-import { BackLink, CharStatusBadge } from '@/components/campaigns';
+import { CharStatusBadge } from '@/components/campaigns';
 import {
   CurrencyPanel,
   TopupForm,
@@ -188,8 +188,6 @@ export default function BalanceManagementPage() {
 
   return (
     <div>
-      <BackLink to={`/campaigns/${campaignId}`} label={t('camp2.back.campaign')} className={s.backLink} />
-
       {/* Header */}
       <div className={s.headerBlock}>
         <p className={cn('ao-overline', s.overlineGold)}>{t('camp.balances.overline')}</p>

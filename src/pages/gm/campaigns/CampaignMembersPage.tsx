@@ -12,7 +12,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { BackLink } from '@/components/campaigns';
 import { useCampaign, useKickMember } from '@/hooks/useCampaigns';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
@@ -79,8 +78,6 @@ export default function CampaignMembersPage() {
 
   return (
     <div>
-      <BackLink to={`/campaigns/${campaignId}`} label={t('camp2.back.campaign')} className={s.backBtn} />
-
       {/* Header */}
       <div className={s.header}>
         <div>

@@ -28,7 +28,6 @@ import {
   useDeleteLocation,
   useToggleLocationVisibility,
 } from '@/hooks/useLocations';
-import { BackLink } from '@/components/campaigns';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
 import type { LocationResponse } from '@/types';
@@ -117,13 +116,11 @@ export default function LocationsPage() {
     });
   };
 
-  const backTo = `/campaigns/${campaignId}`;
   /* ── loading ─────────────────────────────────────────────── */
 
   if (isLoading) {
     return (
       <div>
-        <BackLink to={backTo} label={t('camp2.back.campaign')} className={s.backLink} />
         <div className={s.header}>
           <div>
             <p className={cn('ao-overline', s.overlineGold)}>{t('camp2.loc.overline')}</p>
@@ -149,7 +146,6 @@ export default function LocationsPage() {
   if (error) {
     return (
       <div>
-        <BackLink to={backTo} label={t('camp2.back.campaign')} className={s.backLink} />
         <div className={s.errorBox}>
           <p className={cn('ao-italic', s.errorText)}>
             {t('camp2.loc.loadError')}
@@ -164,7 +160,6 @@ export default function LocationsPage() {
 
   return (
     <div>
-      <BackLink to={backTo} label={t('camp2.back.campaign')} className={s.backLink} />
       {/* Header */}
       <div className={s.header}>
         <div>

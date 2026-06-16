@@ -10,7 +10,7 @@ import {
   Bar,
   EmptyVault,
 } from '@/components/ordo';
-import { BackLink, CharStatusBadge } from '@/components/campaigns';
+import { CharStatusBadge } from '@/components/campaigns';
 import { useCampaignCharacters } from '@/hooks/useCharacter';
 import { useGrantXp } from '@/hooks/useXp';
 import { useT } from '@/i18n/I18nContext';
@@ -109,7 +109,6 @@ export default function XPGrantPage() {
   if (isLoading) {
     return (
       <div>
-        <BackLink to={`/campaigns/${campaignId}`} label={t('camp2.back.campaign')} className={s.backLink} />
         <div className={s.headerBlock}>
           <p className={cn('ao-overline', s.overlineGold)}>
             {t('camp2.xp.gmTools')}
@@ -136,7 +135,6 @@ export default function XPGrantPage() {
   if (error) {
     return (
       <div>
-        <BackLink to={`/campaigns/${campaignId}`} label={t('camp2.back.campaign')} className={s.backLink} />
         <div className={s.errorBlock}>
           <p className={cn('ao-italic', s.errorText)}>
             {t('camp2.xp.loadError')}
@@ -152,7 +150,6 @@ export default function XPGrantPage() {
   if (!activeCharacters.length) {
     return (
       <div>
-        <BackLink to={`/campaigns/${campaignId}`} label={t('camp2.back.campaign')} className={s.backLink} />
         <div className={s.headerBlock}>
           <p className={cn('ao-overline', s.overlineGold)}>
             {t('camp2.xp.gmTools')}
@@ -174,8 +171,6 @@ export default function XPGrantPage() {
   /* ---- render ---- */
   return (
     <div>
-      <BackLink to={`/campaigns/${campaignId}`} label={t('camp2.back.campaign')} className={s.backLink} />
-
       {/* Header */}
       <div className={s.header}>
         <div>

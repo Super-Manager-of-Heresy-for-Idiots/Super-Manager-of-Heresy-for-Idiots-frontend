@@ -1,13 +1,13 @@
-import { useEffect, useState } from 'react';
-import { Outlet, useLocation, useMatch, useNavigate } from 'react-router-dom';
+import { Suspense, useEffect, useState } from 'react';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
-import { useWebSocket } from '@/hooks/useWebSocket';
 import { Rune, Sigil } from '@/components/ordo';
 import { useT } from '@/i18n/I18nContext';
 import { useIsMobile } from '@/hooks/useMediaQuery';
 import { cn } from '@/lib/utils';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { AccountSwitcher } from './AccountSwitcher';
+import { PageFallback } from './PageFallback';
 import type { Role } from '@/types';
 
 /** Description i18n key for a nav entry, e.g. `nav.campaigns` → `nav.desc.campaigns`. */
@@ -73,16 +73,6 @@ function getNavItems(role?: Role): NavEntry[] {
 }
 
 /* ── Layout ─────────────────────────────────────────────── */
-
-/**
- * Lives inside AppLayout so the campaign-scoped WebSocket follows the route.
- * Connects on enter, disconnects on leave, swaps cleanly on campaign switch.
- */
-function CampaignWsBridge() {
-  const match = useMatch('/campaigns/:campaignId/*');
-  useWebSocket(match?.params.campaignId);
-  return null;
-}
 
 export function AppLayout() {
   const { user } = useAuthStore();
@@ -259,8 +249,9 @@ export function AppLayout() {
         {header}
         <main className="ao-scroll ao-grain app-main ao-shell-main">
           <div className="ao-shell-content">
-            <CampaignWsBridge />
-            <Outlet />
+            <Suspense fallback={<PageFallback />}>
+              <Outlet />
+            </Suspense>
           </div>
         </main>
       </div>

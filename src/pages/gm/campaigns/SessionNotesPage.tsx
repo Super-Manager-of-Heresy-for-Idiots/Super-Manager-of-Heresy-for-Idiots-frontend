@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import { OrdoPanel, PanelHeader, Rune, OrdoField, OrdoDivider, EmptyVault } from '@/components/ordo';
-import { BackLink } from '@/components/campaigns';
 import {
   Dialog,
   DialogContent,
@@ -139,8 +138,6 @@ export default function SessionNotesPage() {
 
   return (
     <div>
-      <BackLink to={`/campaigns/${campaignId}`} label={t('camp2.back.campaign')} className={s.backBtn} />
-
       {/* Privacy banner */}
       <div className={s.privacyBanner}>
         <Rune kind="lock" size={16} color="rgba(180,80,80,0.6)" />

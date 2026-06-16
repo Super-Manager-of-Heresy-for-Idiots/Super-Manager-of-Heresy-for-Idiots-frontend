@@ -3,7 +3,6 @@ import type { CSSProperties } from 'react';
 import { useParams } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import { OrdoPanel, Rune, OrdoField, EmptyVault, OrdoChip, OrdoDivider, Placeholder } from '@/components/ordo';
-import { BackLink } from '@/components/campaigns';
 import {
   Dialog,
   DialogContent,
@@ -488,8 +487,6 @@ export default function SharedStoragePage() {
 
   return (
     <div>
-      <BackLink to={`/campaigns/${campaignId}`} label={t('camp2.back.campaign')} className={s.backBtn} />
-
       {/* Header */}
       <div className={s.header}>
         <div>

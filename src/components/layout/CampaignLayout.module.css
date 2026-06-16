@@ -1,0 +1,29 @@
+.shell { display: block; }
+
+.back { margin-bottom: 12px; }
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--abyss);
+  margin-bottom: 24px;
+}
+
+.body { display: block; }
+
+/* ── loading / error ─────────────────────────────────────── */
+.headSkel { margin-bottom: 24px; }
+.phTitle { width: 40%; height: 26px; margin-bottom: 16px; }
+.phNav { width: 70%; height: 16px; }
+
+.errorBlock { text-align: center; padding: 48px 0; }
+.errorText { color: var(--ink-faint); margin-bottom: 16px; }

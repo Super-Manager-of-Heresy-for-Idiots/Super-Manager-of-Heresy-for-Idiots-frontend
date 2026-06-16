@@ -18,7 +18,6 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useCampaignQuests, useCreateQuest } from '@/hooks/useQuests';
-import { BackLink } from '@/components/campaigns';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
 import type { QuestResponse, QuestStatus } from '@/types';
@@ -70,13 +69,11 @@ export default function QuestManagerPage() {
     );
   };
 
-  const backTo = `/campaigns/${campaignId}`;
   /* ── loading ─────────────────────────────────────────────── */
 
   if (isLoading) {
     return (
       <div>
-        <BackLink to={backTo} label={t('camp2.back.campaign')} className={css.backLink} />
         <div className={css.header}>
           <div>
             <p className={cn('ao-overline', css.overlineGold)}>{t('camp2.questMgr.overline')}</p>
@@ -102,7 +99,6 @@ export default function QuestManagerPage() {
   if (error) {
     return (
       <div>
-        <BackLink to={backTo} label={t('camp2.back.campaign')} className={css.backLink} />
         <div className={css.errorBlock}>
           <p className={cn('ao-italic', css.errorText)}>
             {t('camp2.questMgr.loadError')}
@@ -125,7 +121,6 @@ export default function QuestManagerPage() {
 
   return (
     <div>
-      <BackLink to={backTo} label={t('camp2.back.campaign')} className={css.backLink} />
       {/* Header */}
       <div className={css.header}>
         <div>

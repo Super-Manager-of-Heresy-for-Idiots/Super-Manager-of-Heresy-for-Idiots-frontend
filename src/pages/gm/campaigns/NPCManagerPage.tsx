@@ -18,7 +18,6 @@ import {
 } from '@/hooks/useNpcs';
 import { useCampaignReferenceContent, useCampaignReferenceSpells } from '@/hooks/useHomebrewCampaign';
 import { useCampaignMonsters } from '@/hooks/useBestiary';
-import { BackLink } from '@/components/campaigns';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
 import type { NpcResponse } from '@/types';
@@ -95,11 +94,9 @@ export default function NPCManagerPage() {
 
   /* ── loading ─────────────────────────────────────────────── */
 
-  const backTo = `/campaigns/${campaignId}`;
   if (isLoading) {
     return (
       <div>
-        <BackLink to={backTo} label={t('camp2.back.campaign')} className={s.backLink} />
         <div className={s.header}>
           <div>
             <p className={cn('ao-overline', s.overlineGold)}>{t('camp2.npcMgr.overline')}</p>
@@ -125,7 +122,6 @@ export default function NPCManagerPage() {
   if (error) {
     return (
       <div>
-        <BackLink to={backTo} label={t('camp2.back.campaign')} className={s.backLink} />
         <div className={s.errorBox}>
           <p className={cn('ao-italic', s.errorText)}>
             {t('camp2.npcMgr.loadError')}
@@ -140,7 +136,6 @@ export default function NPCManagerPage() {
 
   return (
     <div>
-      <BackLink to={backTo} label={t('camp2.back.campaign')} className={s.backLink} />
       {/* Header */}
       <div className={s.header}>
         <div>

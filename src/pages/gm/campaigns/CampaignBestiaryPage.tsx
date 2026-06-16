@@ -12,7 +12,6 @@ import {
   useToggleCampaignMonsterVisibility,
 } from '@/hooks/useBestiary';
 import MonsterStatblock from '@/components/bestiary/MonsterStatblock';
-import { BackLink } from '@/components/campaigns';
 import { SIZE_VALUES, dictName, sizeKey } from '@/components/bestiary/constants';
 import { useI18n, useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
@@ -117,7 +116,6 @@ export default function CampaignBestiaryPage() {
     <div className={s.page}>
       <header className={s.header}>
         <div className={s.headerMain}>
-          <BackLink to={`/campaigns/${campaignId}`} label={t('camp2.back.campaign')} />
           <Diamond size={9} />
           <div>
             <div className={s.headerTitle}>{t('best.cmp.title')}</div>
