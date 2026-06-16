@@ -6,7 +6,7 @@ import { z } from 'zod';
 import { useLogin } from '@/hooks/useAuth';
 import { useAuthStore } from '@/store/authStore';
 import { getRoleRedirectPath } from '@/lib/utils';
-import { Rune, Sigil, OrdoDivider, OrdoPanel, OrdoField } from '@/components/ordo';
+import { Rune, Sigil, OrdoDivider, OrdoPanel } from '@/components/ordo';
 import { useT } from '@/i18n/I18nContext';
 import { LanguageSwitcher } from '@/components/layout/LanguageSwitcher';
 import { cn } from '@/lib/utils';

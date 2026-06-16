@@ -9,6 +9,7 @@ import {
   OrdoChip,
   Bar,
   EmptyVault,
+  ErrorAltar,
 } from '@/components/ordo';
 import { BackLink, CharStatusBadge } from '@/components/campaigns';
 import { useCampaignCharacters } from '@/hooks/useCharacter';
@@ -137,14 +138,11 @@ export default function XPGrantPage() {
     return (
       <div>
         <BackLink to={`/campaigns/${campaignId}`} label={t('camp2.back.campaign')} className={s.backLink} />
-        <div className={s.errorBlock}>
-          <p className={cn('ao-italic', s.errorText)}>
-            {t('camp2.xp.loadError')}
-          </p>
-          <button className="ao-btn" onClick={() => refetch()}>
-            {t('common.retry')}
-          </button>
-        </div>
+        <ErrorAltar
+          title={t('camp2.xp.loadError')}
+          onRetry={() => refetch()}
+          retryLabel={t('common.retry')}
+        />
       </div>
     );
   }
@@ -248,8 +246,6 @@ export default function XPGrantPage() {
               const isSelected =
                 targetMode === 'ALL' || selectedIds.has(ch.id);
               const nextLevelXp = xpForNextLevel(ch.totalLevel);
-              const xpProgress =
-                nextLevelXp === Infinity ? 100 : (ch.experience / nextLevelXp) * 100;
 
               return (
                 <div

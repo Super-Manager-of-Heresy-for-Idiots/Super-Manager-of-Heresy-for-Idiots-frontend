@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { Outlet, useLocation, useMatch, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 import { useWebSocket } from '@/hooks/useWebSocket';
@@ -7,6 +7,7 @@ import { useT } from '@/i18n/I18nContext';
 import { useIsMobile } from '@/hooks/useMediaQuery';
 import { cn } from '@/lib/utils';
 import { LanguageSwitcher } from './LanguageSwitcher';
+import { RouteFallback } from './RouteFallback';
 import type { Role } from '@/types';
 
 /* ── Nav definition ─────────────────────────────────────── */
@@ -253,7 +254,9 @@ export function AppLayout() {
         <main className="ao-scroll ao-grain app-main ao-shell-main">
           <div className="ao-shell-content">
             <CampaignWsBridge />
-            <Outlet />
+            <Suspense fallback={<RouteFallback />}>
+              <Outlet />
+            </Suspense>
           </div>
         </main>
       </div>

@@ -12,7 +12,7 @@ import {
   usePublicMonsters,
   useUpdateHomebrewDictionaryEntry,
 } from '@/hooks/useBestiary';
-import { DICTIONARY_KINDS, dictLabelKey, dictName, type TFunc } from '@/components/bestiary/constants';
+import { DICTIONARY_KINDS, dictLabelKey, dictName } from '@/components/bestiary/constants';
 import { useI18n, useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
 import type { DictionaryEntryResponse, DictionaryKind, DictionaryRef, MonsterSummaryResponse } from '@/types';

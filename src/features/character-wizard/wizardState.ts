@@ -39,6 +39,8 @@ export interface WizardChar {
   saves: Partial<Record<AbilityKey, boolean>>;
   ac: number;
   hp: { max: number; cur: number; temp: number };
+  // content-shaped level-1 reward selections: group key -> selected option ids (prepared; not yet submitted)
+  contentRewardSelections: Record<string, string[]>;
   // abilities
   baseScores: ScoreMap;
   scores: ScoreMap;
@@ -113,6 +115,7 @@ export function initialChar(): WizardChar {
     raceKey: '', subraceKey: '', race: '', speed: 30,
     classKey: '', cls: '', isSpellcaster: false, hitDiceType: 'd8', hitDiceTotal: '',
     saves: {}, ac: 10, hp: { max: 0, cur: 0, temp: 0 },
+    contentRewardSelections: {},
     baseScores: zeroScores(), scores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
     scoreMethod: 'standard', rolledPool: [],
     backgroundKey: '', background: '', classSkills: [], bgSkills: [], skills: {},
@@ -352,6 +355,7 @@ export function makeActions(c: WizardChar, setC: (c: WizardChar) => void): Wizar
         proficiencies: meta?.proficiencies || c.proficiencies,
         classSkills: [],
         spells: { cantrips: [], known: [] },
+        contentRewardSelections: {},
       }));
     },
     setMethod: (m) => setC(recompute({

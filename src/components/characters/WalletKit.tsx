@@ -10,6 +10,7 @@ import { OrdoPanel, PanelHeader, Rune, OrdoField, Sigil } from '@/components/ord
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
 import type { WalletEntry, WalletHistoryEntry } from '@/types';
+import { walletTotalGold } from './WalletKit.helpers';
 import s from './WalletKit.module.css';
 
 /* ── semantic delta colours ─────────────────────────────────── */
@@ -18,9 +19,6 @@ const NEG = 'var(--ember)';
 const NEG_SOFT = '#d8896a';
 
 const fmt = (n: number) => Math.round(n).toLocaleString();
-
-export const walletTotalGold = (entries: WalletEntry[]): number =>
-  entries.reduce((s, w) => s + (w.goldEquivalent ?? 0), 0);
 
 /* ── one currency row ───────────────────────────────────────── */
 function CurrencyRow({

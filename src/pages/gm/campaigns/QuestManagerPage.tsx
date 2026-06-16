@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
-import { OrdoPanel, PanelHeader, Rune, OrdoField, EmptyVault } from '@/components/ordo';
+import { OrdoPanel, Rune, OrdoField, EmptyVault, ErrorAltar } from '@/components/ordo';
 import { VisibilityToggle, QuestStatusBadge } from '@/components/narrative';
 import {
   Dialog,
@@ -103,12 +103,11 @@ export default function QuestManagerPage() {
     return (
       <div>
         <BackLink to={backTo} label={t('camp2.back.campaign')} className={css.backLink} />
-        <div className={css.errorBlock}>
-          <p className={cn('ao-italic', css.errorText)}>
-            {t('camp2.questMgr.loadError')}
-          </p>
-          <button className="ao-btn" onClick={() => refetch()}>{t('common.retry')}</button>
-        </div>
+        <ErrorAltar
+          title={t('camp2.questMgr.loadError')}
+          onRetry={() => refetch()}
+          retryLabel={t('common.retry')}
+        />
       </div>
     );
   }

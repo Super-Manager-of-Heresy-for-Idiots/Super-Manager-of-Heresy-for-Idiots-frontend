@@ -1623,6 +1623,14 @@ input[type="number"].ao-input::-webkit-inner-spin-button { opacity: 0.3; }
 .ao-empty-title { color: var(--ink-quiet); }
 .ao-empty-body { font-size: 14px; color: var(--ink-quiet); max-width: 320px; }
 .ao-empty-action { margin-top: 8px; }
+.ao-error-overline { color: var(--ember-pale); }
+.ao-route-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 240px;
+  color: var(--ink-faint);
+}
 
 /* Placeholder */
 .ao-placeholder {

@@ -5,10 +5,8 @@ import {
   OrdoPanel,
   PanelHeader,
   Rune,
-  OrdoDivider,
   OrdoChip,
   ModifierTag,
-  EmptyVault,
 } from '@/components/ordo';
 import { EffectRow } from '@/components/gm/EffectRow';
 import { BackLink } from '@/components/campaigns';

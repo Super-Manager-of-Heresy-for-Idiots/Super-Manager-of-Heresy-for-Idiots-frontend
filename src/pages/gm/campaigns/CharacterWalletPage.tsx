@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { OrdoPanel, PanelHeader, Rune, OrdoField, EmptyVault } from '@/components/ordo';
+import { OrdoPanel, PanelHeader, Rune, OrdoField, EmptyVault, ErrorAltar } from '@/components/ordo';
 import { BackLink } from '@/components/campaigns';
 import { WalletPanel } from '@/components/characters';
 import {
@@ -263,11 +263,12 @@ export default function CharacterWalletPage() {
         </div>
       ) : error ? (
         /* Error banner with retry */
-        <OrdoPanel frame>
-          <div className={s.errorBox}>
-            <p className={cn('ao-italic', s.errorText)}>{t('camp.wallet.loadError')}</p>
-            <button className="ao-btn" onClick={() => refetch()}>{t('common.retry')}</button>
-          </div>
+        <OrdoPanel frame padding={0}>
+          <ErrorAltar
+            title={t('camp.wallet.loadError')}
+            onRetry={() => refetch()}
+            retryLabel={t('common.retry')}
+          />
         </OrdoPanel>
       ) : entries.length === 0 && !canWrite ? (
         /* Empty + read-only viewer */

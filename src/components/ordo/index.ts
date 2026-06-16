@@ -12,5 +12,6 @@ export { StatBlock } from './StatBlock';
 export { DamageBadge } from './DamageBadge';
 export { ModalScene } from './ModalScene';
 export { EmptyVault } from './EmptyVault';
+export { ErrorAltar } from './ErrorAltar';
 export { RoleBadge } from './RoleBadge';
 export { Placeholder } from './Placeholder';

@@ -7,7 +7,6 @@ import type {
   UpdateCampaignRequest,
   SetCampaignStatusRequest,
   JoinCampaignRequest,
-  KickMemberRequest,
   ReassignCharacterRequest,
   CreateStorageContainerRequest,
   ApiError,

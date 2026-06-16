@@ -58,11 +58,14 @@ export default function MonsterFormPage() {
   const handleSubmit = (req: MonsterRequest) => {
     const onSuccess = () => navigate(listPath);
     if (scope === 'SYSTEM') {
-      isEdit ? updateAdmin.mutate({ id: monsterId!, data: req }, { onSuccess }) : createAdmin.mutate(req, { onSuccess });
+      if (isEdit) updateAdmin.mutate({ id: monsterId!, data: req }, { onSuccess });
+      else createAdmin.mutate(req, { onSuccess });
     } else if (scope === 'HOMEBREW') {
-      isEdit ? updateHb.mutate({ id: monsterId!, data: req }, { onSuccess }) : createHb.mutate(req, { onSuccess });
+      if (isEdit) updateHb.mutate({ id: monsterId!, data: req }, { onSuccess });
+      else createHb.mutate(req, { onSuccess });
     } else {
-      isEdit ? updateCm.mutate({ id: monsterId!, data: req }, { onSuccess }) : createCm.mutate(req, { onSuccess });
+      if (isEdit) updateCm.mutate({ id: monsterId!, data: req }, { onSuccess });
+      else createCm.mutate(req, { onSuccess });
     }
   };
 

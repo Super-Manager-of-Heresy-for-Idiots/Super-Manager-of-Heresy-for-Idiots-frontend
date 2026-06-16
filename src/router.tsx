@@ -1,99 +1,103 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
+import { lazy } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { ProtectedRoute } from '@/components/layout/ProtectedRoute';
+import { SuspenseLayout } from '@/components/layout/SuspenseLayout';
 
+// Eager: auth + core landing pages (entry points, hit on first load)
 import LoginPage from '@/pages/auth/LoginPage';
 import RegisterPage from '@/pages/auth/RegisterPage';
 import TodoPage from '@/pages/TodoPage';
-
-// Campaign pages
 import CampaignListPage from '@/pages/gm/campaigns/CampaignListPage';
 import CampaignDashboardPage from '@/pages/gm/campaigns/CampaignDashboardPage';
-import CampaignMembersPage from '@/pages/gm/campaigns/CampaignMembersPage';
-import CampaignInvitePage from '@/pages/gm/campaigns/CampaignInvitePage';
-import SharedStoragePage from '@/pages/gm/campaigns/SharedStoragePage';
-import SessionNotesPage from '@/pages/gm/campaigns/SessionNotesPage';
-import XPGrantPage from '@/pages/gm/campaigns/XPGrantPage';
-import ApplyEffectPage from '@/pages/gm/campaigns/ApplyEffectPage';
-import InventoryPage from '@/pages/gm/campaigns/InventoryPage';
-import CharacterManagementPage from '@/pages/gm/campaigns/CharacterManagementPage';
-import CharacterCreationWizardPage from '@/pages/gm/campaigns/CharacterCreationWizardPage';
-import AddCharacterPage from '@/pages/gm/campaigns/AddCharacterPage';
-import LevelUpWizardPage from '@/pages/gm/campaigns/LevelUpWizardPage';
-import CharacterRewardsPage from '@/pages/gm/campaigns/CharacterRewardsPage';
-import FolioPage from '@/pages/gm/campaigns/FolioPage';
-import CharacterWalletPage from '@/pages/gm/campaigns/CharacterWalletPage';
-import CharacterResourcesPage from '@/pages/gm/campaigns/CharacterResourcesPage';
-import BalanceManagementPage from '@/pages/gm/campaigns/BalanceManagementPage';
-import MyCharactersPage from '@/pages/player/MyCharactersPage';
-import TemplateWizardPage from '@/pages/player/TemplateWizardPage';
-import TemplateDetailPage from '@/pages/player/TemplateDetailPage';
 import {
   AbilityCheckPage,
   CharacterEditPage,
   CharacterHpPage,
   CharacterStatsPage,
 } from '@/pages/gm/campaigns/CharacterPlaceholderPages';
-import NPCManagerPage from '@/pages/gm/campaigns/NPCManagerPage';
-import NPCDetailPage from '@/pages/gm/campaigns/NPCDetailPage';
-import QuestManagerPage from '@/pages/gm/campaigns/QuestManagerPage';
-import QuestDetailPage from '@/pages/gm/campaigns/QuestDetailPage';
-import LocationsPage from '@/pages/gm/campaigns/LocationsPage';
 
-// Combat / Loot prototype preview pages (screens only, no API wiring)
-import CombatPreviewIndexPage from '@/pages/gm/combat/CombatPreviewIndexPage';
-import CombatTrackerGMPage from '@/pages/gm/combat/CombatTrackerGMPage';
-import CombatTrackerPlayerPage from '@/pages/gm/combat/CombatTrackerPlayerPage';
-import EncounterBuilderPage from '@/pages/gm/combat/EncounterBuilderPage';
-import EncounterListPage from '@/pages/gm/combat/EncounterListPage';
-import CombatSummaryPage from '@/pages/gm/combat/CombatSummaryPage';
-import DashboardTilesPage from '@/pages/gm/combat/DashboardTilesPage';
-import LootTableEditorPage from '@/pages/gm/combat/LootTableEditorPage';
-import LootGeneratorPage from '@/pages/gm/combat/LootGeneratorPage';
-import QuestDetailV2Page from '@/pages/gm/combat/QuestDetailV2Page';
-import NPCDetailV2Page from '@/pages/gm/combat/NPCDetailV2Page';
-import QuestListV2Page from '@/pages/gm/combat/QuestListV2Page';
-import NPCListV2Page from '@/pages/gm/combat/NPCListV2Page';
-import SystemPatternsPage from '@/pages/gm/combat/SystemPatternsPage';
-import CombatKitReferencePage from '@/pages/gm/combat/CombatKitReferencePage';
-import MobilePreviewPage from '@/pages/gm/combat/MobilePreviewPage';
+// Lazy: campaign character + management flows
+const CampaignMembersPage = lazy(() => import('@/pages/gm/campaigns/CampaignMembersPage'));
+const CampaignInvitePage = lazy(() => import('@/pages/gm/campaigns/CampaignInvitePage'));
+const SharedStoragePage = lazy(() => import('@/pages/gm/campaigns/SharedStoragePage'));
+const SessionNotesPage = lazy(() => import('@/pages/gm/campaigns/SessionNotesPage'));
+const XPGrantPage = lazy(() => import('@/pages/gm/campaigns/XPGrantPage'));
+const ApplyEffectPage = lazy(() => import('@/pages/gm/campaigns/ApplyEffectPage'));
+const InventoryPage = lazy(() => import('@/pages/gm/campaigns/InventoryPage'));
+const CharacterManagementPage = lazy(() => import('@/pages/gm/campaigns/CharacterManagementPage'));
+const CharacterCreationWizardPage = lazy(() => import('@/pages/gm/campaigns/CharacterCreationWizardPage'));
+const AddCharacterPage = lazy(() => import('@/pages/gm/campaigns/AddCharacterPage'));
+const LevelUpWizardPage = lazy(() => import('@/pages/gm/campaigns/LevelUpWizardPage'));
+const CharacterRewardsPage = lazy(() => import('@/pages/gm/campaigns/CharacterRewardsPage'));
+const FolioPage = lazy(() => import('@/pages/gm/campaigns/FolioPage'));
+const CharacterWalletPage = lazy(() => import('@/pages/gm/campaigns/CharacterWalletPage'));
+const CharacterResourcesPage = lazy(() => import('@/pages/gm/campaigns/CharacterResourcesPage'));
+const BalanceManagementPage = lazy(() => import('@/pages/gm/campaigns/BalanceManagementPage'));
+const MyCharactersPage = lazy(() => import('@/pages/player/MyCharactersPage'));
+const TemplateWizardPage = lazy(() => import('@/pages/player/TemplateWizardPage'));
+const TemplateDetailPage = lazy(() => import('@/pages/player/TemplateDetailPage'));
+const NPCManagerPage = lazy(() => import('@/pages/gm/campaigns/NPCManagerPage'));
+const NPCDetailPage = lazy(() => import('@/pages/gm/campaigns/NPCDetailPage'));
+const QuestManagerPage = lazy(() => import('@/pages/gm/campaigns/QuestManagerPage'));
+const QuestDetailPage = lazy(() => import('@/pages/gm/campaigns/QuestDetailPage'));
+const LocationsPage = lazy(() => import('@/pages/gm/campaigns/LocationsPage'));
 
-// Homebrew pages
-import MarketplacePage from '@/pages/gm/homebrew/MarketplacePage';
-import MarketplaceDetailPage from '@/pages/gm/homebrew/MarketplaceDetailPage';
-import MyDoctrinesPage from '@/pages/gm/homebrew/MyDoctrinesPage';
-import CreateDoctrinePage from '@/pages/gm/homebrew/CreateDoctrinePage';
-import EditDoctrinePage from '@/pages/gm/homebrew/EditDoctrinePage';
-import InstalledDoctrinesPage from '@/pages/gm/homebrew/InstalledDoctrinesPage';
-import HomebrewLibraryPage from '@/pages/gm/homebrew/HomebrewLibraryPage';
+// Lazy: combat / loot prototype preview pages (screens only, no API wiring)
+const CombatPreviewIndexPage = lazy(() => import('@/pages/gm/combat/CombatPreviewIndexPage'));
+const CombatTrackerGMPage = lazy(() => import('@/pages/gm/combat/CombatTrackerGMPage'));
+const CombatTrackerPlayerPage = lazy(() => import('@/pages/gm/combat/CombatTrackerPlayerPage'));
+const EncounterBuilderPage = lazy(() => import('@/pages/gm/combat/EncounterBuilderPage'));
+const EncounterListPage = lazy(() => import('@/pages/gm/combat/EncounterListPage'));
+const CombatSummaryPage = lazy(() => import('@/pages/gm/combat/CombatSummaryPage'));
+const DashboardTilesPage = lazy(() => import('@/pages/gm/combat/DashboardTilesPage'));
+const LootTableEditorPage = lazy(() => import('@/pages/gm/combat/LootTableEditorPage'));
+const LootGeneratorPage = lazy(() => import('@/pages/gm/combat/LootGeneratorPage'));
+const QuestDetailV2Page = lazy(() => import('@/pages/gm/combat/QuestDetailV2Page'));
+const NPCDetailV2Page = lazy(() => import('@/pages/gm/combat/NPCDetailV2Page'));
+const QuestListV2Page = lazy(() => import('@/pages/gm/combat/QuestListV2Page'));
+const NPCListV2Page = lazy(() => import('@/pages/gm/combat/NPCListV2Page'));
+const SystemPatternsPage = lazy(() => import('@/pages/gm/combat/SystemPatternsPage'));
+const CombatKitReferencePage = lazy(() => import('@/pages/gm/combat/CombatKitReferencePage'));
+const MobilePreviewPage = lazy(() => import('@/pages/gm/combat/MobilePreviewPage'));
 
-// Campaign Blueprint pages
-import BlueprintMarketplacePage from '@/pages/gm/blueprints/BlueprintMarketplacePage';
-import BlueprintMarketplaceDetailPage from '@/pages/gm/blueprints/BlueprintMarketplaceDetailPage';
-import MyBlueprintsPage from '@/pages/gm/blueprints/MyBlueprintsPage';
-import BlueprintEditorPage from '@/pages/gm/blueprints/BlueprintEditorPage';
+// Lazy: homebrew pages
+const MarketplacePage = lazy(() => import('@/pages/gm/homebrew/MarketplacePage'));
+const MarketplaceDetailPage = lazy(() => import('@/pages/gm/homebrew/MarketplaceDetailPage'));
+const MyDoctrinesPage = lazy(() => import('@/pages/gm/homebrew/MyDoctrinesPage'));
+const CreateDoctrinePage = lazy(() => import('@/pages/gm/homebrew/CreateDoctrinePage'));
+const EditDoctrinePage = lazy(() => import('@/pages/gm/homebrew/EditDoctrinePage'));
+const InstalledDoctrinesPage = lazy(() => import('@/pages/gm/homebrew/InstalledDoctrinesPage'));
+const HomebrewLibraryPage = lazy(() => import('@/pages/gm/homebrew/HomebrewLibraryPage'));
 
-// Bestiary (monsters + dictionaries) — wired to the bestiary API contract
-import BestiaryMonstersPage from '@/pages/admin/BestiaryMonstersPage';
-import BestiaryDictionariesPage from '@/pages/admin/BestiaryDictionariesPage';
-import HomebrewBestiaryPage from '@/pages/gm/homebrew/HomebrewBestiaryPage';
-import CampaignBestiaryPage from '@/pages/gm/campaigns/CampaignBestiaryPage';
-import MonsterDetailPage from '@/pages/bestiary/MonsterDetailPage';
-import MonsterFormPage from '@/pages/bestiary/MonsterFormPage';
+// Lazy: campaign blueprint pages
+const BlueprintMarketplacePage = lazy(() => import('@/pages/gm/blueprints/BlueprintMarketplacePage'));
+const BlueprintMarketplaceDetailPage = lazy(() => import('@/pages/gm/blueprints/BlueprintMarketplaceDetailPage'));
+const MyBlueprintsPage = lazy(() => import('@/pages/gm/blueprints/MyBlueprintsPage'));
+const BlueprintEditorPage = lazy(() => import('@/pages/gm/blueprints/BlueprintEditorPage'));
 
-import AdminDashboardPage from '@/pages/admin/AdminDashboardPage';
-import UsersListPage from '@/pages/admin/UsersListPage';
-import StatTypesPage from '@/pages/admin/StatTypesPage';
-import ItemTypesPage from '@/pages/admin/ItemTypesPage';
-import CharacterClassesPage from '@/pages/admin/CharacterClassesPage';
-import CharacterRacesPage from '@/pages/admin/CharacterRacesPage';
-import SkillsPage from '@/pages/admin/SkillsPage';
-import SubclassesPage from '@/pages/admin/SubclassesPage';
-import FeatsPage from '@/pages/admin/FeatsPage';
-import LevelRewardsPage from '@/pages/admin/LevelRewardsPage';
-import BuffsDebuffsPage from '@/pages/admin/BuffsDebuffsPage';
-import EnchantmentTypesPage from '@/pages/admin/EnchantmentTypesPage';
-import AdminHomebrewPage from '@/pages/admin/AdminHomebrewPage';
+// Lazy: bestiary (monsters + dictionaries)
+const BestiaryMonstersPage = lazy(() => import('@/pages/admin/BestiaryMonstersPage'));
+const BestiaryDictionariesPage = lazy(() => import('@/pages/admin/BestiaryDictionariesPage'));
+const HomebrewBestiaryPage = lazy(() => import('@/pages/gm/homebrew/HomebrewBestiaryPage'));
+const CampaignBestiaryPage = lazy(() => import('@/pages/gm/campaigns/CampaignBestiaryPage'));
+const MonsterDetailPage = lazy(() => import('@/pages/bestiary/MonsterDetailPage'));
+const MonsterFormPage = lazy(() => import('@/pages/bestiary/MonsterFormPage'));
+
+// Lazy: admin pages
+const AdminDashboardPage = lazy(() => import('@/pages/admin/AdminDashboardPage'));
+const UsersListPage = lazy(() => import('@/pages/admin/UsersListPage'));
+const StatTypesPage = lazy(() => import('@/pages/admin/StatTypesPage'));
+const ItemTypesPage = lazy(() => import('@/pages/admin/ItemTypesPage'));
+const CharacterClassesPage = lazy(() => import('@/pages/admin/CharacterClassesPage'));
+const CharacterRacesPage = lazy(() => import('@/pages/admin/CharacterRacesPage'));
+const SkillsPage = lazy(() => import('@/pages/admin/SkillsPage'));
+const SubclassesPage = lazy(() => import('@/pages/admin/SubclassesPage'));
+const FeatsPage = lazy(() => import('@/pages/admin/FeatsPage'));
+const LevelRewardsPage = lazy(() => import('@/pages/admin/LevelRewardsPage'));
+const BuffsDebuffsPage = lazy(() => import('@/pages/admin/BuffsDebuffsPage'));
+const EnchantmentTypesPage = lazy(() => import('@/pages/admin/EnchantmentTypesPage'));
+const AdminHomebrewPage = lazy(() => import('@/pages/admin/AdminHomebrewPage'));
 
 export const router = createBrowserRouter([
   // Public routes
@@ -149,25 +153,30 @@ export const router = createBrowserRouter([
   {
     element: <ProtectedRoute allowedRoles={['PLAYER', 'GAME_MASTER', 'ADMIN']} />,
     children: [
-      { path: '/combat-preview/kit', element: <CombatKitReferencePage /> },
-      { path: '/combat-preview/tracker-gm', element: <CombatTrackerGMPage /> },
-      { path: '/combat-preview/tracker-gm-paused', element: <CombatTrackerGMPage initialPaused /> },
-      { path: '/combat-preview/tracker-player', element: <CombatTrackerPlayerPage myTurn /> },
-      { path: '/combat-preview/tracker-player-wait', element: <CombatTrackerPlayerPage myTurn={false} /> },
-      { path: '/combat-preview/encounter-builder', element: <EncounterBuilderPage /> },
-      { path: '/combat-preview/encounters', element: <EncounterListPage /> },
-      { path: '/combat-preview/summary', element: <CombatSummaryPage /> },
-      { path: '/combat-preview/dashboard', element: <DashboardTilesPage /> },
-      { path: '/combat-preview/loot-table', element: <LootTableEditorPage /> },
-      { path: '/combat-preview/loot-gen', element: <LootGeneratorPage /> },
-      { path: '/combat-preview/loot-gen-empty', element: <LootGeneratorPage empty /> },
-      { path: '/combat-preview/quest', element: <QuestDetailV2Page /> },
-      { path: '/combat-preview/npc', element: <NPCDetailV2Page /> },
-      { path: '/combat-preview/npc-empty', element: <NPCDetailV2Page noStatblock /> },
-      { path: '/combat-preview/quests-list', element: <QuestListV2Page /> },
-      { path: '/combat-preview/npc-list', element: <NPCListV2Page /> },
-      { path: '/combat-preview/patterns', element: <SystemPatternsPage /> },
-      { path: '/combat-preview/mobile', element: <MobilePreviewPage /> },
+      {
+        element: <SuspenseLayout />,
+        children: [
+          { path: '/combat-preview/kit', element: <CombatKitReferencePage /> },
+          { path: '/combat-preview/tracker-gm', element: <CombatTrackerGMPage /> },
+          { path: '/combat-preview/tracker-gm-paused', element: <CombatTrackerGMPage initialPaused /> },
+          { path: '/combat-preview/tracker-player', element: <CombatTrackerPlayerPage myTurn /> },
+          { path: '/combat-preview/tracker-player-wait', element: <CombatTrackerPlayerPage myTurn={false} /> },
+          { path: '/combat-preview/encounter-builder', element: <EncounterBuilderPage /> },
+          { path: '/combat-preview/encounters', element: <EncounterListPage /> },
+          { path: '/combat-preview/summary', element: <CombatSummaryPage /> },
+          { path: '/combat-preview/dashboard', element: <DashboardTilesPage /> },
+          { path: '/combat-preview/loot-table', element: <LootTableEditorPage /> },
+          { path: '/combat-preview/loot-gen', element: <LootGeneratorPage /> },
+          { path: '/combat-preview/loot-gen-empty', element: <LootGeneratorPage empty /> },
+          { path: '/combat-preview/quest', element: <QuestDetailV2Page /> },
+          { path: '/combat-preview/npc', element: <NPCDetailV2Page /> },
+          { path: '/combat-preview/npc-empty', element: <NPCDetailV2Page noStatblock /> },
+          { path: '/combat-preview/quests-list', element: <QuestListV2Page /> },
+          { path: '/combat-preview/npc-list', element: <NPCListV2Page /> },
+          { path: '/combat-preview/patterns', element: <SystemPatternsPage /> },
+          { path: '/combat-preview/mobile', element: <MobilePreviewPage /> },
+        ],
+      },
     ],
   },
 

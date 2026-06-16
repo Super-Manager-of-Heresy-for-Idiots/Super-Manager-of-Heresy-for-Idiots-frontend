@@ -7,8 +7,8 @@ export {
   WalletSkeleton,
   WalletErrorBanner,
   WalletReadOnlyBanner,
-  walletTotalGold,
 } from './WalletKit';
+export { walletTotalGold } from './WalletKit.helpers';
 export { ResourcesPanel } from './ResourcesPanel';
 export { AbilityCheckPanel } from './AbilityCheckPanel';
 export { StatusControlPanel } from './StatusControlPanel';

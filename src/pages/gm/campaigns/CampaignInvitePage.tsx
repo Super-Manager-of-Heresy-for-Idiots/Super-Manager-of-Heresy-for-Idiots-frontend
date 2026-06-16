@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
-import { OrdoPanel, PanelHeader, Rune, OrdoDivider } from '@/components/ordo';
+import { OrdoPanel, PanelHeader, Rune, OrdoDivider, ErrorAltar } from '@/components/ordo';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -70,12 +70,11 @@ export default function CampaignInvitePage() {
 
   if (error) {
     return (
-      <div className={s.errorBlock}>
-        <p className={cn('ao-italic', s.errorText)}>
-          {t('camp.invite.loadError')}
-        </p>
-        <button className="ao-btn" onClick={() => refetch()}>{t('camp.retry')}</button>
-      </div>
+      <ErrorAltar
+        title={t('camp.invite.loadError')}
+        onRetry={() => refetch()}
+        retryLabel={t('camp.retry')}
+      />
     );
   }
 

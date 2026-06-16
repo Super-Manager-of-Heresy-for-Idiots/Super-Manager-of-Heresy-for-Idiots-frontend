@@ -1,0 +1,35 @@
+import { useState, useCallback, useMemo, type ReactNode } from 'react';
+import { translations, type Lang } from './translations';
+import { LANG_STORAGE_KEY, DEFAULT_LANG, getStoredLang } from './lang';
+import { I18nContext } from './I18nContext';
+
+export function I18nProvider({ children }: { children: ReactNode }) {
+  const [lang, setLangState] = useState<Lang>(getStoredLang);
+
+  const setLang = useCallback((next: Lang) => {
+    localStorage.setItem(LANG_STORAGE_KEY, next);
+    document.documentElement.lang = next;
+    setLangState(next);
+  }, []);
+
+  const t = useCallback(
+    (key: string, vars?: Record<string, string | number>) => {
+      const dict = translations[lang];
+      let value = dict[key] ?? translations[DEFAULT_LANG][key] ?? key;
+      if (vars) {
+        for (const [name, replacement] of Object.entries(vars)) {
+          value = value.replace(
+            new RegExp(`\\{${name}\\}`, 'g'),
+            String(replacement),
+          );
+        }
+      }
+      return value;
+    },
+    [lang],
+  );
+
+  const value = useMemo(() => ({ lang, setLang, t }), [lang, setLang, t]);
+
+  return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
+}

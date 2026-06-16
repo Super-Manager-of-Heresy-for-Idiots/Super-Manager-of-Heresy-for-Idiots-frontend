@@ -27,8 +27,10 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => {
     if (response.data && response.data.success === false) {
-      const error = new Error(response.data.message || 'Request failed');
-      (error as any).response = response;
+      const error = new Error(response.data.message || 'Request failed') as Error & {
+        response?: typeof response;
+      };
+      error.response = response;
       return Promise.reject(error);
     }
     return response;

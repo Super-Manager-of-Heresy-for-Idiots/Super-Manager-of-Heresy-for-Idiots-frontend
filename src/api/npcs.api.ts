@@ -11,7 +11,6 @@ import type {
 
 type NpcNoteResponse = NoteResponse;
 type CreateNpcNoteRequest = CreateNoteRequest;
-type UpdateNpcNoteRequest = UpdateNoteRequest;
 
 export const npcsApi = {
   list: async (campaignId: string): Promise<ApiResponse<NpcResponse[]>> => {

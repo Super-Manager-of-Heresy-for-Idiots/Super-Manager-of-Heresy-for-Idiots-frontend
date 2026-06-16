@@ -751,6 +751,3 @@ function AbilityBonusEditor({
     </div>
   );
 }
-
-// Helper: expose deriveInitialState for tests if needed
-export { deriveInitialState };

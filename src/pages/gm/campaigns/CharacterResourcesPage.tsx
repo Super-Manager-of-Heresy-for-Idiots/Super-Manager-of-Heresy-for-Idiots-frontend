@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
-import { OrdoPanel, EmptyVault } from '@/components/ordo';
+import { OrdoPanel, EmptyVault, ErrorAltar } from '@/components/ordo';
 import { BackLink } from '@/components/campaigns';
 import { ResourcesPanel } from '@/components/characters';
 import { useCharacter, useCharacterResources, useModifyResource } from '@/hooks/useCharacter';
@@ -55,12 +55,13 @@ export default function CharacterResourcesPage() {
         </OrdoPanel>
       ) : error ? (
         <OrdoPanel frame padding={0}>
-          <EmptyVault glyph="hex" title={t('camp.resources.error.title')} body={t('camp.resources.error.body')} />
-          <div className={s.retryBox}>
-            <button className="ao-btn ao-btn--ghost ao-btn--sm" onClick={() => refetch()}>
-              {t('camp.retry')}
-            </button>
-          </div>
+          <ErrorAltar
+            glyph="hex"
+            title={t('camp.resources.error.title')}
+            body={t('camp.resources.error.body')}
+            onRetry={() => refetch()}
+            retryLabel={t('camp.retry')}
+          />
         </OrdoPanel>
       ) : resources.length === 0 ? (
         <OrdoPanel frame padding={0}>

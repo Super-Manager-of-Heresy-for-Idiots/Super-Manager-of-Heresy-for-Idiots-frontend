@@ -1,4 +1,5 @@
 import api from './axios';
+import { normalizeClassDetail } from '@/lib/contentAdapters';
 import type {
   ApiResponse,
   AttachHomebrewRequest,
@@ -48,7 +49,10 @@ export const homebrewCampaignApi = {
 
   getReferenceClasses: async (campaignId: string): Promise<ApiResponse<CharacterClassDetailResponse[]>> => {
     const response = await api.get<ApiResponse<CharacterClassDetailResponse[]>>(`/campaigns/${campaignId}/reference/classes`);
-    return response.data;
+    return {
+      ...response.data,
+      data: response.data.data?.map(normalizeClassDetail),
+    };
   },
 
   getReferenceRaces: async (campaignId: string): Promise<ApiResponse<CharacterRaceDetailResponse[]>> => {

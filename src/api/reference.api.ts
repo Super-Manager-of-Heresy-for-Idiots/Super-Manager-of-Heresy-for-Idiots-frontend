@@ -1,4 +1,5 @@
 import api from './axios';
+import { normalizeClassDetail } from '@/lib/contentAdapters';
 import type {
   ApiResponse,
   BackgroundResponse,
@@ -31,7 +32,10 @@ export const referenceApi = {
 
   getClasses: async (): Promise<ApiResponse<CharacterClassDetailResponse[]>> => {
     const response = await api.get<ApiResponse<CharacterClassDetailResponse[]>>('/reference/classes');
-    return response.data;
+    return {
+      ...response.data,
+      data: response.data.data?.map(normalizeClassDetail),
+    };
   },
 
   getRaces: async (): Promise<ApiResponse<CharacterRaceDetailResponse[]>> => {
