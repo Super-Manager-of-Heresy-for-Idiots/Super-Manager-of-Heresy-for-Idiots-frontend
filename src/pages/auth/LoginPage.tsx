@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, Navigate } from 'react-router-dom';
+import { Link, Navigate, useSearchParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -24,6 +24,10 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const loginMutation = useLogin();
   const { isAuthenticated, user } = useAuthStore();
+  const [searchParams] = useSearchParams();
+  // `?add=1` lets an already-authenticated user reach the login form to add
+  // another account to the quick-switch list instead of being redirected away.
+  const addingAccount = searchParams.get('add') === '1';
   const t = useT();
 
   const {
@@ -34,7 +38,7 @@ export default function LoginPage() {
     resolver: zodResolver(loginSchema),
   });
 
-  if (isAuthenticated && user) {
+  if (isAuthenticated && user && !addingAccount) {
     return <Navigate to={getRoleRedirectPath(user.role)} replace />;
   }
 

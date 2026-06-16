@@ -1061,76 +1061,130 @@
 /* ============================================================
    APP SHELL — desktop rail (left navigation)
    ============================================================ */
+/* The rail is a fixed-width spacer; the actual panel (`.ao-rail-inner`) is
+   absolutely positioned and grows over the content on hover. */
 .ao-rail {
   width: 68px;
   min-width: 68px;
+  position: relative;
   background: var(--abyss);
   border-right: 1px solid var(--rule);
+}
+.ao-rail-inner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 68px;
+  z-index: 50;
   display: flex;
   flex-direction: column;
-  align-items: center;
   padding: 16px 0;
-  gap: 4px;
+  background: var(--abyss);
+  border-right: 1px solid var(--rule);
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-width: none;
+  transition: width 220ms cubic-bezier(0.3, 0, 0.2, 1), box-shadow 220ms;
 }
-.ao-rail-brand { margin-bottom: 20px; }
+.ao-rail-inner::-webkit-scrollbar { width: 0; }
+.ao-rail:hover .ao-rail-inner {
+  width: 284px;
+  box-shadow: var(--shadow-high);
+  border-right-color: var(--rule-strong);
+}
+
+.ao-rail-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 14px;
+  margin-bottom: 18px;
+  min-height: 40px;
+}
+.ao-rail-brand-mark { flex: 0 0 40px; display: flex; justify-content: center; }
+.ao-rail-brand-name {
+  font-size: 14px;
+  color: var(--ink-bright);
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 160ms;
+}
+.ao-rail:hover .ao-rail-brand-name { opacity: 1; }
+
 .ao-rail-items {
   flex: 1;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  overflow-y: auto;
-  scrollbar-width: none;
-  padding-bottom: 8px;
+  gap: 2px;
 }
 .ao-rail-btn {
-  width: 44px;
-  height: 44px;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 2px;
+  gap: 12px;
+  width: 100%;
+  padding: 8px 14px;
+  min-height: 44px;
   background: transparent;
-  border: 1px solid transparent;
+  border: none;
+  border-left: 2px solid transparent;
   color: var(--ink-faint);
   cursor: pointer;
-  transition: all 150ms;
+  text-align: left;
+  transition: background 150ms, color 150ms;
+}
+.ao-rail-btn-ico {
+  flex: 0 0 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   position: relative;
+}
+.ao-rail-btn-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  opacity: 0;
+  transition: opacity 160ms;
+}
+.ao-rail:hover .ao-rail-btn-text { opacity: 1; }
+.ao-rail-btn-label {
+  font-family: var(--font-serif);
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ao-rail-btn-desc {
+  font-size: var(--t-pico);
+  color: var(--ink-faint);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 1px;
 }
 .ao-rail-btn:hover:not(.is-active) {
   color: var(--ink-quiet);
-  border-color: var(--rule);
+  background: rgba(255, 255, 255, 0.02);
 }
 .ao-rail-btn.is-active {
   background: rgba(176, 141, 78, 0.12);
-  border-color: var(--brass);
+  border-left-color: var(--gold);
   color: var(--gold-pale);
 }
 .ao-rail-dot {
   position: absolute;
-  top: 4px;
+  top: 2px;
   right: 4px;
   width: 6px;
   height: 6px;
   border-radius: 50%;
   background: var(--ember);
 }
-.ao-rail-logout {
-  width: 44px;
-  height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-  border: 1px solid transparent;
-  color: var(--ink-faint);
-  cursor: pointer;
-  transition: all 150ms;
-}
-.ao-rail-logout:hover {
-  color: var(--ember);
-  border-color: var(--rule);
+.ao-rail-foot {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--rule);
 }
 
 /* ============================================================
@@ -1204,6 +1258,16 @@
   border-left-color: var(--gold);
   color: var(--gold-pale);
 }
+.ao-drawer-link-text { display: flex; flex-direction: column; min-width: 0; }
+.ao-drawer-link-label { font-size: 15px; }
+.ao-drawer-link-desc {
+  font-size: var(--t-pico);
+  color: var(--ink-faint);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
 .ao-drawer-foot {
   padding: 14px 18px 20px;
@@ -1221,7 +1285,109 @@
   gap: 10px;
 }
 .ao-drawer-foot-row .ao-overline { font-size: var(--t-pico); }
-.ao-drawer-logout { justify-content: flex-start; gap: 10px; }
+
+/* ============================================================
+   ACCOUNT SWITCHER — shared by rail (expanded) and drawer
+   ============================================================ */
+.ao-acct {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 12px 4px;
+}
+.ao-acct-section { padding: 0 2px 2px; }
+.ao-acct-current {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  border: 1px solid var(--rule);
+  background: rgba(176, 141, 78, 0.06);
+}
+.ao-acct-avatar {
+  flex: 0 0 28px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--brass);
+  background: var(--abyss);
+}
+.ao-acct-avatar--dim { border-color: var(--rule); }
+.ao-acct-meta { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.ao-acct-name {
+  font-size: 13px;
+  color: var(--ink-bright);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ao-acct-role { font-size: var(--t-pico); color: var(--ink-faint); }
+.ao-acct-badge { font-size: var(--t-pico); color: var(--gold-pale); white-space: nowrap; }
+.ao-acct-row { display: flex; align-items: center; gap: 6px; }
+.ao-acct-pick {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 6px 8px;
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  text-align: left;
+  transition: background 150ms, border-color 150ms;
+}
+.ao-acct-pick:hover { border-color: var(--rule); background: rgba(255, 255, 255, 0.02); }
+.ao-acct-remove {
+  flex: 0 0 26px;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--ink-faint);
+  cursor: pointer;
+  transition: border-color 150ms, color 150ms;
+}
+.ao-acct-remove:hover { border-color: var(--rule); color: var(--ember); }
+.ao-acct-actions { display: flex; flex-direction: column; gap: 4px; margin-top: 4px; }
+.ao-acct-action {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 8px;
+  background: transparent;
+  border: 1px solid var(--rule);
+  color: var(--ink-quiet);
+  cursor: pointer;
+  font-family: var(--font-serif);
+  font-size: 13px;
+  transition: border-color 150ms, color 150ms;
+}
+.ao-acct-action:hover { border-color: var(--brass); color: var(--gold-pale); }
+.ao-acct-action--danger:hover { border-color: var(--ember); color: var(--ember); }
+
+/* In the collapsed rail, hide everything but the avatars; reveal on hover. */
+.ao-rail .ao-acct-section,
+.ao-rail .ao-acct-meta,
+.ao-rail .ao-acct-badge,
+.ao-rail .ao-acct-remove,
+.ao-rail .ao-acct-actions {
+  opacity: 0;
+  transition: opacity 160ms;
+}
+.ao-rail:hover .ao-acct-section,
+.ao-rail:hover .ao-acct-meta,
+.ao-rail:hover .ao-acct-badge,
+.ao-rail:hover .ao-acct-remove,
+.ao-rail:hover .ao-acct-actions {
+  opacity: 1;
+}
 
 /* ============================================================
    APP SHELL — top bar + root layout

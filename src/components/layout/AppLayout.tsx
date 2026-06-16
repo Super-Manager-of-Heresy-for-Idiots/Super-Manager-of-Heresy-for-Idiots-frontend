@@ -7,7 +7,11 @@ import { useT } from '@/i18n/I18nContext';
 import { useIsMobile } from '@/hooks/useMediaQuery';
 import { cn } from '@/lib/utils';
 import { LanguageSwitcher } from './LanguageSwitcher';
+import { AccountSwitcher } from './AccountSwitcher';
 import type { Role } from '@/types';
+
+/** Description i18n key for a nav entry, e.g. `nav.campaigns` → `nav.desc.campaigns`. */
+const descKey = (labelKey: string) => labelKey.replace('nav.', 'nav.desc.');
 
 /* ── Nav definition ─────────────────────────────────────── */
 
@@ -81,7 +85,7 @@ function CampaignWsBridge() {
 }
 
 export function AppLayout() {
-  const { user, logout } = useAuthStore();
+  const { user } = useAuthStore();
   const location = useLocation();
   const navigate = useNavigate();
   const t = useT();
@@ -92,11 +96,6 @@ export function AppLayout() {
 
   const isActive = (item: NavEntry) =>
     item.exact ? location.pathname === item.path : location.pathname.startsWith(item.path);
-
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
 
   const goTo = (path: string) => {
     navigate(path);
@@ -112,35 +111,46 @@ export function AppLayout() {
     if (!isMobile) setDrawerOpen(false);
   }, [isMobile]);
 
-  /* ── Rail (desktop only) ──────────────────────────────── */
+  /* ── Rail (desktop only) — collapsed icons, expands on hover ── */
   const rail = (
     <nav className="ao-rail">
-      <div className="ao-rail-brand">
-        <Sigil size={40} glyph="sigil-1" color="var(--gold)" />
-      </div>
+      <div className="ao-scroll ao-rail-inner">
+        <div className="ao-rail-brand">
+          <span className="ao-rail-brand-mark">
+            <Sigil size={36} glyph="sigil-1" color="var(--gold)" />
+          </span>
+          <span className="ao-rail-brand-name ao-engraved">{t('app.name')}</span>
+        </div>
 
-      <div className="ao-rail-items">
-        {navItems.map((item) => {
-          const active = isActive(item);
-          return (
-            <button
-              key={item.labelKey}
-              onClick={() => navigate(item.path)}
-              title={t(item.labelKey)}
-              className={cn('ao-rail-btn', active && 'is-active')}
-            >
-              <Rune kind={item.glyph} size={18} />
-              {item.labelKey === 'nav.admin' && user?.role === 'ADMIN' && (
-                <span className="ao-rail-dot" />
-              )}
-            </button>
-          );
-        })}
-      </div>
+        <div className="ao-rail-items">
+          {navItems.map((item) => {
+            const active = isActive(item);
+            return (
+              <button
+                key={item.labelKey}
+                onClick={() => navigate(item.path)}
+                title={t(item.labelKey)}
+                className={cn('ao-rail-btn', active && 'is-active')}
+              >
+                <span className="ao-rail-btn-ico">
+                  <Rune kind={item.glyph} size={18} />
+                  {item.labelKey === 'nav.admin' && user?.role === 'ADMIN' && (
+                    <span className="ao-rail-dot" />
+                  )}
+                </span>
+                <span className="ao-rail-btn-text">
+                  <span className="ao-rail-btn-label">{t(item.labelKey)}</span>
+                  <span className="ao-rail-btn-desc">{t(descKey(item.labelKey))}</span>
+                </span>
+              </button>
+            );
+          })}
+        </div>
 
-      <button onClick={handleLogout} title={t('topbar.logout')} className="ao-rail-logout">
-        <Rune kind="x" size={16} />
-      </button>
+        <div className="ao-rail-foot">
+          <AccountSwitcher />
+        </div>
+      </div>
     </nav>
   );
 
@@ -186,25 +196,22 @@ export function AppLayout() {
                   size={16}
                   color={active ? 'var(--gold)' : 'var(--ink-faint)'}
                 />
-                {t(item.labelKey)}
+                <span className="ao-drawer-link-text">
+                  <span className="ao-drawer-link-label">{t(item.labelKey)}</span>
+                  <span className="ao-drawer-link-desc">{t(descKey(item.labelKey))}</span>
+                </span>
               </button>
             );
           })}
         </div>
 
-        {/* Drawer footer: language + logout */}
+        {/* Drawer footer: language + account switcher */}
         <div className="ao-drawer-foot">
           <div className="ao-drawer-foot-row">
             <span className="ao-overline">{t('lang.label')}</span>
             <LanguageSwitcher />
           </div>
-          <button
-            onClick={handleLogout}
-            className="ao-btn ao-btn--ghost ao-btn--block ao-drawer-logout"
-          >
-            <Rune kind="x" size={14} />
-            {t('topbar.logout')}
-          </button>
+          <AccountSwitcher onNavigate={() => setDrawerOpen(false)} />
         </div>
       </div>
     </div>
