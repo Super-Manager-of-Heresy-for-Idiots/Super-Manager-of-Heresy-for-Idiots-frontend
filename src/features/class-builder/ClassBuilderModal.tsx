@@ -1,6 +1,6 @@
 import { useMemo, useState, type ReactNode } from 'react';
 import toast from 'react-hot-toast';
-import { Loader2, Plus, Save, Trash2 } from 'lucide-react';
+import { ChevronDown, ChevronUp, Loader2, Plus, Save, Trash2 } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { RewardGroupView } from '@/components/content-rewards/RewardGroupRenderer';
@@ -43,6 +43,25 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'rewards', label: 'Награды' },
   { id: 'review', label: 'Обзор' },
 ];
+
+/** Returns a copy of `arr` with item `i` moved by `dir` (-1 up / +1 down). */
+function moveItem<T>(arr: T[], i: number, dir: -1 | 1): T[] {
+  const j = i + dir;
+  if (j < 0 || j >= arr.length) return arr;
+  const next = arr.slice();
+  [next[i], next[j]] = [next[j], next[i]];
+  return next;
+}
+
+/** Up/down reorder control. */
+function MoveButtons({ index, total, onMove }: { index: number; total: number; onMove: (dir: -1 | 1) => void }) {
+  return (
+    <span className="ao-row ao-gap-2">
+      <button className="ao-btn ao-btn--sm ao-btn--ghost" disabled={index <= 0} onClick={() => onMove(-1)} title="Выше"><ChevronUp size={12} /></button>
+      <button className="ao-btn ao-btn--sm ao-btn--ghost" disabled={index >= total - 1} onClick={() => onMove(1)} title="Ниже"><ChevronDown size={12} /></button>
+    </span>
+  );
+}
 
 /** Pulls structured 422 validation issues (path/code/severity/message) from an axios error. */
 function extractServerIssues(error: unknown): AuthoringValidationIssue[] {
@@ -439,10 +458,13 @@ function RewardsTab({
           key={g.id ?? g.key ?? gi}
           group={g}
           path={`rewardGroups[${gi}]`}
+          index={gi}
+          total={groups.length}
           issues={issues}
           refData={ref}
           localRefs={{ subclasses: draft.subclasses ?? [], features: draft.features }}
           onChange={(ng) => setGroups(groups.map((x, j) => j === gi ? ng : x))}
+          onMove={(dir) => setGroups(moveItem(groups, gi, dir))}
           onRemove={() => setGroups(groups.filter((_, j) => j !== gi))}
         />
       ))}
@@ -458,18 +480,24 @@ interface LocalRefs {
 function GroupEditor({
   group,
   path,
+  index,
+  total,
   issues,
   refData,
   localRefs,
   onChange,
+  onMove,
   onRemove,
 }: {
   group: RewardGroupInput;
   path: string;
+  index: number;
+  total: number;
   issues: AuthoringValidationIssue[];
   refData: ReturnType<typeof useBuilderRefData>;
   localRefs: LocalRefs;
   onChange: (g: RewardGroupInput) => void;
+  onMove: (dir: -1 | 1) => void;
   onRemove: () => void;
 }) {
   const isChoice = group.groupKind === 'CHOICE';
@@ -489,7 +517,10 @@ function GroupEditor({
           </label>
           <Badges issues={issuesAt(issues, path)} />
         </div>
-        <button className="ao-btn ao-btn--sm ao-btn--ghost" onClick={onRemove}><Trash2 size={12} /></button>
+        <span className="ao-row ao-gap-4">
+          <MoveButtons index={index} total={total} onMove={onMove} />
+          <button className="ao-btn ao-btn--sm ao-btn--ghost" onClick={onRemove}><Trash2 size={12} /></button>
+        </span>
       </div>
 
       {isChoice && (
@@ -532,10 +563,13 @@ function GroupEditor({
               key={opt.id ?? opt.key ?? oi}
               option={opt}
               path={`${path}.options[${oi}]`}
+              index={oi}
+              total={group.options.length}
               issues={issues}
               refData={refData}
               localRefs={localRefs}
               onChange={(no) => set({ options: group.options.map((x, j) => j === oi ? no : x) })}
+              onMove={(dir) => set({ options: moveItem(group.options, oi, dir) })}
               onRemove={() => set({ options: group.options.filter((_, j) => j !== oi) })}
             />
           ))}
@@ -548,18 +582,24 @@ function GroupEditor({
 function OptionEditor({
   option,
   path,
+  index,
+  total,
   issues,
   refData,
   localRefs,
   onChange,
+  onMove,
   onRemove,
 }: {
   option: RewardOptionInput;
   path: string;
+  index: number;
+  total: number;
   issues: AuthoringValidationIssue[];
   refData: ReturnType<typeof useBuilderRefData>;
   localRefs: LocalRefs;
   onChange: (o: RewardOptionInput) => void;
+  onMove: (dir: -1 | 1) => void;
   onRemove: () => void;
 }) {
   const set = (p: Partial<RewardOptionInput>) => onChange({ ...option, ...p });
@@ -573,7 +613,10 @@ function OptionEditor({
           <label className="ao-row ao-gap-4"><input type="checkbox" checked={!!option.recommended} onChange={(e) => set({ recommended: e.target.checked })} /><span className="ao-codex">рекоменд.</span></label>
           <Badges issues={issuesAt(issues, path)} />
         </div>
-        <button className="ao-btn ao-btn--sm ao-btn--ghost" onClick={onRemove}><Trash2 size={12} /></button>
+        <span className="ao-row ao-gap-4">
+          <MoveButtons index={index} total={total} onMove={onMove} />
+          <button className="ao-btn ao-btn--sm ao-btn--ghost" onClick={onRemove}><Trash2 size={12} /></button>
+        </span>
       </div>
       <div className="ao-row ao-between"><span className="ao-overline">Гранты опции</span>
         <button className="ao-btn ao-btn--sm ao-btn--ghost" onClick={addGrant}><Plus size={12} /> грант</button>
