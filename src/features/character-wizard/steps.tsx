@@ -35,7 +35,7 @@ import css from './steps.module.css';
 import type { WizardActions, WizardChar, ScoreMethod } from './wizardState';
 import type { ContentLabel } from '@/types';
 import { isContentRewardGroup, rewardGroupKey } from '@/lib/contentAdapters';
-import { RewardGroupRenderer } from '@/components/content-rewards/RewardGroupRenderer';
+import { RewardGroupView } from '@/components/content-rewards/RewardGroupRenderer';
 import {
   DetailLine,
   StepHead,
@@ -486,7 +486,7 @@ export function StepClass({ c, A, n, total, availability }: StepProps) {
           {contentRewardGroups.map((g) => {
             const key = rewardGroupKey(g);
             return (
-              <RewardGroupRenderer
+              <RewardGroupView
                 key={key}
                 group={g}
                 selectedOptionIds={c.contentRewardSelections[key] ?? []}

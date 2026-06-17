@@ -20,7 +20,7 @@ import {
   isContentRewardGroup,
   isContentGroupSatisfied,
 } from '@/lib/contentAdapters';
-import { RewardGroupRenderer } from '@/components/content-rewards/RewardGroupRenderer';
+import { RewardGroupView } from '@/components/content-rewards/RewardGroupRenderer';
 import type {
   AbilityOption,
   AbilityScoreImprovementRequest,
@@ -601,7 +601,7 @@ function StepRewards({
           prepared but not yet submitted — ContentLevelUpRequest wiring is deferred
           until the backend accepts it (rollout step 7). */}
       {contentGroups.map((g) => (
-        <RewardGroupRenderer
+        <RewardGroupView
           key={rewardGroupKey(g)}
           group={g}
           selectedOptionIds={contentSel(g)}
