@@ -11,6 +11,7 @@ import {
   Placeholder,
 } from '@/components/ordo';
 import { CharStatusBadge } from '@/components/campaigns';
+import { CompatibilityBanner } from '@/components/CompatibilityBanner';
 import {
   MulticlassPanel,
   AbilityCheckPanel,
@@ -427,6 +428,7 @@ export default function FolioPage() {
 
   return (
     <div>
+      <CompatibilityBanner character={character} />
       {/* ── Page header (TopBar) ───────────────────────────────── */}
       <div className={s.topBar}>
         <div>

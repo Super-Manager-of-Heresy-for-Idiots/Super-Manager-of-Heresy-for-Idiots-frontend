@@ -21,6 +21,7 @@ import {
   isContentGroupSatisfied,
 } from '@/lib/contentAdapters';
 import { RewardGroupPicker } from '@/components/content-rewards/RewardGroupPicker';
+import { isMigrationBlocked } from '@/lib/characterMigration';
 import {
   buildContentLevelUpRequest,
   contentLevelUpComplete,
@@ -100,6 +101,11 @@ export default function LevelUpWizardPage() {
         onBack={backToCharacter}
       />
     );
+  }
+
+  // Migration window: block content-changing flow for un-mappable characters.
+  if (isMigrationBlocked(character)) {
+    return <RiteGate glyph="lock" message={t('camp2.migration.blocked')} onBack={backToCharacter} />;
   }
 
   const selectedClass: AvailableClassOption | undefined = options.availableClasses.find(

@@ -10,6 +10,10 @@ export const campaigns2: DictModule = {
     'camp2.back.npcs': 'К NPC',
     'camp2.back.character': 'К персонажу',
     'camp2.back.dashboard': 'К панели',
+    'camp2.migration.legacy': 'Данные персонажа из старой модели контента — часть полей может отображаться неполно. Обновление выполняется.',
+    'camp2.migration.upgrading': 'Данные персонажа обновляются до новой модели контента. Скоро всё будет на месте.',
+    'camp2.migration.blocked': 'Этого персонажа нельзя автоматически перенести. Изменения временно заблокированы до завершения миграции.',
+    'camp2.migration.readonly': 'Только чтение на время миграции.',
 
     /* ── Quest statuses (display) ───────────────────── */
     'camp2.questStatus.ACTIVE': 'Активен',
@@ -550,6 +554,10 @@ export const campaigns2: DictModule = {
     'camp2.back.npcs': 'To NPCs',
     'camp2.back.character': 'To Character',
     'camp2.back.dashboard': 'To Dashboard',
+    'camp2.migration.legacy': 'This character uses the old content model — some fields may be incomplete. An upgrade is in progress.',
+    'camp2.migration.upgrading': 'This character is being upgraded to the new content model. It will be fully available shortly.',
+    'camp2.migration.blocked': 'This character could not be migrated automatically. Changes are temporarily blocked until migration completes.',
+    'camp2.migration.readonly': 'Read-only during migration.',
 
     /* ── Quest statuses (display) ───────────────────── */
     'camp2.questStatus.ACTIVE': 'Active',

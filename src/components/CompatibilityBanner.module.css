@@ -1,0 +1,24 @@
+.banner {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  padding: var(--s-2) var(--s-3);
+  border-radius: var(--radius);
+  border: 1px solid var(--hairline);
+  margin-bottom: var(--s-3);
+}
+
+.notice {
+  border-color: color-mix(in srgb, var(--gold) 45%, transparent);
+  background: color-mix(in srgb, var(--gold) 8%, transparent);
+}
+
+.blocked {
+  border-color: color-mix(in srgb, var(--ember) 50%, transparent);
+  background: color-mix(in srgb, var(--ember) 10%, transparent);
+}
+
+.tag {
+  margin-left: auto;
+  color: var(--ember);
+}

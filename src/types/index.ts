@@ -144,6 +144,12 @@ export interface CharacterResponse {
   playerName?: string;
   proficiencies?: string;
   equipment?: string;
+  // Content-model migration signal (optional; populated only during the migration
+  // window). Absent => treated as fully migrated. `blocked` => the character can't
+  // be auto-mapped yet and content-changing flows should be read-only.
+  contentMigrationStatus?: 'LEGACY' | 'UPGRADING' | 'MIGRATED' | string;
+  contentMigrationBlocked?: boolean;
+  contentMigrationMessage?: string;
   createdAt: string;
   updatedAt: string;
 }
