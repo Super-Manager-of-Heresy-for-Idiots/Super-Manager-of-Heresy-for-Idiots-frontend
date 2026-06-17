@@ -111,6 +111,7 @@ const LevelRewardsPage = lazy(() => import('@/pages/admin/LevelRewardsPage'));
 const BuffsDebuffsPage = lazy(() => import('@/pages/admin/BuffsDebuffsPage'));
 const EnchantmentTypesPage = lazy(() => import('@/pages/admin/EnchantmentTypesPage'));
 const AdminHomebrewPage = lazy(() => import('@/pages/admin/AdminHomebrewPage'));
+const ContentQualityPage = lazy(() => import('@/pages/admin/ContentQualityPage'));
 
 export const router = createBrowserRouter([
   // Public routes
@@ -281,6 +282,7 @@ export const router = createBrowserRouter([
           { path: '/admin/stat-types', element: <StatTypesPage /> },
           { path: '/admin/item-types', element: <ItemTypesPage /> },
           { path: '/admin/character-classes', element: <CharacterClassesPage /> },
+          { path: '/admin/content-quality', element: <ContentQualityPage /> },
           { path: '/admin/character-races', element: <CharacterRacesPage /> },
           { path: '/admin/skills', element: <SkillsPage /> },
           { path: '/admin/subclasses', element: <SubclassesPage /> },

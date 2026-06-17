@@ -1,20 +1,20 @@
 import { useState } from 'react';
 import { CrudTable } from '@/components/admin/CrudTable';
 import { AdminClassBuilder } from '@/features/class-builder/AdminClassBuilder';
-import {
-  useCharacterClasses,
-  useDeleteCharacterClass,
-} from '@/hooks/useAdmin';
+import { ConfirmDeleteClassDialog } from '@/features/class-builder/ConfirmDeleteClassDialog';
+import { useCharacterClasses } from '@/hooks/useAdmin';
 import type { CharacterClassResponse } from '@/types';
 import { useT } from '@/i18n/I18nContext';
+
+const ADMIN_SCOPE = { kind: 'admin' } as const;
 
 export default function CharacterClassesPage() {
   const t = useT();
   const { data, isLoading, isError, refetch } = useCharacterClasses();
-  const deleteMutation = useDeleteCharacterClass();
 
   const [builderOpen, setBuilderOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | undefined>(undefined);
+  const [deleting, setDeleting] = useState<{ id: string; name: string } | null>(null);
 
   const handleAdd = () => {
     setEditingId(undefined);
@@ -24,6 +24,11 @@ export default function CharacterClassesPage() {
   const handleEdit = (item: CharacterClassResponse) => {
     setEditingId(item.id);
     setBuilderOpen(true);
+  };
+
+  const handleDelete = (id: string) => {
+    const item = data?.find((c) => c.id === id);
+    setDeleting({ id, name: item?.name ?? '' });
   };
 
   return (
@@ -36,7 +41,7 @@ export default function CharacterClassesPage() {
         onRetry={refetch}
         onAdd={handleAdd}
         onEdit={handleEdit}
-        onDelete={(id) => deleteMutation.mutate(id)}
+        onDelete={handleDelete}
         addLabel={t('adm.classes.add')}
         columns={[
           { header: t('adm.shared.colName'), accessor: 'name' },
@@ -48,6 +53,14 @@ export default function CharacterClassesPage() {
         onOpenChange={setBuilderOpen}
         editingId={editingId}
         onSaved={refetch}
+      />
+      <ConfirmDeleteClassDialog
+        open={!!deleting}
+        onOpenChange={(o) => !o && setDeleting(null)}
+        scope={ADMIN_SCOPE}
+        classId={deleting?.id}
+        className={deleting?.name}
+        onDeleted={refetch}
       />
     </>
   );

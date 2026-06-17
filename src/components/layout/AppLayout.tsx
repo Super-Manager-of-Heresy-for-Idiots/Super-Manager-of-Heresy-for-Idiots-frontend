@@ -58,6 +58,7 @@ const adminNav: NavEntry[] = [
   { labelKey: 'nav.bestiary', path: '/admin/bestiary/monsters', glyph: 'sword' },
   { labelKey: 'nav.bestiaryDicts', path: '/admin/bestiary/dictionaries', glyph: 'book' },
   { labelKey: 'nav.homebrew', path: '/admin/homebrew', glyph: 'scroll' },
+  { labelKey: 'nav.contentQuality', path: '/admin/content-quality', glyph: 'diamond' },
 ];
 
 function getNavItems(role?: Role): NavEntry[] {
