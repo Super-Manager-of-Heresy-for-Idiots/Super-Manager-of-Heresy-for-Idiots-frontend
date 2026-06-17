@@ -5,6 +5,7 @@ import type {
   BackgroundResponse,
   CharacterClassDetailResponse,
   CharacterRaceDetailResponse,
+  ContentLabel,
   ProficiencySkillResponse,
   SpellReferenceResponse,
   StatTypeResponse,
@@ -15,6 +16,21 @@ export interface ReferenceCurrencyType {
   name: string;
   abbreviation?: string;
   goldValue?: number;
+}
+
+/** Feat reference option (authoring dropdowns). */
+export interface ReferenceFeatOption {
+  id: string;
+  slug?: string;
+  name: string;
+  prerequisiteText?: string;
+}
+
+/** Numeric-modifier key suggestion. */
+export interface ReferenceModifierKey {
+  key: string;
+  label?: string;
+  defaultUnit?: string;
 }
 
 /**
@@ -64,6 +80,26 @@ export const referenceApi = {
     const response = await api.get<ApiResponse<SpellReferenceResponse[]>>('/reference/spells', {
       params: classId ? { classId } : undefined,
     });
+    return response.data;
+  },
+
+  /** Ability scores (ability_score) for authoring dropdowns. */
+  getAbilities: async (): Promise<ApiResponse<ContentLabel[]>> => {
+    const response = await api.get<ApiResponse<ContentLabel[]>>('/reference/abilities');
+    return response.data;
+  },
+
+  /** Feat options (paginated/searchable) for authoring dropdowns. */
+  getFeatOptions: async (query?: string): Promise<ApiResponse<ReferenceFeatOption[]>> => {
+    const response = await api.get<ApiResponse<ReferenceFeatOption[]>>('/reference/feats', {
+      params: query ? { query } : undefined,
+    });
+    return response.data;
+  },
+
+  /** Known numeric-modifier keys (suggestions; free text still allowed). */
+  getModifierKeys: async (): Promise<ApiResponse<ReferenceModifierKey[]>> => {
+    const response = await api.get<ApiResponse<ReferenceModifierKey[]>>('/reference/modifier-keys');
     return response.data;
   },
 };

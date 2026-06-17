@@ -22,7 +22,7 @@ import {
   validateClassDraft,
   type ClassDraft,
 } from './classDraft';
-import { MODIFIER_KEYS, useBuilderRefData, type RefOption } from './refData';
+import { useBuilderRefData, type RefOption } from './refData';
 import { draftToRewardGroups, type PreviewCtx } from './draftPreview';
 import type {
   AuthoringValidationIssue,
@@ -770,7 +770,7 @@ function GrantEditor({
         <div className={s.grid3}>
           <Field label="modifierKey">
             <input className="ao-input" list="mod-keys" value={(p.modifierKey as string) ?? ''} onChange={(e) => setPayload({ modifierKey: e.target.value })} />
-            <datalist id="mod-keys">{MODIFIER_KEYS.map((k) => <option key={k} value={k} />)}</datalist>
+            <datalist id="mod-keys">{refData.modifierKeys.map((k) => <option key={k} value={k} />)}</datalist>
           </Field>
           <Field label="amount"><input className="ao-input" type="number" value={(p.amount as number) ?? 0} onChange={(e) => setPayload({ amount: Number(e.target.value) || 0 })} /></Field>
           <Field label="unitText"><input className="ao-input" value={(p.unitText as string) ?? ''} onChange={(e) => setPayload({ unitText: e.target.value })} /></Field>
