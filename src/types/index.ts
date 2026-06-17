@@ -800,6 +800,189 @@ export interface RichCharacterClassResponse {
   packageDetail?: HomebrewDetailResponse | null;
 }
 
+// === Class Authoring (new content model) — aggregate upsert ===
+// Mirrors the backend ClassWriteRequest graph: identity + mechanics + features +
+// subclasses + rewardGroups -> options -> typed grants. Children carry a server
+// `id` (update) or a client `key` (create, referenced by grants in the same request).
+
+export interface SpellcastingProfileInput {
+  casterProgression: string;     // known: FULL | HALF | THIRD | PACT (free text allowed)
+  spellcastingAbilityId: string;
+  preparation: string;           // known: PREPARED | KNOWN
+  ritualCasting: boolean;
+  spellcastingFocusText?: string;
+  notes?: string;
+}
+
+export interface FeatureInput {
+  id?: string;
+  key?: string;
+  level: number;
+  sortOrder: number;
+  title: string;
+  description?: string;
+  subclassId?: string;
+  subclassKey?: string;
+}
+
+export interface SubclassInput {
+  id?: string;
+  key?: string;
+  name: string;
+  nameRu?: string;
+  nameEn?: string;
+  slug?: string;
+  subtitle?: string;
+  description?: string;
+}
+
+export interface FeatureGrantPayload {
+  featureId?: string;
+  featureKey?: string;
+  inline?: { title: string; description?: string };
+}
+export interface SubclassGrantPayload {
+  subclassId?: string;
+  subclassKey?: string;
+}
+export interface FeatGrantPayload {
+  mode: 'FIXED' | 'ANY';
+  featId?: string;
+  inlineFeat?: { name: string; prerequisiteText?: string; description?: string };
+  chooseCount?: number;
+}
+export interface SpellGrantPayload {
+  mode: 'FIXED' | 'CHOICE';
+  fixedSpellIds?: string[];
+  spellLevel?: number;
+  minLevel?: number;
+  maxLevel?: number;
+  schoolIds?: string[];
+  spellListId?: string;
+  classSpellListId?: string;
+  chooseCount?: number;
+  allowReplaceOnLevelUp?: boolean;
+}
+export interface SkillProficiencyGrantPayload {
+  mode: 'FIXED' | 'CHOICE' | 'ANY';
+  skillIds?: string[];
+  skillOptionIds?: string[];
+  chooseCount?: number;
+}
+export interface AbilityScoreGrantPayload {
+  abilityOptionIds?: string[];
+  chooseCount: number;
+  bonusPerChoice: number;
+  totalBonus?: number;
+  maxPerAbility?: number;
+  maxScore?: number;
+}
+export interface NumericModifierGrantPayload {
+  modifierKey: string;
+  amount: number;
+  unitText?: string;
+  durationText?: string;
+  stacking?: boolean;
+}
+export interface CustomTextGrantPayload {
+  title?: string;
+  body?: string;
+  markdown?: boolean;
+  userEditable?: boolean;
+}
+
+export type GrantPayload =
+  | FeatureGrantPayload
+  | SubclassGrantPayload
+  | FeatGrantPayload
+  | SpellGrantPayload
+  | SkillProficiencyGrantPayload
+  | AbilityScoreGrantPayload
+  | NumericModifierGrantPayload
+  | CustomTextGrantPayload;
+
+export interface GrantInput {
+  id?: string;
+  grantType: string;
+  label?: string;
+  labelRu?: string;
+  labelEn?: string;
+  description?: string;
+  sortOrder: number;
+  payload: GrantPayload;
+}
+
+export interface RewardOptionInput {
+  id?: string;
+  key?: string;
+  optionKey: string;
+  label: string;
+  labelRu?: string;
+  labelEn?: string;
+  description?: string;
+  recommended?: boolean;
+  sortOrder: number;
+  grants: GrantInput[];
+}
+
+export interface RewardGroupInput {
+  id?: string;
+  key?: string;
+  classLevel: number;
+  groupKind: string;             // known: AUTO | CHOICE
+  prompt?: string;
+  description?: string;
+  chooseMin: number;
+  chooseMax: number;
+  repeatable: boolean;
+  sortOrder: number;
+  classFeatureId?: string;
+  classFeatureKey?: string;
+  options: RewardOptionInput[];
+  grants: GrantInput[];
+}
+
+export interface ClassWriteRequest {
+  name: string;
+  nameRu?: string;
+  nameEn?: string;
+  slug?: string;
+  subtitle?: string;
+  description?: string;
+  hitDie: number;                // 6 | 8 | 10 | 12
+  primaryAbilityIds: string[];
+  savingThrowIds: string[];
+  skillChoiceCount: number;
+  skillChoiceAny: boolean;
+  skillOptionIds: string[];
+  armorProficiencyText?: string;
+  weaponProficiencyText?: string;
+  toolProficiencyText?: string;
+  spellcasting?: SpellcastingProfileInput | null;
+  features: FeatureInput[];
+  subclasses?: SubclassInput[];
+  rewardGroups: RewardGroupInput[];
+}
+
+export interface AuthoringValidationIssue {
+  path: string;
+  code: string;
+  severity: 'ERROR' | 'WARNING';
+  message: string;
+}
+
+export interface ClassSaveResult {
+  class: ContentClassDetailResponse;
+  id: string;
+  slug: string;
+  packageId?: string;
+  etag: string;
+  createdAt: string;
+  updatedAt: string;
+  warnings: AuthoringValidationIssue[];
+  resourceUrl: string;
+}
+
 // === Enchantments ===
 
 export interface EnchantmentTypeResponse {
