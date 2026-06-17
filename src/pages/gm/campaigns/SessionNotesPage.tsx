@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
-import { OrdoPanel, PanelHeader, Rune, OrdoField, OrdoDivider, EmptyVault } from '@/components/ordo';
+import { OrdoPanel, Rune, OrdoField, EmptyVault, ErrorAltar } from '@/components/ordo';
 import {
   Dialog,
   DialogContent,
@@ -123,12 +123,11 @@ export default function SessionNotesPage() {
 
   if (error) {
     return (
-      <div className={s.errorBlock}>
-        <p className={cn('ao-italic', s.errorText)}>
-          {t('camp2.session.loadError')}
-        </p>
-        <button className="ao-btn" onClick={() => refetch()}>{t('common.retry')}</button>
-      </div>
+      <ErrorAltar
+        title={t('camp2.session.loadError')}
+        onRetry={() => refetch()}
+        retryLabel={t('common.retry')}
+      />
     );
   }
 

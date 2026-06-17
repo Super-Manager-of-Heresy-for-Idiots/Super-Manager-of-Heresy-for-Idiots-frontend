@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
-import { OrdoPanel, Rune, EmptyVault } from '@/components/ordo';
+import { OrdoPanel, Rune, EmptyVault, ErrorAltar } from '@/components/ordo';
 import { CodexID } from '@/components/homebrew/CodexID';
 import { VisibilityToggle } from '@/components/narrative';
 import {
@@ -21,13 +21,12 @@ import { useCampaignMonsters } from '@/hooks/useBestiary';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
 import type { NpcResponse } from '@/types';
+import { NpcFormFields, type NpcFormState } from './NpcFormFields';
 import {
-  NpcFormFields,
   emptyNpcForm,
   buildNpcPayload,
   isNpcFormValid,
-  type NpcFormState,
-} from './NpcFormFields';
+} from './NpcFormFields.helpers';
 import s from './NPCManagerPage.module.css';
 
 /* ── helpers ─────────────────────────────────────────────────── */
@@ -122,12 +121,11 @@ export default function NPCManagerPage() {
   if (error) {
     return (
       <div>
-        <div className={s.errorBox}>
-          <p className={cn('ao-italic', s.errorText)}>
-            {t('camp2.npcMgr.loadError')}
-          </p>
-          <button className="ao-btn" onClick={() => refetch()}>{t('common.retry')}</button>
-        </div>
+        <ErrorAltar
+          title={t('camp2.npcMgr.loadError')}
+          onRetry={() => refetch()}
+          retryLabel={t('common.retry')}
+        />
       </div>
     );
   }

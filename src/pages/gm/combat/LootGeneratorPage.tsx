@@ -1,6 +1,5 @@
 import { Fragment, useState } from 'react';
 import {
-  OrdoPanel as Panel,
   OrdoChip as Chip,
   OrdoField as Field,
   PanelHeader,

@@ -214,6 +214,36 @@ export interface LevelUpRequest {
   abilityScoreImprovement?: AbilityScoreImprovementRequest;
 }
 
+export interface ContentLevelUpRequest {
+  classId: string;
+  rewardSelections: ContentRewardSelection[];
+}
+
+export interface ContentRewardSelection {
+  groupId: string;
+  optionId?: string;
+  abilityScoreSelections?: ContentAbilityScoreSelection[];
+  skillSelections?: ContentSkillSelection[];
+  spellSelections?: ContentSpellSelection[];
+  noteText?: string;
+}
+
+export interface ContentAbilityScoreSelection {
+  grantId: string;
+  abilityScoreId: string;
+  bonusAmount: number;
+}
+
+export interface ContentSkillSelection {
+  grantId: string;
+  skillId: string;
+}
+
+export interface ContentSpellSelection {
+  grantId: string;
+  spellId: string;
+}
+
 export interface RewardSelection {
   rewardType: string;
   rewardEntryId: string;
@@ -264,6 +294,20 @@ export interface AscentDerivedPreview {
 }
 
 export interface RewardGroup {
+  id?: string;
+  groupKind?: string;
+  prompt?: string;
+  description?: string;
+  chooseMin?: number;
+  chooseMax?: number;
+  repeatable?: boolean;
+  grants?: ContentRewardGrant[];
+  options?: ContentRewardOption[];
+  /**
+   * Stable frontend key. Legacy payloads use rewardType; new content payloads use id.
+   * Filled by normalizeLevelUpOptions().
+   */
+  groupKey?: string;
   rewardType: string;
   isChoice: boolean;
   rewards: RewardEntry[];
@@ -277,6 +321,63 @@ export interface RewardEntry {
   alreadyAcquired: boolean;
   // Structured mechanics for richer display. Optional; backend may omit.
   detail?: RewardDetail;
+}
+
+export interface ContentRewardOption {
+  id: string;
+  optionKey: string;
+  label: string;
+  description?: string;
+  recommended?: boolean;
+  grants?: ContentRewardGrant[];
+}
+
+export interface ContentRewardGrant {
+  id: string;
+  grantType: string;
+  label?: string;
+  description?: string;
+  feature?: ClassFeatureSummary;
+  subclass?: ContentLabel;
+  feat?: ContentLabel;
+  spell?: ContentLabel;
+  fixedSkill?: ContentLabel;
+  skillOptions?: ContentLabel[];
+  fixedAbility?: ContentLabel;
+  abilityOptions?: ContentLabel[];
+  spellLevel?: number;
+  chooseCount?: number;
+  anySkill?: boolean;
+  bonusPerChoice?: number;
+  totalBonus?: number;
+  maxPerAbility?: number;
+  maxScore?: number;
+  modifierKey?: string;
+  targetKind?: string;
+  targetLabel?: string;
+  amount?: number;
+  unitText?: string;
+  durationText?: string;
+  title?: string;
+  body?: string;
+  userEditable?: boolean;
+  rawFilterText?: string;
+}
+
+export interface ContentLabel {
+  id: string;
+  slug?: string;
+  name: string;
+  nameEn?: string;
+  nameRu?: string;
+}
+
+export interface ClassFeatureSummary {
+  id: string;
+  slug?: string;
+  level: number;
+  title: string;
+  description?: string;
 }
 
 // Mirrors the structured fields already modelled on SkillResponse / FeatResponse /
@@ -405,20 +506,36 @@ export interface SpellReferenceResponse {
 
 export interface CharacterClassDetailResponse {
   id: string;
+  slug?: string;
   name: string;
+  nameEn?: string;
+  nameRu?: string;
+  subtitle?: string;
   description?: string;
   hitDie?: number;
   primaryAbilityStatId?: string;
+  primaryAbilities?: ContentLabel[];
   savingThrowStatNames?: string[];
+  savingThrows?: ContentLabel[];
   skillChoiceCount?: number;
+  skillChoiceAny?: boolean;
   skillChoiceOptions?: ProficiencySkillResponse[];
+  skillOptions?: ContentLabel[];
   armorWeaponProficiencies?: string;
+  armorProficiencyText?: string;
+  weaponProficiencyText?: string;
+  toolProficiencyText?: string;
+  features?: ClassFeatureSummary[];
+  rewardGroups?: RewardGroup[];
   spellcasting?: {
     isSpellcaster?: boolean;
+    spellcaster?: boolean;
     spellcastingStatId?: string;
     spellcastingStatName?: string;
+    spellcastingAbility?: ContentLabel;
     hasCantrips?: boolean;
     isHalfCaster?: boolean;
+    halfCaster?: boolean;
   };
 }
 
@@ -870,7 +987,7 @@ export interface CreateStorageContainerRequest {
 
 export type CharacterStatus = 'ACTIVE' | 'DEAD' | 'RESERVE';
 
-export interface CharacterV2Response extends CharacterResponse {}
+export type CharacterV2Response = CharacterResponse;
 
 export interface CreateCharacterInCampaignRequest {
   name: string;

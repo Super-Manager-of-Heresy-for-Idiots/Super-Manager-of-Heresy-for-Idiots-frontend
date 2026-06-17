@@ -1,5 +1,4 @@
 import { Fragment, useEffect, useMemo, useState } from 'react';
-import type { CSSProperties } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Plus, Pencil, Trash2, Eye, EyeOff, Copy, X, Search, AlertTriangle, SlidersHorizontal, ChevronDown } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
@@ -93,7 +92,7 @@ export default function CampaignBestiaryPage() {
 
   const systemActive = isGM && tab === 'system';
   const systemQ = usePublicMonsters(systemActive);
-  const systemRows = systemQ.data ?? [];
+  const systemRows = useMemo(() => systemQ.data ?? [], [systemQ.data]);
 
   const monsters = monstersQ.data ?? [];
   const visible = monsters.filter((m) => m.isVisibleToPlayers);

@@ -33,16 +33,21 @@ import { useGameTerms } from '@/i18n/gameTerms';
 import { cn } from '@/lib/utils';
 import css from './steps.module.css';
 import type { WizardActions, WizardChar, ScoreMethod } from './wizardState';
+import type { ContentLabel } from '@/types';
+import { isContentRewardGroup, rewardGroupKey } from '@/lib/contentAdapters';
+import { RewardGroupRenderer } from '@/components/content-rewards/RewardGroupRenderer';
 import {
-  CLASS_GLYPH,
   DetailLine,
-  PORTRAIT_GALLERY,
   StepHead,
   WizCard,
   type WizardAvailability,
+} from './parts';
+import {
+  CLASS_GLYPH,
+  PORTRAIT_GALLERY,
   asiText,
   makePortrait,
-} from './parts';
+} from './parts.helpers';
 
 export interface StepProps {
   c: WizardChar;
@@ -278,6 +283,35 @@ export function StepClass({ c, A, n, total, availability }: StepProps) {
     const stat = availability.statTypes.find((item) => item.id === id);
     return <>{stat ? gt.ability(stat.name) : '\u2014'}</>;
   };
+  const d = selectedClassDetail;
+  const resolveAbilityName = (label: ContentLabel): string =>
+    availability.statTypes.find((stat) => stat.id === label.id)?.name ?? label.name;
+  const primaryAbilitiesText = d?.primaryAbilities?.length
+    ? d.primaryAbilities.map((label) => gt.ability(resolveAbilityName(label))).join(' \u00b7 ')
+    : undefined;
+  const savesText = d?.savingThrows?.length
+    ? d.savingThrows.map((label) => gt.abilityAbbr(shortStatName(resolveAbilityName(label)))).join(' \u00b7 ')
+    : undefined;
+  const armorText = d?.armorProficiencyText?.trim();
+  const weaponText = d?.weaponProficiencyText?.trim();
+  const toolText = d?.toolProficiencyText?.trim();
+  const combinedProf = d?.armorWeaponProficiencies?.trim();
+  const hasSeparateProf = !!(armorText || weaponText || toolText);
+  const skillChoiceCount = d?.skillChoiceCount ?? 0;
+  const skillChoiceText = d?.skillChoiceAny
+    ? t('wiz.class.skillAny')
+    : d?.skillOptions?.length
+      ? d.skillOptions.map((label) => label.name).join(', ')
+      : undefined;
+  const spellcastingAbilityText = d?.spellcasting?.spellcastingAbility
+    ? gt.ability(resolveAbilityName(d.spellcasting.spellcastingAbility))
+    : d?.spellcasting?.spellcastingStatName
+      ? gt.ability(d.spellcasting.spellcastingStatName)
+      : undefined;
+  // Level-1 content-shaped reward groups (new grants/options payload). Selections are
+  // prepared in wizard state but not yet submitted — ContentLevelUpRequest wiring is
+  // deferred until the backend accepts it (rollout step 7).
+  const contentRewardGroups = (d?.rewardGroups ?? []).filter(isContentRewardGroup);
   return (
     <div>
       <StepHead n={n} total={total} title={t('wiz.class.title')} sub={t('wiz.class.sub')} />
@@ -322,13 +356,28 @@ export function StepClass({ c, A, n, total, availability }: StepProps) {
                   <div className={cn('ao-italic', css.desc14)}>{selectedClassDetail.description}</div>
                   <DetailLine label={t('wiz.class.source')}>{selectedClass?.entry.homebrewTitle || selectedClass?.entry.source}</DetailLine>
                   <DetailLine label={t('wiz.class.hitDie')}>d{selectedClassDetail.hitDie || 8}</DetailLine>
-                  <DetailLine label={t('wiz.class.primary')}><StatName id={selectedClassDetail.primaryAbilityStatId} /></DetailLine>
-                  <DetailLine label={t('wiz.class.saves')}>{selectedClassDetail.savingThrowStatNames?.map((nm) => gt.abilityAbbr(shortStatName(nm))).join(' \u00b7 ') || '\u2014'}</DetailLine>
-                  <DetailLine label={t('wiz.class.proficiencies')}>{selectedClassDetail.armorWeaponProficiencies || '\u2014'}</DetailLine>
+                  <DetailLine label={t('wiz.class.primary')}>{primaryAbilitiesText ?? <StatName id={selectedClassDetail.primaryAbilityStatId} />}</DetailLine>
+                  <DetailLine label={t('wiz.class.saves')}>{savesText ?? '\u2014'}</DetailLine>
+                  {hasSeparateProf ? (
+                    <>
+                      {armorText && <DetailLine label={t('wiz.class.armor')}>{armorText}</DetailLine>}
+                      {weaponText && <DetailLine label={t('wiz.class.weapons')}>{weaponText}</DetailLine>}
+                      {toolText && <DetailLine label={t('wiz.class.tools')}>{toolText}</DetailLine>}
+                    </>
+                  ) : (
+                    <DetailLine label={t('wiz.class.proficiencies')}>{combinedProf || '\u2014'}</DetailLine>
+                  )}
+                  {skillChoiceCount > 0 && (
+                    <DetailLine label={t('wiz.class.skillChoice')}>
+                      {skillChoiceText
+                        ? t('wiz.class.skillChoiceRule', { count: skillChoiceCount, options: skillChoiceText })
+                        : t('wiz.class.skillChoiceN', { count: skillChoiceCount })}
+                    </DetailLine>
+                  )}
                   {selectedClassDetail.spellcasting?.isSpellcaster && (
                     <div className={css.mt10}>
                       <OrdoChip tone="arcane" glyph="sigil-1">
-                        {t('wiz.class.spellcaster')}{selectedClassDetail.spellcasting.isHalfCaster ? ' \u00b7 ' + t('wiz.class.half') : ''}{!selectedClassDetail.spellcasting.hasCantrips ? ' \u00b7 ' + t('wiz.class.noCantrips') : ''}
+                        {t('wiz.class.spellcaster')}{spellcastingAbilityText ? ' \u00b7 ' + spellcastingAbilityText : ''}{selectedClassDetail.spellcasting.isHalfCaster ? ' \u00b7 ' + t('wiz.class.half') : ''}{!selectedClassDetail.spellcasting.hasCantrips ? ' \u00b7 ' + t('wiz.class.noCantrips') : ''}
                       </OrdoChip>
                     </div>
                   )}
@@ -432,6 +481,23 @@ export function StepClass({ c, A, n, total, availability }: StepProps) {
           </OrdoPanel>
         </div>
       </div>
+      {contentRewardGroups.length > 0 && (
+        <div className={css.contentRewards}>
+          {contentRewardGroups.map((g) => {
+            const key = rewardGroupKey(g);
+            return (
+              <RewardGroupRenderer
+                key={key}
+                group={g}
+                selectedOptionIds={c.contentRewardSelections[key] ?? []}
+                onChange={(ids) =>
+                  A.patch({ contentRewardSelections: { ...c.contentRewardSelections, [key]: ids } })
+                }
+              />
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

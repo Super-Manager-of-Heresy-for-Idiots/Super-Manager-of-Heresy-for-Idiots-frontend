@@ -1,7 +1,6 @@
 import api from './axios';
 import type {
   ApiResponse,
-  CharacterV2Response,
   CharacterResponse,
   CreateCharacterInCampaignRequest,
   UpdateCharacterRequest,

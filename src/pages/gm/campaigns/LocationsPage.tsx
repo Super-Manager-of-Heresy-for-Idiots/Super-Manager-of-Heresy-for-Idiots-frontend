@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
-import { OrdoPanel, Rune, OrdoField, Placeholder, EmptyVault } from '@/components/ordo';
+import { OrdoPanel, Rune, OrdoField, Placeholder, EmptyVault, ErrorAltar } from '@/components/ordo';
 import { CodexID } from '@/components/homebrew/CodexID';
 import { VisibilityToggle } from '@/components/narrative';
 import {
@@ -146,12 +146,11 @@ export default function LocationsPage() {
   if (error) {
     return (
       <div>
-        <div className={s.errorBox}>
-          <p className={cn('ao-italic', s.errorText)}>
-            {t('camp2.loc.loadError')}
-          </p>
-          <button className="ao-btn" onClick={() => refetch()}>{t('common.retry')}</button>
-        </div>
+        <ErrorAltar
+          title={t('camp2.loc.loadError')}
+          onRetry={() => refetch()}
+          retryLabel={t('common.retry')}
+        />
       </div>
     );
   }

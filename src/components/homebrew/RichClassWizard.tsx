@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { FileUp, Loader2, Plus, Save, Trash2 } from 'lucide-react';
 import { Rune, OrdoChip } from '@/components/ordo';
 import { useT } from '@/i18n/I18nContext';
@@ -350,16 +350,21 @@ export function RichClassWizard({ open, onOpenChange, packageDetail, editingClas
     setHydratedKey(key);
   }, [open, editingClass, hydratedKey]);
 
-  const contentByType = packageDetail.contentByType || {};
-  const getContent = (type: RichClassRewardType) => (contentByType[type as ContentType] || []) as ExistingContent[];
-  const getExistingById = (type: RichClassRewardType, id: string) =>
-    getContent(type).find((item) => item.id === id);
+  const getContent = useCallback(
+    (type: RichClassRewardType) =>
+      ((packageDetail.contentByType || {})[type as ContentType] || []) as ExistingContent[],
+    [packageDetail],
+  );
+  const getExistingById = useCallback(
+    (type: RichClassRewardType, id: string) => getContent(type).find((item) => item.id === id),
+    [getContent],
+  );
   const currentRewards = levelsByNumber[selectedLevel] || [];
   const selectedReward = currentRewards.find((reward) => reward.localId === selectedRewardId) || currentRewards[0] || null;
 
   const validation = useMemo(
     () => validate(className, levelsByNumber, getExistingById, t),
-    [className, levelsByNumber, packageDetail, t],
+    [className, levelsByNumber, getExistingById, t],
   );
   const isSaving = createMutation.isPending || updateMutation.isPending || importMutation.isPending;
   const canSave = validation.errors.length === 0 && className.trim().length > 0 && !isSaving;

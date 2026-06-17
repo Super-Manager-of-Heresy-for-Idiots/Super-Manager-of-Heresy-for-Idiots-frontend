@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
-import { Rune, Sigil, OrdoDivider, OrdoPanel, OrdoField, EmptyVault } from '@/components/ordo';
+import { Rune, Sigil, OrdoDivider, OrdoPanel, OrdoField, EmptyVault, ErrorAltar } from '@/components/ordo';
 import { CampaignStatusPill } from '@/components/campaigns';
 import { useAuthStore } from '@/store/authStore';
 import {
@@ -134,12 +134,11 @@ export default function CampaignListPage() {
 
         <div className={s.section}>
           {error ? (
-            <div className={s.errorBlock}>
-              <p className={cn('ao-italic', s.errorText)}>
-                {t('camp.list.loadError')}
-              </p>
-              <button className="ao-btn" onClick={() => refetch()}>{t('camp.retry')}</button>
-            </div>
+            <ErrorAltar
+              title={t('camp.list.loadError')}
+              onRetry={() => refetch()}
+              retryLabel={t('camp.retry')}
+            />
           ) : isLoading ? (
             <div className={s.cardGrid}>
               {Array.from({ length: 2 }).map((_, i) => (
@@ -206,12 +205,11 @@ export default function CampaignListPage() {
 
   if (error) {
     return (
-      <div className={s.errorBlockLg}>
-        <p className={cn('ao-italic', s.errorText)}>
-          {t('camp.list.loadError')}
-        </p>
-        <button className="ao-btn" onClick={() => refetch()}>{t('camp.retry')}</button>
-      </div>
+      <ErrorAltar
+        title={t('camp.list.loadError')}
+        onRetry={() => refetch()}
+        retryLabel={t('camp.retry')}
+      />
     );
   }
 

@@ -57,7 +57,7 @@ export function useMyBlueprints() {
     queryKey: myListKey(),
     queryFn: async () => {
       const response = await campaignBlueprintsApi.getMy();
-      return response.data ?? [];
+      return response.data?.content ?? [];
     },
   });
 }

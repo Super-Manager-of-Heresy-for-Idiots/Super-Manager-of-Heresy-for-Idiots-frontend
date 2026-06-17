@@ -5,8 +5,20 @@ import { authApi } from '@/api/auth.api';
 import { useAuthStore } from '@/store/authStore';
 import { getRoleRedirectPath } from '@/lib/utils';
 import { useT } from '@/i18n/I18nContext';
-import type { LoginRequest, RegisterRequest, ApiError } from '@/types';
+import type { LoginRequest, RegisterRequest, ApiError, UserResponse } from '@/types';
 import { AxiosError } from 'axios';
+
+type AuthResponseLike = {
+  data?: unknown;
+  token?: unknown;
+  accessToken?: unknown;
+  jwt?: unknown;
+  user?: unknown;
+};
+
+function asRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === 'object' ? value as Record<string, unknown> : {};
+}
 
 export function useLogin() {
   const navigate = useNavigate();
@@ -20,10 +32,11 @@ export function useLogin() {
       // The login endpoint is an external boundary: tolerate both the `{ success, data }`
       // envelope and a flat body, plus common token field names. If the token is missing
       // we surface a clear error instead of redirecting into a session that 401/403s.
-      const body = response as Record<string, any>;
-      const payload = (body?.data ?? body) as Record<string, any>;
-      const token: string | undefined = payload?.token ?? payload?.accessToken ?? payload?.jwt;
-      const user = payload?.user ?? body?.user;
+      const body = response as AuthResponseLike;
+      const payload = asRecord(body.data ?? body);
+      const tokenValue = payload.token ?? payload.accessToken ?? payload.jwt;
+      const token = typeof tokenValue === 'string' ? tokenValue : undefined;
+      const user = (payload.user ?? body.user) as UserResponse | undefined;
 
       if (!token || !user) {
         console.error('[auth] Login response missing token/user.', {

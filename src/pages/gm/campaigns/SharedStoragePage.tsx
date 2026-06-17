@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import type { CSSProperties } from 'react';
 import { useParams } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
-import { OrdoPanel, Rune, OrdoField, EmptyVault, OrdoChip, OrdoDivider, Placeholder } from '@/components/ordo';
+import { OrdoPanel, Rune, OrdoField, EmptyVault, ErrorAltar, OrdoChip, OrdoDivider, Placeholder } from '@/components/ordo';
 import {
   Dialog,
   DialogContent,
@@ -472,12 +472,11 @@ export default function SharedStoragePage() {
 
   if (error) {
     return (
-      <div className={s.errorBlock}>
-        <p className={cn('ao-italic', s.errorText)}>
-          {t('camp2.storage.loadError')}
-        </p>
-        <button className="ao-btn" onClick={() => refetch()}>{t('common.retry')}</button>
-      </div>
+      <ErrorAltar
+        title={t('camp2.storage.loadError')}
+        onRetry={() => refetch()}
+        retryLabel={t('common.retry')}
+      />
     );
   }
 

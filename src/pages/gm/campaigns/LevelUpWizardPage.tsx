@@ -14,6 +14,13 @@ import { CodexID } from '@/components/homebrew';
 import { useT } from '@/i18n/I18nContext';
 import { useCharacter } from '@/hooks/useCharacter';
 import { useLevelUpOptions, useLevelUp } from '@/hooks/useLevelUp';
+import {
+  rewardGroupKey,
+  rewardGroupLabel,
+  isContentRewardGroup,
+  isContentGroupSatisfied,
+} from '@/lib/contentAdapters';
+import { RewardGroupRenderer } from '@/components/content-rewards/RewardGroupRenderer';
 import type {
   AbilityOption,
   AbilityScoreImprovementRequest,
@@ -47,8 +54,10 @@ export default function LevelUpWizardPage() {
 
   const [step, setStep] = useState<WizardStep>('pick-class');
   const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
-  // groupKey (rewardType) -> selected rewardEntryId
+  // reward group key -> selected rewardEntryId
   const [choiceSelections, setChoiceSelections] = useState<Record<string, string>>({});
+  // content-shaped groups: reward group key -> selected option ids (prepared; not yet submitted)
+  const [contentSelections, setContentSelections] = useState<Record<string, string[]>>({});
   // ASI: statTypeId -> point count
   const [asi, setAsi] = useState<AsiAllocation>({ points: {} });
   const [result, setResult] = useState<LevelUpResultResponse | null>(null);
@@ -117,6 +126,7 @@ export default function LevelUpWizardPage() {
           onSelect={(id) => {
             setSelectedClassId(id);
             setChoiceSelections({});
+            setContentSelections({});
             setAsi({ points: {} });
           }}
           onNext={() => setStep('rewards')}
@@ -131,6 +141,8 @@ export default function LevelUpWizardPage() {
           characterName={character?.name}
           choiceSelections={choiceSelections}
           setChoiceSelections={setChoiceSelections}
+          contentSelections={contentSelections}
+          setContentSelections={setContentSelections}
           asi={asi}
           setAsi={setAsi}
           onBack={() => setStep('pick-class')}
@@ -352,6 +364,8 @@ function StepRewards({
   characterName,
   choiceSelections,
   setChoiceSelections,
+  contentSelections,
+  setContentSelections,
   asi,
   setAsi,
   onBack,
@@ -362,23 +376,32 @@ function StepRewards({
   characterName?: string;
   choiceSelections: Record<string, string>;
   setChoiceSelections: (s: Record<string, string>) => void;
+  contentSelections: Record<string, string[]>;
+  setContentSelections: (s: Record<string, string[]>) => void;
   asi: AsiAllocation;
   setAsi: (a: AsiAllocation) => void;
   onBack: () => void;
   onNext: () => void;
 }) {
   const t = useT();
+
+  // Content-shaped groups (new grants/options payload) render via RewardGroupRenderer;
+  // legacy groups keep the ceremony UI. Detection is by payload, not flag.
+  const contentGroups = option.rewardGroups.filter(isContentRewardGroup);
+  const legacyGroups = option.rewardGroups.filter((g) => !isContentRewardGroup(g));
+  const contentSel = (g: RewardGroup) => contentSelections[rewardGroupKey(g)] ?? [];
+
   // ASI arrives as a non-choice group with a single reward whose detail carries
   // abilityOptions + asiPointsTotal, so detect it regardless of isChoice.
-  const asiGroup = option.rewardGroups.find((g) => g.rewardType === 'ABILITY_SCORE_IMPROVEMENT');
+  const asiGroup = legacyGroups.find((g) => g.rewardType === 'ABILITY_SCORE_IMPROVEMENT');
   const asiDetail = asiGroup?.rewards[0]?.detail;
   const asiOptions: AbilityOption[] = asiDetail?.abilityOptions ?? [];
   const asiPointsTotal = asiDetail?.asiPointsTotal ?? 2;
 
-  const automatic = option.rewardGroups.filter(
+  const automatic = legacyGroups.filter(
     (g) => !g.isChoice && g.rewardType !== 'ABILITY_SCORE_IMPROVEMENT',
   );
-  const choices = option.rewardGroups.filter((g) => g.isChoice);
+  const choices = legacyGroups.filter((g) => g.isChoice);
   const subclassGroups = choices.filter((g) => g.rewardType === 'SUBCLASS');
   const normalChoices = choices.filter(
     (g) => g.rewardType !== 'ABILITY_SCORE_IMPROVEMENT' && g.rewardType !== 'SUBCLASS',
@@ -390,8 +413,9 @@ function StepRewards({
   const choicesValid = allChoiceGroups.every((g) => {
     const allAlready = g.rewards.length > 0 && g.rewards.every((r) => r.alreadyAcquired);
     if (allAlready) return true;
-    return !!choiceSelections[g.rewardType];
+    return !!choiceSelections[rewardGroupKey(g)];
   });
+  const contentValid = contentGroups.every((g) => isContentGroupSatisfied(g, contentSel(g)));
 
   // Build the "rites yet to be chosen" checklist from real groups
   const rites: { name: string; complete: boolean }[] = [
@@ -399,9 +423,15 @@ function StepRewards({
       const allAlready = g.rewards.length > 0 && g.rewards.every((r) => r.alreadyAcquired);
       return {
         name: t('camp.lvl.choose', { label: REWARD_TYPE_LABELS[g.rewardType] || g.rewardType }),
-        complete: allAlready || !!choiceSelections[g.rewardType],
+        complete: allAlready || !!choiceSelections[rewardGroupKey(g)],
       };
     }),
+    ...contentGroups
+      .filter((g) => (g.options?.length ?? 0) > 0)
+      .map((g) => ({
+        name: t('camp.lvl.choose', { label: rewardGroupLabel(g) }),
+        complete: isContentGroupSatisfied(g, contentSel(g)),
+      })),
     ...(asiGroup ? [{ name: t('camp.lvl.asiChecklist'), complete: asiValid }] : []),
   ];
 
@@ -550,20 +580,32 @@ function StepRewards({
       {/* Subclass — Choosing of Oaths */}
       {subclassGroups.map((g) => (
         <OathGroup
-          key={g.rewardType}
+          key={rewardGroupKey(g)}
           group={g}
-          selectedId={choiceSelections[g.rewardType] || ''}
-          onSelect={(id) => setChoiceSelections({ ...choiceSelections, [g.rewardType]: id })}
+          selectedId={choiceSelections[rewardGroupKey(g)] || ''}
+          onSelect={(id) => setChoiceSelections({ ...choiceSelections, [rewardGroupKey(g)]: id })}
         />
       ))}
 
       {/* Other choices — Three Offerings */}
       {normalChoices.map((g) => (
         <ChoiceGroup
-          key={g.rewardType}
+          key={rewardGroupKey(g)}
           group={g}
-          selectedId={choiceSelections[g.rewardType] || ''}
-          onSelect={(id) => setChoiceSelections({ ...choiceSelections, [g.rewardType]: id })}
+          selectedId={choiceSelections[rewardGroupKey(g)] || ''}
+          onSelect={(id) => setChoiceSelections({ ...choiceSelections, [rewardGroupKey(g)]: id })}
+        />
+      ))}
+
+      {/* Content-shaped reward groups (new grants/options payload). Selections are
+          prepared but not yet submitted — ContentLevelUpRequest wiring is deferred
+          until the backend accepts it (rollout step 7). */}
+      {contentGroups.map((g) => (
+        <RewardGroupRenderer
+          key={rewardGroupKey(g)}
+          group={g}
+          selectedOptionIds={contentSel(g)}
+          onChange={(ids) => setContentSelections({ ...contentSelections, [rewardGroupKey(g)]: ids })}
         />
       ))}
 
@@ -590,7 +632,7 @@ function StepRewards({
             <span className={s.stepDot} />
           </span>
         </div>
-        <button className="ao-btn ao-btn--primary ao-btn--lg" onClick={onNext} disabled={!choicesValid || !asiValid}>
+        <button className="ao-btn ao-btn--primary ao-btn--lg" onClick={onNext} disabled={!choicesValid || !asiValid || !contentValid}>
           <Rune kind="diamond-fill" size={9} /> {t('camp.lvl.toSeal')}
         </button>
       </div>
@@ -1035,7 +1077,7 @@ function StepConfirm({
   }
   for (const g of option.rewardGroups) {
     if (!g.isChoice || g.rewardType === 'ABILITY_SCORE_IMPROVEMENT') continue;
-    const id = choiceSelections[g.rewardType];
+    const id = choiceSelections[rewardGroupKey(g)];
     const r = g.rewards.find((x) => x.rewardEntryId === id);
     if (r) chosenLines.push({ type: g.rewardType, name: r.name, tag: 'choice' });
   }
@@ -1237,7 +1279,7 @@ function buildSelections(
   for (const g of option.rewardGroups) {
     if (!g.isChoice) continue;
     if (g.rewardType === 'ABILITY_SCORE_IMPROVEMENT') continue;
-    const id = choiceSelections[g.rewardType];
+    const id = choiceSelections[rewardGroupKey(g)];
     if (id) out.push({ rewardType: g.rewardType, rewardEntryId: id });
   }
   return out;

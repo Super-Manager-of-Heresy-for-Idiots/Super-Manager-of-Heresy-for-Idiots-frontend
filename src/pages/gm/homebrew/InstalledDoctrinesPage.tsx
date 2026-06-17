@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Rune, OrdoPanel, OrdoChip } from '@/components/ordo';
+import { Rune, OrdoPanel } from '@/components/ordo';
 import { VersionSeal, StatusBadge, ContentPills, CodexID } from '@/components/homebrew';
 import {
   AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle,

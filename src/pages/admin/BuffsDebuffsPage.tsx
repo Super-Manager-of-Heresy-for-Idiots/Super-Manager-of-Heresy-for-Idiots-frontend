@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import type { CSSProperties } from 'react';
 import { Loader2 } from 'lucide-react';
-import { Rune, OrdoPanel, OrdoField, OrdoChip, PanelHeader } from '@/components/ordo';
+import { Rune, OrdoPanel, OrdoField, OrdoChip } from '@/components/ordo';
 import {
   Dialog,
   DialogContent,

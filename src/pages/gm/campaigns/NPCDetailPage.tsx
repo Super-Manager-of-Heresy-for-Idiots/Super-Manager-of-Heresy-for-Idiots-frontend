@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Loader2, Pencil, Trash2 } from 'lucide-react';
-import { OrdoPanel, PanelHeader, Rune, OrdoDivider, Placeholder, EmptyVault } from '@/components/ordo';
+import { OrdoPanel, PanelHeader, Rune, OrdoDivider, Placeholder } from '@/components/ordo';
 import { CodexID } from '@/components/homebrew/CodexID';
 import { VisibilityToggle, QuestStatusBadge } from '@/components/narrative';
 import {
@@ -25,14 +25,13 @@ import {
 import { useCampaignReferenceContent, useCampaignReferenceSpells } from '@/hooks/useHomebrewCampaign';
 import { useCampaignMonsters } from '@/hooks/useBestiary';
 import type { NpcNoteResponse, QuestStatus } from '@/types';
+import { NpcFormFields, type NpcFormState } from './NpcFormFields';
 import {
-  NpcFormFields,
   emptyNpcForm,
   npcFormFromResponse,
   buildNpcPayload,
   isNpcFormValid,
-  type NpcFormState,
-} from './NpcFormFields';
+} from './NpcFormFields.helpers';
 import s from './NPCDetailPage.module.css';
 
 /* ── helpers ─────────────────────────────────────────────────── */
@@ -158,10 +157,12 @@ export default function NPCDetailPage() {
   }
 
   /* ── linked entities (from quest/location data on the NPC, if available) ── */
-  const linkedQuests: { id: string; name: string; status?: QuestStatus }[] =
-    (npc as any).linkedQuests ?? [];
-  const linkedLocations: { id: string; name: string }[] =
-    (npc as any).linkedLocations ?? [];
+  const npcLinks = npc as typeof npc & {
+    linkedQuests?: { id: string; name: string; status?: QuestStatus }[];
+    linkedLocations?: { id: string; name: string }[];
+  };
+  const linkedQuests = npcLinks.linkedQuests ?? [];
+  const linkedLocations = npcLinks.linkedLocations ?? [];
 
   /* ── main ────────────────────────────────────────────────── */
 

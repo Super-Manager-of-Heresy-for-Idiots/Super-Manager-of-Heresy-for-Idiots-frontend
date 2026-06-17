@@ -36,6 +36,7 @@ import {
 } from './steps';
 import { type WizardAvailability } from './parts';
 import { ForgeSheetBody } from './ForgeSheetBody';
+import { normalizeClassDetail } from '@/lib/contentAdapters';
 import css from './CharacterCreationWizard.module.css';
 import type {
   BackgroundResponse,
@@ -165,7 +166,10 @@ function buildAvailability(
     if (local) classByVanillaId.set(id, local);
   });
   const raceByName = new Map(RACES.map((r) => [normalizeContentName(r.label), r]));
-  const classDetailById = new Map(referenceClasses.map((cl) => [cl.id, cl]));
+  const classDetailById = new Map(referenceClasses.map((cl) => {
+    const detail = normalizeClassDetail(cl);
+    return [detail.id, detail] as const;
+  }));
   const raceDetailById = new Map(referenceRaces.map((r) => [r.id, r]));
 
   const seenClassIds = new Set<string>();

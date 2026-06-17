@@ -11,6 +11,7 @@ import {
   OrdoDivider,
   OrdoChip,
   Placeholder,
+  ErrorAltar,
 } from '@/components/ordo';
 import {
   Dialog,
@@ -117,10 +118,10 @@ export default function InventoryPage() {
 
   /* ── derived ───────────────────────────────────────────────── */
 
-  const items: ItemInstanceResponse[] = inventory ?? [];
-  const equippedItems: ItemInstanceResponse[] = equipped ?? [];
-  const backpackItems: ItemInstanceResponse[] = backpack ?? [];
-  const grantTemplates: ItemTemplateResponse[] = itemTemplates ?? [];
+  const items: ItemInstanceResponse[] = useMemo(() => inventory ?? [], [inventory]);
+  const equippedItems: ItemInstanceResponse[] = useMemo(() => equipped ?? [], [equipped]);
+  const backpackItems: ItemInstanceResponse[] = useMemo(() => backpack ?? [], [backpack]);
+  const grantTemplates: ItemTemplateResponse[] = useMemo(() => itemTemplates ?? [], [itemTemplates]);
 
   const equippedBySlot = useMemo(() => {
     const map = new Map<string, ItemInstanceResponse>();
@@ -307,12 +308,11 @@ export default function InventoryPage() {
     return (
       <div>
         <BackLink to={backTo} label={t('camp2.back.character')} className={s.backLink} />
-        <div className={s.errorBox}>
-          <p className={cn('ao-italic', s.errorText)}>
-            {t('camp2.inv.loadError')}
-          </p>
-          <button className="ao-btn" onClick={() => refetch()}>{t('common.retry')}</button>
-        </div>
+        <ErrorAltar
+          title={t('camp2.inv.loadError')}
+          onRetry={() => refetch()}
+          retryLabel={t('common.retry')}
+        />
       </div>
     );
   }

@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { levelUpApi } from '@/api/levelup.api';
 import { useT } from '@/i18n/I18nContext';
+import { normalizeLevelUpOptions } from '@/lib/contentAdapters';
 import type { LevelUpRequest, ApiError } from '@/types';
 import { AxiosError } from 'axios';
 
@@ -10,7 +11,7 @@ export function useLevelUpOptions(characterId: string) {
     queryKey: ['level-up-options', characterId],
     queryFn: async () => {
       const response = await levelUpApi.getOptions(characterId);
-      return response.data;
+      return response.data ? normalizeLevelUpOptions(response.data) : response.data;
     },
     enabled: !!characterId,
   });

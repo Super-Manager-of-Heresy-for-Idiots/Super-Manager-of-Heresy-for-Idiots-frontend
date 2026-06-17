@@ -92,6 +92,8 @@ export default function BlueprintEditorPage() {
   const [homebrewPick, setHomebrewPick] = useState('');
   const [charPick, setCharPick] = useState('');
 
+  // Hydrate the form only when a different blueprint loads (id change), not on
+  // every refetch — otherwise a background refetch would clobber in-progress edits.
   useEffect(() => {
     if (bp) {
       setTitle(bp.title);
@@ -100,6 +102,7 @@ export default function BlueprintEditorPage() {
       setAllowForks(bp.allowForks);
       setCoverUrl(bp.coverUrl ?? '');
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bp?.id]);
 
   const resolvedUniverseId = (universes ?? []).find((u) => u.slug === universeSlug)?.id ?? '';
