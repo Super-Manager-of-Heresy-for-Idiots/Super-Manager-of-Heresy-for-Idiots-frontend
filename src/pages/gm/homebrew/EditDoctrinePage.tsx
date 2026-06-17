@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { Rune, OrdoPanel, OrdoChip, PanelHeader } from '@/components/ordo';
-import { RichClassWizard } from '@/components/homebrew/RichClassWizard';
+import { HomebrewClassBuilder } from '@/features/class-builder/HomebrewClassBuilder';
 import { RaceEditor } from '@/components/admin/RaceEditor';
 import {
   useCreateHomebrewRace,
@@ -726,14 +726,15 @@ export default function EditDoctrinePage() {
         </OrdoPanel>
       </div>
 
-      <RichClassWizard
+      <HomebrewClassBuilder
         open={showRichClassWizard}
         onOpenChange={(nextOpen) => {
           setShowRichClassWizard(nextOpen);
           if (!nextOpen) setEditingRichClass(null);
         }}
-        packageDetail={pkg}
-        editingClass={editingRichClass}
+        packageId={pkg.id}
+        editingId={editingRichClass?.id}
+        onSaved={() => setEditingRichClass(null)}
       />
 
       <RaceEditor
