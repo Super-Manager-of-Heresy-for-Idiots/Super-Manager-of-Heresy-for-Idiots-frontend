@@ -20,14 +20,14 @@ export interface AdminClassBuilderProps {
 export function AdminClassBuilder({ open, onOpenChange, editingId, onSaved }: AdminClassBuilderProps) {
   const detail = useQuery({
     queryKey: ['admin-class-detail', editingId],
-    queryFn: async () => (await classAuthoringApi.get(ADMIN_SCOPE, editingId!)).data,
+    queryFn: async () => classAuthoringApi.getForEdit(ADMIN_SCOPE, editingId!),
     enabled: open && !!editingId,
   });
 
   if (!open) return null;
 
   if (editingId) {
-    if (detail.isLoading || !detail.data) return null;
+    if (detail.isLoading || !detail.data?.class) return null;
     return (
       <ClassBuilderModal
         key={editingId}
@@ -35,7 +35,8 @@ export function AdminClassBuilder({ open, onOpenChange, editingId, onSaved }: Ad
         onOpenChange={onOpenChange}
         scope={ADMIN_SCOPE}
         editId={editingId}
-        initialDraft={classDetailToDraft(detail.data)}
+        etag={detail.data.etag}
+        initialDraft={classDetailToDraft(detail.data.class)}
         onSaved={onSaved}
       />
     );

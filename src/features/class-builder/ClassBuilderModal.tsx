@@ -102,6 +102,13 @@ export function ClassBuilderModal({
   const [saving, setSaving] = useState(false);
   // Server-side validation issues (422) mapped back onto nodes by `path`.
   const [serverIssues, setServerIssues] = useState<AuthoringValidationIssue[]>([]);
+  // Idempotency key for create — prevents duplicate classes on double-submit.
+  const idempotencyKey = useMemo(
+    () => (typeof crypto !== 'undefined' && 'randomUUID' in crypto
+      ? crypto.randomUUID()
+      : `ik_${Date.now()}_${Math.random().toString(36).slice(2)}`),
+    [],
+  );
 
   const clientIssues = useMemo(() => validateClassDraft(draft), [draft]);
   // Badges/review show client + server issues; the Save gate uses only client
@@ -132,7 +139,7 @@ export function ClassBuilderModal({
       const body = buildClassWriteRequest(draft);
       const res = editId
         ? await classAuthoringApi.update(scope, editId, body, etag)
-        : await classAuthoringApi.create(scope, body);
+        : await classAuthoringApi.create(scope, body, idempotencyKey);
       if (!res.data) throw new Error('Пустой ответ сервера');
       queryClient.invalidateQueries({ queryKey: ['character-classes'] });
       queryClient.invalidateQueries({ queryKey: ['reference', 'classes'] });

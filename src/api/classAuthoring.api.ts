@@ -20,14 +20,35 @@ function basePath(scope: AuthoringScope): string {
  * class graph (mechanics + features + subclasses + reward groups/options/grants);
  * the server diffs children by id (update) / key (create) / absence (delete).
  */
+/** Class detail + its concurrency etag (from ClassSaveResult / GET ETag header). */
+export interface ClassWithEtag {
+  class?: ContentClassDetailResponse;
+  etag?: string;
+}
+
 export const classAuthoringApi = {
   get: async (scope: AuthoringScope, id: string): Promise<ApiResponse<ContentClassDetailResponse>> => {
     const response = await api.get<ApiResponse<ContentClassDetailResponse>>(`${basePath(scope)}/${id}`);
     return response.data;
   },
 
-  create: async (scope: AuthoringScope, data: ClassWriteRequest): Promise<ApiResponse<ClassSaveResult>> => {
-    const response = await api.post<ApiResponse<ClassSaveResult>>(basePath(scope), data);
+  /** GET that also surfaces the ETag header for a subsequent If-Match update. */
+  getForEdit: async (scope: AuthoringScope, id: string): Promise<ClassWithEtag> => {
+    const response = await api.get<ApiResponse<ContentClassDetailResponse>>(`${basePath(scope)}/${id}`);
+    const headerEtag = response.headers?.etag ?? response.headers?.ETag;
+    return { class: response.data.data, etag: typeof headerEtag === 'string' ? headerEtag : undefined };
+  },
+
+  create: async (
+    scope: AuthoringScope,
+    data: ClassWriteRequest,
+    idempotencyKey?: string,
+  ): Promise<ApiResponse<ClassSaveResult>> => {
+    const response = await api.post<ApiResponse<ClassSaveResult>>(
+      basePath(scope),
+      data,
+      idempotencyKey ? { headers: { 'Idempotency-Key': idempotencyKey } } : undefined,
+    );
     return response.data;
   },
 
