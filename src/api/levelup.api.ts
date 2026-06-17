@@ -1,8 +1,8 @@
 import api from './axios';
 import type {
   ApiResponse,
+  ContentLevelUpRequest,
   LevelUpOptionsResponse,
-  LevelUpRequest,
   LevelUpResultResponse,
   CharacterRewardsResponse,
 } from '@/types';
@@ -13,7 +13,8 @@ export const levelUpApi = {
     return response.data;
   },
 
-  levelUp: async (characterId: string, data: LevelUpRequest): Promise<ApiResponse<LevelUpResultResponse>> => {
+  // Final contract: commits reward groups / options / typed-grant child selections.
+  levelUp: async (characterId: string, data: ContentLevelUpRequest): Promise<ApiResponse<LevelUpResultResponse>> => {
     const response = await api.post<ApiResponse<LevelUpResultResponse>>(`/characters/${characterId}/level-up`, data);
     return response.data;
   },

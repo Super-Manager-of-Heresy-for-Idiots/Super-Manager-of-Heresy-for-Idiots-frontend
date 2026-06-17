@@ -3,7 +3,7 @@ import toast from 'react-hot-toast';
 import { levelUpApi } from '@/api/levelup.api';
 import { useT } from '@/i18n/I18nContext';
 import { normalizeLevelUpOptions } from '@/lib/contentAdapters';
-import type { LevelUpRequest, ApiError } from '@/types';
+import type { ContentLevelUpRequest, ApiError } from '@/types';
 import { AxiosError } from 'axios';
 
 export function useLevelUpOptions(characterId: string) {
@@ -21,7 +21,7 @@ export function useLevelUp() {
   const queryClient = useQueryClient();
   const t = useT();
   return useMutation({
-    mutationFn: ({ characterId, data }: { characterId: string; data: LevelUpRequest }) =>
+    mutationFn: ({ characterId, data }: { characterId: string; data: ContentLevelUpRequest }) =>
       levelUpApi.levelUp(characterId, data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['characters', variables.characterId] });

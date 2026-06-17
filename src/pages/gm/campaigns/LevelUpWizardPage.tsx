@@ -20,16 +20,19 @@ import {
   isContentRewardGroup,
   isContentGroupSatisfied,
 } from '@/lib/contentAdapters';
-import { RewardGroupView } from '@/components/content-rewards/RewardGroupRenderer';
+import { RewardGroupPicker } from '@/components/content-rewards/RewardGroupPicker';
+import {
+  buildContentLevelUpRequest,
+  contentLevelUpComplete,
+  type ChildSelections,
+} from './contentLevelUp';
 import type {
   AbilityOption,
-  AbilityScoreImprovementRequest,
   AvailableClassOption,
   LevelUpResultResponse,
   RewardDetail,
   RewardEntry,
   RewardGroup,
-  RewardSelection,
 } from '@/types';
 import { REWARD_TYPE_LABELS } from '@/types';
 import { cn } from '@/lib/utils';
@@ -56,8 +59,10 @@ export default function LevelUpWizardPage() {
   const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
   // reward group key -> selected rewardEntryId
   const [choiceSelections, setChoiceSelections] = useState<Record<string, string>>({});
-  // content-shaped groups: reward group key -> selected option ids (prepared; not yet submitted)
+  // content-shaped groups: reward group key -> selected option ids
   const [contentSelections, setContentSelections] = useState<Record<string, string[]>>({});
+  // content grant child picks: grantId -> abilities/skills/spells
+  const [childSelections, setChildSelections] = useState<ChildSelections>({});
   // ASI: statTypeId -> point count
   const [asi, setAsi] = useState<AsiAllocation>({ points: {} });
   const [result, setResult] = useState<LevelUpResultResponse | null>(null);
@@ -127,6 +132,7 @@ export default function LevelUpWizardPage() {
             setSelectedClassId(id);
             setChoiceSelections({});
             setContentSelections({});
+            setChildSelections({});
             setAsi({ points: {} });
           }}
           onNext={() => setStep('rewards')}
@@ -143,6 +149,8 @@ export default function LevelUpWizardPage() {
           setChoiceSelections={setChoiceSelections}
           contentSelections={contentSelections}
           setContentSelections={setContentSelections}
+          childSelections={childSelections}
+          setChildSelections={setChildSelections}
           asi={asi}
           setAsi={setAsi}
           onBack={() => setStep('pick-class')}
@@ -153,15 +161,19 @@ export default function LevelUpWizardPage() {
       {step === 'confirm' && selectedClass && (
         <StepConfirm
           option={selectedClass}
-          choiceSelections={choiceSelections}
-          asi={asi}
+          contentSelections={contentSelections}
+          childSelections={childSelections}
           submitting={levelUpMutation.isPending}
           onBack={() => setStep('rewards')}
           onConfirm={() => {
-            const selections = buildSelections(selectedClass, choiceSelections);
-            const abilityScoreImprovement = buildAsi(asi);
+            const data = buildContentLevelUpRequest(
+              selectedClass.classId,
+              selectedClass.rewardGroups,
+              contentSelections,
+              childSelections,
+            );
             levelUpMutation.mutate(
-              { characterId: characterId!, data: { classId: selectedClass.classId, selections, abilityScoreImprovement } },
+              { characterId: characterId!, data },
               {
                 onSuccess: (res) => {
                   if (res.data) {
@@ -366,6 +378,8 @@ function StepRewards({
   setChoiceSelections,
   contentSelections,
   setContentSelections,
+  childSelections,
+  setChildSelections,
   asi,
   setAsi,
   onBack,
@@ -378,6 +392,8 @@ function StepRewards({
   setChoiceSelections: (s: Record<string, string>) => void;
   contentSelections: Record<string, string[]>;
   setContentSelections: (s: Record<string, string[]>) => void;
+  childSelections: ChildSelections;
+  setChildSelections: (s: ChildSelections) => void;
   asi: AsiAllocation;
   setAsi: (a: AsiAllocation) => void;
   onBack: () => void;
@@ -415,7 +431,7 @@ function StepRewards({
     if (allAlready) return true;
     return !!choiceSelections[rewardGroupKey(g)];
   });
-  const contentValid = contentGroups.every((g) => isContentGroupSatisfied(g, contentSel(g)));
+  const contentValid = contentLevelUpComplete(option.rewardGroups, contentSelections, childSelections);
 
   // Build the "rites yet to be chosen" checklist from real groups
   const rites: { name: string; complete: boolean }[] = [
@@ -597,15 +613,17 @@ function StepRewards({
         />
       ))}
 
-      {/* Content-shaped reward groups (new grants/options payload). Selections are
-          prepared but not yet submitted — ContentLevelUpRequest wiring is deferred
-          until the backend accepts it (rollout step 7). */}
+      {/* Content-shaped reward groups (final contract): option selection + typed-grant
+          child picks (ability distribution / skill choice). Committed as
+          ContentLevelUpRequest at the seal. */}
       {contentGroups.map((g) => (
-        <RewardGroupView
+        <RewardGroupPicker
           key={rewardGroupKey(g)}
           group={g}
-          selectedOptionIds={contentSel(g)}
-          onChange={(ids) => setContentSelections({ ...contentSelections, [rewardGroupKey(g)]: ids })}
+          optionIds={contentSel(g)}
+          onOptionsChange={(ids) => setContentSelections({ ...contentSelections, [rewardGroupKey(g)]: ids })}
+          child={childSelections}
+          onChildChange={(grantId, sel) => setChildSelections({ ...childSelections, [grantId]: sel })}
         />
       ))}
 
@@ -1056,39 +1074,49 @@ function AsiGroup({
 
 function StepConfirm({
   option,
-  choiceSelections,
-  asi,
+  contentSelections,
+  childSelections,
   submitting,
   onBack,
   onConfirm,
 }: {
   option: AvailableClassOption;
-  choiceSelections: Record<string, string>;
-  asi: AsiAllocation;
+  contentSelections: Record<string, string[]>;
+  childSelections: ChildSelections;
   submitting: boolean;
   onBack: () => void;
   onConfirm: () => void;
 }) {
   const t = useT();
-  const automatic = option.rewardGroups.filter((g) => !g.isChoice);
+  // Summary built from the final content selections: auto grants, chosen options,
+  // and the typed-grant child picks (ability distribution / skills).
   const chosenLines: { type: string; name: string; tag: 'auto' | 'choice' }[] = [];
-  for (const g of automatic) {
-    for (const r of g.rewards) chosenLines.push({ type: g.rewardType, name: r.name, tag: 'auto' });
-  }
-  for (const g of option.rewardGroups) {
-    if (!g.isChoice || g.rewardType === 'ABILITY_SCORE_IMPROVEMENT') continue;
-    const id = choiceSelections[rewardGroupKey(g)];
-    const r = g.rewards.find((x) => x.rewardEntryId === id);
-    if (r) chosenLines.push({ type: g.rewardType, name: r.name, tag: 'choice' });
-  }
-  const asiGroup = option.rewardGroups.find((g) => g.rewardType === 'ABILITY_SCORE_IMPROVEMENT');
-  const asiOptions = asiGroup?.rewards[0]?.detail?.abilityOptions ?? [];
-  for (const [statTypeId, points] of Object.entries(asi.points)) {
-    if (!points) continue;
-    const o = asiOptions.find((x) => x.statTypeId === statTypeId);
-    if (!o) continue;
-    const label = `${o.name} ${o.currentScore} → ${o.currentScore + points}`;
-    chosenLines.push({ type: 'ABILITY_SCORE_IMPROVEMENT', name: label, tag: 'choice' });
+  for (const g of option.rewardGroups.filter(isContentRewardGroup)) {
+    const kindLabel = g.groupKind || 'REWARD';
+    for (const gr of g.grants ?? []) {
+      chosenLines.push({ type: kindLabel, name: gr.label || gr.feature?.title || gr.grantType, tag: 'auto' });
+    }
+    for (const optId of contentSelections[rewardGroupKey(g)] ?? []) {
+      const opt = g.options?.find((o) => o.id === optId);
+      if (!opt) continue;
+      chosenLines.push({ type: kindLabel, name: opt.label, tag: 'choice' });
+      for (const gr of opt.grants ?? []) {
+        const child = childSelections[gr.id];
+        if (child?.abilities) {
+          for (const [abilityId, bonus] of Object.entries(child.abilities)) {
+            if (bonus <= 0) continue;
+            const ability = gr.abilityOptions?.find((x) => x.id === abilityId);
+            chosenLines.push({ type: 'ABILITY_SCORE', name: `${ability?.name ?? abilityId} +${bonus}`, tag: 'choice' });
+          }
+        }
+        if (child?.skills) {
+          for (const skillId of child.skills) {
+            const skill = gr.skillOptions?.find((x) => x.id === skillId);
+            chosenLines.push({ type: 'SKILL_PROFICIENCY', name: skill?.name ?? skillId, tag: 'choice' });
+          }
+        }
+      }
+    }
   }
 
   return (
@@ -1269,26 +1297,4 @@ function roman(n: number): string {
     }
   }
   return out;
-}
-
-function buildSelections(
-  option: AvailableClassOption,
-  choiceSelections: Record<string, string>,
-): RewardSelection[] {
-  const out: RewardSelection[] = [];
-  for (const g of option.rewardGroups) {
-    if (!g.isChoice) continue;
-    if (g.rewardType === 'ABILITY_SCORE_IMPROVEMENT') continue;
-    const id = choiceSelections[rewardGroupKey(g)];
-    if (id) out.push({ rewardType: g.rewardType, rewardEntryId: id });
-  }
-  return out;
-}
-
-// ASI is sent as a dedicated top-level field, not via selections.
-function buildAsi(asi: AsiAllocation): AbilityScoreImprovementRequest | undefined {
-  const increases = Object.entries(asi.points)
-    .filter(([, amount]) => amount > 0)
-    .map(([statTypeId, amount]) => ({ statTypeId, amount }));
-  return increases.length > 0 ? { increases } : undefined;
 }

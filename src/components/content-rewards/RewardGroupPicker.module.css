@@ -1,0 +1,92 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+
+.child {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+  padding: var(--s-3);
+  margin-left: var(--s-3);
+  border-left: 2px solid var(--brass);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-2);
+  flex-wrap: wrap;
+}
+
+.hint {
+  color: var(--ink-quiet);
+}
+
+.abilities {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+}
+
+.abilityRow {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  align-items: center;
+  gap: var(--s-2);
+  padding: var(--s-1) var(--s-2);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+}
+
+.abilityRow.active {
+  border-color: var(--gold);
+}
+
+.abilityName {
+  font-family: var(--font-display);
+  color: var(--ink-bright);
+}
+
+.abilityVal {
+  min-width: 32px;
+  text-align: center;
+  color: var(--gold);
+  font-family: var(--font-display);
+}
+
+.skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+
+.skillChip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-1);
+  padding: var(--s-1) var(--s-2);
+  background: var(--panel);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  color: var(--ink-quiet);
+  cursor: pointer;
+  font: inherit;
+}
+
+.skillChip:hover:not(:disabled) {
+  border-color: var(--brass);
+  color: var(--ink-bright);
+}
+
+.skillChip:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.skillChip.on {
+  border-color: var(--gold);
+  color: var(--ink-bright);
+}
