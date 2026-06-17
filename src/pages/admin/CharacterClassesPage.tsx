@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { CrudTable } from '@/components/admin/CrudTable';
-import { AdminClassRichWizard } from '@/components/admin/AdminClassRichWizard';
+import { AdminClassBuilder } from '@/features/class-builder/AdminClassBuilder';
 import {
   useCharacterClasses,
   useDeleteCharacterClass,
@@ -13,17 +13,17 @@ export default function CharacterClassesPage() {
   const { data, isLoading, isError, refetch } = useCharacterClasses();
   const deleteMutation = useDeleteCharacterClass();
 
-  const [wizardOpen, setWizardOpen] = useState(false);
-  const [editing, setEditing] = useState<CharacterClassResponse | null>(null);
+  const [builderOpen, setBuilderOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | undefined>(undefined);
 
   const handleAdd = () => {
-    setEditing(null);
-    setWizardOpen(true);
+    setEditingId(undefined);
+    setBuilderOpen(true);
   };
 
   const handleEdit = (item: CharacterClassResponse) => {
-    setEditing(item);
-    setWizardOpen(true);
+    setEditingId(item.id);
+    setBuilderOpen(true);
   };
 
   return (
@@ -43,10 +43,11 @@ export default function CharacterClassesPage() {
           { header: t('adm.shared.colDescription'), accessor: 'description' },
         ]}
       />
-      <AdminClassRichWizard
-        open={wizardOpen}
-        onOpenChange={setWizardOpen}
-        editingClass={editing}
+      <AdminClassBuilder
+        open={builderOpen}
+        onOpenChange={setBuilderOpen}
+        editingId={editingId}
+        onSaved={refetch}
       />
     </>
   );

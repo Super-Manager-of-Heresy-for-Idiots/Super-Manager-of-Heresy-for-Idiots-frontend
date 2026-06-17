@@ -1,0 +1,149 @@
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-1);
+  padding: var(--s-2) var(--s-3) 0;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.body {
+  padding: var(--s-4);
+  overflow: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s-3);
+}
+
+.grid3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--s-3);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+  min-width: 0;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  flex-wrap: wrap;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-1);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-1);
+  padding: 2px var(--s-2);
+  border: 1px solid var(--gold);
+  border-radius: var(--radius);
+  color: var(--ink-bright);
+  background: var(--panel);
+}
+
+.chipX {
+  cursor: pointer;
+  color: var(--ink-quiet);
+}
+
+.chipX:hover {
+  color: var(--ember);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+  padding: var(--s-3);
+  margin-bottom: var(--s-3);
+}
+
+.optionCard {
+  border-left: 2px solid var(--brass);
+  margin-left: var(--s-3);
+  padding-left: var(--s-3);
+}
+
+.grantCard {
+  border-left: 2px solid var(--arcane);
+  margin-left: var(--s-3);
+  padding: var(--s-2) var(--s-3);
+}
+
+.cardHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-2);
+  flex-wrap: wrap;
+}
+
+.issues {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+}
+
+.issueErr {
+  color: var(--ember);
+}
+
+.issueWarn {
+  color: var(--gold);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-1);
+  padding: 0 var(--s-1);
+  border-radius: var(--radius);
+  font-size: 0.72rem;
+}
+
+.badgeErr {
+  color: var(--ember);
+  border: 1px solid color-mix(in srgb, var(--ember) 45%, transparent);
+}
+
+.badgeWarn {
+  color: var(--gold);
+  border: 1px solid color-mix(in srgb, var(--gold) 45%, transparent);
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-2);
+  padding: var(--s-3) var(--s-4);
+  border-top: 1px solid var(--hairline);
+}
+
+.muted {
+  color: var(--ink-quiet);
+}
+
+.previewWrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+
+.w64 { width: 64px; }
+.w140 { width: 140px; }
