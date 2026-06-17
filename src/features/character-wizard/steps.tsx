@@ -659,16 +659,26 @@ export function StepBackground({ c, A, n, total, availability }: StepProps) {
       return { key: local?.key ?? `db-background:${entry.id}`, entry, local };
     })
     : BACKGROUNDS.map((local) => ({ key: local.key, entry: null, local }));
-  const classSkillOptions = selectedClass?.detail?.skillChoiceOptions?.length
-    ? selectedClass.detail.skillChoiceOptions
-    : cls?.skills.map((key) => {
-      const local = SKILLS.find((skill) => skill.key === key);
-      const ref = availability.proficiencySkills.find((skill) => norm(skill.name) === norm(local?.label));
-      return ref || (local ? { id: key, name: local.label } : null);
-    }).filter((skill): skill is { id: string; name: string } => !!skill) || [];
+  // Final contract: skill choice driven by `skillOptions` (ContentLabel[]) and
+  // `skillChoiceAny` (any skill allowed). Falls back to legacy local skills when
+  // the class has no content detail at all.
+  const detail = selectedClass?.detail;
+  const skillChoiceAny = detail?.skillChoiceAny ?? false;
+  const allSkillOptions: { id: string; name: string }[] = availability.proficiencySkills.length
+    ? availability.proficiencySkills.map((skill) => ({ id: skill.id, name: skill.name }))
+    : SKILLS.map((skill) => ({ id: skill.key, name: skill.label }));
+  const classSkillOptions: { id: string; name: string }[] = skillChoiceAny
+    ? allSkillOptions
+    : detail?.skillOptions?.length
+      ? detail.skillOptions.map((label) => ({ id: label.id, name: label.name }))
+      : cls?.skills.map((key) => {
+        const local = SKILLS.find((skill) => skill.key === key);
+        const ref = availability.proficiencySkills.find((skill) => norm(skill.name) === norm(local?.label));
+        return ref || (local ? { id: key, name: local.label } : null);
+      }).filter((skill): skill is { id: string; name: string } => !!skill) || [];
   const classSkillKeys = classSkillOptions.map((skill) => skillKeyForLabel(skill.name) || skill.id);
   const chosen = c.classSkills || [];
-  const limit = selectedClass?.detail?.skillChoiceCount ?? cls?.skillCount ?? 0;
+  const limit = detail?.skillChoiceCount ?? cls?.skillCount ?? 0;
   const bgSkills = bg ? bg.skills : (dbBackground?.skillProficiencyNames || []).map((name) => skillKeyForLabel(name) || name);
 
   return (

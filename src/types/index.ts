@@ -293,14 +293,19 @@ export interface AscentDerivedPreview {
   cantripsGained?: number;
 }
 
+// Final contract: RewardGroupDto.
 export interface RewardGroup {
   id?: string;
+  classId?: string;
+  classFeatureId?: string;
+  classLevel?: number;
   groupKind?: string;
   prompt?: string;
   description?: string;
   chooseMin?: number;
   chooseMax?: number;
   repeatable?: boolean;
+  sortOrder?: number;
   grants?: ContentRewardGrant[];
   options?: ContentRewardOption[];
   /**
@@ -308,8 +313,11 @@ export interface RewardGroup {
    * Filled by normalizeLevelUpOptions().
    */
   groupKey?: string;
+  /** @deprecated legacy reward-type-only payload; removed in Phase 11–12. */
   rewardType: string;
+  /** @deprecated legacy choice flag; superseded by chooseMin/chooseMax. */
   isChoice: boolean;
+  /** @deprecated legacy flat reward entries; superseded by options/grants. */
   rewards: RewardEntry[];
 }
 
@@ -323,20 +331,28 @@ export interface RewardEntry {
   detail?: RewardDetail;
 }
 
+// Final contract: RewardOptionDto.
 export interface ContentRewardOption {
   id: string;
   optionKey: string;
   label: string;
+  labelRu?: string;
+  labelEn?: string;
   description?: string;
   recommended?: boolean;
+  sortOrder?: number;
   grants?: ContentRewardGrant[];
 }
 
+// Final contract: RewardGrantDto + typed payload.
 export interface ContentRewardGrant {
   id: string;
   grantType: string;
   label?: string;
+  labelRu?: string;
+  labelEn?: string;
   description?: string;
+  sortOrder?: number;
   feature?: ClassFeatureSummary;
   subclass?: ContentLabel;
   feat?: ContentLabel;
@@ -372,10 +388,14 @@ export interface ContentLabel {
   nameRu?: string;
 }
 
+// Final contract: ClassFeatureSummaryDto.
 export interface ClassFeatureSummary {
   id: string;
   slug?: string;
+  classId?: string;
+  subclassId?: string;
   level: number;
+  sortOrder?: number;
   title: string;
   description?: string;
 }
@@ -426,6 +446,25 @@ export interface AcquiredRewardSummary {
   name: string;
   description?: string;
   detail?: RewardDetail;
+}
+
+// Known typed grant payloads. `grantType` on the backend is flexible text;
+// the frontend renders known types its own way and unknown ones as custom/manual.
+export const KNOWN_GRANT_TYPES = [
+  'FEATURE',
+  'SUBCLASS',
+  'FEAT',
+  'SPELL',
+  'SKILL_PROFICIENCY',
+  'ABILITY_SCORE',
+  'NUMERIC_MODIFIER',
+  'CUSTOM_TEXT',
+] as const;
+
+export type KnownGrantType = (typeof KNOWN_GRANT_TYPES)[number];
+
+export function isKnownGrantType(grantType: string): grantType is KnownGrantType {
+  return (KNOWN_GRANT_TYPES as readonly string[]).includes(grantType);
 }
 
 export const REWARD_TYPE_LABELS: Record<string, string> = {
@@ -504,6 +543,8 @@ export interface SpellReferenceResponse {
   availableToClassIds?: string[];
 }
 
+// Final contract: ContentClassDetailResponse (kept name CharacterClassDetailResponse
+// in code for now; `ContentClassDetailResponse` alias exported below).
 export interface CharacterClassDetailResponse {
   id: string;
   slug?: string;
@@ -513,14 +554,18 @@ export interface CharacterClassDetailResponse {
   subtitle?: string;
   description?: string;
   hitDie?: number;
+  /** @deprecated legacy single primary ability; superseded by primaryAbilities[]. */
   primaryAbilityStatId?: string;
   primaryAbilities?: ContentLabel[];
+  /** @deprecated legacy saving-throw names; superseded by savingThrows[]. */
   savingThrowStatNames?: string[];
   savingThrows?: ContentLabel[];
   skillChoiceCount?: number;
   skillChoiceAny?: boolean;
+  /** @deprecated legacy skill options; superseded by skillOptions[]. */
   skillChoiceOptions?: ProficiencySkillResponse[];
   skillOptions?: ContentLabel[];
+  /** @deprecated legacy combined proficiency; superseded by armor/weapon/tool text. */
   armorWeaponProficiencies?: string;
   armorProficiencyText?: string;
   weaponProficiencyText?: string;
@@ -538,6 +583,9 @@ export interface CharacterClassDetailResponse {
     halfCaster?: boolean;
   };
 }
+
+/** Alias matching the final contract name. */
+export type ContentClassDetailResponse = CharacterClassDetailResponse;
 
 export interface CharacterRaceDetailResponse {
   id: string;

@@ -4,13 +4,10 @@ import { localizedName, rewardGroupChoose } from '@/lib/contentAdapters';
 import { cn } from '@/lib/utils';
 import type { Lang } from '@/i18n/translations';
 import type { ContentLabel, ContentRewardGrant, ContentRewardOption, RewardGroup } from '@/types';
+import { grantKind, type GrantKind } from './grants';
 import s from './RewardGroupRenderer.module.css';
 
 type T = (key: string, vars?: Record<string, string | number>) => string;
-
-type GrantKind =
-  | 'FEATURE' | 'SUBCLASS' | 'FEAT' | 'SPELL' | 'SKILL'
-  | 'ABILITY' | 'MODIFIER' | 'CUSTOM' | 'UNKNOWN';
 
 const GRANT_GLYPH: Record<GrantKind, string> = {
   FEATURE: 'sigil-1',
@@ -23,19 +20,6 @@ const GRANT_GLYPH: Record<GrantKind, string> = {
   CUSTOM: 'book',
   UNKNOWN: 'diamond',
 };
-
-function grantKind(grantType: string | undefined): GrantKind {
-  const k = (grantType ?? '').toUpperCase().replace(/[\s-]+/g, '_');
-  if (k.includes('FEATURE')) return 'FEATURE';
-  if (k.includes('SUBCLASS')) return 'SUBCLASS';
-  if (k.includes('FEAT')) return 'FEAT';
-  if (k.includes('SPELL')) return 'SPELL';
-  if (k.includes('SKILL')) return 'SKILL';
-  if (k.includes('ABILITY')) return 'ABILITY';
-  if (k.includes('MODIFIER') || k.includes('NUMERIC')) return 'MODIFIER';
-  if (k.includes('CUSTOM') || k.includes('TEXT')) return 'CUSTOM';
-  return 'UNKNOWN';
-}
 
 function grantTypeLabel(t: T, kind: GrantKind): string {
   return t(`camp.lvl.rg.${kind.toLowerCase()}`);
@@ -112,7 +96,9 @@ function grantDetailText(grant: ContentRewardGrant, kind: GrantKind, lang: Lang,
   }
 }
 
-function GrantView({ grant, compact }: { grant: ContentRewardGrant; compact?: boolean }) {
+/** A single typed grant line (FEATURE / SUBCLASS / FEAT / SPELL / SKILL / ABILITY /
+ *  MODIFIER / CUSTOM). Unknown grant types fall back to a custom/manual line — never crash. */
+export function RewardGrantLine({ grant, compact }: { grant: ContentRewardGrant; compact?: boolean }) {
   const t = useT();
   const { lang } = useI18n();
   const kind = grantKind(grant.grantType);
@@ -124,6 +110,9 @@ function GrantView({ grant, compact }: { grant: ContentRewardGrant; compact?: bo
         <div className={s.grantHead}>
           <span className={cn('ao-overline', s.grantType)}>{grantTypeLabel(t, kind)}</span>
           <span className={s.grantName}>{grantPrimaryText(grant, kind, lang, t)}</span>
+          {kind === 'UNKNOWN' && (
+            <OrdoChip tone="ember" glyph="diamond">{grant.grantType || '??'}</OrdoChip>
+          )}
         </div>
         {detail && <span className={cn('ao-codex', s.grantDetail)}>{detail}</span>}
         {grant.description && <span className={cn('ao-italic', s.grantDesc)}>{grant.description}</span>}
@@ -132,7 +121,7 @@ function GrantView({ grant, compact }: { grant: ContentRewardGrant; compact?: bo
   );
 }
 
-function OptionCard({
+function RewardOptionCard({
   option,
   selected,
   single,
@@ -163,14 +152,16 @@ function OptionCard({
       {option.description && <p className={cn('ao-italic', s.optionDesc)}>{option.description}</p>}
       {grants.length > 0 && (
         <div className={s.optionGrants}>
-          {grants.map((g) => <GrantView key={g.id} grant={g} compact />)}
+          {grants.map((g) => <RewardGrantLine key={g.id} grant={g} compact />)}
         </div>
       )}
     </div>
   );
 }
 
-export interface RewardGroupRendererProps {
+export { RewardOptionCard };
+
+export interface RewardGroupViewProps {
   group: RewardGroup;
   selectedOptionIds: string[];
   onChange: (optionIds: string[]) => void;
@@ -182,7 +173,7 @@ export interface RewardGroupRendererProps {
  * radio (chooseMax=1) or checkbox (min/max) selection. Submit wiring is deferred until
  * the backend accepts ContentLevelUpRequest.
  */
-export function RewardGroupRenderer({ group, selectedOptionIds, onChange }: RewardGroupRendererProps) {
+export function RewardGroupView({ group, selectedOptionIds, onChange }: RewardGroupViewProps) {
   const t = useT();
   const options = group.options ?? [];
   const directGrants = group.grants ?? [];
@@ -209,13 +200,13 @@ export function RewardGroupRenderer({ group, selectedOptionIds, onChange }: Rewa
         {group.description && <p className={cn('ao-italic', s.desc)}>{group.description}</p>}
         {directGrants.length > 0 && (
           <div className={s.grants}>
-            {directGrants.map((g) => <GrantView key={g.id} grant={g} />)}
+            {directGrants.map((g) => <RewardGrantLine key={g.id} grant={g} />)}
           </div>
         )}
         {options.length > 0 && (
           <div className={s.options}>
             {options.map((opt) => (
-              <OptionCard
+              <RewardOptionCard
                 key={opt.id}
                 option={opt}
                 selected={selectedOptionIds.includes(opt.id)}
@@ -229,3 +220,8 @@ export function RewardGroupRenderer({ group, selectedOptionIds, onChange }: Rewa
     </OrdoPanel>
   );
 }
+
+// Backward-compatible aliases (legacy import name). Removed in Phase 11–12 once
+// all consumers import the named components directly.
+export const RewardGroupRenderer = RewardGroupView;
+export type RewardGroupRendererProps = RewardGroupViewProps;

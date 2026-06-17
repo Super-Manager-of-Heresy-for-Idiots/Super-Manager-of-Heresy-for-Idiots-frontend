@@ -1,0 +1,160 @@
+# Content Model Migration (frontend)
+
+> Живой документ миграции non-bestiary контента (character creation, level-up,
+> homebrew authoring, admin, character sheet) с legacy PHB-модели на новую
+> нормализованную content-модель. Источник плана: `frontend-migration-prompt.md`.
+> **Bestiary не трогаем.**
+
+---
+
+## ⚠️ Инженерная заметка (Phase 1) — читать обязательно
+
+Бэкенд **сейчас гибридный**: часть non-bestiary эндпоинтов всё ещё отдаёт legacy-форму,
+а финальные нормализованные контракты (reference/classes, level-up-options, level-up,
+rewards) внедряются постепенно. Поэтому:
+
+1. **Экраны могут временно ломаться** во время миграции — это допустимо и ожидаемо
+   (правило промпта: «временно сломанный экран во время миграции — допустимо»).
+   Ломаемся только в runtime; **компиляция/билд должны оставаться зелёными** на каждой фазе.
+2. **Не добавляем новые compatibility-слои под старые контракты.** Adapter
+   (`src/lib/contentAdapters.ts`) оставляем только там, где он упрощает UI-код.
+3. **Никакая новая фича не должна зависеть от старых контрактов.** Новые экраны
+   пишутся in-place поверх финального контракта.
+4. **Homebrew authoring — без ввода сырого JSON.** Гибкость только через UI-контролы.
+5. **Persistence выбора наград не реализуем раньше, чем это указано в фазе**
+   (read-флоу и commit-флоу разнесены: Phase 6 = read, Phase 7 = commit).
+
+Legacy-поля в типах временно сохранены и помечены `@deprecated (legacy ...)`.
+Они удаляются в Phase 11–12, когда потребляющие их экраны мигрированы и компилируются.
+
+---
+
+## Финальные контракты (single source of truth)
+
+### Endpoints (финальные, заменяют старые in-place)
+
+- `GET /api/campaigns/{campaignId}/reference/classes`
+- `GET /api/reference/classes`
+- `GET /api/characters/{id}/level-up-options`
+- `POST /api/characters/{id}/level-up`
+- `GET /api/characters/{id}/rewards`
+
+### Grant types (typed payloads)
+
+`FEATURE`, `SUBCLASS`, `FEAT`, `SPELL`, `SKILL_PROFICIENCY`, `ABILITY_SCORE`,
+`NUMERIC_MODIFIER`, `CUSTOM_TEXT`.
+
+> `grantType` на бэке — гибкий текст. Фронт рендерит известные типы по-своему,
+> а **неизвестные — как custom/manual без падения**.
+
+---
+
+## Contract doc: old API fields → final fields → screen migration status
+
+Маппинг legacy-полей фронта на финальные DTO-поля и статус миграции экранов.
+
+### ContentLabelDto
+
+| final field | заметки |
+|---|---|
+| `id`, `slug`, `name`, `nameRu`, `nameEn` | базовый локализованный ярлык; в коде `ContentLabel` |
+
+### ContentClassDetailResponse (в коде `CharacterClassDetailResponse`)
+
+| legacy field (frontend) | final field | заметки |
+|---|---|---|
+| `primaryAbilityStatId` | `primaryAbilities[]` | было одно, стало массив |
+| `savingThrowStatNames[]` | `savingThrows[]` (`ContentLabel[]`) | строки → лейблы |
+| `skillChoiceOptions[]` (`ProficiencySkillResponse`) | `skillOptions[]` (`ContentLabel[]`) | + `skillChoiceCount`, `skillChoiceAny` |
+| `armorWeaponProficiencies` (single) | `armorProficiencyText` / `weaponProficiencyText` / `toolProficiencyText` | разнесено по 3 блокам |
+| — | `subtitle`, `hitDie`, `spellcasting`, `features[]`, `rewardGroups[]` | новые |
+
+### RewardGroupDto (в коде `RewardGroup`)
+
+| legacy field | final field | заметки |
+|---|---|---|
+| `rewardType` (string) | `groupKind` + typed `grants[]` | rewardType-only допущение удаляется в Phase 11 |
+| `isChoice` (bool) | `chooseMin` / `chooseMax` | choice выводится из choose-правил |
+| `rewards[]` (`RewardEntry`, плоские) | `options[]` (`RewardOptionDto`) + `grants[]` (`RewardGrantDto`) | плоские → структурные |
+| — | `id`, `classId`, `classFeatureId`, `classLevel`, `sortOrder`, `prompt`, `description`, `repeatable` | новые |
+
+### RewardOptionDto / RewardGrantDto
+
+| final field | заметки |
+|---|---|
+| Option: `id`, `optionKey`, `label`, `labelRu`, `labelEn`, `description`, `recommended`, `sortOrder`, `grants[]` | |
+| Grant: `id`, `grantType`, `label`, `labelRu`, `labelEn`, `description`, `sortOrder`, + typed payload | |
+
+### ClassFeatureSummaryDto (в коде `ClassFeatureSummary`)
+
+| final field | заметки |
+|---|---|
+| `id`, `slug`, `classId`, `subclassId`, `level`, `sortOrder`, `title`, `description` | |
+
+---
+
+## Статус миграции экранов (screen migration status)
+
+| Экран / область | Файл | Статус |
+|---|---|---|
+| Class reference data source | `src/api/reference.api.ts` | legacy (Phase 3) |
+| Dev-only class reference viewer | `src/pages/dev/ContentClassViewerPage.tsx` (`/dev/content-classes`) | ✅ Phase 3 |
+| Reward visual components | `src/components/content-rewards/` (`RewardGrantLine`, `RewardOptionCard`, `RewardGroupView`, `FeatureTimeline`, `grants.ts`) | ✅ Phase 4 |
+| Character creation wizard | `src/features/character-wizard/` | ✅ Phase 5: read-flow на финальном detail + reward-валидация + Vitest-тесты (old local-path как safety net до Phase 11–12) |
+| Level-up read model | `src/pages/gm/campaigns/LevelUpWizardPage.tsx` | legacy (Phase 6) |
+| Level-up commit | `src/pages/gm/campaigns/LevelUpWizardPage.tsx` | legacy submit (Phase 7) |
+| Homebrew authoring | `src/components/admin/AdminClassRichWizard.tsx`, `src/components/homebrew/RichClassWizard.tsx` | legacy (Phase 8) |
+| Admin tools | `src/pages/admin/` | legacy (Phase 9) |
+| Character sheet (runtime data) | — | legacy (Phase 10) |
+
+---
+
+## Contract fixtures
+
+Типизированные фикстуры финального контракта живут в
+`src/fixtures/contentModel.ts` и покрывают случаи:
+
+- class without spellcasting;
+- full caster;
+- half caster;
+- class with subclass choice;
+- class with several reward groups at one level;
+- homebrew custom grant.
+
+Они типизированы строго против финальных DTO — это даёт compile-time проверку,
+что наши типы совпадают с контрактом бэкенда, и служат данными для dev-only viewer (Phase 3–4).
+
+---
+
+## Лог по фазам
+
+- **Phase 1** ✅ инженерная заметка добавлена; новые фичи не вяжутся к legacy-контрактам.
+- **Phase 2** ✅ типы выровнены под финальные DTO (superset, legacy `@deprecated`);
+  заведены `KNOWN_GRANT_TYPES` + `isKnownGrantType`; alias `ContentClassDetailResponse`;
+  6 contract-фикстур в `src/fixtures/contentModel.ts` (типизированы через `Omit` от app-типов);
+  contract-doc (old→final mapping + screen status). `tsc -b` и `npm run build` зелёные.
+- **Phase 3** ✅ reference API уже бьёт в финальные endpoints (`/reference/classes`,
+  `/campaigns/{id}/reference/classes`) + `normalizeClassDetail`. Собран dev-only viewer
+  `src/pages/dev/ContentClassViewerPage.tsx` (скрытый роут `/dev/content-classes`):
+  список классов, переключатель Live API / Fixtures, механики (multi-primary, спасброски-бейджи,
+  раздельные armor/weapon/tool, заклинательство, выбор навыков), timeline умений по уровням,
+  reward groups по уровням через переиспользуемый `RewardGroupRenderer` (typed grants + unknown→custom).
+  Selection — локальный preview, без persistence (Phase 7). `tsc`/`build`/`eslint` зелёные.
+- **Phase 4** ✅ выделены именованные визуальные компоненты в `src/components/content-rewards/`:
+  `RewardGrantLine`, `RewardOptionCard`, `RewardGroupView` (+ alias `RewardGroupRenderer` для legacy-импортов,
+  убирается в Phase 11–12), `FeatureTimeline`; helper-модуль `grants.ts` (`grantKind`, `isUnknownGrantKind`).
+  Unknown grant type теперь явно помечается бейджем и не роняет рендер. Viewer расширен панелью
+  «Полнота данных» (счётчики умений/групп, уровни с наградами, неизвестные grant'ы, пустые группы)
+  и маркерами reward/unknown на `FeatureTimeline`. Persistence не трогали. `tsc`/`build`/`eslint` зелёные.
+- **Phase 5** 🚧 character creation read-flow. Визард уже читает финальный class `detail`
+  (multi-primary, спасброски, раздельные armor/weapon/tool, spellcasting, level-1 reward groups
+  через `RewardGroupView`). Доделано: (1) `rewardSelection.ts` — модель/валидация выбора наград
+  (`rewardSelectionsComplete`, `unsatisfiedRewardCount`, `isOptionSelectable`) с подключением в
+  gating class-step (`validateCampaignReferences` + `campaignReferenceHint` + ключ `wiz.hint.chooseRewards`);
+  (2) skill-step переведён на финальные `skillOptions` + `skillChoiceAny` (fallback на legacy только
+  при отсутствии detail). Старый local-path оставлен как safety net (удаление — Phase 11–12, exit Phase 5
+  допускает доступность старого creation). Добавлен тест-раннер **Vitest** (`vitest.config.ts`,
+  scripts `test`/`test:watch`) и fixture-тесты `src/__tests__/contentModel.test.ts` (9 шт.):
+  class detail mechanics, choose-two-skills, choose-one-subclass валидация, custom/unknown grant,
+  KNOWN_GRANT_TYPES. **Осталось на потом:** child-выборы skill/ability/spell внутри гранта
+  (commit-концерн, Phase 6–7). `tsc`/`build`/`eslint`/`vitest` зелёные (9/9).

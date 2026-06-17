@@ -36,6 +36,7 @@ import {
 } from './steps';
 import { type WizardAvailability } from './parts';
 import { ForgeSheetBody } from './ForgeSheetBody';
+import { rewardSelectionsComplete, unsatisfiedRewardCount } from './rewardSelection';
 import { normalizeClassDetail } from '@/lib/contentAdapters';
 import css from './CharacterCreationWizard.module.css';
 import type {
@@ -124,6 +125,11 @@ function validateCampaignReferences(id: StepId, c: WizardChar, availability: Wiz
     if (selectedRace?.detail?.subraces?.length) return !!c.subraceKey;
     return true;
   }
+  if (id === 'class') {
+    // Gate on level-1 content reward groups (choose-one subclass, ASI, etc.).
+    const selectedClass = availability.classOptions.find((cl) => cl.key === c.classKey);
+    return rewardSelectionsComplete(selectedClass?.detail?.rewardGroups, c.contentRewardSelections);
+  }
   if (id !== 'background') return true;
   const selectedClass = availability.classOptions.find((cl) => cl.key === c.classKey);
   const expected = selectedClass?.detail?.skillChoiceCount;
@@ -136,6 +142,12 @@ function campaignReferenceHint(id: StepId, c: WizardChar, availability: WizardAv
     const selectedRace = availability.raceOptions.find((race) => race.key === c.raceKey);
     if (selectedRace?.detail?.subraces?.length && !c.subraceKey) return { key: 'wiz.hint.chooseSubrace' };
     return { key: '' };
+  }
+  if (id === 'class') {
+    if (!c.classKey) return { key: 'wiz.hint.chooseClass' };
+    const selectedClass = availability.classOptions.find((cl) => cl.key === c.classKey);
+    const pending = unsatisfiedRewardCount(selectedClass?.detail?.rewardGroups, c.contentRewardSelections);
+    return pending > 0 ? { key: 'wiz.hint.chooseRewards', vars: { count: pending } } : { key: '' };
   }
   if (id !== 'background') return { key: '' };
   const selectedClass = availability.classOptions.find((cl) => cl.key === c.classKey);

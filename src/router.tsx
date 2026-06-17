@@ -72,6 +72,9 @@ const SystemPatternsPage = lazy(() => import('@/pages/gm/combat/SystemPatternsPa
 const CombatKitReferencePage = lazy(() => import('@/pages/gm/combat/CombatKitReferencePage'));
 const MobilePreviewPage = lazy(() => import('@/pages/gm/combat/MobilePreviewPage'));
 
+// Dev-only content-model viewer (hidden, no nav link) — Phase 3
+const ContentClassViewerPage = lazy(() => import('@/pages/dev/ContentClassViewerPage'));
+
 // Homebrew pages
 const MarketplacePage = lazy(() => import('@/pages/gm/homebrew/MarketplacePage'));
 const MarketplaceDetailPage = lazy(() => import('@/pages/gm/homebrew/MarketplaceDetailPage'));
@@ -226,6 +229,9 @@ export const router = createBrowserRouter([
           { path: '/combat-preview/npc-list', element: <NPCListV2Page /> },
           { path: '/combat-preview/patterns', element: <SystemPatternsPage /> },
           { path: '/combat-preview/mobile', element: <MobilePreviewPage /> },
+
+          // Dev-only content-model viewer (Phase 3) — hidden, no nav entry
+          { path: '/dev/content-classes', element: <ContentClassViewerPage /> },
         ],
       },
     ],

@@ -21,6 +21,7 @@ export const wizard: DictModule = {
     'wiz.hint.overBudget': 'Ты превысил предел в 27 очков',
     'wiz.hint.chooseBackground': 'Избери происхождение',
     'wiz.hint.classSkills': 'Избери {count} навыков призвания ({chosen}/{count})',
+    'wiz.hint.chooseRewards': 'Сделай выбор в дарах призвания (осталось: {count})',
     'wiz.hint.chooseSpells': 'Избери {cantrips} заговоров и {spells} заклинаний',
 
     /* ── Wizard chrome / navigation ─────────────────── */
@@ -244,6 +245,7 @@ export const wizard: DictModule = {
     'wiz.hint.overBudget': 'You are over the 27-point budget',
     'wiz.hint.chooseBackground': 'Choose a background',
     'wiz.hint.classSkills': 'Choose {count} class skills ({chosen}/{count})',
+    'wiz.hint.chooseRewards': 'Make your class reward choices ({count} left)',
     'wiz.hint.chooseSpells': 'Choose {cantrips} cantrips & {spells} spells',
 
     /* ── Wizard chrome / navigation ─────────────────── */

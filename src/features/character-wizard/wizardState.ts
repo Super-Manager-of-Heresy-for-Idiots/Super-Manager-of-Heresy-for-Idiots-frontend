@@ -258,7 +258,8 @@ export function requirementHint(id: StepId, c: WizardChar): RequirementHint {
       return { key: '' };
     }
     case 'class':
-      return { key: 'wiz.hint.chooseClass' };
+      // Once a class is picked, defer to the campaign-reference hint (reward choices).
+      return c.classKey ? { key: '' } : { key: 'wiz.hint.chooseClass' };
     case 'abilities': {
       if (!ABILITIES.every((a) => (c.baseScores[a.key] || 0) > 0)) return { key: 'wiz.hint.assignAbilities' };
       if (c.scoreMethod === 'pointbuy' && pointBuySpent(c.baseScores) > POINT_BUY_BUDGET) return { key: 'wiz.hint.overBudget' };
