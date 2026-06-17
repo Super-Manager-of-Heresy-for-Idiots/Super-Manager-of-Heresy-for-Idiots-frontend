@@ -7,10 +7,7 @@ import {
   Rune,
   OrdoDivider,
   Sigil,
-  OrdoChip,
-  Placeholder,
 } from '@/components/ordo';
-import { CodexID } from '@/components/homebrew';
 import { useT } from '@/i18n/I18nContext';
 import { useCharacter } from '@/hooks/useCharacter';
 import { useLevelUpOptions, useLevelUp } from '@/hooks/useLevelUp';
@@ -28,11 +25,9 @@ import {
   type ChildSelections,
 } from './contentLevelUp';
 import type {
-  AbilityOption,
   AvailableClassOption,
   LevelUpResultResponse,
   RewardDetail,
-  RewardEntry,
   RewardGroup,
 } from '@/types';
 import { REWARD_TYPE_LABELS } from '@/types';
@@ -40,11 +35,6 @@ import { cn } from '@/lib/utils';
 import s from './LevelUpWizardPage.module.css';
 
 type WizardStep = 'pick-class' | 'rewards' | 'confirm' | 'result';
-
-interface AsiAllocation {
-  // statTypeId -> points (0..total)
-  points: Record<string, number>;
-}
 
 type Tone = 'gold' | 'arcane' | 'ember';
 
@@ -58,14 +48,10 @@ export default function LevelUpWizardPage() {
 
   const [step, setStep] = useState<WizardStep>('pick-class');
   const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
-  // reward group key -> selected rewardEntryId
-  const [choiceSelections, setChoiceSelections] = useState<Record<string, string>>({});
   // content-shaped groups: reward group key -> selected option ids
   const [contentSelections, setContentSelections] = useState<Record<string, string[]>>({});
   // content grant child picks: grantId -> abilities/skills/spells
   const [childSelections, setChildSelections] = useState<ChildSelections>({});
-  // ASI: statTypeId -> point count
-  const [asi, setAsi] = useState<AsiAllocation>({ points: {} });
   const [result, setResult] = useState<LevelUpResultResponse | null>(null);
 
   const backToCharacter = () => navigate(`/campaigns/${campaignId}/characters/${characterId}`);
@@ -136,10 +122,8 @@ export default function LevelUpWizardPage() {
           selectedClassId={selectedClassId}
           onSelect={(id) => {
             setSelectedClassId(id);
-            setChoiceSelections({});
             setContentSelections({});
             setChildSelections({});
-            setAsi({ points: {} });
           }}
           onNext={() => setStep('rewards')}
           onBack={backToCharacter}
@@ -151,14 +135,10 @@ export default function LevelUpWizardPage() {
           option={selectedClass}
           currentTotal={options.currentTotalLevel}
           characterName={character?.name}
-          choiceSelections={choiceSelections}
-          setChoiceSelections={setChoiceSelections}
           contentSelections={contentSelections}
           setContentSelections={setContentSelections}
           childSelections={childSelections}
           setChildSelections={setChildSelections}
-          asi={asi}
-          setAsi={setAsi}
           onBack={() => setStep('pick-class')}
           onNext={() => setStep('confirm')}
         />
@@ -338,7 +318,7 @@ function ClassGroup({
           const isMulti = opt.currentLevelInClass === 0;
           const isActive = selectedClassId === opt.classId;
           const previewRewards = opt.rewardGroups
-            .map((g) => g.rewards[0]?.name)
+            .map((g) => g.prompt || g.options?.[0]?.label || g.grants?.[0]?.label || g.grants?.[0]?.feature?.title)
             .filter(Boolean)
             .slice(0, 3)
             .join(' · ');
@@ -380,82 +360,37 @@ function StepRewards({
   option,
   currentTotal,
   characterName,
-  choiceSelections,
-  setChoiceSelections,
   contentSelections,
   setContentSelections,
   childSelections,
   setChildSelections,
-  asi,
-  setAsi,
   onBack,
   onNext,
 }: {
   option: AvailableClassOption;
   currentTotal: number;
   characterName?: string;
-  choiceSelections: Record<string, string>;
-  setChoiceSelections: (s: Record<string, string>) => void;
   contentSelections: Record<string, string[]>;
   setContentSelections: (s: Record<string, string[]>) => void;
   childSelections: ChildSelections;
   setChildSelections: (s: ChildSelections) => void;
-  asi: AsiAllocation;
-  setAsi: (a: AsiAllocation) => void;
   onBack: () => void;
   onNext: () => void;
 }) {
   const t = useT();
 
-  // Content-shaped groups (new grants/options payload) render via RewardGroupRenderer;
-  // legacy groups keep the ceremony UI. Detection is by payload, not flag.
+  // Final contract: every reward group is content-shaped (grants/options payload).
   const contentGroups = option.rewardGroups.filter(isContentRewardGroup);
-  const legacyGroups = option.rewardGroups.filter((g) => !isContentRewardGroup(g));
   const contentSel = (g: RewardGroup) => contentSelections[rewardGroupKey(g)] ?? [];
-
-  // ASI arrives as a non-choice group with a single reward whose detail carries
-  // abilityOptions + asiPointsTotal, so detect it regardless of isChoice.
-  const asiGroup = legacyGroups.find((g) => g.rewardType === 'ABILITY_SCORE_IMPROVEMENT');
-  const asiDetail = asiGroup?.rewards[0]?.detail;
-  const asiOptions: AbilityOption[] = asiDetail?.abilityOptions ?? [];
-  const asiPointsTotal = asiDetail?.asiPointsTotal ?? 2;
-
-  const automatic = legacyGroups.filter(
-    (g) => !g.isChoice && g.rewardType !== 'ABILITY_SCORE_IMPROVEMENT',
-  );
-  const choices = legacyGroups.filter((g) => g.isChoice);
-  const subclassGroups = choices.filter((g) => g.rewardType === 'SUBCLASS');
-  const normalChoices = choices.filter(
-    (g) => g.rewardType !== 'ABILITY_SCORE_IMPROVEMENT' && g.rewardType !== 'SUBCLASS',
-  );
-
-  const allChoiceGroups = [...subclassGroups, ...normalChoices];
-  const asiTotal = asiGroup ? Object.values(asi.points).reduce((sum, v) => sum + v, 0) : 0;
-  const asiValid = asiGroup ? asiTotal === asiPointsTotal : true;
-  const choicesValid = allChoiceGroups.every((g) => {
-    const allAlready = g.rewards.length > 0 && g.rewards.every((r) => r.alreadyAcquired);
-    if (allAlready) return true;
-    return !!choiceSelections[rewardGroupKey(g)];
-  });
   const contentValid = contentLevelUpComplete(option.rewardGroups, contentSelections, childSelections);
 
-  // Build the "rites yet to be chosen" checklist from real groups
-  const rites: { name: string; complete: boolean }[] = [
-    ...allChoiceGroups.map((g) => {
-      const allAlready = g.rewards.length > 0 && g.rewards.every((r) => r.alreadyAcquired);
-      return {
-        name: t('camp.lvl.choose', { label: REWARD_TYPE_LABELS[g.rewardType] || g.rewardType }),
-        complete: allAlready || !!choiceSelections[rewardGroupKey(g)],
-      };
-    }),
-    ...contentGroups
-      .filter((g) => (g.options?.length ?? 0) > 0)
-      .map((g) => ({
-        name: t('camp.lvl.choose', { label: rewardGroupLabel(g) }),
-        complete: isContentGroupSatisfied(g, contentSel(g)),
-      })),
-    ...(asiGroup ? [{ name: t('camp.lvl.asiChecklist'), complete: asiValid }] : []),
-  ];
+  // Checklist of choice groups still to resolve.
+  const rites: { name: string; complete: boolean }[] = contentGroups
+    .filter((g) => (g.options?.length ?? 0) > 0)
+    .map((g) => ({
+      name: t('camp.lvl.choose', { label: rewardGroupLabel(g) }),
+      complete: isContentGroupSatisfied(g, contentSel(g)),
+    }));
 
   // Vitae + derived stat tiles granted automatically by the ascent (Vitae always first).
   const hp = option.hpGain;
@@ -496,22 +431,6 @@ function StepRewards({
   if (derived?.cantripsGained) {
     grants.push({ glyph: 'sigil-3', label: t('camp.lvl.cantrips'), value: `+${derived.cantripsGained}`, tone: 'arcane' });
   }
-  // Empty automatic groups (reward decided at seal) shown as small "auto" tiles.
-  for (const g of automatic) {
-    if (g.rewards.length === 0) {
-      grants.push({
-        glyph: 'scroll',
-        label: REWARD_TYPE_LABELS[g.rewardType] || g.rewardType,
-        value: t('camp.lvl.auto'),
-        sub: t('camp.lvl.atSeal'),
-        tone: 'arcane',
-      });
-    }
-  }
-  // Concrete automatic features shown as full-width rows (name + description + effects).
-  const autoRewards = automatic.flatMap((g) =>
-    g.rewards.map((r) => ({ typeLabel: REWARD_TYPE_LABELS[g.rewardType] || g.rewardType, reward: r })),
-  );
 
   return (
     <div>
@@ -565,17 +484,6 @@ function StepRewards({
             ))}
           </div>
 
-          {autoRewards.length > 0 && (
-            <>
-              <OrdoDivider glyph="diamond">{t('camp.lvl.autoFeatures')}</OrdoDivider>
-              <div className={s.colGap8}>
-                {autoRewards.map((a, i) => (
-                  <AutoGrantRow key={i} typeLabel={a.typeLabel} reward={a.reward} />
-                ))}
-              </div>
-            </>
-          )}
-
           {rites.length > 0 && (
             <>
               <OrdoDivider glyph="cross-pat">{t('camp.lvl.ritesToChoose')}</OrdoDivider>
@@ -599,26 +507,6 @@ function StepRewards({
         </div>
       </div>
 
-      {/* Subclass — Choosing of Oaths */}
-      {subclassGroups.map((g) => (
-        <OathGroup
-          key={rewardGroupKey(g)}
-          group={g}
-          selectedId={choiceSelections[rewardGroupKey(g)] || ''}
-          onSelect={(id) => setChoiceSelections({ ...choiceSelections, [rewardGroupKey(g)]: id })}
-        />
-      ))}
-
-      {/* Other choices — Three Offerings */}
-      {normalChoices.map((g) => (
-        <ChoiceGroup
-          key={rewardGroupKey(g)}
-          group={g}
-          selectedId={choiceSelections[rewardGroupKey(g)] || ''}
-          onSelect={(id) => setChoiceSelections({ ...choiceSelections, [rewardGroupKey(g)]: id })}
-        />
-      ))}
-
       {/* Content-shaped reward groups (final contract): option selection + typed-grant
           child picks (ability distribution / skill choice). Committed as
           ContentLevelUpRequest at the seal. */}
@@ -633,9 +521,7 @@ function StepRewards({
         />
       ))}
 
-      {asiGroup && <AsiGroup options={asiOptions} pointsTotal={asiPointsTotal} asi={asi} setAsi={setAsi} />}
-
-      {rites.length === 0 && (
+      {contentGroups.length === 0 && (
         <OrdoPanel frame padding={0} className={s.mb16}>
           <div className={cn('ao-italic', s.noChoosable)}>
             {t('camp.lvl.noChoosableThisStep')}
@@ -656,7 +542,7 @@ function StepRewards({
             <span className={s.stepDot} />
           </span>
         </div>
-        <button className="ao-btn ao-btn--primary ao-btn--lg" onClick={onNext} disabled={!choicesValid || !asiValid || !contentValid}>
+        <button className="ao-btn ao-btn--primary ao-btn--lg" onClick={onNext} disabled={!contentValid}>
           <Rune kind="diamond-fill" size={9} /> {t('camp.lvl.toSeal')}
         </button>
       </div>
@@ -687,222 +573,6 @@ function GrantCard({
       <div className={cn('ao-overline', s.grantLabel)}>{label}</div>
       {sub && <div className={cn('ao-codex', s.grantSub)}>{sub}</div>}
     </div>
-  );
-}
-
-// ── Subclass oaths (banner cards) ────────────────────────────────────
-
-function OathGroup({
-  group,
-  selectedId,
-  onSelect,
-}: {
-  group: RewardGroup;
-  selectedId: string;
-  onSelect: (id: string) => void;
-}) {
-  const t = useT();
-  const allAlready = group.rewards.length > 0 && group.rewards.every((r) => r.alreadyAcquired);
-  return (
-    <OrdoPanel frame padding={0} className={s.mb16}>
-      <PanelHeader
-        title={t('camp.lvl.oath.title')}
-        glyph="shield"
-        sub={t('camp.lvl.oath.sub')}
-        tone="arcane"
-      />
-      <div className={s.oathBody}>
-        {group.rewards.length === 0 ? (
-          <EmptyChoiceNote text={t('camp.lvl.oath.noList')} />
-        ) : allAlready ? (
-          <EmptyChoiceNote text={t('camp.lvl.oath.allTaken')} />
-        ) : (
-          <div className={s.oathGrid}>
-            {group.rewards.map((r, i) => (
-              <OathCard
-                key={r.rewardEntryId}
-                reward={r}
-                tone={cycleTone(i)}
-                selected={selectedId === r.rewardEntryId}
-                onSelect={() => !r.alreadyAcquired && onSelect(r.rewardEntryId)}
-              />
-            ))}
-          </div>
-        )}
-      </div>
-    </OrdoPanel>
-  );
-}
-
-function OathCard({
-  reward,
-  tone,
-  selected,
-  onSelect,
-}: {
-  reward: RewardEntry;
-  tone: Tone;
-  selected: boolean;
-  onSelect: () => void;
-}) {
-  const t = useT();
-  const disabled = reward.alreadyAcquired;
-  const color = toneVar(tone);
-  return (
-    <div
-      onClick={onSelect}
-      className={cn('ao-panel ao-frame', s.oathCard, disabled && s.disabled, selected && s.selected)}
-      style={{ '--c': color } as CSSProperties}
-    >
-      <span className="ao-frame-c" />
-      {/* Banner area */}
-      <div className={s.oathBanner}>
-        <Placeholder className={s.oathBannerPh}>{t('camp.lvl.oath.banner', { name: reward.name })}</Placeholder>
-        <div className={s.oathBannerFade} />
-        <div className={s.oathSigil}>
-          <Sigil size={36} glyph="shield" color={color} />
-        </div>
-        <div className={s.oathBannerText}>
-          <div className={cn('ao-overline', s.oathSacred)}>{t('camp.lvl.oath.sacred')}</div>
-          <div className={cn('ao-h5', s.oathName)}>{reward.name}</div>
-        </div>
-        {selected && (
-          <div className={s.oathChipPos}>
-            <OrdoChip glyph="diamond-fill" tone={tone}>{t('camp.lvl.oath.considered')}</OrdoChip>
-          </div>
-        )}
-      </div>
-
-      {(reward.description || reward.detail) && (
-        <div className={s.oathDescBody}>
-          {reward.description && (
-            <p className={cn('ao-italic', s.oathDesc)}>«{reward.description}»</p>
-          )}
-          <DetailBadges detail={reward.detail} />
-        </div>
-      )}
-
-      <div className={s.oathFoot}>
-        <span className={cn('ao-codex', s.oathFootText)}>
-          {disabled ? t('camp.lvl.oath.alreadyTaken') : selected ? t('camp.lvl.oath.chosenToSeal') : t('camp.lvl.oath.acceptOath')}
-        </span>
-        <Rune kind="chev-r" size={12} color={selected ? color : 'var(--ink-faint)'} />
-      </div>
-    </div>
-  );
-}
-
-// ── Generic choice (offerings — framed relic cards) ──────────────────
-
-function ChoiceGroup({
-  group,
-  selectedId,
-  onSelect,
-}: {
-  group: RewardGroup;
-  selectedId: string;
-  onSelect: (id: string) => void;
-}) {
-  const t = useT();
-  const allAlready = group.rewards.length > 0 && group.rewards.every((r) => r.alreadyAcquired);
-  return (
-    <OrdoPanel frame padding={0} className={s.mb16}>
-      <PanelHeader
-        title={t('camp.lvl.offering.title', { label: REWARD_TYPE_LABELS[group.rewardType] || group.rewardType })}
-        glyph="sigil-1"
-        sub={t('camp.lvl.offering.sub')}
-        tone="arcane"
-      />
-      <div className={s.oathBody}>
-        {group.rewards.length === 0 ? (
-          <EmptyChoiceNote text={t('camp.lvl.offering.noList')} />
-        ) : allAlready ? (
-          <EmptyChoiceNote text={t('camp.lvl.offering.allTaken')} />
-        ) : (
-          <div className={s.offeringGrid}>
-            {group.rewards.map((r, i) => (
-              <OfferingCard
-                key={r.rewardEntryId}
-                reward={r}
-                tone={cycleTone(i)}
-                typeLabel={REWARD_TYPE_LABELS[group.rewardType] || group.rewardType}
-                selected={selectedId === r.rewardEntryId}
-                onSelect={() => !r.alreadyAcquired && onSelect(r.rewardEntryId)}
-              />
-            ))}
-          </div>
-        )}
-      </div>
-    </OrdoPanel>
-  );
-}
-
-function OfferingCard({
-  reward,
-  tone,
-  typeLabel,
-  selected,
-  onSelect,
-}: {
-  reward: RewardEntry;
-  tone: Tone;
-  typeLabel: string;
-  selected: boolean;
-  onSelect: () => void;
-}) {
-  const t = useT();
-  const disabled = reward.alreadyAcquired;
-  const color = toneVar(tone);
-  const glow =
-    tone === 'arcane' ? 'rgba(90,142,148,0.25)' : tone === 'ember' ? 'rgba(179,70,26,0.25)' : 'rgba(176,141,78,0.25)';
-  return (
-    <div
-      onClick={onSelect}
-      className={cn('ao-panel ao-frame', s.offeringCard, disabled ? s.disabled : s.clickable, selected && s.selected)}
-      style={{ '--c': color, '--glow': glow } as CSSProperties}
-    >
-      <span className="ao-frame-c" />
-      <div className={s.offeringHead}>
-        <CodexID>{typeLabel}</CodexID>
-        {selected ? (
-          <OrdoChip glyph="check" tone={tone}>{t('camp.lvl.offering.sealing')}</OrdoChip>
-        ) : (
-          <span className={cn('ao-codex', s.offeringHeadNote)}>{disabled ? t('camp.lvl.offering.alreadyReceived') : t('camp.lvl.offering.clickToSeal')}</span>
-        )}
-      </div>
-
-      <div className={s.offeringBody}>
-        <div className={cn(s.relic, selected && s.selected)}>
-          <div className={s.relicInner} />
-          <Rune kind={glyphFor(tone)} size={56} color={color} />
-        </div>
-
-        <div className={cn('ao-overline', s.offeringType)}>{typeLabel}</div>
-        <div className={cn('ao-h5', s.offeringName)}>{reward.name}</div>
-      </div>
-
-      <div className={s.offeringDivider}>
-        <OrdoDivider glyph="diamond" color={color} />
-      </div>
-
-      {(reward.description || reward.detail) && (
-        <div className={s.offeringInsc}>
-          {reward.description && (
-            <>
-              <div className={cn('ao-overline', s.offeringInscLabel)}>{t('camp.lvl.offering.inscription')}</div>
-              <div className={cn('ao-italic', s.offeringInscText)}>«{reward.description}»</div>
-            </>
-          )}
-          <DetailBadges detail={reward.detail} />
-        </div>
-      )}
-    </div>
-  );
-}
-
-function EmptyChoiceNote({ text }: { text: string }) {
-  return (
-    <div className={cn('ao-italic', s.emptyNote)}>{text}</div>
   );
 }
 
@@ -970,109 +640,6 @@ function DetailBadges({ detail }: { detail?: RewardDetail }) {
         <Tag tone="ember">{t('camp.lvl.fx.requires', { req: detail.prerequisites })}</Tag>
       )}
     </div>
-  );
-}
-
-// ── Automatic feature row (granted by the ascent, no choice) ─────────
-
-function AutoGrantRow({ typeLabel, reward }: { typeLabel: string; reward: RewardEntry }) {
-  return (
-    <div className={s.autoRow}>
-      <div className={s.autoRowHead}>
-        <span className={cn('ao-codex', s.autoRowType)}>{typeLabel}</span>
-        <span className={cn('ao-h5', s.autoRowName)}>{reward.name}</span>
-      </div>
-      {reward.description && (
-        <p className={cn('ao-italic', s.autoRowDesc)}>
-          {reward.description}
-        </p>
-      )}
-      <DetailBadges detail={reward.detail} />
-    </div>
-  );
-}
-
-// ── ASI ──────────────────────────────────────────────────────────────
-
-function AsiGroup({
-  options,
-  pointsTotal,
-  asi,
-  setAsi,
-}: {
-  options: AbilityOption[];
-  pointsTotal: number;
-  asi: AsiAllocation;
-  setAsi: (a: AsiAllocation) => void;
-}) {
-  const t = useT();
-  const total = Object.values(asi.points).reduce((sum, v) => sum + v, 0);
-  const remaining = pointsTotal - total;
-  const change = (statTypeId: string, delta: number) => {
-    const current = asi.points[statTypeId] || 0;
-    if (delta > 0 && remaining <= 0) return;
-    const next = Math.max(0, Math.min(pointsTotal, current + delta));
-    if (next === current) return;
-    setAsi({ points: { ...asi.points, [statTypeId]: next } });
-  };
-  return (
-    <OrdoPanel frame padding={0} className={s.mb16}>
-      <PanelHeader
-        title={t('camp.lvl.asi.title')}
-        glyph="sigil-2"
-        sub={t('camp.lvl.asi.sub')}
-        tone="arcane"
-        right={
-          <span className={cn('ao-codex', s.asiRemaining, remaining === 0 && s.done)}>
-            {t('camp.lvl.asi.remaining', { count: remaining })}
-          </span>
-        }
-      />
-      <div className={s.asiBody}>
-        {options.length === 0 && (
-          <EmptyChoiceNote text={t('camp.lvl.asi.noAspects')} />
-        )}
-        {options.map((o) => {
-          const value = asi.points[o.statTypeId] || 0;
-          const cur = o.currentScore;
-          const cap = o.maxScore ?? 20;
-          const after = cur + value;
-          const atCap = after >= cap;
-          const modBefore = abilityMod(cur);
-          const modAfter = abilityMod(after);
-          return (
-            <div
-              key={o.statTypeId}
-              className={cn('ao-rgrid', s.asiRow, value > 0 && s.active)}
-            >
-              <span className={s.asiName}>
-                <span className={s.asiNameRow}>
-                  <span className={cn('ao-h5', s.asiStatName)}>{o.name}</span>
-                  <span className={cn('ao-codex', s.asiScore)}>
-                    {t('camp.lvl.asi.score', { from: cur, to: after })}
-                  </span>
-                  {modBefore !== modAfter && (
-                    <span className={cn('ao-codex', s.asiMod)}>
-                      {t('camp.lvl.asi.mod', { from: fmtMod(modBefore), to: fmtMod(modAfter) })}
-                    </span>
-                  )}
-                  {atCap && (
-                    <span className={cn('ao-overline', s.asiCap)}>{t('camp.lvl.asi.atCap')}</span>
-                  )}
-                </span>
-              </span>
-              <button className="ao-iconbtn" disabled={value <= 0} onClick={() => change(o.statTypeId, -1)}>
-                <Rune kind="minus" size={11} />
-              </button>
-              <span className={s.asiValue}>+{value}</span>
-              <button className="ao-iconbtn" disabled={remaining <= 0 || value >= pointsTotal || atCap} onClick={() => change(o.statTypeId, 1)}>
-                <Rune kind="plus" size={11} />
-              </button>
-            </div>
-          );
-        })}
-      </div>
-    </OrdoPanel>
   );
 }
 
@@ -1269,22 +836,6 @@ function StepResult({ result, onDone }: { result: LevelUpResultResponse; onDone:
 
 function toneVar(tone: Tone): string {
   return tone === 'arcane' ? 'var(--arcane)' : tone === 'ember' ? 'var(--ember)' : 'var(--gold)';
-}
-
-function abilityMod(score: number): number {
-  return Math.floor((score - 10) / 2);
-}
-
-function fmtMod(mod: number): string {
-  return mod >= 0 ? `+${mod}` : `${mod}`;
-}
-
-function cycleTone(i: number): Tone {
-  return (['gold', 'arcane', 'ember'] as const)[i % 3];
-}
-
-function glyphFor(tone: Tone): string {
-  return tone === 'arcane' ? 'sigil-1' : tone === 'ember' ? 'flame' : 'shield';
 }
 
 function roman(n: number): string {

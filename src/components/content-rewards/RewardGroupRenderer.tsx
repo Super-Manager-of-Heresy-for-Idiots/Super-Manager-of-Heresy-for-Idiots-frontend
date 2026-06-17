@@ -220,8 +220,3 @@ export function RewardGroupView({ group, selectedOptionIds, onChange }: RewardGr
     </OrdoPanel>
   );
 }
-
-// Backward-compatible aliases (legacy import name). Removed in Phase 11–12 once
-// all consumers import the named components directly.
-export const RewardGroupRenderer = RewardGroupView;
-export type RewardGroupRendererProps = RewardGroupViewProps;

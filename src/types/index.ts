@@ -314,17 +314,8 @@ export interface RewardGroup {
   sortOrder?: number;
   grants?: ContentRewardGrant[];
   options?: ContentRewardOption[];
-  /**
-   * Stable frontend key. Legacy payloads use rewardType; new content payloads use id.
-   * Filled by normalizeLevelUpOptions().
-   */
+  /** Stable frontend key (filled by normalizeRewardGroup; id/groupKind fallback). */
   groupKey?: string;
-  /** @deprecated legacy reward-type-only payload; removed in Phase 11–12. */
-  rewardType: string;
-  /** @deprecated legacy choice flag; superseded by chooseMin/chooseMax. */
-  isChoice: boolean;
-  /** @deprecated legacy flat reward entries; superseded by options/grants. */
-  rewards: RewardEntry[];
 }
 
 export interface RewardEntry {

@@ -118,10 +118,6 @@ export function draftGroupToRewardGroup(group: RewardGroupInput, ctx: PreviewCtx
     groupKey: key,
     grants: group.grants.map((g, i) => grantToContent(g, i, ctx)),
     options: group.groupKind === 'AUTO' ? [] : group.options.map((o) => optionToContent(o, ctx)),
-    // legacy bridge fields
-    rewardType: group.groupKind,
-    isChoice: group.groupKind === 'CHOICE',
-    rewards: [],
   };
 }
 

@@ -13,31 +13,26 @@ const fallbackText = (value: string | undefined, fallback: string): string => {
   return trimmed ? trimmed : fallback;
 };
 
-export function rewardGroupKey(group: Pick<RewardGroup, 'id' | 'rewardType' | 'groupKey'>): string {
-  return group.groupKey || group.id || group.rewardType;
+export function rewardGroupKey(group: Pick<RewardGroup, 'id' | 'groupKey' | 'groupKind'>): string {
+  return group.groupKey || group.id || group.groupKind || 'group';
 }
 
-export function rewardGroupLabel(group: Pick<RewardGroup, 'prompt' | 'groupKind' | 'rewardType'>): string {
-  return fallbackText(group.prompt, group.groupKind || group.rewardType);
+export function rewardGroupLabel(group: Pick<RewardGroup, 'prompt' | 'groupKind'>): string {
+  return fallbackText(group.prompt, group.groupKind || 'REWARD');
 }
 
 export function normalizeRewardGroup(group: RewardGroup): RewardGroup {
-  const rewardType = fallbackText(group.rewardType, group.groupKind || 'CUSTOM');
   const optionCount = group.options?.length ?? 0;
-  const chooseMax = group.chooseMax ?? (group.isChoice ? 1 : 0);
-  const isChoice = group.isChoice || optionCount > 0 || chooseMax > 0;
+  const chooseMax = group.chooseMax ?? (optionCount > 0 ? 1 : 0);
 
   return {
     ...group,
-    rewardType,
-    isChoice,
-    rewards: group.rewards ?? [],
     grants: group.grants ?? [],
     options: group.options ?? [],
-    chooseMin: group.chooseMin ?? (isChoice ? 1 : 0),
+    chooseMin: group.chooseMin ?? (optionCount > 0 ? 1 : 0),
     chooseMax,
     repeatable: group.repeatable ?? false,
-    groupKey: rewardGroupKey({ ...group, rewardType }),
+    groupKey: rewardGroupKey(group),
   };
 }
 
