@@ -57,8 +57,8 @@ export const campaignBlueprintsApi = {
     return response.data;
   },
 
-  getMy: async (): Promise<ApiResponse<CampaignBlueprintResponse[]>> => {
-    const response = await api.get<ApiResponse<CampaignBlueprintResponse[]>>(`${BASE}/my`);
+  getMy: async (): Promise<ApiResponse<Page<CampaignBlueprintResponse>>> => {
+    const response = await api.get<ApiResponse<Page<CampaignBlueprintResponse>>>(`${BASE}/my`);
     return response.data;
   },
 
