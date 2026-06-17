@@ -44,6 +44,17 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'review', label: 'Обзор' },
 ];
 
+/** Pulls structured 422 validation issues (path/code/severity/message) from an axios error. */
+function extractServerIssues(error: unknown): AuthoringValidationIssue[] {
+  const data = (error as { response?: { data?: { issues?: unknown } } })?.response?.data;
+  const issues = data?.issues;
+  if (!Array.isArray(issues)) return [];
+  return issues.filter(
+    (i): i is AuthoringValidationIssue =>
+      !!i && typeof (i as AuthoringValidationIssue).path === 'string',
+  );
+}
+
 export interface ClassBuilderModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -70,9 +81,14 @@ export function ClassBuilderModal({
   const [tab, setTab] = useState<Tab>('identity');
   const [draft, setDraft] = useState<ClassDraft>(() => initialDraft ?? emptyDraft());
   const [saving, setSaving] = useState(false);
+  // Server-side validation issues (422) mapped back onto nodes by `path`.
+  const [serverIssues, setServerIssues] = useState<AuthoringValidationIssue[]>([]);
 
-  const issues = useMemo(() => validateClassDraft(draft), [draft]);
-  const blocking = hasBlockingErrors(issues);
+  const clientIssues = useMemo(() => validateClassDraft(draft), [draft]);
+  // Badges/review show client + server issues; the Save gate uses only client
+  // errors so a server issue on a non-editable path can't permanently block.
+  const issues = useMemo(() => [...clientIssues, ...serverIssues], [clientIssues, serverIssues]);
+  const blocking = hasBlockingErrors(clientIssues);
 
   const previewCtx: PreviewCtx = {
     abilities: ref.abilities,
@@ -92,6 +108,7 @@ export function ClassBuilderModal({
       return;
     }
     setSaving(true);
+    setServerIssues([]);
     try {
       const body = buildClassWriteRequest(draft);
       const res = editId
@@ -109,7 +126,14 @@ export function ClassBuilderModal({
       onSaved?.();
       onOpenChange(false);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Не удалось сохранить класс.');
+      const found = extractServerIssues(error);
+      if (found.length) {
+        setServerIssues(found);
+        const firstError = found.find((i) => i.severity === 'ERROR') ?? found[0];
+        toast.error(`Сервер отклонил: ${firstError.message}`);
+      } else {
+        toast.error(error instanceof Error ? error.message : 'Не удалось сохранить класс.');
+      }
     } finally {
       setSaving(false);
     }
