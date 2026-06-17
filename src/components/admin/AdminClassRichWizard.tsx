@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
-import { FileUp, Loader2, Plus, Save, Trash2 } from 'lucide-react';
+import { Loader2, Plus, Save, Trash2 } from 'lucide-react';
 import { Rune, OrdoChip } from '@/components/ordo';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
@@ -271,22 +271,6 @@ function validate(
   return { errors, levelErrors, rewardErrors };
 }
 
-function validateImportPayload(value: unknown, t: TFn): string[] {
-  const errors: string[] = [];
-  const data = value as Partial<CreateRichCharacterClassRequest> | null;
-  if (!data || typeof data !== 'object') return [t('cmp2.rich.err.jsonRootObject')];
-  if (!data.name || typeof data.name !== 'string') errors.push(t('cmp2.rich.err.classNameRequired'));
-  if (typeof data.name === 'string' && data.name.length > 50) errors.push(t('cmp2.rich.err.classNameMax'));
-  if (data.levels != null && !Array.isArray(data.levels)) errors.push(t('cmp2.rich.err.levelsArray'));
-  if (Array.isArray(data.levels)) {
-    data.levels.forEach((level, index) => {
-      if (level.level < 1 || level.level > 20) errors.push(t('cmp2.rich.err.levelRange', { i: index }));
-      if (!Array.isArray(level.rewards)) errors.push(t('cmp2.rich.err.rewardsArray', { i: index }));
-    });
-  }
-  return errors;
-}
-
 export function AdminClassRichWizard({ open, onOpenChange, editingClass }: AdminClassRichWizardProps) {
   const t = useT();
   const queryClient = useQueryClient();
@@ -299,7 +283,6 @@ export function AdminClassRichWizard({ open, onOpenChange, editingClass }: Admin
 
   const [hydratedKey, setHydratedKey] = useState('');
   const [saving, setSaving] = useState(false);
-  const [importError, setImportError] = useState('');
   const [result, setResult] = useState<RichCharacterClassResponse | null>(null);
   const [className, setClassName] = useState('');
   const [classDescription, setClassDescription] = useState('');
@@ -311,7 +294,6 @@ export function AdminClassRichWizard({ open, onOpenChange, editingClass }: Admin
     if (!open) {
       setHydratedKey('');
       setResult(null);
-      setImportError('');
       return;
     }
 
@@ -471,33 +453,6 @@ export function AdminClassRichWizard({ open, onOpenChange, editingClass }: Admin
       toast.success(editingClass ? t('cmp2.rich.toastUpdated') : t('cmp2.rich.toastCreated'));
     } catch (error) {
       toast.error(error instanceof Error ? error.message : t('cmp2.rich.toastSaveFailed'));
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleImportJson = async (file: File | undefined) => {
-    if (!file) return;
-    setImportError('');
-    setSaving(true);
-    try {
-      const parsed = JSON.parse(await file.text()) as unknown;
-      const errors = validateImportPayload(parsed, t);
-      if (errors.length > 0) {
-        setImportError(errors.join(' '));
-        return;
-      }
-      const response = await adminApi.importRichCharacterClassJson(parsed as CreateRichCharacterClassRequest);
-      if (!response.data) throw new Error('Import returned no data'); // internal error, not user-facing
-      queryClient.invalidateQueries({ queryKey: ['character-classes'] });
-      queryClient.invalidateQueries({ queryKey: ['skills'] });
-      queryClient.invalidateQueries({ queryKey: ['feats'] });
-      queryClient.invalidateQueries({ queryKey: ['subclasses'] });
-      queryClient.invalidateQueries({ queryKey: ['buffs-debuffs'] });
-      setResult(response.data);
-      toast.success(t('cmp2.rich.toastImported'));
-    } catch (error) {
-      setImportError(error instanceof Error ? error.message : t('cmp2.rich.toastImportFailed'));
     } finally {
       setSaving(false);
     }
@@ -762,20 +717,6 @@ export function AdminClassRichWizard({ open, onOpenChange, editingClass }: Admin
               </div>
             </div>
             <div className="ao-row ao-gap-8">
-              <label className={cn('ao-btn ao-btn--ghost', s.fileLabel, saving && s.notAllowed)}>
-                <FileUp size={14} />
-                {t('cmp2.rich.importJson')}
-                <input
-                  type="file"
-                  accept="application/json,.json"
-                  disabled={saving}
-                  onChange={(event) => {
-                    handleImportJson(event.target.files?.[0]);
-                    event.currentTarget.value = '';
-                  }}
-                  className={s.hidden}
-                />
-              </label>
               <button className="ao-btn ao-btn--ghost" onClick={() => handleClose(false)} disabled={saving}>{t('common.cancel')}</button>
               <button className="ao-btn ao-btn--primary" onClick={handleSave} disabled={!canSave || rewardsLoading}>
                 {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
@@ -829,7 +770,6 @@ export function AdminClassRichWizard({ open, onOpenChange, editingClass }: Admin
                   {validation.errors.length > 5 && <div className="ao-codex">{t('cmp2.rich.moreIssues', { count: validation.errors.length - 5 })}</div>}
                 </div>
               )}
-              {importError && <div className={cn('ao-codex', s.err)}>{importError}</div>}
             </div>
 
             <div className="ao-row ao-between">

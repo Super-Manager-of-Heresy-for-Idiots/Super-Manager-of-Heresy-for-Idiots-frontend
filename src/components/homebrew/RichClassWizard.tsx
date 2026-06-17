@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { FileUp, Loader2, Plus, Save, Trash2 } from 'lucide-react';
+import { Loader2, Plus, Save, Trash2 } from 'lucide-react';
 import { Rune, OrdoChip } from '@/components/ordo';
 import { useT } from '@/i18n/I18nContext';
 import {
@@ -8,11 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { useCreateRichHomebrewClass } from '@/hooks/useHomebrew';
-import {
-  useImportRichHomebrewClassJson,
-  useUpdateRichHomebrewClass,
-} from '@/hooks/useHomebrew';
+import { useCreateRichHomebrewClass, useUpdateRichHomebrewClass } from '@/hooks/useHomebrew';
 import { useStatTypes } from '@/hooks/useAdmin';
 import { cn } from '@/lib/utils';
 import s from './RichClassWizard.module.css';
@@ -305,30 +301,12 @@ function validate(
   return { errors, levelErrors, rewardErrors };
 }
 
-function validateImportPayload(value: unknown, t: TFn): string[] {
-  const errors: string[] = [];
-  const data = value as Partial<CreateRichCharacterClassRequest> | null;
-  if (!data || typeof data !== 'object') return [t('cmp2.rich.err.jsonRootObject')];
-  if (!data.name || typeof data.name !== 'string') errors.push(t('cmp2.rich.err.classNameRequired'));
-  if (typeof data.name === 'string' && data.name.length > 50) errors.push(t('cmp2.rich.err.classNameMax'));
-  if (data.levels != null && !Array.isArray(data.levels)) errors.push(t('cmp2.rich.err.levelsArray'));
-  if (Array.isArray(data.levels)) {
-    data.levels.forEach((level, index) => {
-      if (level.level < 1 || level.level > 20) errors.push(t('cmp2.rich.err.levelRange', { i: index }));
-      if (!Array.isArray(level.rewards)) errors.push(t('cmp2.rich.err.rewardsArray', { i: index }));
-    });
-  }
-  return errors;
-}
-
 export function RichClassWizard({ open, onOpenChange, packageDetail, editingClass }: RichClassWizardProps) {
   const t = useT();
   const createMutation = useCreateRichHomebrewClass();
   const updateMutation = useUpdateRichHomebrewClass();
-  const importMutation = useImportRichHomebrewClassJson();
   const { data: statTypes } = useStatTypes();
   const [hydratedKey, setHydratedKey] = useState('');
-  const [importError, setImportError] = useState('');
   const [className, setClassName] = useState('');
   const [classDescription, setClassDescription] = useState('');
   const [selectedLevel, setSelectedLevel] = useState(1);
@@ -346,7 +324,6 @@ export function RichClassWizard({ open, onOpenChange, packageDetail, editingClas
     setSelectedRewardId(null);
     setLevelsByNumber({});
     setResult(null);
-    setImportError('');
     setHydratedKey(key);
   }, [open, editingClass, hydratedKey]);
 
@@ -366,7 +343,7 @@ export function RichClassWizard({ open, onOpenChange, packageDetail, editingClas
     () => validate(className, levelsByNumber, getExistingById, t),
     [className, levelsByNumber, getExistingById, t],
   );
-  const isSaving = createMutation.isPending || updateMutation.isPending || importMutation.isPending;
+  const isSaving = createMutation.isPending || updateMutation.isPending;
   const canSave = validation.errors.length === 0 && className.trim().length > 0 && !isSaving;
 
   const updateRewards = (level: number, updater: (rewards: DraftReward[]) => DraftReward[]) => {
@@ -396,7 +373,6 @@ export function RichClassWizard({ open, onOpenChange, packageDetail, editingClas
 
   const resetWizard = () => {
     setHydratedKey('');
-    setImportError('');
     setClassName('');
     setClassDescription('');
     setSelectedLevel(1);
@@ -495,29 +471,6 @@ export function RichClassWizard({ open, onOpenChange, packageDetail, editingClas
           },
         },
       );
-    }
-  };
-
-  const handleImportJson = async (file: File | undefined) => {
-    if (!file) return;
-    setImportError('');
-    try {
-      const parsed = JSON.parse(await file.text()) as unknown;
-      const errors = validateImportPayload(parsed, t);
-      if (errors.length > 0) {
-        setImportError(errors.join(' '));
-        return;
-      }
-      importMutation.mutate(
-        { packageId: packageDetail.id, data: parsed as CreateRichCharacterClassRequest },
-        {
-          onSuccess: (response) => {
-            if (response.data) setResult(response.data);
-          },
-        },
-      );
-    } catch (error) {
-      setImportError(error instanceof Error ? error.message : t('cmp2.rich.toastImportFailed'));
     }
   };
 
@@ -859,20 +812,6 @@ export function RichClassWizard({ open, onOpenChange, packageDetail, editingClas
               <div className={cn('ao-codex', s.mt5)}>{t('cmp2.rich.hbSubtitle', { title: packageDetail.title })}</div>
             </div>
             <div className="ao-row ao-gap-8">
-              <label className={cn('ao-btn ao-btn--ghost', isSaving && s.notAllowed)}>
-                <FileUp size={14} />
-                {t('cmp2.rich.importJson')}
-                <input
-                  type="file"
-                  accept="application/json,.json"
-                  disabled={isSaving}
-                  onChange={(event) => {
-                    handleImportJson(event.target.files?.[0]);
-                    event.currentTarget.value = '';
-                  }}
-                  className={s.hidden}
-                />
-              </label>
               <button className="ao-btn ao-btn--ghost" onClick={() => handleClose(false)}>{t('common.cancel')}</button>
               <button className="ao-btn ao-btn--primary" onClick={handleSave} disabled={!canSave}>
                 {isSaving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
@@ -942,7 +881,6 @@ export function RichClassWizard({ open, onOpenChange, packageDetail, editingClas
                   {t('cmp2.rich.editReplaceWarning')}
                 </div>
               )}
-              {importError && <div className={cn('ao-codex', s.err)}>{importError}</div>}
             </div>
 
             <div className="ao-row ao-between">
