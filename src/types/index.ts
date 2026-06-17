@@ -13,7 +13,6 @@ export type DamageType = 'SLASHING' | 'PIERCING' | 'BLUDGEONING' | 'FIRE' | 'COL
 export type SkillActivation = 'PASSIVE' | 'ACTIVE';
 
 export type RewardType = 'SKILL' | 'SUBCLASS' | 'FEAT' | 'BUFF_DEBUFF';
-export type RichClassRewardType = 'SKILL' | 'FEAT' | 'SUBCLASS' | 'BUFF_DEBUFF';
 export type SkillEffectRole = 'BUFF' | 'DEBUFF';
 
 export type CampaignRole = 'GAME_MASTER' | 'PLAYER';
@@ -213,13 +212,6 @@ export interface InviteCodeResponse {
 
 // === Level-Up ===
 
-export interface LevelUpRequest {
-  classId: string;
-  selections: RewardSelection[];
-  // Required when the new class level grants an ABILITY_SCORE_IMPROVEMENT.
-  abilityScoreImprovement?: AbilityScoreImprovementRequest;
-}
-
 export interface ContentLevelUpRequest {
   classId: string;
   rewardSelections: ContentRewardSelection[];
@@ -248,20 +240,6 @@ export interface ContentSkillSelection {
 export interface ContentSpellSelection {
   grantId: string;
   spellId: string;
-}
-
-export interface RewardSelection {
-  rewardType: string;
-  rewardEntryId: string;
-}
-
-export interface AbilityScoreImprovementRequest {
-  increases: StatIncrease[];
-}
-
-export interface StatIncrease {
-  statTypeId: string;  // matches AbilityOption.statTypeId
-  amount: number;      // 1 or 2; total across increases must equal asiPointsTotal
 }
 
 export interface LevelUpOptionsResponse {
@@ -316,16 +294,6 @@ export interface RewardGroup {
   options?: ContentRewardOption[];
   /** Stable frontend key (filled by normalizeRewardGroup; id/groupKind fallback). */
   groupKey?: string;
-}
-
-export interface RewardEntry {
-  rewardEntryId: string;
-  rewardId: string;
-  name: string;
-  description?: string;
-  alreadyAcquired: boolean;
-  // Structured mechanics for richer display. Optional; backend may omit.
-  detail?: RewardDetail;
 }
 
 // Final contract: RewardOptionDto.
@@ -751,50 +719,6 @@ export interface CreateBuffDebuffRequest {
   classIds?: string[];
   /** Races this buff/debuff is bound to (homebrew dependency picker). */
   raceIds?: string[];
-}
-
-export interface RichClassSkillEffectRequest {
-  effectRole: SkillEffectRole;
-  chancePercent: number;
-  buffDebuffId?: string;
-  buffDebuff?: CreateBuffDebuffRequest;
-}
-
-export interface RichClassSkillRequest extends CreateSkillRequest {
-  effects?: RichClassSkillEffectRequest[];
-}
-
-export interface RichClassSubclassRequest {
-  name: string;
-  description?: string;
-}
-
-export interface RichClassRewardRequest {
-  rewardType: RichClassRewardType;
-  isChoice: boolean;
-  rewardId?: string;
-  skill?: RichClassSkillRequest;
-  feat?: CreateFeatRequest;
-  subclass?: RichClassSubclassRequest;
-  buffDebuff?: CreateBuffDebuffRequest;
-}
-
-export interface RichClassLevelRequest {
-  level: number;
-  rewards: RichClassRewardRequest[];
-}
-
-export interface CreateRichCharacterClassRequest {
-  name: string;
-  description?: string;
-  levels: RichClassLevelRequest[];
-}
-
-export interface RichCharacterClassResponse {
-  characterClass: CharacterClassResponse;
-  rewards: ClassLevelRewardResponse[];
-  createdContent: Partial<Record<ContentType, ContentSummaryDto[]>>;
-  packageDetail?: HomebrewDetailResponse | null;
 }
 
 // === Class Authoring (new content model) — aggregate upsert ===

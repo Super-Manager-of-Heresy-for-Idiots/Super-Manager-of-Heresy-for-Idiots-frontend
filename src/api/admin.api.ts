@@ -24,8 +24,6 @@ import type {
   CreateEnchantmentTypeRequest,
   SetSkillEffectsRequest,
   SkillEffectResponse,
-  CreateRichCharacterClassRequest,
-  RichCharacterClassResponse,
 } from '@/types';
 
 export const adminApi = {
@@ -82,27 +80,12 @@ export const adminApi = {
     const response = await api.post<ApiResponse<CharacterClassResponse>>('/admin/character-classes', data);
     return response.data;
   },
-  createRichCharacterClass: async (data: CreateRichCharacterClassRequest): Promise<ApiResponse<RichCharacterClassResponse>> => {
-    const response = await api.post<ApiResponse<RichCharacterClassResponse>>('/admin/character-classes/rich', data);
-    return response.data;
-  },
-  importRichCharacterClassJson: async (data: CreateRichCharacterClassRequest): Promise<ApiResponse<RichCharacterClassResponse>> => {
-    const response = await api.post<ApiResponse<RichCharacterClassResponse>>('/admin/character-classes/import-json', data);
-    return response.data;
-  },
   getCharacterClass: async (id: string): Promise<ApiResponse<CharacterClassResponse>> => {
     const response = await api.get<ApiResponse<CharacterClassResponse>>(`/admin/character-classes/${id}`);
     return response.data;
   },
   updateCharacterClass: async (id: string, data: CreateCharacterClassRequest): Promise<ApiResponse<CharacterClassResponse>> => {
     const response = await api.put<ApiResponse<CharacterClassResponse>>(`/admin/character-classes/${id}`, data);
-    return response.data;
-  },
-  updateRichCharacterClass: async (
-    id: string,
-    data: CreateRichCharacterClassRequest,
-  ): Promise<ApiResponse<RichCharacterClassResponse>> => {
-    const response = await api.put<ApiResponse<RichCharacterClassResponse>>(`/admin/character-classes/${id}/rich`, data);
     return response.data;
   },
   deleteCharacterClass: async (id: string): Promise<ApiResponse<void>> => {

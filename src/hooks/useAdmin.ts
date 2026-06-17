@@ -176,25 +176,6 @@ export function useUpdateCharacterClass() {
   });
 }
 
-export function useDeleteCharacterClass() {
-  const queryClient = useQueryClient();
-  const t = useT();
-  return useMutation({
-    mutationFn: (id: string) => adminApi.deleteCharacterClass(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['character-classes'] });
-      toast.success(t('hk.class.deleted'));
-    },
-    onError: (error: AxiosError<ApiError>) => {
-      const status = error.response?.status;
-      const message = status === 409
-        ? t('hk.class.deleteInUse')
-        : error.response?.data?.message || t('hk.class.deleteFailed');
-      toast.error(message);
-    },
-  });
-}
-
 // === Character Races ===
 export function useCharacterRaces() {
   return useQuery({
