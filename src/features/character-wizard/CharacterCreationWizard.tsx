@@ -9,9 +9,6 @@ import type { CreateFullCharacterRequest } from '@/api/characters-full.api';
 import type { ReferenceCurrencyType } from '@/api/reference.api';
 import {
   ABILITIES,
-  BACKGROUNDS,
-  CLASSES,
-  RACES,
   SKILLS,
 } from '@/data/wizard5e';
 import {
@@ -91,20 +88,6 @@ function resolveSpellIds(
   }
   return { ids, missing };
 }
-const VANILLA_CLASS_KEY_BY_ID: Record<string, string> = {
-  'b0000000-0000-0000-0000-000000000001': 'fighter',
-  'b0000000-0000-0000-0000-000000000002': 'wizard',
-  'b0000000-0000-0000-0000-000000000003': 'rogue',
-  'b0000000-0000-0000-0000-000000000004': 'cleric',
-  'b0000000-0000-0000-0000-000000000005': 'ranger',
-  'b0000000-0000-0000-0000-000000000006': 'paladin',
-  'b0000000-0000-0000-0000-000000000007': 'bard',
-  'b0000000-0000-0000-0000-000000000008': 'druid',
-  'b0000000-0000-0000-0000-000000000009': 'barbarian',
-  'b0000000-0000-0000-0000-000000000010': 'monk',
-  'b0000000-0000-0000-0000-000000000011': 'sorcerer',
-  'b0000000-0000-0000-0000-000000000012': 'warlock',
-};
 const scoreMethodForApi = (method: WizardChar['scoreMethod']): string => {
   if (method === 'pointbuy') return 'POINT_BUY';
   if (method === 'roll') return 'ROLL';
@@ -200,17 +183,11 @@ function buildAvailability(
   referenceBackgrounds: BackgroundResponse[] = [],
   referenceProficiencySkills: ProficiencySkillResponse[] = [],
   referenceStatTypes: StatTypeResponse[] = [],
+  referenceSpells: SpellReferenceResponse[] = [],
   availableCurrencies: ReferenceCurrencyType[] = [],
 ): WizardAvailability {
   const classIdByKey: Record<string, string> = {};
   const raceIdByKey: Record<string, string> = {};
-  const classByName = new Map(CLASSES.map((cl) => [normalizeContentName(cl.label), cl]));
-  const classByVanillaId = new Map<string, (typeof CLASSES)[number]>();
-  Object.entries(VANILLA_CLASS_KEY_BY_ID).forEach(([id, key]) => {
-    const local = CLASSES.find((cl) => cl.key === key);
-    if (local) classByVanillaId.set(id, local);
-  });
-  const raceByName = new Map(RACES.map((r) => [normalizeContentName(r.label), r]));
   const classDetailById = new Map(referenceClasses.map((cl) => {
     const detail = normalizeClassDetail(cl);
     return [detail.id, detail] as const;
@@ -218,7 +195,6 @@ function buildAvailability(
   const raceDetailById = new Map(referenceRaces.map((r) => [r.id, r]));
 
   const seenClassIds = new Set<string>();
-  const usedClassKeys = new Set<string>();
   const classOptions = availableClasses
     .filter((entry) => {
       if (seenClassIds.has(entry.id)) return false;
@@ -226,19 +202,12 @@ function buildAvailability(
       return true;
     })
     .map((entry) => {
-      const detail = classDetailById.get(entry.id);
-      const local = classByName.get(normalizeContentName(entry.name))
-        || (detail ? classByName.get(normalizeContentName(detail.name)) : undefined)
-        || classByVanillaId.get(entry.id);
-      const localKeyAvailable = local && !usedClassKeys.has(local.key);
-      const key = localKeyAvailable ? local.key : `db-class:${entry.id}`;
-      usedClassKeys.add(key);
+      const key = `db-class:${entry.id}`;
       classIdByKey[key] = entry.id;
-      return { key, entry, local, detail };
+      return { key, entry, detail: classDetailById.get(entry.id) };
     });
 
   const seenRaceIds = new Set<string>();
-  const usedRaceKeys = new Set<string>();
   const raceOptions = availableRaces
     .filter((entry) => {
       if (seenRaceIds.has(entry.id)) return false;
@@ -246,12 +215,9 @@ function buildAvailability(
       return true;
     })
     .map((entry) => {
-      const local = raceByName.get(normalizeContentName(entry.name));
-      const localKeyAvailable = local && !usedRaceKeys.has(local.key);
-      const key = localKeyAvailable ? local.key : `db-race:${entry.id}`;
-      usedRaceKeys.add(key);
+      const key = `db-race:${entry.id}`;
       raceIdByKey[key] = entry.id;
-      return { key, entry, local, detail: raceDetailById.get(entry.id) };
+      return { key, entry, detail: raceDetailById.get(entry.id) };
     });
 
   return {
@@ -265,6 +231,7 @@ function buildAvailability(
     backgrounds: referenceBackgrounds,
     proficiencySkills: referenceProficiencySkills,
     statTypes: referenceStatTypes,
+    spells: referenceSpells,
     currencies: availableCurrencies,
   };
 }
@@ -304,6 +271,7 @@ export function CharacterCreationWizard({
       referenceBackgrounds,
       referenceProficiencySkills,
       referenceStatTypes,
+      referenceSpells,
       availableCurrencies,
     ),
     [
@@ -317,6 +285,7 @@ export function CharacterCreationWizard({
       referenceProficiencySkills,
       referenceRaces,
       referenceStatTypes,
+      referenceSpells,
       availableCurrencies,
     ],
   );
@@ -381,11 +350,7 @@ export function CharacterCreationWizard({
       return;
     }
 
-    const localBackground = BACKGROUNDS.find((b) => b.key === c.backgroundKey);
-    const backgroundName = localBackground?.label || c.background;
-    const background = c.backgroundKey.startsWith('db-background:')
-      ? availability.backgrounds.find((b) => c.backgroundKey === `db-background:${b.id}`)
-      : availability.backgrounds.find((b) => normalizeContentName(b.name) === normalizeContentName(backgroundName));
+    const background = availability.backgrounds.find((b) => c.backgroundKey === `db-background:${b.id}`);
     if (!background) {
       toast.error(t('wiz.err.background'));
       return;
@@ -411,13 +376,7 @@ export function CharacterCreationWizard({
     }
 
     const selectedRace = availability.raceOptions.find((r) => r.key === c.raceKey);
-    const localRace = RACES.find((race) => race.key === c.raceKey);
-    const localSubrace = localRace?.subraces.find((subrace) => subrace.key === c.subraceKey);
-    const selectedSubrace = selectedRace?.detail?.subraces?.find((subrace) => {
-      if (c.subraceKey === subrace.id) return true;
-      if (localSubrace && normalizeContentName(subrace.name) === normalizeContentName(localSubrace.label)) return true;
-      return normalizeContentName(subrace.name) === normalizeContentName(c.subraceKey);
-    });
+    const selectedSubrace = selectedRace?.detail?.subraces?.find((subrace) => subrace.id === c.subraceKey);
     const initialRewardGroups = initialContentRewardGroupsOf(selectedClass?.detail?.rewardGroups);
     const initialRewardSelections = buildContentLevelUpRequest(
       classId,

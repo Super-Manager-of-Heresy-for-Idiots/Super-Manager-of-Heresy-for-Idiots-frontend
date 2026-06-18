@@ -8,24 +8,20 @@ import {
 } from '@/components/ordo';
 import {
   ABILITIES,
-  BACKGROUNDS,
   POINT_BUY_BUDGET,
   POINT_BUY_COST,
-  SCHOOLS,
   SKILLS,
   STANDARD_ARRAY,
+  abilityKeyByStatName,
   abilityMod,
-  classByKey,
+  asiFromDetail,
   clamp,
-  combinedASI,
   fmtMod,
+  mergeAsi,
   pointBuySpent,
   profByLevel,
-  raceByKey,
   spellLimits,
-  spellsForClass,
   type AbilityKey,
-  type Spell,
 } from '@/data/wizard5e';
 import { ALIGNMENTS } from '@/data/wizard5e';
 import { useT } from '@/i18n/I18nContext';
@@ -33,7 +29,7 @@ import { useGameTerms } from '@/i18n/gameTerms';
 import { cn } from '@/lib/utils';
 import css from './steps.module.css';
 import type { WizardActions, WizardChar, ScoreMethod } from './wizardState';
-import type { ContentLabel } from '@/types';
+import type { ContentLabel, SpellReferenceResponse, StatTypeResponse } from '@/types';
 import { isContentRewardGroup, rewardGroupKey } from '@/lib/contentAdapters';
 import { RewardGroupPicker } from '@/components/content-rewards/RewardGroupPicker';
 import { initialContentRewardGroupsOf } from './rewardSelection';
@@ -44,11 +40,16 @@ import {
   type WizardAvailability,
 } from './parts';
 import {
-  CLASS_GLYPH,
   PORTRAIT_GALLERY,
-  asiText,
+  glyphForClass,
   makePortrait,
 } from './parts.helpers';
+
+// Resolve an AbilityKey from a backend stat id/name (statTypes carry localized names).
+const makeStatResolver = (statTypes: StatTypeResponse[]) => (statName: string): AbilityKey | undefined => {
+  const byId = statTypes.find((s) => s.id === statName)?.name;
+  return abilityKeyByStatName(byId ?? statName);
+};
 
 export interface StepProps {
   c: WizardChar;
@@ -116,10 +117,34 @@ export function StepBasics({ c, A, n, total }: StepProps) {
 export function StepRace({ c, A, n, total, availability }: StepProps) {
   const t = useT();
   const gt = useGameTerms();
-  const race = raceByKey(c.raceKey);
+  const resolveKey = useMemo(() => makeStatResolver(availability.statTypes), [availability.statTypes]);
   const selectedRace = availability.raceOptions.find((r) => r.key === c.raceKey);
   const selectedRaceDetail = selectedRace?.detail;
   const selectedDbSubrace = selectedRaceDetail?.subraces?.find((s) => s.id === c.subraceKey);
+  const pickRace = (option: typeof availability.raceOptions[number]) => {
+    const detail = option.detail;
+    A.setRace(option.key, option.entry.name, {
+      racialAsi: asiFromDetail(detail?.abilityScoreIncreases, resolveKey),
+      speed: detail?.speed ?? 30,
+      traits: detail?.traits ?? [],
+    });
+  };
+  const pickSubrace = (subraceId: string) => {
+    const sub = selectedRaceDetail?.subraces?.find((s) => s.id === subraceId);
+    if (!sub || !selectedRaceDetail) {
+      A.setSubrace(subraceId);
+      return;
+    }
+    A.setSubrace(subraceId, {
+      raceLabel: selectedRaceDetail.name + ' (' + sub.name + ')',
+      racialAsi: mergeAsi(
+        asiFromDetail(selectedRaceDetail.abilityScoreIncreases, resolveKey),
+        asiFromDetail(sub.abilityScoreIncreases, resolveKey),
+      ),
+      speed: sub.speedOverride ?? selectedRaceDetail.speed ?? 30,
+      traits: sub.traits?.length ? sub.traits : selectedRaceDetail.traits,
+    });
+  };
   const onFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files && e.target.files[0];
     if (!f) return;
@@ -134,17 +159,16 @@ export function StepRace({ c, A, n, total, availability }: StepProps) {
         <div>
           <div className="wiz-grid">
             {availability.raceOptions.map((option) => {
-              const r = option.local;
               const detail = option.detail;
               const source = option.entry.homebrewTitle || option.entry.source;
               return (
                 <WizCard
                   key={option.key}
                   active={c.raceKey === option.key}
-                  onClick={() => A.setRace(option.key, option.entry.name)}
+                  onClick={() => pickRace(option)}
                   glyph="hex"
                   title={option.entry.name}
-                  sub={(detail ? dbAsiText(detail.abilityScoreIncreases, gt.abilityAbbr) + ' \u00b7 ' + (detail.speed ?? 30) + ' ' + t('wiz.race.ft') : r ? asiText(r.asi, gt.abilityAbbr) + ' \u00b7 ' + r.speed + ' ' + t('wiz.race.ft') : '30 ' + t('wiz.race.ft')) + ' \u00b7 ' + source}
+                  sub={(detail ? dbAsiText(detail.abilityScoreIncreases, gt.abilityAbbr) + ' \u00b7 ' + (detail.speed ?? 30) + ' ' + t('wiz.race.ft') : '30 ' + t('wiz.race.ft')) + ' \u00b7 ' + source}
                 />
               );
             })}
@@ -156,7 +180,7 @@ export function StepRace({ c, A, n, total, availability }: StepProps) {
 
         <div className="wiz-side">
           <OrdoPanel frame padding={0}>
-            <PanelHeader title={selectedRaceDetail?.name || race?.label || selectedRace?.entry.name || t('wiz.race.selectRace')} glyph="hex" />
+            <PanelHeader title={selectedRaceDetail?.name || selectedRace?.entry.name || t('wiz.race.selectRace')} glyph="hex" />
             <div className={css.pad16}>
               {selectedRaceDetail ? (
                 <>
@@ -171,7 +195,7 @@ export function StepRace({ c, A, n, total, availability }: StepProps) {
                       <select
                         className={cn('ao-input', css.inkInput)}
                         value={c.subraceKey || ''}
-                        onChange={(e) => A.setSubrace(e.target.value)}
+                        onChange={(e) => pickSubrace(e.target.value)}
                       >
                         <option value="">{t('wiz.race.chooseSubrace')}</option>
                         {selectedRaceDetail.subraces.map((s) => (
@@ -181,33 +205,6 @@ export function StepRace({ c, A, n, total, availability }: StepProps) {
                       {selectedDbSubrace && (
                         <div className={cn('ao-italic', css.sub13)}>
                           {selectedDbSubrace.description}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </>
-              ) : race ? (
-                <>
-                  <div className={cn('ao-italic', css.desc14)}>{race.desc}</div>
-                  <DetailLine label={t('wiz.race.abilityBonus')}>{asiText(combinedASI(race, c.subraceKey), gt.abilityAbbr)}</DetailLine>
-                  <DetailLine label={t('wiz.race.speed')}>{(race.subraces.find((s) => s.key === c.subraceKey) || {}).speed || race.speed} {t('wiz.race.ft')}</DetailLine>
-                  <DetailLine label={t('wiz.race.traits')}>{race.traits.join(' \u00b7 ')}</DetailLine>
-                  {race.subraces.length > 0 && (
-                    <div className={css.mt14}>
-                      <label className="ao-label">{t('wiz.race.subrace')} <span className="wiz-req">{t('wiz.basics.required')}</span></label>
-                      <select
-                        className={cn('ao-input', css.inkInput)}
-                        value={c.subraceKey || ''}
-                        onChange={(e) => A.setSubrace(e.target.value)}
-                      >
-                        <option value="">{t('wiz.race.chooseSubrace')}</option>
-                        {race.subraces.map((s) => (
-                          <option key={s.key} value={s.key}>{s.label} ({asiText(s.asi, gt.abilityAbbr)})</option>
-                        ))}
-                      </select>
-                      {c.subraceKey && (
-                        <div className={cn('ao-italic', css.sub13)}>
-                          {race.subraces.find((s) => s.key === c.subraceKey)?.desc}
                         </div>
                       )}
                     </div>
@@ -276,7 +273,6 @@ export function StepRace({ c, A, n, total, availability }: StepProps) {
 export function StepClass({ c, A, n, total, availability }: StepProps) {
   const t = useT();
   const gt = useGameTerms();
-  const cls = classByKey(c.classKey);
   const selectedClass = availability.classOptions.find((cl) => cl.key === c.classKey);
   const selectedClassDetail = selectedClass?.detail;
   const prof = profByLevel(c.level);
@@ -318,11 +314,10 @@ export function StepClass({ c, A, n, total, availability }: StepProps) {
         <div>
           <div className="wiz-grid">
             {availability.classOptions.map((option) => {
-              const cl = option.local;
               const detail = option.detail;
               const source = option.entry.homebrewTitle || option.entry.source;
               const primaryStat = availability.statTypes.find((stat) => stat.id === detail?.primaryAbilityStatId);
-              const isSpellcaster = detail?.spellcasting?.isSpellcaster ?? cl?.spellcaster;
+              const isSpellcaster = detail?.spellcasting?.isSpellcaster;
               return (
                 <WizCard
                   key={option.key}
@@ -330,14 +325,18 @@ export function StepClass({ c, A, n, total, availability }: StepProps) {
                   onClick={() => A.setClass(option.key, option.entry.name, {
                     hitDie: detail?.hitDie,
                     isSpellcaster,
+                    hasCantrips: detail?.spellcasting?.hasCantrips,
+                    isHalfCaster: detail?.spellcasting?.isHalfCaster,
+                    slug: detail?.slug,
+                    classDesc: detail?.description,
                     saves: detail?.savingThrowStatNames?.map(abilityKeyForStatName).filter((key): key is AbilityKey => !!key),
                     proficiencies: detail?.armorWeaponProficiencies ? 'Weapons & armour: ' + detail.armorWeaponProficiencies : undefined,
                   })}
-                  glyph={cl ? CLASS_GLYPH[cl.key] : 'book'}
+                  glyph={glyphForClass(detail?.slug, option.entry.name)}
                   title={option.entry.name}
                   sub={(detail
                     ? 'd' + (detail.hitDie || 8) + ' \u00b7 ' + (primaryStat ? gt.abilityAbbr(shortStatName(primaryStat.name)) : 'DB') + (isSpellcaster ? ' \u00b7 ' + t('wiz.class.caster') : '')
-                    : cl ? 'd' + cl.hitDie + ' \u00b7 ' + gt.abilityAbbr(cl.primary) + (cl.spellcaster ? ' \u00b7 ' + t('wiz.class.caster') : '') : 'd8') + ' \u00b7 ' + source}
+                    : 'd8') + ' \u00b7 ' + source}
                 />
               );
             })}
@@ -348,7 +347,7 @@ export function StepClass({ c, A, n, total, availability }: StepProps) {
         </div>
         <div className="wiz-side">
           <OrdoPanel frame padding={0}>
-            <PanelHeader title={selectedClassDetail?.name || cls?.label || selectedClass?.entry.name || t('wiz.class.selectClass')} glyph={cls ? CLASS_GLYPH[cls.key] : 'sword'} />
+            <PanelHeader title={selectedClassDetail?.name || selectedClass?.entry.name || t('wiz.class.selectClass')} glyph={glyphForClass(selectedClassDetail?.slug, selectedClass?.entry.name)} />
             <div className={css.pad16}>
               {selectedClassDetail ? (
                 <>
@@ -377,44 +376,6 @@ export function StepClass({ c, A, n, total, availability }: StepProps) {
                     <div className={css.mt10}>
                       <OrdoChip tone="arcane" glyph="sigil-1">
                         {t('wiz.class.spellcaster')}{spellcastingAbilityText ? ' \u00b7 ' + spellcastingAbilityText : ''}{selectedClassDetail.spellcasting.isHalfCaster ? ' \u00b7 ' + t('wiz.class.half') : ''}{!selectedClassDetail.spellcasting.hasCantrips ? ' \u00b7 ' + t('wiz.class.noCantrips') : ''}
-                      </OrdoChip>
-                    </div>
-                  )}
-                  <OrdoDivider glyph="diamond-fill" />
-                  <div className="wiz-level">
-                    <div>
-                      <label className={cn('ao-label', css.label0)}>{t('wiz.class.level')}</label>
-                      <div className={cn('ao-codex', css.fs10)}>{t('wiz.class.profBonus', { prof: fmtMod(prof) })}</div>
-                    </div>
-                    <div className="wiz-level-ctrl">
-                      <button className="ao-iconbtn" onClick={() => A.setLevel(clamp(c.level - 1, 1, 20))}>
-                        <Rune kind="minus" size={12} />
-                      </button>
-                      <input
-                        className={cn('ao-input', css.lvlInput)}
-                        type="number"
-                        min={1}
-                        max={20}
-                        value={c.level}
-                        onChange={(e) => A.setLevel(clamp(Number(e.target.value || 1), 1, 20))}
-                      />
-                      <button className="ao-iconbtn" onClick={() => A.setLevel(clamp(c.level + 1, 1, 20))}>
-                        <Rune kind="plus" size={12} />
-                      </button>
-                    </div>
-                  </div>
-                </>
-              ) : cls ? (
-                <>
-                  <div className={cn('ao-italic', css.desc14)}>{cls.desc}</div>
-                  <DetailLine label={t('wiz.class.hitDie')}>d{cls.hitDie}</DetailLine>
-                  <DetailLine label={t('wiz.class.primary')}>{gt.ability(ABILITIES.find((a) => a.key === cls.primary)?.label)}</DetailLine>
-                  <DetailLine label={t('wiz.class.saves')}>{cls.saves.map((s) => gt.abilityAbbr(ABILITIES.find((a) => a.key === s)?.abbr)).join(' \u00b7 ')}</DetailLine>
-                  <DetailLine label={t('wiz.class.proficiencies')}>{cls.profs}</DetailLine>
-                  {cls.spellcaster && (
-                    <div className={css.mt10}>
-                      <OrdoChip tone="arcane" glyph="sigil-1">
-                        {t('wiz.class.spellcaster')}{cls.halfCaster ? ' \u00b7 ' + t('wiz.class.half') : ''}{!cls.cantrips ? ' \u00b7 ' + t('wiz.class.noCantrips') : ''}
                       </OrdoChip>
                     </div>
                   )}
@@ -536,8 +497,7 @@ function isOptDisabled(v: number, current: number, base: Record<AbilityKey, numb
 export function StepAbilities({ c, A, n, total }: StepProps) {
   const t = useT();
   const gt = useGameTerms();
-  const race = raceByKey(c.raceKey);
-  const asi = combinedASI(race, c.subraceKey);
+  const asi = c.racialAsi || {};
   const base = c.baseScores;
   const spent = pointBuySpent(base);
   const remaining = POINT_BUY_BUDGET - spent;
@@ -658,18 +618,14 @@ export function StepBackground({ c, A, n, total, availability }: StepProps) {
   const t = useT();
   const gt = useGameTerms();
   const selectedClass = availability.classOptions.find((option) => option.key === c.classKey);
-  const cls = classByKey(c.classKey) || selectedClass?.local;
-  const bg = BACKGROUNDS.find((b) => b.key === c.backgroundKey);
-  const dbBackground = availability.backgrounds.find((b) => c.backgroundKey === `db-background:${b.id}` || norm(b.name) === norm(c.background));
-  const backgroundOptions = availability.backgrounds.length
-    ? availability.backgrounds.map((entry) => {
-      const local = BACKGROUNDS.find((b) => norm(b.label) === norm(entry.name));
-      return { key: local?.key ?? `db-background:${entry.id}`, entry, local };
-    })
-    : BACKGROUNDS.map((local) => ({ key: local.key, entry: null, local }));
+  const dbBackground = availability.backgrounds.find((b) => c.backgroundKey === `db-background:${b.id}`);
+  const backgroundOptions = availability.backgrounds.map((entry) => ({
+    key: `db-background:${entry.id}`,
+    entry,
+  }));
   // Final contract: skill choice driven by `skillOptions` (ContentLabel[]) and
-  // `skillChoiceAny` (any skill allowed). Falls back to legacy local skills when
-  // the class has no content detail at all.
+  // `skillChoiceAny` (any skill allowed). Falls back to all proficiency skills
+  // when the class has no explicit skill options.
   const detail = selectedClass?.detail;
   const skillChoiceAny = detail?.skillChoiceAny ?? false;
   const allSkillOptions: { id: string; name: string }[] = availability.proficiencySkills.length
@@ -679,15 +635,11 @@ export function StepBackground({ c, A, n, total, availability }: StepProps) {
     ? allSkillOptions
     : detail?.skillOptions?.length
       ? detail.skillOptions.map((label) => ({ id: label.id, name: label.name }))
-      : cls?.skills.map((key) => {
-        const local = SKILLS.find((skill) => skill.key === key);
-        const ref = availability.proficiencySkills.find((skill) => norm(skill.name) === norm(local?.label));
-        return ref || (local ? { id: key, name: local.label } : null);
-      }).filter((skill): skill is { id: string; name: string } => !!skill) || [];
+      : allSkillOptions;
   const classSkillKeys = classSkillOptions.map((skill) => skillKeyForLabel(skill.name) || skill.id);
   const chosen = c.classSkills || [];
-  const limit = detail?.skillChoiceCount ?? cls?.skillCount ?? 0;
-  const bgSkills = bg ? bg.skills : (dbBackground?.skillProficiencyNames || []).map((name) => skillKeyForLabel(name) || name);
+  const limit = detail?.skillChoiceCount ?? 0;
+  const bgSkills = (dbBackground?.skillProficiencyNames || []).map((name) => skillKeyForLabel(name) || name);
 
   return (
     <div>
@@ -697,37 +649,37 @@ export function StepBackground({ c, A, n, total, availability }: StepProps) {
           <div className={cn('ao-overline', css.mb10)}>{t('wiz.bg.background')}</div>
           <div className="wiz-grid wiz-grid--bg">
             {backgroundOptions.map((option) => {
-              const grantedSkillKeys = option.local
-                ? option.local.skills
-                : (option.entry?.skillProficiencyNames || []).map((name) => skillKeyForLabel(name) || name);
+              const grantedSkillKeys = (option.entry.skillProficiencyNames || []).map((name) => skillKeyForLabel(name) || name);
               return (
                 <WizCard
                   key={option.key}
                   active={c.backgroundKey === option.key}
-                  onClick={() => A.setBackground(option.key, option.entry?.name || option.local?.label, grantedSkillKeys)}
+                  onClick={() => A.setBackground(option.key, option.entry.name, grantedSkillKeys, {
+                    desc: option.entry.description,
+                    extra: option.entry.grantedExtras,
+                  })}
                   glyph="scroll"
-                  title={option.entry?.name || option.local?.label || t('wiz.bg.backgroundFallback')}
-                  sub={option.local
-                    ? option.local.skills.map((s) => gt.skill(SKILLS.find((x) => x.key === s)?.label)).join(' \u00b7 ')
-                    : (option.entry?.skillProficiencyNames || []).map((nm) => gt.skill(nm)).join(' \u00b7 ')}
+                  title={option.entry.name || t('wiz.bg.backgroundFallback')}
+                  sub={(option.entry.skillProficiencyNames || []).map((nm) => gt.skill(nm)).join(' \u00b7 ')}
                 />
               );
             })}
+            {!backgroundOptions.length && (
+              <div className="ao-codex">{t('wiz.bg.chooseBackground')}</div>
+            )}
           </div>
         </div>
         <div className="wiz-side">
           <OrdoPanel frame padding={0}>
             <PanelHeader title={t('wiz.bg.grants')} glyph="scroll" />
             <div className={css.pad16}>
-              {bg || dbBackground ? (
+              {dbBackground ? (
                 <>
-                  <div className={cn('ao-italic', css.desc14)}>{bg?.desc || dbBackground?.description}</div>
+                  <div className={cn('ao-italic', css.desc14)}>{dbBackground.description}</div>
                   <DetailLine label={t('wiz.bg.skillProficiencies')}>
-                    {bg
-                      ? bg.skills.map((s) => gt.skill(SKILLS.find((x) => x.key === s)?.label)).join(' \u00b7 ')
-                      : (dbBackground?.skillProficiencyNames || []).map((nm) => gt.skill(nm)).join(' \u00b7 ')}
+                    {(dbBackground.skillProficiencyNames || []).map((nm) => gt.skill(nm)).join(' \u00b7 ')}
                   </DetailLine>
-                  <DetailLine label={t('wiz.bg.alsoGrants')}>{bg?.extra || dbBackground?.grantedExtras || '\u2014'}</DetailLine>
+                  <DetailLine label={t('wiz.bg.alsoGrants')}>{dbBackground.grantedExtras || '\u2014'}</DetailLine>
                 </>
               ) : (
                 <div className="ao-codex">{t('wiz.bg.chooseBackground')}</div>
@@ -779,11 +731,21 @@ export function StepBackground({ c, A, n, total, availability }: StepProps) {
 // ════════════════════════════════════════════════════════════
 // STEP 6 — SPELLS (spellcasters only)
 // ════════════════════════════════════════════════════════════
-export function StepSpells({ c, A, n, total }: StepProps) {
+export function StepSpells({ c, A, n, total, availability }: StepProps) {
   const t = useT();
-  const cls = classByKey(c.classKey);
-  const limits = spellLimits(cls, c.level);
-  const list = useMemo(() => spellsForClass(c.classKey), [c.classKey]);
+  const limits = spellLimits(
+    { isSpellcaster: c.isSpellcaster, hasCantrips: c.hasCantrips, isHalfCaster: c.isHalfCaster, kind: c.classSlug },
+    c.level,
+  );
+  const classId = availability.classIdByKey[c.classKey];
+  const list = useMemo(
+    () => availability.spells.filter((sp) => !classId || (sp.availableToClassIds?.includes(classId) ?? false)),
+    [availability.spells, classId],
+  );
+  const schools = useMemo(
+    () => Array.from(new Set(list.map((s) => s.school).filter((x): x is string => !!x))).sort(),
+    [list],
+  );
   const [q, setQ] = useState('');
   const [lvlFilter, setLvlFilter] = useState('all');
   const [schoolFilter, setSchoolFilter] = useState('all');
@@ -791,6 +753,9 @@ export function StepSpells({ c, A, n, total }: StepProps) {
 
   const cantripsChosen = c.spells.cantrips || [];
   const knownChosen = c.spells.known || [];
+
+  // Selections are stored by English name so the Forge submit can resolve ids.
+  const spellKey = (s: SpellReferenceResponse): string => s.nameEn ?? s.name;
 
   const filtered = list.filter((s) => {
     if (q && !s.name.toLowerCase().includes(q.toLowerCase())) return false;
@@ -802,11 +767,12 @@ export function StepSpells({ c, A, n, total }: StepProps) {
   const cantrips = filtered.filter((s) => s.level === 0);
   const leveled = filtered.filter((s) => s.level > 0);
 
-  const SpellRow = ({ s }: { s: Spell }) => {
+  const SpellRow = ({ s }: { s: SpellReferenceResponse }) => {
     const isCantrip = s.level === 0;
     const chosenArr = isCantrip ? cantripsChosen : knownChosen;
     const lim = isCantrip ? limits.cantrips : limits.spells;
-    const on = chosenArr.includes(s.name);
+    const key = spellKey(s);
+    const on = chosenArr.includes(key);
     const atLimit = chosenArr.length >= lim && !on;
     return (
       <div className={'wiz-spell' + (on ? ' is-on' : '')}>
@@ -814,25 +780,25 @@ export function StepSpells({ c, A, n, total }: StepProps) {
           type="button"
           className="wiz-spell-pick"
           disabled={atLimit}
-          onClick={() => A.toggleSpell(isCantrip ? 'cantrips' : 'known', s.name)}
+          onClick={() => A.toggleSpell(isCantrip ? 'cantrips' : 'known', key)}
         >
           <span className={cn(css.pip13, on && css.pipOn)} />
         </button>
-        <button type="button" className="wiz-spell-body" onClick={() => setOpen(open === s.name ? null : s.name)}>
+        <button type="button" className="wiz-spell-body" onClick={() => setOpen(open === s.id ? null : s.id)}>
           <div className="wiz-spell-main">
             <span className="wiz-spell-name">{s.name}</span>
-            <span className={cn('ao-codex', css.fs10)}>{isCantrip ? t('wiz.spells.cantrip') : t('wiz.spells.lvl', { level: s.level })} · {s.school}</span>
+            <span className={cn('ao-codex', css.fs10)}>{isCantrip ? t('wiz.spells.cantrip') : t('wiz.spells.lvl', { level: s.level })}{s.school ? ' · ' + s.school : ''}</span>
           </div>
-          <Rune kind={open === s.name ? 'chev-d' : 'chev-r'} size={12} color="var(--ink-faint)" />
+          <Rune kind={open === s.id ? 'chev-d' : 'chev-r'} size={12} color="var(--ink-faint)" />
         </button>
-        {open === s.name && <div className="wiz-spell-desc ao-italic">{s.desc}</div>}
+        {open === s.id && <div className="wiz-spell-desc ao-italic">{s.description}</div>}
       </div>
     );
   };
 
   return (
     <div>
-      <StepHead n={n} total={total} title={t('wiz.spells.title')} sub={t('wiz.spells.sub', { class: cls ? cls.label : t('wiz.spells.caster') })} />
+      <StepHead n={n} total={total} title={t('wiz.spells.title')} sub={t('wiz.spells.sub', { class: c.cls || t('wiz.spells.caster') })} />
 
       <div className="wiz-spell-toolbar">
         <div className="wiz-search">
@@ -848,7 +814,7 @@ export function StepSpells({ c, A, n, total }: StepProps) {
         </select>
         <select className="ao-input wiz-filter" value={schoolFilter} onChange={(e) => setSchoolFilter(e.target.value)}>
           <option value="all">{t('wiz.spells.allSchools')}</option>
-          {SCHOOLS.map((s) => <option key={s} value={s}>{s}</option>)}
+          {schools.map((s) => <option key={s} value={s}>{s}</option>)}
         </select>
       </div>
 
@@ -864,7 +830,7 @@ export function StepSpells({ c, A, n, total }: StepProps) {
             {limits.cantrips === 0
               ? <div className={cn('ao-codex', css.pad14)}>{t('wiz.spells.noCantrips')}</div>
               : cantrips.length
-                ? cantrips.map((s) => <SpellRow key={s.name} s={s} />)
+                ? cantrips.map((s) => <SpellRow key={s.id} s={s} />)
                 : <div className={cn('ao-codex', css.pad14)}>{t('wiz.spells.noCantripsMatch')}</div>}
           </div>
         </OrdoPanel>
@@ -877,7 +843,7 @@ export function StepSpells({ c, A, n, total }: StepProps) {
           />
           <div className="wiz-spell-list ao-scroll">
             {leveled.length
-              ? leveled.map((s) => <SpellRow key={s.name} s={s} />)
+              ? leveled.map((s) => <SpellRow key={s.id} s={s} />)
               : <div className={cn('ao-codex', css.pad14)}>{t('wiz.spells.noSpellsMatch')}</div>}
           </div>
         </OrdoPanel>

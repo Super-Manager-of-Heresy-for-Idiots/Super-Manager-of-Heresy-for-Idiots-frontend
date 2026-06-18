@@ -2,13 +2,13 @@ import type { ReactNode } from 'react';
 import { Rune } from '@/components/ordo';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
-import type { CharClass, Race } from '@/data/wizard5e';
 import type {
   AvailableContentEntry,
   BackgroundResponse,
   CharacterClassDetailResponse,
   CharacterRaceDetailResponse,
   ProficiencySkillResponse,
+  SpellReferenceResponse,
   StatTypeResponse,
 } from '@/types';
 import type { ReferenceCurrencyType } from '@/api/reference.api';
@@ -18,14 +18,12 @@ import s from './parts.module.css';
 export interface WizardClassOption {
   key: string;
   entry: AvailableContentEntry;
-  local?: CharClass;
   detail?: CharacterClassDetailResponse;
 }
 
 export interface WizardRaceOption {
   key: string;
   entry: AvailableContentEntry;
-  local?: Race;
   detail?: CharacterRaceDetailResponse;
 }
 
@@ -40,6 +38,7 @@ export interface WizardAvailability {
   backgrounds: BackgroundResponse[];
   proficiencySkills: ProficiencySkillResponse[];
   statTypes: StatTypeResponse[];
+  spells: SpellReferenceResponse[];
   currencies: ReferenceCurrencyType[];
 }
 

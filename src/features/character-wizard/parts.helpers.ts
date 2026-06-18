@@ -1,14 +1,3 @@
-import type { ASI } from '@/data/wizard5e';
-import { ABILITIES } from '@/data/wizard5e';
-
-export function asiText(asi: ASI, fmtAbbr: (s: string) => string = (s) => s): string {
-  const parts = (Object.keys(asi || {}) as (keyof ASI)[]).map((k) => {
-    const a = ABILITIES.find((x) => x.key === k);
-    return fmtAbbr(a ? a.abbr : String(k).toUpperCase()) + ' +' + asi[k];
-  });
-  return parts.length ? parts.join(' · ') : '—';
-}
-
 // ── Portrait placeholder generator (data-URI SVG) ──────────
 const PORTRAIT_GLYPHS: Record<string, string> = {
   diamond: '<path d="M60 28 92 60 60 92 28 60Z"/>',
@@ -40,3 +29,8 @@ export const CLASS_GLYPH: Record<string, string> = {
   monk: 'cir-dot', paladin: 'shield', ranger: 'tri', rogue: 'diamond', sorcerer: 'sigil-1',
   warlock: 'eye', wizard: 'book',
 };
+
+/** Glyph for a class by slug (preferred) or name, defaulting to a generic book. */
+export function glyphForClass(slug?: string, name?: string): string {
+  return CLASS_GLYPH[(slug || name || '').trim().toLowerCase()] ?? 'book';
+}
