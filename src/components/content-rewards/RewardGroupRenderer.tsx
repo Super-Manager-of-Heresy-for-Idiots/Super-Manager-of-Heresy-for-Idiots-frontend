@@ -170,8 +170,8 @@ export interface RewardGroupViewProps {
 /**
  * Renders a content-shaped reward group (direct grants + selectable options) using
  * the normalized `grants`/`options` payload. Read-only for grants; options support
- * radio (chooseMax=1) or checkbox (min/max) selection. Submit wiring is deferred until
- * the backend accepts ContentLevelUpRequest.
+ * radio (chooseMax=1) or checkbox (min/max) selection. Submit wiring is owned by
+ * the flow that embeds this renderer.
  */
 export function RewardGroupView({ group, selectedOptionIds, onChange }: RewardGroupViewProps) {
   const t = useT();

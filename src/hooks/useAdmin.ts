@@ -1,17 +1,16 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { adminApi } from '@/api/admin.api';
+import { referenceApi } from '@/api/reference.api';
 import { useT } from '@/i18n/I18nContext';
 import type {
   ApiError,
   CreateStatTypeRequest,
   CreateItemTypeRequest,
-  CreateCharacterClassRequest,
   CreateCharacterRaceRequest,
   CreateSkillRequest,
   CreateSubclassRequest,
   CreateFeatRequest,
-  CreateClassLevelRewardRequest,
   CreateBuffDebuffRequest,
   CreateEnchantmentTypeRequest,
   SetSkillEffectsRequest,
@@ -135,43 +134,15 @@ export function useDeleteItemType() {
 }
 
 // === Character Classes ===
+// Source of truth is the content model. The legacy create/update hooks were removed
+// (their backend endpoints are gone — class authoring now goes through classAuthoringApi
+// in the class-builder feature). The list reads /reference/classes so it reflects builder writes.
 export function useCharacterClasses() {
   return useQuery({
     queryKey: ['character-classes'],
     queryFn: async () => {
-      const response = await adminApi.getCharacterClasses();
+      const response = await referenceApi.getClasses();
       return response.data;
-    },
-  });
-}
-
-export function useCreateCharacterClass() {
-  const queryClient = useQueryClient();
-  const t = useT();
-  return useMutation({
-    mutationFn: (data: CreateCharacterClassRequest) => adminApi.createCharacterClass(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['character-classes'] });
-      toast.success(t('hk.class.created'));
-    },
-    onError: (error: AxiosError<ApiError>) => {
-      toast.error(error.response?.data?.message || t('hk.class.createFailed'));
-    },
-  });
-}
-
-export function useUpdateCharacterClass() {
-  const queryClient = useQueryClient();
-  const t = useT();
-  return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: CreateCharacterClassRequest }) =>
-      adminApi.updateCharacterClass(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['character-classes'] });
-      toast.success(t('hk.class.updated'));
-    },
-    onError: (error: AxiosError<ApiError>) => {
-      toast.error(error.response?.data?.message || t('hk.class.updateFailed'));
     },
   });
 }
@@ -436,49 +407,8 @@ export function useDeleteFeat() {
   });
 }
 
-// === Level Rewards ===
-export function useLevelRewards(classId: string) {
-  return useQuery({
-    queryKey: ['level-rewards', classId],
-    queryFn: async () => {
-      const response = await adminApi.getLevelRewards(classId);
-      return response.data;
-    },
-    enabled: !!classId,
-  });
-}
-
-export function useCreateLevelReward() {
-  const queryClient = useQueryClient();
-  const t = useT();
-  return useMutation({
-    mutationFn: ({ classId, data }: { classId: string; data: CreateClassLevelRewardRequest }) =>
-      adminApi.createLevelReward(classId, data),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['level-rewards', variables.classId] });
-      toast.success(t('hk.levelReward.created'));
-    },
-    onError: (error: AxiosError<ApiError>) => {
-      toast.error(error.response?.data?.message || t('hk.levelReward.createFailed'));
-    },
-  });
-}
-
-export function useDeleteLevelReward() {
-  const queryClient = useQueryClient();
-  const t = useT();
-  return useMutation({
-    mutationFn: ({ classId, rewardEntryId }: { classId: string; rewardEntryId: string }) =>
-      adminApi.deleteLevelReward(classId, rewardEntryId),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['level-rewards', variables.classId] });
-      toast.success(t('hk.levelReward.deleted'));
-    },
-    onError: (error: AxiosError<ApiError>) => {
-      toast.error(error.response?.data?.message || t('hk.levelReward.deleteFailed'));
-    },
-  });
-}
+// Legacy class level-rewards hooks removed — rewards are authored in the class-builder
+// (classAuthoringApi) on the new content model.
 
 // === Buffs / Debuffs ===
 export function useBuffsDebuffs(params?: { isBuff?: boolean; effectType?: string }, enabled = true) {

@@ -3,23 +3,19 @@ import type {
   ApiResponse,
   StatTypeResponse,
   ItemTypeResponse,
-  CharacterClassResponse,
   CharacterRaceResponse,
   UserResponse,
   SkillResponse,
   FeatResponse,
   SubclassResponse,
-  ClassLevelRewardResponse,
   BuffDebuffResponse,
   EnchantmentTypeResponse,
   CreateStatTypeRequest,
   CreateItemTypeRequest,
-  CreateCharacterClassRequest,
   CreateCharacterRaceRequest,
   CreateSkillRequest,
   CreateFeatRequest,
   CreateSubclassRequest,
-  CreateClassLevelRewardRequest,
   CreateBuffDebuffRequest,
   CreateEnchantmentTypeRequest,
   SetSkillEffectsRequest,
@@ -71,27 +67,7 @@ export const adminApi = {
     return response.data;
   },
 
-  // === Character Classes ===
-  getCharacterClasses: async (): Promise<ApiResponse<CharacterClassResponse[]>> => {
-    const response = await api.get<ApiResponse<CharacterClassResponse[]>>('/admin/character-classes');
-    return response.data;
-  },
-  createCharacterClass: async (data: CreateCharacterClassRequest): Promise<ApiResponse<CharacterClassResponse>> => {
-    const response = await api.post<ApiResponse<CharacterClassResponse>>('/admin/character-classes', data);
-    return response.data;
-  },
-  getCharacterClass: async (id: string): Promise<ApiResponse<CharacterClassResponse>> => {
-    const response = await api.get<ApiResponse<CharacterClassResponse>>(`/admin/character-classes/${id}`);
-    return response.data;
-  },
-  updateCharacterClass: async (id: string, data: CreateCharacterClassRequest): Promise<ApiResponse<CharacterClassResponse>> => {
-    const response = await api.put<ApiResponse<CharacterClassResponse>>(`/admin/character-classes/${id}`, data);
-    return response.data;
-  },
-  deleteCharacterClass: async (id: string): Promise<ApiResponse<void>> => {
-    const response = await api.delete<ApiResponse<void>>(`/admin/character-classes/${id}`);
-    return response.data;
-  },
+  // Character classes are authored via the content model (class-builder + /reference/classes).
 
   // === Character Races ===
   getCharacterRaces: async (): Promise<ApiResponse<CharacterRaceResponse[]>> => {
@@ -184,20 +160,6 @@ export const adminApi = {
   },
   deleteFeat: async (id: string): Promise<ApiResponse<void>> => {
     const response = await api.delete<ApiResponse<void>>(`/admin/feats/${id}`);
-    return response.data;
-  },
-
-  // === Level Rewards ===
-  getLevelRewards: async (classId: string): Promise<ApiResponse<ClassLevelRewardResponse[]>> => {
-    const response = await api.get<ApiResponse<ClassLevelRewardResponse[]>>(`/admin/classes/${classId}/level-rewards`);
-    return response.data;
-  },
-  createLevelReward: async (classId: string, data: CreateClassLevelRewardRequest): Promise<ApiResponse<ClassLevelRewardResponse>> => {
-    const response = await api.post<ApiResponse<ClassLevelRewardResponse>>(`/admin/classes/${classId}/level-rewards`, data);
-    return response.data;
-  },
-  deleteLevelReward: async (classId: string, rewardId: string): Promise<ApiResponse<void>> => {
-    const response = await api.delete<ApiResponse<void>>(`/admin/classes/${classId}/level-rewards/${rewardId}`);
     return response.data;
   },
 

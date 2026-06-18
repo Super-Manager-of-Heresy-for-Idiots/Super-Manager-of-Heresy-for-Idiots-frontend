@@ -17,6 +17,7 @@ import {
   type AbilityKey,
   type ScoreMap,
 } from '@/data/wizard5e';
+import type { ChildSelections } from '@/pages/gm/campaigns/contentLevelUp';
 
 export type ScoreMethod = 'standard' | 'pointbuy' | 'roll';
 
@@ -39,8 +40,10 @@ export interface WizardChar {
   saves: Partial<Record<AbilityKey, boolean>>;
   ac: number;
   hp: { max: number; cur: number; temp: number };
-  // content-shaped level-1 reward selections: group key -> selected option ids (prepared; not yet submitted)
+  // content-shaped level-1 reward selections: group key -> selected option ids
   contentRewardSelections: Record<string, string[]>;
+  // grant id -> child selections for ability/skill/spell grants
+  contentRewardChildSelections: ChildSelections;
   // abilities
   baseScores: ScoreMap;
   scores: ScoreMap;
@@ -116,6 +119,7 @@ export function initialChar(): WizardChar {
     classKey: '', cls: '', isSpellcaster: false, hitDiceType: 'd8', hitDiceTotal: '',
     saves: {}, ac: 10, hp: { max: 0, cur: 0, temp: 0 },
     contentRewardSelections: {},
+    contentRewardChildSelections: {},
     baseScores: zeroScores(), scores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
     scoreMethod: 'standard', rolledPool: [],
     backgroundKey: '', background: '', classSkills: [], bgSkills: [], skills: {},
@@ -357,6 +361,7 @@ export function makeActions(c: WizardChar, setC: (c: WizardChar) => void): Wizar
         classSkills: [],
         spells: { cantrips: [], known: [] },
         contentRewardSelections: {},
+        contentRewardChildSelections: {},
       }));
     },
     setMethod: (m) => setC(recompute({

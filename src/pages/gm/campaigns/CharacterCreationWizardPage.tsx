@@ -76,6 +76,7 @@ export default function CharacterCreationWizardPage() {
       referenceBackgrounds={referenceContent?.backgrounds ?? []}
       referenceProficiencySkills={referenceContent?.skills ?? []}
       referenceStatTypes={referenceContent?.statTypes ?? []}
+      referenceSpells={referenceContent?.spells ?? []}
       availableCurrencies={currencies ?? []}
       submitting={createMutation.isPending}
       onSubmit={handleSubmit}

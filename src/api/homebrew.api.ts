@@ -13,7 +13,6 @@ import type {
   AddContentRequest,
   HomebrewStatus,
   CreateItemTypeRequest,
-  CreateCharacterClassRequest,
   CreateSkillRequest,
   CreateFeatRequest,
   CreateBuffDebuffRequest,
@@ -58,11 +57,6 @@ export const homebrewApi = {
 
   createPackageItemType: async (id: string, data: CreateItemTypeRequest): Promise<ApiResponse<HomebrewDetailResponse>> => {
     const response = await api.post<ApiResponse<HomebrewDetailResponse>>(`/homebrew/my/${id}/content/item-types`, data);
-    return response.data;
-  },
-
-  createPackageCharacterClass: async (id: string, data: CreateCharacterClassRequest): Promise<ApiResponse<HomebrewDetailResponse>> => {
-    const response = await api.post<ApiResponse<HomebrewDetailResponse>>(`/homebrew/my/${id}/content/classes`, data);
     return response.data;
   },
 

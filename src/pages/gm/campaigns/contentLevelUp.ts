@@ -11,7 +11,7 @@ import { grantKind } from '@/components/content-rewards/grants';
 import type {
   ContentLevelUpRequest,
   ContentRewardGrant,
-  ContentRewardSelection,
+  ContentLevelUpChildSelections,
   RewardGroup,
 } from '@/types';
 
@@ -104,31 +104,26 @@ export function contentLevelUpComplete(
     .every((g) => groupComplete(g, options[rewardGroupKey(g)] ?? [], child));
 }
 
-type ChildPayload = Pick<
-  ContentRewardSelection,
-  'abilityScoreSelections' | 'skillSelections' | 'spellSelections'
->;
-
-function collectChild(grants: ContentRewardGrant[], child: ChildSelections): ChildPayload {
-  const abilityScoreSelections: NonNullable<ContentRewardSelection['abilityScoreSelections']> = [];
-  const skillSelections: NonNullable<ContentRewardSelection['skillSelections']> = [];
-  const spellSelections: NonNullable<ContentRewardSelection['spellSelections']> = [];
+function collectChild(grants: ContentRewardGrant[], child: ChildSelections): ContentLevelUpChildSelections | undefined {
+  const abilityScores: NonNullable<ContentLevelUpChildSelections['abilityScores']> = [];
+  const skillIds: NonNullable<ContentLevelUpChildSelections['skillIds']> = [];
+  const spellIds: NonNullable<ContentLevelUpChildSelections['spellIds']> = [];
   for (const g of grants) {
     const c = child[g.id];
     if (!c) continue;
     if (c.abilities) {
-      for (const [abilityScoreId, bonusAmount] of Object.entries(c.abilities)) {
-        if (bonusAmount > 0) abilityScoreSelections.push({ grantId: g.id, abilityScoreId, bonusAmount });
+      for (const [abilityScoreId, amount] of Object.entries(c.abilities)) {
+        if (amount > 0) abilityScores.push({ abilityScoreId, amount });
       }
     }
-    if (c.skills) for (const skillId of c.skills) skillSelections.push({ grantId: g.id, skillId });
-    if (c.spells) for (const spellId of c.spells) spellSelections.push({ grantId: g.id, spellId });
+    if (c.skills) skillIds.push(...c.skills);
+    if (c.spells) spellIds.push(...c.spells);
   }
-  return {
-    abilityScoreSelections: abilityScoreSelections.length ? abilityScoreSelections : undefined,
-    skillSelections: skillSelections.length ? skillSelections : undefined,
-    spellSelections: spellSelections.length ? spellSelections : undefined,
-  };
+  const payload: ContentLevelUpChildSelections = {};
+  if (abilityScores.length) payload.abilityScores = abilityScores;
+  if (skillIds.length) payload.skillIds = [...new Set(skillIds)];
+  if (spellIds.length) payload.spellIds = [...new Set(spellIds)];
+  return Object.keys(payload).length ? payload : undefined;
 }
 
 /** Builds the final ContentLevelUpRequest from option + child selections. */
@@ -138,22 +133,22 @@ export function buildContentLevelUpRequest(
   options: OptionSelections,
   child: ChildSelections,
 ): ContentLevelUpRequest {
-  const rewardSelections: ContentRewardSelection[] = [];
+  const selections: ContentLevelUpRequest['selections'] = [];
   for (const g of groups.filter(isContentRewardGroup)) {
-    const groupId = g.id;
-    if (!groupId) continue;
+    const rewardGroupId = g.id;
+    if (!rewardGroupId) continue;
     const optionIds = options[rewardGroupKey(g)] ?? [];
     if ((g.options?.length ?? 0) > 0) {
-      for (const optId of optionIds) {
-        const opt = g.options!.find((o) => o.id === optId);
-        rewardSelections.push({ groupId, optionId: optId, ...collectChild(opt?.grants ?? [], child) });
-      }
-    } else {
-      const payload = collectChild(g.grants ?? [], child);
-      if (payload.abilityScoreSelections || payload.skillSelections || payload.spellSelections) {
-        rewardSelections.push({ groupId, ...payload });
-      }
+      const grants = (g.options ?? [])
+        .filter((o) => optionIds.includes(o.id))
+        .flatMap((o) => o.grants ?? []);
+      const childSelections = collectChild(grants, child);
+      selections.push({
+        rewardGroupId,
+        optionIds,
+        ...(childSelections ? { childSelections } : {}),
+      });
     }
   }
-  return { classId, rewardSelections };
+  return { classId, selections };
 }

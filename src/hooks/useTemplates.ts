@@ -1,7 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import toast from 'react-hot-toast';
-import { charactersFullApi, type CreateFullCharacterRequest } from '@/api/characters-full.api';
+import {
+  charactersFullApi,
+  type CreateTemplateCharacterRequest,
+} from '@/api/characters-full.api';
 import { referenceApi } from '@/api/reference.api';
 import { useT, useI18n } from '@/i18n/I18nContext';
 import type { ApiError, AvailableContentEntry, CharacterResponse, UpdateCharacterRequest } from '@/types';
@@ -34,7 +37,7 @@ export function useCreateTemplate() {
   const qc = useQueryClient();
   const t = useT();
   return useMutation({
-    mutationFn: (data: CreateFullCharacterRequest) => charactersFullApi.createTemplate(data),
+    mutationFn: (data: CreateTemplateCharacterRequest) => charactersFullApi.createTemplate(data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: myKey });
       toast.success(t('hk.template.created'));
@@ -128,13 +131,14 @@ export function useGlobalReferenceContent() {
   return useQuery({
     queryKey: ['reference', 'global', lang],
     queryFn: async () => {
-      const [classes, races, backgrounds, skills, statTypes, currencies] = await Promise.all([
+      const [classes, races, backgrounds, skills, statTypes, currencies, spells] = await Promise.all([
         referenceApi.getClasses(),
         referenceApi.getRaces(),
         referenceApi.getBackgrounds(),
         referenceApi.getSkills(),
         referenceApi.getStatTypes(),
         referenceApi.getCurrencies(),
+        referenceApi.getSpells(),
       ]);
       const classList = classes.data ?? [];
       const raceList = races.data ?? [];
@@ -145,6 +149,7 @@ export function useGlobalReferenceContent() {
         skills: skills.data ?? [],
         statTypes: statTypes.data ?? [],
         currencies: currencies.data ?? [],
+        spells: spells.data ?? [],
         // Wizard picker entries are derived from the detail lists — no extra
         // round-trip to a (non-existent) `/reference/available/*` endpoint.
         availableClasses: classList.map(detailToEntry),

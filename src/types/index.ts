@@ -214,32 +214,25 @@ export interface InviteCodeResponse {
 
 export interface ContentLevelUpRequest {
   classId: string;
-  rewardSelections: ContentRewardSelection[];
+  selections: ContentLevelUpGroupSelection[];
 }
 
-export interface ContentRewardSelection {
-  groupId: string;
-  optionId?: string;
-  abilityScoreSelections?: ContentAbilityScoreSelection[];
-  skillSelections?: ContentSkillSelection[];
-  spellSelections?: ContentSpellSelection[];
-  noteText?: string;
+export interface ContentLevelUpGroupSelection {
+  rewardGroupId: string;
+  optionIds?: string[];
+  childSelections?: ContentLevelUpChildSelections;
 }
 
-export interface ContentAbilityScoreSelection {
-  grantId: string;
+export interface ContentLevelUpChildSelections {
+  abilityScores?: ContentAbilityScoreChoice[];
+  skillIds?: string[];
+  spellIds?: string[];
+  featId?: string;
+}
+
+export interface ContentAbilityScoreChoice {
   abilityScoreId: string;
-  bonusAmount: number;
-}
-
-export interface ContentSkillSelection {
-  grantId: string;
-  skillId: string;
-}
-
-export interface ContentSpellSelection {
-  grantId: string;
-  spellId: string;
+  amount: number;
 }
 
 export interface LevelUpOptionsResponse {
@@ -401,9 +394,22 @@ export interface LevelUpResultResponse {
   newClassLevel: number;
   hpIncrease?: number;
   newMaxHp?: number;
-  rewardsAcquired: AcquiredRewardSummary[];
+  appliedGrants?: LevelUpAppliedGrant[];
+  manualActions?: LevelUpManualActionItem[];
   proficiencyBonusBefore?: number;
   proficiencyBonusAfter?: number;
+}
+
+export interface LevelUpAppliedGrant {
+  grantId: string;
+  grantType: string;
+  summary: string;
+}
+
+export interface LevelUpManualActionItem {
+  grantId: string;
+  grantType: string;
+  instruction: string;
 }
 
 export interface AcquiredRewardSummary {
@@ -502,6 +508,7 @@ export interface BackgroundResponse {
 export interface SpellReferenceResponse {
   id: string;
   name: string;
+  nameEn?: string;
   level: number;
   school?: string;
   description?: string;

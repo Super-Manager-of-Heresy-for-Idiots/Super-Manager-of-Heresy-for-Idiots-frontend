@@ -758,6 +758,8 @@ function StepConfirm({
 
 function StepResult({ result, onDone }: { result: LevelUpResultResponse; onDone: () => void }) {
   const t = useT();
+  const appliedGrants = result.appliedGrants ?? [];
+  const manualActions = result.manualActions ?? [];
   return (
     <div>
       <div className={cn('ao-panel ao-frame ao-grain', s.resultBanner)}>
@@ -803,20 +805,24 @@ function StepResult({ result, onDone }: { result: LevelUpResultResponse; onDone:
             )}
           </div>
           <OrdoDivider glyph="diamond-fill">{t('camp.lvl.result.acquiredGifts')}</OrdoDivider>
-          {result.rewardsAcquired.length === 0 ? (
+          {appliedGrants.length === 0 && manualActions.length === 0 ? (
             <div className={cn('ao-italic', s.resultDash)}>—</div>
           ) : (
             <div className={s.resultAcqGrid}>
-              {result.rewardsAcquired.map((r, idx) => (
-                <div key={idx} className={s.resultAcqCard}>
+              {appliedGrants.map((r) => (
+                <div key={`applied-${r.grantId}`} className={s.resultAcqCard}>
                   <span className={cn('ao-codex', s.resultAcqType)}>
-                    {REWARD_TYPE_LABELS[r.rewardType] || r.rewardType}
+                    {REWARD_TYPE_LABELS[r.grantType] || r.grantType}
                   </span>
-                  <span className={s.resultAcqName}>{r.name}</span>
-                  {r.description && (
-                    <span className={cn('ao-italic', s.resultAcqDesc)}>{r.description}</span>
-                  )}
-                  <DetailBadges detail={r.detail} />
+                  <span className={s.resultAcqName}>{r.summary}</span>
+                </div>
+              ))}
+              {manualActions.map((r) => (
+                <div key={`manual-${r.grantId}`} className={s.resultAcqCard}>
+                  <span className={cn('ao-codex', s.resultAcqType)}>
+                    {REWARD_TYPE_LABELS[r.grantType] || r.grantType}
+                  </span>
+                  <span className={s.resultAcqName}>{r.instruction}</span>
                 </div>
               ))}
             </div>

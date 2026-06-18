@@ -43,6 +43,7 @@ export const wizard: DictModule = {
     'wiz.err.background': 'Избранное происхождение недоступно в этой кампании.',
     'wiz.err.classSkills': 'Избранные навыки призвания недоступны в этой кампании.',
     'wiz.err.chooseSkillsBeforeForge': 'Избери {count} навыков призвания перед ковкой.',
+    'wiz.err.spellsUnresolved': 'Не удалось сопоставить заклинания с каталогом: {spells}.',
 
     /* ── Summary / review ───────────────────────────── */
     'wiz.summary.title': 'Фолиант Выкован',
@@ -267,6 +268,7 @@ export const wizard: DictModule = {
     'wiz.err.background': 'Selected background is not available in this campaign.',
     'wiz.err.classSkills': 'Selected class skills are not available in this campaign.',
     'wiz.err.chooseSkillsBeforeForge': 'Choose {count} class skills before forging.',
+    'wiz.err.spellsUnresolved': 'Could not match spells to the catalog: {spells}.',
 
     /* ── Summary / review ───────────────────────────── */
     'wiz.summary.title': 'The Folio is Forged',

@@ -24,7 +24,7 @@ export interface RewardGroupPickerProps {
 }
 
 /**
- * Level-up reward group picker: option selection (via RewardGroupView) plus the
+ * Reward group picker: option selection (via RewardGroupView) plus the
  * per-grant child choices required to build a ContentRewardSelection — ability
  * point distribution and skill picks. Spell picks stay a manual/dedicated step.
  */

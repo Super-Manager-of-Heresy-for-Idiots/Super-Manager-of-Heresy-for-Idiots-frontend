@@ -29,7 +29,10 @@ describe('subclass choose-one group', () => {
   it('builds a reward selection with groupId + optionId', () => {
     const req = buildContentLevelUpRequest(cleric.id, groups, { [key]: ['opt-domain-life'] }, {});
     expect(req.classId).toBe(cleric.id);
-    expect(req.rewardSelections).toContainEqual({ groupId: 'rg-cleric-1-domain', optionId: 'opt-domain-life' });
+    expect(req.selections).toContainEqual({
+      rewardGroupId: 'rg-cleric-1-domain',
+      optionIds: ['opt-domain-life'],
+    });
   });
 });
 
@@ -75,9 +78,9 @@ describe('ASI grant child choices', () => {
       { [key]: ['opt-asi-plus2'] },
       { 'g-asi-2': { abilities: { 'stat-con': 2 } } },
     );
-    const sel = req.rewardSelections.find((r) => r.optionId === 'opt-asi-plus2');
-    expect(sel?.abilityScoreSelections).toEqual([
-      { grantId: 'g-asi-2', abilityScoreId: 'stat-con', bonusAmount: 2 },
+    const sel = req.selections.find((r) => r.optionIds?.includes('opt-asi-plus2'));
+    expect(sel?.childSelections?.abilityScores).toEqual([
+      { abilityScoreId: 'stat-con', amount: 2 },
     ]);
   });
 });

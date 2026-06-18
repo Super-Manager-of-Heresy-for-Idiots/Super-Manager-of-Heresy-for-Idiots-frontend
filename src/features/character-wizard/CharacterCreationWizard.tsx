@@ -36,14 +36,20 @@ import {
 } from './steps';
 import { type WizardAvailability } from './parts';
 import { ForgeSheetBody } from './ForgeSheetBody';
-import { rewardSelectionsComplete, unsatisfiedRewardCount } from './rewardSelection';
+import {
+  initialContentRewardGroupsOf,
+  initialRewardSelectionsComplete,
+  initialUnsatisfiedRewardCount,
+} from './rewardSelection';
 import { normalizeClassDetail } from '@/lib/contentAdapters';
+import { buildContentLevelUpRequest } from '@/pages/gm/campaigns/contentLevelUp';
 import css from './CharacterCreationWizard.module.css';
 import type {
   BackgroundResponse,
   CharacterClassDetailResponse,
   CharacterRaceDetailResponse,
   ProficiencySkillResponse,
+  SpellReferenceResponse,
   StatTypeResponse,
 } from '@/types';
 
@@ -59,6 +65,7 @@ interface CharacterCreationWizardProps {
   referenceBackgrounds?: BackgroundResponse[];
   referenceProficiencySkills?: ProficiencySkillResponse[];
   referenceStatTypes?: StatTypeResponse[];
+  referenceSpells?: SpellReferenceResponse[];
   availableCurrencies?: ReferenceCurrencyType[];
   submitting: boolean;
   onSubmit: (req: CreateFullCharacterRequest) => void;
@@ -66,6 +73,24 @@ interface CharacterCreationWizardProps {
 }
 
 const normalizeContentName = (value: string): string => value.trim().toLowerCase();
+// Spell names come from the local 5e catalog (English) and must resolve to content
+// spell ids by English name; curly/straight apostrophes are unified.
+const normalizeSpellName = (value: string): string =>
+  value.trim().toLowerCase().replace(/[‘’]/g, "'");
+
+function resolveSpellIds(
+  names: string[] | undefined,
+  byName: Map<string, string>,
+): { ids: string[]; missing: string[] } {
+  const ids: string[] = [];
+  const missing: string[] = [];
+  for (const name of names ?? []) {
+    const id = byName.get(normalizeSpellName(name));
+    if (id) ids.push(id);
+    else missing.push(name);
+  }
+  return { ids, missing };
+}
 const VANILLA_CLASS_KEY_BY_ID: Record<string, string> = {
   'b0000000-0000-0000-0000-000000000001': 'fighter',
   'b0000000-0000-0000-0000-000000000002': 'wizard',
@@ -128,7 +153,11 @@ function validateCampaignReferences(id: StepId, c: WizardChar, availability: Wiz
   if (id === 'class') {
     // Gate on level-1 content reward groups (choose-one subclass, ASI, etc.).
     const selectedClass = availability.classOptions.find((cl) => cl.key === c.classKey);
-    return rewardSelectionsComplete(selectedClass?.detail?.rewardGroups, c.contentRewardSelections);
+    return initialRewardSelectionsComplete(
+      selectedClass?.detail?.rewardGroups,
+      c.contentRewardSelections,
+      c.contentRewardChildSelections,
+    );
   }
   if (id !== 'background') return true;
   const selectedClass = availability.classOptions.find((cl) => cl.key === c.classKey);
@@ -146,7 +175,11 @@ function campaignReferenceHint(id: StepId, c: WizardChar, availability: WizardAv
   if (id === 'class') {
     if (!c.classKey) return { key: 'wiz.hint.chooseClass' };
     const selectedClass = availability.classOptions.find((cl) => cl.key === c.classKey);
-    const pending = unsatisfiedRewardCount(selectedClass?.detail?.rewardGroups, c.contentRewardSelections);
+    const pending = initialUnsatisfiedRewardCount(
+      selectedClass?.detail?.rewardGroups,
+      c.contentRewardSelections,
+      c.contentRewardChildSelections,
+    );
     return pending > 0 ? { key: 'wiz.hint.chooseRewards', vars: { count: pending } } : { key: '' };
   }
   if (id !== 'background') return { key: '' };
@@ -248,6 +281,7 @@ export function CharacterCreationWizard({
   referenceBackgrounds = [],
   referenceProficiencySkills = [],
   referenceStatTypes = [],
+  referenceSpells = [],
   availableCurrencies = [],
   submitting,
   onSubmit,
@@ -286,6 +320,15 @@ export function CharacterCreationWizard({
       availableCurrencies,
     ],
   );
+
+  const spellIdByName = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const sp of referenceSpells) {
+      const key = sp.nameEn ?? sp.name;
+      if (key) map.set(normalizeSpellName(key), sp.id);
+    }
+    return map;
+  }, [referenceSpells]);
 
   const steps = ALL_STEPS.filter((s) => !s.spellOnly || c.isSpellcaster);
   const stepIdx = Math.min(Math.max(st.step, 0), steps.length - 1);
@@ -350,19 +393,19 @@ export function CharacterCreationWizard({
 
     const proficiencyByName = new Map(availability.proficiencySkills.map((skill) => [normalizeContentName(skill.name), skill]));
     const proficiencyById = new Map(availability.proficiencySkills.map((skill) => [skill.id, skill]));
-    const chosenSkillProficiencyIds = (c.classSkills || []).map((skillKey) => {
+    const chosenSkillIds = (c.classSkills || []).map((skillKey) => {
       const byId = proficiencyById.get(skillKey);
       if (byId) return byId.id;
       const skillLabel = SKILLS.find((skill) => skill.key === skillKey)?.label || skillKey;
       return proficiencyByName.get(normalizeContentName(skillLabel))?.id;
     });
-    if (chosenSkillProficiencyIds.some((id) => !id)) {
+    if (chosenSkillIds.some((id) => !id)) {
       toast.error(t('wiz.err.classSkills'));
       return;
     }
     const selectedClass = availability.classOptions.find((cl) => cl.key === c.classKey);
     const expectedSkillChoices = selectedClass?.detail?.skillChoiceCount;
-    if (expectedSkillChoices !== undefined && chosenSkillProficiencyIds.length !== expectedSkillChoices) {
+    if (expectedSkillChoices !== undefined && chosenSkillIds.length !== expectedSkillChoices) {
       toast.error(t('wiz.err.chooseSkillsBeforeForge', { count: expectedSkillChoices }));
       return;
     }
@@ -375,6 +418,21 @@ export function CharacterCreationWizard({
       if (localSubrace && normalizeContentName(subrace.name) === normalizeContentName(localSubrace.label)) return true;
       return normalizeContentName(subrace.name) === normalizeContentName(c.subraceKey);
     });
+    const initialRewardGroups = initialContentRewardGroupsOf(selectedClass?.detail?.rewardGroups);
+    const initialRewardSelections = buildContentLevelUpRequest(
+      classId,
+      initialRewardGroups,
+      c.contentRewardSelections,
+      c.contentRewardChildSelections,
+    ).selections;
+
+    const resolvedCantrips = resolveSpellIds(c.spells.cantrips, spellIdByName);
+    const resolvedSpells = resolveSpellIds(c.spells.known, spellIdByName);
+    const missingSpells = [...resolvedCantrips.missing, ...resolvedSpells.missing];
+    if (missingSpells.length) {
+      toast.error(t('wiz.err.spellsUnresolved', { spells: missingSpells.join(', ') }));
+      return;
+    }
     const req: CreateFullCharacterRequest = {
       campaignId,
       name: c.name.trim(),
@@ -395,12 +453,12 @@ export function CharacterCreationWizard({
       scoreMethod: scoreMethodForApi(c.scoreMethod),
       skills: Object.keys(c.skills),
       classSkills: c.classSkills,
-      chosenSkillProficiencyIds: chosenSkillProficiencyIds as string[],
+      chosenSkillIds: chosenSkillIds as string[],
       backgroundSkills: c.bgSkills,
       cantrips: c.spells.cantrips,
-      cantripIds: [],
+      cantripIds: resolvedCantrips.ids,
       spells: c.spells.known,
-      spellIds: [],
+      spellIds: resolvedSpells.ids,
       speed: c.speed,
       armorClass: c.ac,
       maxHp: c.hp.max,
@@ -410,6 +468,7 @@ export function CharacterCreationWizard({
       proficiencies: c.proficiencies,
       biography: buildBiography(c),
       startingCoins: buildStartingCoins(c, availability.currencies),
+      initialRewardSelections: initialRewardSelections.length ? initialRewardSelections : undefined,
     };
     onSubmit(req);
   };

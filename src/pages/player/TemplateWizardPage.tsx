@@ -1,7 +1,10 @@
 import { useNavigate } from 'react-router-dom';
 import { CharacterCreationWizard } from '@/features/character-wizard/CharacterCreationWizard';
 import { useCreateTemplate, useGlobalReferenceContent } from '@/hooks/useTemplates';
-import type { CreateFullCharacterRequest } from '@/api/characters-full.api';
+import type {
+  CreateFullCharacterRequest,
+  CreateTemplateCharacterRequest,
+} from '@/api/characters-full.api';
 import { cn } from '@/lib/utils';
 import s from './TemplateWizardPage.module.css';
 
@@ -26,7 +29,7 @@ export default function TemplateWizardPage() {
     // Templates live outside campaigns — strip the field.
     const { campaignId: _campaignId, ...rest } = req;
     void _campaignId;
-    createTemplate.mutate(rest as CreateFullCharacterRequest, {
+    createTemplate.mutate(rest as CreateTemplateCharacterRequest, {
       onSuccess: (res) => {
         const id = res.data?.id;
         if (id) navigate(`/characters/templates/${id}`);
@@ -48,6 +51,7 @@ export default function TemplateWizardPage() {
       referenceBackgrounds={reference.backgrounds}
       referenceProficiencySkills={reference.skills}
       referenceStatTypes={reference.statTypes}
+      referenceSpells={reference.spells}
       availableCurrencies={reference.currencies}
       submitting={createTemplate.isPending}
       onSubmit={handleSubmit}

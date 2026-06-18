@@ -1,27 +1,23 @@
-// ============================================================
-// Character Wizard — content reward selection model & validation
-// (Phase 5). Pure logic, no JSX.
-//
-// The wizard stores level-1 content reward picks as a flat map:
-//   groupKey -> selected option ids
-// (see WizardChar.contentRewardSelections). These helpers validate those picks
-// against the class detail's reward groups: chooseMin / chooseMax rules, and
-// surface which groups still need a decision so the step can gate "Next".
-//
-// Child choices (which skills/abilities/spells inside a granted option) are a
-// commit-time concern (Phase 6–7); this module covers the read-flow gating.
-// ============================================================
 import {
   isContentGroupSatisfied,
   isContentRewardGroup,
   rewardGroupChoose,
   rewardGroupKey,
 } from '@/lib/contentAdapters';
+import {
+  groupComplete,
+  type ChildSelections,
+} from '@/pages/gm/campaigns/contentLevelUp';
 import type { RewardGroup } from '@/types';
 
-/** Content-shaped (grants/options payload) reward groups that need rendering/validation. */
+/** Content-shaped reward groups that need rendering/validation. */
 export function contentRewardGroupsOf(groups: RewardGroup[] | undefined): RewardGroup[] {
   return (groups ?? []).filter(isContentRewardGroup);
+}
+
+/** Initial character creation only commits level-1 reward groups. */
+export function initialContentRewardGroupsOf(groups: RewardGroup[] | undefined): RewardGroup[] {
+  return contentRewardGroupsOf(groups).filter((group) => (group.classLevel ?? 1) === 1);
 }
 
 export interface RewardGroupStatus {
@@ -54,7 +50,7 @@ export function rewardGroupStatuses(
   });
 }
 
-/** True when every required reward group has a valid selection. */
+/** True when every required reward group has a valid option selection. */
 export function rewardSelectionsComplete(
   groups: RewardGroup[] | undefined,
   selections: Record<string, string[]>,
@@ -62,12 +58,33 @@ export function rewardSelectionsComplete(
   return rewardGroupStatuses(groups, selections).every((s) => s.satisfied);
 }
 
-/** Number of reward groups still missing a required selection. */
+/** True when every level-1 group has valid option and child selections. */
+export function initialRewardSelectionsComplete(
+  groups: RewardGroup[] | undefined,
+  selections: Record<string, string[]>,
+  childSelections: ChildSelections,
+): boolean {
+  return initialContentRewardGroupsOf(groups)
+    .every((group) => groupComplete(group, selections[rewardGroupKey(group)] ?? [], childSelections));
+}
+
+/** Number of reward groups still missing a required option selection. */
 export function unsatisfiedRewardCount(
   groups: RewardGroup[] | undefined,
   selections: Record<string, string[]>,
 ): number {
   return rewardGroupStatuses(groups, selections).filter((s) => !s.satisfied).length;
+}
+
+/** Number of level-1 groups still missing required option or child selections. */
+export function initialUnsatisfiedRewardCount(
+  groups: RewardGroup[] | undefined,
+  selections: Record<string, string[]>,
+  childSelections: ChildSelections,
+): number {
+  return initialContentRewardGroupsOf(groups)
+    .filter((group) => !groupComplete(group, selections[rewardGroupKey(group)] ?? [], childSelections))
+    .length;
 }
 
 /**
@@ -79,8 +96,8 @@ export function isOptionSelectable(
   selectedOptionIds: string[],
   optionId: string,
 ): boolean {
-  if (selectedOptionIds.includes(optionId)) return true; // can always toggle off
+  if (selectedOptionIds.includes(optionId)) return true;
   const { max } = rewardGroupChoose(group);
-  if (max <= 1) return true; // radio: selecting swaps the single pick
+  if (max <= 1) return true;
   return selectedOptionIds.length < max;
 }

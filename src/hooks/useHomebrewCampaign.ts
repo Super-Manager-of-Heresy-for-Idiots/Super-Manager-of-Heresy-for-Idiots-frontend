@@ -96,12 +96,13 @@ export function useCampaignReferenceContent(campaignId: string) {
   return useQuery({
     queryKey: ['campaigns', campaignId, 'reference-content', lang],
     queryFn: async () => {
-      const [classes, races, backgrounds, skills, statTypes] = await Promise.all([
+      const [classes, races, backgrounds, skills, statTypes, spells] = await Promise.all([
         homebrewCampaignApi.getReferenceClasses(campaignId),
         homebrewCampaignApi.getReferenceRaces(campaignId),
         homebrewCampaignApi.getReferenceBackgrounds(campaignId),
         homebrewCampaignApi.getReferenceSkills(campaignId),
         homebrewCampaignApi.getReferenceStatTypes(campaignId),
+        homebrewCampaignApi.getReferenceSpells(campaignId),
       ]);
 
       return {
@@ -110,6 +111,7 @@ export function useCampaignReferenceContent(campaignId: string) {
         backgrounds: backgrounds.data ?? [],
         skills: skills.data ?? [],
         statTypes: statTypes.data ?? [],
+        spells: spells.data ?? [],
       };
     },
     enabled: !!campaignId,

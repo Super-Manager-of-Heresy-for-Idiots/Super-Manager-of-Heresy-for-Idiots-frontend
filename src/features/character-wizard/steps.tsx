@@ -35,7 +35,8 @@ import css from './steps.module.css';
 import type { WizardActions, WizardChar, ScoreMethod } from './wizardState';
 import type { ContentLabel } from '@/types';
 import { isContentRewardGroup, rewardGroupKey } from '@/lib/contentAdapters';
-import { RewardGroupView } from '@/components/content-rewards/RewardGroupRenderer';
+import { RewardGroupPicker } from '@/components/content-rewards/RewardGroupPicker';
+import { initialContentRewardGroupsOf } from './rewardSelection';
 import {
   DetailLine,
   StepHead,
@@ -308,10 +309,8 @@ export function StepClass({ c, A, n, total, availability }: StepProps) {
     : d?.spellcasting?.spellcastingStatName
       ? gt.ability(d.spellcasting.spellcastingStatName)
       : undefined;
-  // Level-1 content-shaped reward groups (new grants/options payload). Selections are
-  // prepared in wizard state but not yet submitted — ContentLevelUpRequest wiring is
-  // deferred until the backend accepts it (rollout step 7).
-  const contentRewardGroups = (d?.rewardGroups ?? []).filter(isContentRewardGroup);
+  // Level-1 content-shaped reward groups (new grants/options payload).
+  const contentRewardGroups = initialContentRewardGroupsOf(d?.rewardGroups).filter(isContentRewardGroup);
   return (
     <div>
       <StepHead n={n} total={total} title={t('wiz.class.title')} sub={t('wiz.class.sub')} />
@@ -486,12 +485,21 @@ export function StepClass({ c, A, n, total, availability }: StepProps) {
           {contentRewardGroups.map((g) => {
             const key = rewardGroupKey(g);
             return (
-              <RewardGroupView
+              <RewardGroupPicker
                 key={key}
                 group={g}
-                selectedOptionIds={c.contentRewardSelections[key] ?? []}
-                onChange={(ids) =>
+                optionIds={c.contentRewardSelections[key] ?? []}
+                onOptionsChange={(ids) =>
                   A.patch({ contentRewardSelections: { ...c.contentRewardSelections, [key]: ids } })
+                }
+                child={c.contentRewardChildSelections}
+                onChildChange={(grantId, sel) =>
+                  A.patch({
+                    contentRewardChildSelections: {
+                      ...c.contentRewardChildSelections,
+                      [grantId]: sel,
+                    },
+                  })
                 }
               />
             );
