@@ -33,6 +33,7 @@ const EVENT_STYLE: Record<WsEventType, EventVisual> = {
   BATTLE_UPDATED:          { glyph: 'sword',   color: 'var(--ink)',       border: 'var(--bronze)' },
   COMBATANT_JOINED:        { glyph: 'helm',    color: 'var(--arcane)',    border: 'var(--arcane)' },
   BATTLE_TURN_CHANGED:     { glyph: 'arrow-r', color: 'var(--gold-pale)', border: 'var(--gold-pale)' },
+  BATTLE_ACTION:           { glyph: 'sword',   color: 'var(--ember)',     border: 'var(--ember)' },
   BATTLE_ENDED:            { glyph: 'flame',   color: 'var(--ember)',     border: 'var(--ember)' },
 };
 

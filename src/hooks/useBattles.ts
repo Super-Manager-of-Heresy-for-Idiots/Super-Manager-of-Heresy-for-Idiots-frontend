@@ -10,6 +10,8 @@ import type {
   AddBattleMonsterRequest,
   OverrideBattleXpRequest,
   JoinBattleRequest,
+  BattleAttackRequest,
+  ApplyCombatantHpRequest,
 } from '@/types';
 
 /* ── query keys ──────────────────────────────────────────────── */
@@ -194,6 +196,46 @@ export function useEndTurn() {
       battlesApi.endTurn(campaignId, battleId),
     onSuccess: (res) => sync(res.data),
     onError: (e) => toast.error(errMsg(e, t('battle.toast.turnEndFailed'))),
+  });
+}
+
+/** The active combatant attacks a target; returns the roll/outcome result and syncs the battle. */
+export function useBattleAttack() {
+  const sync = useSyncBattle();
+  const t = useT();
+  return useMutation({
+    mutationFn: ({
+      campaignId,
+      battleId,
+      data,
+    }: {
+      campaignId: string;
+      battleId: string;
+      data: BattleAttackRequest;
+    }) => battlesApi.attack(campaignId, battleId, data),
+    onSuccess: (res) => sync(res.data?.battle),
+    onError: (e) => toast.error(errMsg(e, t('battle.toast.attackFailed'))),
+  });
+}
+
+/** GM adjusts a combatant's HP (negative damages, positive heals). */
+export function useApplyCombatantHp() {
+  const sync = useSyncBattle();
+  const t = useT();
+  return useMutation({
+    mutationFn: ({
+      campaignId,
+      battleId,
+      combatantId,
+      data,
+    }: {
+      campaignId: string;
+      battleId: string;
+      combatantId: string;
+      data: ApplyCombatantHpRequest;
+    }) => battlesApi.applyCombatantHp(campaignId, battleId, combatantId, data),
+    onSuccess: (res) => sync(res.data),
+    onError: (e) => toast.error(errMsg(e, t('battle.toast.hpFailed'))),
   });
 }
 

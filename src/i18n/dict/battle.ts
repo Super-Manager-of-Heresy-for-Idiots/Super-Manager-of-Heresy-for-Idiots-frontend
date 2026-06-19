@@ -88,12 +88,36 @@ export const battle: DictModule = {
     'battle.action.spell.level': 'Ур. {n}',
     'battle.action.spell.cantrip': 'Заговор',
 
+    /* ── Attack flow (player + GM) ───────────────────────── */
+    'battle.attack.title': 'Атака',
+    'battle.attack.pickAttack': 'Выберите атаку',
+    'battle.attack.pickTarget': 'Выберите цель',
+    'battle.attack.noTargets': 'Нет доступных целей',
+    'battle.attack.d20': 'Бросок d20',
+    'battle.attack.rollDie': 'Бросить кубик',
+    'battle.attack.confirm': 'Атаковать',
+    'battle.attack.hint': 'Введите d20 (1–20) или бросьте кубик, сервер рассчитает попадание',
+    'battle.attack.outcome.HIT': 'Попадание',
+    'battle.attack.outcome.MISS': 'Промах',
+    'battle.attack.outcome.CRIT': 'Критическое попадание!',
+    'battle.attack.dealt': 'Урон: {n} {type}',
+    'battle.attack.rollLine': 'd20 {d20} · бонус {bonus} = {total} против КЗ {ac}',
+    'battle.attack.targetDown': '{name} повержен(а)!',
+    'battle.attack.targetHp': 'ОЗ цели: {cur}/{max}',
+
     /* ── GM active controls ─────────────────────────────── */
     'battle.gm.controls': 'Управление боем',
     'battle.gm.endTurn': 'Следующий ход',
     'battle.gm.endBattle': 'Завершить бой',
     'battle.gm.currentTurnOf': 'Ходит: {name}',
     'battle.gm.endBattleConfirm': 'Завершить бой? Отменить это действие нельзя.',
+    'battle.gm.npcControl': 'Ход монстра',
+    'battle.gm.npcAttackHint': 'Сейчас ходит монстр — выберите его атаку и цель',
+    'battle.gm.hpTitle': 'Правка ОЗ',
+    'battle.gm.hpPickTarget': 'Участник',
+    'battle.gm.hpAmount': 'Значение',
+    'battle.gm.hpDamage': 'Урон',
+    'battle.gm.hpHeal': 'Лечение',
 
     /* ── Completed ──────────────────────────────────────── */
     'battle.completed.title': 'Бой завершён',
@@ -120,6 +144,8 @@ export const battle: DictModule = {
     'battle.toast.ended': 'Бой завершён',
     'battle.toast.endFailed': 'Не удалось завершить бой',
     'battle.toast.dieRolled': 'Выпало: {n}',
+    'battle.toast.attackFailed': 'Не удалось провести атаку',
+    'battle.toast.hpFailed': 'Не удалось изменить ОЗ',
   },
   en: {
     /* ── Tab + status ───────────────────────────────────── */
@@ -204,12 +230,36 @@ export const battle: DictModule = {
     'battle.action.spell.level': 'Lvl {n}',
     'battle.action.spell.cantrip': 'Cantrip',
 
+    /* ── Attack flow (player + GM) ───────────────────────── */
+    'battle.attack.title': 'Attack',
+    'battle.attack.pickAttack': 'Choose an attack',
+    'battle.attack.pickTarget': 'Choose a target',
+    'battle.attack.noTargets': 'No available targets',
+    'battle.attack.d20': 'd20 roll',
+    'battle.attack.rollDie': 'Roll die',
+    'battle.attack.confirm': 'Attack',
+    'battle.attack.hint': 'Enter a d20 (1–20) or roll the die; the server resolves the hit',
+    'battle.attack.outcome.HIT': 'Hit',
+    'battle.attack.outcome.MISS': 'Miss',
+    'battle.attack.outcome.CRIT': 'Critical hit!',
+    'battle.attack.dealt': 'Damage: {n} {type}',
+    'battle.attack.rollLine': 'd20 {d20} · bonus {bonus} = {total} vs AC {ac}',
+    'battle.attack.targetDown': '{name} is down!',
+    'battle.attack.targetHp': 'Target HP: {cur}/{max}',
+
     /* ── GM active controls ─────────────────────────────── */
     'battle.gm.controls': 'Battle controls',
     'battle.gm.endTurn': 'Next turn',
     'battle.gm.endBattle': 'End battle',
     'battle.gm.currentTurnOf': 'Current: {name}',
     'battle.gm.endBattleConfirm': 'End the battle? This cannot be undone.',
+    'battle.gm.npcControl': 'Monster turn',
+    'battle.gm.npcAttackHint': 'A monster is acting — pick its attack and target',
+    'battle.gm.hpTitle': 'Adjust HP',
+    'battle.gm.hpPickTarget': 'Combatant',
+    'battle.gm.hpAmount': 'Amount',
+    'battle.gm.hpDamage': 'Damage',
+    'battle.gm.hpHeal': 'Heal',
 
     /* ── Completed ──────────────────────────────────────── */
     'battle.completed.title': 'Battle completed',
@@ -236,5 +286,7 @@ export const battle: DictModule = {
     'battle.toast.ended': 'Battle ended',
     'battle.toast.endFailed': 'Failed to end battle',
     'battle.toast.dieRolled': 'Rolled: {n}',
+    'battle.toast.attackFailed': 'Attack failed',
+    'battle.toast.hpFailed': 'Failed to change HP',
   },
 };

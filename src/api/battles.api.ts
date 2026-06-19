@@ -7,6 +7,9 @@ import type {
   AddBattleMonsterRequest,
   OverrideBattleXpRequest,
   JoinBattleRequest,
+  BattleAttackRequest,
+  ApplyCombatantHpRequest,
+  BattleActionResultResponse,
 } from '@/types';
 
 /**
@@ -95,6 +98,33 @@ export const battlesApi = {
 
   endTurn: async (campaignId: string, battleId: string): Promise<ApiResponse<BattleResponse>> => {
     const response = await api.post<ApiResponse<BattleResponse>>(`${base(campaignId)}/${battleId}/end-turn`);
+    return response.data;
+  },
+
+  /** Active combatant attacks a target (manual d20; server resolves hit/crit and rolls damage). */
+  attack: async (
+    campaignId: string,
+    battleId: string,
+    data: BattleAttackRequest,
+  ): Promise<ApiResponse<BattleActionResultResponse>> => {
+    const response = await api.post<ApiResponse<BattleActionResultResponse>>(
+      `${base(campaignId)}/${battleId}/attack`,
+      data,
+    );
+    return response.data;
+  },
+
+  /** GM adjusts a combatant's HP (negative damages, positive heals). */
+  applyCombatantHp: async (
+    campaignId: string,
+    battleId: string,
+    combatantId: string,
+    data: ApplyCombatantHpRequest,
+  ): Promise<ApiResponse<BattleResponse>> => {
+    const response = await api.post<ApiResponse<BattleResponse>>(
+      `${base(campaignId)}/${battleId}/combatants/${combatantId}/hp`,
+      data,
+    );
     return response.data;
   },
 

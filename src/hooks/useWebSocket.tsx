@@ -36,6 +36,7 @@ const EVENT_STYLE: Record<WsEventType, EventStyle> = {
   BATTLE_UPDATED:           { glyph: 'sword',    color: 'var(--ink)',       label: 'Battle Updated' },
   COMBATANT_JOINED:         { glyph: 'helm',     color: 'var(--arcane)',    label: 'Combatant Joined' },
   BATTLE_TURN_CHANGED:      { glyph: 'arrow-r',  color: 'var(--gold-pale)', label: 'Turn Changed' },
+  BATTLE_ACTION:            { glyph: 'sword',    color: 'var(--ember)',     label: 'Battle Strike' },
   BATTLE_ENDED:             { glyph: 'flame',    color: 'var(--ember)',     label: 'Battle Ended' },
 };
 
@@ -160,6 +161,7 @@ export function useWebSocket(campaignId: string | undefined): { connectionState:
         case 'BATTLE_UPDATED':
         case 'COMBATANT_JOINED':
         case 'BATTLE_TURN_CHANGED':
+        case 'BATTLE_ACTION':
         case 'BATTLE_ENDED': {
           // The payload only carries { battleId }; the REST GET is the source
           // of truth. A prefix invalidate refreshes the list, the active battle
@@ -197,7 +199,8 @@ export function useWebSocket(campaignId: string | undefined): { connectionState:
       if (
         event.type === 'BATTLE_UPDATED' ||
         event.type === 'COMBATANT_JOINED' ||
-        event.type === 'BATTLE_TURN_CHANGED'
+        event.type === 'BATTLE_TURN_CHANGED' ||
+        event.type === 'BATTLE_ACTION'
       ) {
         return;
       }

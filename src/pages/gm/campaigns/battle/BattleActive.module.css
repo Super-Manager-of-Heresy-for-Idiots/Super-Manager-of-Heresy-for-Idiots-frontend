@@ -151,6 +151,49 @@
 .mt16 { margin-top: 16px; }
 .mb16 { margin-bottom: 16px; }
 
+/* ── attack flow ───────────────────────────────────────────── */
+.optGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.optBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 10px;
+  border: 1px solid var(--rule);
+  background: var(--panel-raised);
+  color: var(--ink);
+  font-size: 12px;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.optBtn:hover { border-color: var(--bronze); }
+.optBtnActive {
+  border-color: var(--gold);
+  box-shadow: 0 0 12px rgba(176, 141, 78, 0.22);
+}
+.optMeta { color: var(--ink-faint); font-size: 11px; }
+.optHp { color: var(--ember); font-size: 11px; }
+
+.resultCard {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--rule);
+  background: var(--panel-raised);
+}
+.resultHit { border-color: var(--gold); }
+.resultCrit { border-color: var(--gold); box-shadow: 0 0 16px rgba(176, 141, 78, 0.25); }
+.resultMiss { border-color: var(--ink-faint); }
+.resultHead { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.resultOutcome { font-weight: 600; }
+.resultLine { color: var(--ink-quiet); font-size: 12px; margin-top: 4px; }
+.resultDmg { color: var(--ember); font-size: 13px; margin-top: 4px; }
+.resultDown { color: var(--ember); font-weight: 600; font-size: 12px; margin-top: 4px; }
+
+.hpBtns { display: flex; gap: 8px; margin-top: 8px; }
+
 @media (max-width: 768px) {
   .cols { grid-template-columns: 1fr; }
 }

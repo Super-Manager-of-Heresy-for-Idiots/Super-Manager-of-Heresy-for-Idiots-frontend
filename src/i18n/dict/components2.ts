@@ -254,6 +254,7 @@ export const components2: DictModule = {
     'cmp2.event.BATTLE_UPDATED': 'Бой обновлён',
     'cmp2.event.COMBATANT_JOINED': 'Боец присоединился',
     'cmp2.event.BATTLE_TURN_CHANGED': 'Смена хода',
+    'cmp2.event.BATTLE_ACTION': 'Удар в бою',
     'cmp2.event.BATTLE_ENDED': 'Бой завершён',
 
     /* ── Realtime: ConnectionSigil ──────────────────── */
@@ -521,6 +522,7 @@ export const components2: DictModule = {
     'cmp2.event.BATTLE_UPDATED': 'Battle Updated',
     'cmp2.event.COMBATANT_JOINED': 'Combatant Joined',
     'cmp2.event.BATTLE_TURN_CHANGED': 'Turn Changed',
+    'cmp2.event.BATTLE_ACTION': 'Battle Strike',
     'cmp2.event.BATTLE_ENDED': 'Battle Ended',
 
     /* ── Realtime: ConnectionSigil ──────────────────── */
