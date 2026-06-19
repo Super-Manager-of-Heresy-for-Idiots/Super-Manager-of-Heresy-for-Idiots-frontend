@@ -78,6 +78,7 @@ export function useWebSocket(campaignId: string | undefined): { connectionState:
           if (charId) {
             queryClient.setQueryData(['campaigns', cid, 'characters', charId], dto);
             queryClient.invalidateQueries({ queryKey: ['campaigns', cid, 'characters', charId] });
+            queryClient.invalidateQueries({ queryKey: ['level-up-options', charId] });
           }
           queryClient.invalidateQueries({ queryKey: ['campaigns', cid, 'characters'] });
           break;
@@ -87,6 +88,7 @@ export function useWebSocket(campaignId: string | undefined): { connectionState:
           const data = event.data as { amount?: number; characterIds?: string[] };
           (data.characterIds ?? []).forEach((id) => {
             queryClient.invalidateQueries({ queryKey: ['campaigns', cid, 'characters', id] });
+            queryClient.invalidateQueries({ queryKey: ['level-up-options', id] });
           });
           queryClient.invalidateQueries({ queryKey: ['campaigns', cid, 'characters'] });
           break;

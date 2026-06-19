@@ -419,6 +419,9 @@ export default function SharedStoragePage() {
   const { user } = useAuthStore();
   const createMutation = useCreateStorageContainer();
 
+  // Only GM/Admin may create containers; players only deposit/withdraw.
+  const isPrivileged = user?.role === 'GAME_MASTER' || user?.role === 'ADMIN';
+
   const [dialogOpen, setDialogOpen] = useState(false);
   const [formName, setFormName] = useState('');
   const [depositStorageId, setDepositStorageId] = useState<string | null>(null);
@@ -427,9 +430,8 @@ export default function SharedStoragePage() {
   // GM/Admin may move items for any character; a player only for their own.
   const eligibleCharacters = useMemo(() => {
     const all = characters ?? [];
-    const isPrivileged = user?.role === 'GAME_MASTER' || user?.role === 'ADMIN';
     return isPrivileged ? all : all.filter((c) => c.ownerId === user?.id);
-  }, [characters, user?.id, user?.role]);
+  }, [characters, user?.id, isPrivileged]);
 
   const canInteract = eligibleCharacters.length > 0;
 
@@ -496,13 +498,15 @@ export default function SharedStoragePage() {
             {t('camp2.storage.subtitle')}
           </p>
         </div>
-        <button
-          className="ao-btn ao-btn--primary"
-          onClick={() => { setFormName(''); setDialogOpen(true); }}
-        >
-          <Rune kind="plus" size={14} color="currentColor" />
-          <span className={s.ml6}>{t('camp2.storage.newContainer')}</span>
-        </button>
+        {isPrivileged && (
+          <button
+            className="ao-btn ao-btn--primary"
+            onClick={() => { setFormName(''); setDialogOpen(true); }}
+          >
+            <Rune kind="plus" size={14} color="currentColor" />
+            <span className={s.ml6}>{t('camp2.storage.newContainer')}</span>
+          </button>
+        )}
       </div>
 
       {/* Container List */}
@@ -512,13 +516,15 @@ export default function SharedStoragePage() {
           title={t('camp2.storage.empty.title')}
           body={t('camp2.storage.empty.body')}
           action={
-            <button
-              className="ao-btn ao-btn--primary"
-              onClick={() => { setFormName(''); setDialogOpen(true); }}
-            >
-              <Rune kind="plus" size={14} color="currentColor" />
-              <span className={s.ml6}>{t('camp2.storage.newContainer')}</span>
-            </button>
+            isPrivileged ? (
+              <button
+                className="ao-btn ao-btn--primary"
+                onClick={() => { setFormName(''); setDialogOpen(true); }}
+              >
+                <Rune kind="plus" size={14} color="currentColor" />
+                <span className={s.ml6}>{t('camp2.storage.newContainer')}</span>
+              </button>
+            ) : undefined
           }
         />
       ) : (
@@ -536,6 +542,7 @@ export default function SharedStoragePage() {
       )}
 
       {/* Create Container Dialog */}
+      {isPrivileged && (
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -573,6 +580,7 @@ export default function SharedStoragePage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      )}
 
       {/* Deposit Item Dialog */}
       {depositStorageId && (

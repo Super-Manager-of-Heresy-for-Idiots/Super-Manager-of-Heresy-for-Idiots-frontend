@@ -29,6 +29,7 @@ import { useT } from '@/i18n/I18nContext';
 import { useGameTerms } from '@/i18n/gameTerms';
 import { cn } from '@/lib/utils';
 import css from './steps.module.css';
+import { CREATION_LEVEL } from './wizardState';
 import type { WizardActions, WizardChar, ScoreMethod } from './wizardState';
 import type { ContentLabel, SpellReferenceResponse, StatTypeResponse } from '@/types';
 import { isContentRewardGroup, rewardGroupKey } from '@/lib/contentAdapters';
@@ -383,7 +384,7 @@ export function StepClass({ c, A, n, total, availability }: StepProps) {
                   <OrdoDivider glyph="diamond-fill" />
                   <div className="wiz-level">
                     <div>
-                      <label className={cn('ao-label', css.label0)}>{t('wiz.class.level')}</label>
+                      <label className={cn('ao-label', css.label0)}>{t('wiz.class.targetLevel')}</label>
                       <div className={cn('ao-codex', css.fs10)}>{t('wiz.class.profBonus', { prof: fmtMod(prof) })}</div>
                     </div>
                     <div className="wiz-level-ctrl">
@@ -403,6 +404,11 @@ export function StepClass({ c, A, n, total, availability }: StepProps) {
                       </button>
                     </div>
                   </div>
+                  {c.level > 1 && (
+                    <div className={css.targetLevelNote}>
+                      {t('wiz.class.targetLevelNote', { level: c.level })}
+                    </div>
+                  )}
                 </>
               ) : selectedClass ? (
                 <>
@@ -414,7 +420,7 @@ export function StepClass({ c, A, n, total, availability }: StepProps) {
                   <OrdoDivider glyph="diamond-fill" />
                   <div className="wiz-level">
                     <div>
-                      <label className={cn('ao-label', css.label0)}>{t('wiz.class.level')}</label>
+                      <label className={cn('ao-label', css.label0)}>{t('wiz.class.targetLevel')}</label>
                       <div className={cn('ao-codex', css.fs10)}>{t('wiz.class.profBonus', { prof: fmtMod(prof) })}</div>
                     </div>
                     <div className="wiz-level-ctrl">
@@ -434,6 +440,11 @@ export function StepClass({ c, A, n, total, availability }: StepProps) {
                       </button>
                     </div>
                   </div>
+                  {c.level > 1 && (
+                    <div className={css.targetLevelNote}>
+                      {t('wiz.class.targetLevelNote', { level: c.level })}
+                    </div>
+                  )}
                 </>
               ) : (
                 <div className="ao-codex">{t('wiz.class.pickCard')}</div>
@@ -734,14 +745,16 @@ export function StepBackground({ c, A, n, total, availability }: StepProps) {
 // ════════════════════════════════════════════════════════════
 export function StepSpells({ c, A, n, total, availability }: StepProps) {
   const t = useT();
+  // Character is created at level 1 (c.level is the *target* level), so the spell
+  // loadout is sized for level 1 — see CREATION_LEVEL in wizardState.
   const limits = spellLimits(
     { isSpellcaster: c.isSpellcaster, hasCantrips: c.hasCantrips, isHalfCaster: c.isHalfCaster, kind: c.classSlug },
-    c.level,
+    CREATION_LEVEL,
   );
   const classId = availability.classIdByKey[c.classKey];
-  // Cap by the highest spell level this character can know (mirrors the backend
-  // validation) so over-level spells are neither shown nor selectable.
-  const maxLvl = maxSpellLevel(!!c.isHalfCaster, c.level);
+  // Cap by the highest spell level a level-1 character can know (mirrors the
+  // backend validation) so over-level spells are neither shown nor selectable.
+  const maxLvl = maxSpellLevel(!!c.isHalfCaster, CREATION_LEVEL);
   const list = useMemo(
     () => availability.spells.filter(
       (sp) => (!classId || (sp.availableToClassIds?.includes(classId) ?? false)) && (sp.level ?? 0) <= maxLvl,

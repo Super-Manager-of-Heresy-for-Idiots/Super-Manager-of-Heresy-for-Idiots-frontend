@@ -108,6 +108,22 @@ function buildBiography(c: WizardChar): CreateFullCharacterRequest['biography'] 
   return Object.values(bio).some(Boolean) ? bio : undefined;
 }
 
+// Forge-sheet attack rows → backend attack entries. The sheet stores
+// hit/dmg/type; the backend expects attackBonus/damage/damageType. Blank rows
+// (no name) are dropped.
+function buildAttacks(c: WizardChar): CreateFullCharacterRequest['attacks'] {
+  const trim = (v: string) => (v.trim() ? v.trim() : undefined);
+  const attacks = c.attacks
+    .map((a) => ({
+      name: a.name.trim(),
+      attackBonus: trim(a.hit),
+      damage: trim(a.dmg),
+      damageType: trim(a.type),
+    }))
+    .filter((a) => a.name.length > 0);
+  return attacks.length ? attacks : undefined;
+}
+
 // Wizard coin pools (pp/gp/ep/sp/cp) → wallet entries keyed by currency id.
 function buildStartingCoins(
   c: WizardChar,
@@ -431,6 +447,8 @@ export function CharacterCreationWizard({
       avatar: c.avatar,
       features: c.features,
       proficiencies: c.proficiencies,
+      equipment: c.equipment,
+      attacks: buildAttacks(c),
       biography: buildBiography(c),
       startingCoins: buildStartingCoins(c, availability.currencies),
       initialRewardSelections: initialRewardSelections.length ? initialRewardSelections : undefined,

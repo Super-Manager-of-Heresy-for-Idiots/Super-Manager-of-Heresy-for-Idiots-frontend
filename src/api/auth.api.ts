@@ -11,4 +11,10 @@ export const authApi = {
     const response = await api.post<ApiResponse<UserResponse>>('/auth/register', data);
     return response.data;
   },
+
+  // No body — the browser sends the session cookies; the server clears them (Max-Age=0).
+  logout: async (): Promise<ApiResponse<null>> => {
+    const response = await api.post<ApiResponse<null>>('/auth/logout');
+    return response.data;
+  },
 };

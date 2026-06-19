@@ -20,14 +20,15 @@ const loginSchema = z.object({
 type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
-  const [remember, setRemember] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const loginMutation = useLogin();
   const { isAuthenticated, user } = useAuthStore();
   const [searchParams] = useSearchParams();
-  // `?add=1` lets an already-authenticated user reach the login form to add
-  // another account to the quick-switch list instead of being redirected away.
+  // `?add=1` lets an already-authenticated user reach the login form to switch into
+  // (re-authenticate) or add another account instead of being redirected away.
   const addingAccount = searchParams.get('add') === '1';
+  // `?user=<name>` pre-fills the username when switching from the account list.
+  const prefillUser = searchParams.get('user') ?? '';
   const t = useT();
 
   const {
@@ -36,6 +37,7 @@ export default function LoginPage() {
     formState: { errors },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
+    defaultValues: { username: prefillUser, password: '' },
   });
 
   if (isAuthenticated && user && !addingAccount) {
@@ -43,7 +45,7 @@ export default function LoginPage() {
   }
 
   const onSubmit = (data: LoginFormData) => {
-    loginMutation.mutate({ ...data, remember });
+    loginMutation.mutate(data);
   };
 
   return (
@@ -163,19 +165,6 @@ export default function LoginPage() {
                     {t(errors.password.message ?? '')}
                   </span>
                 )}
-              </div>
-
-              {/* Remember me */}
-              <div className={s.rememberRow}>
-                <span
-                  onClick={() => setRemember(!remember)}
-                  className={cn(s.checkbox, remember && s.on)}
-                >
-                  {remember && <Rune kind="check" size={10} color="var(--abyss)" />}
-                </span>
-                <span className={cn('ao-italic', s.pointer)} onClick={() => setRemember(!remember)}>
-                  {t('auth.login.remember')}
-                </span>
               </div>
 
               {/* Primary submit */}

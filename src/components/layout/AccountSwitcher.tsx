@@ -1,9 +1,8 @@
 import { useNavigate } from 'react-router-dom';
-import { useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '@/store/authStore';
+import { useLogout } from '@/hooks/useAuth';
 import { Rune } from '@/components/ordo';
 import { useT } from '@/i18n/I18nContext';
-import { getRoleRedirectPath } from '@/lib/utils';
 
 interface AccountSwitcherProps {
   /** Called after any navigation so the host (mobile drawer) can close itself. */
@@ -12,22 +11,20 @@ interface AccountSwitcherProps {
 
 /**
  * Quick account switcher shared by the desktop rail and the mobile drawer.
- * Lists locally remembered logins, lets the user switch without re-entering
- * credentials, add another account, or sign out of the current one.
+ * Lists locally remembered logins. Because the session lives in HttpOnly cookies
+ * (one per browser), switching can't be a silent token swap — it sends the user to
+ * the login form pre-filled with the chosen username to re-authenticate.
  */
 export function AccountSwitcher({ onNavigate }: AccountSwitcherProps) {
-  const { user, savedAccounts, switchAccount, removeAccount, logout } = useAuthStore();
+  const { user, savedAccounts, removeAccount } = useAuthStore();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
+  const logout = useLogout();
   const t = useT();
 
   const others = savedAccounts.filter((a) => a.user.id !== user?.id);
 
-  const handleSwitch = (userId: string) => {
-    switchAccount(userId);
-    queryClient.clear();
-    const next = useAuthStore.getState().user;
-    navigate(getRoleRedirectPath(next?.role ?? ''));
+  const handleSwitch = (username: string) => {
+    navigate(`/login?add=1&user=${encodeURIComponent(username)}`);
     onNavigate?.();
   };
 
@@ -41,10 +38,8 @@ export function AccountSwitcher({ onNavigate }: AccountSwitcherProps) {
     onNavigate?.();
   };
 
-  const handleLogout = () => {
-    logout();
-    queryClient.clear();
-    navigate('/login');
+  const handleLogout = async () => {
+    await logout();
     onNavigate?.();
   };
 
@@ -71,7 +66,7 @@ export function AccountSwitcher({ onNavigate }: AccountSwitcherProps) {
         <div key={acc.user.id} className="ao-acct-row">
           <button
             type="button"
-            onClick={() => handleSwitch(acc.user.id)}
+            onClick={() => handleSwitch(acc.user.username)}
             className="ao-acct-pick"
             title={t('acct.switch')}
           >

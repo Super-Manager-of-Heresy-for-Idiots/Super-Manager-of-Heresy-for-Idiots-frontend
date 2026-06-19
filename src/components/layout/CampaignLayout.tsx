@@ -28,7 +28,7 @@ const SUBNAV: SubNavEntry[] = [
   { to: 'members', labelKey: 'camp.dash.drill.roster' },
   { to: 'bestiary', labelKey: 'camp.dash.drill.bestiary' },
   { to: 'storage', labelKey: 'camp.dash.drill.storage' },
-  { to: 'invite', labelKey: 'camp.dash.drill.invite' },
+  { to: 'invite', labelKey: 'camp.dash.drill.invite', gm: true },
   { to: 'npcs', labelKey: 'camp.dash.drill.npcs', gm: true },
   { to: 'quests', labelKey: 'camp.dash.drill.quests', gm: true },
   { to: 'locations', labelKey: 'camp.dash.drill.locations', gm: true },

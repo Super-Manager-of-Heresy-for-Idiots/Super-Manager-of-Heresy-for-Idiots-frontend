@@ -30,6 +30,13 @@ export interface CreateFullCharacterCoin {
   amount: number;
 }
 
+export interface CreateFullCharacterAttack {
+  name: string;
+  attackBonus?: string;
+  damage?: string;
+  damageType?: string;
+}
+
 export interface CreateFullCharacterRequest {
   campaignId: string;
   name: string;
@@ -66,6 +73,8 @@ export interface CreateFullCharacterRequest {
   initialRewardSelections?: ContentLevelUpRequest['selections'];
   features?: string;
   proficiencies?: string;
+  equipment?: string;
+  attacks?: CreateFullCharacterAttack[];
 }
 
 export type CreateTemplateCharacterRequest = Omit<CreateFullCharacterRequest, 'campaignId'>;
@@ -85,6 +94,14 @@ export interface CreateContentCharacterRequest {
   spellIds?: string[];
   startingCoins?: CreateFullCharacterCoin[];
   initialRewardSelections?: ContentLevelUpRequest['selections'];
+  // Narrative & sheet fields the backend now persists (biography_json,
+  // attacks_json, features, proficiencies, equipment, alignment).
+  alignment?: string;
+  proficiencies?: string;
+  equipment?: string;
+  features?: string;
+  biography?: CreateFullCharacterBiography;
+  attacks?: CreateFullCharacterAttack[];
 }
 
 export interface ContentCharacterCreationResponse {
@@ -101,6 +118,11 @@ function nonEmptyIds(ids?: string[]): string[] | undefined {
   const filtered = (ids ?? []).filter(Boolean);
   return filtered.length ? filtered : undefined;
 }
+
+const nonEmptyText = (v?: string): string | undefined => {
+  const trimmed = v?.trim();
+  return trimmed ? trimmed : undefined;
+};
 
 function toContentCharacterRequest(
   data: CreateFullCharacterRequest | CreateTemplateCharacterRequest,
@@ -120,6 +142,13 @@ function toContentCharacterRequest(
     spellIds: nonEmptyIds(data.spellIds),
     startingCoins: data.startingCoins,
     initialRewardSelections: data.initialRewardSelections?.length ? data.initialRewardSelections : undefined,
+    // P2: forward the narrative & sheet fields the backend now persists.
+    alignment: nonEmptyText(data.alignment),
+    proficiencies: nonEmptyText(data.proficiencies),
+    equipment: nonEmptyText(data.equipment),
+    features: nonEmptyText(data.features),
+    biography: data.biography,
+    attacks: data.attacks?.length ? data.attacks : undefined,
   };
 }
 

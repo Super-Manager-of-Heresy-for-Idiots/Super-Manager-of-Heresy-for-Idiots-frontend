@@ -156,7 +156,6 @@ export const router = createBrowserRouter([
 
               // Sections available to every member
               { path: 'members', element: <CampaignMembersPage /> },
-              { path: 'invite', element: <CampaignInvitePage /> },
               { path: 'storage', element: <SharedStoragePage /> },
               { path: 'bestiary', element: <CampaignBestiaryPage /> },
               { path: 'bestiary/monsters/:monsterId', element: <MonsterDetailPage source="campaign" /> },
@@ -181,6 +180,7 @@ export const router = createBrowserRouter([
               {
                 element: <ProtectedRoute allowedRoles={['GAME_MASTER', 'ADMIN']} />,
                 children: [
+                  { path: 'invite', element: <CampaignInvitePage /> },
                   { path: 'notes', element: <SessionNotesPage /> },
                   { path: 'wallet', element: <BalanceManagementPage /> },
                   { path: 'balances', element: <Navigate to="../wallet" replace /> },
