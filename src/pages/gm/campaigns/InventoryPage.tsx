@@ -34,6 +34,7 @@ import {
 } from '@/hooks/useInventory';
 import { useCharacter, useCharacterWallet, useCampaignCharacters } from '@/hooks/useCharacter';
 import { useAuthStore } from '@/store/authStore';
+import { isRetryableError } from '@/lib/errors';
 import { rarityColor, slotClass, itemGlyph } from '@/lib/itemVisuals';
 import { useT } from '@/i18n/I18nContext';
 import type {
@@ -82,7 +83,13 @@ export default function InventoryPage() {
   const { data: equipped } = useEquippedInventory(campaignId!, characterId!);
   const { data: backpack } = useBackpackInventory(campaignId!, characterId!);
   const { data: wallet } = useCharacterWallet(campaignId!, characterId!);
-  const { data: itemTemplates, isLoading: itemTemplatesLoading } = useCampaignItemTemplates(campaignId);
+  const {
+    data: itemTemplates,
+    isLoading: itemTemplatesLoading,
+    isError: itemTemplatesIsError,
+    error: itemTemplatesError,
+    refetch: refetchItemTemplates,
+  } = useCampaignItemTemplates(campaignId);
   const { data: campaignCharacters } = useCampaignCharacters(campaignId!);
 
   const grantMutation = useGrantItem();
@@ -310,6 +317,7 @@ export default function InventoryPage() {
         <BackLink to={backTo} label={t('camp2.back.character')} className={s.backLink} />
         <ErrorAltar
           title={t('camp2.inv.loadError')}
+          error={error}
           onRetry={() => refetch()}
           retryLabel={t('common.retry')}
         />
@@ -571,16 +579,18 @@ export default function InventoryPage() {
                 className="ao-input"
                 value={grantTemplateId}
                 onChange={(e) => setGrantTemplateId(e.target.value)}
-                disabled={itemTemplatesLoading || grantTemplates.length === 0}
+                disabled={itemTemplatesLoading || itemTemplatesIsError || grantTemplates.length === 0}
               >
                 <option value="">
                   {itemTemplatesLoading
                     ? t('camp2.inv.loadingTemplates')
-                    : grantTemplates.length
-                      ? t('camp2.inv.chooseTemplate')
-                      : t('camp2.inv.noTemplatesAvailable')}
+                    : itemTemplatesIsError
+                      ? t('camp2.inv.templatesLoadError')
+                      : grantTemplates.length
+                        ? t('camp2.inv.chooseTemplate')
+                        : t('camp2.inv.noTemplatesAvailable')}
                 </option>
-                {!itemTemplatesLoading && grantTemplateOptions.length === 0 && (
+                {!itemTemplatesLoading && !itemTemplatesIsError && grantTemplateOptions.length === 0 && (
                   <option value="" disabled>{t('camp2.inv.noTemplatesMatch')}</option>
                 )}
                 {grantTemplateOptions.map((template) => (
@@ -589,6 +599,20 @@ export default function InventoryPage() {
                   </option>
                 ))}
               </select>
+              {itemTemplatesIsError && (
+                <div className={cn('ao-codex', 'ao-row', 'ao-gap-8', s.mt8)}>
+                  <span>{t('camp2.inv.templatesLoadError')}</span>
+                  {isRetryableError(itemTemplatesError) && (
+                    <button
+                      type="button"
+                      className="ao-btn ao-btn--ghost"
+                      onClick={() => refetchItemTemplates()}
+                    >
+                      <Rune kind="arrow-r" size={11} /> {t('camp2.inv.retry')}
+                    </button>
+                  )}
+                </div>
+              )}
               {selectedGrantTemplate && (
                 <div className={cn('ao-codex', s.mt8)}>
                   {selectedGrantTemplate.description || selectedGrantTemplate.sourceHomebrewTitle || t('camp2.inv.campaignTemplate')}

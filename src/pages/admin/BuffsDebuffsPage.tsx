@@ -37,6 +37,7 @@ import {
 import type { BuffDebuffResponse, CreateBuffDebuffRequest } from '@/types';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
+import { isRetryableError } from '@/lib/errors';
 import s from './BuffsDebuffsPage.module.css';
 
 const EFFECT_TYPES = [
@@ -224,7 +225,9 @@ export default function BuffsDebuffsPage() {
         <p className={cn('ao-italic', s.errorText)}>
           {t('adm.buffs.errorBody')}
         </p>
-        <button className="ao-btn" onClick={() => refetch()}>{t('common.retry')}</button>
+        {isRetryableError(error) && (
+          <button className="ao-btn" onClick={() => refetch()}>{t('common.retry')}</button>
+        )}
       </div>
     );
   }

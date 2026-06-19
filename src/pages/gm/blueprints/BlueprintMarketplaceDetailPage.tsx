@@ -5,6 +5,7 @@ import { useBlueprintMarketplaceDetail, useForkBlueprint } from '@/hooks/useCamp
 import { useAuthStore } from '@/store/authStore';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
+import { isRetryableError } from '@/lib/errors';
 import s from './blueprints.module.css';
 
 type TabId = 'npcs' | 'quests' | 'locations' | 'homebrew' | 'characters';
@@ -41,7 +42,9 @@ export default function BlueprintMarketplaceDetailPage() {
     return (
       <div className={s.errorBox}>
         <p className={cn('ao-italic', s.errorText)}>{t('bp.detail.error')}</p>
-        <button className="ao-btn" onClick={() => refetch()}>{t('common.retry')}</button>
+        {isRetryableError(error) && (
+          <button className="ao-btn" onClick={() => refetch()}>{t('common.retry')}</button>
+        )}
       </div>
     );
   }

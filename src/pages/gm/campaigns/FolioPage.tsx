@@ -34,6 +34,7 @@ import { useGameTerms } from '@/i18n/gameTerms';
 import { REWARD_TYPE_LABELS } from '@/types';
 import type { CharacterStatResponse, ItemInstanceResponse } from '@/types';
 import { cn } from '@/lib/utils';
+import { isRetryableError } from '@/lib/errors';
 import s from './FolioPage.module.css';
 
 /* ── helpers ─────────────────────────────────────────────────── */
@@ -164,7 +165,9 @@ export default function FolioPage() {
         <p className={cn('ao-italic', s.errorText)}>
           {t('camp2.folio.unsealed')}
         </p>
-        <button className="ao-btn" onClick={() => refetch()}>{t('common.retry')}</button>
+        {isRetryableError(error) && (
+          <button className="ao-btn" onClick={() => refetch()}>{t('common.retry')}</button>
+        )}
       </div>
     );
   }

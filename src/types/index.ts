@@ -2373,3 +2373,246 @@ export interface InstantiateBlueprintRequest {
   name: string;
   description?: string;
 }
+
+// ============================================================================
+// Content Catalog (PHB 2024 normalized read model) — feats / spells /
+// backgrounds / equipment / magic items. Read-only. See
+// prompts/2026-06-19/00-14-content-catalog-api.md. Reuses ContentLabel above.
+// Nullable single-FK objects per contract; BigDecimal fields arrive as strings.
+// ============================================================================
+
+// ---------- Feat ----------
+export interface FeatPrerequisite {
+  type: string | null;
+  levelRequired: number | null;
+  abilityScore: ContentLabel | null;
+  minimumScore: number | null;
+  groupKey: string | null;
+  rawText: string | null;
+}
+export interface FeatSection {
+  title: string | null;
+  body: string | null;
+}
+export interface FeatDetail {
+  id: string;
+  slug: string;
+  name: string;
+  nameRu: string;
+  nameEn: string | null;
+  description: string | null;
+  repeatable: boolean | null;
+  packageId: string | null;
+  category: ContentLabel | null;
+  prerequisites: FeatPrerequisite[];
+  sections: FeatSection[];
+}
+
+// ---------- Spell ----------
+export interface SpellComponent {
+  component: string | null;
+  materialText: string | null;
+  consumed: boolean | null;
+}
+export interface SpellDetail {
+  id: string;
+  slug: string;
+  name: string;
+  nameRu: string;
+  nameEn: string | null;
+  level: number | null;
+  school: ContentLabel | null;
+  castingTimeRaw: string | null;
+  castingActionSlug: string | null;
+  ritual: boolean | null;
+  rangeType: string | null;
+  rangeDistance: number | null;
+  rangeUnit: string | null;
+  durationRaw: string | null;
+  durationType: string | null;
+  durationAmount: number | null;
+  durationUnit: string | null;
+  concentration: boolean | null;
+  description: string | null;
+  higherLevels: string | null;
+  packageId: string | null;
+  components: SpellComponent[];
+  classes: ContentLabel[];
+  subclasses: ContentLabel[];
+}
+
+// ---------- Species (2024 race model) ----------
+export interface SpeciesSpeed {
+  type: string | null;
+  amountFt: number | null;
+  rawText: string | null;
+}
+export interface SpeciesTraitEffect {
+  effectType: string | null;
+  damageType: ContentLabel | null;
+  spell: ContentLabel | null;
+  rangeFt: number | null;
+}
+export interface SpeciesTrait {
+  slug: string | null;
+  name: string | null;
+  description: string | null;
+  effects: SpeciesTraitEffect[];
+}
+export interface SpeciesDetail {
+  id: string;
+  slug: string | null;
+  name: string;
+  nameRu: string | null;
+  nameEn: string | null;
+  description: string | null;
+  packageId: string | null;
+  creatureType: ContentLabel | null;
+  sizeOptions: ContentLabel[];
+  speeds: SpeciesSpeed[];
+  traits: SpeciesTrait[];
+}
+
+// ---------- Background ----------
+export interface BackgroundFeatOption {
+  feat: ContentLabel | null;
+  featCategory: ContentLabel | null;
+  chooseCount: number | null;
+  selectedOptionRaw: string | null;
+  recommendedFeat: ContentLabel | null;
+  rawText: string | null;
+}
+export interface BackgroundToolProficiency {
+  equipmentItemId: string | null;
+  chooseCount: number | null;
+  choiceGroupSlug: string | null;
+  rawText: string | null;
+}
+export interface BackgroundLanguageProficiency {
+  languageSlug: string | null;
+  chooseCount: number | null;
+  rawText: string | null;
+}
+export interface BackgroundEquipmentEntry {
+  entryType: string | null;
+  equipmentItemId: string | null;
+  moneyValueId: string | null;
+  quantity: string | null;
+  quantityUnitRaw: string | null;
+  variantNote: string | null;
+  choiceRef: string | null;
+  rawText: string | null;
+}
+export interface BackgroundEquipmentOption {
+  optionCode: string | null;
+  sortOrder: number | null;
+  rawText: string | null;
+  entries: BackgroundEquipmentEntry[];
+}
+export interface BackgroundEquipmentGroup {
+  groupSlug: string | null;
+  chooseCount: number | null;
+  rawText: string | null;
+  options: BackgroundEquipmentOption[];
+}
+export interface BackgroundDetail {
+  id: string;
+  slug: string;
+  name: string;
+  nameRu: string;
+  nameEn: string | null;
+  description: string | null;
+  url: string | null;
+  packageId: string | null;
+  grantedFeat: ContentLabel | null;
+  abilityOptions: ContentLabel[];
+  skillProficiencies: ContentLabel[];
+  featOptions: BackgroundFeatOption[];
+  toolProficiencies: BackgroundToolProficiency[];
+  languageProficiencies: BackgroundLanguageProficiency[];
+  equipmentChoiceGroups: BackgroundEquipmentGroup[];
+}
+
+// ---------- Equipment Item ----------
+export interface DiceFormula {
+  diceCount: number | null;
+  dieSize: number | null;
+  bonus: number | null;
+  rawText: string | null;
+}
+export interface EquipmentCost {
+  amount: string | null;
+  currency: ContentLabel | null;
+  copperValue: string | null;
+  rawText: string | null;
+}
+export interface WeaponStat {
+  damageDice: DiceFormula | null;
+  damageType: ContentLabel | null;
+  flatDamage: number | null;
+  mastery: ContentLabel | null;
+}
+export interface ArmorStat {
+  baseAc: number | null;
+  dexBonusAllowed: boolean | null;
+  maxDexBonus: number | null;
+  strengthRequired: number | null;
+  stealthDisadvantage: boolean | null;
+  armorClassRaw: string | null;
+}
+export interface WeaponItemProperty {
+  property: ContentLabel | null;
+  normalRangeFt: number | null;
+  longRangeFt: number | null;
+  versatileDice: DiceFormula | null;
+  ammunitionEquipmentItemId: string | null;
+  rawText: string | null;
+}
+export interface EquipmentItemDetail {
+  id: string;
+  slug: string;
+  name: string;
+  nameRu: string;
+  nameEn: string | null;
+  kind: string;
+  category: ContentLabel | null;
+  cost: EquipmentCost | null;
+  weightLb: string | null;
+  propertiesText: string | null;
+  url: string | null;
+  packageId: string | null;
+  weaponStat: WeaponStat | null;
+  armorStat: ArmorStat | null;
+  weaponProperties: WeaponItemProperty[];
+}
+
+// ---------- Magic Item ----------
+export interface MagicItemCost {
+  amount: string | null;
+  currency: ContentLabel | null;
+  copperValue: string | null;
+  rawText: string | null;
+}
+export interface MagicItemAllowedEquipment {
+  equipment: ContentLabel | null;
+  rawText: string | null;
+}
+export interface MagicItemDetail {
+  id: string;
+  slug: string;
+  name: string;
+  nameRu: string;
+  nameEn: string | null;
+  type: ContentLabel | null;
+  typeRestrictionRaw: string | null;
+  rarity: ContentLabel | null;
+  variableRarity: boolean | null;
+  attunementRequired: boolean | null;
+  attunementRequirement: string | null;
+  cost: MagicItemCost | null;
+  description: string | null;
+  embeddedTablesDetected: boolean | null;
+  url: string | null;
+  packageId: string | null;
+  allowedEquipment: MagicItemAllowedEquipment[];
+}

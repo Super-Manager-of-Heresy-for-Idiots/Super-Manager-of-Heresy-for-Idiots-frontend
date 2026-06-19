@@ -14,7 +14,7 @@ import { useT } from '@/i18n/I18nContext';
 
 export default function ItemTypesPage() {
   const t = useT();
-  const { data, isLoading, isError, refetch } = useItemTypes();
+  const { data, isLoading, isError, error, refetch } = useItemTypes();
   const createMutation = useCreateItemType();
   const updateMutation = useUpdateItemType();
   const deleteMutation = useDeleteItemType();
@@ -53,6 +53,7 @@ export default function ItemTypesPage() {
         data={data}
         isLoading={isLoading}
         isError={isError}
+        error={error}
         onRetry={refetch}
         onAdd={handleAdd}
         onEdit={handleEdit}

@@ -21,6 +21,7 @@ import {
 import { useCampaign } from '@/hooks/useCampaigns';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
+import { isRetryableError } from '@/lib/errors';
 import type { CharacterResponse, CurrencyTypeResponse, WalletEntry } from '@/types';
 import s from './BalanceManagementPage.module.css';
 
@@ -143,7 +144,7 @@ function BalanceEditor({
           {isLoading ? (
             <WalletSkeleton />
           ) : error ? (
-            <WalletErrorBanner onRetry={() => refetch()} />
+            <WalletErrorBanner onRetry={() => refetch()} error={error} />
           ) : (
             <CurrencyPanel entries={entries} editable={!isDead} onAdjust={adjust} pending={modifyWallet.isPending} />
           )}
@@ -214,7 +215,9 @@ export default function BalanceManagementPage() {
           ) : error ? (
             <div className={s.errorBox}>
               <p className={cn('ao-italic', s.errorText)}>{t('camp.balances.loadError')}</p>
-              <button className="ao-btn ao-btn--sm" onClick={() => refetch()}>{t('common.retry')}</button>
+              {isRetryableError(error) && (
+                <button className="ao-btn ao-btn--sm" onClick={() => refetch()}>{t('common.retry')}</button>
+              )}
             </div>
           ) : roster.length === 0 ? (
             <div className={s.emptyBox}>

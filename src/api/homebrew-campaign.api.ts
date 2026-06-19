@@ -1,5 +1,11 @@
 import api from './axios';
-import { normalizeClassDetail } from '@/lib/contentAdapters';
+import { contentCatalogApi } from './content-catalog.api';
+import {
+  backgroundDetailToResponse,
+  normalizeClassDetail,
+  speciesDetailToRaceResponse,
+  spellDetailToReference,
+} from '@/lib/contentAdapters';
 import type {
   ApiResponse,
   AttachHomebrewRequest,
@@ -9,6 +15,7 @@ import type {
   CharacterRaceDetailResponse,
   PinHomebrewVersionRequest,
   ProficiencySkillResponse,
+  SpeciesDetail,
   SpellReferenceResponse,
   StatTypeResponse,
   TeamAvailableContentResponse,
@@ -55,14 +62,27 @@ export const homebrewCampaignApi = {
     };
   },
 
+  /**
+   * Campaign-visible races as Species (core + active homebrew) from the normalized
+   * content model; the legacy `/reference/races` route was removed (Phase S5) in
+   * favor of `/reference/species`. Mapped back to CharacterRaceDetailResponse.
+   */
   getReferenceRaces: async (campaignId: string): Promise<ApiResponse<CharacterRaceDetailResponse[]>> => {
-    const response = await api.get<ApiResponse<CharacterRaceDetailResponse[]>>(`/campaigns/${campaignId}/reference/races`);
-    return response.data;
+    const response = await api.get<ApiResponse<SpeciesDetail[]>>(`/campaigns/${campaignId}/reference/species`);
+    return {
+      ...response.data,
+      data: response.data.data?.map(speciesDetailToRaceResponse),
+    };
   },
 
+  /**
+   * Campaign-visible backgrounds (core + active homebrew) from the normalized
+   * content model; the legacy `/reference/backgrounds` shape was superseded.
+   * Mapped back to the wizard's lightweight BackgroundResponse.
+   */
   getReferenceBackgrounds: async (campaignId: string): Promise<ApiResponse<BackgroundResponse[]>> => {
-    const response = await api.get<ApiResponse<BackgroundResponse[]>>(`/campaigns/${campaignId}/reference/backgrounds`);
-    return response.data;
+    const response = await contentCatalogApi.backgrounds.campaignList(campaignId);
+    return { ...response, data: (response.data ?? []).map(backgroundDetailToResponse) };
   },
 
   getReferenceSkills: async (campaignId: string): Promise<ApiResponse<ProficiencySkillResponse[]>> => {
@@ -75,10 +95,17 @@ export const homebrewCampaignApi = {
     return response.data;
   },
 
+  /**
+   * Campaign-visible spells (core + active homebrew) from the normalized content
+   * model. The `classId` filter is applied client-side via the flattened class
+   * availability, since the catalog list endpoint is unfiltered.
+   */
   getReferenceSpells: async (campaignId: string, classId?: string): Promise<ApiResponse<SpellReferenceResponse[]>> => {
-    const response = await api.get<ApiResponse<SpellReferenceResponse[]>>(`/campaigns/${campaignId}/reference/spells`, {
-      params: classId ? { classId } : undefined,
-    });
-    return response.data;
+    const response = await contentCatalogApi.spells.campaignList(campaignId);
+    const mapped = (response.data ?? []).map(spellDetailToReference);
+    return {
+      ...response,
+      data: classId ? mapped.filter((s) => s.availableToClassIds?.includes(classId)) : mapped,
+    };
   },
 };

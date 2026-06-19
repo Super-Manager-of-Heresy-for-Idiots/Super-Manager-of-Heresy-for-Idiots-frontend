@@ -138,6 +138,7 @@ export default function XPGrantPage() {
       <div>
         <ErrorAltar
           title={t('camp2.xp.loadError')}
+          error={error}
           onRetry={() => refetch()}
           retryLabel={t('common.retry')}
         />

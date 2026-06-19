@@ -10,6 +10,8 @@ import type { ReferenceCurrencyType } from '@/api/reference.api';
 import {
   ABILITIES,
   SKILLS,
+  abilityKeyByStatName,
+  type AbilityKey,
 } from '@/data/wizard5e';
 import {
   ALL_STEPS,
@@ -340,9 +342,13 @@ export function CharacterCreationWizard({
       toast.error(t('wiz.err.classOrRace'));
       return;
     }
-    const statByName = new Map(availability.statTypes.map((stat) => [normalizeContentName(stat.name), stat]));
+    const statByAbility = new Map<AbilityKey, StatTypeResponse>();
+    for (const stat of availability.statTypes) {
+      const key = abilityKeyByStatName(stat.name);
+      if (key && !statByAbility.has(key)) statByAbility.set(key, stat);
+    }
     const abilityScores = ABILITIES.map((a) => {
-      const stat = statByName.get(normalizeContentName(a.label));
+      const stat = statByAbility.get(a.key);
       return stat ? { statId: stat.id, baseValue: c.baseScores[a.key] || 0 } : null;
     });
     if (abilityScores.some((entry) => !entry)) {

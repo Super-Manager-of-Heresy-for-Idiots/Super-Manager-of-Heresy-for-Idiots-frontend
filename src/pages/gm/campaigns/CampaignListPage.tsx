@@ -136,6 +136,7 @@ export default function CampaignListPage() {
           {error ? (
             <ErrorAltar
               title={t('camp.list.loadError')}
+              error={error}
               onRetry={() => refetch()}
               retryLabel={t('camp.retry')}
             />
@@ -207,6 +208,7 @@ export default function CampaignListPage() {
     return (
       <ErrorAltar
         title={t('camp.list.loadError')}
+        error={error}
         onRetry={() => refetch()}
         retryLabel={t('camp.retry')}
       />

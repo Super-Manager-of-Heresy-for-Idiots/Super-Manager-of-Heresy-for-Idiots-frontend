@@ -34,7 +34,7 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/dnd_manager
       SPRING_DATASOURCE_USERNAME: dnd
       SPRING_DATASOURCE_PASSWORD: dnd_secret
-      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
       SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
     depends_on:
       postgres:

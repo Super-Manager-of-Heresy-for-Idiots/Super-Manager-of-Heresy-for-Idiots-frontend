@@ -13,6 +13,7 @@ import { useMarketplace } from '@/hooks/useHomebrew';
 import { useRateHomebrew } from '@/hooks/useHomebrewCampaign';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
+import { isRetryableError } from '@/lib/errors';
 import type { HomebrewPackageResponse } from '@/types';
 import s from './MarketplacePage.module.css';
 
@@ -80,7 +81,9 @@ export default function MarketplacePage() {
         <p className={cn('ao-italic', s.errorText)}>
           {t('hb.market.error')}
         </p>
-        <button className="ao-btn" onClick={() => refetch()}>{t('common.retry')}</button>
+        {isRetryableError(error) && (
+          <button className="ao-btn" onClick={() => refetch()}>{t('common.retry')}</button>
+        )}
       </div>
     );
   }

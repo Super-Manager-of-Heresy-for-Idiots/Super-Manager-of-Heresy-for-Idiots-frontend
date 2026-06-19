@@ -474,6 +474,7 @@ export default function SharedStoragePage() {
     return (
       <ErrorAltar
         title={t('camp2.storage.loadError')}
+        error={error}
         onRetry={() => refetch()}
         retryLabel={t('common.retry')}
       />

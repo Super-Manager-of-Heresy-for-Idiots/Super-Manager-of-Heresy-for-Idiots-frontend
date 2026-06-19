@@ -28,6 +28,7 @@ import {
 import type { FeatResponse } from '@/types';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
+import { isRetryableError } from '@/lib/errors';
 import s from './AdminCrud.module.css';
 
 export default function FeatsPage() {
@@ -110,7 +111,9 @@ export default function FeatsPage() {
         <p className={cn('ao-italic', s.errorText)}>
           {t('adm.shared.tomeUnavailable')}
         </p>
-        <button className="ao-btn" onClick={() => refetch()}>{t('common.retry')}</button>
+        {isRetryableError(error) && (
+          <button className="ao-btn" onClick={() => refetch()}>{t('common.retry')}</button>
+        )}
       </div>
     );
   }

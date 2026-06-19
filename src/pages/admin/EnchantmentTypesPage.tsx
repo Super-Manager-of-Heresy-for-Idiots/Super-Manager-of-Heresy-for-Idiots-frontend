@@ -37,6 +37,7 @@ import {
 import type { EnchantmentTypeResponse, CreateEnchantmentTypeRequest, DamageType } from '@/types';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
+import { isRetryableError } from '@/lib/errors';
 import s from './EnchantmentTypesPage.module.css';
 
 /* ------------------------------------------------------------------ */
@@ -248,7 +249,9 @@ export default function EnchantmentTypesPage() {
           <p className={cn('ao-italic', s.errorText)}>
             {t('adm.ench.errorBody')}
           </p>
-          <button className="ao-btn" onClick={() => refetch()}>{t('common.retry')}</button>
+          {isRetryableError(error) && (
+            <button className="ao-btn" onClick={() => refetch()}>{t('common.retry')}</button>
+          )}
         </div>
       </div>
     );

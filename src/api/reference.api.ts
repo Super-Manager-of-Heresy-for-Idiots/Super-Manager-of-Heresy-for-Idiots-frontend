@@ -1,5 +1,11 @@
 import api from './axios';
-import { normalizeClassDetail } from '@/lib/contentAdapters';
+import { contentCatalogApi } from './content-catalog.api';
+import {
+  backgroundDetailToResponse,
+  normalizeClassDetail,
+  speciesDetailToRaceResponse,
+  spellDetailToReference,
+} from '@/lib/contentAdapters';
 import type {
   ApiResponse,
   BackgroundResponse,
@@ -7,6 +13,7 @@ import type {
   CharacterRaceDetailResponse,
   ContentLabel,
   ProficiencySkillResponse,
+  SpeciesDetail,
   SpellReferenceResponse,
   StatTypeResponse,
 } from '@/types';
@@ -54,14 +61,27 @@ export const referenceApi = {
     };
   },
 
+  /**
+   * Races now come from the normalized content model as Species (2024). The legacy
+   * `/reference/races` route was removed (Phase S5) in favor of `/reference/species`.
+   * Mapped back to the wizard's lightweight CharacterRaceDetailResponse.
+   */
   getRaces: async (): Promise<ApiResponse<CharacterRaceDetailResponse[]>> => {
-    const response = await api.get<ApiResponse<CharacterRaceDetailResponse[]>>('/reference/races');
-    return response.data;
+    const response = await api.get<ApiResponse<SpeciesDetail[]>>('/reference/species');
+    return {
+      ...response.data,
+      data: response.data.data?.map(speciesDetailToRaceResponse),
+    };
   },
 
+  /**
+   * Backgrounds now come from the normalized content model (Content Catalog);
+   * the legacy `/reference/backgrounds` shape was superseded. Mapped back to the
+   * wizard's lightweight BackgroundResponse.
+   */
   getBackgrounds: async (): Promise<ApiResponse<BackgroundResponse[]>> => {
-    const response = await api.get<ApiResponse<BackgroundResponse[]>>('/reference/backgrounds');
-    return response.data;
+    const response = await contentCatalogApi.backgrounds.list();
+    return { ...response, data: (response.data ?? []).map(backgroundDetailToResponse) };
   },
 
   /** Backend exposes proficiency skills at `/reference/skills` (no `proficiency-` prefix). */
@@ -76,11 +96,18 @@ export const referenceApi = {
     return response.data;
   },
 
+  /**
+   * Spells come from the normalized content model (Content Catalog). The `classId`
+   * filter is applied client-side via the flattened class availability, since the
+   * catalog list endpoint is unfiltered.
+   */
   getSpells: async (classId?: string): Promise<ApiResponse<SpellReferenceResponse[]>> => {
-    const response = await api.get<ApiResponse<SpellReferenceResponse[]>>('/reference/spells', {
-      params: classId ? { classId } : undefined,
-    });
-    return response.data;
+    const response = await contentCatalogApi.spells.list();
+    const mapped = (response.data ?? []).map(spellDetailToReference);
+    return {
+      ...response,
+      data: classId ? mapped.filter((s) => s.availableToClassIds?.includes(classId)) : mapped,
+    };
   },
 
   /** Ability scores (ability_score) for authoring dropdowns. */

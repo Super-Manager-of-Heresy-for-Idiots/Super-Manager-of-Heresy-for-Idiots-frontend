@@ -71,6 +71,7 @@ export default function CampaignInvitePage() {
     return (
       <ErrorAltar
         title={t('camp.invite.loadError')}
+        error={error}
         onRetry={() => refetch()}
         retryLabel={t('camp.retry')}
       />

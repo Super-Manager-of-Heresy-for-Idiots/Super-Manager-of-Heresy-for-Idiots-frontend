@@ -9,6 +9,7 @@ import type { ReactNode, CSSProperties } from 'react';
 import { OrdoPanel, PanelHeader, Rune, OrdoField, Sigil } from '@/components/ordo';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
+import { isRetryableError } from '@/lib/errors';
 import type { WalletEntry, WalletHistoryEntry } from '@/types';
 import { walletTotalGold } from './WalletKit.helpers';
 import s from './WalletKit.module.css';
@@ -340,7 +341,7 @@ export function WalletSkeleton() {
   );
 }
 
-export function WalletErrorBanner({ onRetry }: { onRetry: () => void }) {
+export function WalletErrorBanner({ onRetry, error }: { onRetry: () => void; error?: unknown }) {
   const t = useT();
   return (
     <OrdoPanel frame className={s.errPanel}>
@@ -351,7 +352,9 @@ export function WalletErrorBanner({ onRetry }: { onRetry: () => void }) {
           <div className={cn('ao-h6', s.errTitle)}>{t('camp.wallet.loadError')}</div>
           <div className={cn('ao-italic', s.errBody)}>{t('camp.wallet.errorBody')}</div>
         </div>
-        <button onClick={onRetry} className={cn('ao-btn ao-btn--danger', s.errBtn)}>{t('common.retry')}</button>
+        {isRetryableError(error) && (
+          <button onClick={onRetry} className={cn('ao-btn ao-btn--danger', s.errBtn)}>{t('common.retry')}</button>
+        )}
       </div>
     </OrdoPanel>
   );

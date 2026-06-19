@@ -17,6 +17,7 @@ import {
   asiFromDetail,
   clamp,
   fmtMod,
+  maxSpellLevel,
   mergeAsi,
   pointBuySpent,
   profByLevel,
@@ -738,9 +739,14 @@ export function StepSpells({ c, A, n, total, availability }: StepProps) {
     c.level,
   );
   const classId = availability.classIdByKey[c.classKey];
+  // Cap by the highest spell level this character can know (mirrors the backend
+  // validation) so over-level spells are neither shown nor selectable.
+  const maxLvl = maxSpellLevel(!!c.isHalfCaster, c.level);
   const list = useMemo(
-    () => availability.spells.filter((sp) => !classId || (sp.availableToClassIds?.includes(classId) ?? false)),
-    [availability.spells, classId],
+    () => availability.spells.filter(
+      (sp) => (!classId || (sp.availableToClassIds?.includes(classId) ?? false)) && (sp.level ?? 0) <= maxLvl,
+    ),
+    [availability.spells, classId, maxLvl],
   );
   const schools = useMemo(
     () => Array.from(new Set(list.map((s) => s.school).filter((x): x is string => !!x))).sort(),
@@ -808,9 +814,9 @@ export function StepSpells({ c, A, n, total, availability }: StepProps) {
         <select className="ao-input wiz-filter" value={lvlFilter} onChange={(e) => setLvlFilter(e.target.value)}>
           <option value="all">{t('wiz.spells.allLevels')}</option>
           <option value="cantrip">{t('wiz.spells.cantrips')}</option>
-          <option value="1">{t('wiz.spells.level1')}</option>
-          <option value="2">{t('wiz.spells.level2')}</option>
-          <option value="3">{t('wiz.spells.level3')}</option>
+          {Array.from({ length: maxLvl }, (_, i) => i + 1).map((lv) => (
+            <option key={lv} value={String(lv)}>{t('wiz.spells.lvl', { level: lv })}</option>
+          ))}
         </select>
         <select className="ao-input wiz-filter" value={schoolFilter} onChange={(e) => setSchoolFilter(e.target.value)}>
           <option value="all">{t('wiz.spells.allSchools')}</option>

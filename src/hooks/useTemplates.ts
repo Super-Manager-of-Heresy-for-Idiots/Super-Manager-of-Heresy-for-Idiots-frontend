@@ -6,6 +6,7 @@ import {
   type CreateTemplateCharacterRequest,
 } from '@/api/characters-full.api';
 import { referenceApi } from '@/api/reference.api';
+import { settledList } from '@/lib/settled';
 import { useT, useI18n } from '@/i18n/I18nContext';
 import type { ApiError, AvailableContentEntry, CharacterResponse, UpdateCharacterRequest } from '@/types';
 
@@ -131,7 +132,9 @@ export function useGlobalReferenceContent() {
   return useQuery({
     queryKey: ['reference', 'global', lang],
     queryFn: async () => {
-      const [classes, races, backgrounds, skills, statTypes, currencies, spells] = await Promise.all([
+      // allSettled, not all: one failing reference dictionary (e.g. a 500 on
+      // /skills mid-migration) must not blank out the others (backgrounds, races…).
+      const [classes, races, backgrounds, skills, statTypes, currencies, spells] = await Promise.allSettled([
         referenceApi.getClasses(),
         referenceApi.getRaces(),
         referenceApi.getBackgrounds(),
@@ -140,16 +143,16 @@ export function useGlobalReferenceContent() {
         referenceApi.getCurrencies(),
         referenceApi.getSpells(),
       ]);
-      const classList = classes.data ?? [];
-      const raceList = races.data ?? [];
+      const classList = settledList(classes);
+      const raceList = settledList(races);
       return {
         classes: classList,
         races: raceList,
-        backgrounds: backgrounds.data ?? [],
-        skills: skills.data ?? [],
-        statTypes: statTypes.data ?? [],
-        currencies: currencies.data ?? [],
-        spells: spells.data ?? [],
+        backgrounds: settledList(backgrounds),
+        skills: settledList(skills),
+        statTypes: settledList(statTypes),
+        currencies: settledList(currencies),
+        spells: settledList(spells),
         // Wizard picker entries are derived from the detail lists — no extra
         // round-trip to a (non-existent) `/reference/available/*` endpoint.
         availableClasses: classList.map(detailToEntry),

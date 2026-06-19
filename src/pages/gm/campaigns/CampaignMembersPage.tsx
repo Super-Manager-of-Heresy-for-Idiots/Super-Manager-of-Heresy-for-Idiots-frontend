@@ -15,6 +15,7 @@ import {
 import { useCampaign, useKickMember } from '@/hooks/useCampaigns';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
+import { isRetryableError } from '@/lib/errors';
 import type { CampaignMember } from '@/types';
 import s from './CampaignMembersPage.module.css';
 
@@ -67,7 +68,9 @@ export default function CampaignMembersPage() {
         <p className={cn('ao-italic', s.errorText)}>
           {t('camp.members.loadError')}
         </p>
-        <button className="ao-btn" onClick={() => refetch()}>{t('camp.retry')}</button>
+        {isRetryableError(error) && (
+          <button className="ao-btn" onClick={() => refetch()}>{t('camp.retry')}</button>
+        )}
       </div>
     );
   }

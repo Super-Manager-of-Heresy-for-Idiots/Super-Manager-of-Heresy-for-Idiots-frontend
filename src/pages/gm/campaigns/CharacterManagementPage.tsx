@@ -11,6 +11,7 @@ import { useLevelUpOptions } from '@/hooks/useLevelUp';
 import { useAuthStore } from '@/store/authStore';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
+import { isRetryableError } from '@/lib/errors';
 import { xpForLevel, xpForNextLevel } from '@/types';
 import s from './CharacterManagementPage.module.css';
 
@@ -82,7 +83,9 @@ export default function CharacterManagementPage() {
         <p className={cn('ao-italic', s.errorText)}>
           {t('camp.mgmt.loadError')}
         </p>
-        <button className="ao-btn" onClick={() => refetch()}>{t('camp.retry')}</button>
+        {isRetryableError(error) && (
+          <button className="ao-btn" onClick={() => refetch()}>{t('camp.retry')}</button>
+        )}
       </div>
     );
   }

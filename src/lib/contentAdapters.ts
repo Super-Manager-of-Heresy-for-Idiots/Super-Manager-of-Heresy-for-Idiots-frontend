@@ -1,10 +1,16 @@
 import type {
   AvailableClassOption,
+  BackgroundDetail,
+  BackgroundResponse,
   CharacterClassDetailResponse,
+  CharacterRaceDetailResponse,
   ContentLabel,
   LevelUpOptionsResponse,
   ProficiencySkillResponse,
   RewardGroup,
+  SpeciesDetail,
+  SpellDetail,
+  SpellReferenceResponse,
 } from '@/types';
 import type { Lang } from '@/i18n/translations';
 
@@ -61,7 +67,10 @@ export function normalizeClassDetail(detail: CharacterClassDetailResponse): Char
     spellcasting: detail.spellcasting
       ? {
           ...detail.spellcasting,
-          isSpellcaster: detail.spellcasting.isSpellcaster ?? detail.spellcasting.spellcaster,
+          // The backend emits a non-null spellcasting block ONLY for casters
+          // (mapSpellcasting returns null otherwise) and never sets an explicit
+          // isSpellcaster flag — the block's presence IS the signal, so default true.
+          isSpellcaster: detail.spellcasting.isSpellcaster ?? detail.spellcasting.spellcaster ?? true,
           isHalfCaster: detail.spellcasting.isHalfCaster ?? detail.spellcasting.halfCaster,
         }
       : undefined,
@@ -78,6 +87,59 @@ function namesToLabels(names: string[] | undefined): ContentLabel[] {
 
 function skillsToLabels(skills: ProficiencySkillResponse[] | undefined): ContentLabel[] {
   return (skills ?? []).map((skill) => ({ id: skill.id, name: skill.name }));
+}
+
+/**
+ * Adapts a new-model BackgroundDetail (Content Catalog) to the lightweight
+ * BackgroundResponse the character wizard consumes. The legacy reference
+ * background endpoints were superseded by the normalized content model, so the
+ * wizard now sources backgrounds from the catalog and maps to its existing shape.
+ * `grantedExtras` surfaces the 2024 origin feat as the headline "also grants".
+ */
+export function backgroundDetailToResponse(detail: BackgroundDetail): BackgroundResponse {
+  return {
+    id: detail.id,
+    name: detail.name,
+    description: detail.description ?? undefined,
+    skillProficiencyNames: (detail.skillProficiencies ?? []).map((s) => s.name),
+    grantedExtras: detail.grantedFeat?.name ?? undefined,
+  };
+}
+
+/**
+ * Adapts a new-model SpeciesDetail (2024 race replacement) to the lightweight
+ * CharacterRaceDetailResponse the character wizard consumes. In the 2024 model
+ * ability bonuses and subraces no longer live on the species (bonuses come from
+ * Background), so those collapse to empty — the wizard renders them as "—".
+ */
+export function speciesDetailToRaceResponse(detail: SpeciesDetail): CharacterRaceDetailResponse {
+  const walk = detail.speeds.find((s) => s.type === 'walk') ?? detail.speeds[0];
+  return {
+    id: detail.id,
+    name: detail.name,
+    description: detail.description ?? undefined,
+    speed: walk?.amountFt ?? undefined,
+    abilityScoreIncreases: [],
+    traits: detail.traits.map((tr) => tr.name).filter((n): n is string => !!n),
+    subraces: [],
+  };
+}
+
+/**
+ * Adapts a new-model SpellDetail (Content Catalog) to the wizard's lightweight
+ * SpellReferenceResponse. Class availability is flattened to ids so the wizard's
+ * client-side per-class filter keeps working.
+ */
+export function spellDetailToReference(detail: SpellDetail): SpellReferenceResponse {
+  return {
+    id: detail.id,
+    name: detail.name,
+    nameEn: detail.nameEn ?? undefined,
+    level: detail.level ?? 0,
+    school: detail.school?.name ?? undefined,
+    description: detail.description ?? undefined,
+    availableToClassIds: detail.classes.map((c) => c.id),
+  };
 }
 
 /** Picks the locale-appropriate name for a content label, falling back to the base name. */

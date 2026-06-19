@@ -266,6 +266,7 @@ export default function CharacterWalletPage() {
         <OrdoPanel frame padding={0}>
           <ErrorAltar
             title={t('camp.wallet.loadError')}
+            error={error}
             onRetry={() => refetch()}
             retryLabel={t('common.retry')}
           />

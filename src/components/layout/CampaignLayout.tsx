@@ -6,6 +6,7 @@ import { useWebSocket } from '@/hooks/useWebSocket';
 import { useAuthStore } from '@/store/authStore';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
+import { isRetryableError } from '@/lib/errors';
 import type { CampaignDetailResponse } from '@/types';
 import { PageFallback } from './PageFallback';
 import s from './CampaignLayout.module.css';
@@ -89,7 +90,9 @@ export function CampaignLayout() {
         <BackLink to="/campaigns" label={t('camp2.back.campaigns')} className={s.back} />
         <div className={s.errorBlock}>
           <p className={cn('ao-italic', s.errorText)}>{t('camp.dash.loadError')}</p>
-          <button className="ao-btn" onClick={() => refetch()}>{t('camp.retry')}</button>
+          {isRetryableError(error) && (
+            <button className="ao-btn" onClick={() => refetch()}>{t('camp.retry')}</button>
+          )}
         </div>
       </div>
     );

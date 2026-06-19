@@ -14,6 +14,7 @@ import {
 import { BackLink } from '@/components/campaigns';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
+import { isRetryableError } from '@/lib/errors';
 import {
   useNpc,
   useNpcNotes,
@@ -150,7 +151,9 @@ export default function NPCDetailPage() {
           <p className={cn('ao-italic', s.errorText)}>
             {t('camp2.npcDetail.notFound')}
           </p>
-          <button className="ao-btn" onClick={() => refetch()}>{t('common.retry')}</button>
+          {isRetryableError(error) && (
+            <button className="ao-btn" onClick={() => refetch()}>{t('common.retry')}</button>
+          )}
         </div>
       </div>
     );

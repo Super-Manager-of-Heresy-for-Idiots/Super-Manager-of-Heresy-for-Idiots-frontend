@@ -125,6 +125,7 @@ export default function SessionNotesPage() {
     return (
       <ErrorAltar
         title={t('camp2.session.loadError')}
+        error={error}
         onRetry={() => refetch()}
         retryLabel={t('common.retry')}
       />

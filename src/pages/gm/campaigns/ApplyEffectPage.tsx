@@ -20,6 +20,7 @@ import { useBuffsDebuffs } from '@/hooks/useAdmin';
 import { useAuthStore } from '@/store/authStore';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
+import { isRetryableError } from '@/lib/errors';
 import s from './ApplyEffectPage.module.css';
 
 /* ================================================================== */
@@ -139,9 +140,11 @@ export default function ApplyEffectPage() {
           <p className={cn('ao-italic', s.errorText)}>
             {t('camp2.effect.loadError')}
           </p>
-          <button className="ao-btn" onClick={() => refetchEffects()}>
-            {t('common.retry')}
-          </button>
+          {isRetryableError(charError) && isRetryableError(effectsError) && (
+            <button className="ao-btn" onClick={() => refetchEffects()}>
+              {t('common.retry')}
+            </button>
+          )}
         </div>
       </div>
     );

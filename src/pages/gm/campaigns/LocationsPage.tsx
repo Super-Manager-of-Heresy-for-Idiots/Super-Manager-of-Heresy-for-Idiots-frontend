@@ -148,6 +148,7 @@ export default function LocationsPage() {
       <div>
         <ErrorAltar
           title={t('camp2.loc.loadError')}
+          error={error}
           onRetry={() => refetch()}
           retryLabel={t('common.retry')}
         />

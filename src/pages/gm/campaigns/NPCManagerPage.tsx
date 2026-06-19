@@ -123,6 +123,7 @@ export default function NPCManagerPage() {
       <div>
         <ErrorAltar
           title={t('camp2.npcMgr.loadError')}
+          error={error}
           onRetry={() => refetch()}
           retryLabel={t('common.retry')}
         />

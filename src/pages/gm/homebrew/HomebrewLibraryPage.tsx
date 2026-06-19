@@ -21,6 +21,7 @@ import { useHomebrewLibrary, useAttachHomebrew, useRateHomebrew } from '@/hooks/
 import { useCampaigns } from '@/hooks/useCampaigns';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
+import { isRetryableError } from '@/lib/errors';
 import type { CampaignResponse } from '@/types';
 import s from './HomebrewLibraryPage.module.css';
 
@@ -123,7 +124,9 @@ export default function HomebrewLibraryPage() {
         <p className={cn('ao-italic', s.errorText)}>
           {t('hb.library.error')}
         </p>
-        <button className="ao-btn" onClick={() => refetch()}>{t('common.retry')}</button>
+        {isRetryableError(error) && (
+          <button className="ao-btn" onClick={() => refetch()}>{t('common.retry')}</button>
+        )}
       </div>
     );
   }

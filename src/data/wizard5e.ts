@@ -99,9 +99,26 @@ export const applyRacial = (base: ScoreMap, asi: ASI): ScoreMap => {
 // ── ASI from backend race detail ───────────────────────────
 const norm = (value: string | undefined): string => (value || '').trim().toLowerCase();
 
+// Canonical Russian ability names. The content-model reference (/reference/stat-types)
+// returns getNameRu() ("Сила", "Ловкость", …); older/vanilla data returns the English
+// label. Match either, so ability↔stat-type resolution survives the migration.
+const STAT_RU_NAME_BY_KEY: Record<AbilityKey, string> = {
+  str: 'Сила',
+  dex: 'Ловкость',
+  con: 'Телосложение',
+  int: 'Интеллект',
+  wis: 'Мудрость',
+  cha: 'Харизма',
+};
+
 /** Resolve an ability key from a stat label (backend uses localized stat names). */
-export const abilityKeyByStatName = (name: string): AbilityKey | undefined =>
-  ABILITIES.find((a) => norm(a.label) === norm(name))?.key;
+export const abilityKeyByStatName = (name: string): AbilityKey | undefined => {
+  const n = norm(name);
+  if (!n) return undefined;
+  return ABILITIES.find(
+    (a) => norm(a.label) === n || norm(a.abbr) === n || norm(STAT_RU_NAME_BY_KEY[a.key]) === n,
+  )?.key;
+};
 
 /** Map backend `{ statName, bonus }[]` to an AbilityKey-keyed ASI via `resolve`. */
 export const asiFromDetail = (
@@ -148,6 +165,17 @@ export function spellLimits(k: SpellcasterKind | null, level: number): { cantrip
   else spells = Math.min(22, 3 + lvl);
   return { cantrips, spells };
 }
+
+/**
+ * Highest spell level a character can know at this level. Mirrors the backend
+ * `ContentCharacterCreationService.getMaxSpellLevel` exactly (`min(cap, (lvl+1)/2)`,
+ * cap 5 for half-casters else 9) so the picker never offers a spell the submit-time
+ * validation would reject ("Spell (level N) exceeds max spell level M").
+ */
+export const maxSpellLevel = (isHalfCaster: boolean, level: number): number => {
+  const lvl = Math.max(1, Math.min(20, Number(level || 1)));
+  return Math.min(isHalfCaster ? 5 : 9, Math.floor((lvl + 1) / 2));
+};
 
 export const skillByKey = (k: string): SkillDef | undefined => SKILLS.find((s) => s.key === k);
 export const abilityByKey = (k: string): AbilityDef | undefined => ABILITIES.find((a) => a.key === k);

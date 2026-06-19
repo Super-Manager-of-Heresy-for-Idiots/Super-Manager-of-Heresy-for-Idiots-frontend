@@ -59,6 +59,7 @@ export default function CharacterResourcesPage() {
             glyph="hex"
             title={t('camp.resources.error.title')}
             body={t('camp.resources.error.body')}
+            error={error}
             onRetry={() => refetch()}
             retryLabel={t('camp.retry')}
           />

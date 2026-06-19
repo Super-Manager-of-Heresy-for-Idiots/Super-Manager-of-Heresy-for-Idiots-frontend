@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import type { CSSProperties } from 'react';
 import { Rune, OrdoPanel, PanelHeader } from '@/components/ordo';
 import { formatDate, cn } from '@/lib/utils';
+import { isRetryableError } from '@/lib/errors';
 import { useUsers } from '@/hooks/useAdmin';
 import { useT } from '@/i18n/I18nContext';
 import s from './UsersListPage.module.css';
@@ -65,7 +66,9 @@ export default function UsersListPage() {
         <p className={cn('ao-italic', s.errorText)}>
           {t('adm.users.errorBody')}
         </p>
-        <button className="ao-btn" onClick={() => refetch()}>{t('common.retry')}</button>
+        {isRetryableError(error) && (
+          <button className="ao-btn" onClick={() => refetch()}>{t('common.retry')}</button>
+        )}
       </div>
     );
   }

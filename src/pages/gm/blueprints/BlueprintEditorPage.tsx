@@ -22,6 +22,7 @@ import { useMyTemplates } from '@/hooks/useTemplates';
 import { CreateUniverseModal } from './CreateUniverseModal';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
+import { isRetryableError } from '@/lib/errors';
 import type { QuestStatus } from '@/types';
 import s from './blueprints.module.css';
 
@@ -142,7 +143,9 @@ export default function BlueprintEditorPage() {
     return (
       <div className={s.errorBox}>
         <p className={cn('ao-italic', s.errorText)}>{t('bp.editor.error')}</p>
-        <button className="ao-btn" onClick={() => refetch()}>{t('common.retry')}</button>
+        {isRetryableError(error) && (
+          <button className="ao-btn" onClick={() => refetch()}>{t('common.retry')}</button>
+        )}
       </div>
     );
   }

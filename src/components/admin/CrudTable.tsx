@@ -2,6 +2,7 @@ import { Pencil, Trash2, Plus } from 'lucide-react';
 import { useT } from '@/i18n/I18nContext';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { isRetryableError } from '@/lib/errors';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,6 +27,7 @@ interface CrudTableProps<T extends { id: string }> {
   columns: Column<T>[];
   isLoading: boolean;
   isError?: boolean;
+  error?: unknown;
   onRetry?: () => void;
   onAdd: () => void;
   onEdit?: (item: T) => void;
@@ -40,6 +42,7 @@ export function CrudTable<T extends { id: string }>({
   columns,
   isLoading,
   isError,
+  error,
   onRetry,
   onAdd,
   onEdit,
@@ -75,7 +78,7 @@ export function CrudTable<T extends { id: string }>({
       ) : isError ? (
         <div className="text-center py-12">
           <p className="text-lg text-destructive">{t('cmp2.crud.loadError')}</p>
-          {onRetry && (
+          {onRetry && isRetryableError(error) && (
             <Button variant="outline" className="mt-4" onClick={onRetry}>
               {t('common.retry')}
             </Button>

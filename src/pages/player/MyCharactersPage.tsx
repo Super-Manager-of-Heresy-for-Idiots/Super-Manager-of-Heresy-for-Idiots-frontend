@@ -15,6 +15,7 @@ import {
 import { useMyTemplates, useDeleteTemplate } from '@/hooks/useTemplates';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
+import { isRetryableError } from '@/lib/errors';
 import type { CharacterResponse } from '@/types';
 import s from './MyCharactersPage.module.css';
 
@@ -54,7 +55,9 @@ export default function MyCharactersPage() {
           <p className={cn('ao-italic', s.errorText)}>
             {t('chars.loadError')}
           </p>
-          <button className="ao-btn" onClick={() => refetch()}>{t('common.retry')}</button>
+          {isRetryableError(error) && (
+            <button className="ao-btn" onClick={() => refetch()}>{t('common.retry')}</button>
+          )}
         </div>
       </div>
     );

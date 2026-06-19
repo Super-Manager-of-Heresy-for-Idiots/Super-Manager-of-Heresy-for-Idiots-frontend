@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { homebrewCampaignApi } from '@/api/homebrew-campaign.api';
 import { homebrewApi } from '@/api/homebrew.api';
+import { settledList } from '@/lib/settled';
 import { useT, useI18n } from '@/i18n/I18nContext';
 import type {
   AttachHomebrewRequest,
@@ -96,7 +97,9 @@ export function useCampaignReferenceContent(campaignId: string) {
   return useQuery({
     queryKey: ['campaigns', campaignId, 'reference-content', lang],
     queryFn: async () => {
-      const [classes, races, backgrounds, skills, statTypes, spells] = await Promise.all([
+      // allSettled, not all: one failing reference dictionary (e.g. a 500 on
+      // /skills mid-migration) must not blank out the others (backgrounds, races…).
+      const [classes, races, backgrounds, skills, statTypes, spells] = await Promise.allSettled([
         homebrewCampaignApi.getReferenceClasses(campaignId),
         homebrewCampaignApi.getReferenceRaces(campaignId),
         homebrewCampaignApi.getReferenceBackgrounds(campaignId),
@@ -106,12 +109,12 @@ export function useCampaignReferenceContent(campaignId: string) {
       ]);
 
       return {
-        classes: classes.data ?? [],
-        races: races.data ?? [],
-        backgrounds: backgrounds.data ?? [],
-        skills: skills.data ?? [],
-        statTypes: statTypes.data ?? [],
-        spells: spells.data ?? [],
+        classes: settledList(classes),
+        races: settledList(races),
+        backgrounds: settledList(backgrounds),
+        skills: settledList(skills),
+        statTypes: settledList(statTypes),
+        spells: settledList(spells),
       };
     },
     enabled: !!campaignId,

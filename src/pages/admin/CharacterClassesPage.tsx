@@ -10,7 +10,7 @@ const ADMIN_SCOPE = { kind: 'admin' } as const;
 
 export default function CharacterClassesPage() {
   const t = useT();
-  const { data, isLoading, isError, refetch } = useCharacterClasses();
+  const { data, isLoading, isError, error, refetch } = useCharacterClasses();
 
   const [builderOpen, setBuilderOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | undefined>(undefined);
@@ -38,6 +38,7 @@ export default function CharacterClassesPage() {
         data={data}
         isLoading={isLoading}
         isError={isError}
+        error={error}
         onRetry={refetch}
         onAdd={handleAdd}
         onEdit={handleEdit}
