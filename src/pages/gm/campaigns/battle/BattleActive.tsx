@@ -194,7 +194,7 @@ function GmControls({
     [turn?.monster?.features],
   );
   const npcTargets = useMemo(
-    () => (current ? liveTargets(battle.combatants, current.id) : []),
+    () => (current ? liveTargets(battle.combatants, current) : []),
     [battle.combatants, current],
   );
 
@@ -340,8 +340,8 @@ function ActionPanel({
   const spells = turn?.character?.knownSpells ?? [];
   const effects = turn?.activeEffects ?? [];
   const targets = useMemo(
-    () => liveTargets(battle.combatants, current.id),
-    [battle.combatants, current.id],
+    () => liveTargets(battle.combatants, current),
+    [battle.combatants, current],
   );
 
   return (
@@ -462,12 +462,21 @@ function ActionPanel({
 
 /* ── attack form (player + GM NPC) ─────────────────────────── */
 
-/** Combatants that can be attacked / adjusted: everyone except `excludeId`, still standing. */
+/**
+ * Valid attack targets for `attacker`: the opposing side only (characters strike monsters and
+ * vice versa), excluding downed combatants. This prevents a GM-controlled monster from defaulting
+ * to — and accidentally damaging — another monster instead of a player.
+ */
 function liveTargets(
   combatants: BattleCombatantResponse[],
-  excludeId: string,
+  attacker: BattleCombatantResponse,
 ): BattleCombatantResponse[] {
-  return combatants.filter((c) => c.id !== excludeId && (c.currentHp == null || c.currentHp > 0));
+  return combatants.filter(
+    (c) =>
+      c.id !== attacker.id &&
+      c.type !== attacker.type &&
+      (c.currentHp == null || c.currentHp > 0),
+  );
 }
 
 interface AttackOption {

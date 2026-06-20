@@ -1082,9 +1082,7 @@
   padding: 16px 0;
   background: var(--abyss);
   border-right: 1px solid var(--rule);
-  overflow-x: hidden;
-  overflow-y: auto;
-  scrollbar-width: none;
+  overflow: hidden;
   transition: width 220ms cubic-bezier(0.3, 0, 0.2, 1), box-shadow 220ms;
 }
 .ao-rail-inner::-webkit-scrollbar { width: 0; }
@@ -1113,11 +1111,16 @@
 .ao-rail:hover .ao-rail-brand-name { opacity: 1; }
 
 .ao-rail-items {
-  flex: 1;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
+.ao-rail-items::-webkit-scrollbar { width: 0; }
 .ao-rail-btn {
   display: flex;
   align-items: center;
@@ -1182,7 +1185,8 @@
   background: var(--ember);
 }
 .ao-rail-foot {
-  margin-top: 8px;
+  flex: 0 0 auto;
+  margin-top: auto;
   padding-top: 8px;
   border-top: 1px solid var(--rule);
 }
@@ -1372,22 +1376,27 @@
 .ao-acct-action:hover { border-color: var(--brass); color: var(--gold-pale); }
 .ao-acct-action--danger:hover { border-color: var(--ember); color: var(--ember); }
 
-/* In the collapsed rail, hide everything but the avatars; reveal on hover. */
-.ao-rail .ao-acct-section,
+/* In the collapsed rail, keep only the avatars. The in-row text fades via
+   opacity (no vertical impact), while the section label and action buttons are
+   removed from layout entirely so the avatars sit flush at the very bottom of
+   the rail. Everything returns on hover. */
 .ao-rail .ao-acct-meta,
 .ao-rail .ao-acct-badge,
-.ao-rail .ao-acct-remove,
-.ao-rail .ao-acct-actions {
+.ao-rail .ao-acct-remove {
   opacity: 0;
   transition: opacity 160ms;
 }
-.ao-rail:hover .ao-acct-section,
 .ao-rail:hover .ao-acct-meta,
 .ao-rail:hover .ao-acct-badge,
-.ao-rail:hover .ao-acct-remove,
-.ao-rail:hover .ao-acct-actions {
+.ao-rail:hover .ao-acct-remove {
   opacity: 1;
 }
+.ao-rail .ao-acct-section,
+.ao-rail .ao-acct-actions {
+  display: none;
+}
+.ao-rail:hover .ao-acct-section { display: block; }
+.ao-rail:hover .ao-acct-actions { display: flex; }
 
 /* ============================================================
    APP SHELL — top bar + root layout
