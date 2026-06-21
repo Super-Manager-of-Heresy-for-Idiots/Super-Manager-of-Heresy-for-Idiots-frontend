@@ -108,6 +108,19 @@ function buildBiography(c: WizardChar): CreateFullCharacterRequest['biography'] 
   return Object.values(bio).some(Boolean) ? bio : undefined;
 }
 
+// Forge attack rows → backend attack objects (omit rows with no data at all).
+function buildAttacks(c: WizardChar): CreateFullCharacterRequest['attacks'] {
+  const attacks = (c.attacks || [])
+    .filter((a) => a.name.trim() || a.hit.trim() || a.dmg.trim() || a.type.trim())
+    .map((a) => ({
+      name: a.name.trim(),
+      attackBonus: a.hit.trim(),
+      damage: a.dmg.trim(),
+      damageType: a.type.trim(),
+    }));
+  return attacks.length ? attacks : undefined;
+}
+
 // Wizard coin pools (pp/gp/ep/sp/cp) → wallet entries keyed by currency id.
 function buildStartingCoins(
   c: WizardChar,
@@ -431,7 +444,9 @@ export function CharacterCreationWizard({
       avatar: c.avatar,
       features: c.features,
       proficiencies: c.proficiencies,
+      equipment: c.equipment,
       biography: buildBiography(c),
+      attacks: buildAttacks(c),
       startingCoins: buildStartingCoins(c, availability.currencies),
       initialRewardSelections: initialRewardSelections.length ? initialRewardSelections : undefined,
     };

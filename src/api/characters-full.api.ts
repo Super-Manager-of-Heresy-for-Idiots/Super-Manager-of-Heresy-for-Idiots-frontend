@@ -25,6 +25,13 @@ export interface CreateFullCharacterBiography {
   flaws?: string;
 }
 
+export interface CreateFullCharacterAttack {
+  name: string;
+  attackBonus: string;
+  damage: string;
+  damageType: string;
+}
+
 export interface CreateFullCharacterCoin {
   currencyTypeId: string;
   amount: number;
@@ -66,6 +73,8 @@ export interface CreateFullCharacterRequest {
   initialRewardSelections?: ContentLevelUpRequest['selections'];
   features?: string;
   proficiencies?: string;
+  equipment?: string;
+  attacks?: CreateFullCharacterAttack[];
 }
 
 export type CreateTemplateCharacterRequest = Omit<CreateFullCharacterRequest, 'campaignId'>;
@@ -85,6 +94,14 @@ export interface CreateContentCharacterRequest {
   spellIds?: string[];
   startingCoins?: CreateFullCharacterCoin[];
   initialRewardSelections?: ContentLevelUpRequest['selections'];
+  // Character-sheet narrative / combat fields persisted on the character.
+  alignment?: string;
+  avatarUrl?: string;
+  proficiencies?: string;
+  equipment?: string;
+  features?: string;
+  biography?: CreateFullCharacterBiography;
+  attacks?: CreateFullCharacterAttack[];
 }
 
 export interface ContentCharacterCreationResponse {
@@ -99,6 +116,21 @@ export interface ContentCharacterCreationResponse {
 
 function nonEmptyIds(ids?: string[]): string[] | undefined {
   const filtered = (ids ?? []).filter(Boolean);
+  return filtered.length ? filtered : undefined;
+}
+
+function trimToUndefined(value?: string | null): string | undefined {
+  const trimmed = value?.trim();
+  return trimmed ? trimmed : undefined;
+}
+
+// Drop attacks that carry no data at all so we never persist blank rows.
+function cleanAttacks(
+  attacks?: CreateFullCharacterAttack[],
+): CreateFullCharacterAttack[] | undefined {
+  const filtered = (attacks ?? []).filter(
+    (a) => a && (a.name?.trim() || a.attackBonus?.trim() || a.damage?.trim() || a.damageType?.trim()),
+  );
   return filtered.length ? filtered : undefined;
 }
 
@@ -120,6 +152,14 @@ function toContentCharacterRequest(
     spellIds: nonEmptyIds(data.spellIds),
     startingCoins: data.startingCoins,
     initialRewardSelections: data.initialRewardSelections?.length ? data.initialRewardSelections : undefined,
+    // Carry the character-sheet narrative / combat fields through to the backend.
+    alignment: trimToUndefined(data.alignment),
+    avatarUrl: trimToUndefined(data.avatar),
+    proficiencies: trimToUndefined(data.proficiencies),
+    equipment: trimToUndefined(data.equipment),
+    features: trimToUndefined(data.features),
+    biography: data.biography,
+    attacks: cleanAttacks(data.attacks),
   };
 }
 
