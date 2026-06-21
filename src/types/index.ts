@@ -1609,6 +1609,7 @@ export type WsEventType =
   | 'BATTLE_UPDATED'
   | 'COMBATANT_JOINED'
   | 'BATTLE_TURN_CHANGED'
+  | 'BATTLE_ACTION'
   | 'BATTLE_ENDED';
 
 export interface WsEvent<T = unknown> {
@@ -1720,6 +1721,43 @@ export interface JoinBattleCharacter {
 /** A player joins an ACTIVE battle with one or more of their characters. */
 export interface JoinBattleRequest {
   characters: JoinBattleCharacter[];
+}
+
+/** The active combatant strikes a target. The attacker rolls their own d20 (1–20). */
+export interface BattleAttackRequest {
+  targetCombatantId: string;
+  /** Attack name as shown on the character sheet / monster feature. */
+  attackName: string;
+  d20: number;
+}
+
+/** GM manual HP change on a combatant: negative `delta` damages, positive heals. */
+export interface ApplyCombatantHpRequest {
+  delta: number;
+}
+
+export type AttackOutcome = 'HIT' | 'MISS' | 'CRIT';
+
+/** Result of a resolved attack — roll breakdown, outcome and the target's HP after. */
+export interface BattleActionResultResponse {
+  attackerCombatantId: string;
+  attackerName: string;
+  targetCombatantId: string;
+  targetName: string;
+  attackName: string;
+  d20: number;
+  attackBonus: number;
+  total: number;
+  targetAc: number;
+  outcome: AttackOutcome;
+  /** Damage dealt; `null` on a miss. */
+  damage: number | null;
+  damageType: string | null;
+  targetCurrentHp: number | null;
+  targetMaxHp: number | null;
+  targetDown: boolean;
+  /** Fresh authoritative battle state for cache sync. */
+  battle: BattleResponse;
 }
 
 // === Type Aliases (backward-compat) ===

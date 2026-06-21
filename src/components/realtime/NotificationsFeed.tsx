@@ -34,6 +34,7 @@ const EVENT_VISUAL: Record<WsEventType, EventVisual> = {
   BATTLE_UPDATED:          { glyph: 'sword',   color: 'var(--ink)' },
   COMBATANT_JOINED:        { glyph: 'helm',    color: 'var(--arcane)' },
   BATTLE_TURN_CHANGED:     { glyph: 'arrow-r', color: 'var(--gold-pale)' },
+  BATTLE_ACTION:           { glyph: 'sword',   color: 'var(--ember)' },
   BATTLE_ENDED:            { glyph: 'flame',   color: 'var(--ember)' },
 };
 
@@ -58,6 +59,7 @@ const EVENT_LABEL_KEY: Record<WsEventType, string> = {
   BATTLE_UPDATED:          'cmp2.event.BATTLE_UPDATED',
   COMBATANT_JOINED:        'cmp2.event.COMBATANT_JOINED',
   BATTLE_TURN_CHANGED:     'cmp2.event.BATTLE_TURN_CHANGED',
+  BATTLE_ACTION:           'cmp2.event.BATTLE_ACTION',
   BATTLE_ENDED:            'cmp2.event.BATTLE_ENDED',
 };
 
