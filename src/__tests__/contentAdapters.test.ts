@@ -5,6 +5,7 @@ import {
   localizedName,
   normalizeAvailableClassOption,
   normalizeLevelUpOptions,
+  normalizeRewardGrant,
   normalizeRewardGroup,
   rewardGroupChoose,
   rewardGroupKey,
@@ -15,6 +16,7 @@ import {
 import type {
   BackgroundDetail,
   ContentLabel,
+  ContentRewardGrant,
   RewardGroup,
   SpeciesDetail,
   SpellDetail,
@@ -77,6 +79,69 @@ describe('normalizeRewardGroup', () => {
     expect(g.options).toEqual([]);
     expect(g.repeatable).toBe(false);
     expect(g.groupKey).toBe('gid');
+  });
+});
+
+describe('normalizeRewardGrant (payload unwrap)', () => {
+  const grant = (o: Partial<ContentRewardGrant>): ContentRewardGrant => o as ContentRewardGrant;
+
+  it('returns fixtures (no payload) untouched', () => {
+    const g = grant({ id: 'g', grantType: 'ABILITY_SCORE', abilityOptions: [{ id: 'str', name: 'STR' }] });
+    expect(normalizeRewardGrant(g)).toBe(g);
+  });
+
+  it('surfaces ability payload fields onto the grant', () => {
+    const g = grant({
+      id: 'g',
+      grantType: 'ABILITY_SCORE',
+      payload: { abilityOptionIds: ['stat-str', 'stat-dex'], chooseCount: 2, bonusPerChoice: 1, totalBonus: 2, maxPerAbility: 2 },
+    });
+    const out = normalizeRewardGrant(g);
+    expect(out.abilityOptionIds).toEqual(['stat-str', 'stat-dex']);
+    expect(out.chooseCount).toBe(2);
+    expect(out.totalBonus).toBe(2);
+    expect(out.maxPerAbility).toBe(2);
+  });
+
+  it('surfaces skill payload incl. expertise and ANY flag', () => {
+    const out = normalizeRewardGrant(grant({
+      id: 'g',
+      grantType: 'SKILL_PROFICIENCY',
+      payload: { mode: 'ANY', chooseCount: 2, grantsExpertise: true },
+    }));
+    expect(out.mode).toBe('ANY');
+    expect(out.anySkill).toBe(true);
+    expect(out.grantsExpertise).toBe(true);
+    expect(out.chooseCount).toBe(2);
+  });
+
+  it('surfaces spell payload pool filters', () => {
+    const out = normalizeRewardGrant(grant({
+      id: 'g',
+      grantType: 'SPELL',
+      payload: { mode: 'CHOICE', chooseCount: 1, minLevel: 0, maxLevel: 0, spellLevel: 0 },
+    }));
+    expect(out.mode).toBe('CHOICE');
+    expect(out.chooseCount).toBe(1);
+    expect(out.minLevel).toBe(0);
+    expect(out.maxLevel).toBe(0);
+  });
+
+  it('does not set anySkill for a non-skill ANY-mode grant (e.g. feat)', () => {
+    const out = normalizeRewardGrant(grant({ id: 'g', grantType: 'FEAT', payload: { mode: 'ANY' } }));
+    expect(out.anySkill).toBeUndefined();
+  });
+
+  it('is applied when normalizing a whole group (direct + option grants)', () => {
+    const g = normalizeRewardGroup(group({
+      id: 'rg',
+      grants: [grant({ id: 'd', grantType: 'ABILITY_SCORE', payload: { abilityOptionIds: ['a'], chooseCount: 1 } })],
+      options: [
+        { id: 'o', optionKey: 'o', label: 'o', grants: [grant({ id: 'og', grantType: 'SPELL', payload: { mode: 'CHOICE', chooseCount: 1 } })] },
+      ] as RewardGroup['options'],
+    }));
+    expect(g.grants?.[0].abilityOptionIds).toEqual(['a']);
+    expect(g.options?.[0].grants?.[0].mode).toBe('CHOICE');
   });
 });
 

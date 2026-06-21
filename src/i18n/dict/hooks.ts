@@ -285,6 +285,13 @@ export const hooks: DictModule = {
     'hk.sessionNote.deleted': 'Заметка сессии удалена!',
     'hk.sessionNote.deleteFailed': 'Не удалось удалить заметку сессии',
 
+    /* ── useSpellSlots ───────────────────────────────── */
+    'hk.spellSlots.expended': 'Ячейка заклинания потрачена',
+    'hk.spellSlots.expendFailed': 'Не удалось потратить ячейку заклинания',
+    'hk.spellSlots.restoredAll': 'Все ячейки заклинаний восстановлены',
+    'hk.spellSlots.restoredHalf': 'Половина использованных ячеек восстановлена',
+    'hk.spellSlots.restoreFailed': 'Не удалось восстановить ячейки заклинаний',
+
     /* ── useTemplates ────────────────────────────────── */
     'hk.template.created': 'Шаблон создан!',
     'hk.template.createFailed': 'Не удалось создать шаблон',
@@ -581,6 +588,13 @@ export const hooks: DictModule = {
     'hk.sessionNote.updateFailed': 'Failed to update session note',
     'hk.sessionNote.deleted': 'Session note deleted!',
     'hk.sessionNote.deleteFailed': 'Failed to delete session note',
+
+    /* ── useSpellSlots ───────────────────────────────── */
+    'hk.spellSlots.expended': 'Spell slot expended',
+    'hk.spellSlots.expendFailed': 'Failed to expend spell slot',
+    'hk.spellSlots.restoredAll': 'All spell slots restored',
+    'hk.spellSlots.restoredHalf': 'Half of expended slots restored',
+    'hk.spellSlots.restoreFailed': 'Failed to restore spell slots',
 
     /* ── useTemplates ────────────────────────────────── */
     'hk.template.created': 'Template created!',

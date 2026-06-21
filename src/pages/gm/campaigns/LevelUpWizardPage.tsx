@@ -11,13 +11,17 @@ import {
 import { useT } from '@/i18n/I18nContext';
 import { useCharacter } from '@/hooks/useCharacter';
 import { useLevelUpOptions, useLevelUp } from '@/hooks/useLevelUp';
+import { useGlobalReferenceContent } from '@/hooks/useTemplates';
 import {
   rewardGroupKey,
   rewardGroupLabel,
   isContentRewardGroup,
   isContentGroupSatisfied,
 } from '@/lib/contentAdapters';
-import { RewardGroupPicker } from '@/components/content-rewards/RewardGroupPicker';
+import {
+  RewardGroupPicker,
+  type RewardPickerCatalogs,
+} from '@/components/content-rewards/RewardGroupPicker';
 import { isMigrationBlocked } from '@/lib/characterMigration';
 import {
   buildContentLevelUpRequest,
@@ -26,6 +30,7 @@ import {
 } from './contentLevelUp';
 import type {
   AvailableClassOption,
+  ContentRewardGrant,
   LevelUpResultResponse,
   RewardDetail,
   RewardGroup,
@@ -44,6 +49,7 @@ export default function LevelUpWizardPage() {
   const { campaignId, characterId } = useParams<{ campaignId: string; characterId: string }>();
   const { data: character } = useCharacter(campaignId!, characterId!);
   const { data: options, isLoading, error } = useLevelUpOptions(characterId!);
+  const { data: refContent } = useGlobalReferenceContent();
   const levelUpMutation = useLevelUp();
 
   const [step, setStep] = useState<WizardStep>('pick-class');
@@ -98,6 +104,17 @@ export default function LevelUpWizardPage() {
     (cl) => cl.classId === selectedClassId,
   );
 
+  // Reference catalogs let the reward pickers resolve the id-lists the backend emits
+  // (ability/skill/spell ids) into labels + selectable pools. Optional: pickers still
+  // render grants that already carry resolved labels.
+  const catalogs: RewardPickerCatalogs = {
+    abilities: refContent?.statTypes,
+    skills: refContent?.skills,
+    spells: refContent?.spells,
+    classId: selectedClassId ?? undefined,
+    proficientSkillIds: character?.skillProficiencies?.map((sp) => sp.skillId),
+  };
+
   return (
     <div>
       {/* Ceremonial header */}
@@ -135,6 +152,7 @@ export default function LevelUpWizardPage() {
           option={selectedClass}
           currentTotal={options.currentTotalLevel}
           characterName={character?.name}
+          catalogs={catalogs}
           contentSelections={contentSelections}
           setContentSelections={setContentSelections}
           childSelections={childSelections}
@@ -147,6 +165,7 @@ export default function LevelUpWizardPage() {
       {step === 'confirm' && selectedClass && (
         <StepConfirm
           option={selectedClass}
+          catalogs={catalogs}
           contentSelections={contentSelections}
           childSelections={childSelections}
           submitting={levelUpMutation.isPending}
@@ -360,6 +379,7 @@ function StepRewards({
   option,
   currentTotal,
   characterName,
+  catalogs,
   contentSelections,
   setContentSelections,
   childSelections,
@@ -370,6 +390,7 @@ function StepRewards({
   option: AvailableClassOption;
   currentTotal: number;
   characterName?: string;
+  catalogs: RewardPickerCatalogs;
   contentSelections: Record<string, string[]>;
   setContentSelections: (s: Record<string, string[]>) => void;
   childSelections: ChildSelections;
@@ -518,6 +539,7 @@ function StepRewards({
           onOptionsChange={(ids) => setContentSelections({ ...contentSelections, [rewardGroupKey(g)]: ids })}
           child={childSelections}
           onChildChange={(grantId, sel) => setChildSelections({ ...childSelections, [grantId]: sel })}
+          catalogs={catalogs}
         />
       ))}
 
@@ -647,6 +669,7 @@ function DetailBadges({ detail }: { detail?: RewardDetail }) {
 
 function StepConfirm({
   option,
+  catalogs,
   contentSelections,
   childSelections,
   submitting,
@@ -654,6 +677,7 @@ function StepConfirm({
   onConfirm,
 }: {
   option: AvailableClassOption;
+  catalogs: RewardPickerCatalogs;
   contentSelections: Record<string, string[]>;
   childSelections: ChildSelections;
   submitting: boolean;
@@ -662,32 +686,47 @@ function StepConfirm({
 }) {
   const t = useT();
   // Summary built from the final content selections: auto grants, chosen options,
-  // and the typed-grant child picks (ability distribution / skills).
+  // and the typed-grant child picks (ability distribution / skills / spells). Names
+  // are resolved from the reference catalogs (grants carry id-lists, not labels).
   const chosenLines: { type: string; name: string; tag: 'auto' | 'choice' }[] = [];
+  const nameOf = (catalog: { id: string; name: string }[] | undefined, id: string) =>
+    catalog?.find((c) => c.id === id)?.name ?? id;
+  const childLinesFor = (gr: ContentRewardGrant) => {
+    const child = childSelections[gr.id];
+    if (!child) return;
+    if (child.abilities) {
+      for (const [abilityId, bonus] of Object.entries(child.abilities)) {
+        if (bonus <= 0) continue;
+        const name = gr.abilityOptions?.find((x) => x.id === abilityId)?.name
+          ?? nameOf(catalogs.abilities, abilityId);
+        chosenLines.push({ type: 'ABILITY_SCORE', name: `${name} +${bonus}`, tag: 'choice' });
+      }
+    }
+    if (child.skills) {
+      for (const skillId of child.skills) {
+        const name = gr.skillOptions?.find((x) => x.id === skillId)?.name
+          ?? nameOf(catalogs.skills, skillId);
+        chosenLines.push({ type: 'SKILL_PROFICIENCY', name, tag: 'choice' });
+      }
+    }
+    if (child.spells) {
+      for (const spellId of child.spells) {
+        chosenLines.push({ type: 'SPELL', name: nameOf(catalogs.spells, spellId), tag: 'choice' });
+      }
+    }
+  };
   for (const g of option.rewardGroups.filter(isContentRewardGroup)) {
     const kindLabel = g.groupKind || 'REWARD';
     for (const gr of g.grants ?? []) {
       chosenLines.push({ type: kindLabel, name: gr.label || gr.feature?.title || gr.grantType, tag: 'auto' });
+      childLinesFor(gr); // direct-grant picks (e.g. AUTO "learn a cantrip")
     }
     for (const optId of contentSelections[rewardGroupKey(g)] ?? []) {
       const opt = g.options?.find((o) => o.id === optId);
       if (!opt) continue;
       chosenLines.push({ type: kindLabel, name: opt.label, tag: 'choice' });
       for (const gr of opt.grants ?? []) {
-        const child = childSelections[gr.id];
-        if (child?.abilities) {
-          for (const [abilityId, bonus] of Object.entries(child.abilities)) {
-            if (bonus <= 0) continue;
-            const ability = gr.abilityOptions?.find((x) => x.id === abilityId);
-            chosenLines.push({ type: 'ABILITY_SCORE', name: `${ability?.name ?? abilityId} +${bonus}`, tag: 'choice' });
-          }
-        }
-        if (child?.skills) {
-          for (const skillId of child.skills) {
-            const skill = gr.skillOptions?.find((x) => x.id === skillId);
-            chosenLines.push({ type: 'SKILL_PROFICIENCY', name: skill?.name ?? skillId, tag: 'choice' });
-          }
-        }
+        childLinesFor(gr);
       }
     }
   }

@@ -34,6 +34,7 @@
 .spellLevel { width: 30px; flex-shrink: 0; color: var(--arcane); font-size: 12px; }
 .spellName { flex: 1; color: var(--ink-bright); font-size: 13px; }
 .spellSchool { color: var(--ink-faint); font-size: 11px; }
+.slotsBlock { margin: var(--s-4); }
 
 /* ── features tab ────────────────────────────────────────────── */
 .classRow { padding: 14px; }

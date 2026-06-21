@@ -36,20 +36,37 @@ describe('grantNeedsChild', () => {
     expect(grantNeedsChild(grant({ grantType: 'ABILITY_SCORE' }))).toBe(false);
   });
 
+  it('requires a child for ability grants given by id-list (payload shape)', () => {
+    expect(
+      grantNeedsChild(grant({ grantType: 'ABILITY_SCORE', abilityOptionIds: ['stat-str', 'stat-dex'] })),
+    ).toBe(true);
+  });
+
   it('requires a child for choosable skill grants but not fixed ones', () => {
     expect(
       grantNeedsChild(grant({ grantType: 'SKILL', skillOptions: [label('a'), label('b')] })),
     ).toBe(true);
+    // CHOICE / ANY given by id-list (payload shape)
+    expect(
+      grantNeedsChild(grant({ grantType: 'SKILL', mode: 'CHOICE', skillOptionIds: ['a', 'b'] })),
+    ).toBe(true);
+    expect(grantNeedsChild(grant({ grantType: 'SKILL', mode: 'ANY', anySkill: true }))).toBe(true);
+    // FIXED grants (concrete skill or id-list) are auto-granted, no pick
     expect(
       grantNeedsChild(
         grant({ grantType: 'SKILL', fixedSkill: label('a'), skillOptions: [label('a')] }),
       ),
     ).toBe(false);
+    expect(grantNeedsChild(grant({ grantType: 'SKILL', mode: 'FIXED', skillIds: ['a'] }))).toBe(false);
     expect(grantNeedsChild(grant({ grantType: 'SKILL' }))).toBe(false);
   });
 
-  it('never requires inline children for spell or feat grants', () => {
-    expect(grantNeedsChild(grant({ grantType: 'SPELL', chooseCount: 1 }))).toBe(false);
+  it('requires a child for CHOICE spell grants but not fixed ones or feats', () => {
+    expect(grantNeedsChild(grant({ grantType: 'SPELL', mode: 'CHOICE', chooseCount: 1 }))).toBe(true);
+    expect(grantNeedsChild(grant({ grantType: 'SPELL', chooseCount: 1 }))).toBe(true);
+    // FIXED spell grants are learned automatically
+    expect(grantNeedsChild(grant({ grantType: 'SPELL', mode: 'FIXED', fixedSpellIds: ['s1'] }))).toBe(false);
+    expect(grantNeedsChild(grant({ grantType: 'SPELL', spell: label('fireball') }))).toBe(false);
     expect(grantNeedsChild(grant({ grantType: 'FEAT' }))).toBe(false);
   });
 });
@@ -69,6 +86,21 @@ describe('grantChildSatisfied (skill branch)', () => {
 
   it('auto-satisfies grants that need no child', () => {
     expect(grantChildSatisfied(grant({ grantType: 'FEAT' }), undefined)).toBe(true);
+  });
+});
+
+describe('grantChildSatisfied (spell branch)', () => {
+  const spellGrant = grant({ grantType: 'SPELL', mode: 'CHOICE', chooseCount: 2 });
+
+  it('requires exactly chooseCount spells', () => {
+    expect(grantChildSatisfied(spellGrant, { spells: ['s1', 's2'] })).toBe(true);
+    expect(grantChildSatisfied(spellGrant, { spells: ['s1'] })).toBe(false);
+    expect(grantChildSatisfied(spellGrant, undefined)).toBe(false);
+  });
+
+  it('does not require a child for a fixed spell grant', () => {
+    const fixed = grant({ grantType: 'SPELL', mode: 'FIXED', fixedSpellIds: ['s1'] });
+    expect(grantChildSatisfied(fixed, undefined)).toBe(true);
   });
 });
 
@@ -153,12 +185,26 @@ describe('buildContentLevelUpRequest', () => {
     expect(req.selections).toEqual([{ rewardGroupId: 'rg-sub', optionIds: ['opt-life'] }]);
   });
 
-  it('skips grant-only groups that have no options to pick', () => {
+  it('skips grant-only groups whose direct grants need no pick', () => {
     const groups = [
       group({ id: 'rg-auto', groupKey: 'rg-auto', grants: [grant({ id: 'gf', grantType: 'FEATURE' })] }),
     ];
     const req = buildContentLevelUpRequest('cls', groups, {}, {});
     expect(req.classId).toBe('cls');
     expect(req.selections).toEqual([]);
+  });
+
+  it('emits a selection for an AUTO group whose direct grant needs spell picks', () => {
+    const groups = [
+      group({
+        id: 'rg-auto-spell',
+        groupKey: 'rg-auto-spell',
+        grants: [grant({ id: 'gsp', grantType: 'SPELL', mode: 'CHOICE', chooseCount: 1 })],
+      }),
+    ];
+    const req = buildContentLevelUpRequest('cls', groups, {}, { gsp: { spells: ['sp-1'] } });
+    expect(req.selections).toEqual([
+      { rewardGroupId: 'rg-auto-spell', optionIds: [], childSelections: { spellIds: ['sp-1'] } },
+    ]);
   });
 });

@@ -17,6 +17,7 @@ import {
   AbilityCheckPanel,
   DamageHealModal,
   EditableSheetField,
+  SpellSlotsPanel,
 } from '@/components/characters';
 import {
   useCharacter,
@@ -29,6 +30,7 @@ import { useCharacterEffects } from '@/hooks/useEffects';
 import { useEquippedInventory } from '@/hooks/useInventory';
 import { useCharacterRewards } from '@/hooks/useLevelUp';
 import { useGlobalReferenceContent } from '@/hooks/useTemplates';
+import { useAuthStore } from '@/store/authStore';
 import { useT } from '@/i18n/I18nContext';
 import { useGameTerms } from '@/i18n/gameTerms';
 import { REWARD_TYPE_LABELS } from '@/types';
@@ -99,6 +101,7 @@ export default function FolioPage() {
   const gt = useGameTerms();
   const navigate = useNavigate();
   const { campaignId, characterId } = useParams<{ campaignId: string; characterId: string }>();
+  const { user } = useAuthStore();
 
   const { data: character, isLoading, error, refetch } = useCharacter(campaignId!, characterId!);
   const { data: resources } = useCharacterResources(campaignId!, characterId!);
@@ -173,6 +176,10 @@ export default function FolioPage() {
   }
 
   const primaryClass = character.classLevels?.[0];
+  // Owner / Chronicler (GM) / admin may spend & restore slots — viewers see them read-only.
+  const isOwner = !!user && user.id === character.ownerId;
+  const isChronicler = user?.role === 'GAME_MASTER' || user?.role === 'ADMIN';
+  const canManageSlots = (isOwner || isChronicler) && character.status !== 'DEAD';
   const stats = character.stats ?? [];
   const currentHp = character.currentHp ?? 0;
   const maxHp = character.maxHp ?? 0;
@@ -265,6 +272,7 @@ export default function FolioPage() {
               </div>
             )}
             {knownSpells.length === 0 && <VoidBody note={t('camp2.folio.spells.void')} />}
+            <SpellSlotsPanel characterId={characterId!} canManage={canManageSlots} className={s.slotsBlock} />
           </>
         );
       case 'features':

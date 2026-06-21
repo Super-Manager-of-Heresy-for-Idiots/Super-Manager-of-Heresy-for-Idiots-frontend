@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { OrdoPanel, EmptyVault, ErrorAltar } from '@/components/ordo';
 import { BackLink } from '@/components/campaigns';
-import { ResourcesPanel } from '@/components/characters';
+import { ResourcesPanel, SpellSlotsPanel } from '@/components/characters';
 import { useCharacter, useCharacterResources, useModifyResource } from '@/hooks/useCharacter';
 import { useAuthStore } from '@/store/authStore';
 import { useT } from '@/i18n/I18nContext';
@@ -83,6 +83,8 @@ export default function CharacterResourcesPage() {
           )}
         </div>
       )}
+
+      <SpellSlotsPanel characterId={characterId!} canManage={canWrite} className={s.slotsBlock} />
     </div>
   );
 }
