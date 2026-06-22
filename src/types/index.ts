@@ -1344,8 +1344,13 @@ export interface ItemInstanceResponse {
   artifactRarity?: Rarity;
 }
 
+export type GrantItemKind = 'EQUIPMENT' | 'MAGIC' | 'TEMPLATE';
+
 export interface GrantItemRequest {
-  templateId: string;
+  /** Id of the catalog item to grant (equipment_item, magic_item, or legacy item_template). */
+  itemId: string;
+  /** Which catalog table itemId refers to. Defaults server-side to EQUIPMENT when omitted. */
+  itemKind: GrantItemKind;
   quantity: number;
   customName?: string;
   isUnique?: boolean;
