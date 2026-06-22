@@ -6,7 +6,7 @@
  * UI chrome is translated through i18n; the demo content (character names,
  * item names, sample log lines) stays as literal data.
  */
-import { RARITY_HUE } from '@/components/items/RarityBadge';
+import { rarityHue as rarityHueBase } from '@/components/items/RarityBadge';
 
 /* ── Domain types ────────────────────────────────────────────── */
 
@@ -164,7 +164,7 @@ export const RARITY_LABEL_KEY: Record<RarityKey, string> = {
 };
 
 export function rarityHue(rarity: string): string {
-  return RARITY_HUE[rarity] ?? RARITY_HUE.COMMON;
+  return rarityHueBase(rarity);
 }
 
 /* ── Health word (verbal HP status for the player view) ──────── */

@@ -1610,7 +1610,8 @@ export interface CreateItemTemplateRequest {
   name: string;
   description?: string;
   itemTypeId?: string;
-  rarity: Rarity;
+  /** Backend resolves this by slug (lowercased), e.g. 'very-rare' — not the UPPER_SNAKE enum. */
+  rarity?: string;
   damageDice?: string;
   damageBonus?: number;
   damageType?: DamageType;

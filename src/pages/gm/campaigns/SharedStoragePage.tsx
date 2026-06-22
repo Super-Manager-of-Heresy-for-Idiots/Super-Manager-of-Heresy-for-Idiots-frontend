@@ -20,6 +20,7 @@ import { useCampaignCharacters } from '@/hooks/useCharacter';
 import { useCharacterInventory } from '@/hooks/useInventory';
 import { useAuthStore } from '@/store/authStore';
 import { rarityColor, slotClass, itemGlyph } from '@/lib/itemVisuals';
+import { RarityBadge, rarityLabelKey } from '@/components/items/RarityBadge';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
 import type {
@@ -257,7 +258,7 @@ function StorageItemPreview({
   const NA = '—';
   const stats: { label: string; value: string; color?: string }[] = [
     { label: t('camp2.storage.preview.type'), value: item.itemTypeName ?? item.templateName ?? NA },
-    { label: t('camp2.storage.preview.rarity'), value: (rarity ?? 'COMMON').replace('_', ' '), color: rarityColor(rarity) },
+    { label: t('camp2.storage.preview.rarity'), value: t(rarityLabelKey(rarity)), color: rarityColor(rarity) },
     { label: t('camp2.storage.preview.quantity'), value: `x${item.quantity}` },
   ];
 
@@ -266,11 +267,7 @@ function StorageItemPreview({
       <Placeholder className={s.previewImg}>{itemLabel(item)}</Placeholder>
 
       <div className={s.chipRow}>
-        {rarity && (
-          <OrdoChip tone={rarity === 'RARE' ? 'arcane' : 'gold'} glyph="diamond-fill">
-            {rarity.replace('_', ' ')}
-          </OrdoChip>
-        )}
+        {rarity && <RarityBadge rarity={rarity} size="md" />}
         {item.isUnique && (
           <OrdoChip tone="arcane" glyph="diamond">{t('camp2.storage.unique')}</OrdoChip>
         )}

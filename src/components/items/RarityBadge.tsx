@@ -2,35 +2,51 @@ import type { CSSProperties } from 'react';
 import { Rune } from '@/components/ordo';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
+import { normalizeRarity, type RarityKey } from '@/lib/itemVisuals';
 import s from './RarityBadge.module.css';
 
-/* ── Rarity colour & glyph maps ───────────────────────────────── */
+/* ── Rarity colour & glyph maps (canonical lowercase keys) ────────── */
 
-const RARITY_HUE: Record<string, string> = {
-  COMMON: '#968c75',
-  UNCOMMON: '#7a9866',
-  RARE: '#6f93c4',
-  VERY_RARE: '#9a7ec0',
-  LEGENDARY: '#d4b478',
+const RARITY_HUE: Record<RarityKey, string> = {
+  common: 'var(--rar-common)',
+  uncommon: 'var(--rar-uncommon)',
+  rare: 'var(--rar-rare)',
+  'very-rare': 'var(--rar-very-rare)',
+  legendary: 'var(--rar-legendary)',
+  artifact: 'var(--rar-artifact)',
 };
 
-const RARITY_GLYPH: Record<string, string> = {
-  COMMON: 'square',
-  UNCOMMON: 'tri',
-  RARE: 'diamond',
-  VERY_RARE: 'hex',
-  LEGENDARY: 'sigil-2',
+const RARITY_GLYPH: Record<RarityKey, string> = {
+  common: 'square',
+  uncommon: 'tri',
+  rare: 'diamond',
+  'very-rare': 'hex',
+  legendary: 'sigil-2',
+  artifact: 'sigil-1',
 };
 
-const RARITY_LABEL_KEY: Record<string, string> = {
-  COMMON: 'cmp.rarity.COMMON',
-  UNCOMMON: 'cmp.rarity.UNCOMMON',
-  RARE: 'cmp.rarity.RARE',
-  VERY_RARE: 'cmp.rarity.VERY_RARE',
-  LEGENDARY: 'cmp.rarity.LEGENDARY',
+const RARITY_LABEL_KEY: Record<RarityKey, string> = {
+  common: 'cmp.rarity.COMMON',
+  uncommon: 'cmp.rarity.UNCOMMON',
+  rare: 'cmp.rarity.RARE',
+  'very-rare': 'cmp.rarity.VERY_RARE',
+  legendary: 'cmp.rarity.LEGENDARY',
+  artifact: 'cmp.rarity.ARTIFACT',
 };
 
-/* ── Component ─────────────────────────────────────────────────── */
+/** Rarity colour (CSS token) for any backend rarity form. */
+export function rarityHue(raw?: string | null): string {
+  const key = normalizeRarity(raw);
+  return key ? RARITY_HUE[key] : RARITY_HUE.common;
+}
+
+/** i18n key for a rarity's label, for any backend rarity form. */
+export function rarityLabelKey(raw?: string | null): string {
+  const key = normalizeRarity(raw) ?? 'common';
+  return RARITY_LABEL_KEY[key];
+}
+
+/* ── Component ─────────────────────────────────────────────────────── */
 
 interface RarityBadgeProps {
   rarity: string;
@@ -39,11 +55,11 @@ interface RarityBadgeProps {
 
 export function RarityBadge({ rarity, size = 'sm' }: RarityBadgeProps) {
   const t = useT();
-  const color = RARITY_HUE[rarity] ?? RARITY_HUE.COMMON;
-  const glyph = RARITY_GLYPH[rarity] ?? RARITY_GLYPH.COMMON;
-  const labelKey = RARITY_LABEL_KEY[rarity];
-  const label = labelKey ? t(labelKey) : rarity;
-  const isLegendary = rarity === 'LEGENDARY';
+  const key = normalizeRarity(rarity) ?? 'common';
+  const color = RARITY_HUE[key];
+  const glyph = RARITY_GLYPH[key];
+  const label = t(RARITY_LABEL_KEY[key]);
+  const isLegendary = key === 'legendary' || key === 'artifact';
   const iconSize = size === 'md' ? 10 : 8;
 
   return (

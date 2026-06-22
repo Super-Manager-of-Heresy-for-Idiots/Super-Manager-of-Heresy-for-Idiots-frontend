@@ -26,6 +26,14 @@ export const hooks: DictModule = {
     'hk.itemType.deleted': 'Тип предмета удалён!',
     'hk.itemType.deleteFailed': 'Не удалось удалить тип предмета',
 
+    /* ── useAdmin: item templates ─────────────────────── */
+    'hk.itemTemplate.created': 'Шаблон предмета создан!',
+    'hk.itemTemplate.createFailed': 'Не удалось создать шаблон предмета',
+    'hk.itemTemplate.updated': 'Шаблон предмета обновлён!',
+    'hk.itemTemplate.updateFailed': 'Не удалось обновить шаблон предмета',
+    'hk.itemTemplate.deleted': 'Шаблон предмета удалён!',
+    'hk.itemTemplate.deleteFailed': 'Не удалось удалить шаблон предмета',
+
     /* ── useAdmin: character classes ─────────────────── */
     'hk.class.created': 'Класс персонажа создан!',
     'hk.class.createFailed': 'Не удалось создать класс персонажа',
@@ -329,6 +337,14 @@ export const hooks: DictModule = {
     'hk.itemType.updateFailed': 'Failed to update item type',
     'hk.itemType.deleted': 'Item type deleted!',
     'hk.itemType.deleteFailed': 'Failed to delete item type',
+
+    /* ── useAdmin: item templates ─────────────────────── */
+    'hk.itemTemplate.created': 'Item template created!',
+    'hk.itemTemplate.createFailed': 'Failed to create item template',
+    'hk.itemTemplate.updated': 'Item template updated!',
+    'hk.itemTemplate.updateFailed': 'Failed to update item template',
+    'hk.itemTemplate.deleted': 'Item template deleted!',
+    'hk.itemTemplate.deleteFailed': 'Failed to delete item template',
 
     /* ── useAdmin: character classes ─────────────────── */
     'hk.class.created': 'Character class created!',

@@ -35,7 +35,8 @@ import {
 import { useCharacter, useCharacterWallet, useCampaignCharacters } from '@/hooks/useCharacter';
 import { useAuthStore } from '@/store/authStore';
 import { isRetryableError } from '@/lib/errors';
-import { rarityColor, slotClass, itemGlyph } from '@/lib/itemVisuals';
+import { rarityColor, slotClass, itemGlyph, normalizeRarity, RARITY_ORDER } from '@/lib/itemVisuals';
+import { RarityBadge, rarityLabelKey } from '@/components/items/RarityBadge';
 import { useT } from '@/i18n/I18nContext';
 import type {
   ItemInstanceResponse,
@@ -69,6 +70,38 @@ const COIN_COLOR: Record<string, string> = {
   silver: 'var(--ink)',
   copper: '#a87858',
 };
+
+/* ── item categories (derived) ───────────────────────────────────
+   Runtime templates carry no `kind` field — the weapon/armor/gear/tool/
+   magic taxonomy lives only on the reference catalog. We derive a coarse
+   category from the template's own fields so the grant picker can group by
+   it: weapons have a damage dice, armor/tools are inferred from the item
+   type name, magic is rarity- or skill-driven, and everything else is gear. */
+
+type ItemCategory = 'weapon' | 'armor' | 'gear' | 'tool' | 'magic';
+
+const CATEGORY_ORDER: ItemCategory[] = ['weapon', 'armor', 'gear', 'tool', 'magic'];
+
+const CATEGORY_GLYPH: Record<ItemCategory, string> = {
+  weapon: 'sword',
+  armor: 'shield',
+  gear: 'scroll',
+  tool: 'cross-pat',
+  magic: 'hex',
+};
+
+const ARMOR_HINTS = ['armor', 'armour', 'shield', 'щит', 'броня', 'доспех', 'латы', 'кольчуг'];
+const TOOL_HINTS = ['tool', 'kit', 'инструмент', 'принадлежн'];
+
+function templateCategory(tpl: ItemTemplateResponse): ItemCategory {
+  if (tpl.damageDice) return 'weapon';
+  const type = (tpl.itemTypeName ?? '').toLowerCase();
+  if (ARMOR_HINTS.some((h) => type.includes(h))) return 'armor';
+  if (TOOL_HINTS.some((h) => type.includes(h))) return 'tool';
+  const rarity = normalizeRarity(tpl.rarity);
+  if ((rarity && rarity !== 'common') || tpl.skillName || tpl.skillActivation) return 'magic';
+  return 'gear';
+}
 
 /* ── page ────────────────────────────────────────────────────── */
 
@@ -114,6 +147,7 @@ export default function InventoryPage() {
   const [grantQuantity, setGrantQuantity] = useState('1');
   const [grantUnique, setGrantUnique] = useState(false);
   const [grantCustomName, setGrantCustomName] = useState('');
+  const [grantCategory, setGrantCategory] = useState<ItemCategory | 'all'>('all');
 
   /* Transfer / Rename / Equip state */
   const [transferInstanceId, setTransferInstanceId] = useState('');
@@ -160,19 +194,48 @@ export default function InventoryPage() {
         template.name,
         template.itemTypeName,
         template.rarity,
+        t(rarityLabelKey(template.rarity)),
+        t(`camp2.inv.cat.${templateCategory(template)}`),
+        template.damageType,
         template.sourceHomebrewTitle,
       ].filter(Boolean).join(' ').toLowerCase();
       return haystack.includes(q);
     });
-  }, [grantTemplateSearch, grantTemplates]);
+  }, [grantTemplateSearch, grantTemplates, t]);
 
-  const grantTemplateOptions = useMemo(() => {
-    const selectedTemplate = grantTemplates.find((template) => template.id === grantTemplateId);
-    if (!selectedTemplate || filteredGrantTemplates.some((template) => template.id === selectedTemplate.id)) {
-      return filteredGrantTemplates;
+  const categorizedTemplates = useMemo(
+    () => filteredGrantTemplates.map((tpl) => ({ tpl, cat: templateCategory(tpl) })),
+    [filteredGrantTemplates],
+  );
+
+  const categoryCounts = useMemo(() => {
+    const counts = new Map<ItemCategory, number>();
+    for (const { cat } of categorizedTemplates) counts.set(cat, (counts.get(cat) ?? 0) + 1);
+    return counts;
+  }, [categorizedTemplates]);
+
+  const grantGroups = useMemo(() => {
+    const buckets = new Map<ItemCategory, ItemTemplateResponse[]>();
+    for (const { tpl, cat } of categorizedTemplates) {
+      if (grantCategory !== 'all' && cat !== grantCategory) continue;
+      const list = buckets.get(cat);
+      if (list) list.push(tpl);
+      else buckets.set(cat, [tpl]);
     }
-    return [selectedTemplate, ...filteredGrantTemplates];
-  }, [filteredGrantTemplates, grantTemplateId, grantTemplates]);
+    const rank = (r: string | undefined) => {
+      const k = normalizeRarity(r);
+      return k ? RARITY_ORDER.indexOf(k) : -1;
+    };
+    return CATEGORY_ORDER
+      .filter((key) => buckets.has(key))
+      .map((key) => ({
+        key,
+        items: buckets
+          .get(key)!
+          .slice()
+          .sort((a, b) => rank(b.rarity) - rank(a.rarity) || a.name.localeCompare(b.name)),
+      }));
+  }, [categorizedTemplates, grantCategory]);
 
   const selectedGrantTemplate = useMemo(
     () => grantTemplates.find((template) => template.id === grantTemplateId) ?? null,
@@ -195,6 +258,7 @@ export default function InventoryPage() {
     setGrantQuantity('1');
     setGrantUnique(false);
     setGrantCustomName('');
+    setGrantCategory('all');
   };
 
   const handleGrant = () => {
@@ -568,39 +632,31 @@ export default function InventoryPage() {
           <div className={s.dialogCol}>
             <div>
               <label className="ao-label">{t('camp2.inv.field.itemTemplate')}</label>
-              <input
-                className={cn('ao-input', s.mb8)}
-                value={grantTemplateSearch}
-                onChange={(e) => setGrantTemplateSearch(e.target.value)}
-                placeholder={t('camp2.inv.field.templateSearch')}
-                disabled={itemTemplatesLoading}
-              />
-              <select
-                className="ao-input"
-                value={grantTemplateId}
-                onChange={(e) => setGrantTemplateId(e.target.value)}
-                disabled={itemTemplatesLoading || itemTemplatesIsError || grantTemplates.length === 0}
-              >
-                <option value="">
-                  {itemTemplatesLoading
-                    ? t('camp2.inv.loadingTemplates')
-                    : itemTemplatesIsError
-                      ? t('camp2.inv.templatesLoadError')
-                      : grantTemplates.length
-                        ? t('camp2.inv.chooseTemplate')
-                        : t('camp2.inv.noTemplatesAvailable')}
-                </option>
-                {!itemTemplatesLoading && !itemTemplatesIsError && grantTemplateOptions.length === 0 && (
-                  <option value="" disabled>{t('camp2.inv.noTemplatesMatch')}</option>
+              <div className={s.grantSearch}>
+                <Rune kind="search" size={13} color="var(--ink-faint)" />
+                <input
+                  className={s.grantSearchInput}
+                  value={grantTemplateSearch}
+                  onChange={(e) => setGrantTemplateSearch(e.target.value)}
+                  placeholder={t('camp2.inv.field.templateSearch')}
+                  disabled={itemTemplatesLoading}
+                />
+                {grantTemplateSearch && (
+                  <button
+                    type="button"
+                    className={s.searchClear}
+                    onClick={() => setGrantTemplateSearch('')}
+                    title={t('camp2.inv.clear')}
+                  >
+                    <Rune kind="x" size={11} color="var(--ink-faint)" />
+                  </button>
                 )}
-                {grantTemplateOptions.map((template) => (
-                  <option key={template.id} value={template.id}>
-                    {template.name} · {template.itemTypeName || t('camp2.inv.item')} · {template.rarity}
-                  </option>
-                ))}
-              </select>
-              {itemTemplatesIsError && (
-                <div className={cn('ao-codex', 'ao-row', 'ao-gap-8', s.mt8)}>
+              </div>
+
+              {itemTemplatesLoading ? (
+                <div className={s.grantState}>{t('camp2.inv.loadingTemplates')}</div>
+              ) : itemTemplatesIsError ? (
+                <div className={cn(s.grantState, s.grantStateRow)}>
                   <span>{t('camp2.inv.templatesLoadError')}</span>
                   {isRetryableError(itemTemplatesError) && (
                     <button
@@ -612,7 +668,92 @@ export default function InventoryPage() {
                     </button>
                   )}
                 </div>
+              ) : grantTemplates.length === 0 ? (
+                <div className={s.grantState}>{t('camp2.inv.templatesEmptyHint')}</div>
+              ) : (
+                <>
+                  <div className={s.grantCatRow}>
+                    <button
+                      type="button"
+                      className={cn(s.grantCat, grantCategory === 'all' && s.grantCatOn)}
+                      onClick={() => setGrantCategory('all')}
+                    >
+                      {t('camp2.inv.cat.all')}
+                      <span className={cn('ao-num', s.grantCatCount)}>{categorizedTemplates.length}</span>
+                    </button>
+                    {CATEGORY_ORDER.filter((c) => categoryCounts.has(c)).map((c) => (
+                      <button
+                        key={c}
+                        type="button"
+                        className={cn(s.grantCat, grantCategory === c && s.grantCatOn)}
+                        onClick={() => setGrantCategory(c)}
+                      >
+                        <Rune kind={CATEGORY_GLYPH[c]} size={12} />
+                        {t(`camp2.inv.cat.${c}`)}
+                        <span className={cn('ao-num', s.grantCatCount)}>{categoryCounts.get(c)}</span>
+                      </button>
+                    ))}
+                  </div>
+
+                  {grantGroups.length === 0 ? (
+                    <div className={s.grantState}>{t('camp2.inv.noTemplatesMatch')}</div>
+                  ) : (
+                    <div className={s.grantList} role="listbox" aria-label={t('camp2.inv.chooseTemplate')}>
+                      {grantGroups.map((group) => (
+                        <div key={group.key}>
+                          <div className={s.grantGroupHead}>
+                            <Rune kind={CATEGORY_GLYPH[group.key]} size={14} color="var(--gold-pale)" />
+                            <span className={s.grantGroupName}>{t(`camp2.inv.cat.${group.key}`)}</span>
+                            <span className={cn('ao-num', s.grantGroupCount)}>{group.items.length}</span>
+                          </div>
+                          <div className={s.grantGroupItems}>
+                            {group.items.map((template) => {
+                              const isSel = template.id === grantTemplateId;
+                              return (
+                                <button
+                                  key={template.id}
+                                  type="button"
+                                  role="option"
+                                  aria-selected={isSel}
+                                  className={cn(s.grantOpt, isSel && s.selected)}
+                                  onClick={() => setGrantTemplateId(template.id)}
+                                >
+                                  <Rune
+                                    kind={CATEGORY_GLYPH[group.key]}
+                                    size={16}
+                                    color={rarityColor(template.rarity)}
+                                  />
+                                  <div className={s.grantOptMain}>
+                                    <div className={s.grantOptName}>{template.name}</div>
+                                    <div className={s.grantOptMeta}>
+                                      <RarityBadge rarity={template.rarity} size="sm" />
+                                      {template.itemTypeName && <span>{template.itemTypeName}</span>}
+                                      {template.damageDice && (
+                                        <span className="ao-num">
+                                          {template.damageDice}
+                                          {template.damageBonus ? ` + ${template.damageBonus}` : ''}
+                                        </span>
+                                      )}
+                                      {template.isStackable && <span>{t('camp2.inv.stackable')}</span>}
+                                      {template.sourceHomebrewTitle && (
+                                        <span className={s.hbBadge}>
+                                          {t('camp2.inv.homebrew')} · {template.sourceHomebrewTitle}
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+                                  {isSel && <Rune kind="check" size={12} color="var(--gold)" />}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>
               )}
+
               {selectedGrantTemplate && (
                 <div className={cn('ao-codex', s.mt8)}>
                   {selectedGrantTemplate.description || selectedGrantTemplate.sourceHomebrewTitle || t('camp2.inv.campaignTemplate')}
@@ -795,8 +936,8 @@ function RelicDetail({
         : NA,
       color: dmgEnchant ? 'var(--ink-bright)' : undefined,
     },
-    { label: t('camp2.inv.relic.type'), value: item.itemTypeName ?? NA },
-    { label: t('camp2.inv.relic.rarity'), value: (rarity ?? 'COMMON').replace('_', ' '), color: rarityColor(rarity) },
+    { label: t('camp2.inv.relic.type'), value: item.itemTypeName ?? item.templateName },
+    { label: t('camp2.inv.relic.rarity'), value: t(rarityLabelKey(rarity)), color: rarityColor(rarity) },
     { label: t('camp2.inv.relic.slot'), value: item.slot ? item.slot.replace('_', ' ') : t('camp2.inv.relic.unbound') },
     { label: t('camp2.inv.relic.quantity'), value: `x${item.quantity}` },
     { label: t('camp2.inv.relic.charges'), value: NA },
@@ -809,11 +950,7 @@ function RelicDetail({
       </Placeholder>
 
       <div className={s.chipRow}>
-        {rarity && (
-          <OrdoChip tone={rarity === 'RARE' ? 'arcane' : 'gold'} glyph="diamond-fill">
-            {rarity.replace('_', ' ')}
-          </OrdoChip>
-        )}
+        {rarity && <RarityBadge rarity={rarity} size="md" />}
         {item.slot && <OrdoChip tone="ember" glyph="flame">{t('camp2.inv.relic.equipped')}</OrdoChip>}
         {item.isUnique && <OrdoChip tone="arcane" glyph="diamond">{t('camp2.inv.relic.unique')}</OrdoChip>}
       </div>

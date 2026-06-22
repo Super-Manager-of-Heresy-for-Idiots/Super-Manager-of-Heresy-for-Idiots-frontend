@@ -1,0 +1,54 @@
+.header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 18px; }
+.titleH3 { margin-top: 4px; }
+.subtitle { color: var(--ink-quiet); font-size: 13px; margin-top: 4px; }
+.headerActions { display: flex; gap: 10px; align-items: center; }
+
+.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.skelCard { padding: 24px; min-height: 160px; }
+.phW40H12 { width: 40%; height: 12px; margin-bottom: 10px; }
+.phW70H18 { width: 70%; height: 18px; margin-bottom: 8px; }
+.phW50H14 { width: 50%; height: 14px; }
+
+.errorBox { text-align: center; padding: 48px 0; }
+.errorText { color: var(--ink-faint); margin-bottom: 16px; }
+.emptyBox { text-align: center; padding: 48px 0; }
+.emptyText { color: var(--ink-faint); }
+
+/* damage badge — ember accent */
+.damageBadge {
+  display: inline-flex; align-items: center; gap: 7px; padding: 4px 10px;
+  background: rgba(0, 0, 0, 0.5); border: 1px solid color-mix(in srgb, var(--ember-pale) 40%, transparent);
+  font-family: var(--font-mono); font-size: 11px; color: var(--ember-pale);
+}
+.damageValue { color: var(--ink-bright); }
+.damageType { letter-spacing: 0.12em; }
+
+/* template card — accent via --c (rarity colour) */
+.card {
+  position: relative; border-color: color-mix(in srgb, var(--c) 33%, transparent);
+  box-shadow: var(--shadow-inset), var(--shadow-low), 0 0 18px color-mix(in srgb, var(--c) 8%, transparent);
+}
+.cardBody { padding: 18px; }
+.cardTop { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+.cardTopMain { min-width: 0; }
+.codexId { color: var(--ink-ghost); font-size: 10px; font-family: var(--font-mono); letter-spacing: 0.08em; }
+.cardName { margin-top: 4px; color: var(--ink-bright); text-shadow: 0 0 16px color-mix(in srgb, var(--c) 40%, transparent); }
+.iconBox {
+  flex: none; width: 40px; height: 40px; border: 1px solid var(--c); background: var(--abyss);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: inset 0 0 12px color-mix(in srgb, var(--c) 20%, transparent);
+}
+.cardDesc { color: var(--ink-quiet); font-size: 13px; margin-top: 10px; }
+.chipRow { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.section { margin-top: 12px; }
+.homebrewLine { display: flex; align-items: center; gap: 6px; color: var(--ink-quiet); font-size: 12px; }
+.cardFooter { display: flex; gap: 6px; padding: 12px 18px; border-top: 1px solid var(--hairline); background: var(--abyss); }
+.footerEdit { flex: 1; }
+
+/* dialog */
+.dialogCol { display: flex; flex-direction: column; gap: 16px; }
+.descArea { resize: vertical; }
+.checkRow { display: flex; align-items: flex-start; gap: 10px; cursor: pointer; }
+.checkText { display: flex; flex-direction: column; gap: 2px; }
+.checkLabel { color: var(--ink-bright); font-size: 13px; }
+.checkHint { color: var(--ink-quiet); font-size: 12px; }

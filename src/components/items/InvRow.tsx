@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react';
 import { Rune, OrdoChip } from '@/components/ordo';
-import { RarityBadge, RARITY_HUE } from './RarityBadge';
+import { RarityBadge, rarityHue } from './RarityBadge';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
 import type { ItemInstanceResponse } from '@/types';
@@ -45,8 +45,7 @@ interface InvRowProps {
 
 export function InvRow({ item, onRename, onTransfer, onMore }: InvRowProps) {
   const t = useT();
-  const rarity = item.rarity ?? 'COMMON';
-  const rarityColor = RARITY_HUE[rarity] ?? RARITY_HUE.COMMON;
+  const rarityColor = rarityHue(item.rarity);
   const slotGlyph = item.slot ? SLOT_ICON[item.slot] ?? 'square' : 'square';
   const slotLabel = item.slot
     ? (SLOT_LABEL_KEY[item.slot] ? t(SLOT_LABEL_KEY[item.slot]) : item.slot)
@@ -83,7 +82,7 @@ export function InvRow({ item, onRename, onTransfer, onMore }: InvRowProps) {
 
         {/* Meta line: rarity + slot */}
         <div className={s.meta}>
-          <RarityBadge rarity={rarity} size="sm" />
+          <RarityBadge rarity={item.rarity ?? 'common'} size="sm" />
           {slotLabel && (
             <span className={cn('ao-codex', s.slotLabel)}>{slotLabel}</span>
           )}

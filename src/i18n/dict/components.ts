@@ -64,6 +64,7 @@ export const components: DictModule = {
     'cmp.rarity.RARE': 'Редкое',
     'cmp.rarity.VERY_RARE': 'Очень редкое',
     'cmp.rarity.LEGENDARY': 'Легендарное',
+    'cmp.rarity.ARTIFACT': 'Артефакт',
 
     /* ── items/InvRow ───────────────────────────────── */
     'cmp.slot.HEAD': 'Голова',
@@ -191,6 +192,7 @@ export const components: DictModule = {
     'cmp.rarity.RARE': 'Rare',
     'cmp.rarity.VERY_RARE': 'Very Rare',
     'cmp.rarity.LEGENDARY': 'Legendary',
+    'cmp.rarity.ARTIFACT': 'Artifact',
 
     /* ── items/InvRow ───────────────────────────────── */
     'cmp.slot.HEAD': 'Head',
