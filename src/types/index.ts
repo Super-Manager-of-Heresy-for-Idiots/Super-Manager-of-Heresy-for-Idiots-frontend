@@ -336,6 +336,64 @@ export interface ContentRewardGrant {
   body?: string;
   userEditable?: boolean;
   rawFilterText?: string;
+  /**
+   * Raw nested payload as emitted by the backend (RewardGrantDto.payload, discriminated
+   * by grantType). The adapter unwraps this into the surfaced id-list / scalar fields
+   * below; components resolve the ids to labels via reference catalogs.
+   */
+  payload?: RewardGrantReadPayload;
+  // --- surfaced from payload by normalizeRewardGroup (id-lists + scalars) ---
+  /** FIXED | CHOICE | ANY (skill) / FIXED | CHOICE (spell) / FIXED | ANY (feat). */
+  mode?: string;
+  /** ABILITY_SCORE: selectable ability ids (payload.abilityOptionIds). */
+  abilityOptionIds?: string[];
+  /** SKILL_PROFICIENCY: fixed-grant skill ids (payload.skillIds). */
+  skillIds?: string[];
+  /** SKILL_PROFICIENCY: selectable skill ids (payload.skillOptionIds). */
+  skillOptionIds?: string[];
+  /** SKILL_PROFICIENCY: chosen skills confer Expertise instead of new proficiency. */
+  grantsExpertise?: boolean;
+  /** SPELL: fixed-grant spell ids (payload.fixedSpellIds). */
+  fixedSpellIds?: string[];
+  /** SPELL: min/max spell level filter for the selectable pool. */
+  minLevel?: number;
+  maxLevel?: number;
+  /** SPELL: school-id filter for the selectable pool. */
+  schoolIds?: string[];
+  /** SPELL: spell-list / class-spell-list ids constraining the selectable pool. */
+  spellListId?: string;
+  classSpellListId?: string;
+  /** SPELL: whether a known spell may be replaced when choosing on level-up. */
+  allowReplaceOnLevelUp?: boolean;
+  /** FEAT: fixed feat id (payload.featId). */
+  featId?: string;
+}
+
+/**
+ * Loose read-side view of {@code RewardGrantDto.payload}: a superset of all typed grant
+ * payloads with every field optional (the backend sends only the subset relevant to the
+ * grant's grantType). The strict {@link GrantPayload} union is the write-side contract.
+ */
+export interface RewardGrantReadPayload {
+  mode?: string;
+  abilityOptionIds?: string[];
+  chooseCount?: number;
+  bonusPerChoice?: number;
+  totalBonus?: number;
+  maxPerAbility?: number;
+  maxScore?: number;
+  skillIds?: string[];
+  skillOptionIds?: string[];
+  grantsExpertise?: boolean;
+  fixedSpellIds?: string[];
+  spellLevel?: number;
+  minLevel?: number;
+  maxLevel?: number;
+  schoolIds?: string[];
+  spellListId?: string;
+  classSpellListId?: string;
+  allowReplaceOnLevelUp?: boolean;
+  featId?: string;
 }
 
 export interface ContentLabel {
@@ -479,6 +537,24 @@ export interface ClassBreakdown {
 export interface AcquiredReward {
   name: string;
   acquiredAt: string;
+}
+
+// === Spell slots ===
+
+/**
+ * Per spell level: derived maximum (from class progression, never stored), how many
+ * are expended, and how many remain available (= max − expended). The backend only
+ * returns levels where max > 0 or expended > 0.
+ */
+export interface SpellSlotLevel {
+  spellLevel: number;
+  max: number;
+  expended: number;
+  available: number;
+}
+
+export interface SpellSlotsResponse {
+  levels: SpellSlotLevel[];
 }
 
 // === Admin / Reference Data ===
@@ -796,6 +872,7 @@ export interface SkillProficiencyGrantPayload {
   skillIds?: string[];
   skillOptionIds?: string[];
   chooseCount?: number;
+  grantsExpertise?: boolean;
 }
 export interface AbilityScoreGrantPayload {
   abilityOptionIds?: string[];
@@ -1533,7 +1610,8 @@ export interface CreateItemTemplateRequest {
   name: string;
   description?: string;
   itemTypeId?: string;
-  rarity: Rarity;
+  /** Backend resolves this by slug (lowercased), e.g. 'very-rare' — not the UPPER_SNAKE enum. */
+  rarity?: string;
   damageDice?: string;
   damageBonus?: number;
   damageType?: DamageType;

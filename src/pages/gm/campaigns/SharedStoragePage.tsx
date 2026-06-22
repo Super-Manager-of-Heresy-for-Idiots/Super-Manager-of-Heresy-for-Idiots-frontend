@@ -20,6 +20,7 @@ import { useCampaignCharacters } from '@/hooks/useCharacter';
 import { useCharacterInventory } from '@/hooks/useInventory';
 import { useAuthStore } from '@/store/authStore';
 import { rarityColor, slotClass, itemGlyph } from '@/lib/itemVisuals';
+import { RarityBadge, rarityLabelKey } from '@/components/items/RarityBadge';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
 import type {
@@ -257,7 +258,7 @@ function StorageItemPreview({
   const NA = '—';
   const stats: { label: string; value: string; color?: string }[] = [
     { label: t('camp2.storage.preview.type'), value: item.itemTypeName ?? item.templateName ?? NA },
-    { label: t('camp2.storage.preview.rarity'), value: (rarity ?? 'COMMON').replace('_', ' '), color: rarityColor(rarity) },
+    { label: t('camp2.storage.preview.rarity'), value: t(rarityLabelKey(rarity)), color: rarityColor(rarity) },
     { label: t('camp2.storage.preview.quantity'), value: `x${item.quantity}` },
   ];
 
@@ -266,11 +267,7 @@ function StorageItemPreview({
       <Placeholder className={s.previewImg}>{itemLabel(item)}</Placeholder>
 
       <div className={s.chipRow}>
-        {rarity && (
-          <OrdoChip tone={rarity === 'RARE' ? 'arcane' : 'gold'} glyph="diamond-fill">
-            {rarity.replace('_', ' ')}
-          </OrdoChip>
-        )}
+        {rarity && <RarityBadge rarity={rarity} size="md" />}
         {item.isUnique && (
           <OrdoChip tone="arcane" glyph="diamond">{t('camp2.storage.unique')}</OrdoChip>
         )}
@@ -419,6 +416,9 @@ export default function SharedStoragePage() {
   const { user } = useAuthStore();
   const createMutation = useCreateStorageContainer();
 
+  // Only GM/Admin may create containers; players only deposit/withdraw.
+  const isPrivileged = user?.role === 'GAME_MASTER' || user?.role === 'ADMIN';
+
   const [dialogOpen, setDialogOpen] = useState(false);
   const [formName, setFormName] = useState('');
   const [depositStorageId, setDepositStorageId] = useState<string | null>(null);
@@ -427,9 +427,8 @@ export default function SharedStoragePage() {
   // GM/Admin may move items for any character; a player only for their own.
   const eligibleCharacters = useMemo(() => {
     const all = characters ?? [];
-    const isPrivileged = user?.role === 'GAME_MASTER' || user?.role === 'ADMIN';
     return isPrivileged ? all : all.filter((c) => c.ownerId === user?.id);
-  }, [characters, user?.id, user?.role]);
+  }, [characters, user?.id, isPrivileged]);
 
   const canInteract = eligibleCharacters.length > 0;
 
@@ -496,13 +495,15 @@ export default function SharedStoragePage() {
             {t('camp2.storage.subtitle')}
           </p>
         </div>
-        <button
-          className="ao-btn ao-btn--primary"
-          onClick={() => { setFormName(''); setDialogOpen(true); }}
-        >
-          <Rune kind="plus" size={14} color="currentColor" />
-          <span className={s.ml6}>{t('camp2.storage.newContainer')}</span>
-        </button>
+        {isPrivileged && (
+          <button
+            className="ao-btn ao-btn--primary"
+            onClick={() => { setFormName(''); setDialogOpen(true); }}
+          >
+            <Rune kind="plus" size={14} color="currentColor" />
+            <span className={s.ml6}>{t('camp2.storage.newContainer')}</span>
+          </button>
+        )}
       </div>
 
       {/* Container List */}
@@ -512,13 +513,15 @@ export default function SharedStoragePage() {
           title={t('camp2.storage.empty.title')}
           body={t('camp2.storage.empty.body')}
           action={
-            <button
-              className="ao-btn ao-btn--primary"
-              onClick={() => { setFormName(''); setDialogOpen(true); }}
-            >
-              <Rune kind="plus" size={14} color="currentColor" />
-              <span className={s.ml6}>{t('camp2.storage.newContainer')}</span>
-            </button>
+            isPrivileged ? (
+              <button
+                className="ao-btn ao-btn--primary"
+                onClick={() => { setFormName(''); setDialogOpen(true); }}
+              >
+                <Rune kind="plus" size={14} color="currentColor" />
+                <span className={s.ml6}>{t('camp2.storage.newContainer')}</span>
+              </button>
+            ) : undefined
           }
         />
       ) : (
@@ -536,6 +539,7 @@ export default function SharedStoragePage() {
       )}
 
       {/* Create Container Dialog */}
+      {isPrivileged && (
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -573,6 +577,7 @@ export default function SharedStoragePage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      )}
 
       {/* Deposit Item Dialog */}
       {depositStorageId && (

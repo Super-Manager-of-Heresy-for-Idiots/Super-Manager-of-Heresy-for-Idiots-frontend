@@ -1,5 +1,4 @@
 .rel { position: relative; }
-.pointer { cursor: pointer; }
 .mt4 { margin-top: 4px; }
 
 .heroGlow { position: absolute; inset: 0; background: radial-gradient(60% 50% at 50% 35%, color-mix(in srgb, var(--gold) 10%, transparent), transparent 60%); }
@@ -35,16 +34,6 @@
   color: var(--ink-faint);
 }
 .pwToggle.on { color: var(--gold-pale); }
-
-.rememberRow { display: flex; align-items: center; gap: 8px; color: var(--ink-quiet); font-size: 12px; }
-.checkbox {
-  width: 14px; height: 14px;
-  border: 1px solid var(--rule-strong);
-  background: var(--abyss);
-  display: inline-flex; align-items: center; justify-content: center;
-  cursor: pointer;
-}
-.checkbox.on { border-color: var(--brass); background: var(--gold); }
 
 .inviteLink { text-decoration: none; text-align: center; margin-top: 8px; }
 .footer { text-align: center; margin-top: 20px; color: var(--ink-faint); }

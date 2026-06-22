@@ -195,6 +195,15 @@ export function recompute(c: WizardChar): WizardChar {
   return next;
 }
 
+/**
+ * Characters are always created at level 1 — the wizard's `level` field is the
+ * *target* level (the backend turns it into an XP threshold). The spell loadout
+ * and the highest selectable spell level are therefore sized for level 1, not the
+ * target level; otherwise the create request carries over-level spells the backend
+ * rejects ("Spell (level X) exceeds max spell level …").
+ */
+export const CREATION_LEVEL = 1;
+
 // Spell-count rule derived from the selected class's stored caster flags.
 const casterKind = (c: WizardChar) => ({
   isSpellcaster: c.isSpellcaster,
@@ -223,7 +232,7 @@ export function validate(id: StepId, c: WizardChar): boolean {
     case 'background':
       return !!c.backgroundKey;
     case 'spells': {
-      const lim = spellLimits(casterKind(c), c.level);
+      const lim = spellLimits(casterKind(c), CREATION_LEVEL);
       return (c.spells.cantrips || []).length === lim.cantrips && (c.spells.known || []).length === lim.spells;
     }
     default:
@@ -259,7 +268,7 @@ export function requirementHint(id: StepId, c: WizardChar): RequirementHint {
       // Class skill count is gated by the campaign-reference hint.
       return c.backgroundKey ? { key: '' } : { key: 'wiz.hint.chooseBackground' };
     case 'spells': {
-      const lim = spellLimits(casterKind(c), c.level);
+      const lim = spellLimits(casterKind(c), CREATION_LEVEL);
       return { key: 'wiz.hint.chooseSpells', vars: { cantrips: lim.cantrips, spells: lim.spells } };
     }
     default:

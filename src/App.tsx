@@ -3,12 +3,15 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
 import { router } from './router';
 import { I18nProvider } from './i18n/I18nProvider';
+import { isRetryableError } from './lib/errors';
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 5 * 60 * 1000,
-      retry: 1,
+      // Не повторять запрос на 4xx (403/404/валидация) — это не изменится и лишь
+      // удваивает ожидание; повторяем только серверные сбои (5xx) и обрывы связи.
+      retry: (failureCount, error) => isRetryableError(error) && failureCount < 1,
       refetchOnWindowFocus: false,
     },
   },

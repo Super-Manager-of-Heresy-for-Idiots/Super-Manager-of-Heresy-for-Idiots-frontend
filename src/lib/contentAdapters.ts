@@ -5,6 +5,7 @@ import type {
   CharacterClassDetailResponse,
   CharacterRaceDetailResponse,
   ContentLabel,
+  ContentRewardGrant,
   LevelUpOptionsResponse,
   ProficiencySkillResponse,
   RewardGroup,
@@ -27,14 +28,52 @@ export function rewardGroupLabel(group: Pick<RewardGroup, 'prompt' | 'groupKind'
   return fallbackText(group.prompt, group.groupKind || 'REWARD');
 }
 
+/**
+ * Flattens a single backend grant's nested {@code payload} onto the grant itself (id-lists +
+ * scalars). Jackson nests the typed fields under {@code grant.payload} (EXTERNAL_PROPERTY
+ * keyed by grantType). Existing top-level values win, so fixtures that already carry the
+ * flattened shape (no payload) pass through untouched. Components resolve the ids to labels.
+ */
+export function normalizeRewardGrant(grant: ContentRewardGrant): ContentRewardGrant {
+  const payload = grant.payload;
+  if (!payload) return grant;
+  const isSkill = (grant.grantType ?? '').toUpperCase().includes('SKILL');
+  return {
+    ...grant,
+    mode: grant.mode ?? payload.mode,
+    chooseCount: grant.chooseCount ?? payload.chooseCount,
+    bonusPerChoice: grant.bonusPerChoice ?? payload.bonusPerChoice,
+    totalBonus: grant.totalBonus ?? payload.totalBonus,
+    maxPerAbility: grant.maxPerAbility ?? payload.maxPerAbility,
+    maxScore: grant.maxScore ?? payload.maxScore,
+    spellLevel: grant.spellLevel ?? payload.spellLevel,
+    minLevel: grant.minLevel ?? payload.minLevel,
+    maxLevel: grant.maxLevel ?? payload.maxLevel,
+    abilityOptionIds: grant.abilityOptionIds ?? payload.abilityOptionIds,
+    skillIds: grant.skillIds ?? payload.skillIds,
+    skillOptionIds: grant.skillOptionIds ?? payload.skillOptionIds,
+    grantsExpertise: grant.grantsExpertise ?? payload.grantsExpertise,
+    fixedSpellIds: grant.fixedSpellIds ?? payload.fixedSpellIds,
+    schoolIds: grant.schoolIds ?? payload.schoolIds,
+    spellListId: grant.spellListId ?? payload.spellListId,
+    classSpellListId: grant.classSpellListId ?? payload.classSpellListId,
+    allowReplaceOnLevelUp: grant.allowReplaceOnLevelUp ?? payload.allowReplaceOnLevelUp,
+    featId: grant.featId ?? payload.featId,
+    anySkill: grant.anySkill ?? (isSkill && payload.mode === 'ANY' ? true : undefined),
+  };
+}
+
 export function normalizeRewardGroup(group: RewardGroup): RewardGroup {
   const optionCount = group.options?.length ?? 0;
   const chooseMax = group.chooseMax ?? (optionCount > 0 ? 1 : 0);
 
   return {
     ...group,
-    grants: group.grants ?? [],
-    options: group.options ?? [],
+    grants: (group.grants ?? []).map(normalizeRewardGrant),
+    options: (group.options ?? []).map((opt) => ({
+      ...opt,
+      grants: (opt.grants ?? []).map(normalizeRewardGrant),
+    })),
     chooseMin: group.chooseMin ?? (optionCount > 0 ? 1 : 0),
     chooseMax,
     repeatable: group.repeatable ?? false,

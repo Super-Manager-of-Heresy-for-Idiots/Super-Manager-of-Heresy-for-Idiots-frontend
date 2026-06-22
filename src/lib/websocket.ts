@@ -86,6 +86,18 @@ class WebSocketService {
   }
 
   /**
+   * Re-handshake the current campaign socket with a freshly issued token.
+   * Called after a JWT refresh. No-op when there's no active connection
+   * (e.g. during app-start session restore, before a campaign is opened).
+   */
+  reconnect(): void {
+    const campaignId = this.currentCampaignId;
+    if (!campaignId) return;
+    this.disconnect(); // nulls currentCampaignId
+    this.connect(campaignId); // re-reads the fresh token from the store
+  }
+
+  /**
    * Gracefully close the STOMP connection and remove all subscriptions.
    */
   disconnect(): void {

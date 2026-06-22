@@ -47,6 +47,14 @@
   --ember-pale:    #d8896a;
   --moss:          #7a9866;
 
+  /* ── Rarity tiers (item rarity colour scale) ──────── */
+  --rar-common:    var(--ink-quiet);
+  --rar-uncommon:  var(--moss);
+  --rar-rare:      var(--arcane);
+  --rar-very-rare: #8f6fb5;
+  --rar-legendary: var(--gold-pale);
+  --rar-artifact:  var(--ember);
+
   /* ── Type ─────────────────────────────────────────── */
   --font-display: 'Cinzel', 'Trajan Pro', 'Times New Roman', serif;
   --font-serif:   'Cormorant Garamond', 'Garamond', 'Times New Roman', serif;

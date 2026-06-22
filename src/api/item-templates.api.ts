@@ -11,6 +11,11 @@ export const itemTemplatesApi = {
     return response.data;
   },
 
+  listAll: async (): Promise<ApiResponse<ItemTemplateResponse[]>> => {
+    const response = await api.get<ApiResponse<ItemTemplateResponse[]>>('/item-templates');
+    return response.data;
+  },
+
   getById: async (id: string): Promise<ApiResponse<ItemTemplateResponse>> => {
     const response = await api.get<ApiResponse<ItemTemplateResponse>>(`/item-templates/${id}`);
     return response.data;

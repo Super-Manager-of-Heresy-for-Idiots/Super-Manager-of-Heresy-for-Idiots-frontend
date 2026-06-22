@@ -35,16 +35,28 @@ export function abilityTotalRequired(grant: ContentRewardGrant): number {
   return grant.totalBonus ?? (grant.chooseCount ?? 1) * (grant.bonusPerChoice ?? 1);
 }
 
+/** Whether a SPELL grant is a fixed grant (auto-learned), needing no client pick. */
+function isFixedSpellGrant(grant: ContentRewardGrant): boolean {
+  if (grant.mode) return grant.mode.toUpperCase() === 'FIXED';
+  // Legacy/fixture shape with no mode: a single concrete spell and no choose count.
+  return !!grant.spell && !((grant.chooseCount ?? 0) > 0);
+}
+
 /** Whether a grant needs a per-grant child decision (ability / skill / spell pick). */
 export function grantNeedsChild(grant: ContentRewardGrant): boolean {
   switch (grantKind(grant.grantType)) {
     case 'ABILITY':
-      return (grant.abilityOptions?.length ?? 0) > 0;
+      return (grant.abilityOptions?.length ?? 0) > 0 || (grant.abilityOptionIds?.length ?? 0) > 0;
     case 'SKILL':
-      // Only when there's a concrete candidate list to pick from on the client.
-      return !grant.fixedSkill && (grant.skillOptions?.length ?? 0) > 0;
-    // SPELL grants carry no candidate list on the client — spell picks stay a
-    // manual / dedicated-spell-step concern, not an inline grant child.
+      // No pick for fixed grants (concrete skill or fixed id-list).
+      if (grant.fixedSkill || (grant.skillIds?.length ?? 0) > 0) return false;
+      // A pick is needed for ANY mode, or when there's a concrete candidate pool.
+      return grant.anySkill === true
+        || (grant.skillOptions?.length ?? 0) > 0
+        || (grant.skillOptionIds?.length ?? 0) > 0;
+    case 'SPELL':
+      // CHOICE spell grants need a pick (candidates resolved client-side by level/class).
+      return !isFixedSpellGrant(grant) && (grant.chooseCount ?? 1) > 0;
     default:
       return false;
   }
@@ -138,16 +150,18 @@ export function buildContentLevelUpRequest(
     const rewardGroupId = g.id;
     if (!rewardGroupId) continue;
     const optionIds = options[rewardGroupKey(g)] ?? [];
-    if ((g.options?.length ?? 0) > 0) {
-      const grants = (g.options ?? [])
-        .filter((o) => optionIds.includes(o.id))
-        .flatMap((o) => o.grants ?? []);
-      const childSelections = collectChild(grants, child);
+    const hasOptions = (g.options?.length ?? 0) > 0;
+    // Child picks come from direct grants plus the grants of any selected option.
+    const childSelections = collectChild(activeGrants(g, optionIds), child);
+    if (hasOptions) {
       selections.push({
         rewardGroupId,
         optionIds,
         ...(childSelections ? { childSelections } : {}),
       });
+    } else if (childSelections) {
+      // AUTO group whose direct grants require a pick (e.g. "learn a new cantrip").
+      selections.push({ rewardGroupId, optionIds: [], childSelections });
     }
   }
   return { classId, selections };

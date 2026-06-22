@@ -10,6 +10,7 @@ export {
 } from './WalletKit';
 export { walletTotalGold } from './WalletKit.helpers';
 export { ResourcesPanel } from './ResourcesPanel';
+export { SpellSlotsPanel } from './SpellSlotsPanel';
 export { AbilityCheckPanel } from './AbilityCheckPanel';
 export { StatusControlPanel } from './StatusControlPanel';
 export { ReadOnlyOverlay } from './ReadOnlyOverlay';

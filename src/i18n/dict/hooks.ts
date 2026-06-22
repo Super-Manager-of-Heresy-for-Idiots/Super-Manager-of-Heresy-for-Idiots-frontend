@@ -26,6 +26,14 @@ export const hooks: DictModule = {
     'hk.itemType.deleted': 'Тип предмета удалён!',
     'hk.itemType.deleteFailed': 'Не удалось удалить тип предмета',
 
+    /* ── useAdmin: item templates ─────────────────────── */
+    'hk.itemTemplate.created': 'Шаблон предмета создан!',
+    'hk.itemTemplate.createFailed': 'Не удалось создать шаблон предмета',
+    'hk.itemTemplate.updated': 'Шаблон предмета обновлён!',
+    'hk.itemTemplate.updateFailed': 'Не удалось обновить шаблон предмета',
+    'hk.itemTemplate.deleted': 'Шаблон предмета удалён!',
+    'hk.itemTemplate.deleteFailed': 'Не удалось удалить шаблон предмета',
+
     /* ── useAdmin: character classes ─────────────────── */
     'hk.class.created': 'Класс персонажа создан!',
     'hk.class.createFailed': 'Не удалось создать класс персонажа',
@@ -285,6 +293,13 @@ export const hooks: DictModule = {
     'hk.sessionNote.deleted': 'Заметка сессии удалена!',
     'hk.sessionNote.deleteFailed': 'Не удалось удалить заметку сессии',
 
+    /* ── useSpellSlots ───────────────────────────────── */
+    'hk.spellSlots.expended': 'Ячейка заклинания потрачена',
+    'hk.spellSlots.expendFailed': 'Не удалось потратить ячейку заклинания',
+    'hk.spellSlots.restoredAll': 'Все ячейки заклинаний восстановлены',
+    'hk.spellSlots.restoredHalf': 'Половина использованных ячеек восстановлена',
+    'hk.spellSlots.restoreFailed': 'Не удалось восстановить ячейки заклинаний',
+
     /* ── useTemplates ────────────────────────────────── */
     'hk.template.created': 'Шаблон создан!',
     'hk.template.createFailed': 'Не удалось создать шаблон',
@@ -322,6 +337,14 @@ export const hooks: DictModule = {
     'hk.itemType.updateFailed': 'Failed to update item type',
     'hk.itemType.deleted': 'Item type deleted!',
     'hk.itemType.deleteFailed': 'Failed to delete item type',
+
+    /* ── useAdmin: item templates ─────────────────────── */
+    'hk.itemTemplate.created': 'Item template created!',
+    'hk.itemTemplate.createFailed': 'Failed to create item template',
+    'hk.itemTemplate.updated': 'Item template updated!',
+    'hk.itemTemplate.updateFailed': 'Failed to update item template',
+    'hk.itemTemplate.deleted': 'Item template deleted!',
+    'hk.itemTemplate.deleteFailed': 'Failed to delete item template',
 
     /* ── useAdmin: character classes ─────────────────── */
     'hk.class.created': 'Character class created!',
@@ -581,6 +604,13 @@ export const hooks: DictModule = {
     'hk.sessionNote.updateFailed': 'Failed to update session note',
     'hk.sessionNote.deleted': 'Session note deleted!',
     'hk.sessionNote.deleteFailed': 'Failed to delete session note',
+
+    /* ── useSpellSlots ───────────────────────────────── */
+    'hk.spellSlots.expended': 'Spell slot expended',
+    'hk.spellSlots.expendFailed': 'Failed to expend spell slot',
+    'hk.spellSlots.restoredAll': 'All spell slots restored',
+    'hk.spellSlots.restoredHalf': 'Half of expended slots restored',
+    'hk.spellSlots.restoreFailed': 'Failed to restore spell slots',
 
     /* ── useTemplates ────────────────────────────────── */
     'hk.template.created': 'Template created!',

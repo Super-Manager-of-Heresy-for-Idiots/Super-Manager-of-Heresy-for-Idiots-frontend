@@ -1,47 +1,30 @@
 import { create } from 'zustand';
 import type { UserResponse } from '@/types';
 
-/** A locally remembered login the user can switch back into without re-entering credentials. */
+/**
+ * A locally remembered login shown in the quick-switch list. Metadata only —
+ * no token is stored. The session lives in HttpOnly cookies the JS can't read,
+ * so "switching" is a re-login (see AccountSwitcher), not a token swap.
+ */
 export interface SavedAccount {
   user: UserResponse;
-  token: string;
-  remember: boolean;
 }
 
 interface AuthState {
   user: UserResponse | null;
+  /** Access token, kept in memory only. Needed for the WebSocket STOMP handshake;
+   *  REST is authorized by the HttpOnly cookie. Never persisted. */
   token: string | null;
   isAuthenticated: boolean;
+  /** False until the app-start session restore (POST /auth/refresh) settles. The
+   *  router stays behind a splash until this is true so logged-in users don't flash
+   *  the login screen on reload. */
+  authReady: boolean;
   savedAccounts: SavedAccount[];
-  login: (user: UserResponse, token: string, remember: boolean) => void;
+  login: (user: UserResponse, token: string) => void;
   logout: () => void;
-  setUser: (user: UserResponse) => void;
-  switchAccount: (userId: string) => void;
+  setAuthReady: (ready: boolean) => void;
   removeAccount: (userId: string) => void;
-}
-
-function getStoredToken(): string | null {
-  const raw = localStorage.getItem('token') || sessionStorage.getItem('token');
-  // Self-heal: older sessions may have persisted the literal string "undefined"/"null"
-  // (when the login response lacked a token), which would be sent as `Bearer undefined`.
-  if (!raw || raw === 'undefined' || raw === 'null') {
-    localStorage.removeItem('token');
-    sessionStorage.removeItem('token');
-    return null;
-  }
-  return raw;
-}
-
-function getStoredUser(): UserResponse | null {
-  const userJson = localStorage.getItem('user') || sessionStorage.getItem('user');
-  if (userJson) {
-    try {
-      return JSON.parse(userJson);
-    } catch {
-      return null;
-    }
-  }
-  return null;
 }
 
 function getStoredAccounts(): SavedAccount[] {
@@ -49,7 +32,12 @@ function getStoredAccounts(): SavedAccount[] {
   if (!raw) return [];
   try {
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
+    if (!Array.isArray(parsed)) return [];
+    // Tolerate the legacy shape ({ user, token, remember }) by keeping only `user`
+    // so the saved-logins list survives the cookie migration without leaking tokens.
+    return parsed
+      .filter((a): a is { user: UserResponse } => !!a && typeof a === 'object' && !!a.user)
+      .map((a) => ({ user: a.user }));
   } catch {
     return [];
   }
@@ -60,75 +48,49 @@ function persistAccounts(accounts: SavedAccount[]) {
 }
 
 /** Upsert an account into the saved list, keyed by user id. */
-function upsertAccount(accounts: SavedAccount[], entry: SavedAccount): SavedAccount[] {
-  const next = accounts.filter((a) => a.user.id !== entry.user.id);
-  next.push(entry);
+function upsertAccount(accounts: SavedAccount[], user: UserResponse): SavedAccount[] {
+  const next = accounts.filter((a) => a.user.id !== user.id);
+  next.push({ user });
   return next;
 }
 
-/** Write the active session token/user to the storage that matches its `remember` flag. */
-function writeActiveSession(user: UserResponse, token: string, remember: boolean) {
-  const storage = remember ? localStorage : sessionStorage;
-  const other = remember ? sessionStorage : localStorage;
-  other.removeItem('token');
-  other.removeItem('user');
-  storage.setItem('token', token);
-  storage.setItem('user', JSON.stringify(user));
-}
+// One-time cleanup of the pre-cookie session: the access token (and user) used to be
+// persisted to localStorage/sessionStorage. The token now lives in memory only (the
+// session is in HttpOnly cookies), so purge any stale copies left by older builds —
+// otherwise a JWT would linger in web storage, defeating the XSS hardening.
+localStorage.removeItem('token');
+localStorage.removeItem('user');
+sessionStorage.removeItem('token');
+sessionStorage.removeItem('user');
 
-function clearActiveSession() {
-  localStorage.removeItem('token');
-  localStorage.removeItem('user');
-  sessionStorage.removeItem('token');
-  sessionStorage.removeItem('user');
-}
+// Re-persist the accounts list stripped of any legacy per-account tokens, so the
+// migration takes effect immediately on first load of the new build.
+const initialAccounts = getStoredAccounts();
+persistAccounts(initialAccounts);
 
 export const useAuthStore = create<AuthState>((set, get) => ({
-  user: getStoredUser(),
-  token: getStoredToken(),
-  isAuthenticated: !!getStoredToken(),
-  savedAccounts: getStoredAccounts(),
-  login: (user: UserResponse, token: string, remember: boolean) => {
+  user: null,
+  token: null,
+  isAuthenticated: false,
+  authReady: false,
+  savedAccounts: initialAccounts,
+  login: (user: UserResponse, token: string) => {
     if (!token) {
-      // Guard against persisting an empty/undefined token, which would leave the app
-      // looking "logged in" while every request fails with 401/403.
+      // Guard against an empty/undefined token, which would leave the app looking
+      // "logged in" while the WS handshake fails.
       throw new Error('Authentication token missing from login response');
     }
-    writeActiveSession(user, token, remember);
-    const savedAccounts = upsertAccount(get().savedAccounts, { user, token, remember });
+    const savedAccounts = upsertAccount(get().savedAccounts, user);
     persistAccounts(savedAccounts);
     set({ user, token, isAuthenticated: true, savedAccounts });
   },
   logout: () => {
-    clearActiveSession();
     set({ user: null, token: null, isAuthenticated: false });
   },
-  setUser: (user: UserResponse) => {
-    const remember = !!localStorage.getItem('token');
-    const storage = remember ? localStorage : sessionStorage;
-    storage.setItem('user', JSON.stringify(user));
-    const savedAccounts = upsertAccount(get().savedAccounts, {
-      user,
-      token: get().token ?? '',
-      remember,
-    });
-    persistAccounts(savedAccounts);
-    set({ user, savedAccounts });
-  },
-  switchAccount: (userId: string) => {
-    const entry = get().savedAccounts.find((a) => a.user.id === userId);
-    if (!entry) return;
-    writeActiveSession(entry.user, entry.token, entry.remember);
-    set({ user: entry.user, token: entry.token, isAuthenticated: true });
-  },
+  setAuthReady: (ready: boolean) => set({ authReady: ready }),
   removeAccount: (userId: string) => {
     const savedAccounts = get().savedAccounts.filter((a) => a.user.id !== userId);
     persistAccounts(savedAccounts);
-    if (get().user?.id === userId) {
-      clearActiveSession();
-      set({ user: null, token: null, isAuthenticated: false, savedAccounts });
-    } else {
-      set({ savedAccounts });
-    }
+    set({ savedAccounts });
   },
 }));

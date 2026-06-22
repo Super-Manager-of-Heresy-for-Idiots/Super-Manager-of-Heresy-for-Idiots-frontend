@@ -57,13 +57,13 @@
   font-family: var(--font-display);
 }
 
-.skills {
+.chips {
   display: flex;
   flex-wrap: wrap;
   gap: var(--s-2);
 }
 
-.skillChip {
+.chip {
   display: inline-flex;
   align-items: center;
   gap: var(--s-1);
@@ -76,17 +76,21 @@
   font: inherit;
 }
 
-.skillChip:hover:not(:disabled) {
+.chip:hover:not(:disabled) {
   border-color: var(--brass);
   color: var(--ink-bright);
 }
 
-.skillChip:disabled {
+.chip:disabled {
   opacity: 0.4;
   cursor: not-allowed;
 }
 
-.skillChip.on {
+.chip.on {
   border-color: var(--gold);
   color: var(--ink-bright);
+}
+
+.empty {
+  color: var(--ink-faint);
 }

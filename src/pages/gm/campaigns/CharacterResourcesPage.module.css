@@ -9,4 +9,5 @@
 .retryBox { padding: 0 24px 24px; text-align: center; }
 
 .body { max-width: 640px; }
+.slotsBlock { max-width: 640px; margin-top: 18px; }
 .readonlyNote { color: var(--ink-faint); font-size: 12px; margin-top: 10px; text-align: center; }

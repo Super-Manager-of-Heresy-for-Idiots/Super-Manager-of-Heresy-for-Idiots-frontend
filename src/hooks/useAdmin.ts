@@ -2,11 +2,13 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { adminApi } from '@/api/admin.api';
 import { referenceApi } from '@/api/reference.api';
+import { itemTemplatesApi } from '@/api/item-templates.api';
 import { useT } from '@/i18n/I18nContext';
 import type {
   ApiError,
   CreateStatTypeRequest,
   CreateItemTypeRequest,
+  CreateItemTemplateRequest,
   CreateCharacterRaceRequest,
   CreateSkillRequest,
   CreateSubclassRequest,
@@ -129,6 +131,63 @@ export function useDeleteItemType() {
     },
     onError: (error: AxiosError<ApiError>) => {
       toast.error(error.response?.data?.message || t('hk.itemType.deleteFailed'));
+    },
+  });
+}
+
+// === Item Templates (Admin authoring) ===
+export function useAdminItemTemplates() {
+  return useQuery({
+    queryKey: ['admin-item-templates'],
+    queryFn: async () => {
+      const response = await itemTemplatesApi.listAll();
+      return response.data;
+    },
+  });
+}
+
+export function useCreateItemTemplate() {
+  const queryClient = useQueryClient();
+  const t = useT();
+  return useMutation({
+    mutationFn: (data: CreateItemTemplateRequest) => itemTemplatesApi.create(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-item-templates'] });
+      toast.success(t('hk.itemTemplate.created'));
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error.response?.data?.message || t('hk.itemTemplate.createFailed'));
+    },
+  });
+}
+
+export function useUpdateItemTemplate() {
+  const queryClient = useQueryClient();
+  const t = useT();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: CreateItemTemplateRequest }) =>
+      itemTemplatesApi.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-item-templates'] });
+      toast.success(t('hk.itemTemplate.updated'));
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error.response?.data?.message || t('hk.itemTemplate.updateFailed'));
+    },
+  });
+}
+
+export function useDeleteItemTemplate() {
+  const queryClient = useQueryClient();
+  const t = useT();
+  return useMutation({
+    mutationFn: (id: string) => itemTemplatesApi.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-item-templates'] });
+      toast.success(t('hk.itemTemplate.deleted'));
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error.response?.data?.message || t('hk.itemTemplate.deleteFailed'));
     },
   });
 }

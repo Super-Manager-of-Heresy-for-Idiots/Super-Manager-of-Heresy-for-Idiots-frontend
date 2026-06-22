@@ -27,6 +27,7 @@ const playerNav: NavEntry[] = [
   { labelKey: 'nav.myCharacters', path: '/characters/templates', glyph: 'shield' },
   { labelKey: 'nav.marketplace', path: '/marketplace', glyph: 'book' },
   { labelKey: 'nav.blueprintMarket', path: '/blueprints/marketplace', glyph: 'hex' },
+  { labelKey: 'nav.itemCatalog', path: '/library/items', glyph: 'sword' },
 ];
 
 const gmNav: NavEntry[] = [
@@ -34,6 +35,7 @@ const gmNav: NavEntry[] = [
   { labelKey: 'nav.myCharacters', path: '/characters/templates', glyph: 'shield' },
   { labelKey: 'nav.marketplace', path: '/marketplace', glyph: 'book' },
   { labelKey: 'nav.blueprintMarket', path: '/blueprints/marketplace', glyph: 'hex' },
+  { labelKey: 'nav.itemCatalog', path: '/library/items', glyph: 'sword' },
   { labelKey: 'nav.myBlueprints', path: '/blueprints/my', glyph: 'sigil-2' },
   { labelKey: 'nav.myDoctrines', path: '/gm/homebrew/my', glyph: 'scroll' },
   { labelKey: 'nav.installed', path: '/gm/homebrew/installed', glyph: 'check' },
@@ -48,6 +50,8 @@ const adminNav: NavEntry[] = [
   { labelKey: 'nav.characters', path: '/admin/characters', glyph: 'shield' },
   { labelKey: 'nav.statTypes', path: '/admin/stat-types', glyph: 'diamond' },
   { labelKey: 'nav.itemTypes', path: '/admin/item-types', glyph: 'sword' },
+  { labelKey: 'nav.itemTemplates', path: '/admin/item-templates', glyph: 'scroll' },
+  { labelKey: 'nav.itemCatalog', path: '/library/items', glyph: 'sword' },
   { labelKey: 'nav.classes', path: '/admin/character-classes', glyph: 'shield' },
   { labelKey: 'nav.races', path: '/admin/character-races', glyph: 'sigil-3' },
   { labelKey: 'nav.skills', path: '/admin/skills', glyph: 'sigil-2' },

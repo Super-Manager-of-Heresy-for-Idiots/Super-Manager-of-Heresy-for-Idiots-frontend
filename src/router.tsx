@@ -34,6 +34,7 @@ const CharacterWalletPage = lazy(() => import('@/pages/gm/campaigns/CharacterWal
 const CharacterResourcesPage = lazy(() => import('@/pages/gm/campaigns/CharacterResourcesPage'));
 const BalanceManagementPage = lazy(() => import('@/pages/gm/campaigns/BalanceManagementPage'));
 const MyCharactersPage = lazy(() => import('@/pages/player/MyCharactersPage'));
+const ItemCatalogPage = lazy(() => import('@/pages/library/ItemCatalogPage'));
 const TemplateWizardPage = lazy(() => import('@/pages/player/TemplateWizardPage'));
 const TemplateDetailPage = lazy(() => import('@/pages/player/TemplateDetailPage'));
 const AbilityCheckPage = lazy(() =>
@@ -109,6 +110,7 @@ const SubclassesPage = lazy(() => import('@/pages/admin/SubclassesPage'));
 const FeatsPage = lazy(() => import('@/pages/admin/FeatsPage'));
 const BuffsDebuffsPage = lazy(() => import('@/pages/admin/BuffsDebuffsPage'));
 const EnchantmentTypesPage = lazy(() => import('@/pages/admin/EnchantmentTypesPage'));
+const ItemTemplatesPage = lazy(() => import('@/pages/admin/ItemTemplatesPage'));
 const AdminHomebrewPage = lazy(() => import('@/pages/admin/AdminHomebrewPage'));
 const ContentQualityPage = lazy(() => import('@/pages/admin/ContentQualityPage'));
 
@@ -137,6 +139,9 @@ export const router = createBrowserRouter([
           { path: '/blueprints/marketplace', element: <BlueprintMarketplacePage /> },
           { path: '/blueprints/marketplace/:id', element: <BlueprintMarketplaceDetailPage /> },
 
+          // Item reference catalog (read-only, every role)
+          { path: '/library/items', element: <ItemCatalogPage /> },
+
           { path: '/combat-preview', element: <CombatPreviewIndexPage /> },
 
           // ── Campaign shell: persistent header + role-aware sub-nav + WS ──
@@ -156,8 +161,8 @@ export const router = createBrowserRouter([
 
               // Sections available to every member
               { path: 'members', element: <CampaignMembersPage /> },
-              { path: 'invite', element: <CampaignInvitePage /> },
               { path: 'storage', element: <SharedStoragePage /> },
+              { path: 'items', element: <ItemCatalogPage /> },
               { path: 'bestiary', element: <CampaignBestiaryPage /> },
               { path: 'bestiary/monsters/:monsterId', element: <MonsterDetailPage source="campaign" /> },
 
@@ -181,6 +186,7 @@ export const router = createBrowserRouter([
               {
                 element: <ProtectedRoute allowedRoles={['GAME_MASTER', 'ADMIN']} />,
                 children: [
+                  { path: 'invite', element: <CampaignInvitePage /> },
                   { path: 'notes', element: <SessionNotesPage /> },
                   { path: 'wallet', element: <BalanceManagementPage /> },
                   { path: 'balances', element: <Navigate to="../wallet" replace /> },
@@ -280,6 +286,7 @@ export const router = createBrowserRouter([
           { path: '/admin/characters', element: <TodoPage title="Characters" /> },
           { path: '/admin/stat-types', element: <StatTypesPage /> },
           { path: '/admin/item-types', element: <ItemTypesPage /> },
+          { path: '/admin/item-templates', element: <ItemTemplatesPage /> },
           { path: '/admin/character-classes', element: <CharacterClassesPage /> },
           { path: '/admin/content-quality', element: <ContentQualityPage /> },
           { path: '/admin/character-races', element: <CharacterRacesPage /> },
