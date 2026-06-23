@@ -112,6 +112,7 @@ export default function LevelUpWizardPage() {
     spells: refContent?.spells,
     classId: selectedClassId ?? undefined,
     proficientSkillIds: character?.skillProficiencies?.map((sp) => sp.skillId),
+    campaignId,
   };
 
   return (

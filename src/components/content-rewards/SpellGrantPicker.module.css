@@ -1,0 +1,368 @@
+/* Two-pane grouped spell picker: scrollable grouped list (left) + detail (right).
+   On narrow viewports the panes stack. Heights are bounded so each pane scrolls
+   independently and the detail-pane action footer stays pinned. */
+
+.wrap {
+  display: flex;
+  height: min(58vh, 440px);
+  min-height: 300px;
+  border: 1px solid var(--rule);
+  background: var(--stone);
+}
+
+/* ── left: grouped list ──────────────────────────────── */
+.list {
+  flex: 0 0 42%;
+  max-width: 42%;
+  min-width: 0;
+  overflow-y: auto;
+  border-right: 1px solid var(--rule);
+  display: flex;
+  flex-direction: column;
+}
+
+.levelGroup {
+  display: flex;
+  flex-direction: column;
+  padding-bottom: var(--s-2);
+}
+
+.levelHead {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-2);
+  padding: var(--s-2) var(--s-3);
+  background: var(--abyss);
+  border-bottom: 1px solid var(--rule);
+}
+
+.levelTitle {
+  font-family: var(--font-display);
+  font-size: 0.84rem;
+  letter-spacing: 0.04em;
+  color: var(--gold-pale);
+}
+
+.levelCount {
+  font-size: 0.78rem;
+  color: var(--ink-faint);
+}
+
+.schoolGroup {
+  padding: 0 var(--s-3);
+}
+
+.schoolHead {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  padding: var(--s-2) 0 var(--s-1);
+}
+
+.schoolName {
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-quiet);
+}
+
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+}
+
+.row {
+  display: flex;
+  align-items: stretch;
+  gap: var(--s-1);
+  min-height: 40px;
+}
+
+.selectBox {
+  flex: 0 0 auto;
+  width: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--rule);
+  background: var(--panel);
+  color: var(--ink-faint);
+  cursor: pointer;
+}
+
+.selectBox:hover:not(:disabled) {
+  border-color: var(--gold);
+  background: var(--panel-raised);
+}
+
+.selectBox:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.selectBoxOn,
+.selectBoxOn:hover:not(:disabled) {
+  background: var(--gold);
+  border-color: var(--gold);
+}
+
+.rowBody {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-2);
+  padding: var(--s-1) var(--s-2);
+  background: var(--panel);
+  border: 1px solid var(--hairline);
+  color: var(--ink-quiet);
+  text-align: left;
+  cursor: pointer;
+}
+
+.rowBody:hover {
+  border-color: var(--brass);
+  background: var(--panel-raised);
+  color: var(--ink-bright);
+}
+
+.rowBodyActive,
+.rowBodyActive:hover {
+  border-color: var(--gold);
+  background: var(--panel-raised);
+  color: var(--ink-bright);
+}
+
+.rowName {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.9rem;
+}
+
+.rowChev {
+  flex: 0 0 auto;
+}
+
+.rowChosen .rowBody {
+  border-color: var(--gold-deep);
+}
+
+.rowChosen .rowName {
+  color: var(--ink-bright);
+}
+
+/* ── right: detail ───────────────────────────────────── */
+.detail {
+  flex: 1 1 58%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.detailScroll {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: var(--s-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+
+.detailFoot {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--s-3);
+  padding: var(--s-2) var(--s-3);
+  border-top: 1px solid var(--rule);
+  background: var(--abyss);
+}
+
+.limitHint {
+  color: var(--ink-faint);
+}
+
+/* empty state (no spell focused) */
+.empty {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-3);
+  padding: var(--s-5);
+  text-align: center;
+}
+
+.emptyIcon {
+  opacity: 0.6;
+}
+
+.emptyText {
+  max-width: 30ch;
+  color: var(--ink-faint);
+}
+
+/* detail header */
+.dHead {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-3);
+}
+
+.dIcon {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--rule);
+  background: var(--stone);
+}
+
+.dHeadMain {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+}
+
+.dName {
+  color: var(--gold-pale);
+}
+
+.dMeta {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+
+.dLevel {
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  color: var(--ink-quiet);
+}
+
+.dSchool {
+  font-size: 0.8rem;
+  color: var(--ink-faint);
+}
+
+/* ritual / concentration badges */
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-1);
+  padding: var(--s-1) var(--s-2);
+  border: 1px solid var(--rule);
+  background: var(--stone);
+  color: var(--ink-quiet);
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.detailState {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  padding: var(--s-2) 0;
+  color: var(--ink-faint);
+  font-size: 0.85rem;
+}
+
+/* stat chips */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--s-2);
+}
+
+.statChip {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+  padding: var(--s-2);
+  border: 1px solid var(--hairline);
+  background: var(--stone);
+}
+
+.statKey {
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.statVal {
+  font-size: 0.85rem;
+  color: var(--ink-bright);
+}
+
+.material {
+  color: var(--ink-quiet);
+  font-size: 0.82rem;
+}
+
+.descText {
+  color: var(--ink-bright);
+  font-size: 0.88rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.higher {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+  padding-top: var(--s-2);
+  border-top: 1px solid var(--hairline);
+}
+
+.higherHead {
+  color: var(--gold);
+}
+
+/* ── stacked layout on narrow viewports ──────────────── */
+@media (max-width: 640px) {
+  .wrap {
+    flex-direction: column;
+    height: auto;
+  }
+  .list {
+    flex: none;
+    max-width: none;
+    width: 100%;
+    max-height: 240px;
+    border-right: none;
+    border-bottom: 1px solid var(--rule);
+  }
+  .detail {
+    flex: none;
+  }
+  .detailScroll {
+    max-height: 320px;
+  }
+  .stats {
+    grid-template-columns: 1fr;
+  }
+}
