@@ -3,6 +3,7 @@ import { useI18n, useT } from '@/i18n/I18nContext';
 import { localizedName } from '@/lib/contentAdapters';
 import { cn } from '@/lib/utils';
 import { RewardGroupView } from './RewardGroupRenderer';
+import { SpellGrantPicker } from './SpellGrantPicker';
 import { grantKind } from './grants';
 import {
   abilityTotalRequired,
@@ -32,6 +33,8 @@ export interface RewardPickerCatalogs {
   classId?: string;
   /** Skill ids the character already has — required for Expertise grants. */
   proficientSkillIds?: string[];
+  /** Active campaign — lets the spell detail pane fetch campaign-scoped spell data. */
+  campaignId?: string;
 }
 
 const byId = (catalog: ContentLabel[] | undefined, ids: string[] | undefined): ContentLabel[] =>
@@ -57,8 +60,10 @@ function skillPoolFor(grant: ContentRewardGrant, catalogs?: RewardPickerCatalogs
   return pool;
 }
 
-/** Resolves the selectable spells for a SPELL grant, filtered by class + level. */
-function spellPoolFor(grant: ContentRewardGrant, catalogs?: RewardPickerCatalogs): ContentLabel[] {
+/** Resolves the selectable spells for a SPELL grant, filtered by class + level.
+   Returns full references (level/school/description) so the grouped picker can
+   bucket by circle + school and seed its detail pane without a refetch. */
+function spellPoolFor(grant: ContentRewardGrant, catalogs?: RewardPickerCatalogs): SpellReferenceResponse[] {
   const all = catalogs?.spells ?? [];
   const classId = catalogs?.classId;
   const exactLevel = grant.spellLevel;
@@ -70,8 +75,7 @@ function spellPoolFor(grant: ContentRewardGrant, catalogs?: RewardPickerCatalogs
       if (exactLevel != null) return sp.level === exactLevel;
       if (lo != null || hi != null) return sp.level >= (lo ?? 0) && sp.level <= (hi ?? 9);
       return true;
-    })
-    .map((sp) => ({ id: sp.id, name: sp.name, nameEn: sp.nameEn }));
+    });
 }
 
 export interface RewardGroupPickerProps {
@@ -274,7 +278,6 @@ function SpellChild({
   catalogs?: RewardPickerCatalogs;
 }) {
   const t = useT();
-  const { lang } = useI18n();
   const options = spellPoolFor(grant, catalogs);
   const need = grant.chooseCount ?? 1;
   const chosen = sel?.spells ?? [];
@@ -304,24 +307,13 @@ function SpellChild({
       {options.length === 0 ? (
         <span className={cn('ao-codex', s.empty)}>{t('camp.lvl.child.noSpells')}</span>
       ) : (
-        <div className={s.chips}>
-          {options.map((o) => {
-            const on = chosen.includes(o.id);
-            const atLimit = chosen.length >= need && !on;
-            return (
-              <button
-                key={o.id}
-                type="button"
-                className={cn(s.chip, on && s.on)}
-                disabled={atLimit}
-                onClick={() => toggle(o.id)}
-              >
-                {on && <Rune kind="check" size={10} color="var(--ink-bright)" />}
-                {localizedName(o, lang)}
-              </button>
-            );
-          })}
-        </div>
+        <SpellGrantPicker
+          pool={options}
+          chosen={chosen}
+          need={need}
+          onToggle={toggle}
+          campaignId={catalogs?.campaignId}
+        />
       )}
     </div>
   );

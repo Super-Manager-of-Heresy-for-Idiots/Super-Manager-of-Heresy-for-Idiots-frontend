@@ -79,7 +79,8 @@ describe('maskInviteCode', () => {
 
 describe('cn (class merge)', () => {
   it('drops falsy values and joins the rest', () => {
-    expect(cn('a', false && 'b', undefined, null, 'c')).toBe('a c');
+    const flag = false;
+    expect(cn('a', flag && 'b', undefined, null, 'c')).toBe('a c');
   });
 
   it('lets later tailwind utilities win conflicting ones', () => {

@@ -1,4 +1,4 @@
-import { useState, type ReactNode, type CSSProperties } from 'react';
+import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Sparkles, Heart, Loader2 } from 'lucide-react';
 import {
@@ -32,7 +32,6 @@ import type {
   AvailableClassOption,
   ContentRewardGrant,
   LevelUpResultResponse,
-  RewardDetail,
   RewardGroup,
 } from '@/types';
 import { REWARD_TYPE_LABELS } from '@/types';
@@ -113,6 +112,7 @@ export default function LevelUpWizardPage() {
     spells: refContent?.spells,
     classId: selectedClassId ?? undefined,
     proficientSkillIds: character?.skillProficiencies?.map((sp) => sp.skillId),
+    campaignId,
   };
 
   return (
@@ -594,73 +594,6 @@ function GrantCard({
       </div>
       <div className={cn('ao-overline', s.grantLabel)}>{label}</div>
       {sub && <div className={cn('ao-codex', s.grantSub)}>{sub}</div>}
-    </div>
-  );
-}
-
-// ── Effect badges / structured mechanics ─────────────────────────────
-
-function Tag({ children, tone }: { children: ReactNode; tone?: Tone }) {
-  const color = tone ? toneVar(tone) : 'var(--ink-quiet)';
-  return (
-    <span className={s.tag} style={{ '--c': color } as CSSProperties}>
-      {children}
-    </span>
-  );
-}
-
-/** Renders concrete mechanics (action type, damage, range, duration, prerequisites,
- *  buff/debuff effects) from RewardDetail. Renders nothing when no detail is present. */
-function DetailBadges({ detail }: { detail?: RewardDetail }) {
-  const t = useT();
-  if (!detail) return null;
-
-  const tags: { label: string; tone?: Tone }[] = [];
-
-  if (detail.skillActivation) {
-    tags.push({
-      label: detail.skillActivation === 'ACTIVE' ? t('camp.lvl.fx.active') : t('camp.lvl.fx.passive'),
-      tone: detail.skillActivation === 'ACTIVE' ? 'ember' : 'arcane',
-    });
-  }
-  if (detail.damageDice || detail.damageBonus) {
-    const dmg = [detail.damageDice, detail.damageBonus ? `+${detail.damageBonus}` : '']
-      .filter(Boolean)
-      .join(' ');
-    const typ = detail.damageType ? ` ${detail.damageType.toLowerCase()}` : '';
-    tags.push({ label: `${t('camp.lvl.fx.damage')}: ${dmg}${typ}`, tone: 'ember' });
-  }
-  if (detail.range) tags.push({ label: `${t('camp.lvl.fx.range')}: ${detail.range}` });
-  if (detail.duration) tags.push({ label: `${t('camp.lvl.fx.duration')}: ${detail.duration}` });
-  if (detail.usage) tags.push({ label: detail.usage });
-
-  const effects = detail.effects ?? [];
-  const hasContent = tags.length > 0 || !!detail.prerequisites || effects.length > 0;
-  if (!hasContent) return null;
-
-  return (
-    <div className={s.tagWrap}>
-      {tags.map((tg, i) => (
-        <Tag key={`t${i}`} tone={tg.tone}>{tg.label}</Tag>
-      ))}
-      {effects.map((e, i) => {
-        const bd = e.buffDebuff;
-        const mod =
-          bd?.modifierValue != null && bd.targetStatName
-            ? ` (${bd.modifierValue >= 0 ? '+' : ''}${bd.modifierValue} ${bd.targetStatName})`
-            : '';
-        const chance = e.chancePercent != null && e.chancePercent < 100 ? ` · ${t('camp.lvl.fx.chance', { chance: e.chancePercent })}` : '';
-        const rounds = bd?.durationRounds ? ` · ${t('camp.lvl.fx.rounds', { rounds: bd.durationRounds })}` : '';
-        const arrow = e.effectRole === 'BUFF' ? '▲' : '▼';
-        return (
-          <Tag key={`e${i}`} tone={e.effectRole === 'BUFF' ? 'arcane' : 'ember'}>
-            {arrow} {bd?.name ?? ''}{mod}{chance}{rounds}
-          </Tag>
-        );
-      })}
-      {detail.prerequisites && (
-        <Tag tone="ember">{t('camp.lvl.fx.requires', { req: detail.prerequisites })}</Tag>
-      )}
     </div>
   );
 }
