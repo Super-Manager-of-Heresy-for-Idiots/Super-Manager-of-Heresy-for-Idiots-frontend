@@ -8,6 +8,12 @@ const api = axios.create({
   // Send the HttpOnly session cookies (access_token / refresh_token) on every
   // request — REST authorization is cookie-based now.
   withCredentials: true,
+  // CSRF double-submit (Spring default names): axios copies the XSRF-TOKEN cookie
+  // into the X-XSRF-TOKEN header on same-origin requests when withCredentials is
+  // set. Safe to ship before the backend enables CSRF — with no cookie present
+  // nothing is sent — so this half of the coordinated change is harmless on its own.
+  xsrfCookieName: 'XSRF-TOKEN',
+  xsrfHeaderName: 'X-XSRF-TOKEN',
   headers: {
     'Content-Type': 'application/json',
   },

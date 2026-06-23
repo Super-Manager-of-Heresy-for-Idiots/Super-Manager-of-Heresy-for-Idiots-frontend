@@ -1,6 +1,6 @@
-import { Client, type IMessage, type StompSubscription } from '@stomp/stompjs';
+import { Client, ReconnectionTimeMode, type IMessage, type StompSubscription } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
-import { useAuthStore } from '@/store/authStore';
+import { ensureFreshAccessToken } from '@/lib/authSession';
 import { useWsStore } from '@/store/wsStore';
 import type { WsEvent } from '@/types';
 
@@ -41,21 +41,35 @@ class WebSocketService {
 
     this.currentCampaignId = campaignId;
 
-    const token = useAuthStore.getState().token;
     const wsStore = useWsStore.getState();
 
     this.client = new Client({
       webSocketFactory: () => new SockJS('/ws') as unknown as WebSocket,
-      connectHeaders: token
-        ? {
-            Authorization: `Bearer ${token}`,
-          }
-        : {},
+      // Token is injected per-attempt in beforeConnect (below), so it stays fresh
+      // across reconnects. The initial value is irrelevant — stompjs awaits
+      // beforeConnect and re-reads connectHeaders before opening the socket.
+      connectHeaders: {},
 
-      // No auto-reconnect: a dropped socket goes 'offline' instead of polling the server.
-      reconnectDelay: 0,
+      // Bounded auto-reconnect: 2s, doubling up to 30s. A network blip or pod
+      // restart now self-heals instead of leaving realtime permanently dead.
+      reconnectDelay: 2000,
+      maxReconnectDelay: 30000,
+      reconnectTimeMode: ReconnectionTimeMode.EXPONENTIAL,
+
+      // Refresh the access token (single-flight) before every (re)connect and hand
+      // it to the CONNECT frame. ensureFreshAccessToken only hits the network when
+      // the in-memory token is missing/expiring, so a healthy reconnect is cheap.
+      beforeConnect: async () => {
+        const fresh = await ensureFreshAccessToken();
+        if (this.client) {
+          this.client.connectHeaders = fresh ? { Authorization: `Bearer ${fresh}` } : {};
+        }
+      },
 
       onConnect: () => {
+        // Fresh socket: drop any stale subscription handles from the previous one
+        // so the array doesn't accumulate dead entries across reconnects.
+        this.subscriptions = [];
         useWsStore.getState().setConnectionState('connected');
 
         // Campaign broadcast topic
@@ -72,8 +86,11 @@ class WebSocketService {
         useWsStore.getState().setConnectionState('offline');
       },
 
+      // While the client is still active, stompjs will keep retrying — show
+      // 'reconnecting' so the UI reflects recovery-in-progress. A close after a
+      // deliberate disconnect() (no longer active) is a real 'offline'.
       onWebSocketClose: () => {
-        useWsStore.getState().setConnectionState('offline');
+        useWsStore.getState().setConnectionState(this.client?.active ? 'reconnecting' : 'offline');
       },
 
       onDisconnect: () => {
@@ -83,18 +100,6 @@ class WebSocketService {
 
     wsStore.setConnectionState('reconnecting');
     this.client.activate();
-  }
-
-  /**
-   * Re-handshake the current campaign socket with a freshly issued token.
-   * Called after a JWT refresh. No-op when there's no active connection
-   * (e.g. during app-start session restore, before a campaign is opened).
-   */
-  reconnect(): void {
-    const campaignId = this.currentCampaignId;
-    if (!campaignId) return;
-    this.disconnect(); // nulls currentCampaignId
-    this.connect(campaignId); // re-reads the fresh token from the store
   }
 
   /**

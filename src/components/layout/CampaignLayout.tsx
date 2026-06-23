@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 import { NavLink, Outlet, useOutletContext, useParams } from 'react-router-dom';
 import { BackLink, CampaignStatusPill } from '@/components/campaigns';
+import { ConnectionIndicator } from '@/components/realtime/ConnectionIndicator';
 import { useCampaign } from '@/hooks/useCampaigns';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { useAuthStore } from '@/store/authStore';
@@ -107,6 +108,9 @@ export function CampaignLayout() {
       <div className={s.head}>
         <h3 className="ao-h3">{campaign.name}</h3>
         <CampaignStatusPill status={campaign.status} />
+        <div className={s.conn}>
+          <ConnectionIndicator />
+        </div>
       </div>
 
       <nav className={cn('ao-tabs', s.nav)} aria-label={t('camp.dash.tabs.label')}>

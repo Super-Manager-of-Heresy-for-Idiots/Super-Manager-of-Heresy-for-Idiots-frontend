@@ -142,7 +142,10 @@ export const router = createBrowserRouter([
           // Item reference catalog (read-only, every role)
           { path: '/library/items', element: <ItemCatalogPage /> },
 
-          { path: '/combat-preview', element: <CombatPreviewIndexPage /> },
+          // Combat/Loot prototype index — dev-only, physically absent from prod builds.
+          ...(import.meta.env.DEV
+            ? [{ path: '/combat-preview', element: <CombatPreviewIndexPage /> }]
+            : []),
 
           // ── Campaign shell: persistent header + role-aware sub-nav + WS ──
           {
@@ -210,7 +213,9 @@ export const router = createBrowserRouter([
   // Combat / Loot prototype previews — full-screen standalone routes
   // (screens only, no API wiring). Rendered outside AppLayout so the
   // tracker's queue | actions | log layout owns the whole viewport.
-  {
+  // Dev-only: the whole block (incl. /dev/content-classes) is stripped from prod
+  // builds, so these routes 404→redirect in production.
+  ...(import.meta.env.DEV ? [{
     element: <ProtectedRoute allowedRoles={['PLAYER', 'GAME_MASTER', 'ADMIN']} />,
     children: [
       {
@@ -241,7 +246,7 @@ export const router = createBrowserRouter([
         ],
       },
     ],
-  },
+  }] : []),
 
   // Game Master routes (non-campaign)
   {

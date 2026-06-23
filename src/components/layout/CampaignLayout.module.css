@@ -10,6 +10,8 @@
   margin-bottom: 14px;
 }
 
+.conn { margin-left: auto; }
+
 .nav {
   position: sticky;
   top: 0;

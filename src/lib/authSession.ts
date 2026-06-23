@@ -1,6 +1,5 @@
 import axios from 'axios';
 import { useAuthStore } from '@/store/authStore';
-import { wsService } from '@/lib/websocket';
 import type { UserResponse } from '@/types';
 
 /**
@@ -58,8 +57,9 @@ export function refreshSession(): Promise<string | null> {
 
       useAuthStore.getState().login(parsed.user, parsed.token);
       scheduleProactiveRefresh(parsed.expiresIn);
-      // Re-handshake the live socket with the new token (no-op if not connected).
-      wsService.reconnect();
+      // The live socket re-handshakes on its own: stompjs auto-reconnect pulls a
+      // fresh token via ensureFreshAccessToken() in beforeConnect. No explicit
+      // wsService call here — that would recurse through beforeConnect.
       return parsed.token;
     } catch {
       return null;
@@ -69,6 +69,35 @@ export function refreshSession(): Promise<string | null> {
   })();
 
   return refreshPromise;
+}
+
+/** Decode a JWT's `exp` claim to epoch-ms. Returns null for opaque/garbage tokens. */
+function readJwtExpiryMs(token: string): number | null {
+  const parts = token.split('.');
+  if (parts.length !== 3) return null;
+  try {
+    const json = atob(parts[1].replace(/-/g, '+').replace(/_/g, '/'));
+    const payload = JSON.parse(json) as { exp?: number };
+    return typeof payload.exp === 'number' ? payload.exp * 1000 : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Return a valid access token for the WebSocket handshake, refreshing first only
+ * when the in-memory token is missing or about to lapse. Reuses the single-flight
+ * {@link refreshSession} so a (re)connect attempt never races a REST-triggered
+ * refresh — two parallel refreshes on one rotating cookie would kill the session.
+ */
+export async function ensureFreshAccessToken(): Promise<string | null> {
+  const token = useAuthStore.getState().token;
+  if (token) {
+    const exp = readJwtExpiryMs(token);
+    // No exp readable → trust it and let the server reject if stale.
+    if (exp == null || exp - Date.now() > 30_000) return token;
+  }
+  return refreshSession();
 }
 
 /**

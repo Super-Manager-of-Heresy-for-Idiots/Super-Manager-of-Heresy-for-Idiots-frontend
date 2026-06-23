@@ -6,6 +6,9 @@ export const campaigns: DictModule = {
     /* ── Shared ─────────────────────────────────────── */
     'camp.retry': 'Повторить',
     'camp.back': '← Назад',
+    'camp.ws.connected': 'На связи',
+    'camp.ws.reconnecting': 'Переподключение…',
+    'camp.ws.offline': 'Нет связи',
 
     /* ── CampaignListPage ───────────────────────────── */
     'camp.list.access.overline': 'Доступ к Кампании',
@@ -395,6 +398,9 @@ export const campaigns: DictModule = {
     /* ── Shared ─────────────────────────────────────── */
     'camp.retry': 'Retry',
     'camp.back': '← Back',
+    'camp.ws.connected': 'Online',
+    'camp.ws.reconnecting': 'Reconnecting…',
+    'camp.ws.offline': 'Offline',
 
     /* ── CampaignListPage ───────────────────────────── */
     'camp.list.access.overline': 'Campaign Access',
