@@ -555,6 +555,19 @@ export const campaigns2: DictModule = {
     'camp2.inv.relic.renameTitle': 'Переименовать',
     'camp2.inv.relic.transferTitle': 'Передать',
     'camp2.inv.relic.removeTitle': 'Удалить',
+    /* ── Grant dialog (two-pane catalog) ── */
+    'camp2.inv.grant.searchPlaceholder': 'Поиск по имени, типу или редкости',
+    'camp2.inv.grant.customNameLabel': 'Своё имя',
+    'camp2.inv.grant.optionalMark': '— необязательно',
+    'camp2.inv.grant.pickEmptyTitle': 'Реликвия не выбрана',
+    'camp2.inv.grant.pickEmptySub': 'Выберите предмет из каталога слева, чтобы изучить его и задать параметры выдачи',
+    'camp2.inv.grant.noResultsTitle': 'Ничего не найдено',
+    'camp2.inv.grant.noResultsSub': 'Измените запрос или выберите другую категорию',
+    'camp2.inv.grant.uniqueSub': 'Существует в единственном экземпляре и не складывается',
+    'camp2.inv.grant.descMore': 'Читать далее',
+    'camp2.inv.grant.descLess': 'Свернуть',
+    'camp2.inv.grant.summaryLabel': 'Выдаётся:',
+    'camp2.inv.grant.nothingSelected': 'Предмет не выбран',
   },
 
   en: {
@@ -1110,5 +1123,18 @@ export const campaigns2: DictModule = {
     'camp2.inv.relic.renameTitle': 'Rename',
     'camp2.inv.relic.transferTitle': 'Transfer',
     'camp2.inv.relic.removeTitle': 'Remove',
+    /* ── Grant dialog (two-pane catalog) ── */
+    'camp2.inv.grant.searchPlaceholder': 'Search by name, type, or rarity',
+    'camp2.inv.grant.customNameLabel': 'Custom name',
+    'camp2.inv.grant.optionalMark': '— optional',
+    'camp2.inv.grant.pickEmptyTitle': 'No relic chosen',
+    'camp2.inv.grant.pickEmptySub': 'Select an item from the catalog on the left to inspect it and set the grant parameters',
+    'camp2.inv.grant.noResultsTitle': 'Nothing found',
+    'camp2.inv.grant.noResultsSub': 'Change the query or choose another category',
+    'camp2.inv.grant.uniqueSub': 'Exists as a single copy and does not stack',
+    'camp2.inv.grant.descMore': 'Read more',
+    'camp2.inv.grant.descLess': 'Collapse',
+    'camp2.inv.grant.summaryLabel': 'Granting:',
+    'camp2.inv.grant.nothingSelected': 'No item selected',
   },
 };

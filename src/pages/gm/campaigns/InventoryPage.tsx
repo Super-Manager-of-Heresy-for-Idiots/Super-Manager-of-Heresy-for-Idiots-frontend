@@ -24,30 +24,23 @@ import {
   useCharacterInventory,
   useEquippedInventory,
   useBackpackInventory,
-  useGrantItem,
   useTransferItem,
   useRenameItem,
   useEquipItem,
   useUnequipItem,
   useRemoveItem,
 } from '@/hooks/useInventory';
-import { useEquipmentItems, useMagicItems } from '@/hooks/useContentCatalog';
 import { useCharacter, useCharacterWallet, useCampaignCharacters } from '@/hooks/useCharacter';
 import { useAuthStore } from '@/store/authStore';
-import { isRetryableError } from '@/lib/errors';
-import { rarityColor, slotClass, itemGlyph, normalizeRarity, RARITY_ORDER } from '@/lib/itemVisuals';
+import { rarityColor, slotClass, itemGlyph } from '@/lib/itemVisuals';
 import { RarityBadge, rarityLabelKey } from '@/components/items/RarityBadge';
 import { useT } from '@/i18n/I18nContext';
 import type {
   ItemInstanceResponse,
-  GrantItemRequest,
-  GrantItemKind,
   RenameItemRequest,
   EquipmentSlot,
-  EquipmentItemDetail,
-  MagicItemDetail,
-  DiceFormula,
 } from '@/types';
+import { GrantItemDialog } from './GrantItemDialog';
 import s from './InventoryPage.module.css';
 
 /* ── helpers ─────────────────────────────────────────────────── */
@@ -74,81 +67,6 @@ const COIN_COLOR: Record<string, string> = {
   copper: '#a87858',
 };
 
-/* ── grant picker model (unified over the campaign item catalog) ──
-   The grant list is sourced from the exact same content catalog the
-   /campaigns/{id}/items page shows: equipment_item + magic_item. Each catalog
-   item is normalized into a GrantEntry so the picker can group, search and
-   grant by a single shape, and so the grant payload carries the right
-   (itemId, itemKind) pair back to the server. */
-
-type ItemCategory = 'weapon' | 'armor' | 'gear' | 'tool' | 'magic';
-
-const CATEGORY_ORDER: ItemCategory[] = ['weapon', 'armor', 'gear', 'tool', 'magic'];
-
-const CATEGORY_GLYPH: Record<ItemCategory, string> = {
-  weapon: 'sword',
-  armor: 'shield',
-  gear: 'scroll',
-  tool: 'cross-pat',
-  magic: 'hex',
-};
-
-interface GrantEntry {
-  id: string;
-  kind: GrantItemKind; // 'EQUIPMENT' | 'MAGIC'
-  category: ItemCategory;
-  name: string;
-  itemTypeName?: string;
-  rarity?: string;
-  damageDice?: string;
-  homebrew: boolean;
-  description?: string;
-}
-
-function diceText(d?: DiceFormula | null): string | undefined {
-  if (!d) return undefined;
-  if (d.rawText) return d.rawText;
-  const count = d.diceCount ?? '';
-  const size = d.dieSize ? `d${d.dieSize}` : '';
-  const bonus = d.bonus ? (d.bonus > 0 ? `+${d.bonus}` : `${d.bonus}`) : '';
-  const txt = `${count}${size}${bonus}`;
-  return txt || undefined;
-}
-
-function equipmentCategory(e: EquipmentItemDetail): ItemCategory {
-  const kind = (e.kind ?? '').toLowerCase();
-  if (kind === 'weapon' || e.weaponStat) return 'weapon';
-  if (kind === 'armor' || e.armorStat) return 'armor';
-  if (kind === 'tool') return 'tool';
-  return 'gear';
-}
-
-function equipmentEntry(e: EquipmentItemDetail): GrantEntry {
-  return {
-    id: e.id,
-    kind: 'EQUIPMENT',
-    category: equipmentCategory(e),
-    name: e.name,
-    itemTypeName: e.category?.name ?? e.kind,
-    damageDice: diceText(e.weaponStat?.damageDice),
-    homebrew: !!e.packageId,
-    description: e.propertiesText ?? undefined,
-  };
-}
-
-function magicEntry(m: MagicItemDetail): GrantEntry {
-  return {
-    id: m.id,
-    kind: 'MAGIC',
-    category: 'magic',
-    name: m.name,
-    itemTypeName: m.type?.name ?? undefined,
-    rarity: m.rarity?.slug ?? m.rarity?.name ?? undefined,
-    homebrew: !!m.packageId,
-    description: m.description ?? undefined,
-  };
-}
-
 /* ── page ────────────────────────────────────────────────────── */
 
 export default function InventoryPage() {
@@ -162,32 +80,8 @@ export default function InventoryPage() {
   const { data: equipped } = useEquippedInventory(campaignId!, characterId!);
   const { data: backpack } = useBackpackInventory(campaignId!, characterId!);
   const { data: wallet } = useCharacterWallet(campaignId!, characterId!);
-  // Grant picker is sourced from the same campaign content catalog the items page
-  // shows: equipment_item + magic_item (single source of truth).
-  const {
-    data: equipmentData,
-    isLoading: equipmentLoading,
-    isError: equipmentIsError,
-    error: equipmentError,
-    refetch: refetchEquipment,
-  } = useEquipmentItems(campaignId);
-  const {
-    data: magicData,
-    isLoading: magicLoading,
-    isError: magicIsError,
-    error: magicError,
-    refetch: refetchMagic,
-  } = useMagicItems(campaignId);
-  const itemTemplatesLoading = equipmentLoading || magicLoading;
-  const itemTemplatesIsError = equipmentIsError || magicIsError;
-  const itemTemplatesError = equipmentError ?? magicError;
-  const refetchItemTemplates = () => {
-    refetchEquipment();
-    refetchMagic();
-  };
   const { data: campaignCharacters } = useCampaignCharacters(campaignId!);
 
-  const grantMutation = useGrantItem();
   const transferMutation = useTransferItem();
   const renameMutation = useRenameItem();
   const equipMutation = useEquipItem();
@@ -203,14 +97,6 @@ export default function InventoryPage() {
   const [renameOpen, setRenameOpen] = useState(false);
   const [equipOpen, setEquipOpen] = useState(false);
 
-  /* Grant form */
-  const [grantTemplateId, setGrantTemplateId] = useState('');
-  const [grantTemplateSearch, setGrantTemplateSearch] = useState('');
-  const [grantQuantity, setGrantQuantity] = useState('1');
-  const [grantUnique, setGrantUnique] = useState(false);
-  const [grantCustomName, setGrantCustomName] = useState('');
-  const [grantCategory, setGrantCategory] = useState<ItemCategory | 'all'>('all');
-
   /* Transfer / Rename / Equip state */
   const [transferInstanceId, setTransferInstanceId] = useState('');
   const [transferToCharId, setTransferToCharId] = useState('');
@@ -224,11 +110,6 @@ export default function InventoryPage() {
   const items: ItemInstanceResponse[] = useMemo(() => inventory ?? [], [inventory]);
   const equippedItems: ItemInstanceResponse[] = useMemo(() => equipped ?? [], [equipped]);
   const backpackItems: ItemInstanceResponse[] = useMemo(() => backpack ?? [], [backpack]);
-  const grantEntries: GrantEntry[] = useMemo(() => {
-    const eq = (equipmentData ?? []).map(equipmentEntry);
-    const mg = (magicData ?? []).map(magicEntry);
-    return [...eq, ...mg];
-  }, [equipmentData, magicData]);
 
   const equippedBySlot = useMemo(() => {
     const map = new Map<string, ItemInstanceResponse>();
@@ -252,56 +133,6 @@ export default function InventoryPage() {
     [items, selectedId],
   );
 
-  const filteredGrantEntries = useMemo(() => {
-    const q = grantTemplateSearch.trim().toLowerCase();
-    if (!q) return grantEntries;
-    return grantEntries.filter((entry) => {
-      const haystack = [
-        entry.name,
-        entry.itemTypeName,
-        entry.rarity,
-        entry.rarity ? t(rarityLabelKey(entry.rarity)) : '',
-        t(`camp2.inv.cat.${entry.category}`),
-        entry.damageDice,
-      ].filter(Boolean).join(' ').toLowerCase();
-      return haystack.includes(q);
-    });
-  }, [grantTemplateSearch, grantEntries, t]);
-
-  const categoryCounts = useMemo(() => {
-    const counts = new Map<ItemCategory, number>();
-    for (const e of filteredGrantEntries) counts.set(e.category, (counts.get(e.category) ?? 0) + 1);
-    return counts;
-  }, [filteredGrantEntries]);
-
-  const grantGroups = useMemo(() => {
-    const buckets = new Map<ItemCategory, GrantEntry[]>();
-    for (const e of filteredGrantEntries) {
-      if (grantCategory !== 'all' && e.category !== grantCategory) continue;
-      const list = buckets.get(e.category);
-      if (list) list.push(e);
-      else buckets.set(e.category, [e]);
-    }
-    const rank = (r: string | undefined) => {
-      const k = normalizeRarity(r);
-      return k ? RARITY_ORDER.indexOf(k) : -1;
-    };
-    return CATEGORY_ORDER
-      .filter((key) => buckets.has(key))
-      .map((key) => ({
-        key,
-        items: buckets
-          .get(key)!
-          .slice()
-          .sort((a, b) => rank(b.rarity) - rank(a.rarity) || a.name.localeCompare(b.name)),
-      }));
-  }, [filteredGrantEntries, grantCategory]);
-
-  const selectedGrantEntry = useMemo(
-    () => grantEntries.find((e) => e.id === grantTemplateId) ?? null,
-    [grantTemplateId, grantEntries],
-  );
-
   const transferCandidates = useMemo(
     () => (campaignCharacters ?? []).filter((c) => c.status === 'ACTIVE' && c.id !== characterId),
     [campaignCharacters, characterId],
@@ -311,35 +142,6 @@ export default function InventoryPage() {
   const attunedCount = items.filter((i) => i.isUnique || i.artifactName).length;
 
   /* ── handlers ──────────────────────────────────────────────── */
-
-  const resetGrantForm = () => {
-    setGrantTemplateId('');
-    setGrantTemplateSearch('');
-    setGrantQuantity('1');
-    setGrantUnique(false);
-    setGrantCustomName('');
-    setGrantCategory('all');
-  };
-
-  const handleGrant = () => {
-    if (!campaignId || !characterId || !selectedGrantEntry) return;
-    const data: GrantItemRequest = {
-      itemId: selectedGrantEntry.id,
-      itemKind: selectedGrantEntry.kind,
-      quantity: Number(grantQuantity) || 1,
-      isUnique: grantUnique || undefined,
-      customName: grantCustomName || undefined,
-    };
-    grantMutation.mutate(
-      { campaignId, characterId, data },
-      {
-        onSuccess: () => {
-          setGrantOpen(false);
-          resetGrantForm();
-        },
-      },
-    );
-  };
 
   const handleTransfer = () => {
     if (!campaignId || !characterId || !transferInstanceId || !transferToCharId) return;
@@ -681,162 +483,12 @@ export default function InventoryPage() {
       </div>
 
       {/* Grant Item Dialog */}
-      <Dialog
+      <GrantItemDialog
         open={grantOpen}
-        onOpenChange={(open) => {
-          setGrantOpen(open);
-          if (!open) resetGrantForm();
-        }}
-      >
-        <DialogContent>
-          <DialogHeader><DialogTitle>{t('camp2.inv.dialog.grantTitle')}</DialogTitle></DialogHeader>
-          <div className={s.dialogCol}>
-            <div>
-              <label className="ao-label">{t('camp2.inv.field.itemTemplate')}</label>
-              <div className={s.grantSearch}>
-                <Rune kind="search" size={13} color="var(--ink-faint)" />
-                <input
-                  className={s.grantSearchInput}
-                  value={grantTemplateSearch}
-                  onChange={(e) => setGrantTemplateSearch(e.target.value)}
-                  placeholder={t('camp2.inv.field.templateSearch')}
-                  disabled={itemTemplatesLoading}
-                />
-                {grantTemplateSearch && (
-                  <button
-                    type="button"
-                    className={s.searchClear}
-                    onClick={() => setGrantTemplateSearch('')}
-                    title={t('camp2.inv.clear')}
-                  >
-                    <Rune kind="x" size={11} color="var(--ink-faint)" />
-                  </button>
-                )}
-              </div>
-
-              {itemTemplatesLoading ? (
-                <div className={s.grantState}>{t('camp2.inv.loadingTemplates')}</div>
-              ) : itemTemplatesIsError ? (
-                <div className={cn(s.grantState, s.grantStateRow)}>
-                  <span>{t('camp2.inv.templatesLoadError')}</span>
-                  {isRetryableError(itemTemplatesError) && (
-                    <button
-                      type="button"
-                      className="ao-btn ao-btn--ghost"
-                      onClick={() => refetchItemTemplates()}
-                    >
-                      <Rune kind="arrow-r" size={11} /> {t('camp2.inv.retry')}
-                    </button>
-                  )}
-                </div>
-              ) : grantEntries.length === 0 ? (
-                <div className={s.grantState}>{t('camp2.inv.templatesEmptyHint')}</div>
-              ) : (
-                <>
-                  <div className={s.grantCatRow}>
-                    <button
-                      type="button"
-                      className={cn(s.grantCat, grantCategory === 'all' && s.grantCatOn)}
-                      onClick={() => setGrantCategory('all')}
-                    >
-                      {t('camp2.inv.cat.all')}
-                      <span className={cn('ao-num', s.grantCatCount)}>{filteredGrantEntries.length}</span>
-                    </button>
-                    {CATEGORY_ORDER.filter((c) => categoryCounts.has(c)).map((c) => (
-                      <button
-                        key={c}
-                        type="button"
-                        className={cn(s.grantCat, grantCategory === c && s.grantCatOn)}
-                        onClick={() => setGrantCategory(c)}
-                      >
-                        <Rune kind={CATEGORY_GLYPH[c]} size={12} />
-                        {t(`camp2.inv.cat.${c}`)}
-                        <span className={cn('ao-num', s.grantCatCount)}>{categoryCounts.get(c)}</span>
-                      </button>
-                    ))}
-                  </div>
-
-                  {grantGroups.length === 0 ? (
-                    <div className={s.grantState}>{t('camp2.inv.noTemplatesMatch')}</div>
-                  ) : (
-                    <div className={s.grantList} role="listbox" aria-label={t('camp2.inv.chooseTemplate')}>
-                      {grantGroups.map((group) => (
-                        <div key={group.key}>
-                          <div className={s.grantGroupHead}>
-                            <Rune kind={CATEGORY_GLYPH[group.key]} size={14} color="var(--gold-pale)" />
-                            <span className={s.grantGroupName}>{t(`camp2.inv.cat.${group.key}`)}</span>
-                            <span className={cn('ao-num', s.grantGroupCount)}>{group.items.length}</span>
-                          </div>
-                          <div className={s.grantGroupItems}>
-                            {group.items.map((entry) => {
-                              const isSel = entry.id === grantTemplateId;
-                              return (
-                                <button
-                                  key={entry.id}
-                                  type="button"
-                                  role="option"
-                                  aria-selected={isSel}
-                                  className={cn(s.grantOpt, isSel && s.selected)}
-                                  onClick={() => setGrantTemplateId(entry.id)}
-                                >
-                                  <Rune
-                                    kind={CATEGORY_GLYPH[group.key]}
-                                    size={16}
-                                    color={rarityColor(entry.rarity)}
-                                  />
-                                  <div className={s.grantOptMain}>
-                                    <div className={s.grantOptName}>{entry.name}</div>
-                                    <div className={s.grantOptMeta}>
-                                      {entry.rarity && <RarityBadge rarity={entry.rarity} size="sm" />}
-                                      {entry.itemTypeName && <span>{entry.itemTypeName}</span>}
-                                      {entry.damageDice && (
-                                        <span className="ao-num">{entry.damageDice}</span>
-                                      )}
-                                      {entry.homebrew && (
-                                        <span className={s.hbBadge}>{t('camp2.inv.homebrew')}</span>
-                                      )}
-                                    </div>
-                                  </div>
-                                  {isSel && <Rune kind="check" size={12} color="var(--gold)" />}
-                                </button>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </>
-              )}
-
-              {selectedGrantEntry && (
-                <div className={cn('ao-codex', s.mt8)}>
-                  {selectedGrantEntry.description || t('camp2.inv.campaignTemplate')}
-                </div>
-              )}
-            </div>
-            <div>
-              <label className="ao-label">{t('camp2.inv.field.quantity')}</label>
-              <input className="ao-input" type="number" min="1" value={grantQuantity} onChange={(e) => setGrantQuantity(e.target.value)} />
-            </div>
-            <div>
-              <label className="ao-label">{t('camp2.inv.field.customName')}</label>
-              <input className="ao-input" value={grantCustomName} onChange={(e) => setGrantCustomName(e.target.value)} placeholder={t('camp2.inv.field.overrideName')} />
-            </div>
-            <label className={s.checkRow}>
-              <input type="checkbox" checked={grantUnique} onChange={(e) => setGrantUnique(e.target.checked)} />
-              <span className={cn('ao-label', s.checkLabel)}>{t('camp2.inv.field.uniqueItem')}</span>
-            </label>
-          </div>
-          <DialogFooter>
-            <button className="ao-btn ao-btn--ghost" onClick={() => setGrantOpen(false)} disabled={grantMutation.isPending}>{t('camp2.inv.withhold')}</button>
-            <button className="ao-btn ao-btn--primary" onClick={handleGrant} disabled={!grantTemplateId || itemTemplatesLoading || grantMutation.isPending}>
-              {grantMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {t('camp2.inv.grant')}
-            </button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        onOpenChange={setGrantOpen}
+        campaignId={campaignId!}
+        characterId={characterId!}
+      />
 
       {/* Equip Dialog */}
       <Dialog open={equipOpen} onOpenChange={setEquipOpen}>

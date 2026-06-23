@@ -1,0 +1,603 @@
+import { useMemo, useState } from 'react';
+import type { CSSProperties } from 'react';
+import { Loader2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { Rune } from '@/components/ordo';
+import { RarityBadge, rarityLabelKey } from '@/components/items/RarityBadge';
+import { useGrantItem } from '@/hooks/useInventory';
+import { useEquipmentItems, useMagicItems } from '@/hooks/useContentCatalog';
+import { isRetryableError } from '@/lib/errors';
+import { rarityColor, normalizeRarity, RARITY_ORDER } from '@/lib/itemVisuals';
+import { useT } from '@/i18n/I18nContext';
+import type {
+  GrantItemRequest,
+  GrantItemKind,
+  EquipmentItemDetail,
+  MagicItemDetail,
+  DiceFormula,
+} from '@/types';
+import s from './GrantItemDialog.module.css';
+
+/* ── grant picker model (unified over the campaign item catalog) ──
+   Sourced from the same content catalog the /campaigns/{id}/items page
+   shows: equipment_item + magic_item. Each catalog item is normalized into
+   a GrantEntry so the picker can group, search and grant by a single shape,
+   and so the payload carries the right (itemId, itemKind) pair to the server. */
+
+type ItemCategory = 'weapon' | 'armor' | 'gear' | 'tool' | 'magic';
+
+const CATEGORY_ORDER: ItemCategory[] = ['weapon', 'armor', 'gear', 'tool', 'magic'];
+
+const CATEGORY_GLYPH: Record<ItemCategory, string> = {
+  weapon: 'sword',
+  armor: 'shield',
+  gear: 'scroll',
+  tool: 'cross-pat',
+  magic: 'hex',
+};
+
+const DESC_WORD_LIMIT = 40;
+
+interface GrantEntry {
+  id: string;
+  kind: GrantItemKind;
+  category: ItemCategory;
+  name: string;
+  itemTypeName?: string;
+  rarity?: string;
+  damageDice?: string;
+  homebrew: boolean;
+  description?: string;
+}
+
+function diceText(d?: DiceFormula | null): string | undefined {
+  if (!d) return undefined;
+  if (d.rawText) return d.rawText;
+  const count = d.diceCount ?? '';
+  const size = d.dieSize ? `d${d.dieSize}` : '';
+  const bonus = d.bonus ? (d.bonus > 0 ? `+${d.bonus}` : `${d.bonus}`) : '';
+  const txt = `${count}${size}${bonus}`;
+  return txt || undefined;
+}
+
+function equipmentCategory(e: EquipmentItemDetail): ItemCategory {
+  const kind = (e.kind ?? '').toLowerCase();
+  if (kind === 'weapon' || e.weaponStat) return 'weapon';
+  if (kind === 'armor' || e.armorStat) return 'armor';
+  if (kind === 'tool') return 'tool';
+  return 'gear';
+}
+
+function equipmentEntry(e: EquipmentItemDetail): GrantEntry {
+  return {
+    id: e.id,
+    kind: 'EQUIPMENT',
+    category: equipmentCategory(e),
+    name: e.name,
+    itemTypeName: e.category?.name ?? e.kind,
+    damageDice: diceText(e.weaponStat?.damageDice),
+    homebrew: !!e.packageId,
+    description: e.propertiesText ?? undefined,
+  };
+}
+
+function magicEntry(m: MagicItemDetail): GrantEntry {
+  return {
+    id: m.id,
+    kind: 'MAGIC',
+    category: 'magic',
+    name: m.name,
+    itemTypeName: m.type?.name ?? undefined,
+    rarity: m.rarity?.slug ?? m.rarity?.name ?? undefined,
+    homebrew: !!m.packageId,
+    description: m.description ?? undefined,
+  };
+}
+
+interface GrantItemDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  campaignId: string;
+  characterId: string;
+}
+
+export function GrantItemDialog({
+  open,
+  onOpenChange,
+  campaignId,
+  characterId,
+}: GrantItemDialogProps) {
+  const t = useT();
+  const grantMutation = useGrantItem();
+
+  const {
+    data: equipmentData,
+    isLoading: equipmentLoading,
+    isError: equipmentIsError,
+    error: equipmentError,
+    refetch: refetchEquipment,
+  } = useEquipmentItems(campaignId);
+  const {
+    data: magicData,
+    isLoading: magicLoading,
+    isError: magicIsError,
+    error: magicError,
+    refetch: refetchMagic,
+  } = useMagicItems(campaignId);
+
+  const loading = equipmentLoading || magicLoading;
+  const isError = equipmentIsError || magicIsError;
+  const loadError = equipmentError ?? magicError;
+  const refetchAll = () => {
+    refetchEquipment();
+    refetchMagic();
+  };
+
+  const [query, setQuery] = useState('');
+  const [category, setCategory] = useState<ItemCategory | 'all'>('all');
+  const [selectedId, setSelectedId] = useState('');
+  const [quantity, setQuantity] = useState(1);
+  const [customName, setCustomName] = useState('');
+  const [unique, setUnique] = useState(false);
+  const [descExpanded, setDescExpanded] = useState(false);
+
+  /* ── derived ── */
+
+  const entries: GrantEntry[] = useMemo(() => {
+    const eq = (equipmentData ?? []).map(equipmentEntry);
+    const mg = (magicData ?? []).map(magicEntry);
+    return [...eq, ...mg];
+  }, [equipmentData, magicData]);
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return entries;
+    return entries.filter((e) => {
+      const haystack = [
+        e.name,
+        e.itemTypeName,
+        e.rarity,
+        e.rarity ? t(rarityLabelKey(e.rarity)) : '',
+        t(`camp2.inv.cat.${e.category}`),
+        e.damageDice,
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+      return haystack.includes(q);
+    });
+  }, [entries, query, t]);
+
+  const categoryCounts = useMemo(() => {
+    const counts = new Map<ItemCategory, number>();
+    for (const e of filtered) counts.set(e.category, (counts.get(e.category) ?? 0) + 1);
+    return counts;
+  }, [filtered]);
+
+  const groups = useMemo(() => {
+    const buckets = new Map<ItemCategory, GrantEntry[]>();
+    for (const e of filtered) {
+      if (category !== 'all' && e.category !== category) continue;
+      const list = buckets.get(e.category);
+      if (list) list.push(e);
+      else buckets.set(e.category, [e]);
+    }
+    const rank = (r?: string) => {
+      const k = normalizeRarity(r);
+      return k ? RARITY_ORDER.indexOf(k) : -1;
+    };
+    return CATEGORY_ORDER.filter((key) => buckets.has(key)).map((key) => ({
+      key,
+      items: buckets
+        .get(key)!
+        .slice()
+        .sort((a, b) => rank(b.rarity) - rank(a.rarity) || a.name.localeCompare(b.name)),
+    }));
+  }, [filtered, category]);
+
+  const selected = useMemo(
+    () => entries.find((e) => e.id === selectedId) ?? null,
+    [entries, selectedId],
+  );
+
+  const descLong = selected?.description
+    ? selected.description.trim().split(/\s+/).filter(Boolean).length > DESC_WORD_LIMIT
+    : false;
+  const descCollapsed = descLong && !descExpanded;
+
+  const stats = useMemo(() => {
+    if (!selected) return [] as { k: string; v: string; color?: string }[];
+    const out: { k: string; v: string; color?: string }[] = [];
+    if (selected.damageDice) out.push({ k: t('camp2.inv.relic.damage'), v: selected.damageDice });
+    if (selected.itemTypeName) out.push({ k: t('camp2.inv.relic.type'), v: selected.itemTypeName });
+    if (selected.rarity)
+      out.push({
+        k: t('camp2.inv.relic.rarity'),
+        v: t(rarityLabelKey(selected.rarity)),
+        color: rarityColor(selected.rarity),
+      });
+    return out;
+  }, [selected, t]);
+
+  const summaryName = customName.trim() || selected?.name || '';
+
+  /* ── handlers ── */
+
+  const reset = () => {
+    setQuery('');
+    setCategory('all');
+    setSelectedId('');
+    setQuantity(1);
+    setCustomName('');
+    setUnique(false);
+    setDescExpanded(false);
+  };
+
+  const handleOpenChange = (next: boolean) => {
+    if (!next) reset();
+    onOpenChange(next);
+  };
+
+  const selectEntry = (id: string) => {
+    setSelectedId(id);
+    setDescExpanded(false);
+  };
+
+  const handleGrant = () => {
+    if (!selected) return;
+    const data: GrantItemRequest = {
+      itemId: selected.id,
+      itemKind: selected.kind,
+      quantity: quantity || 1,
+      isUnique: unique || undefined,
+      customName: customName.trim() || undefined,
+    };
+    grantMutation.mutate(
+      { campaignId, characterId, data },
+      {
+        onSuccess: () => {
+          reset();
+          onOpenChange(false);
+        },
+      },
+    );
+  };
+
+  /* ── render ── */
+
+  return (
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent
+        className={cn('ao-panel ao-frame ao-modal', s.modal)}
+        aria-describedby={undefined}
+        style={{ maxWidth: 980, '--accent': 'var(--gold)' } as CSSProperties}
+      >
+        <span className="ao-frame-c" />
+        <div className={s.shell}>
+          {/* ── header ── */}
+          <div className={s.head}>
+            <div className={s.headTitle}>
+              <div className={s.headRune}>
+                <Rune kind="book" size={18} color="var(--accent)" />
+              </div>
+              <DialogTitle asChild>
+                <div className={cn('ao-h4', s.headText)}>{t('camp2.inv.dialog.grantTitle')}</div>
+              </DialogTitle>
+            </div>
+          </div>
+
+          {/* ── body: two panes ── */}
+          <div className={s.body}>
+            {/* LEFT — catalog */}
+            <div className={s.catalog}>
+              <div className={s.catalogHead}>
+                <div className={s.search}>
+                  <Rune kind="search" size={15} color="var(--ink-faint)" />
+                  <input
+                    className={s.searchInput}
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder={t('camp2.inv.grant.searchPlaceholder')}
+                    disabled={loading}
+                  />
+                  {query && (
+                    <button
+                      type="button"
+                      className={s.searchClear}
+                      onClick={() => setQuery('')}
+                      title={t('camp2.inv.clear')}
+                    >
+                      <Rune kind="x" size={12} color="var(--ink-faint)" />
+                    </button>
+                  )}
+                </div>
+
+                {!loading && !isError && entries.length > 0 && (
+                  <div className={s.chips}>
+                    <button
+                      type="button"
+                      className={cn(s.chip, category === 'all' && s.chipOn)}
+                      onClick={() => setCategory('all')}
+                    >
+                      <span>{t('camp2.inv.cat.all')}</span>
+                      <span className={cn('ao-num', s.chipCount)}>{filtered.length}</span>
+                    </button>
+                    {CATEGORY_ORDER.filter((c) => categoryCounts.has(c)).map((c) => (
+                      <button
+                        key={c}
+                        type="button"
+                        className={cn(s.chip, category === c && s.chipOn)}
+                        onClick={() => setCategory(c)}
+                      >
+                        <span>{t(`camp2.inv.cat.${c}`)}</span>
+                        <span className={cn('ao-num', s.chipCount)}>{categoryCounts.get(c)}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className={s.list} role="listbox" aria-label={t('camp2.inv.chooseTemplate')}>
+                {loading ? (
+                  <div className={s.state}>
+                    <Loader2 className="h-4 w-4 animate-spin" /> {t('camp2.inv.loadingTemplates')}
+                  </div>
+                ) : isError ? (
+                  <div className={s.state}>
+                    <div>{t('camp2.inv.templatesLoadError')}</div>
+                    {isRetryableError(loadError) && (
+                      <button type="button" className="ao-btn ao-btn--ghost" onClick={refetchAll}>
+                        <Rune kind="arrow-r" size={11} /> {t('camp2.inv.retry')}
+                      </button>
+                    )}
+                  </div>
+                ) : entries.length === 0 ? (
+                  <div className={cn('ao-italic', s.state)}>{t('camp2.inv.templatesEmptyHint')}</div>
+                ) : groups.length === 0 ? (
+                  <div className={s.noResults}>
+                    <div className={s.noResultsTitle}>{t('camp2.inv.grant.noResultsTitle')}</div>
+                    <div className={cn('ao-italic', s.noResultsSub)}>
+                      {t('camp2.inv.grant.noResultsSub')}
+                    </div>
+                  </div>
+                ) : (
+                  groups.map((g) => (
+                    <div key={g.key} className={s.group}>
+                      <div className={s.groupHead}>
+                        <span className={s.groupName}>
+                          <Rune kind={CATEGORY_GLYPH[g.key]} size={13} color="var(--accent)" />
+                          {t(`camp2.inv.cat.${g.key}`)}
+                        </span>
+                        <span className={cn('ao-num', s.groupCount)}>{g.items.length}</span>
+                      </div>
+                      <div className={s.groupItems}>
+                        {g.items.map((e) => {
+                          const sel = e.id === selectedId;
+                          return (
+                            <button
+                              key={e.id}
+                              type="button"
+                              role="option"
+                              aria-selected={sel}
+                              className={cn(s.opt, sel && s.optOn)}
+                              onClick={() => selectEntry(e.id)}
+                            >
+                              <span className={s.optIcon}>
+                                <Rune
+                                  kind={CATEGORY_GLYPH[e.category]}
+                                  size={17}
+                                  color={rarityColor(e.rarity)}
+                                />
+                              </span>
+                              <span className={s.optMain}>
+                                <span className={s.optName}>{e.name}</span>
+                                <span className={s.optMeta}>
+                                  {e.rarity && <RarityBadge rarity={e.rarity} size="sm" />}
+                                  {e.itemTypeName && <span className={s.optType}>{e.itemTypeName}</span>}
+                                  {e.damageDice && <span className="ao-num">{e.damageDice}</span>}
+                                  {e.homebrew && (
+                                    <span className={s.hbBadge}>{t('camp2.inv.homebrew')}</span>
+                                  )}
+                                </span>
+                              </span>
+                              {sel && <Rune kind="check" size={16} color="var(--accent)" />}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            {/* RIGHT — detail / empty */}
+            <div className={s.detail}>
+              {selected ? (
+                <div className={s.detailScroll}>
+                  <div className={s.itemHead}>
+                    <div className={s.itemIcon}>
+                      <Rune
+                        kind={CATEGORY_GLYPH[selected.category]}
+                        size={28}
+                        color={rarityColor(selected.rarity)}
+                      />
+                    </div>
+                    <div className={s.itemHeadMain}>
+                      <div className={cn('ao-h4', s.itemName)}>{selected.name}</div>
+                      <div className={s.itemSub}>
+                        {selected.rarity && <RarityBadge rarity={selected.rarity} size="md" />}
+                        {selected.itemTypeName && (
+                          <span className={cn('ao-italic', s.itemType)}>{selected.itemTypeName}</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {stats.length > 0 && (
+                    <div className={s.statRow}>
+                      {stats.map((st) => (
+                        <div key={st.k} className={s.statChip}>
+                          <span className={s.statKey}>{st.k}</span>
+                          <span
+                            className={s.statVal}
+                            style={st.color ? { color: st.color } : undefined}
+                          >
+                            {st.v}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {selected.description && (
+                    <div className={s.descBlock}>
+                      <div className={s.descClip}>
+                        <div className={cn(s.descText, descCollapsed && s.descCollapsed)}>
+                          {selected.description}
+                        </div>
+                        {descCollapsed && <div className={s.descFade} />}
+                      </div>
+                      {descLong && (
+                        <button
+                          type="button"
+                          className={s.descToggle}
+                          onClick={() => setDescExpanded((v) => !v)}
+                        >
+                          <span>
+                            {descExpanded
+                              ? t('camp2.inv.grant.descLess')
+                              : t('camp2.inv.grant.descMore')}
+                          </span>
+                          <Rune
+                            kind="chev-d"
+                            size={13}
+                            className={cn(s.descChev, descExpanded && s.descChevUp)}
+                          />
+                        </button>
+                      )}
+                    </div>
+                  )}
+
+                  <div className={s.form}>
+                    <div className={s.formRow}>
+                      <div className={s.qtyField}>
+                        <div className={s.fieldLabel}>{t('camp2.inv.field.quantity')}</div>
+                        <div className={s.stepper}>
+                          <button
+                            type="button"
+                            className={s.stepBtn}
+                            onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                            aria-label={t('camp2.inv.field.quantity')}
+                          >
+                            <Rune kind="minus" size={14} />
+                          </button>
+                          <input
+                            className={cn('ao-num', s.stepInput)}
+                            type="number"
+                            min={1}
+                            value={quantity}
+                            onChange={(e) => {
+                              const n = parseInt(e.target.value, 10);
+                              setQuantity(isNaN(n) ? 1 : Math.max(1, Math.min(999, n)));
+                            }}
+                          />
+                          <button
+                            type="button"
+                            className={s.stepBtn}
+                            onClick={() => setQuantity((q) => Math.min(999, q + 1))}
+                            aria-label={t('camp2.inv.field.quantity')}
+                          >
+                            <Rune kind="plus" size={14} />
+                          </button>
+                        </div>
+                      </div>
+                      <div className={s.nameField}>
+                        <div className={s.fieldLabel}>
+                          {t('camp2.inv.grant.customNameLabel')}{' '}
+                          <span className={s.fieldOptional}>{t('camp2.inv.grant.optionalMark')}</span>
+                        </div>
+                        <input
+                          className={s.nameInput}
+                          value={customName}
+                          onChange={(e) => setCustomName(e.target.value)}
+                          placeholder={t('camp2.inv.field.overrideName')}
+                        />
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      className={cn(s.uniqueRow, unique && s.uniqueOn)}
+                      onClick={() => setUnique((v) => !v)}
+                      aria-pressed={unique}
+                    >
+                      <span className={cn(s.uniqueBox, unique && s.uniqueBoxOn)}>
+                        {unique && <Rune kind="check" size={13} color="var(--stone)" />}
+                      </span>
+                      <span className={s.uniqueText}>
+                        <span className={s.uniqueLabel}>{t('camp2.inv.field.uniqueItem')}</span>
+                        <span className={cn('ao-italic', s.uniqueSub)}>
+                          {t('camp2.inv.grant.uniqueSub')}
+                        </span>
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className={s.empty}>
+                  <div className={s.emptyIcon}>
+                    <Rune kind="hex" size={26} color="var(--ink-ghost)" />
+                  </div>
+                  <div className={cn('ao-h5', s.emptyTitle)}>
+                    {t('camp2.inv.grant.pickEmptyTitle')}
+                  </div>
+                  <div className={cn('ao-italic', s.emptySub)}>
+                    {t('camp2.inv.grant.pickEmptySub')}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* ── footer ── */}
+          <div className={s.foot}>
+            <div className={s.summary}>
+              {selected ? (
+                <span className={s.summaryText}>
+                  <span className={cn('ao-italic', s.summaryLabel)}>
+                    {t('camp2.inv.grant.summaryLabel')}
+                  </span>{' '}
+                  <span className={s.summaryName}>{summaryName}</span>{' '}
+                  <span className={cn('ao-num', s.summaryQty)}>× {quantity}</span>
+                </span>
+              ) : (
+                <span className={cn('ao-italic', s.summaryEmpty)}>
+                  {t('camp2.inv.grant.nothingSelected')}
+                </span>
+              )}
+            </div>
+            <div className={s.footActions}>
+              <button
+                className="ao-btn ao-btn--ghost"
+                onClick={() => handleOpenChange(false)}
+                disabled={grantMutation.isPending}
+              >
+                {t('camp2.inv.withhold')}
+              </button>
+              <button
+                className="ao-btn ao-btn--primary"
+                onClick={handleGrant}
+                disabled={!selected || loading || grantMutation.isPending}
+              >
+                {grantMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {t('camp2.inv.grant')}
+              </button>
+            </div>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
