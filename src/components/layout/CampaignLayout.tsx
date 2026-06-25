@@ -34,6 +34,7 @@ const SUBNAV: SubNavEntry[] = [
   { to: 'npcs', labelKey: 'camp.dash.drill.npcs', gm: true },
   { to: 'quests', labelKey: 'camp.dash.drill.quests', gm: true },
   { to: 'locations', labelKey: 'camp.dash.drill.locations', gm: true },
+  { to: 'maps', labelKey: 'camp.dash.drill.maps', gm: true },
   { to: 'notes', labelKey: 'camp.dash.drill.notes', gm: true },
   { to: 'xp', labelKey: 'camp.dash.drill.grantXp', gm: true },
   { to: 'wallet', labelKey: 'camp.dash.drill.balances', gm: true },

@@ -11,6 +11,7 @@ import {
 import { useIsMobile } from '@/hooks/useMediaQuery';
 import { useT, useI18n } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
+import { BattleTacticalMapButton } from '@/features/map/tactical';
 import type { BattleResponse, MonsterSummaryResponse } from '@/types';
 import s from './BattleAssembly.module.css';
 
@@ -219,6 +220,13 @@ export function BattleAssembly({ battle, campaignId }: BattleAssemblyProps) {
         {group.length === 0 && (
           <div className={cn(s.muted, s.mt12)}>{t('battle.assembly.needMonsters')}</div>
         )}
+        <BattleTacticalMapButton
+          campaignId={campaignId}
+          battleId={battle.id}
+          battleName={battle.name}
+          block
+          className={s.mt12}
+        />
         <button
           className={cn('ao-btn ao-btn--ghost ao-btn--block', s.mt12)}
           onClick={cancel}

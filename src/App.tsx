@@ -1,9 +1,13 @@
+import { useEffect } from 'react';
 import { RouterProvider } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
 import { router } from './router';
 import { I18nProvider } from './i18n/I18nProvider';
 import { isRetryableError } from './lib/errors';
+import { bootstrapAuth } from './lib/authSession';
+import { useAuthStore } from './store/authStore';
+import { PageFallback } from './components/layout/PageFallback';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -18,10 +22,20 @@ const queryClient = new QueryClient({
 });
 
 function App() {
+  // Restore the session from the HttpOnly refresh cookie before the router mounts.
+  // Until `authReady` flips, hold a splash so a logged-in user reloading the page
+  // doesn't flash the login screen (ProtectedRoute would redirect on the empty
+  // in-memory store before /auth/refresh resolves).
+  const authReady = useAuthStore((s) => s.authReady);
+
+  useEffect(() => {
+    void bootstrapAuth();
+  }, []);
+
   return (
     <I18nProvider>
     <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
+      {authReady ? <RouterProvider router={router} /> : <PageFallback />}
       <Toaster
         position="top-right"
         toastOptions={{

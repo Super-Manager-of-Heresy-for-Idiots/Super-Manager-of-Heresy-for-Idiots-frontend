@@ -22,6 +22,7 @@ export default function DashboardSectionsView() {
           <DrillBlock label={t('camp.dash.drill.npcs')} glyph="sigil-1" to={`/campaigns/${campaignId}/npcs`} />
           <DrillBlock label={t('camp.dash.drill.quests')} glyph="scroll" to={`/campaigns/${campaignId}/quests`} />
           <DrillBlock label={t('camp.dash.drill.locations')} glyph="sigil-3" to={`/campaigns/${campaignId}/locations`} />
+          <DrillBlock label={t('camp.dash.drill.maps')} glyph="sigil-2" to={`/campaigns/${campaignId}/maps`} />
         </>
       )}
       <DrillBlock label={t('camp.dash.drill.bestiary')} glyph="sword" to={`/campaigns/${campaignId}/bestiary`} />

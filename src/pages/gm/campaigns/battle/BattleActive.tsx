@@ -15,6 +15,7 @@ import {
 import { useIsMobile } from '@/hooks/useMediaQuery';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
+import { BattleTacticalMapButton } from '@/features/map/tactical';
 import type {
   BattleResponse,
   BattleCombatantResponse,
@@ -218,6 +219,11 @@ function GmControls({
             <Rune kind="arrow-r" size={14} color="currentColor" />
             <span className={s.ml6}>{t('battle.gm.endTurn')}</span>
           </button>
+          <BattleTacticalMapButton
+            campaignId={campaignId}
+            battleId={battle.id}
+            battleName={battle.name}
+          />
         </div>
 
         {isMonsterTurn && current && npcAttacks.length > 0 && (
