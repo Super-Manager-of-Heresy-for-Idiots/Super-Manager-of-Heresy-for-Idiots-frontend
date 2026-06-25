@@ -1,0 +1,89 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  height: calc(100dvh - 200px);
+  min-height: 420px;
+  gap: var(--s-3);
+}
+
+.bar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s-3);
+}
+.barLeft {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+}
+.barRight {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+}
+
+.overline {
+  color: var(--gold);
+}
+
+.rev {
+  font-family: var(--font-mono);
+  font-size: var(--t-nano);
+  color: var(--ink-quiet);
+  text-transform: uppercase;
+  letter-spacing: var(--track-eng);
+}
+
+.closed {
+  padding: 2px var(--s-2);
+  border: 1px solid var(--ember);
+  color: var(--ember);
+  font-size: var(--t-nano);
+  text-transform: uppercase;
+  letter-spacing: var(--track-eng);
+}
+
+.canvas {
+  flex: 1;
+  min-height: 0;
+  border: 1px solid var(--rule);
+  overflow: hidden;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 320px;
+}
+.loadingText {
+  color: var(--ink-quiet);
+}
+
+.conn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-1);
+  font-size: var(--t-nano);
+  text-transform: uppercase;
+  letter-spacing: var(--track-eng);
+}
+.connDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.connIdle {
+  color: var(--ink-faint);
+}
+.connBusy {
+  color: var(--gold);
+}
+.connOk {
+  color: var(--arcane);
+}
+.connBad {
+  color: var(--ember);
+}

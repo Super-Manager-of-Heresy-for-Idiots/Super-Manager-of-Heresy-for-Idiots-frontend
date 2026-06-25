@@ -1,0 +1,306 @@
+/* Private styles for the grid-calibration family (GridOverlay + GridCalibrationPanel).
+   Only the origin handle's position/counter-scale stays inline in the TSX (it is a
+   genuinely computed value); everything static lives here and uses design tokens. */
+
+/* ── Origin handle (rendered in image space, inside the world) ──── */
+.originHandle {
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  margin: 0;
+  padding: 0;
+  border: 2px solid var(--gold);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--gold) 22%, transparent);
+  box-shadow: var(--glow-gold);
+  cursor: grab;
+  pointer-events: auto;
+  touch-action: none;
+}
+.originHandle:active {
+  cursor: grabbing;
+}
+.originHandle:focus-visible {
+  outline: 2px solid var(--gold-pale);
+  outline-offset: 3px;
+}
+/* Crosshair pinpointing the exact origin pixel. */
+.originHandle::before,
+.originHandle::after {
+  content: '';
+  position: absolute;
+  background: var(--gold-pale);
+}
+.originHandle::before {
+  left: 50%;
+  top: 4px;
+  bottom: 4px;
+  width: 1px;
+  transform: translateX(-50%);
+}
+.originHandle::after {
+  top: 50%;
+  left: 4px;
+  right: 4px;
+  height: 1px;
+  transform: translateY(-50%);
+}
+
+/* ── Calibration panel ─────────────────────────────────────────── */
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+  width: 100%;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--track-eng);
+  font-size: var(--t-small);
+  color: var(--ink-bright);
+}
+
+.warning {
+  margin: 0;
+  padding: var(--s-2);
+  border-left: 2px solid var(--ember);
+  background: color-mix(in srgb, var(--ember) 12%, transparent);
+  color: var(--ink);
+  font-family: var(--font-serif);
+  font-size: var(--t-small);
+  line-height: 1.5;
+}
+
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s-2);
+}
+
+.field {
+  min-width: 0;
+}
+
+.error {
+  color: var(--ember-pale);
+  font-size: var(--t-nano);
+}
+
+.lock {
+  display: flex;
+  align-items: center;
+  gap: var(--s-1);
+  color: var(--ink-quiet);
+  font-size: var(--t-small);
+  cursor: pointer;
+}
+
+.actions {
+  display: flex;
+  gap: var(--s-1);
+  margin-top: var(--s-1);
+}
+
+.flow,
+.modePanel,
+.visualPanel,
+.advanced {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+
+.prompt,
+.subhead {
+  margin: 0;
+  color: var(--ink-bright);
+  font-family: var(--font-display);
+  font-size: var(--t-small);
+  text-transform: uppercase;
+  letter-spacing: var(--track-eng);
+}
+
+.segmented {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border: 1px solid var(--hairline);
+}
+
+.segmentButton {
+  min-height: 36px;
+  border: 0;
+  border-right: 1px solid var(--hairline);
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+}
+.segmentButton:last-child {
+  border-right: 0;
+}
+.segmentButton:hover,
+.segmentButton:focus-visible,
+.segmentActive {
+  background: color-mix(in srgb, var(--gold) 18%, transparent);
+  color: var(--ink-bright);
+}
+
+.choiceGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--s-2);
+}
+
+.choice {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+  padding: var(--s-2);
+  border: 1px solid var(--hairline);
+  background: color-mix(in srgb, var(--panel) 72%, transparent);
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+}
+.choice:hover,
+.choice:focus-visible,
+.choiceActive {
+  border-color: var(--gold);
+}
+.choice span {
+  color: var(--ink-quiet);
+  font-size: var(--t-small);
+}
+
+.captureButton {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-2);
+  min-height: 42px;
+  padding: var(--s-2);
+  border: 1px solid var(--hairline);
+  background: transparent;
+  color: var(--ink);
+  text-align: left;
+  cursor: crosshair;
+}
+.captureButton:hover,
+.captureButton:focus-visible,
+.captureActive {
+  border-color: var(--arcane);
+  background: color-mix(in srgb, var(--arcane) 14%, transparent);
+}
+.captureButton strong {
+  font-family: var(--font-mono);
+  font-size: var(--t-nano);
+  color: var(--ink-quiet);
+  white-space: nowrap;
+}
+
+.visualPanel {
+  padding-top: var(--s-2);
+  border-top: 1px solid var(--hairline);
+}
+
+.colorRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-2);
+}
+
+.colorInput {
+  width: 42px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid var(--hairline);
+  background: transparent;
+  cursor: pointer;
+}
+
+.presetRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-1);
+}
+
+.swatchButton {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid var(--hairline);
+  cursor: pointer;
+}
+.swatchButton:hover,
+.swatchButton:focus-visible {
+  outline: 2px solid var(--gold-pale);
+  outline-offset: 2px;
+}
+.swatchWhite { background: #fff; }
+.swatchBlack { background: #000; }
+.swatchYellow { background: #ff0; }
+.swatchCyan { background: #0ff; }
+.swatchRed { background: #f00; }
+.swatchGreen { background: #0f0; }
+
+.rangeLine {
+  display: grid;
+  grid-template-columns: 1fr 48px;
+  align-items: center;
+  gap: var(--s-2);
+}
+.rangeValue {
+  font-family: var(--font-mono);
+  font-size: var(--t-nano);
+  color: var(--ink-quiet);
+  text-align: right;
+}
+
+.advanced {
+  padding: var(--s-2);
+  border: 1px solid var(--hairline);
+}
+.advanced summary {
+  cursor: pointer;
+  color: var(--ink-bright);
+}
+
+.comingSoon {
+  padding: var(--s-2);
+  border: 1px dashed var(--hairline);
+  color: var(--ink-quiet);
+  font-size: var(--t-small);
+}
+
+.clickLayer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 20;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: rgba(0, 0, 0, 0.14);
+  cursor: crosshair;
+  pointer-events: auto;
+}
+
+.clickInstruction {
+  position: absolute;
+  top: var(--s-3);
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: min(420px, calc(100% - var(--s-6)));
+  padding: var(--s-2) var(--s-3);
+  border: 1px solid var(--hairline);
+  background: color-mix(in srgb, var(--panel) 92%, transparent);
+  color: var(--ink-bright);
+  font-family: var(--font-display);
+  font-size: var(--t-small);
+  text-transform: uppercase;
+  letter-spacing: var(--track-eng);
+  pointer-events: none;
+}

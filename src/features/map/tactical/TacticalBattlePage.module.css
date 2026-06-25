@@ -1,0 +1,330 @@
+.workspace {
+  display: flex;
+  flex-direction: column;
+  height: calc(100dvh - 200px);
+  min-height: 480px;
+  gap: var(--s-3);
+}
+
+/* ── Top bar ─────────────────────────────────────────────── */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-4);
+  flex-wrap: wrap;
+}
+.topbarMain {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--s-1);
+  min-width: 0;
+}
+.topOverline {
+  color: var(--gold);
+}
+.topTitle {
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+.topbarMeta {
+  flex-wrap: wrap;
+}
+.topStat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 64px;
+}
+.topStatValue {
+  font-family: var(--font-display);
+  font-size: var(--t-body);
+  color: var(--ink-bright);
+}
+
+/* ── 3-column grid ───────────────────────────────────────── */
+.grid {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr) 320px;
+  gap: var(--s-3);
+}
+.col {
+  min-height: 0;
+  overflow: hidden;
+}
+.colLeft,
+.colRight {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+.colCenter {
+  min-width: 0;
+  padding: 0;
+}
+
+.panelEmpty {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  height: 100%;
+  padding: var(--s-4);
+  color: var(--ink-quiet);
+}
+
+/* ── Center status (loading / no map) ────────────────────── */
+.centerStatus {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  height: 100%;
+  padding: var(--s-5);
+}
+.statusText {
+  color: var(--ink-quiet);
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--track-eng);
+  font-size: var(--t-small);
+}
+
+/* ── Left panel ──────────────────────────────────────────── */
+.left {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+.leftOverline {
+  color: var(--gold);
+}
+.leftMeta {
+  margin: var(--s-1) 0 var(--s-2);
+}
+.metaPill {
+  padding: 2px var(--s-2);
+  border: 1px solid var(--rule);
+  font-size: var(--t-nano);
+  text-transform: uppercase;
+  letter-spacing: var(--track-eng);
+  color: var(--ink-quiet);
+}
+
+.combatantList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+}
+.combatantRow {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-2);
+  padding: var(--s-2);
+  border: 1px solid var(--panel-edge);
+  background: var(--stone);
+}
+.isCurrentTurn {
+  border-color: var(--gold);
+  box-shadow: var(--shadow-inset);
+}
+.initBadge {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 var(--s-1);
+  border: 1px solid var(--brass);
+  font-family: var(--font-display);
+  font-size: var(--t-small);
+  color: var(--gold-pale);
+}
+.combatantBody {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+}
+.combatantName {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-1);
+  min-width: 0;
+  color: var(--ink-bright);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.youTag {
+  flex: 0 0 auto;
+  padding: 0 4px;
+  border: 1px solid var(--verdigris);
+  color: var(--verdigris);
+  font-size: var(--t-nano);
+  text-transform: uppercase;
+  letter-spacing: var(--track-eng);
+}
+.onMapDot {
+  flex: 0 0 auto;
+  font-size: var(--t-nano);
+  text-transform: uppercase;
+  letter-spacing: var(--track-eng);
+}
+.onMapYes {
+  color: var(--verdigris);
+}
+.onMapNo {
+  color: var(--ink-faint);
+}
+
+.hpRow {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+.hpTrack {
+  flex: 1;
+  height: 6px;
+  background: var(--abyss);
+  border: 1px solid var(--panel-edge);
+  overflow: hidden;
+}
+.hpFill {
+  height: 100%;
+  background: var(--ember);
+}
+.hpText {
+  flex: 0 0 auto;
+  font-family: var(--font-mono);
+  font-size: var(--t-nano);
+  color: var(--ink-quiet);
+}
+
+.leftHint {
+  margin-top: var(--s-2);
+  color: var(--ink-faint);
+  font-size: var(--t-small);
+}
+
+.placeRow {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  margin-top: var(--s-1);
+}
+.placeHint {
+  flex: 1;
+  min-width: 0;
+  color: var(--gold-pale);
+}
+
+/* ── Right inspector ─────────────────────────────────────── */
+.right {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+.inspectGrid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--s-1) var(--s-3);
+  margin: var(--s-2) 0 0;
+}
+.inspectGrid dt {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--track-eng);
+  font-size: var(--t-nano);
+  color: var(--ink-quiet);
+}
+.inspectGrid dd {
+  margin: 0;
+  color: var(--ink-bright);
+}
+.monoCell {
+  font-family: var(--font-mono);
+  font-size: var(--t-nano);
+  word-break: break-all;
+  color: var(--ink-quiet);
+}
+
+/* ── Inspector action blocks (HP adjust / attack) ────────── */
+.actionBlock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  margin-top: var(--s-3);
+  padding-top: var(--s-3);
+  border-top: 1px solid var(--hairline, rgba(212, 180, 120, 0.18));
+}
+.actionOverline {
+  color: var(--ink-quiet);
+}
+.amountField {
+  width: 4.5rem;
+  text-align: center;
+}
+.attackLine {
+  margin: 0;
+  font-size: var(--t-small);
+  color: var(--ink-quiet);
+}
+.attackName {
+  font-family: var(--font-display);
+  color: var(--gold-pale);
+}
+.attackConfirmBtn {
+  align-self: flex-start;
+}
+
+/* ── Left-panel attack picker ────────────────────────────── */
+.attackPicker {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+  margin-top: var(--s-3);
+  padding-top: var(--s-3);
+  border-top: 1px solid var(--hairline, rgba(212, 180, 120, 0.18));
+}
+.attackOptions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-1);
+}
+.attackOption.is-active {
+  border-color: var(--gold-pale);
+  color: var(--gold-pale);
+}
+.attackHint {
+  margin: 0;
+  font-size: var(--t-small);
+  color: var(--gold-pale);
+}
+
+/* ── Responsive collapse ─────────────────────────────────── */
+@media (max-width: 1024px) {
+  .workspace {
+    height: auto;
+  }
+  .grid {
+    grid-template-columns: 1fr;
+  }
+  .colCenter {
+    min-height: 420px;
+  }
+}
