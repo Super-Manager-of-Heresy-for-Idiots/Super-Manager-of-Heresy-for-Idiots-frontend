@@ -52,6 +52,13 @@ import {
 } from './workspace/movement';
 import s from './TacticalBattlePage.module.css';
 
+/**
+ * Grace window after sending a MOVE_TOKEN before we stop trusting the optimistic ghost
+ * and resync the snapshot. The authoritative TOKEN_MOVED normally lands in well under a
+ * second; this only fires when that echo never resolves the move.
+ */
+const MOVE_CONFIRM_TIMEOUT_MS = 2000;
+
 interface TacticalMapCenterPanelProps {
   sessionId: UUID;
   battleId: UUID;
@@ -60,6 +67,11 @@ interface TacticalMapCenterPanelProps {
    * dragging is disabled. When false (assembling / no battle) tokens drag freely.
    */
   battleActive?: boolean;
+  /**
+   * Whether the current user is the GM. During preparation the GM may freely drag any
+   * placed token to reposition it, regardless of the map-session move grants.
+   */
+  isGm?: boolean;
   /** Movement gating + preview for the acting combatant; omit to allow free moves. */
   movement?: MovementConfig | null;
 }
@@ -68,6 +80,7 @@ export function TacticalMapCenterPanel({
   sessionId,
   battleId,
   battleActive,
+  isGm,
   movement,
 }: TacticalMapCenterPanelProps) {
   const t = useT();
@@ -125,6 +138,39 @@ export function TacticalMapCenterPanel({
     [t],
   );
 
+  // A move we've sent and are waiting for the authoritative TOKEN_MOVED to confirm.
+  // Until then the local ghost (dashed) holds the destination; on confirmation the
+  // committed token reaches it and we drop the ghost (see the resolver effect below).
+  const pendingMove = useRef<{ tokenId: UUID; gridX: number; gridY: number } | null>(null);
+
+  // Watchdog for that confirmation. If the authoritative event never resolves the
+  // pending move — a dropped/missed event, or the client's revision having drifted so
+  // the command no-ops against the server — the ghost would otherwise mask an un-moved
+  // token indefinitely, surfacing only as a confusing snap-back when the turn ends.
+  // After a short grace window we drop the ghost and resync, so the committed position
+  // AND our revision become authoritative again (also unsticking a stale-revision
+  // deadlock for subsequent moves). When events flow normally this never fires.
+  const moveWatchdogRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const clearMoveWatchdog = useCallback(() => {
+    if (moveWatchdogRef.current) {
+      clearTimeout(moveWatchdogRef.current);
+      moveWatchdogRef.current = null;
+    }
+  }, []);
+  const armMoveWatchdog = useCallback(() => {
+    clearMoveWatchdog();
+    moveWatchdogRef.current = setTimeout(() => {
+      moveWatchdogRef.current = null;
+      if (!pendingMove.current) return;
+      pendingMove.current = null;
+      setLocalDragPreview(null);
+      realtime.resync();
+    }, MOVE_CONFIRM_TIMEOUT_MS);
+  }, [clearMoveWatchdog, realtime, setLocalDragPreview]);
+
+  // Cancel any in-flight watchdog when the panel unmounts.
+  useEffect(() => clearMoveWatchdog, [clearMoveWatchdog]);
+
   /* ── Movement (active combatant, action-driven) ──────────────── */
 
   // Per-turn movement budget; reset (and any staged action disarmed) whenever the
@@ -136,10 +182,12 @@ export function TacticalMapCenterPanel({
     if (turnKeyRef.current !== key) {
       turnKeyRef.current = key;
       setMoveUsed(0);
+      pendingMove.current = null;
+      clearMoveWatchdog();
       clearCombatAction();
       setLocalDragPreview(null);
     }
-  }, [movement?.turnKey, clearCombatAction, setLocalDragPreview]);
+  }, [movement?.turnKey, clearCombatAction, setLocalDragPreview, clearMoveWatchdog]);
 
   const moveMode = combatAction?.type === 'MOVE' ? combatAction.mode : null;
   const rangeForMode = movement
@@ -196,19 +244,21 @@ export function TacticalMapCenterPanel({
     return isReachable(reach, pendingCell) ? reconstructPath(reach, pendingCell) : [];
   }, [reach, pendingCell]);
 
-  const pendingMove = useRef<{ tokenId: UUID; gridX: number; gridY: number } | null>(null);
   const isConnected = realtime.connectionState === 'connected';
   const sessionClosed = session?.status === 'CLOSED';
 
   // During an active battle there is no free dragging — movement goes through the
-  // action flow. Outside battle, drag per permissions.
+  // action flow. Outside battle (preparation / no battle), tokens drag freely: the GM
+  // may reposition ANY placed token, everyone else only what the map grants them.
   const canDragToken = useCallback(
     (tokenId: UUID) => {
-      if (!isConnected || sessionClosed || !permissions) return false;
+      if (!isConnected || sessionClosed) return false;
       if (battleActive) return false;
+      if (isGm) return true;
+      if (!permissions) return false;
       return permissions.canMoveAnyToken || permissions.movableTokenIds.includes(tokenId);
     },
-    [isConnected, sessionClosed, permissions, battleActive],
+    [isConnected, sessionClosed, permissions, battleActive, isGm],
   );
 
   const onTokenDragMove = useCallback(
@@ -246,8 +296,9 @@ export function TacticalMapCenterPanel({
         expectedRevision: currentRevision,
         to: { gridX: cell.gridX, gridY: cell.gridY },
       });
+      armMoveWatchdog();
     },
-    [tokensById, currentRevision, me?.id, realtime, setLocalDragPreview],
+    [tokensById, currentRevision, me?.id, realtime, setLocalDragPreview, armMoveWatchdog],
   );
 
   const onTokenDragCancel = useCallback(() => {
@@ -330,9 +381,10 @@ export function TacticalMapCenterPanel({
       to: { gridX: pendingCell.gridX, gridY: pendingCell.gridY },
       path: reconstructPath(reach, pendingCell).map((c) => ({ gridX: c.gridX, gridY: c.gridY })),
     });
+    armMoveWatchdog();
     setMoveUsed((used) => used + stepDistance(origin, pendingCell));
     clearCombatAction();
-  }, [movement, reach, origin, pendingCell, currentRevision, me?.id, realtime, setLocalDragPreview, clearCombatAction]);
+  }, [movement, reach, origin, pendingCell, currentRevision, me?.id, realtime, setLocalDragPreview, clearCombatAction, armMoveWatchdog]);
 
   const cancelAction = useCallback(() => {
     clearCombatAction();
@@ -377,8 +429,9 @@ export function TacticalMapCenterPanel({
       expectedRevision: currentRevision,
       to: away,
     });
+    armMoveWatchdog();
     clearCombatAction();
-  }, [movement, pushTargetTokenId, map, tokensById, tokens, permissions, currentRevision, me?.id, realtime, setLocalDragPreview, clearCombatAction, t]);
+  }, [movement, pushTargetTokenId, map, tokensById, tokens, permissions, currentRevision, me?.id, realtime, setLocalDragPreview, clearCombatAction, t, armMoveWatchdog]);
 
   // Resolve a pending move once the committed token reaches the target (TOKEN_MOVED).
   useEffect(() => {
@@ -387,9 +440,10 @@ export function TacticalMapCenterPanel({
     const tok = tokensById[pm.tokenId];
     if (tok && tok.gridX === pm.gridX && tok.gridY === pm.gridY) {
       pendingMove.current = null;
+      clearMoveWatchdog();
       setLocalDragPreview(null);
     }
-  }, [tokensById, setLocalDragPreview]);
+  }, [tokensById, setLocalDragPreview, clearMoveWatchdog]);
 
   // Surface command errors once and snap a failed move back to its committed cell.
   const lastToastedError = useRef<unknown>(null);
@@ -400,9 +454,10 @@ export function TacticalMapCenterPanel({
     if (isLoaded) toast.error(t(mapErrorI18nKey(err)));
     if (pendingMove.current) {
       pendingMove.current = null;
+      clearMoveWatchdog();
       setLocalDragPreview(null);
     }
-  }, [realtime.error, isLoaded, t, setLocalDragPreview]);
+  }, [realtime.error, isLoaded, t, setLocalDragPreview, clearMoveWatchdog]);
 
   if (!isLoaded && realtime.isLoading) {
     return (

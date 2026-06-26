@@ -140,6 +140,7 @@ export function TacticalWorkspace({
                 sessionId={mapSessionId}
                 battleId={battle.id}
                 battleActive={isActive}
+                isGm={isGm}
                 movement={movement}
               />
             </Suspense>

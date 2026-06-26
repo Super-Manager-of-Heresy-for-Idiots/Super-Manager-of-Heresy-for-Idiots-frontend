@@ -189,7 +189,7 @@ export const map: DictModule = {
     /* ── Состав / навигация ── */
     'tactical.roster.prepTitle': 'Порядок боя',
     'tactical.roster.combatTitle': 'Очередь хода',
-    'tactical.roster.prepHint': 'Нажмите «Разместить» у бойца, затем кликните клетку на карте.',
+    'tactical.roster.prepHint': 'Нажмите «Разместить» у бойца, затем кликните клетку на карте. Размещённого бойца можно перетащить мышью.',
     'tactical.roster.combatHint': 'Жёлтым отмечен боец, чей сейчас ход.',
     'tactical.nav.map': 'Карта',
     'tactical.nav.roster': 'Состав',
@@ -434,7 +434,7 @@ export const map: DictModule = {
     /* ── Roster / nav ── */
     'tactical.roster.prepTitle': 'Battle order',
     'tactical.roster.combatTitle': 'Turn order',
-    'tactical.roster.prepHint': 'Click “Place” on a combatant, then click a cell on the map.',
+    'tactical.roster.prepHint': 'Click “Place” on a combatant, then click a cell on the map. Placed combatants can be dragged to reposition.',
     'tactical.roster.combatHint': 'The combatant whose turn it is is highlighted in gold.',
     'tactical.nav.map': 'Map',
     'tactical.nav.roster': 'Roster',
