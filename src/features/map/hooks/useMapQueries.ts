@@ -21,6 +21,7 @@ import type {
 export const mapQueryKeys = {
   campaignMaps: (campaignId: UUID) => ['map', 'campaign', campaignId, 'maps'] as const,
   mapDefinition: (mapId: UUID) => ['map', 'definition', mapId] as const,
+  battleSession: (battleId: UUID) => ['map', 'battle-session', battleId] as const,
 };
 
 /** All maps in a campaign (GM map library). */
@@ -29,6 +30,20 @@ export function useCampaignMaps(campaignId: UUID | undefined) {
     queryKey: mapQueryKeys.campaignMaps(campaignId ?? ''),
     queryFn: () => mapApi.maps.list(campaignId as UUID),
     enabled: !!campaignId,
+  });
+}
+
+/**
+ * The live map session linked to a battle (by `externalBattleId`), or `null` if none.
+ * Lets the battle tab reopen the same map after a long absence without a `?session=`
+ * id in the URL — the link is owned by the battle and the session state is persisted.
+ */
+export function useBattleMapSession(battleId: UUID | undefined) {
+  return useQuery({
+    queryKey: mapQueryKeys.battleSession(battleId ?? ''),
+    queryFn: () => mapApi.sessions.findByBattle(battleId as UUID),
+    enabled: !!battleId,
+    staleTime: 30_000,
   });
 }
 

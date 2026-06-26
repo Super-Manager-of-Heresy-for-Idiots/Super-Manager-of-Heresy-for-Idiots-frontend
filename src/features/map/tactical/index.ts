@@ -1,5 +1,7 @@
 export { default as TacticalBattlePage } from './TacticalBattlePage';
+export { TacticalWorkspace } from './workspace/TacticalWorkspace';
 export { TacticalBattleLeftPanel } from './TacticalBattleLeftPanel';
+export { battleTabRoute } from './battleMapSelection';
 export { TacticalInspectorPanel } from './TacticalInspectorPanel';
 export { TacticalMapCenterPanel } from './TacticalMapCenterPanel';
 export { BattleMapSelectionModal } from './BattleMapSelectionModal';

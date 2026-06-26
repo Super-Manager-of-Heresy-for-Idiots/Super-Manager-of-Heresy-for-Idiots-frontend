@@ -20,9 +20,9 @@ import { useCampaignMaps, useCreateMapSession } from '../hooks';
 import { isForbidden, isMapSessionClosed, isNotFound, isUnauthorized } from '../utils';
 import type { MapDefinitionDto, UUID } from '../types';
 import {
+  battleTabRoute,
   mapSourceType,
   resolveMapSelectionAction,
-  tacticalRoute,
   type MapSelectionChoice,
 } from './battleMapSelection';
 import s from './BattleMapSelectionModal.module.css';
@@ -54,7 +54,7 @@ export function BattleMapSelectionModal({
         createSession.mutate(action.request, {
           onSuccess: (session) => {
             onOpenChange(false);
-            navigate(tacticalRoute(campaignId, battleId, session.id));
+            navigate(battleTabRoute(campaignId, session.id));
           },
         });
         break;

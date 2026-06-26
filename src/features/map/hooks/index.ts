@@ -7,6 +7,7 @@ export {
 export {
   mapQueryKeys,
   useCampaignMaps,
+  useBattleMapSession,
   useMapDefinition,
   useUploadMapAsset,
   useCreateMap,

@@ -146,6 +146,92 @@ export const map: DictModule = {
     'tactical.attack.notYourTurn': 'Сейчас не ваш ход.',
     'tactical.attack.noAttacks': 'Нет доступных атак.',
 
+    /* ── Объединённый воркспейс: командная строка ── */
+    'tactical.cmd.kickerGm': 'Тактическое поле',
+    'tactical.cmd.kickerPlayer': 'Поле игрока',
+    'tactical.phase.prep': 'Подготовка',
+    'tactical.phase.combat': 'Бой',
+    'tactical.phase.done': 'Итоги',
+    'tactical.cmd.startCombat': 'Начать бой',
+    'tactical.cmd.nextTurn': 'Следующий ход',
+    'tactical.cmd.endCombat': 'Завершить бой',
+    'tactical.cmd.endConfirm': 'Завершить бой? Отменить нельзя.',
+    'tactical.cmd.confirm': 'Подтвердить',
+    'tactical.cmd.cancel': 'Отмена',
+    'tactical.cmd.waiting': 'Ожидание начала боя',
+    'tactical.cmd.currentTurn': 'Сейчас ходит: {name}',
+    'tactical.cmd.round': 'Раунд',
+    'tactical.cmd.turnLabel': 'Сейчас ходит',
+    'tactical.cmd.needMonsters': 'Добавьте монстра, чтобы начать',
+
+    /* ── Вкладки правой панели ── */
+    'tactical.tab.turn': 'Ход',
+    'tactical.tab.inspect': 'Осмотр',
+    'tactical.tab.bestiary': 'Бестиарий',
+    'tactical.tab.summary': 'Сводка',
+    'tactical.tab.character': 'Персонаж',
+    'tactical.tab.target': 'Цель',
+
+    /* ── Вкладка «Ход» ── */
+    'tactical.turn.overline': 'Текущий ход',
+    'tactical.turn.empty': 'Сейчас никто не ходит.',
+    'tactical.turn.monsterHint': 'Выберите атаку монстра и цель.',
+    'tactical.turn.charHint': 'Ходит персонаж — действиями управляет игрок.',
+
+    /* ── Вкладка «Цель» (игрок) ── */
+    'tactical.target.overline': 'Цель',
+    'tactical.target.empty': 'Кликните по фишке на карте, чтобы выбрать цель.',
+    'tactical.target.status': 'Состояние',
+    'tactical.target.active': 'Активна',
+    'tactical.target.down': 'Повержена',
+    'tactical.target.selectHint': 'Эта цель будет подставлена в атаку на вкладке «Персонаж».',
+
+    /* ── Состав / навигация ── */
+    'tactical.roster.prepTitle': 'Порядок боя',
+    'tactical.roster.combatTitle': 'Очередь хода',
+    'tactical.roster.prepHint': 'Нажмите «Разместить» у бойца, затем кликните клетку на карте.',
+    'tactical.roster.combatHint': 'Жёлтым отмечен боец, чей сейчас ход.',
+    'tactical.nav.map': 'Карта',
+    'tactical.nav.roster': 'Состав',
+    'tactical.nav.close': 'Закрыть',
+
+    /* ── Итоги ── */
+    'tactical.done.overline': 'Итоги боя',
+    'tactical.done.title': 'Бой завершён',
+    'tactical.done.body': 'Сражение окончено.',
+
+    /* ── Базовые действия (Сходить / Перелететь / Оттолкнуть) ── */
+    'tactical.actions.title': 'Действия',
+    'tactical.actions.move': 'Сходить',
+    'tactical.actions.fly': 'Перелететь',
+    'tactical.actions.push': 'Оттолкнуть',
+    'tactical.actions.moveHint': 'Выберите клетку на карте, затем подтвердите.',
+    'tactical.actions.flyHint': 'Выберите клетку — полёт игнорирует возвышенности.',
+    'tactical.actions.pushHint': 'Кликните соседнего противника, затем подтвердите.',
+    'tactical.actions.armedMove': 'Перемещение: выберите клетку',
+    'tactical.actions.armedFly': 'Полёт: выберите клетку',
+    'tactical.actions.armedPush': 'Толчок: выберите цель',
+    'tactical.actions.cancel': 'Отменить действие',
+    'tactical.actions.noRange': 'Движение закончилось',
+
+    /* ── Подтверждение перемещения/толчка на карте ── */
+    'tactical.move.confirm': 'Подтвердить',
+    'tactical.move.cancel': 'Отмена',
+    'tactical.move.pickCell': 'Кликните доступную клетку',
+    'tactical.move.distance': 'Дистанция: {n} кл.',
+    'tactical.push.confirm': 'Оттолкнуть',
+    'tactical.push.pickTarget': 'Кликните соседнего противника',
+    'tactical.push.target': 'Цель: {name}',
+    'tactical.push.blocked': 'Толкать некуда — край карты или занято.',
+    'tactical.push.needsServer': 'Полный расчёт толчка появится с поддержкой сервера.',
+
+    /* ── Размер фишки при размещении ── */
+    'tactical.place.size': 'Размер фишки',
+    'tactical.size.s1': 'Средний · 1×1',
+    'tactical.size.s2': 'Большой · 2×2',
+    'tactical.size.s3': 'Огромный · 3×3',
+    'tactical.size.s4': 'Громадный · 4×4',
+
     /* ── Выбор карты для боя ── */
     'tactical.mapSelect.button': 'Тактическая карта',
     'tactical.mapSelect.overline': 'Картографикум',
@@ -304,6 +390,92 @@ export const map: DictModule = {
     'tactical.attack.pickTarget': 'Attack chosen — click a target on the map.',
     'tactical.attack.notYourTurn': 'It is not your turn.',
     'tactical.attack.noAttacks': 'No attacks available.',
+
+    /* ── Unified workspace: command bar ── */
+    'tactical.cmd.kickerGm': 'Tactical field',
+    'tactical.cmd.kickerPlayer': 'Player field',
+    'tactical.phase.prep': 'Prep',
+    'tactical.phase.combat': 'Combat',
+    'tactical.phase.done': 'Results',
+    'tactical.cmd.startCombat': 'Start battle',
+    'tactical.cmd.nextTurn': 'Next turn',
+    'tactical.cmd.endCombat': 'End battle',
+    'tactical.cmd.endConfirm': 'End the battle? This cannot be undone.',
+    'tactical.cmd.confirm': 'Confirm',
+    'tactical.cmd.cancel': 'Cancel',
+    'tactical.cmd.waiting': 'Waiting for the battle to start',
+    'tactical.cmd.currentTurn': 'Current turn: {name}',
+    'tactical.cmd.round': 'Round',
+    'tactical.cmd.turnLabel': 'Current turn',
+    'tactical.cmd.needMonsters': 'Add a monster to start',
+
+    /* ── Right dock tabs ── */
+    'tactical.tab.turn': 'Turn',
+    'tactical.tab.inspect': 'Inspect',
+    'tactical.tab.bestiary': 'Bestiary',
+    'tactical.tab.summary': 'Summary',
+    'tactical.tab.character': 'Character',
+    'tactical.tab.target': 'Target',
+
+    /* ── Turn tab ── */
+    'tactical.turn.overline': 'Current turn',
+    'tactical.turn.empty': 'No one is acting right now.',
+    'tactical.turn.monsterHint': 'Pick the monster’s attack and target.',
+    'tactical.turn.charHint': 'A character is acting — the player controls it.',
+
+    /* ── Target tab (player) ── */
+    'tactical.target.overline': 'Target',
+    'tactical.target.empty': 'Click a token on the map to choose a target.',
+    'tactical.target.status': 'Status',
+    'tactical.target.active': 'Active',
+    'tactical.target.down': 'Down',
+    'tactical.target.selectHint': 'This target will be pre-filled in the attack on the “Character” tab.',
+
+    /* ── Roster / nav ── */
+    'tactical.roster.prepTitle': 'Battle order',
+    'tactical.roster.combatTitle': 'Turn order',
+    'tactical.roster.prepHint': 'Click “Place” on a combatant, then click a cell on the map.',
+    'tactical.roster.combatHint': 'The combatant whose turn it is is highlighted in gold.',
+    'tactical.nav.map': 'Map',
+    'tactical.nav.roster': 'Roster',
+    'tactical.nav.close': 'Close',
+
+    /* ── Results ── */
+    'tactical.done.overline': 'Battle results',
+    'tactical.done.title': 'Battle completed',
+    'tactical.done.body': 'The encounter is over.',
+
+    /* ── Default actions (Move / Fly / Push) ── */
+    'tactical.actions.title': 'Actions',
+    'tactical.actions.move': 'Move',
+    'tactical.actions.fly': 'Fly',
+    'tactical.actions.push': 'Shove',
+    'tactical.actions.moveHint': 'Pick a cell on the map, then confirm.',
+    'tactical.actions.flyHint': 'Pick a cell — flight ignores high ground.',
+    'tactical.actions.pushHint': 'Click an adjacent enemy, then confirm.',
+    'tactical.actions.armedMove': 'Move: pick a cell',
+    'tactical.actions.armedFly': 'Fly: pick a cell',
+    'tactical.actions.armedPush': 'Shove: pick a target',
+    'tactical.actions.cancel': 'Cancel action',
+    'tactical.actions.noRange': 'No movement left',
+
+    /* ── On-map move / shove confirmation ── */
+    'tactical.move.confirm': 'Confirm',
+    'tactical.move.cancel': 'Cancel',
+    'tactical.move.pickCell': 'Click a reachable cell',
+    'tactical.move.distance': 'Distance: {n} cells',
+    'tactical.push.confirm': 'Shove',
+    'tactical.push.pickTarget': 'Click an adjacent enemy',
+    'tactical.push.target': 'Target: {name}',
+    'tactical.push.blocked': 'Nowhere to shove — map edge or occupied.',
+    'tactical.push.needsServer': 'Full shove resolution arrives with server support.',
+
+    /* ── Token size at placement ── */
+    'tactical.place.size': 'Token size',
+    'tactical.size.s1': 'Medium · 1×1',
+    'tactical.size.s2': 'Large · 2×2',
+    'tactical.size.s3': 'Huge · 3×3',
+    'tactical.size.s4': 'Gargantuan · 4×4',
 
     /* ── Battle map selection ── */
     'tactical.mapSelect.button': 'Tactical map',

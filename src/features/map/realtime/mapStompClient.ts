@@ -1,19 +1,25 @@
 /**
- * Thin STOMP-over-SockJS client for the map-service realtime channel. One instance
- * per live session: it owns the socket, subscribes the three map destinations
- * (committed events, transient presence, per-user errors) and forwards each parsed
- * frame to the injected {@link MapMessageRouter}. Outbound commands are published as
+ * Thin native-STOMP client for the map-service realtime channel. One instance per
+ * live session: it owns the socket, subscribes the three map destinations (committed
+ * events, transient presence, per-user errors) and forwards each parsed frame to the
+ * injected {@link MapMessageRouter}. Outbound commands are published as
  * {@link MapCommandEnvelope}s to the `/app/...` destinations.
  *
+ * Transport (audit MAP-06): native WebSocket via stompjs `brokerURL` — the backend
+ * endpoint has no `.withSockJS()`, so SockJS is not used.
+ *
+ * Auth (audit MAP-04): CONNECT carries `Authorization: Bearer <token>` (same contract
+ * as the core socket). It does NOT forge `X-User-Id`/`userId`/`X-Authorities`; the
+ * server derives identity from the validated token. A local opt-in dev shim may add
+ * `X-User-Id`/`X-Username` for a gateway-less dev map-service — compiled out of prod.
+ *
  * Deliberately store-free — connection lifecycle is emitted via a callback — so the
- * testable branching stays in the pure router. SockJS + stompjs cannot run under
- * node/vitest, so this file intentionally has no unit tests.
+ * testable branching stays in the pure router and the header/URL helpers below.
  */
 
 import { Client, ReconnectionTimeMode, type IMessage } from '@stomp/stompjs';
-import SockJS from 'sockjs-client';
 import { ensureFreshAccessToken } from '@/lib/authSession';
-import { buildMapAuthHeaders } from '../api/mapAuthHeaders';
+import { buildBearerAuthHeader, buildDevMapIdentityHeaders } from '../api/mapAuthHeaders';
 import type { UUID } from '../types';
 import { MAP_WS_URL } from './mapWsConfig';
 import type { MapConnectionState } from './mapConnectionStore';
@@ -29,6 +35,24 @@ import {
   type PingPayload,
 } from './mapWsTypes';
 
+/**
+ * STOMP CONNECT headers: the production `Authorization: Bearer <token>` plus the
+ * opt-in dev identity shim (empty in prod). Never includes forged identity headers
+ * in a production build.
+ */
+export function buildMapConnectHeaders(token: string | null | undefined): Record<string, string> {
+  return { ...buildDevMapIdentityHeaders(), ...buildBearerAuthHeader(token) };
+}
+
+/**
+ * STOMP SEND headers: only the opt-in dev identity shim (empty in prod). The
+ * authenticated principal is bound at CONNECT, so production SEND frames carry no
+ * identity headers.
+ */
+export function buildMapSendHeaders(): Record<string, string> {
+  return buildDevMapIdentityHeaders();
+}
+
 export interface MapStompClientOptions {
   sessionId: UUID;
   router: MapMessageRouter;
@@ -36,7 +60,7 @@ export interface MapStompClientOptions {
   onConnectionStateChange?: (state: MapConnectionState) => void;
   /** Fired after subscriptions are wired on each (re)connect — send JOIN here. */
   onConnected?: () => void;
-  /** Override the SockJS endpoint (defaults to {@link MAP_WS_URL}). */
+  /** Override the native broker URL (defaults to {@link MAP_WS_URL}). */
   url?: string;
 }
 
@@ -67,8 +91,10 @@ export class MapStompClient {
     this.emit('connecting');
 
     this.client = new Client({
-      webSocketFactory: () => new SockJS(this.url) as unknown as WebSocket,
-      connectHeaders: buildMapAuthHeaders(),
+      // Native WebSocket transport (no SockJS): the backend endpoint has no
+      // `.withSockJS()`. stompjs opens `new WebSocket(brokerURL)`.
+      brokerURL: this.url,
+      connectHeaders: buildMapConnectHeaders(null),
 
       // Bounded auto-reconnect: 2s, doubling up to 30s — mirrors the core socket.
       reconnectDelay: 2000,
@@ -76,11 +102,12 @@ export class MapStompClient {
       reconnectTimeMode: ReconnectionTimeMode.EXPONENTIAL,
 
       // Single-flight fresh token on every (re)connect, shared with the core socket's
-      // refresh so two parallel refreshes never race the rotating cookie.
+      // refresh so two parallel refreshes never race the rotating cookie. The fresh
+      // token is bound to the CONNECT frame as `Authorization: Bearer …`.
       beforeConnect: async () => {
-        await ensureFreshAccessToken();
+        const token = await ensureFreshAccessToken();
         if (this.client) {
-          this.client.connectHeaders = buildMapAuthHeaders();
+          this.client.connectHeaders = buildMapConnectHeaders(token);
         }
       },
 
@@ -189,7 +216,7 @@ export class MapStompClient {
     };
     this.client.publish({
       destination,
-      headers: buildMapAuthHeaders(),
+      headers: buildMapSendHeaders(),
       body: JSON.stringify(envelope),
     });
     return true;

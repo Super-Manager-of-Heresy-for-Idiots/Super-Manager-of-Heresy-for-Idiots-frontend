@@ -110,11 +110,24 @@ export interface MapPing {
  * Active combatant-placement intent. While set, the next empty grid-cell click
  * creates a linked token for `combatantId` (frontend prompt 03). Local-only — it
  * never touches committed state and clears once the placement request is sent.
+ * `widthCells`/`heightCells` carry the GM-chosen token size (creature size).
  */
 export interface PlacementState {
   mode: 'PLACE_COMBATANT';
   combatantId: UUID;
+  widthCells?: number;
+  heightCells?: number;
 }
+
+/**
+ * A staged default action awaiting target + confirmation. MOVE/FLY pick a destination
+ * cell ({@link MapTransientState.movePending}); PUSH picks an enemy token
+ * ({@link MapTransientState.pushTargetTokenId}). Nothing commits until the user
+ * confirms — local-only intent, never committed state.
+ */
+export type CombatActionIntent =
+  | { type: 'MOVE'; mode: 'WALK' | 'FLY' }
+  | { type: 'PUSH' };
 
 export interface MapTransientState {
   selectedTokenId: UUID | null;
@@ -132,4 +145,10 @@ export interface MapTransientState {
    * the core battle API — this is purely the "which attack" half of the selection.
    */
   attackName: string | null;
+  /** Staged default action (Move/Fly/Push) awaiting target + confirmation. */
+  combatAction: CombatActionIntent | null;
+  /** MOVE/FLY destination cell chosen but not yet confirmed (route-preview target). */
+  movePending: GridPoint | null;
+  /** PUSH target token chosen but not yet confirmed. */
+  pushTargetTokenId: UUID | null;
 }

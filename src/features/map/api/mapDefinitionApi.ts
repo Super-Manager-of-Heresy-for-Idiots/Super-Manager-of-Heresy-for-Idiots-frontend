@@ -25,10 +25,12 @@ export const mapDefinitionApi = {
 
   /** POST /api/maps — create a map definition (GM). */
   create: async (request: CreateMapRequest): Promise<MapDefinitionDto> => {
-    const { data } = await mapHttp.post<MapDefinitionDto>('/maps', {
-      ...request,
-      gridConfig: normalizeGridConfig(request.gridConfig),
-    });
+    // Grid-only maps omit `gridConfig` (they carry `canvasConfig` instead); only
+    // normalize when an image-backed `gridConfig` is actually present.
+    const body = request.gridConfig
+      ? { ...request, gridConfig: normalizeGridConfig(request.gridConfig) }
+      : request;
+    const { data } = await mapHttp.post<MapDefinitionDto>('/maps', body);
     return normalizeDefinition(data);
   },
 

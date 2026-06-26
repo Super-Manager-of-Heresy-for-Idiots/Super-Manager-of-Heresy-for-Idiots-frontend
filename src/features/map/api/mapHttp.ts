@@ -2,7 +2,7 @@ import axios, { AxiosError, type InternalAxiosRequestConfig } from 'axios';
 import { useAuthStore } from '@/store/authStore';
 import { refreshSession } from '@/lib/authSession';
 import { MAP_API_BASE_URL } from './mapApiConfig';
-import { buildMapAuthHeaders } from './mapAuthHeaders';
+import { buildBearerAuthHeader, buildDevMapIdentityHeaders } from './mapAuthHeaders';
 
 export { MAP_API_BASE_URL } from './mapApiConfig';
 
@@ -13,14 +13,16 @@ export { MAP_API_BASE_URL } from './mapApiConfig';
  * calls are kept off the core `@/api/axios` instance (global rule: do not mix
  * map-service calls into core clients). It still reuses the EXACT same auth as the
  * rest of the app — there is no second login flow:
- *  - `withCredentials` sends the HttpOnly session cookies (the gateway authenticates
- *    these and injects the `X-User-Id`/`X-Username`/`X-Authorities` headers the
- *    map-service reads);
- *  - the in-memory access token rides along as a `Bearer` header fallback;
+ *  - `withCredentials` sends the HttpOnly session cookies, authenticated at the edge
+ *    (the trusted gateway/map-service validates them and derives identity);
+ *  - the in-memory access token rides along as the `Authorization: Bearer` header,
+ *    mirroring the core WS/REST contract;
  *  - a 401 triggers the same single-flight {@link refreshSession} and replays once.
  *
- * Cookies stay enabled for gateway deployments, but direct map asset rendering uses
- * `mapApi.assets.content()` so the request can include `X-User-Id`.
+ * The browser NEVER forges `X-User-Id`/`X-Username`/`X-Authorities` (audit MAP-01):
+ * identity comes from the validated session, not from client-set headers. The only
+ * exception is a local, opt-in dev shim ({@link buildDevMapIdentityHeaders}), which
+ * is compiled out of production builds.
  */
 
 const mapHttp = axios.create({
@@ -40,14 +42,19 @@ function isAuthEndpoint(url: string | undefined): boolean {
   return !!url && url.includes('/auth/');
 }
 
-mapHttp.interceptors.request.use((config) => {
+/**
+ * Request interceptor (exported for unit tests): attach the production auth header
+ * (`Authorization: Bearer …`) plus the opt-in dev identity shim (a no-op in prod).
+ * Never attaches forged `X-User-Id`/`X-Username`/`X-Authorities` in a prod build.
+ */
+export function attachMapAuth<T extends InternalAxiosRequestConfig>(config: T): T {
   const token = useAuthStore.getState().token;
-  Object.assign(config.headers, buildMapAuthHeaders());
-  if (token && token !== 'undefined' && token !== 'null') {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
+  Object.assign(config.headers, buildDevMapIdentityHeaders());
+  Object.assign(config.headers, buildBearerAuthHeader(token));
   return config;
-});
+}
+
+mapHttp.interceptors.request.use(attachMapAuth);
 
 mapHttp.interceptors.response.use(
   (response) => response,

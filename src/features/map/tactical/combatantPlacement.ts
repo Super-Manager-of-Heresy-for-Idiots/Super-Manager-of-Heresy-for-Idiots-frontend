@@ -10,7 +10,6 @@
  *  - players cannot place monsters (MVP: placement is GM-only).
  */
 
-import type { BattleCombatantResponse } from '@/types';
 import type { CreateTokenFromCombatantRequest } from '../types';
 import type { PlacementState } from '../state';
 
@@ -25,25 +24,34 @@ export function canPlaceCombatant(role: string | null | undefined): boolean {
   return role === 'GAME_MASTER' || role === 'ADMIN';
 }
 
-/** Enter placement mode for one combatant (drives the next empty-cell click). */
-export function enterPlacement(combatantId: string): PlacementState {
-  return { mode: 'PLACE_COMBATANT', combatantId };
+/**
+ * Enter placement mode for one combatant (drives the next empty-cell click).
+ * `widthCells`/`heightCells` carry the GM-chosen creature size (square; default 1×1).
+ */
+export function enterPlacement(
+  combatantId: string,
+  widthCells = 1,
+  heightCells = 1,
+): PlacementState {
+  return { mode: 'PLACE_COMBATANT', combatantId, widthCells, heightCells };
 }
 
 /**
- * Build the `from-combatant` request body from the clicked grid cell. Intentionally
- * projects to `{battleId, combatantId, gridX, gridY}` only — any pixel/image/screen
- * coordinates on the source cell are dropped so they can never reach the wire.
+ * Build the `from-combatant` request body from the clicked grid cell. Carries grid
+ * coordinates ONLY (never pixel/image/screen), plus the optional GM-chosen token size.
  */
 export function buildFromCombatantRequest(
   battleId: string,
   combatantId: string,
   cell: PlacementCell,
+  size?: { widthCells?: number; heightCells?: number },
 ): CreateTokenFromCombatantRequest {
   return {
     battleId,
     combatantId,
     gridX: cell.gridX,
     gridY: cell.gridY,
+    ...(size?.widthCells ? { widthCells: size.widthCells } : {}),
+    ...(size?.heightCells ? { heightCells: size.heightCells } : {}),
   };
 }

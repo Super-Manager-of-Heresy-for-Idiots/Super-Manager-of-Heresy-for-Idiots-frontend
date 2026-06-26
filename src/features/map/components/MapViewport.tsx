@@ -46,6 +46,8 @@ export interface MapViewportProps {
    * drop a combatant token; fires only when the pointer barely moved between down/up.
    */
   onEmptyCellClick?: (cell: GridCoord) => void;
+  /** In-world layer drawn UNDER the tokens (e.g. the movement preview), image space. */
+  underlay?: ReactNode;
   /** Extra in-world overlays (e.g. the calibration overlay), drawn in image space. */
   children?: ReactNode;
   toolbarLabels?: MapToolbarLabels;
@@ -84,6 +86,7 @@ export function MapViewport({
   onTokenDragCancel,
   onCursorMove,
   onEmptyCellClick,
+  underlay,
   children,
   toolbarLabels = DEFAULT_TOOLBAR_LABELS,
   emptyLabel = 'No map image',
@@ -188,6 +191,7 @@ export function MapViewport({
           <MapViewportContext.Provider value={{ viewport: vp.viewport, imageSize: vp.imageSize }}>
             <MapBackgroundLayer imageAssetId={imageAssetId} onImageSize={vp.setImageSize} />
             {gridVisible && <MapGridLayer grid={normalizedGrid} imageSize={vp.imageSize} />}
+            {underlay}
             <MapTokenLayer
               grid={normalizedGrid}
               tokens={tokens}

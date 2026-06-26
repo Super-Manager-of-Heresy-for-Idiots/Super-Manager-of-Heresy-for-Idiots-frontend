@@ -62,8 +62,22 @@ describe('canPlaceCombatant', () => {
 });
 
 describe('enterPlacement', () => {
-  it('enters PLACE_COMBATANT mode for the chosen combatant', () => {
-    expect(enterPlacement('cmb-7')).toEqual({ mode: 'PLACE_COMBATANT', combatantId: 'cmb-7' });
+  it('enters PLACE_COMBATANT mode for the chosen combatant (default 1×1)', () => {
+    expect(enterPlacement('cmb-7')).toEqual({
+      mode: 'PLACE_COMBATANT',
+      combatantId: 'cmb-7',
+      widthCells: 1,
+      heightCells: 1,
+    });
+  });
+
+  it('carries the GM-chosen creature size', () => {
+    expect(enterPlacement('cmb-7', 3, 3)).toEqual({
+      mode: 'PLACE_COMBATANT',
+      combatantId: 'cmb-7',
+      widthCells: 3,
+      heightCells: 3,
+    });
   });
 });
 

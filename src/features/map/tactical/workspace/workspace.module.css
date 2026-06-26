@@ -1,0 +1,732 @@
+/* ── Unified tactical workspace shell ─────────────────────── */
+.workspace {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+  height: calc(100dvh - 200px);
+  min-height: 540px;
+}
+
+/* ── Command bar ──────────────────────────────────────────── */
+.command {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-3) var(--s-4);
+  padding: var(--s-3) var(--s-4);
+  border-top: 2px solid var(--gold-deep);
+  flex: 0 0 auto;
+}
+.commandCombat {
+  border-top-color: var(--ember-deep);
+}
+.commandId {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.commandName {
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 28ch;
+}
+.commandMeta {
+  margin-left: auto;
+  flex-wrap: wrap;
+}
+
+/* phase stepper (read-only) */
+.steps {
+  flex-wrap: wrap;
+}
+.stepWrap {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-1);
+}
+.stepDash {
+  width: 16px;
+  height: 1px;
+  background: var(--rule);
+}
+.step {
+  white-space: nowrap;
+  padding: 5px var(--s-2);
+  border: 1px solid var(--hairline);
+  font-family: var(--font-display);
+  font-size: var(--t-nano);
+  text-transform: uppercase;
+  letter-spacing: var(--track-eng);
+  color: var(--ink-faint);
+}
+.stepActive {
+  border-color: var(--brass);
+  color: var(--gold-pale);
+  background: rgba(176, 141, 78, 0.12);
+}
+.stepDone {
+  color: var(--ink-quiet);
+}
+
+.metaStat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 56px;
+}
+.metaTurn {
+  padding-left: var(--s-3);
+  border-left: 1px solid var(--hairline);
+  min-width: 90px;
+}
+.metaLbl {
+  color: var(--ink-faint);
+}
+.metaVal {
+  font-family: var(--font-display);
+  font-size: var(--t-body);
+  color: var(--ink-bright);
+  line-height: 1.1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.playerStatus {
+  padding: 8px var(--s-3);
+  border: 1px solid var(--hairline);
+  background: var(--panel-raised);
+  font-family: var(--font-display);
+  font-size: var(--t-nano);
+  text-transform: uppercase;
+  letter-spacing: var(--track-eng);
+  color: var(--ink-quiet);
+  white-space: nowrap;
+}
+.playerStatusActive {
+  border-color: var(--ember-deep);
+  color: var(--ember-pale);
+}
+
+/* ── 3-column grid ────────────────────────────────────────── */
+.grid {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr) 360px;
+  gap: var(--s-3);
+}
+.col {
+  min-height: 0;
+  overflow: hidden;
+}
+.colLeft,
+.colRight {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+}
+.colCenter {
+  min-width: 0;
+  padding: 0;
+}
+
+/* ── Center status (loading / no map) ─────────────────────── */
+.centerStatus {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  height: 100%;
+  padding: var(--s-5);
+}
+.statusText {
+  color: var(--ink-quiet);
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--track-eng);
+  font-size: var(--t-small);
+}
+
+/* ── Roster rail ──────────────────────────────────────────── */
+.roster {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100%;
+}
+.rosterHead {
+  padding: var(--s-3) var(--s-3) var(--s-2);
+  border-bottom: 1px solid var(--hairline);
+  flex: 0 0 auto;
+}
+.rosterList {
+  list-style: none;
+  margin: 0;
+  padding: var(--s-2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+  overflow-y: auto;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.rosterRow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+  padding: var(--s-2);
+  border: 1px solid var(--hairline);
+  background: transparent;
+}
+.rosterRowActive {
+  border-color: var(--gold);
+  box-shadow: inset 3px 0 0 var(--gold-pale);
+}
+.rosterRowClickable {
+  cursor: pointer;
+}
+.rosterRowClickable:hover {
+  border-color: var(--rule-strong);
+  background: var(--panel-raised);
+}
+.initBadge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 40px;
+  padding-right: var(--s-2);
+  border-right: 1px solid var(--hairline);
+}
+.initVal {
+  font-family: var(--font-display);
+  font-size: var(--t-body);
+  color: var(--gold-pale);
+  line-height: 1;
+}
+.initLbl {
+  color: var(--ink-ghost);
+  font-size: 8px;
+}
+.rosterIcon {
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--bronze);
+  background: radial-gradient(circle at 50% 30%, #241a13, var(--abyss));
+}
+.rosterMain {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.rosterName {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-1);
+  min-width: 0;
+  color: var(--ink-bright);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.youTag {
+  flex: 0 0 auto;
+  padding: 0 4px;
+  border: 1px solid var(--verdigris);
+  color: var(--verdigris);
+  font-size: var(--t-nano);
+  text-transform: uppercase;
+  letter-spacing: var(--track-eng);
+}
+.placedTag {
+  font-size: var(--t-nano);
+  text-transform: uppercase;
+  letter-spacing: var(--track-eng);
+}
+.placedYes {
+  color: var(--moss);
+}
+.placedNo {
+  color: var(--ink-ghost);
+}
+.rosterHp {
+  flex: 0 0 auto;
+  font-size: var(--t-nano);
+  color: var(--ink-quiet);
+}
+.placeRow {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+.placeHint {
+  flex: 1;
+  min-width: 0;
+  color: var(--gold-pale);
+}
+.rosterFootHint {
+  flex: 0 0 auto;
+  padding: var(--s-2) var(--s-3);
+  border-top: 1px solid var(--hairline);
+  color: var(--ink-faint);
+  font-size: var(--t-small);
+  margin: 0;
+}
+
+/* ── Right dock (tabs) ────────────────────────────────────── */
+.dock {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100%;
+}
+.dockTabs {
+  flex: 0 0 auto;
+  background: var(--panel-raised);
+}
+.dockBody {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+/* ── Tab content scaffolding ──────────────────────────────── */
+.tabPad {
+  padding: var(--s-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+.tabHead {
+  margin-bottom: var(--s-1);
+}
+.tabTitle {
+  margin: 0;
+}
+.tabSub {
+  margin: 0;
+  color: var(--ink-quiet);
+  font-size: var(--t-small);
+}
+.tabSubMono {
+  color: var(--arcane);
+  font-size: var(--t-small);
+}
+.goldOverline {
+  color: var(--gold);
+}
+.arcaneOverline {
+  color: var(--arcane);
+}
+.emberOverline {
+  color: var(--ember);
+}
+.fieldLabel {
+  color: var(--ink-faint);
+}
+.block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  margin-top: var(--s-2);
+}
+.note {
+  padding: var(--s-4);
+  border: 1px dashed var(--hairline);
+  text-align: center;
+  font-style: italic;
+  color: var(--ink-quiet);
+  font-size: var(--t-small);
+}
+.muted {
+  color: var(--ink-faint);
+  font-size: var(--t-small);
+}
+.hint {
+  margin: var(--s-1) 0 0;
+  color: var(--ink-faint);
+  font-size: var(--t-small);
+}
+
+/* ── Inline rows / inputs ─────────────────────────────────── */
+.inlineRow {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+.numField {
+  width: 4.5rem;
+  text-align: center;
+}
+.numFieldWide {
+  width: 8rem;
+}
+.searchField {
+  width: 100%;
+}
+
+/* ── Option grids (attack / target / join pickers) ────────── */
+.optGrid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+}
+.optBtn {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  width: 100%;
+  text-align: left;
+  padding: var(--s-2);
+  border: 1px solid var(--hairline);
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  font: inherit;
+}
+.optBtn:hover {
+  border-color: var(--rule-strong);
+}
+.optBtnActive {
+  border-color: var(--brass);
+  background: var(--panel-raised);
+  box-shadow: inset 3px 0 0 var(--ember);
+}
+.optName {
+  flex: 1 1 auto;
+  min-width: 0;
+  color: var(--ink-bright);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.optMeta {
+  flex: 0 0 auto;
+  color: var(--ink-quiet);
+  font-size: var(--t-nano);
+}
+.optHp {
+  flex: 0 0 auto;
+  font-family: var(--font-mono);
+  font-size: var(--t-nano);
+  color: var(--ember-pale);
+}
+
+/* ── Resources / chips ────────────────────────────────────── */
+.resItem {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+}
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-1);
+}
+.chipMeta {
+  margin-left: var(--s-1);
+  color: var(--ink-faint);
+  font-size: var(--t-nano);
+}
+.skWrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+.skWrap > :global(.ao-ph) {
+  height: 14px;
+}
+
+/* ── Init result (join) ───────────────────────────────────── */
+.initResult {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-2);
+  margin-top: var(--s-1);
+}
+.initResultVal {
+  font-family: var(--font-display);
+  font-size: var(--t-h4, 1.4rem);
+  color: var(--gold-pale);
+}
+
+/* ── Stat cards (summary) ─────────────────────────────────── */
+.statRow {
+  display: flex;
+  gap: var(--s-2);
+  margin-top: var(--s-2);
+}
+.statCard {
+  flex: 1;
+  padding: var(--s-2);
+  border: 1px solid var(--hairline);
+  background: var(--panel-raised);
+  text-align: center;
+}
+.statVal {
+  font-family: var(--font-display);
+  font-size: var(--t-body);
+  color: var(--ink-bright);
+  line-height: 1;
+}
+.valArcane {
+  color: var(--arcane);
+}
+.valGold {
+  color: var(--gold-pale);
+}
+.statLbl {
+  margin-top: var(--s-1);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: var(--track-eng);
+  color: var(--ink-faint);
+}
+.squadHead {
+  border-top: 1px solid var(--hairline);
+  padding-top: var(--s-2);
+}
+
+/* ── List rows (bestiary / squad) ─────────────────────────── */
+.list {
+  display: flex;
+  flex-direction: column;
+  max-height: 420px;
+  overflow-y: auto;
+}
+.listRow {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  padding: var(--s-2) 2px;
+  border-bottom: 1px solid var(--hairline);
+}
+.listMain {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.listName {
+  color: var(--ink-bright);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.listMeta {
+  font-size: var(--t-nano);
+  text-transform: uppercase;
+  letter-spacing: var(--track-eng);
+  color: var(--ink-faint);
+}
+.countTag {
+  flex: 0 0 auto;
+  font-size: var(--t-small);
+  color: var(--ink-quiet);
+}
+.subHdr {
+  color: var(--ink-faint);
+  padding: var(--s-2) 2px var(--s-1);
+}
+
+/* ── Key/value grid (target) ──────────────────────────────── */
+.kvGrid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--s-1) var(--s-3);
+  margin: var(--s-2) 0 0;
+}
+.kvGrid dt {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--track-eng);
+  font-size: var(--t-nano);
+  color: var(--ink-quiet);
+}
+.kvGrid dd {
+  margin: 0;
+  color: var(--ink-bright);
+}
+
+/* ── Attack result card ───────────────────────────────────── */
+.resultCard {
+  margin-top: var(--s-3);
+  padding: var(--s-2) var(--s-3);
+  border: 1px solid var(--hairline);
+  background: var(--panel-raised);
+  border-left-width: 3px;
+}
+.resultHit {
+  border-left-color: var(--moss);
+}
+.resultCrit {
+  border-left-color: var(--gold-pale);
+}
+.resultMiss {
+  border-left-color: var(--ink-faint);
+}
+.resultHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-2);
+}
+.resultOutcome {
+  font-family: var(--font-display);
+  color: var(--ink-bright);
+}
+.resultLine {
+  margin-top: var(--s-1);
+  font-size: var(--t-small);
+  color: var(--ink-quiet);
+}
+.resultDmg {
+  margin-top: var(--s-1);
+  color: var(--ember-pale);
+  font-family: var(--font-display);
+}
+.resultDown {
+  margin-top: var(--s-1);
+  color: var(--ember);
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--track-eng);
+  font-size: var(--t-nano);
+}
+
+/* ── Default actions (Move / Fly / Push) ──────────────────── */
+.actionGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-1);
+}
+.actionChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: var(--s-1) var(--s-2);
+  border: 1px solid var(--bronze);
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: var(--t-small);
+  letter-spacing: var(--track-eng);
+  text-transform: uppercase;
+}
+.actionChip:hover {
+  border-color: var(--rule-strong);
+  color: var(--ink-bright);
+}
+.actionChipActive {
+  border-color: var(--gold-pale);
+  color: var(--gold-pale);
+  background: rgba(176, 141, 78, 0.12);
+}
+.armedRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-2);
+  margin-top: var(--s-1);
+}
+
+/* ── Placement size selector ──────────────────────────────── */
+.placeSizeRow {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: var(--s-2) var(--s-3) 0;
+}
+.sizeSelect {
+  width: 100%;
+  background: var(--void);
+  border: 1px solid var(--bronze);
+  color: var(--ink-bright);
+  padding: 6px var(--s-2);
+  font-family: var(--font-display);
+  font-size: var(--t-small);
+}
+
+/* ── Movement preview overlay (in-world, image space) ─────── */
+.moveOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  overflow: visible;
+}
+.moveCharacter {
+  --move-color: var(--gold-pale);
+}
+.moveMonster {
+  --move-color: var(--ember-pale);
+}
+.moveCell {
+  fill: var(--move-color);
+  fill-opacity: 0.1;
+  stroke: var(--move-color);
+  stroke-opacity: 0.32;
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+.movePath {
+  stroke: var(--move-color);
+  stroke-opacity: 0.9;
+  stroke-width: 2;
+  stroke-dasharray: 5 4;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+.moveTarget {
+  fill: var(--move-color);
+  fill-opacity: 0.22;
+  stroke: var(--move-color);
+  stroke-opacity: 0.95;
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+
+/* ── Utilities ────────────────────────────────────────────── */
+.ml6 {
+  margin-left: 6px;
+}
+.mt8 {
+  margin-top: var(--s-2);
+}
+.mt12 {
+  margin-top: var(--s-3);
+}
+
+/* ── Responsive: stack below desktop ──────────────────────── */
+@media (max-width: 1024px) {
+  .workspace {
+    height: auto;
+  }
+  .grid {
+    grid-template-columns: 1fr;
+  }
+  .colLeft,
+  .colRight {
+    max-height: 70vh;
+  }
+  .colCenter {
+    min-height: 420px;
+  }
+  .commandMeta {
+    margin-left: 0;
+    width: 100%;
+  }
+}

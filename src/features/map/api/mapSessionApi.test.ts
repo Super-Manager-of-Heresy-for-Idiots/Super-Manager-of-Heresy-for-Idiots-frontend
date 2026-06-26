@@ -27,10 +27,12 @@ function snapshot(): MapSnapshotDto {
     map: {
       id: 'map-1',
       name: 'Dungeon',
+      sourceType: 'IMAGE',
       imageAssetId: 'asset-1',
       imageUrl: '/api/map-assets/asset-1/content',
       gridType: 'SQUARE',
       gridConfig: legacyGrid as never,
+      canvasConfig: null,
     },
     tokens: [],
     fog: null,

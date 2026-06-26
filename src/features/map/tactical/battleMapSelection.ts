@@ -8,9 +8,19 @@
 
 import type { CreateMapSessionRequest, UUID } from '../types';
 
-/** Where the tactical workspace lives, optionally carrying a linked map session. */
+/** Standalone tactical workspace route (deep-link), optionally carrying a session. */
 export function tacticalRoute(campaignId: UUID, battleId: UUID, sessionId?: UUID | null): string {
   const base = `/campaigns/${campaignId}/battles/${battleId}/tactical`;
+  return sessionId ? `${base}?session=${sessionId}` : base;
+}
+
+/**
+ * The unified battle is embedded in the campaign "Бой" tab; the linked map session
+ * rides on the `?session=` query param (no first-class Battle↔MapSession link yet).
+ * This is the canonical destination after attaching a map.
+ */
+export function battleTabRoute(campaignId: UUID, sessionId?: UUID | null): string {
+  const base = `/campaigns/${campaignId}/battle`;
   return sessionId ? `${base}?session=${sessionId}` : base;
 }
 

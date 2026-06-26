@@ -1,6 +1,8 @@
 # Stage 1: build
 FROM node:20-alpine AS build
 WORKDIR /app
+ARG VITE_MAP_DEV_IDENTITY=false
+ENV VITE_MAP_DEV_IDENTITY=$VITE_MAP_DEV_IDENTITY
 COPY package*.json ./
 RUN npm ci
 COPY . .

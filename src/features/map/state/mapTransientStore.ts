@@ -8,6 +8,7 @@
 import { create } from 'zustand';
 import type { UUID } from '../types';
 import type {
+  CombatActionIntent,
   GridPoint,
   MapPing,
   MapTransientState,
@@ -26,6 +27,12 @@ interface MapTransientStore extends MapTransientState {
   setPlacement: (placement: PlacementState | null) => void;
   clearPlacement: () => void;
   setAttackName: (attackName: string | null) => void;
+  /** Arm a default action (Move/Fly/Push); clears any staged target/pending cell. */
+  setCombatAction: (action: CombatActionIntent | null) => void;
+  setMovePending: (cell: GridPoint | null) => void;
+  setPushTarget: (tokenId: UUID | null) => void;
+  /** Disarm the staged action and clear its target/pending cell. */
+  clearCombatAction: () => void;
   setLocalDragPreview: (preview: TokenDragPreview | null) => void;
   upsertRemoteDragPreview: (preview: TokenDragPreview) => void;
   clearRemoteDragPreview: (tokenId: UUID) => void;
@@ -47,6 +54,9 @@ function createInitialTransientState(): MapTransientState {
     pings: [],
     placement: null,
     attackName: null,
+    combatAction: null,
+    movePending: null,
+    pushTargetTokenId: null,
   };
 }
 
@@ -65,6 +75,17 @@ export const useMapTransientStore = create<MapTransientStore>((set) => ({
   clearPlacement: () => set({ placement: null }),
 
   setAttackName: (attackName) => set({ attackName }),
+
+  // Arming an action starts a fresh staging (no leftover pending cell / push target).
+  setCombatAction: (combatAction) =>
+    set({ combatAction, movePending: null, pushTargetTokenId: null }),
+
+  setMovePending: (cell) => set({ movePending: cell }),
+
+  setPushTarget: (tokenId) => set({ pushTargetTokenId: tokenId }),
+
+  clearCombatAction: () =>
+    set({ combatAction: null, movePending: null, pushTargetTokenId: null }),
 
   setLocalDragPreview: (preview) => set({ localDragPreview: preview }),
 

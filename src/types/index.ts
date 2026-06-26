@@ -122,6 +122,8 @@ export interface CharacterResponse {
   currentHp?: number;
   maxHp?: number;
   tempHp?: number;
+  /** Walking speed in feet — drives tactical movement range (speed / cell size). */
+  speed?: number;
   // Rich sheet fields (persisted by the wizard / full-create endpoint).
   alignment?: string;
   avatarUrl?: string;

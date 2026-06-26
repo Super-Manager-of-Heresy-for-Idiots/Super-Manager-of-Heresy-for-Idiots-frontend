@@ -8,8 +8,10 @@ interface MapAssetImageProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, '
 }
 
 /**
- * Renders map asset content through an authorized REST request. A plain `<img src>`
- * cannot attach the `X-User-Id` header required by map-service.
+ * Renders map asset content through an authorized REST request (browser-safe content
+ * endpoint, audit MAP-13). A plain `<img src>` cannot attach the `Authorization`
+ * header / session credentials the map-service requires, so the bytes are fetched via
+ * `mapApi.assets.content()` and shown as an object URL.
  */
 export function MapAssetImage({ assetId, ...imgProps }: MapAssetImageProps) {
   const [objectUrl, setObjectUrl] = useState<string | null>(null);
