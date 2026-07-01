@@ -57,6 +57,18 @@
 .coinMain { flex: 1; min-width: 0; }
 .coinLabel { font-size: 9px; }
 .coinAmount { font-size: 18px; font-family: var(--font-serif); color: var(--coin, var(--gold-pale)); }
+.valueCard {
+  padding: 11px 12px;
+  margin-bottom: 10px;
+  background: color-mix(in srgb, var(--gold) 8%, var(--abyss));
+  border: 1px solid color-mix(in srgb, var(--gold) 28%, var(--rule));
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.valueMain { flex: 1; min-width: 0; }
+.valueAmount { font-size: 20px; font-family: var(--font-serif); color: var(--gold-pale); }
+.valueHint { margin-top: 2px; font-size: 11px; color: var(--ink-faint); }
 .noCoin { color: var(--ink-faint); font-size: 12px; text-align: center; padding: 8px 0; }
 
 /* ── relic folio ── */
@@ -75,6 +87,19 @@
 .enchName { font-size: 13px; color: var(--ink-bright); }
 .enchDesc { font-size: 12px; color: var(--ink-quiet); }
 .noEnch { font-size: 13px; color: var(--ink-faint); }
+.effectList { display: flex; flex-direction: column; gap: 8px; }
+.effectRow {
+  display: flex; gap: 10px; align-items: flex-start;
+  padding: 8px 10px; border: 1px solid color-mix(in srgb, var(--c) 36%, var(--rule));
+  background: color-mix(in srgb, var(--c) 7%, var(--abyss));
+}
+.effectMain { flex: 1; min-width: 0; }
+.effectName { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink-bright); }
+.effectKind {
+  color: var(--c); border: 1px solid color-mix(in srgb, var(--c) 45%, transparent);
+  padding: 0 5px; font-size: 9px; text-transform: uppercase;
+}
+.effectDesc { margin-top: 2px; font-size: 12px; color: var(--ink-quiet); }
 .provList { display: flex; flex-direction: column; gap: 8px; font-size: 12px; color: var(--ink-quiet); }
 .provRow { display: flex; gap: 10px; }
 .relicActions { display: flex; gap: 8px; margin-top: 18px; flex-wrap: wrap; }

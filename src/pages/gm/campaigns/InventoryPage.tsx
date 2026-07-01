@@ -29,18 +29,22 @@ import {
   useEquipItem,
   useUnequipItem,
   useRemoveItem,
+  useUpdateItemBuffs,
 } from '@/hooks/useInventory';
 import { useCharacter, useCharacterWallet, useCampaignCharacters } from '@/hooks/useCharacter';
 import { useAuthStore } from '@/store/authStore';
 import { rarityColor, slotClass, itemGlyph } from '@/lib/itemVisuals';
 import { RarityBadge, rarityLabelKey } from '@/components/items/RarityBadge';
 import { useT } from '@/i18n/I18nContext';
+import { formatApproxGold, stackGoldValue } from '@/lib/price';
+import { effectNature, effectSummary } from '@/lib/effects';
 import type {
   ItemInstanceResponse,
   RenameItemRequest,
   EquipmentSlot,
 } from '@/types';
 import { GrantItemDialog } from './GrantItemDialog';
+import { ItemBuffPickerDialog } from './ItemBuffPickerDialog';
 import s from './InventoryPage.module.css';
 
 /* ── helpers ─────────────────────────────────────────────────── */
@@ -87,6 +91,7 @@ export default function InventoryPage() {
   const equipMutation = useEquipItem();
   const unequipMutation = useUnequipItem();
   const removeMutation = useRemoveItem();
+  const updateItemBuffsMutation = useUpdateItemBuffs();
 
   const [filterText, setFilterText] = useState('');
   const [showSearch, setShowSearch] = useState(false);
@@ -96,6 +101,7 @@ export default function InventoryPage() {
   const [transferOpen, setTransferOpen] = useState(false);
   const [renameOpen, setRenameOpen] = useState(false);
   const [equipOpen, setEquipOpen] = useState(false);
+  const [itemBuffsOpen, setItemBuffsOpen] = useState(false);
 
   /* Transfer / Rename / Equip state */
   const [transferInstanceId, setTransferInstanceId] = useState('');
@@ -104,6 +110,7 @@ export default function InventoryPage() {
   const [renameCustomName, setRenameCustomName] = useState('');
   const [equipInstanceId, setEquipInstanceId] = useState('');
   const [equipSlot, setEquipSlot] = useState<EquipmentSlot>('MAIN_HAND');
+  const [itemBuffsInstanceId, setItemBuffsInstanceId] = useState('');
 
   /* ── derived ───────────────────────────────────────────────── */
 
@@ -133,6 +140,11 @@ export default function InventoryPage() {
     [items, selectedId],
   );
 
+  const itemBuffsTarget = useMemo(
+    () => items.find((i) => i.id === itemBuffsInstanceId) ?? null,
+    [items, itemBuffsInstanceId],
+  );
+
   const transferCandidates = useMemo(
     () => (campaignCharacters ?? []).filter((c) => c.status === 'ACTIVE' && c.id !== characterId),
     [campaignCharacters, characterId],
@@ -140,6 +152,12 @@ export default function InventoryPage() {
 
   const slotsFilled = equippedItems.length;
   const attunedCount = items.filter((i) => i.isUnique || i.artifactName).length;
+  const inventoryValueGold = useMemo(
+    () => items.reduce((sum, item) => sum + (stackGoldValue(item.priceGold, item.quantity) ?? 0), 0),
+    [items],
+  );
+  const pricedItemsCount = items.filter((item) => stackGoldValue(item.priceGold, item.quantity) != null).length;
+  const unpricedItemsCount = Math.max(0, items.length - pricedItemsCount);
 
   /* ── handlers ──────────────────────────────────────────────── */
 
@@ -215,6 +233,24 @@ export default function InventoryPage() {
     setEquipInstanceId(item.id);
     setEquipSlot(item.slot ?? 'MAIN_HAND');
     setEquipOpen(true);
+  };
+
+  const openItemBuffs = (item: ItemInstanceResponse) => {
+    setItemBuffsInstanceId(item.id);
+    setItemBuffsOpen(true);
+  };
+
+  const handleSaveItemBuffs = (buffDebuffIds: string[]) => {
+    if (!campaignId || !characterId || !itemBuffsInstanceId) return;
+    updateItemBuffsMutation.mutate(
+      { campaignId, characterId, instanceId: itemBuffsInstanceId, buffDebuffIds },
+      {
+        onSuccess: () => {
+          setItemBuffsOpen(false);
+          setItemBuffsInstanceId('');
+        },
+      },
+    );
   };
 
   /* ── loading / error ───────────────────────────────────────── */
@@ -429,6 +465,19 @@ export default function InventoryPage() {
 
             <OrdoDivider glyph="diamond-fill" color="var(--rule)">{t('camp2.inv.coinWealth')}</OrdoDivider>
 
+            <div className={s.valueCard}>
+              <Rune kind="coin" size={16} color="var(--gold-pale)" />
+              <div className={s.valueMain}>
+                <div className={cn('ao-overline', s.coinLabel)}>Inventory value</div>
+                <div className={cn('ao-num', s.valueAmount)}>
+                  {pricedItemsCount > 0 ? formatApproxGold(inventoryValueGold) : '-'}
+                </div>
+                {unpricedItemsCount > 0 && (
+                  <div className={s.valueHint}>{unpricedItemsCount} without price</div>
+                )}
+              </div>
+            </div>
+
             {wallet && wallet.length > 0 ? (
               <div className={cn('ao-rgrid', 'ao-rgrid--keep2', s.quad)}>
                 {wallet.map((c) => {
@@ -471,11 +520,12 @@ export default function InventoryPage() {
             <RelicDetail
               item={selected}
               isGm={isGm}
-              busy={equipMutation.isPending || unequipMutation.isPending || removeMutation.isPending}
+              busy={equipMutation.isPending || unequipMutation.isPending || removeMutation.isPending || updateItemBuffsMutation.isPending}
               onEquip={() => openEquip(selected)}
               onUnequip={() => handleUnequip(selected)}
               onRename={() => openRename(selected)}
               onTransfer={() => openTransfer(selected)}
+              onConfigureBuffs={() => openItemBuffs(selected)}
               onRemove={() => handleRemove(selected)}
             />
           )}
@@ -488,6 +538,16 @@ export default function InventoryPage() {
         onOpenChange={setGrantOpen}
         campaignId={campaignId!}
         characterId={characterId!}
+      />
+
+      <ItemBuffPickerDialog
+        open={itemBuffsOpen}
+        onOpenChange={setItemBuffsOpen}
+        selectedIds={itemBuffsTarget?.itemBuffs?.map((effect) => effect.id) ?? []}
+        onSave={handleSaveItemBuffs}
+        saving={updateItemBuffsMutation.isPending}
+        title="Configure item buffs"
+        itemName={itemBuffsTarget?.displayName}
       />
 
       {/* Equip Dialog */}
@@ -619,6 +679,7 @@ function RelicDetail({
   onUnequip,
   onRename,
   onTransfer,
+  onConfigureBuffs,
   onRemove,
 }: {
   item: ItemInstanceResponse;
@@ -628,6 +689,7 @@ function RelicDetail({
   onUnequip: () => void;
   onRename: () => void;
   onTransfer: () => void;
+  onConfigureBuffs: () => void;
   onRemove: () => void;
 }) {
   const t = useT();
@@ -646,6 +708,7 @@ function RelicDetail({
     { label: t('camp2.inv.relic.type'), value: item.itemTypeName ?? item.templateName },
     { label: t('camp2.inv.relic.rarity'), value: t(rarityLabelKey(rarity)), color: rarityColor(rarity) },
     { label: t('camp2.inv.relic.slot'), value: item.slot ? item.slot.replace('_', ' ') : t('camp2.inv.relic.unbound') },
+    { label: 'Price', value: formatApproxGold(item.priceGold), color: item.priceGold != null ? 'var(--gold-pale)' : undefined },
     { label: t('camp2.inv.relic.quantity'), value: `x${item.quantity}` },
     { label: t('camp2.inv.relic.charges'), value: NA },
   ];
@@ -702,6 +765,50 @@ function RelicDetail({
         </p>
       )}
 
+      {item.templateBuffs && item.templateBuffs.length > 0 && (
+        <>
+          <OrdoDivider glyph="hex" color="var(--rule)">Template effects</OrdoDivider>
+          <div className={s.effectList}>
+            {item.templateBuffs.map((effect) => (
+              <div key={effect.id} className={s.effectRow} style={{ '--c': effect.isBuff ? '#7a9866' : '#c0584a' } as CSSProperties}>
+                <Rune kind={effect.isBuff ? 'diamond-fill' : 'tri-inv'} size={8} color="var(--c)" />
+                <div className={s.effectMain}>
+                  <div className={s.effectName}>
+                    {effect.name}
+                    <span className={s.effectKind}>{effectNature(effect)}</span>
+                  </div>
+                  <div className={cn('ao-italic', s.effectDesc)}>
+                    {effectSummary(effect) || effect.description}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
+      {item.itemBuffs && item.itemBuffs.length > 0 && (
+        <>
+          <OrdoDivider glyph="hex" color="var(--rule)">Item buffs</OrdoDivider>
+          <div className={s.effectList}>
+            {item.itemBuffs.map((effect) => (
+              <div key={effect.id} className={s.effectRow} style={{ '--c': effect.isBuff ? '#7a9866' : '#c0584a' } as CSSProperties}>
+                <Rune kind={effect.isBuff ? 'diamond-fill' : 'tri-inv'} size={8} color="var(--c)" />
+                <div className={s.effectMain}>
+                  <div className={s.effectName}>
+                    {effect.name}
+                    <span className={s.effectKind}>{effectNature(effect)}</span>
+                  </div>
+                  <div className={cn('ao-italic', s.effectDesc)}>
+                    {effectSummary(effect) || effect.description}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
       <OrdoDivider glyph="diamond-fill" color="var(--rule)">{t('camp2.inv.relic.provenance')}</OrdoDivider>
 
       <div className={s.provList}>
@@ -736,7 +843,10 @@ function RelicDetail({
         <button className="ao-btn ao-btn--ghost" onClick={onRename} title={t('camp2.inv.relic.renameTitle')}><Rune kind="scroll" size={10} /></button>
         <button className="ao-btn ao-btn--ghost" onClick={onTransfer} title={t('camp2.inv.relic.transferTitle')}><Rune kind="arrow-r" size={10} /></button>
         {isGm && (
-          <button className="ao-btn ao-btn--danger" onClick={onRemove} disabled={busy} title={t('camp2.inv.relic.removeTitle')}><Rune kind="x" size={10} /></button>
+          <>
+            <button className="ao-btn ao-btn--ghost" onClick={onConfigureBuffs} disabled={busy} title="Configure item buffs"><Rune kind="hex" size={10} /></button>
+            <button className="ao-btn ao-btn--danger" onClick={onRemove} disabled={busy} title={t('camp2.inv.relic.removeTitle')}><Rune kind="x" size={10} /></button>
+          </>
         )}
       </div>
     </div>

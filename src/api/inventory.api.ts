@@ -51,6 +51,11 @@ export const inventoryApi = {
     return response.data;
   },
 
+  updateBuffs: async (campaignId: string, characterId: string, instanceId: string, data: { buffDebuffIds: string[] }): Promise<ApiResponse<ItemInstanceResponse>> => {
+    const response = await api.put<ApiResponse<ItemInstanceResponse>>(`/campaigns/${campaignId}/characters/${characterId}/inventory/${instanceId}/buffs`, data);
+    return response.data;
+  },
+
   transfer: async (campaignId: string, characterId: string, instanceId: string, data: TransferItemRequest): Promise<ApiResponse<ItemInstanceResponse>> => {
     const response = await api.post<ApiResponse<ItemInstanceResponse>>(
       `/campaigns/${campaignId}/characters/${characterId}/inventory/${instanceId}/transfer`,

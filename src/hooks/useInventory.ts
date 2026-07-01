@@ -174,6 +174,32 @@ export function useRenameItem() {
   });
 }
 
+export function useUpdateItemBuffs() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      campaignId,
+      characterId,
+      instanceId,
+      buffDebuffIds,
+    }: {
+      campaignId: string;
+      characterId: string;
+      instanceId: string;
+      buffDebuffIds: string[];
+    }) => inventoryApi.updateBuffs(campaignId, characterId, instanceId, { buffDebuffIds }),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId, 'inventory'] });
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId] });
+      toast.success('Item buffs updated');
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error.response?.data?.message || 'Failed to update item buffs');
+    },
+  });
+}
+
 export function useTransferItem() {
   const queryClient = useQueryClient();
   const t = useT();

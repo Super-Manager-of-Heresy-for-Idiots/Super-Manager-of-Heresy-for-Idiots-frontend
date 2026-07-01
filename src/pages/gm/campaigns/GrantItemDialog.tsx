@@ -9,6 +9,8 @@ import { useGrantItem } from '@/hooks/useInventory';
 import { useEquipmentItems, useMagicItems } from '@/hooks/useContentCatalog';
 import { isRetryableError } from '@/lib/errors';
 import { rarityColor, normalizeRarity, RARITY_ORDER } from '@/lib/itemVisuals';
+import { formatApproxGold, goldFromCopper } from '@/lib/price';
+import { useAuthStore } from '@/store/authStore';
 import { useT } from '@/i18n/I18nContext';
 import type {
   GrantItemRequest,
@@ -17,6 +19,7 @@ import type {
   MagicItemDetail,
   DiceFormula,
 } from '@/types';
+import { ItemBuffPickerDialog } from './ItemBuffPickerDialog';
 import s from './GrantItemDialog.module.css';
 
 /* ── grant picker model (unified over the campaign item catalog) ──
@@ -47,6 +50,7 @@ interface GrantEntry {
   itemTypeName?: string;
   rarity?: string;
   damageDice?: string;
+  priceGold?: number | null;
   homebrew: boolean;
   description?: string;
 }
@@ -77,6 +81,7 @@ function equipmentEntry(e: EquipmentItemDetail): GrantEntry {
     name: e.name,
     itemTypeName: e.category?.name ?? e.kind,
     damageDice: diceText(e.weaponStat?.damageDice),
+    priceGold: goldFromCopper(e.cost?.copperValue),
     homebrew: !!e.packageId,
     description: e.propertiesText ?? undefined,
   };
@@ -90,6 +95,7 @@ function magicEntry(m: MagicItemDetail): GrantEntry {
     name: m.name,
     itemTypeName: m.type?.name ?? undefined,
     rarity: m.rarity?.slug ?? m.rarity?.name ?? undefined,
+    priceGold: goldFromCopper(m.cost?.copperValue),
     homebrew: !!m.packageId,
     description: m.description ?? undefined,
   };
@@ -110,6 +116,8 @@ export function GrantItemDialog({
 }: GrantItemDialogProps) {
   const t = useT();
   const grantMutation = useGrantItem();
+  const { user } = useAuthStore();
+  const canManageItemBuffs = user?.role === 'ADMIN' || user?.role === 'GAME_MASTER';
 
   const {
     data: equipmentData,
@@ -141,6 +149,8 @@ export function GrantItemDialog({
   const [customName, setCustomName] = useState('');
   const [unique, setUnique] = useState(false);
   const [descExpanded, setDescExpanded] = useState(false);
+  const [buffPickerOpen, setBuffPickerOpen] = useState(false);
+  const [selectedBuffIds, setSelectedBuffIds] = useState<string[]>([]);
 
   /* ── derived ── */
 
@@ -161,6 +171,7 @@ export function GrantItemDialog({
         e.rarity ? t(rarityLabelKey(e.rarity)) : '',
         t(`camp2.inv.cat.${e.category}`),
         e.damageDice,
+        e.priceGold != null ? formatApproxGold(e.priceGold) : '',
       ]
         .filter(Boolean)
         .join(' ')
@@ -211,6 +222,7 @@ export function GrantItemDialog({
     const out: { k: string; v: string; color?: string }[] = [];
     if (selected.damageDice) out.push({ k: t('camp2.inv.relic.damage'), v: selected.damageDice });
     if (selected.itemTypeName) out.push({ k: t('camp2.inv.relic.type'), v: selected.itemTypeName });
+    if (selected.priceGold != null) out.push({ k: 'Price', v: formatApproxGold(selected.priceGold), color: 'var(--gold-pale)' });
     if (selected.rarity)
       out.push({
         k: t('camp2.inv.relic.rarity'),
@@ -232,6 +244,8 @@ export function GrantItemDialog({
     setCustomName('');
     setUnique(false);
     setDescExpanded(false);
+    setBuffPickerOpen(false);
+    setSelectedBuffIds([]);
   };
 
   const handleOpenChange = (next: boolean) => {
@@ -252,6 +266,7 @@ export function GrantItemDialog({
       quantity: quantity || 1,
       isUnique: unique || undefined,
       customName: customName.trim() || undefined,
+      buffDebuffIds: selectedBuffIds.length > 0 ? selectedBuffIds : undefined,
     };
     grantMutation.mutate(
       { campaignId, characterId, data },
@@ -396,6 +411,9 @@ export function GrantItemDialog({
                                   {e.rarity && <RarityBadge rarity={e.rarity} size="sm" />}
                                   {e.itemTypeName && <span className={s.optType}>{e.itemTypeName}</span>}
                                   {e.damageDice && <span className="ao-num">{e.damageDice}</span>}
+                                  {e.priceGold != null && (
+                                    <span className={cn('ao-num', s.optPrice)}>{formatApproxGold(e.priceGold)}</span>
+                                  )}
                                   {e.homebrew && (
                                     <span className={s.hbBadge}>{t('camp2.inv.homebrew')}</span>
                                   )}
@@ -543,6 +561,24 @@ export function GrantItemDialog({
                         </span>
                       </span>
                     </button>
+
+                    {canManageItemBuffs && (
+                      <button
+                        type="button"
+                        className={cn(s.buffRow, selectedBuffIds.length > 0 && s.buffRowOn)}
+                        onClick={() => setBuffPickerOpen(true)}
+                      >
+                        <Rune kind="hex" size={16} color="var(--accent)" />
+                        <span className={s.uniqueText}>
+                          <span className={s.uniqueLabel}>Item buffs</span>
+                          <span className={cn('ao-italic', s.uniqueSub)}>
+                            {selectedBuffIds.length > 0
+                              ? `${selectedBuffIds.length} linked to this granted item`
+                              : 'Choose buffs linked to this granted item'}
+                          </span>
+                        </span>
+                      </button>
+                    )}
                   </div>
                 </div>
               ) : (
@@ -598,6 +634,17 @@ export function GrantItemDialog({
           </div>
         </div>
       </DialogContent>
+      <ItemBuffPickerDialog
+        open={buffPickerOpen}
+        onOpenChange={setBuffPickerOpen}
+        selectedIds={selectedBuffIds}
+        onSave={(ids) => {
+          setSelectedBuffIds(ids);
+          setBuffPickerOpen(false);
+        }}
+        title="Choose item buffs"
+        itemName={selected?.name}
+      />
     </Dialog>
   );
 }
