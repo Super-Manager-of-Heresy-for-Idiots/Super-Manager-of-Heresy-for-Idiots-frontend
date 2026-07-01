@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 import { NavLink, Outlet, useOutletContext, useParams } from 'react-router-dom';
 import { BackLink, CampaignStatusPill } from '@/components/campaigns';
+import { ConnectionIndicator } from '@/components/realtime/ConnectionIndicator';
 import { useCampaign } from '@/hooks/useCampaigns';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { useAuthStore } from '@/store/authStore';
@@ -33,6 +34,7 @@ const SUBNAV: SubNavEntry[] = [
   { to: 'npcs', labelKey: 'camp.dash.drill.npcs', gm: true },
   { to: 'quests', labelKey: 'camp.dash.drill.quests', gm: true },
   { to: 'locations', labelKey: 'camp.dash.drill.locations', gm: true },
+  { to: 'maps', labelKey: 'camp.dash.drill.maps', gm: true },
   { to: 'notes', labelKey: 'camp.dash.drill.notes', gm: true },
   { to: 'xp', labelKey: 'camp.dash.drill.grantXp', gm: true },
   { to: 'wallet', labelKey: 'camp.dash.drill.balances', gm: true },
@@ -107,6 +109,9 @@ export function CampaignLayout() {
       <div className={s.head}>
         <h3 className="ao-h3">{campaign.name}</h3>
         <CampaignStatusPill status={campaign.status} />
+        <div className={s.conn}>
+          <ConnectionIndicator />
+        </div>
       </div>
 
       <nav className={cn('ao-tabs', s.nav)} aria-label={t('camp.dash.tabs.label')}>

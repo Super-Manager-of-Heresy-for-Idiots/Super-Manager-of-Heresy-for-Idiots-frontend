@@ -29,6 +29,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import {
   useAdminItemTemplates,
+  useBuffsDebuffs,
   useCreateItemTemplate,
   useUpdateItemTemplate,
   useDeleteItemTemplate,
@@ -39,6 +40,8 @@ import { cn } from '@/lib/utils';
 import { isRetryableError } from '@/lib/errors';
 import { rarityColor, normalizeRarity, RARITY_ORDER } from '@/lib/itemVisuals';
 import { RarityBadge, rarityLabelKey } from '@/components/items/RarityBadge';
+import { formatApproxGold } from '@/lib/price';
+import { effectNature, effectSummary } from '@/lib/effects';
 import s from './ItemTemplatesPage.module.css';
 
 /* Damage type slugs are single words; the resolver lowercases on save, so the
@@ -72,6 +75,7 @@ export default function ItemTemplatesPage() {
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<ItemTemplateResponse | null>(null);
+  const { data: buffsDebuffs } = useBuffsDebuffs(undefined, dialogOpen);
 
   // Form state
   const [formName, setFormName] = useState('');
@@ -80,6 +84,8 @@ export default function ItemTemplatesPage() {
   const [formDamageDice, setFormDamageDice] = useState('');
   const [formDamageBonus, setFormDamageBonus] = useState('');
   const [formDamageType, setFormDamageType] = useState(NONE);
+  const [formPriceGold, setFormPriceGold] = useState('');
+  const [formBuffDebuffIds, setFormBuffDebuffIds] = useState<string[]>([]);
   const [formStackable, setFormStackable] = useState(false);
 
   const busy = createMutation.isPending || updateMutation.isPending;
@@ -91,6 +97,8 @@ export default function ItemTemplatesPage() {
     setFormDamageDice('');
     setFormDamageBonus('');
     setFormDamageType(NONE);
+    setFormPriceGold('');
+    setFormBuffDebuffIds([]);
     setFormStackable(false);
   };
 
@@ -108,6 +116,8 @@ export default function ItemTemplatesPage() {
     setFormDamageDice(item.damageDice || '');
     setFormDamageBonus(item.damageBonus != null ? String(item.damageBonus) : '');
     setFormDamageType(item.damageType ? item.damageType.toUpperCase() : NONE);
+    setFormPriceGold(item.priceGold != null ? String(item.priceGold) : '');
+    setFormBuffDebuffIds(item.templateBuffs?.map((effect) => effect.id) ?? []);
     setFormStackable(item.isStackable ?? false);
     setDialogOpen(true);
   };
@@ -120,7 +130,9 @@ export default function ItemTemplatesPage() {
       damageDice: formDamageDice.trim() || undefined,
       damageBonus: formDamageBonus ? Number(formDamageBonus) : undefined,
       damageType: formDamageType !== NONE ? (formDamageType as DamageType) : undefined,
+      priceGold: formPriceGold.trim() ? Number(formPriceGold) : undefined,
       isStackable: formStackable,
+      buffDebuffIds: formBuffDebuffIds,
     };
 
     if (editing) {
@@ -131,6 +143,12 @@ export default function ItemTemplatesPage() {
     } else {
       createMutation.mutate(payload, { onSuccess: () => setDialogOpen(false) });
     }
+  };
+
+  const toggleBuffDebuff = (id: string) => {
+    setFormBuffDebuffIds((current) =>
+      current.includes(id) ? current.filter((item) => item !== id) : [...current, id],
+    );
   };
 
   /* ---- Header ---- */
@@ -224,6 +242,9 @@ export default function ItemTemplatesPage() {
 
                   <div className={s.chipRow}>
                     <RarityBadge rarity={item.rarity} size="md" />
+                    {item.priceGold != null && (
+                      <OrdoChip tone="gold" glyph="coin">{formatApproxGold(item.priceGold)}</OrdoChip>
+                    )}
                     {item.isStackable && (
                       <OrdoChip tone="rune" glyph="square">{t('adm.itemTpl.stackableYes')}</OrdoChip>
                     )}
@@ -232,6 +253,18 @@ export default function ItemTemplatesPage() {
                   {(item.damageDice || item.damageBonus || item.damageType) && (
                     <div className={s.section}>
                       <DamageBadge dice={item.damageDice} bonus={item.damageBonus} type={item.damageType} />
+                    </div>
+                  )}
+
+                  {item.templateBuffs && item.templateBuffs.length > 0 && (
+                    <div className={cn(s.section, s.effectList)}>
+                      {item.templateBuffs.map((effect) => (
+                        <span key={effect.id} className={s.effectPill} style={{ '--c': effect.isBuff ? '#7a9866' : '#c0584a' } as CSSProperties}>
+                          <Rune kind={effect.isBuff ? 'diamond-fill' : 'tri-inv'} size={8} />
+                          <span>{effect.name}</span>
+                          <span className={s.effectMeta}>{effectSummary(effect)}</span>
+                        </span>
+                      ))}
                     </div>
                   )}
 
@@ -350,6 +383,51 @@ export default function ItemTemplatesPage() {
                   ))}
                 </SelectContent>
               </Select>
+            </OrdoField>
+
+            <OrdoField label="Approx. price" hint="Gold pieces; shown to users with ~">
+              <input
+                className="ao-input"
+                type="number"
+                min="0"
+                step="0.01"
+                value={formPriceGold}
+                onChange={(e) => setFormPriceGold(e.target.value)}
+                placeholder="0"
+              />
+            </OrdoField>
+
+            <OrdoField label="Template effects" hint="Applied while this template-backed item is equipped">
+              {buffsDebuffs && buffsDebuffs.length > 0 ? (
+                <div className={s.effectPicker}>
+                  {buffsDebuffs.map((effect) => {
+                    const checked = formBuffDebuffIds.includes(effect.id);
+                    return (
+                      <button
+                        key={effect.id}
+                        type="button"
+                        className={cn(s.effectOption, checked && s.effectOptionOn)}
+                        onClick={() => toggleBuffDebuff(effect.id)}
+                      >
+                        <span className={s.effectCheck}>
+                          {checked && <Rune kind="check" size={12} />}
+                        </span>
+                        <span className={s.effectOptionMain}>
+                          <span className={s.effectOptionTop}>
+                            <span>{effect.name}</span>
+                            <span className={s.effectKind} style={{ '--c': effect.isBuff ? '#7a9866' : '#c0584a' } as CSSProperties}>
+                              {effectNature(effect)}
+                            </span>
+                          </span>
+                          <span className={s.effectOptionMeta}>{effectSummary(effect) || effect.description}</span>
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className={cn('ao-italic', s.emptyText)}>No buffs/debuffs available.</p>
+              )}
             </OrdoField>
 
             <label className={s.checkRow}>

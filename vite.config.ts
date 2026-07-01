@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
+import { devProxy } from './src/lib/devProxy'
 
 export default defineConfig({
   plugins: [react()],
@@ -39,16 +40,8 @@ export default defineConfig({
   },
   server: {
     port: 5173,
-    proxy: {
-      '/api': {
-        target: 'http://localhost:8080',
-        changeOrigin: true,
-      },
-      '/ws': {
-        target: 'http://localhost:8080',
-        changeOrigin: true,
-        ws: true,
-      },
-    },
+    // Same-origin dev proxy (audit MAP-07). Defined in src/lib/devProxy.ts so it is
+    // unit-testable; map-service routes precede the generic core `/api` and `/ws`.
+    proxy: devProxy,
   },
 })

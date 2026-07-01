@@ -1,0 +1,32 @@
+.wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--ink-quiet);
+  user-select: none;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ink-faint);
+  flex: none;
+}
+
+.label { white-space: nowrap; }
+
+.connected .dot { background: var(--moss); }
+
+.reconnecting .dot {
+  background: var(--gold-pale);
+  animation: connPulse 1s ease-in-out infinite;
+}
+
+.offline .dot { background: var(--ember); }
+
+@keyframes connPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.25; }
+}

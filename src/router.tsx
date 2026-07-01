@@ -55,6 +55,12 @@ const QuestManagerPage = lazy(() => import('@/pages/gm/campaigns/QuestManagerPag
 const QuestDetailPage = lazy(() => import('@/pages/gm/campaigns/QuestDetailPage'));
 const LocationsPage = lazy(() => import('@/pages/gm/campaigns/LocationsPage'));
 
+// Map feature (battle map / VTT) — isolated module under src/features/map
+const CampaignMapListPage = lazy(() => import('@/features/map/pages/CampaignMapListPage'));
+const MapEditorPage = lazy(() => import('@/features/map/pages/MapEditorPage'));
+const MapSessionPage = lazy(() => import('@/features/map/pages/MapSessionPage'));
+const TacticalBattlePage = lazy(() => import('@/features/map/tactical/TacticalBattlePage'));
+
 // Combat / Loot prototype preview pages (screens only, no API wiring)
 const CombatPreviewIndexPage = lazy(() => import('@/pages/gm/combat/CombatPreviewIndexPage'));
 const CombatTrackerGMPage = lazy(() => import('@/pages/gm/combat/CombatTrackerGMPage'));
@@ -142,7 +148,10 @@ export const router = createBrowserRouter([
           // Item reference catalog (read-only, every role)
           { path: '/library/items', element: <ItemCatalogPage /> },
 
-          { path: '/combat-preview', element: <CombatPreviewIndexPage /> },
+          // Combat/Loot prototype index — dev-only, physically absent from prod builds.
+          ...(import.meta.env.DEV
+            ? [{ path: '/combat-preview', element: <CombatPreviewIndexPage /> }]
+            : []),
 
           // ── Campaign shell: persistent header + role-aware sub-nav + WS ──
           {
@@ -165,6 +174,12 @@ export const router = createBrowserRouter([
               { path: 'items', element: <ItemCatalogPage /> },
               { path: 'bestiary', element: <CampaignBestiaryPage /> },
               { path: 'bestiary/monsters/:monsterId', element: <MonsterDetailPage source="campaign" /> },
+
+              // Live map session — every member (server authorizes per-token movement)
+              { path: 'map-sessions/:sessionId', element: <MapSessionPage /> },
+
+              // Tactical battle workspace — battle state + linked map session (?session=)
+              { path: 'battles/:battleId/tactical', element: <TacticalBattlePage /> },
 
               // Character management (every member)
               { path: 'characters/create', element: <CharacterCreationWizardPage /> },
@@ -196,6 +211,12 @@ export const router = createBrowserRouter([
                   { path: 'quests', element: <QuestManagerPage /> },
                   { path: 'quests/:questId', element: <QuestDetailPage /> },
                   { path: 'locations', element: <LocationsPage /> },
+
+                  // Map authoring (GM library + grid editor)
+                  { path: 'maps', element: <CampaignMapListPage /> },
+                  { path: 'maps/new', element: <MapEditorPage /> },
+                  { path: 'maps/:mapId/edit', element: <MapEditorPage /> },
+
                   { path: 'bestiary/monsters/new', element: <MonsterFormPage /> },
                   { path: 'bestiary/monsters/:monsterId/edit', element: <MonsterFormPage /> },
                 ],
@@ -210,7 +231,9 @@ export const router = createBrowserRouter([
   // Combat / Loot prototype previews — full-screen standalone routes
   // (screens only, no API wiring). Rendered outside AppLayout so the
   // tracker's queue | actions | log layout owns the whole viewport.
-  {
+  // Dev-only: the whole block (incl. /dev/content-classes) is stripped from prod
+  // builds, so these routes 404→redirect in production.
+  ...(import.meta.env.DEV ? [{
     element: <ProtectedRoute allowedRoles={['PLAYER', 'GAME_MASTER', 'ADMIN']} />,
     children: [
       {
@@ -241,7 +264,7 @@ export const router = createBrowserRouter([
         ],
       },
     ],
-  },
+  }] : []),
 
   // Game Master routes (non-campaign)
   {

@@ -1,0 +1,185 @@
+/* Private styles for the map renderer family (MapViewport + its layers/toolbar).
+   Only genuinely computed values (the world transform, token rects, marker
+   positions) stay inline in the TSX; everything static lives here. */
+
+.viewport {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--abyss);
+  /* We own pan/zoom gestures — stop the browser from scrolling/zooming first. */
+  touch-action: none;
+  user-select: none;
+}
+.isPannable { cursor: grab; }
+.isPanning { cursor: grabbing; }
+
+.world {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
+/* ── Background image ─────────────────────────────────────────── */
+.bgImage {
+  display: block;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* ── System grid ──────────────────────────────────────────────── */
+.gridSvg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
+.gridLine {
+  vector-effect: non-scaling-stroke;
+}
+
+/* ── Tokens ───────────────────────────────────────────────────── */
+.tokenLayer,
+.cursorLayer,
+.pingLayer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.token {
+  position: absolute;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--rule-strong);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--panel) 72%, transparent);
+  color: var(--ink-bright);
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  overflow: hidden;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: border-color 150ms, box-shadow 150ms;
+}
+.token:hover { border-color: var(--brass); }
+.token:focus-visible {
+  outline: 2px solid var(--gold-pale);
+  outline-offset: 2px;
+}
+.isSelected {
+  border-color: var(--gold-pale);
+  box-shadow: var(--glow-gold);
+}
+.isLocked { cursor: not-allowed; }
+.isGhost {
+  opacity: 0.5;
+  border-style: dashed;
+  pointer-events: none;
+}
+
+.typeCharacter { border-color: var(--gold); }
+.typeNpc { border-color: var(--arcane); }
+.typeMonster { border-color: var(--ember); }
+.typeObject,
+.typeMarker { border-radius: 0; }
+
+.tokenLabel {
+  padding: 0 2px;
+  font-size: var(--t-micro);
+  letter-spacing: 0.04em;
+  pointer-events: none;
+  white-space: nowrap;
+}
+.tokenLock {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  color: var(--ember-pale);
+}
+
+/* ── Remote cursors ───────────────────────────────────────────── */
+.cursor {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  color: var(--arcane);
+  pointer-events: none;
+}
+.cursorLabel {
+  margin-top: 2px;
+  padding: 1px 4px;
+  font-family: var(--font-mono);
+  font-size: var(--t-pico);
+  color: var(--ink);
+  background: rgba(0, 0, 0, 0.6);
+  white-space: nowrap;
+}
+
+/* ── Pings ────────────────────────────────────────────────────── */
+.ping {
+  position: absolute;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+.pingRing {
+  position: absolute;
+  border: 2px solid var(--ember-pale);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  animation: mapPing 1.2s ease-out infinite;
+}
+@keyframes mapPing {
+  0%   { width: 8px;  height: 8px;  opacity: 0.9; }
+  100% { width: 64px; height: 64px; opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pingRing {
+    animation-duration: 0.01ms;
+    animation-iteration-count: 1;
+  }
+}
+
+/* ── Toolbar overlay (NOT transformed) ────────────────────────── */
+.toolbar {
+  position: absolute;
+  top: var(--s-3);
+  right: var(--s-3);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+}
+.toolbarRow {
+  display: flex;
+  gap: var(--s-1);
+}
+.scaleReadout {
+  padding: 2px 0;
+  font-family: var(--font-mono);
+  font-size: var(--t-nano);
+  color: var(--ink-quiet);
+  text-align: center;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--hairline);
+}
+
+/* ── Empty state ──────────────────────────────────────────────── */
+.empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-faint);
+  font-family: var(--font-serif);
+  font-style: italic;
+}

@@ -122,6 +122,8 @@ export interface CharacterResponse {
   currentHp?: number;
   maxHp?: number;
   tempHp?: number;
+  /** Walking speed in feet — drives tactical movement range (speed / cell size). */
+  speed?: number;
   // Rich sheet fields (persisted by the wizard / full-create endpoint).
   alignment?: string;
   avatarUrl?: string;
@@ -787,7 +789,7 @@ export interface BuffDebuffResponse {
   modifierValue?: number;
   durationRounds?: number;
   isBuff: boolean;
-  createdAt: string;
+  createdAt?: string;
 }
 
 export interface CreateBuffDebuffRequest {
@@ -1340,6 +1342,9 @@ export interface ItemInstanceResponse {
   enchantments: EnchantmentResponse[];
   itemTypeId?: string;
   itemTypeName?: string;
+  priceGold?: number | string | null;
+  templateBuffs?: BuffDebuffResponse[];
+  itemBuffs?: BuffDebuffResponse[];
   artifactName?: string;
   artifactRarity?: Rarity;
 }
@@ -1354,6 +1359,7 @@ export interface GrantItemRequest {
   quantity: number;
   customName?: string;
   isUnique?: boolean;
+  buffDebuffIds?: string[];
 }
 
 export interface EquipItemRequest {
@@ -1605,9 +1611,11 @@ export interface ItemTemplateResponse {
   damageDice?: string;
   damageBonus?: number;
   damageType?: DamageType;
+  priceGold?: number | string | null;
   isStackable: boolean;
   skillName?: string;
   skillActivation?: SkillActivation;
+  templateBuffs?: BuffDebuffResponse[];
   sourceHomebrewTitle?: string;
 }
 
@@ -1620,9 +1628,11 @@ export interface CreateItemTemplateRequest {
   damageDice?: string;
   damageBonus?: number;
   damageType?: DamageType;
+  priceGold?: number | string | null;
   isStackable?: boolean;
   skillId?: string;
   skillActivation?: SkillActivation;
+  buffDebuffIds?: string[];
 }
 
 // === Homebrew v2 (Campaign attachment & ratings) ===

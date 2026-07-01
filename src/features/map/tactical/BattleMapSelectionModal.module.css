@@ -1,0 +1,107 @@
+.listTitle {
+  color: var(--gold);
+  margin-bottom: var(--s-2);
+}
+
+.note {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  align-items: flex-start;
+  padding: var(--s-3) 0;
+  color: var(--ink-quiet);
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+  max-height: 320px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  width: 100%;
+  padding: var(--s-2);
+  border: 1px solid var(--panel-edge);
+  background: var(--stone);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+.row:hover:not(:disabled) {
+  border-color: var(--gold);
+}
+.row:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.thumb {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border: 1px solid var(--panel-edge);
+  background: var(--abyss);
+  overflow: hidden;
+}
+.thumbImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.thumbIcon {
+  color: var(--ink-faint);
+}
+
+.rowMain {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.rowName {
+  color: var(--ink-bright);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rowMeta {
+  font-size: var(--t-nano);
+  text-transform: uppercase;
+  letter-spacing: var(--track-eng);
+  color: var(--ink-quiet);
+}
+
+.selectChip {
+  flex: 0 0 auto;
+}
+
+.spin {
+  flex: 0 0 auto;
+  color: var(--gold);
+  animation: tacticalMapSpin 0.8s linear infinite;
+}
+
+@keyframes tacticalMapSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  justify-content: flex-end;
+  width: 100%;
+}

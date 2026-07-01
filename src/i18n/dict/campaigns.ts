@@ -6,6 +6,9 @@ export const campaigns: DictModule = {
     /* ── Shared ─────────────────────────────────────── */
     'camp.retry': 'Повторить',
     'camp.back': '← Назад',
+    'camp.ws.connected': 'На связи',
+    'camp.ws.reconnecting': 'Переподключение…',
+    'camp.ws.offline': 'Нет связи',
 
     /* ── CampaignListPage ───────────────────────────── */
     'camp.list.access.overline': 'Доступ к Кампании',
@@ -59,6 +62,7 @@ export const campaigns: DictModule = {
     'camp.dash.drill.npcs': 'НИП',
     'camp.dash.drill.quests': 'Задания',
     'camp.dash.drill.locations': 'Локации',
+    'camp.dash.drill.maps': 'Карты',
     'camp.dash.drill.storage': 'Хранилище',
     'camp.dash.drill.items': 'Каталог предметов',
     'camp.dash.drill.invite': 'Код Приглашения',
@@ -395,6 +399,9 @@ export const campaigns: DictModule = {
     /* ── Shared ─────────────────────────────────────── */
     'camp.retry': 'Retry',
     'camp.back': '← Back',
+    'camp.ws.connected': 'Online',
+    'camp.ws.reconnecting': 'Reconnecting…',
+    'camp.ws.offline': 'Offline',
 
     /* ── CampaignListPage ───────────────────────────── */
     'camp.list.access.overline': 'Campaign Access',
@@ -448,6 +455,7 @@ export const campaigns: DictModule = {
     'camp.dash.drill.npcs': 'NPCs',
     'camp.dash.drill.quests': 'Quests',
     'camp.dash.drill.locations': 'Locations',
+    'camp.dash.drill.maps': 'Maps',
     'camp.dash.drill.storage': 'Storage',
     'camp.dash.drill.items': 'Item Catalog',
     'camp.dash.drill.invite': 'Invite Code',
