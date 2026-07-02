@@ -134,8 +134,8 @@ export default function CampaignMembersPage() {
               {/* Role */}
               <div>
                 <OrdoChip
-                  tone={member.roleInCampaign === 'GAME_MASTER' ? 'arcane' : 'gold'}
-                  glyph={member.roleInCampaign === 'GAME_MASTER' ? 'sigil-1' : 'helm'}
+                  tone={member.roleInCampaign === 'GM' ? 'arcane' : 'gold'}
+                  glyph={member.roleInCampaign === 'GM' ? 'sigil-1' : 'helm'}
                 >
                   {t(`role.${member.roleInCampaign}`)}
                 </OrdoChip>

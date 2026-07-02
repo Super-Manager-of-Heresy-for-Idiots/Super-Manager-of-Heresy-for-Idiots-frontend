@@ -14,6 +14,8 @@ import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/store/authStore';
 import { useBattle } from '@/hooks/useBattles';
+import { useCampaign } from '@/hooks/useCampaigns';
+import { isCampaignGmOrAdmin } from '@/lib/campaignAccess';
 import { useBattleMapSession } from '../hooks';
 import { TacticalWorkspace } from './workspace/TacticalWorkspace';
 import s from './TacticalBattlePage.module.css';
@@ -25,14 +27,15 @@ export default function TacticalBattlePage() {
   const sessionParam = searchParams.get('session');
 
   const user = useAuthStore((st) => st.user);
-  const isGm = user?.role === 'GAME_MASTER' || user?.role === 'ADMIN';
 
   const { data: battle, isLoading, error } = useBattle(campaignId, battleId);
+  const { data: campaign, isLoading: campaignLoading } = useCampaign(campaignId);
+  const isGm = isCampaignGmOrAdmin(user, campaign);
   // Fall back to the battle's persisted map-session link when no `?session=` is given.
   const { data: linkedSession } = useBattleMapSession(battleId || undefined);
   const mapSessionId = sessionParam ?? linkedSession?.id ?? null;
 
-  if (isLoading) {
+  if (isLoading || campaignLoading) {
     return (
       <div className={cn('ao-panel ao-breathe', s.centerStatus)}>
         <span className={s.statusText}>{t('tactical.top.loading')}</span>

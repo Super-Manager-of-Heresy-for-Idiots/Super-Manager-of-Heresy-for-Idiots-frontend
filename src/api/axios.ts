@@ -2,6 +2,7 @@ import axios, { AxiosError, type InternalAxiosRequestConfig } from 'axios';
 import { useAuthStore } from '@/store/authStore';
 import { ensureFreshAccessToken, refreshSession } from '@/lib/authSession';
 import { getStoredLang } from '@/i18n/lang';
+import { markNetworkRequestStarted, recordNetworkFailure, recordNetworkSuccess } from '@/lib/bugReport';
 
 const api = axios.create({
   baseURL: '/api',
@@ -26,6 +27,7 @@ function isAuthEndpoint(url: string | undefined): boolean {
 }
 
 api.interceptors.request.use(async (config) => {
+  markNetworkRequestStarted(config);
   // The access token is also sent in the Authorization header. REST is authorized by
   // cookie; this header is the auth path for setups where the cookie can't ride along
   // and is a harmless fallback otherwise.
@@ -47,6 +49,7 @@ api.interceptors.request.use(async (config) => {
 
 api.interceptors.response.use(
   (response) => {
+    recordNetworkSuccess(response);
     if (response.data && response.data.success === false) {
       const error = new Error(response.data.message || 'Request failed') as Error & {
         response?: typeof response;
@@ -57,6 +60,7 @@ api.interceptors.response.use(
     return response;
   },
   async (error: AxiosError) => {
+    recordNetworkFailure(error);
     const original = error.config as (InternalAxiosRequestConfig & { _retry?: boolean }) | undefined;
     const status = error.response?.status;
 

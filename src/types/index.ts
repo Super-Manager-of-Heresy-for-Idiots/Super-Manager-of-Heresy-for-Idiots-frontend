@@ -15,7 +15,7 @@ export type SkillActivation = 'PASSIVE' | 'ACTIVE';
 export type RewardType = 'SKILL' | 'SUBCLASS' | 'FEAT' | 'BUFF_DEBUFF';
 export type SkillEffectRole = 'BUFF' | 'DEBUFF';
 
-export type CampaignRole = 'GAME_MASTER' | 'PLAYER';
+export type CampaignRole = 'GM' | 'PLAYER';
 
 export const EQUIPMENT_SLOTS: EquipmentSlot[] = [
   'HEAD', 'CHEST', 'LEGS', 'FEET', 'MAIN_HAND',

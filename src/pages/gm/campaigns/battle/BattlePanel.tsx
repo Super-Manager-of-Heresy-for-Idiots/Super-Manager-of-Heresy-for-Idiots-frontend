@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react';
 import { EmptyVault, OrdoPanel, Rune } from '@/components/ordo';
+import { useCampaignContext } from '@/components/layout/CampaignLayout';
 import { useAuthStore } from '@/store/authStore';
 import { useCampaignBattles, useCreateBattle } from '@/hooks/useBattles';
 import { useT } from '@/i18n/I18nContext';
+import { isCampaignGmOrAdmin } from '@/lib/campaignAccess';
 import { cn } from '@/lib/utils';
 import { BattleAssembly } from './BattleAssembly';
 import { BattleActive } from './BattleActive';
@@ -23,8 +25,9 @@ interface BattlePanelProps {
  */
 export function BattlePanel({ campaignId }: BattlePanelProps) {
   const t = useT();
+  const { campaign } = useCampaignContext();
   const { user } = useAuthStore();
-  const isGm = user?.role === 'GAME_MASTER' || user?.role === 'ADMIN';
+  const isGm = isCampaignGmOrAdmin(user, campaign);
 
   const { data: battles, isLoading } = useCampaignBattles(campaignId);
   const createBattle = useCreateBattle();
@@ -51,7 +54,7 @@ export function BattlePanel({ campaignId }: BattlePanelProps) {
   }
 
   if (active) {
-    return <BattleActive battle={active} campaignId={campaignId} />;
+    return <BattleActive battle={active} campaignId={campaignId} isGm={isGm} />;
   }
 
   if (isGm && assembling) {

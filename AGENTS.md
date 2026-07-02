@@ -1,5 +1,31 @@
 # AGENTS.md
 
+## Workspace context
+
+This repository is the React/Vite frontend for the existing D&D application.
+Before broad code navigation, read the workspace memory files:
+
+1. `../AGENTS.md`
+2. `../PROJECT_MAP.md`
+3. `../docs/architecture.md`
+4. `../docs/known-issues.md`
+5. `../docs/tooling-serena.md`
+
+Route UI, screen, button, layout, route, component, frontend API client, client state, and styles tasks here.
+Route backend domain/API/persistence tasks to `../SuperManagerofHeresyforIdiots`, map-service server tasks to `../SuperManagerofHeresyforIdiots-map`, and Kubernetes/deployment tasks to `../dnd-gitops`.
+
+Use Serena for semantic code work: locating routes/components/hooks/API clients/types, finding references, tracing route -> component -> API client -> backend endpoint, and refactors. Use normal shell/file search first for markdown, package/build config, Docker/Kubernetes yaml, and simple string search.
+
+Key frontend paths:
+
+- Routing: `src/router.tsx`.
+- Core API clients: `src/api`.
+- Core WebSocket client: `src/lib/websocket.ts`.
+- Shared state: `src/store`.
+- Shared types: `src/types/index.ts`.
+- Map frontend feature: `src/features/map`; keep its HTTP client separate from core `src/api/axios.ts`.
+- Dev proxy: `src/lib/devProxy.ts`; map-service routes and `/ws/map` must precede generic `/api` and `/ws`.
+
 > ⚠️ **ОБЯЗАТЕЛЬНО К ПРОЧТЕНИЮ ДЛЯ ЛЮБОГО ИИ-АГЕНТА (Codex / Claude Code / др.)**
 > Полная инструкция проекта — в **`CLAUDE.md`** (корень репозитория). Этот файл —
 > её зеркало с ключевыми правилами. Перед правкой UI-кода прочитай раздел ниже.

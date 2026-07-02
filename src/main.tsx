@@ -2,6 +2,9 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
 import './index.css';
+import { installBugReportCollectors } from './lib/bugReport';
+
+installBugReportCollectors();
 
 // A tab opened before a redeploy will 404 when it lazy-loads a chunk whose hash
 // changed. Recover by reloading once to pull the fresh index.html; the timestamp

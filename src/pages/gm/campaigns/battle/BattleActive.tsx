@@ -27,6 +27,7 @@ import s from './BattleActive.module.css';
 interface BattleActiveProps {
   battle: BattleResponse;
   campaignId: string;
+  isGm: boolean;
 }
 
 /**
@@ -35,10 +36,9 @@ interface BattleActiveProps {
  *  - LEFT  : GM turn controls, or the player's join / action panel.
  * On mobile the sides collapse to a single column with a tab switch.
  */
-export function BattleActive({ battle, campaignId }: BattleActiveProps) {
+export function BattleActive({ battle, campaignId, isGm }: BattleActiveProps) {
   const t = useT();
   const { user } = useAuthStore();
-  const isGm = user?.role === 'GAME_MASTER' || user?.role === 'ADMIN';
   const userId = user?.id;
   const isMobile = useIsMobile();
   const [section, setSection] = useState<'tracker' | 'side'>('tracker');

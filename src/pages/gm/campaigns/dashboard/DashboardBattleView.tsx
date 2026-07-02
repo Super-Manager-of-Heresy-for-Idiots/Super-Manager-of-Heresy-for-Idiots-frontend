@@ -5,6 +5,7 @@ import { useAuthStore } from '@/store/authStore';
 import { useCampaignBattles } from '@/hooks/useBattles';
 import { useBattleMapSession } from '@/features/map/hooks';
 import { TacticalWorkspace } from '@/features/map/tactical/workspace/TacticalWorkspace';
+import { isCampaignGmOrAdmin } from '@/lib/campaignAccess';
 import { BattlePanel } from '../battle/BattlePanel';
 import { useDashboardContext } from '../CampaignDashboardPage';
 
@@ -15,11 +16,11 @@ import { useDashboardContext } from '../CampaignDashboardPage';
  * empty/create panel is shown (GM can start one there).
  */
 export default function DashboardBattleView() {
-  const { campaignId } = useDashboardContext();
+  const { campaignId, campaign } = useDashboardContext();
   const [params] = useSearchParams();
   const sessionParam = params.get('session');
   const { user } = useAuthStore();
-  const isGm = user?.role === 'GAME_MASTER' || user?.role === 'ADMIN';
+  const isGm = isCampaignGmOrAdmin(user, campaign);
 
   const { data: battles, isLoading } = useCampaignBattles(campaignId);
   const battle = useMemo(() => {

@@ -27,6 +27,7 @@ const core: Record<Lang, Dict> = {
 
     /* ── Roles ──────────────────────────────────────── */
     'role.PLAYER': 'Длань Судьбы',
+    'role.GM': 'Летописец',
     'role.GAME_MASTER': 'Летописец',
     'role.ADMIN': 'Архивариус',
 
@@ -200,6 +201,7 @@ const core: Record<Lang, Dict> = {
 
     /* ── Roles ──────────────────────────────────────── */
     'role.PLAYER': 'Hand of Fate',
+    'role.GM': 'Chronicler',
     'role.GAME_MASTER': 'Chronicler',
     'role.ADMIN': 'Archivist',
 

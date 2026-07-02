@@ -8,6 +8,8 @@ import { isRetryableError } from './lib/errors';
 import { bootstrapAuth } from './lib/authSession';
 import { useAuthStore } from './store/authStore';
 import { PageFallback } from './components/layout/PageFallback';
+import { BugReportErrorBoundary } from './components/bug-report/BugReportErrorBoundary';
+import { BugReportWidget } from './components/bug-report/BugReportWidget';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -35,7 +37,10 @@ function App() {
   return (
     <I18nProvider>
     <QueryClientProvider client={queryClient}>
-      {authReady ? <RouterProvider router={router} /> : <PageFallback />}
+      <BugReportErrorBoundary>
+        {authReady ? <RouterProvider router={router} /> : <PageFallback />}
+      </BugReportErrorBoundary>
+      <BugReportWidget />
       <Toaster
         position="top-right"
         toastOptions={{
