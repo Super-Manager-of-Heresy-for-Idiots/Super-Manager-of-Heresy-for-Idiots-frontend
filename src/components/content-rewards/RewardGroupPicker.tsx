@@ -35,6 +35,12 @@ export interface RewardPickerCatalogs {
   proficientSkillIds?: string[];
   /** Active campaign — lets the spell detail pane fetch campaign-scoped spell data. */
   campaignId?: string;
+  /**
+   * Highest spell circle the character can learn at the level being gained (derived from the
+   * spellcasting class level + half-caster status). Caps the SPELL grant pool so the picker
+   * never offers a spell the backend would reject. Omitted → no character-level cap.
+   */
+  characterMaxSpellLevel?: number;
 }
 
 const byId = (catalog: ContentLabel[] | undefined, ids: string[] | undefined): ContentLabel[] =>
@@ -69,8 +75,12 @@ function spellPoolFor(grant: ContentRewardGrant, catalogs?: RewardPickerCatalogs
   const exactLevel = grant.spellLevel;
   const lo = grant.minLevel;
   const hi = grant.maxLevel;
+  // Character-level cap: a character can never learn a spell of a higher circle than their
+  // class level grants access to. Cantrips (level 0) are exempt.
+  const charCap = catalogs?.characterMaxSpellLevel;
   return all
     .filter((sp) => (classId ? sp.availableToClassIds?.includes(classId) : true))
+    .filter((sp) => charCap == null || sp.level === 0 || sp.level <= charCap)
     .filter((sp) => {
       if (exactLevel != null) return sp.level === exactLevel;
       if (lo != null || hi != null) return sp.level >= (lo ?? 0) && sp.level <= (hi ?? 9);

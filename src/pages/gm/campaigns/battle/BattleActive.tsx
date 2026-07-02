@@ -11,6 +11,8 @@ import {
   useInitiativeBonus,
   useBattleAttack,
   useApplyCombatantHp,
+  useSpendAction,
+  useAdjustActionEconomy,
 } from '@/hooks/useBattles';
 import { useIsMobile } from '@/hooks/useMediaQuery';
 import { useT } from '@/i18n/I18nContext';
@@ -21,6 +23,8 @@ import type {
   BattleCombatantResponse,
   BattleActionResultResponse,
   CharacterV2Response,
+  SpellSlotsResponse,
+  ActionEconomySlot,
 } from '@/types';
 import s from './BattleActive.module.css';
 
@@ -159,7 +163,118 @@ function CombatantRow({ c, userId }: { c: BattleCombatantResponse; userId?: stri
             <Bar value={c.currentHp} max={c.maxHp} tone="ember" height={5} showNumbers={false} />
           </div>
         )}
+        <div className={s.mt6}>
+          <ActionEconomy combatant={c} compact />
+        </div>
       </div>
+    </div>
+  );
+}
+
+/* ── action economy (actions / bonus / legendary) ──────────── */
+
+/**
+ * Per-turn action economy shown as tokens: a dark-green circle per action, an orange triangle per
+ * bonus action, and a gold diamond per legendary action (only when the combatant has any). Filled
+ * tokens are still available; dimmed tokens are already spent this turn. When `interactive`, a
+ * player/GM may click an available token to spend that slot (actions are also spent automatically
+ * by attacks). All pools reset when the combatant's turn begins.
+ */
+function ActionEconomy({
+  combatant,
+  campaignId,
+  battleId,
+  interactive = false,
+  compact = false,
+}: {
+  combatant: BattleCombatantResponse;
+  campaignId?: string;
+  battleId?: string;
+  interactive?: boolean;
+  compact?: boolean;
+}) {
+  const t = useT();
+  const spend = useSpendAction();
+
+  const groups: Array<{ slot: ActionEconomySlot; max: number; spent: number; pipCls: string; label: string }> = [
+    { slot: 'ACTION', max: combatant.actionMax, spent: combatant.actionSpent, pipCls: s.pipAction, label: t('battle.eco.action') },
+    { slot: 'BONUS_ACTION', max: combatant.bonusActionMax, spent: combatant.bonusActionSpent, pipCls: s.pipBonus, label: t('battle.eco.bonus') },
+  ];
+  if (combatant.legendaryActionMax > 0) {
+    groups.push({
+      slot: 'LEGENDARY_ACTION',
+      max: combatant.legendaryActionMax,
+      spent: combatant.legendaryActionSpent,
+      pipCls: s.pipLegendary,
+      label: t('battle.eco.legendary'),
+    });
+  }
+
+  const doSpend = (slot: ActionEconomySlot) => {
+    if (!interactive || !campaignId || !battleId) return;
+    spend.mutate({ campaignId, battleId, combatantId: combatant.id, data: { slot } });
+  };
+
+  return (
+    <div className={s.economy}>
+      {groups.map((g) => {
+        const available = Math.max(0, g.max - g.spent);
+        return (
+          <div key={g.slot} className={s.ecoGroup}>
+            {!compact && (
+              <div className={s.ecoTop}>
+                <span className={s.ecoLabel}>{g.label}</span>
+                <span className={s.ecoCount}>
+                  {available}/{g.max}
+                </span>
+              </div>
+            )}
+            <div className={s.pips}>
+              {Array.from({ length: Math.max(0, g.max) }).map((_, i) => {
+                const isSpent = i >= available;
+                const canSpend = interactive && !isSpent && !spend.isPending;
+                return (
+                  <button
+                    key={i}
+                    type="button"
+                    className={cn(s.pip, g.pipCls, isSpent && s.pipSpent, canSpend && s.pipBtn)}
+                    disabled={!canSpend}
+                    onClick={() => doSpend(g.slot)}
+                    title={`${g.label} ${available}/${g.max}`}
+                    aria-label={`${g.label} ${available}/${g.max}`}
+                  />
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ── spell slot tracker ────────────────────────────────────── */
+
+/** Per-level spell slots as arcane tokens (filled = available, dimmed = expended). */
+function SpellSlots({ slots }: { slots: SpellSlotsResponse }) {
+  const t = useT();
+  const levels = (slots.levels ?? []).filter((l) => l.max > 0);
+  if (levels.length === 0) return null;
+  return (
+    <div className={s.slots}>
+      {levels.map((lvl) => (
+        <div key={lvl.spellLevel} className={s.slotRow}>
+          <span className={s.slotLvl}>{t('battle.slots.level', { n: lvl.spellLevel })}</span>
+          <div className={s.slotPips}>
+            {Array.from({ length: lvl.max }).map((_, i) => (
+              <span key={i} className={cn(s.slotPip, i >= lvl.available && s.slotPipSpent)} />
+            ))}
+            <span className={s.slotCount}>
+              {lvl.available}/{lvl.max}
+            </span>
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
@@ -240,6 +355,8 @@ function GmControls({
         )}
 
         <HpAdjustPanel campaignId={campaignId} battle={battle} />
+
+        <ActionEconomyGmPanel campaignId={campaignId} battle={battle} />
 
         {!confirming ? (
           <div className={s.endConfirm}>
@@ -345,6 +462,7 @@ function ActionPanel({
   const attacks = turn?.character?.attacks ?? [];
   const spells = turn?.character?.knownSpells ?? [];
   const effects = turn?.activeEffects ?? [];
+  const spellSlots = turn?.spellSlots ?? null;
   const targets = useMemo(
     () => liveTargets(battle.combatants, current),
     [battle.combatants, current],
@@ -362,6 +480,27 @@ function ActionPanel({
           </div>
         ) : (
           <>
+            <div className={s.section}>
+              <div className={cn('ao-overline', s.sectionHdr)}>
+                {t('battle.eco.title')}
+              </div>
+              <ActionEconomy
+                combatant={current}
+                campaignId={campaignId}
+                battleId={battle.id}
+                interactive
+              />
+            </div>
+
+            {spellSlots && spellSlots.levels.length > 0 && (
+              <div className={s.section}>
+                <div className={cn('ao-overline', s.sectionHdr)}>
+                  {t('battle.slots.title')}
+                </div>
+                <SpellSlots slots={spellSlots} />
+              </div>
+            )}
+
             <div className={s.section}>
               <div className={cn('ao-overline', s.sectionHdr)}>
                 {t('battle.action.resources')}
@@ -757,6 +896,119 @@ function HpAdjustPanel({
           <span className={s.ml6}>{t('battle.gm.hpHeal')}</span>
         </button>
       </div>
+    </div>
+  );
+}
+
+/* ── GM action-economy adjust ──────────────────────────────── */
+
+/**
+ * GM tool to grow/shrink a combatant's action economy: set the number of actions, bonus actions
+ * and legendary actions. Models pools growing with level or spells and grants legendary actions.
+ * The change takes effect immediately; spent counts are clamped to the new maxima server-side.
+ */
+function ActionEconomyGmPanel({
+  campaignId,
+  battle,
+}: {
+  campaignId: string;
+  battle: BattleResponse;
+}) {
+  const t = useT();
+  const adjust = useAdjustActionEconomy();
+  const combatants = battle.combatants;
+  const [combatantId, setCombatantId] = useState(combatants[0]?.id ?? '');
+  const [actionMax, setActionMax] = useState('');
+  const [bonusMax, setBonusMax] = useState('');
+  const [legendaryMax, setLegendaryMax] = useState('');
+
+  // Keep the target valid and prefill the fields from its current maxima.
+  useEffect(() => {
+    const c = combatants.find((x) => x.id === combatantId) ?? combatants[0];
+    if (!c) return;
+    if (c.id !== combatantId) setCombatantId(c.id);
+    setActionMax(String(c.actionMax));
+    setBonusMax(String(c.bonusActionMax));
+    setLegendaryMax(String(c.legendaryActionMax));
+  }, [combatantId, combatants]);
+
+  if (combatants.length === 0) return null;
+
+  const parse = (v: string) => {
+    const n = parseInt(v, 10);
+    return Number.isFinite(n) && n >= 0 && n <= 20 ? n : undefined;
+  };
+  const apply = () => {
+    if (!combatantId) return;
+    adjust.mutate({
+      campaignId,
+      battleId: battle.id,
+      combatantId,
+      data: {
+        actionMax: parse(actionMax),
+        bonusActionMax: parse(bonusMax),
+        legendaryActionMax: parse(legendaryMax),
+      },
+    });
+  };
+
+  return (
+    <div className={s.section}>
+      <div className={cn('ao-overline', s.sectionHdr)}>{t('battle.eco.gmTitle')}</div>
+      <div className={s.optGrid}>
+        {combatants.map((c) => (
+          <button
+            key={c.id}
+            type="button"
+            className={cn(s.optBtn, combatantId === c.id && s.optBtnActive)}
+            onClick={() => setCombatantId(c.id)}
+          >
+            <Rune
+              kind={c.type === 'MONSTER' ? 'flame' : 'helm'}
+              size={10}
+              color={c.type === 'MONSTER' ? 'var(--ember)' : 'var(--gold)'}
+            />
+            {c.displayName}
+          </button>
+        ))}
+      </div>
+      <div className={s.ecoAdjustRow}>
+        <label className={s.ecoAdjustField}>
+          <span>{t('battle.eco.action')}</span>
+          <input
+            className={cn('ao-input', s.ecoNum)}
+            inputMode="numeric"
+            value={actionMax}
+            onChange={(e) => setActionMax(e.target.value.replace(/[^0-9]/g, ''))}
+          />
+        </label>
+        <label className={s.ecoAdjustField}>
+          <span>{t('battle.eco.bonus')}</span>
+          <input
+            className={cn('ao-input', s.ecoNum)}
+            inputMode="numeric"
+            value={bonusMax}
+            onChange={(e) => setBonusMax(e.target.value.replace(/[^0-9]/g, ''))}
+          />
+        </label>
+        <label className={s.ecoAdjustField}>
+          <span>{t('battle.eco.legendary')}</span>
+          <input
+            className={cn('ao-input', s.ecoNum)}
+            inputMode="numeric"
+            value={legendaryMax}
+            onChange={(e) => setLegendaryMax(e.target.value.replace(/[^0-9]/g, ''))}
+          />
+        </label>
+      </div>
+      <button
+        className={cn('ao-btn ao-btn--ghost', s.mt12)}
+        onClick={apply}
+        disabled={adjust.isPending || !combatantId}
+      >
+        <Rune kind="check" size={14} color="currentColor" />
+        <span className={s.ml6}>{t('battle.eco.apply')}</span>
+      </button>
     </div>
   );
 }

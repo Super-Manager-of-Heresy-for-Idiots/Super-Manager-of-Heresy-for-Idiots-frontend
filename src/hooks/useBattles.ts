@@ -12,6 +12,8 @@ import type {
   JoinBattleRequest,
   BattleAttackRequest,
   ApplyCombatantHpRequest,
+  SpendActionRequest,
+  AdjustActionEconomyRequest,
 } from '@/types';
 
 /* ── query keys ──────────────────────────────────────────────── */
@@ -236,6 +238,48 @@ export function useApplyCombatantHp() {
     }) => battlesApi.applyCombatantHp(campaignId, battleId, combatantId, data),
     onSuccess: (res) => sync(res.data),
     onError: (e) => toast.error(errMsg(e, t('battle.toast.hpFailed'))),
+  });
+}
+
+/** Marks a combatant's action / bonus action / legendary action / reaction as spent this turn. */
+export function useSpendAction() {
+  const sync = useSyncBattle();
+  const t = useT();
+  return useMutation({
+    mutationFn: ({
+      campaignId,
+      battleId,
+      combatantId,
+      data,
+    }: {
+      campaignId: string;
+      battleId: string;
+      combatantId: string;
+      data: SpendActionRequest;
+    }) => battlesApi.spendAction(campaignId, battleId, combatantId, data),
+    onSuccess: (res) => sync(res.data),
+    onError: (e) => toast.error(errMsg(e, t('battle.toast.actionFailed'))),
+  });
+}
+
+/** GM adjusts a combatant's action / bonus / legendary action maxima. */
+export function useAdjustActionEconomy() {
+  const sync = useSyncBattle();
+  const t = useT();
+  return useMutation({
+    mutationFn: ({
+      campaignId,
+      battleId,
+      combatantId,
+      data,
+    }: {
+      campaignId: string;
+      battleId: string;
+      combatantId: string;
+      data: AdjustActionEconomyRequest;
+    }) => battlesApi.adjustActionEconomy(campaignId, battleId, combatantId, data),
+    onSuccess: (res) => sync(res.data),
+    onError: (e) => toast.error(errMsg(e, t('battle.toast.actionFailed'))),
   });
 }
 

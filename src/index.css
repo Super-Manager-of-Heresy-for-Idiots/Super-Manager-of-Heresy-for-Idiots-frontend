@@ -46,6 +46,9 @@
   --verdigris:     #4a6b53;
   --ember-pale:    #d8896a;
   --moss:          #7a9866;
+  /* Combat action economy: dark-green action, orange bonus action. */
+  --action-green:  #3f7d4f;
+  --bonus-orange:  #c8791d;
 
   /* ── Rarity tiers (item rarity colour scale) ──────── */
   --rar-common:    var(--ink-quiet);

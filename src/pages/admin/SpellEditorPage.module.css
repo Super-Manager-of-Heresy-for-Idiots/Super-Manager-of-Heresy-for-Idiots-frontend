@@ -69,6 +69,20 @@
 .emptyRow { font-size: 12px; font-style: italic; color: var(--ink-faint); padding: 2px 0; }
 .invalid { border-color: color-mix(in srgb, var(--danger) 60%, transparent) !important; }
 
+/* ---- linked buffs / debuffs ---- */
+.buffChips { display: flex; flex-wrap: wrap; gap: 8px; }
+.buffChip {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 5px 10px; font-size: 12px; cursor: pointer;
+  background: var(--panel-raised); color: var(--ink-quiet);
+  border: 1px solid var(--rule); transition: border-color 0.12s, color 0.12s, background 0.12s;
+}
+.buffChip:hover { border-color: var(--bronze); }
+.buffChipOn { color: var(--ink-bright); background: var(--panel); }
+.buffChipOn.buffChipBuff { border-color: var(--gold); box-shadow: 0 0 10px rgba(176, 141, 78, 0.2); }
+.buffChipOn.buffChipDebuff { border-color: var(--ember); box-shadow: 0 0 10px rgba(179, 70, 26, 0.2); }
+.buffHint { font-size: 11px; color: var(--ink-faint); }
+
 /* ---- footer ---- */
 .footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding-top: 4px; border-top: 1px solid var(--hairline); }
 .footerRight { display: flex; align-items: center; gap: 12px; }

@@ -194,6 +194,95 @@
 
 .hpBtns { display: flex; gap: 8px; margin-top: 8px; }
 
+/* ── action economy (actions / bonus / legendary) ──────────── */
+.economy { display: flex; flex-wrap: wrap; gap: 16px; }
+.ecoGroup { display: flex; flex-direction: column; gap: 5px; }
+.ecoTop { display: flex; align-items: baseline; gap: 6px; }
+.ecoLabel {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 9px;
+  color: var(--ink-quiet);
+}
+.ecoCount { font-family: var(--font-mono); font-size: 11px; color: var(--ink-faint); }
+.pips { display: flex; align-items: center; gap: 6px; }
+/* A pip is a token: filled = available, hollowed = spent. Clickable pips spend the slot. */
+.pip {
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: default;
+  flex-shrink: 0;
+  transition: transform 0.12s, filter 0.12s, opacity 0.12s;
+}
+.pipBtn { cursor: pointer; }
+.pipBtn:hover:not(:disabled) { transform: scale(1.12); }
+.pip:disabled { cursor: default; }
+
+/* Action: dark-green circle. */
+.pipAction {
+  border-radius: 50%;
+  background: var(--action-green);
+  border: 1.5px solid var(--action-green);
+  box-shadow: 0 0 6px rgba(63, 125, 79, 0.5);
+}
+/* Bonus action: orange triangle (pointing up). */
+.pipBonus {
+  background: var(--bonus-orange);
+  clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+  filter: drop-shadow(0 0 3px rgba(200, 121, 29, 0.5));
+}
+/* Legendary action: gold diamond. */
+.pipLegendary {
+  background: var(--gold-pale);
+  border: 1.5px solid var(--gold);
+  transform: rotate(45deg);
+  box-shadow: 0 0 6px rgba(212, 180, 120, 0.5);
+}
+.pipLegendary.pipBtn:hover:not(:disabled) { transform: rotate(45deg) scale(1.12); }
+
+/* Spent pips read as dimmed, drained tokens. */
+.pipSpent { opacity: 0.3; filter: grayscale(0.7); }
+
+/* ── spell slot tracker ────────────────────────────────────── */
+.slots { display: flex; flex-direction: column; gap: 8px; }
+.slotRow { display: flex; align-items: center; gap: 10px; }
+.slotLvl {
+  font-family: var(--font-display);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-quiet);
+  width: 58px;
+  flex-shrink: 0;
+}
+.slotPips { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
+.slotPip {
+  width: 13px;
+  height: 13px;
+  border-radius: 3px;
+  border: 1px solid var(--arcane-deep);
+  background: var(--arcane);
+  box-shadow: 0 0 5px rgba(90, 142, 148, 0.4);
+}
+.slotPipSpent { background: transparent; border-color: var(--ink-ghost); box-shadow: none; }
+.slotCount { font-family: var(--font-mono); font-size: 11px; color: var(--ink-faint); margin-left: 4px; }
+
+/* ── GM action-economy adjust ──────────────────────────────── */
+.ecoAdjustRow { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
+.ecoAdjustField { display: flex; flex-direction: column; gap: 4px; }
+.ecoAdjustField > span {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 9px;
+  color: var(--ink-quiet);
+}
+.ecoNum { width: 64px; }
+
 @media (max-width: 768px) {
   .cols { grid-template-columns: 1fr; }
 }

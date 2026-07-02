@@ -23,6 +23,7 @@ import {
   type RewardPickerCatalogs,
 } from '@/components/content-rewards/RewardGroupPicker';
 import { isMigrationBlocked } from '@/lib/characterMigration';
+import { maxSpellLevel } from '@/data/wizard5e';
 import {
   buildContentLevelUpRequest,
   contentLevelUpComplete,
@@ -103,6 +104,19 @@ export default function LevelUpWizardPage() {
     (cl) => cl.classId === selectedClassId,
   );
 
+  // Highest spell circle this character may learn at the level being gained. Derived from the
+  // selected spellcasting class's level-after-ascent + half-caster status; caps the SPELL pool
+  // so a level-2 wizard can't be shown (and can't submit) a 9th-circle spell.
+  const selectedClassDetail = refContent?.classes?.find((c) => c.id === selectedClassId);
+  const isHalfCaster = !!(selectedClassDetail?.spellcasting?.isHalfCaster
+    || selectedClassDetail?.spellcasting?.halfCaster);
+  const isSpellcasterClass = !!(selectedClassDetail?.spellcasting?.isSpellcaster
+    || selectedClassDetail?.spellcasting?.spellcaster);
+  const nextClassLevel = selectedClass?.newLevelInClass ?? ((character?.totalLevel ?? 0) + 1);
+  const characterMaxSpellLevel = selectedClassDetail && isSpellcasterClass
+    ? maxSpellLevel(isHalfCaster, nextClassLevel)
+    : undefined;
+
   // Reference catalogs let the reward pickers resolve the id-lists the backend emits
   // (ability/skill/spell ids) into labels + selectable pools. Optional: pickers still
   // render grants that already carry resolved labels.
@@ -113,6 +127,7 @@ export default function LevelUpWizardPage() {
     classId: selectedClassId ?? undefined,
     proficientSkillIds: character?.skillProficiencies?.map((sp) => sp.skillId),
     campaignId,
+    characterMaxSpellLevel,
   };
 
   return (

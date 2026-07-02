@@ -231,4 +231,14 @@ export const adminApi = {
     return response.data;
   },
 
+  // === Spell ↔ buff/debuff links ===
+  getSpellBuffs: async (id: string): Promise<ApiResponse<BuffDebuffResponse[]>> => {
+    const response = await api.get<ApiResponse<BuffDebuffResponse[]>>(`/admin/content/spells/${id}/buffs`);
+    return response.data;
+  },
+  setSpellBuffs: async (id: string, buffDebuffIds: string[]): Promise<ApiResponse<BuffDebuffResponse[]>> => {
+    const response = await api.put<ApiResponse<BuffDebuffResponse[]>>(`/admin/content/spells/${id}/buffs`, { buffDebuffIds });
+    return response.data;
+  },
+
 };

@@ -1,8 +1,8 @@
-import { Fragment, useMemo, useRef, useState } from 'react';
-import { Check, Plus, Trash2, Wand2, Search, AlertTriangle } from 'lucide-react';
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
+import { Check, Plus, Trash2, Wand2, Search, AlertTriangle, Sparkles } from 'lucide-react';
 import { useSpells, useDamageTypes } from '@/hooks/useContentCatalog';
 import { useProficiencySkills } from '@/hooks/useBestiary';
-import { useUpdateSpell } from '@/hooks/useAdmin';
+import { useUpdateSpell, useBuffsDebuffs, useSpellBuffs, useSetSpellBuffs } from '@/hooks/useAdmin';
 import { DetailStatus, ExpandChevron, ExpandableRow } from '@/components/common/ExpandableRow';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
@@ -199,6 +199,9 @@ function SpellEditor({ spell, damageTypes, skills }: {
         ))}
       </div>
 
+      {/* Linked buffs / debuffs */}
+      <SpellBuffsSection spellId={spell.id} />
+
       {/* Footer: warning + save */}
       <div className={s.footer}>
         <label className={s.checkRow}>
@@ -210,6 +213,74 @@ function SpellEditor({ spell, damageTypes, skills }: {
           {dirty && !hasErrors && <span className={s.dirtyDot}>{t('adm.spellEdit.unsaved')}</span>}
           <button className="ao-btn ao-btn--primary" disabled={!dirty || hasErrors || update.isPending} onClick={submit}>
             <Check size={13} /> {update.isPending ? t('adm.spellEdit.saving') : t('adm.spellEdit.saveBtn')}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Links buffs/debuffs to a spell: toggle any effect on/off and save. The set replaces the spell's
+ * current links server-side. Buffs read gold, debuffs read ember, matching the buff/debuff admin.
+ */
+function SpellBuffsSection({ spellId }: { spellId: string }) {
+  const t = useT();
+  const { data: linked = [], isLoading } = useSpellBuffs(spellId);
+  const { data: allBuffs = [] } = useBuffsDebuffs();
+  const setBuffs = useSetSpellBuffs();
+
+  const linkedKey = useMemo(() => [...linked.map((b) => b.id)].sort().join(','), [linked]);
+  const [selected, setSelected] = useState<string[]>([]);
+
+  // Seed (and re-seed) the local selection from the server whenever the linked set changes.
+  useEffect(() => {
+    if (!isLoading) setSelected(linked.map((b) => b.id));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [linkedKey, isLoading]);
+
+  const toggle = (id: string) =>
+    setSelected((cur) => (cur.includes(id) ? cur.filter((x) => x !== id) : [...cur, id]));
+
+  const dirty = [...selected].sort().join(',') !== linkedKey;
+
+  return (
+    <div className={s.group}>
+      <div className={cn('ao-overline', s.groupLabel)}>
+        <Sparkles size={12} /> {t('adm.spellEdit.buffs')}
+      </div>
+      {isLoading ? (
+        <div className={s.emptyRow}>{t('adm.spellEdit.loading')}</div>
+      ) : allBuffs.length === 0 ? (
+        <div className={s.emptyRow}>{t('adm.spellEdit.noBuffsAvailable')}</div>
+      ) : (
+        <div className={s.buffChips}>
+          {allBuffs.map((b) => {
+            const on = selected.includes(b.id);
+            return (
+              <button
+                key={b.id}
+                type="button"
+                className={cn(s.buffChip, on && s.buffChipOn, b.isBuff ? s.buffChipBuff : s.buffChipDebuff)}
+                onClick={() => toggle(b.id)}
+              >
+                {on && <Check size={11} />}
+                {b.name}
+              </button>
+            );
+          })}
+        </div>
+      )}
+      <div className={s.footer}>
+        <span className={s.buffHint}>{t('adm.spellEdit.buffsHint')}</span>
+        <div className={s.footerRight}>
+          {dirty && <span className={s.dirtyDot}>{t('adm.spellEdit.unsaved')}</span>}
+          <button
+            className="ao-btn ao-btn--primary"
+            disabled={!dirty || setBuffs.isPending}
+            onClick={() => setBuffs.mutate({ spellId, buffDebuffIds: selected })}
+          >
+            <Check size={13} /> {setBuffs.isPending ? t('adm.spellEdit.saving') : t('adm.spellEdit.saveBtn')}
           </button>
         </div>
       </div>

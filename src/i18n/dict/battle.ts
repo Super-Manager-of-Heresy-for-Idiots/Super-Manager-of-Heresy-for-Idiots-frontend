@@ -88,6 +88,18 @@ export const battle: DictModule = {
     'battle.action.spell.level': 'Ур. {n}',
     'battle.action.spell.cantrip': 'Заговор',
 
+    /* ── Action economy (действия / бонусные / легендарные) ─ */
+    'battle.eco.title': 'Действия',
+    'battle.eco.action': 'Действие',
+    'battle.eco.bonus': 'Бонусное',
+    'battle.eco.legendary': 'Легендарное',
+    'battle.eco.gmTitle': 'Настройка действий',
+    'battle.eco.apply': 'Применить',
+
+    /* ── Spell slots ─────────────────────────────────────── */
+    'battle.slots.title': 'Ячейки заклинаний',
+    'battle.slots.level': '{n}-й круг',
+
     /* ── Attack flow (player + GM) ───────────────────────── */
     'battle.attack.title': 'Атака',
     'battle.attack.pickAttack': 'Выберите атаку',
@@ -146,6 +158,7 @@ export const battle: DictModule = {
     'battle.toast.dieRolled': 'Выпало: {n}',
     'battle.toast.attackFailed': 'Не удалось провести атаку',
     'battle.toast.hpFailed': 'Не удалось изменить ОЗ',
+    'battle.toast.actionFailed': 'Не удалось изменить действия',
   },
   en: {
     /* ── Tab + status ───────────────────────────────────── */
@@ -230,6 +243,18 @@ export const battle: DictModule = {
     'battle.action.spell.level': 'Lvl {n}',
     'battle.action.spell.cantrip': 'Cantrip',
 
+    /* ── Action economy (action / bonus / legendary) ─────── */
+    'battle.eco.title': 'Actions',
+    'battle.eco.action': 'Action',
+    'battle.eco.bonus': 'Bonus',
+    'battle.eco.legendary': 'Legendary',
+    'battle.eco.gmTitle': 'Adjust action economy',
+    'battle.eco.apply': 'Apply',
+
+    /* ── Spell slots ─────────────────────────────────────── */
+    'battle.slots.title': 'Spell slots',
+    'battle.slots.level': 'Level {n}',
+
     /* ── Attack flow (player + GM) ───────────────────────── */
     'battle.attack.title': 'Attack',
     'battle.attack.pickAttack': 'Choose an attack',
@@ -288,5 +313,6 @@ export const battle: DictModule = {
     'battle.toast.dieRolled': 'Rolled: {n}',
     'battle.toast.attackFailed': 'Attack failed',
     'battle.toast.hpFailed': 'Failed to change HP',
+    'battle.toast.actionFailed': 'Failed to update action economy',
   },
 };

@@ -655,4 +655,32 @@ export function useUpdateSpell() {
   });
 }
 
+// === Spell ↔ buff/debuff links ===
+
+/** The buffs/debuffs currently linked to a spell. */
+export function useSpellBuffs(spellId: string, enabled = true) {
+  return useQuery({
+    queryKey: ['content', 'spells', spellId, 'buffs'],
+    queryFn: async () => (await adminApi.getSpellBuffs(spellId)).data ?? [],
+    enabled: !!spellId && enabled,
+  });
+}
+
+/** Replaces the full set of buffs/debuffs a spell applies. */
+export function useSetSpellBuffs() {
+  const queryClient = useQueryClient();
+  const t = useT();
+  return useMutation({
+    mutationFn: ({ spellId, buffDebuffIds }: { spellId: string; buffDebuffIds: string[] }) =>
+      adminApi.setSpellBuffs(spellId, buffDebuffIds),
+    onSuccess: (_res, { spellId }) => {
+      queryClient.invalidateQueries({ queryKey: ['content', 'spells', spellId, 'buffs'] });
+      toast.success(t('hk.spellBuffs.saved'));
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error.response?.data?.message || t('hk.spellBuffs.saveFailed'));
+    },
+  });
+}
+
 // === Admin Teams (read-only) ===

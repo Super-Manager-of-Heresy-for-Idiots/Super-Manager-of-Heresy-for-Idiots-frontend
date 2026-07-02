@@ -1747,6 +1747,29 @@ export interface BattleCombatantResponse {
   currentHp: number | null;
   maxHp: number | null;
   currentTurn: boolean;
+  // Action economy for the current turn. Actions and bonus actions are pools (max + spent);
+  // legendary actions default to 0. Reactions stay a single per-round flag. Reset each turn.
+  actionMax: number;
+  actionSpent: number;
+  bonusActionMax: number;
+  bonusActionSpent: number;
+  legendaryActionMax: number;
+  legendaryActionSpent: number;
+  reactionUsed: boolean;
+}
+
+export type ActionEconomySlot = 'ACTION' | 'BONUS_ACTION' | 'LEGENDARY_ACTION' | 'REACTION';
+
+/** Mark one of a combatant's action-economy slots as spent this turn. */
+export interface SpendActionRequest {
+  slot: ActionEconomySlot;
+}
+
+/** GM adjustment of a combatant's action-economy maxima (only provided pools change). */
+export interface AdjustActionEconomyRequest {
+  actionMax?: number;
+  bonusActionMax?: number;
+  legendaryActionMax?: number;
 }
 
 export interface BattleResponse {
@@ -1781,6 +1804,8 @@ export interface CombatantTurnResponse {
   character?: CharacterV2Response | null;
   resources?: ResourceResponse[] | null;
   activeEffects?: CharacterActiveEffectResponse[] | null;
+  /** Spell slots (per level: max / expended / available). Null when the class has no slots. */
+  spellSlots?: SpellSlotsResponse | null;
   monster?: MonsterResponse | null;
 }
 

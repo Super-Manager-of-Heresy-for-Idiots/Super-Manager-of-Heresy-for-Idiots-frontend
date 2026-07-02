@@ -10,6 +10,8 @@ import type {
   BattleAttackRequest,
   ApplyCombatantHpRequest,
   BattleActionResultResponse,
+  SpendActionRequest,
+  AdjustActionEconomyRequest,
 } from '@/types';
 
 /**
@@ -123,6 +125,34 @@ export const battlesApi = {
   ): Promise<ApiResponse<BattleResponse>> => {
     const response = await api.post<ApiResponse<BattleResponse>>(
       `${base(campaignId)}/${battleId}/combatants/${combatantId}/hp`,
+      data,
+    );
+    return response.data;
+  },
+
+  /** Marks a combatant's action / bonus action / legendary action / reaction as spent this turn. */
+  spendAction: async (
+    campaignId: string,
+    battleId: string,
+    combatantId: string,
+    data: SpendActionRequest,
+  ): Promise<ApiResponse<BattleResponse>> => {
+    const response = await api.post<ApiResponse<BattleResponse>>(
+      `${base(campaignId)}/${battleId}/combatants/${combatantId}/spend`,
+      data,
+    );
+    return response.data;
+  },
+
+  /** GM adjusts a combatant's action / bonus / legendary action maxima. */
+  adjustActionEconomy: async (
+    campaignId: string,
+    battleId: string,
+    combatantId: string,
+    data: AdjustActionEconomyRequest,
+  ): Promise<ApiResponse<BattleResponse>> => {
+    const response = await api.post<ApiResponse<BattleResponse>>(
+      `${base(campaignId)}/${battleId}/combatants/${combatantId}/action-economy`,
       data,
     );
     return response.data;

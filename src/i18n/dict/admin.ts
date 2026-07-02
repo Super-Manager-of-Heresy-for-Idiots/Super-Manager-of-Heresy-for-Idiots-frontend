@@ -321,6 +321,9 @@ export const admin: DictModule = {
     'adm.spellEdit.fixErrors': 'Исправьте ошибки',
     'adm.spellEdit.saveBtn': 'Сохранить',
     'adm.spellEdit.saving': 'Сохранение…',
+    'adm.spellEdit.buffs': 'Баффы / дебаффы',
+    'adm.spellEdit.buffsHint': 'Эффекты, которые накладывает заклинание',
+    'adm.spellEdit.noBuffsAvailable': 'Нет созданных баффов/дебаффов',
 
     /* ── AdminHomebrewPage ── */
     'adm.hb.summaryItems': '{count} предметов',
@@ -757,6 +760,9 @@ export const admin: DictModule = {
     'adm.spellEdit.fixErrors': 'Fix errors',
     'adm.spellEdit.saveBtn': 'Save',
     'adm.spellEdit.saving': 'Saving…',
+    'adm.spellEdit.buffs': 'Buffs / debuffs',
+    'adm.spellEdit.buffsHint': 'Effects this spell applies',
+    'adm.spellEdit.noBuffsAvailable': 'No buffs/debuffs created yet',
 
     /* ── AdminHomebrewPage ── */
     'adm.hb.summaryItems': '{count} items',
