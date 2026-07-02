@@ -19,6 +19,7 @@ import type {
   UserResponse,
   Page,
   SpellResolutionRequest,
+  UpdateSpellRequest,
 } from '@/types';
 import { AxiosError } from 'axios';
 
@@ -631,6 +632,25 @@ export function useResolveSpell() {
     },
     onError: (error: AxiosError<ApiError>) => {
       toast.error(error.response?.data?.message || t('hk.spellWarn.resolveFailed'));
+    },
+  });
+}
+
+/** Full admin edit of a spell (damage/healing/save/attack/check/warning). */
+export function useUpdateSpell() {
+  const queryClient = useQueryClient();
+  const t = useT();
+  const { lang } = useI18n();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: UpdateSpellRequest }) =>
+      adminApi.updateSpell(id, data, lang),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['content', 'spells'] });
+      queryClient.invalidateQueries({ queryKey: ['spell-warnings'] });
+      toast.success(t('hk.spellEdit.saved'));
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error.response?.data?.message || t('hk.spellEdit.saveFailed'));
     },
   });
 }

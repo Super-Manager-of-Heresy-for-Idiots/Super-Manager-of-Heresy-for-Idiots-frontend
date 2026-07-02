@@ -116,6 +116,12 @@ export const referenceApi = {
     return response.data;
   },
 
+  /** Damage types (damage_type) for spell/item authoring dropdowns. */
+  getDamageTypes: async (): Promise<ApiResponse<ContentLabel[]>> => {
+    const response = await api.get<ApiResponse<ContentLabel[]>>('/reference/damage-types');
+    return response.data;
+  },
+
   /** Feat options (paginated/searchable) for authoring dropdowns. */
   getFeatOptions: async (query?: string): Promise<ApiResponse<ReferenceFeatOption[]>> => {
     const response = await api.get<ApiResponse<ReferenceFeatOption[]>>('/reference/feats', {

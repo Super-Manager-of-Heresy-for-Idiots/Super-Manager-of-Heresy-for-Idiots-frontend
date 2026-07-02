@@ -1,6 +1,7 @@
-import { Users, ScrollText, Package, Swords, Crown } from 'lucide-react';
+import { Users, ScrollText, Package, Swords, Crown, Wand2 } from 'lucide-react';
 import { DashboardCard } from '@/components/admin/DashboardCard';
 import { useUsers, useStatTypes, useItemTypes, useCharacterClasses, useCharacterRaces } from '@/hooks/useAdmin';
+import { useSpells } from '@/hooks/useContentCatalog';
 import { useT } from '@/i18n/I18nContext';
 
 export default function AdminDashboardPage() {
@@ -10,6 +11,7 @@ export default function AdminDashboardPage() {
   const { data: itemTypes, isLoading: itemTypesLoading } = useItemTypes();
   const { data: classes, isLoading: classesLoading } = useCharacterClasses();
   const { data: races, isLoading: racesLoading } = useCharacterRaces();
+  const { data: spells, isLoading: spellsLoading } = useSpells();
 
   return (
     <div>
@@ -49,6 +51,13 @@ export default function AdminDashboardPage() {
           icon={<Crown className="h-6 w-6" />}
           href="/admin/character-races"
           isLoading={racesLoading}
+        />
+        <DashboardCard
+          title={t('adm.dashboard.spells')}
+          value={spells?.length}
+          icon={<Wand2 className="h-6 w-6" />}
+          href="/admin/spells"
+          isLoading={spellsLoading}
         />
       </div>
     </div>

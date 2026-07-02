@@ -22,6 +22,8 @@ import type {
   SkillEffectResponse,
   SpellWarningResponse,
   SpellResolutionRequest,
+  SpellDetail,
+  UpdateSpellRequest,
 } from '@/types';
 
 export const adminApi = {
@@ -222,6 +224,10 @@ export const adminApi = {
   },
   resolveSpell: async (id: string, data: SpellResolutionRequest, lang: string): Promise<ApiResponse<SpellWarningResponse>> => {
     const response = await api.patch<ApiResponse<SpellWarningResponse>>(`/admin/content/spells/${id}/resolution`, data, { params: { lang } });
+    return response.data;
+  },
+  updateSpell: async (id: string, data: UpdateSpellRequest, lang: string): Promise<ApiResponse<SpellDetail>> => {
+    const response = await api.put<ApiResponse<SpellDetail>>(`/admin/content/spells/${id}`, data, { params: { lang } });
     return response.data;
   },
 

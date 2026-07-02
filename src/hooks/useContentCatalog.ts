@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { contentCatalogApi } from '@/api/content-catalog.api';
+import { referenceApi } from '@/api/reference.api';
 
 /**
  * React Query hooks for the read-only Content Catalog (PHB 2024 model):
@@ -162,6 +163,15 @@ export function useMagicItem(magicItemId: string | undefined, campaignId?: strin
       return res.data;
     },
     enabled: !!magicItemId,
+    staleTime: STALE,
+  });
+}
+
+// ---------- Damage types (authoring dropdowns) ----------
+export function useDamageTypes() {
+  return useQuery({
+    queryKey: ['content', 'damage-types'],
+    queryFn: async () => (await referenceApi.getDamageTypes()).data ?? [],
     staleTime: STALE,
   });
 }

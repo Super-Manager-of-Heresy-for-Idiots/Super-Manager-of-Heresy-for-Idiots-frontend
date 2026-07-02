@@ -2581,6 +2581,8 @@ export interface SpellDetail {
   description: string | null;
   higherLevels: string | null;
   packageId: string | null;
+  warning: boolean | null;
+  warningReason: string | null;
   components: SpellComponent[];
   damage: SpellDamage[];
   healing: SpellHealing[];
@@ -2618,6 +2620,34 @@ export interface SpellResolutionRequest {
   saveAbility?: string | null;
   attackRoll?: boolean;
   warning?: boolean;
+}
+
+/** One damage row in the admin spell editor. `damageTypeSlug` refs /reference/damage-types. */
+export interface SpellDamageEditRow {
+  dice?: string | null;
+  damageTypeSlug?: string | null;
+  raw?: string | null;
+}
+
+/** One healing row in the admin spell editor. */
+export interface SpellHealingEditRow {
+  dice?: string | null;
+  flat?: number | null;
+  raw?: string | null;
+}
+
+/**
+ * Full admin edit of a spell's combat resolution (PUT /admin/content/spells/:id).
+ * `damages`/`healings` replace the current sets wholesale; omit to leave untouched.
+ */
+export interface UpdateSpellRequest {
+  saveAbility?: string | null;
+  attackRoll?: boolean;
+  checkAbility?: string | null;
+  checkSkill?: string | null;
+  warning?: boolean;
+  damages?: SpellDamageEditRow[];
+  healings?: SpellHealingEditRow[];
 }
 
 // ---------- Species (2024 race model) ----------
