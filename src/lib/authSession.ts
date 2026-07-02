@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { useAuthStore } from '@/store/authStore';
+import { ensureCsrfToken } from '@/lib/csrf';
 import type { UserResponse } from '@/types';
 
 /**
@@ -51,12 +52,17 @@ export function refreshSession(): Promise<string | null> {
   refreshPromise = (async () => {
     try {
       // No body — the browser sends the refresh_token cookie automatically.
-      const res = await axios.post('/api/auth/refresh', null, { withCredentials: true });
+      const res = await axios.post('/api/auth/refresh', null, {
+        withCredentials: true,
+        xsrfCookieName: 'XSRF-TOKEN',
+        xsrfHeaderName: 'X-XSRF-TOKEN',
+      });
       const parsed = parseAuth(res.data);
       if (!parsed) return null;
 
       useAuthStore.getState().login(parsed.user, parsed.token);
       scheduleProactiveRefresh(parsed.expiresIn);
+      await ensureCsrfToken(true);
       // The live socket re-handshakes on its own: stompjs auto-reconnect pulls a
       // fresh token via ensureFreshAccessToken() in beforeConnect. No explicit
       // wsService call here — that would recurse through beforeConnect.
@@ -129,6 +135,7 @@ export function cancelProactiveRefresh(): void {
 export async function bootstrapAuth(): Promise<void> {
   try {
     await refreshSession();
+    await ensureCsrfToken();
   } finally {
     useAuthStore.getState().setAuthReady(true);
   }

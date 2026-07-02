@@ -1,6 +1,8 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from 'axios';
 import { useAuthStore } from '@/store/authStore';
 import { ensureFreshAccessToken, refreshSession } from '@/lib/authSession';
+import { attachCsrfHeader, ensureCsrfToken } from '@/lib/csrf';
+import { installUnsafeRequestCoalescing, isUnsafeMethod } from '@/lib/httpMutationDedupe';
 import { getStoredLang } from '@/i18n/lang';
 import { markNetworkRequestStarted, recordNetworkFailure, recordNetworkSuccess } from '@/lib/bugReport';
 
@@ -20,6 +22,8 @@ const api = axios.create({
   },
 });
 
+installUnsafeRequestCoalescing(api);
+
 /** Endpoints that must never trigger the reactive refresh (avoids 401→refresh→401 loops). */
 function isAuthEndpoint(url: string | undefined): boolean {
   if (!url) return false;
@@ -28,6 +32,10 @@ function isAuthEndpoint(url: string | undefined): boolean {
 
 api.interceptors.request.use(async (config) => {
   markNetworkRequestStarted(config);
+  if (isUnsafeMethod(config.method)) {
+    const csrfToken = await ensureCsrfToken();
+    attachCsrfHeader(config.headers, csrfToken);
+  }
   // The access token is also sent in the Authorization header. REST is authorized by
   // cookie; this header is the auth path for setups where the cookie can't ride along
   // and is a harmless fallback otherwise.

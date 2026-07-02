@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { authApi } from '@/api/auth.api';
 import { useAuthStore } from '@/store/authStore';
 import { scheduleProactiveRefresh, cancelProactiveRefresh } from '@/lib/authSession';
+import { ensureCsrfToken } from '@/lib/csrf';
 import { wsService } from '@/lib/websocket';
 import { getRoleRedirectPath } from '@/lib/utils';
 import { useT } from '@/i18n/I18nContext';
@@ -32,7 +33,7 @@ export function useLogin() {
   return useMutation({
     mutationFn: (data: LoginRequest) =>
       authApi.login({ username: data.username, password: data.password }),
-    onSuccess: (response) => {
+    onSuccess: async (response) => {
       // The login endpoint is an external boundary: tolerate both the `{ success, data }`
       // envelope and a flat body, plus common token field names. If the token is missing
       // we surface a clear error instead of redirecting into a session that 401/403s.
@@ -58,6 +59,7 @@ export function useLogin() {
       queryClient.clear();
       login(user, token);
       scheduleProactiveRefresh(expiresIn);
+      await ensureCsrfToken(true);
       toast.success(t('hk.auth.welcomeBack', { name: user.username }));
       navigate(getRoleRedirectPath(user.role));
     },
@@ -74,7 +76,8 @@ export function useRegister() {
 
   return useMutation({
     mutationFn: (data: RegisterRequest) => authApi.register(data),
-    onSuccess: () => {
+    onSuccess: async () => {
+      await ensureCsrfToken(true);
       toast.success(t('hk.auth.registerSuccess'));
       navigate('/login');
     },
@@ -104,6 +107,7 @@ export function useLogout() {
     } catch {
       /* ignore — client teardown happens regardless */
     }
+    await ensureCsrfToken(true);
     wsService.disconnect();
     logout();
     queryClient.clear();

@@ -47,6 +47,15 @@ const MAX_CONSOLE_LOGS = 120;
 const MAX_NETWORK_LOGS = 100;
 const MAX_BREADCRUMBS = 160;
 const MAX_STRING = 4000;
+const HEADER_WHITELIST = new Set([
+  'accept',
+  'content-type',
+  'x-requested-with',
+  'x-request-id',
+  'x-correlation-id',
+  'x-xsrf-token',
+  'authorization',
+]);
 
 const consoleLogs: JsonValue[] = [];
 const networkLogs: JsonValue[] = [];
@@ -141,6 +150,10 @@ export function recordNetworkSuccess(response: AxiosResponse) {
     url: config.url,
     status: response.status,
     durationMs: durationFrom(config.__bugReportStartedAt),
+    correlationId: correlationIdFrom(response.headers),
+    requestHeaders: headersSnapshot(config.headers),
+    responseHeaders: headersSnapshot(response.headers),
+    responseBody: responseBodySnapshot(response.data),
   });
 }
 
@@ -157,6 +170,10 @@ export function recordNetworkFailure(error: AxiosError) {
     durationMs: durationFrom(config?.__bugReportStartedAt),
     message: error.message,
     responseMessage: responseMessage(error.response?.data),
+    correlationId: correlationIdFrom(error.response?.headers),
+    requestHeaders: headersSnapshot(config?.headers),
+    responseHeaders: headersSnapshot(error.response?.headers),
+    responseBody: responseBodySnapshot(error.response?.data),
   };
   pushNetworkLog(entry);
 
@@ -361,6 +378,49 @@ function responseMessage(data: unknown) {
   if (!data || typeof data !== 'object') return undefined;
   const record = data as Record<string, unknown>;
   return typeof record.message === 'string' ? record.message : undefined;
+}
+
+function responseBodySnapshot(data: unknown): JsonValue {
+  if (data == null) return null;
+  return sanitize(data);
+}
+
+function correlationIdFrom(headers: unknown): string | undefined {
+  const headersRecord = plainHeaders(headers);
+  const value = headersRecord['x-correlation-id'] ?? headersRecord['x-request-id'];
+  return typeof value === 'string' ? value : undefined;
+}
+
+function headersSnapshot(headers: unknown): JsonValue {
+  const headersRecord = plainHeaders(headers);
+  const result: Record<string, JsonValue> = {};
+  Object.entries(headersRecord).forEach(([key, value]) => {
+    const normalized = key.toLowerCase();
+    if (!HEADER_WHITELIST.has(normalized)) return;
+    result[normalized] = SENSITIVE_KEY.test(normalized) ? '[redacted]' : sanitizeHeaderValue(value);
+  });
+  return result;
+}
+
+function plainHeaders(headers: unknown): Record<string, unknown> {
+  if (!headers || typeof headers !== 'object') return {};
+  const maybeAxiosHeaders = headers as { toJSON?: () => unknown };
+  const raw = typeof maybeAxiosHeaders.toJSON === 'function' ? maybeAxiosHeaders.toJSON() : headers;
+  if (!raw || typeof raw !== 'object') return {};
+
+  const normalized: Record<string, unknown> = {};
+  Object.entries(raw as Record<string, unknown>).forEach(([key, value]) => {
+    normalized[key.toLowerCase()] = value;
+  });
+  return normalized;
+}
+
+function sanitizeHeaderValue(value: unknown): JsonValue {
+  if (Array.isArray(value)) {
+    return value.map((item) => sanitizeHeaderValue(item));
+  }
+  if (value == null) return null;
+  return redactString(String(value)).slice(0, MAX_STRING);
 }
 
 function stringify(value: unknown): string {

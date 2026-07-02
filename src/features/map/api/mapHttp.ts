@@ -1,6 +1,7 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from 'axios';
 import { useAuthStore } from '@/store/authStore';
 import { ensureFreshAccessToken, refreshSession } from '@/lib/authSession';
+import { markNetworkRequestStarted, recordNetworkFailure, recordNetworkSuccess } from '@/lib/bugReport';
 import { MAP_API_BASE_URL } from './mapApiConfig';
 import { buildBearerAuthHeader, buildDevMapIdentityHeaders } from './mapAuthHeaders';
 
@@ -54,6 +55,7 @@ export function attachMapAuth<T extends InternalAxiosRequestConfig>(config: T, t
 }
 
 mapHttp.interceptors.request.use(async (config) => {
+  markNetworkRequestStarted(config);
   const token = isAuthEndpoint(config.url)
     ? useAuthStore.getState().token
     : await ensureFreshAccessToken();
@@ -61,8 +63,12 @@ mapHttp.interceptors.request.use(async (config) => {
 });
 
 mapHttp.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    recordNetworkSuccess(response);
+    return response;
+  },
   async (error: AxiosError) => {
+    recordNetworkFailure(error);
     const original = error.config as (InternalAxiosRequestConfig & { _retry?: boolean }) | undefined;
     const status = error.response?.status;
 
