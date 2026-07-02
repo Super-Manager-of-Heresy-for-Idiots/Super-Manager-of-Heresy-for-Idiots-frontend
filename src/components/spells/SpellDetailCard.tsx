@@ -1,4 +1,5 @@
-import { Loader2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Loader2, PawPrint } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useSpell } from '@/hooks/useContentCatalog';
 import { useT } from '@/i18n/I18nContext';
@@ -39,11 +40,19 @@ export function SpellDetailCard({ spellId, campaignId }: { spellId: string; camp
   if (comp) stats.push({ k: t('camp.lvl.spell.components'), v: comp });
   const material = spellMaterialText(detail);
   const damage = (detail.damage ?? []).filter((d) => d.dice || d.raw || d.damageType);
-  const hasBody = stats.length > 0 || damage.length > 0 || !!material || !!detail.description || !!detail.higherLevels;
+  const healing = (detail.healing ?? []).filter((h) => h.dice || h.flat || h.raw);
+  const summoned = detail.summonedMonsters ?? [];
+  // Summoned statblocks are core (SYSTEM) monsters; navigate within the current
+  // scope — the campaign bestiary route when opened from a campaign, otherwise admin.
+  const monsterHref = (id: string) =>
+    campaignId ? `/campaigns/${campaignId}/bestiary/monsters/${id}` : `/admin/bestiary/monsters/${id}`;
+  const hasBody =
+    stats.length > 0 || damage.length > 0 || healing.length > 0 || summoned.length > 0 ||
+    !!material || !!detail.description || !!detail.higherLevels;
 
   return (
     <div className={s.card}>
-      {(detail.concentration || detail.ritual || detail.saveAbility || detail.attackRoll) && (
+      {(detail.concentration || detail.ritual || detail.saveAbility || detail.attackRoll || detail.checkAbility) && (
         <div className={s.badges}>
           {detail.saveAbility && (
             <span className={cn(s.badge, s.badgeResolve)}>
@@ -52,6 +61,12 @@ export function SpellDetailCard({ spellId, campaignId }: { spellId: string; camp
           )}
           {detail.attackRoll && (
             <span className={cn(s.badge, s.badgeResolve)}>{t('camp.lvl.spell.attackRoll')}</span>
+          )}
+          {detail.checkAbility && (
+            <span className={cn(s.badge, s.badgeResolve)}>
+              {t('camp.lvl.spell.check')}: {t(`best.ability.${detail.checkAbility}`)}
+              {detail.checkSkill ? ` (${detail.checkSkill})` : ''}
+            </span>
           )}
           {detail.concentration && <span className={s.badge}>{t('camp.lvl.spell.concentration')}</span>}
           {detail.ritual && <span className={s.badge}>{t('camp.lvl.spell.ritual')}</span>}
@@ -80,6 +95,43 @@ export function SpellDetailCard({ spellId, campaignId }: { spellId: string; camp
                   ? <span className={s.damageType}>{d.damageType.name}</span>
                   : (!d.dice && d.raw ? <span className={s.damageType}>{d.raw}</span> : null)}
               </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {healing.length > 0 && (
+        <div className={s.healing}>
+          <span className={s.statKey}>{t('camp.lvl.spell.healing')}</span>
+          <div className={s.healChips}>
+            {healing.map((h, i) => (
+              <span key={i} className={s.healChip}>
+                {h.dice || h.flat != null ? (
+                  <span className={s.healAmount}>{h.dice ?? h.flat}</span>
+                ) : (
+                  h.raw && <span className={s.healRaw}>{h.raw}</span>
+                )}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {summoned.length > 0 && (
+        <div className={s.summons}>
+          <span className={s.statKey}>{t('camp.lvl.spell.summons')}</span>
+          <div className={s.summonChips}>
+            {summoned.map((m) => (
+              <Link
+                key={m.id}
+                to={monsterHref(m.id)}
+                className={s.summonChip}
+                title={t('camp.lvl.spell.summonsHint')}
+              >
+                <PawPrint size={12} className={s.summonIcon} />
+                <span className={s.summonName}>{m.name}</span>
+                {m.crRating && <span className={s.summonCr}>CR {m.crRating}</span>}
+              </Link>
             ))}
           </div>
         </div>

@@ -2550,6 +2550,11 @@ export interface SpellDamage {
   damageType: ContentLabel | null;
   raw: string | null;
 }
+export interface SpellHealing {
+  dice: string | null;
+  flat: number | null;
+  raw: string | null;
+}
 export interface SpellDetail {
   id: string;
   slug: string;
@@ -2571,13 +2576,28 @@ export interface SpellDetail {
   concentration: boolean | null;
   saveAbility: string | null;
   attackRoll: boolean | null;
+  checkAbility: string | null;
+  checkSkill: string | null;
   description: string | null;
   higherLevels: string | null;
   packageId: string | null;
   components: SpellComponent[];
   damage: SpellDamage[];
+  healing: SpellHealing[];
   classes: ContentLabel[];
   subclasses: ContentLabel[];
+  /** Bestiary statblocks this summon spell references; empty for non-summon spells. */
+  summonedMonsters: SummonedMonster[];
+}
+
+/** A bestiary statblock referenced by a summon spell (link target for the detail view). */
+export interface SummonedMonster {
+  id: string;
+  slug: string;
+  name: string;
+  nameRu: string;
+  nameEn: string | null;
+  crRating: string | null;
 }
 
 /** Admin review row for a spell flagged as needing manual resolution. */
