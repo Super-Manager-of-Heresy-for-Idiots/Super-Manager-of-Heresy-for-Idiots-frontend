@@ -110,10 +110,6 @@ const UsersListPage = lazy(() => import('@/pages/admin/UsersListPage'));
 const StatTypesPage = lazy(() => import('@/pages/admin/StatTypesPage'));
 const ItemTypesPage = lazy(() => import('@/pages/admin/ItemTypesPage'));
 const CharacterClassesPage = lazy(() => import('@/pages/admin/CharacterClassesPage'));
-const CharacterRacesPage = lazy(() => import('@/pages/admin/CharacterRacesPage'));
-const SkillsPage = lazy(() => import('@/pages/admin/SkillsPage'));
-const SubclassesPage = lazy(() => import('@/pages/admin/SubclassesPage'));
-const FeatsPage = lazy(() => import('@/pages/admin/FeatsPage'));
 const BuffsDebuffsPage = lazy(() => import('@/pages/admin/BuffsDebuffsPage'));
 const EnchantmentTypesPage = lazy(() => import('@/pages/admin/EnchantmentTypesPage'));
 const ItemTemplatesPage = lazy(() => import('@/pages/admin/ItemTemplatesPage'));
@@ -316,10 +312,10 @@ export const router = createBrowserRouter([
           { path: '/admin/content-quality', element: <ContentQualityPage /> },
           { path: '/admin/spell-warnings', element: <SpellWarningsPage /> },
           { path: '/admin/spells', element: <SpellEditorPage /> },
-          { path: '/admin/character-races', element: <CharacterRacesPage /> },
-          { path: '/admin/skills', element: <SkillsPage /> },
-          { path: '/admin/subclasses', element: <SubclassesPage /> },
-          { path: '/admin/feats', element: <FeatsPage /> },
+          { path: '/admin/character-races', element: <Navigate to="/admin/content-quality" replace /> },
+          { path: '/admin/skills', element: <Navigate to="/admin/character-classes" replace /> },
+          { path: '/admin/subclasses', element: <Navigate to="/admin/character-classes" replace /> },
+          { path: '/admin/feats', element: <Navigate to="/admin/character-classes" replace /> },
           { path: '/admin/buffs-debuffs', element: <BuffsDebuffsPage /> },
           { path: '/admin/enchantment-types', element: <EnchantmentTypesPage /> },
           { path: '/admin/homebrew', element: <AdminHomebrewPage /> },

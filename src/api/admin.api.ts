@@ -3,23 +3,13 @@ import type {
   ApiResponse,
   StatTypeResponse,
   ItemTypeResponse,
-  CharacterRaceResponse,
   UserResponse,
-  SkillResponse,
-  FeatResponse,
-  SubclassResponse,
   BuffDebuffResponse,
   EnchantmentTypeResponse,
   CreateStatTypeRequest,
   CreateItemTypeRequest,
-  CreateCharacterRaceRequest,
-  CreateSkillRequest,
-  CreateFeatRequest,
-  CreateSubclassRequest,
   CreateBuffDebuffRequest,
   CreateEnchantmentTypeRequest,
-  SetSkillEffectsRequest,
-  SkillEffectResponse,
   SpellWarningResponse,
   SpellResolutionRequest,
   SpellDetail,
@@ -71,101 +61,10 @@ export const adminApi = {
     return response.data;
   },
 
-  // Character classes are authored via the content model (class-builder + /reference/classes).
-
-  // === Character Races ===
-  getCharacterRaces: async (): Promise<ApiResponse<CharacterRaceResponse[]>> => {
-    const response = await api.get<ApiResponse<CharacterRaceResponse[]>>('/admin/character-races');
-    return response.data;
-  },
-  createCharacterRace: async (data: CreateCharacterRaceRequest): Promise<ApiResponse<CharacterRaceResponse>> => {
-    const response = await api.post<ApiResponse<CharacterRaceResponse>>('/admin/character-races', data);
-    return response.data;
-  },
-  updateCharacterRace: async (id: string, data: CreateCharacterRaceRequest): Promise<ApiResponse<CharacterRaceResponse>> => {
-    const response = await api.put<ApiResponse<CharacterRaceResponse>>(`/admin/character-races/${id}`, data);
-    return response.data;
-  },
-  deleteCharacterRace: async (id: string): Promise<ApiResponse<void>> => {
-    const response = await api.delete<ApiResponse<void>>(`/admin/character-races/${id}`);
-    return response.data;
-  },
-
-  // === Skills ===
-  getSkills: async (): Promise<ApiResponse<SkillResponse[]>> => {
-    const response = await api.get<ApiResponse<SkillResponse[]>>('/admin/skills');
-    return response.data;
-  },
-  createSkill: async (data: CreateSkillRequest): Promise<ApiResponse<SkillResponse>> => {
-    const response = await api.post<ApiResponse<SkillResponse>>('/admin/skills', data);
-    return response.data;
-  },
-  getSkill: async (id: string): Promise<ApiResponse<SkillResponse>> => {
-    const response = await api.get<ApiResponse<SkillResponse>>(`/admin/skills/${id}`);
-    return response.data;
-  },
-  updateSkill: async (id: string, data: CreateSkillRequest): Promise<ApiResponse<SkillResponse>> => {
-    const response = await api.put<ApiResponse<SkillResponse>>(`/admin/skills/${id}`, data);
-    return response.data;
-  },
-  deleteSkill: async (id: string): Promise<ApiResponse<void>> => {
-    const response = await api.delete<ApiResponse<void>>(`/admin/skills/${id}`);
-    return response.data;
-  },
-
-  // Skill Effects
-  getSkillEffects: async (skillId: string): Promise<ApiResponse<SkillEffectResponse[]>> => {
-    const response = await api.get<ApiResponse<SkillEffectResponse[]>>(`/admin/skills/${skillId}/effects`);
-    return response.data;
-  },
-  setSkillEffects: async (skillId: string, data: SetSkillEffectsRequest): Promise<ApiResponse<SkillEffectResponse[]>> => {
-    const response = await api.put<ApiResponse<SkillEffectResponse[]>>(`/admin/skills/${skillId}/effects`, data);
-    return response.data;
-  },
-
-  // === Subclasses ===
-  getSubclasses: async (): Promise<ApiResponse<SubclassResponse[]>> => {
-    const response = await api.get<ApiResponse<SubclassResponse[]>>('/admin/subclasses');
-    return response.data;
-  },
-  createSubclass: async (data: CreateSubclassRequest): Promise<ApiResponse<SubclassResponse>> => {
-    const response = await api.post<ApiResponse<SubclassResponse>>('/admin/subclasses', data);
-    return response.data;
-  },
-  getSubclass: async (id: string): Promise<ApiResponse<SubclassResponse>> => {
-    const response = await api.get<ApiResponse<SubclassResponse>>(`/admin/subclasses/${id}`);
-    return response.data;
-  },
-  updateSubclass: async (id: string, data: CreateSubclassRequest): Promise<ApiResponse<SubclassResponse>> => {
-    const response = await api.put<ApiResponse<SubclassResponse>>(`/admin/subclasses/${id}`, data);
-    return response.data;
-  },
-  deleteSubclass: async (id: string): Promise<ApiResponse<void>> => {
-    const response = await api.delete<ApiResponse<void>>(`/admin/subclasses/${id}`);
-    return response.data;
-  },
-
-  // === Feats ===
-  getFeats: async (): Promise<ApiResponse<FeatResponse[]>> => {
-    const response = await api.get<ApiResponse<FeatResponse[]>>('/admin/feats');
-    return response.data;
-  },
-  createFeat: async (data: CreateFeatRequest): Promise<ApiResponse<FeatResponse>> => {
-    const response = await api.post<ApiResponse<FeatResponse>>('/admin/feats', data);
-    return response.data;
-  },
-  getFeat: async (id: string): Promise<ApiResponse<FeatResponse>> => {
-    const response = await api.get<ApiResponse<FeatResponse>>(`/admin/feats/${id}`);
-    return response.data;
-  },
-  updateFeat: async (id: string, data: CreateFeatRequest): Promise<ApiResponse<FeatResponse>> => {
-    const response = await api.put<ApiResponse<FeatResponse>>(`/admin/feats/${id}`, data);
-    return response.data;
-  },
-  deleteFeat: async (id: string): Promise<ApiResponse<void>> => {
-    const response = await api.delete<ApiResponse<void>>(`/admin/feats/${id}`);
-    return response.data;
-  },
+  // Character classes, subclasses, features and rewards are authored through
+  // classAuthoringApi on the normalized content model. Standalone legacy admin
+  // CRUD for races/species, skills, subclasses and feats is no longer exposed
+  // from active frontend surfaces.
 
   // === Buffs / Debuffs ===
   getBuffsDebuffs: async (params?: { isBuff?: boolean; effectType?: string }): Promise<ApiResponse<BuffDebuffResponse[]>> => {

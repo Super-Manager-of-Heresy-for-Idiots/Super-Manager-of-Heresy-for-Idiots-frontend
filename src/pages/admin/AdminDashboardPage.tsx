@@ -1,6 +1,6 @@
-import { Users, ScrollText, Package, Swords, Crown, Wand2 } from 'lucide-react';
+import { Users, ScrollText, Package, Swords, ShieldCheck, Wand2 } from 'lucide-react';
 import { DashboardCard } from '@/components/admin/DashboardCard';
-import { useUsers, useStatTypes, useItemTypes, useCharacterClasses, useCharacterRaces } from '@/hooks/useAdmin';
+import { useUsers, useStatTypes, useItemTypes, useCharacterClasses } from '@/hooks/useAdmin';
 import { useSpells } from '@/hooks/useContentCatalog';
 import { useT } from '@/i18n/I18nContext';
 
@@ -10,7 +10,6 @@ export default function AdminDashboardPage() {
   const { data: statTypes, isLoading: statTypesLoading } = useStatTypes();
   const { data: itemTypes, isLoading: itemTypesLoading } = useItemTypes();
   const { data: classes, isLoading: classesLoading } = useCharacterClasses();
-  const { data: races, isLoading: racesLoading } = useCharacterRaces();
   const { data: spells, isLoading: spellsLoading } = useSpells();
 
   return (
@@ -46,11 +45,11 @@ export default function AdminDashboardPage() {
           isLoading={classesLoading}
         />
         <DashboardCard
-          title={t('adm.dashboard.characterRaces')}
-          value={races?.length}
-          icon={<Crown className="h-6 w-6" />}
-          href="/admin/character-races"
-          isLoading={racesLoading}
+          title={t('nav.contentQuality')}
+          value={classes?.length}
+          icon={<ShieldCheck className="h-6 w-6" />}
+          href="/admin/content-quality"
+          isLoading={classesLoading}
         />
         <DashboardCard
           title={t('adm.dashboard.spells')}

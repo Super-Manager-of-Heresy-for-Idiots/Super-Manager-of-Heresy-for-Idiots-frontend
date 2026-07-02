@@ -53,16 +53,12 @@ const adminNav: NavEntry[] = [
   { labelKey: 'nav.itemTemplates', path: '/admin/item-templates', glyph: 'scroll' },
   { labelKey: 'nav.itemCatalog', path: '/library/items', glyph: 'sword' },
   { labelKey: 'nav.classes', path: '/admin/character-classes', glyph: 'shield' },
-  { labelKey: 'nav.races', path: '/admin/character-races', glyph: 'sigil-3' },
-  { labelKey: 'nav.skills', path: '/admin/skills', glyph: 'sigil-2' },
-  { labelKey: 'nav.subclasses', path: '/admin/subclasses', glyph: 'cross-pat' },
-  { labelKey: 'nav.feats', path: '/admin/feats', glyph: 'flame' },
+  { labelKey: 'nav.contentQuality', path: '/admin/content-quality', glyph: 'diamond' },
   { labelKey: 'nav.buffsDebuffs', path: '/admin/buffs-debuffs', glyph: 'hex' },
   { labelKey: 'nav.enchantments', path: '/admin/enchantment-types', glyph: 'eye' },
   { labelKey: 'nav.bestiary', path: '/admin/bestiary/monsters', glyph: 'sword' },
   { labelKey: 'nav.bestiaryDicts', path: '/admin/bestiary/dictionaries', glyph: 'book' },
   { labelKey: 'nav.homebrew', path: '/admin/homebrew', glyph: 'scroll' },
-  { labelKey: 'nav.contentQuality', path: '/admin/content-quality', glyph: 'diamond' },
   { labelKey: 'nav.spellWarnings', path: '/admin/spell-warnings', glyph: 'tri-inv' },
 ];
 
