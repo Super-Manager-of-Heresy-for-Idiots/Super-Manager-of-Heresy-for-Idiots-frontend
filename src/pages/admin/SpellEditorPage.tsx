@@ -6,7 +6,7 @@ import { useUpdateSpell } from '@/hooks/useAdmin';
 import { DetailStatus, ExpandChevron, ExpandableRow } from '@/components/common/ExpandableRow';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
-import type { SpellDetail, UpdateSpellRequest } from '@/types';
+import type { ContentLabel, SpellDetail, UpdateSpellRequest } from '@/types';
 import s from './SpellEditorPage.module.css';
 
 const ABILITIES = ['STRENGTH', 'DEXTERITY', 'CONSTITUTION', 'INTELLIGENCE', 'WISDOM', 'CHARISMA'] as const;
@@ -27,7 +27,7 @@ function snapshot(save: string, attack: boolean, chkAb: string, chkSk: string, w
 
 function SpellEditor({ spell, damageTypes, skills }: {
   spell: SpellDetail;
-  damageTypes: { slug: string; name: string }[];
+  damageTypes: ContentLabel[];
   skills: { name: string }[];
 }) {
   const t = useT();
@@ -152,7 +152,7 @@ function SpellEditor({ spell, damageTypes, skills }: {
               onChange={(e) => setDamages((r) => r.map((x, j) => j === i ? { ...x, damageTypeSlug: e.target.value } : x))}
             >
               <option value="">{t('adm.spellEdit.typeless')}</option>
-              {damageTypes.map((dt) => <option key={dt.slug} value={dt.slug}>{dt.name}</option>)}
+              {damageTypes.filter((dt) => dt.slug).map((dt) => <option key={dt.slug} value={dt.slug}>{dt.name}</option>)}
             </select>
             <input
               className={cn('ao-input', s.raw)} placeholder={t('adm.spellEdit.rawPh')} value={d.raw}
