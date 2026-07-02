@@ -3,7 +3,7 @@ import toast from 'react-hot-toast';
 import { adminApi } from '@/api/admin.api';
 import { referenceApi } from '@/api/reference.api';
 import { itemTemplatesApi } from '@/api/item-templates.api';
-import { useT } from '@/i18n/I18nContext';
+import { useI18n, useT } from '@/i18n/I18nContext';
 import type {
   ApiError,
   CreateStatTypeRequest,
@@ -18,6 +18,7 @@ import type {
   SetSkillEffectsRequest,
   UserResponse,
   Page,
+  SpellResolutionRequest,
 } from '@/types';
 import { AxiosError } from 'axios';
 
@@ -601,6 +602,35 @@ export function useUsers() {
       const data = response.data as UserResponse[] | Page<UserResponse> | undefined;
       if (Array.isArray(data)) return data;
       return data?.content ?? [];
+    },
+  });
+}
+
+// === Spell resolution review (data-quality) ===
+export function useSpellWarnings() {
+  const { lang } = useI18n();
+  return useQuery({
+    queryKey: ['spell-warnings', lang],
+    queryFn: async () => {
+      const response = await adminApi.getSpellWarnings(lang);
+      return response.data ?? [];
+    },
+  });
+}
+
+export function useResolveSpell() {
+  const queryClient = useQueryClient();
+  const t = useT();
+  const { lang } = useI18n();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: SpellResolutionRequest }) =>
+      adminApi.resolveSpell(id, data, lang),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['spell-warnings'] });
+      toast.success(t('hk.spellWarn.resolved'));
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error.response?.data?.message || t('hk.spellWarn.resolveFailed'));
     },
   });
 }

@@ -119,6 +119,7 @@ const EnchantmentTypesPage = lazy(() => import('@/pages/admin/EnchantmentTypesPa
 const ItemTemplatesPage = lazy(() => import('@/pages/admin/ItemTemplatesPage'));
 const AdminHomebrewPage = lazy(() => import('@/pages/admin/AdminHomebrewPage'));
 const ContentQualityPage = lazy(() => import('@/pages/admin/ContentQualityPage'));
+const SpellWarningsPage = lazy(() => import('@/pages/admin/SpellWarningsPage'));
 
 export const router = createBrowserRouter([
   // Public routes
@@ -312,6 +313,7 @@ export const router = createBrowserRouter([
           { path: '/admin/item-templates', element: <ItemTemplatesPage /> },
           { path: '/admin/character-classes', element: <CharacterClassesPage /> },
           { path: '/admin/content-quality', element: <ContentQualityPage /> },
+          { path: '/admin/spell-warnings', element: <SpellWarningsPage /> },
           { path: '/admin/character-races', element: <CharacterRacesPage /> },
           { path: '/admin/skills', element: <SkillsPage /> },
           { path: '/admin/subclasses', element: <SubclassesPage /> },

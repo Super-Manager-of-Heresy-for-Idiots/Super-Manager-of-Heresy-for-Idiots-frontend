@@ -1,16 +1,18 @@
-import { Fragment, useEffect, useMemo, useState } from 'react';
+import { Fragment, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Plus, Pencil, Trash2, Eye, EyeOff, Copy, X, Search, AlertTriangle, SlidersHorizontal, ChevronDown } from 'lucide-react';
+import { Plus, Pencil, Trash2, Eye, EyeOff, Copy, X, Search, AlertTriangle, SlidersHorizontal } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import {
   useCampaignMonster,
   useCampaignMonsters,
   useCloneCampaignMonster,
   useDeleteCampaignMonster,
+  usePublicMonster,
   usePublicMonsters,
   useToggleCampaignMonsterVisibility,
 } from '@/hooks/useBestiary';
 import MonsterStatblock from '@/components/bestiary/MonsterStatblock';
+import { DetailStatus, ExpandChevron, ExpandableRow } from '@/components/common/ExpandableRow';
 import { SIZE_VALUES, dictName, sizeKey } from '@/components/bestiary/constants';
 import { useI18n, useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
@@ -39,31 +41,22 @@ function Select<T extends string>({ value, onChange, options }: { value: T; onCh
   );
 }
 
-function MonsterDetailRow({ campaignId, monsterId, open, colSpan }: { campaignId: string; monsterId: string; open: boolean; colSpan: number }) {
+/** Campaign monster full statblock, lazily fetched on first expand. */
+function CampaignMonsterDetail({ campaignId, monsterId }: { campaignId: string; monsterId: string }) {
   const t = useT();
-  const [everOpened, setEverOpened] = useState(false);
-  useEffect(() => { if (open) setEverOpened(true); }, [open]);
-  const q = useCampaignMonster(campaignId, everOpened ? monsterId : undefined);
+  const q = useCampaignMonster(campaignId, monsterId);
+  if (q.isLoading) return <DetailStatus>{t('best.com.loading')}</DetailStatus>;
+  if (q.isError) return <DetailStatus>{t('best.mon.loadError')}</DetailStatus>;
+  return q.data ? <MonsterStatblock monster={q.data} /> : null;
+}
 
-  return (
-    <tr>
-      <td colSpan={colSpan} className={cn(s.detailCell, open && s.open)}>
-        <div className={cn(s.detailGrid, open && s.open)}>
-          <div className={s.detailClip}>
-            <div className={cn(s.detailInner, open && s.open)}>
-              {q.isLoading && (
-                <div className={s.detailStatus}>{t('best.com.loading')}</div>
-              )}
-              {q.isError && (
-                <div className={s.detailStatus}>{t('best.mon.loadError')}</div>
-              )}
-              {q.data && <MonsterStatblock monster={q.data} />}
-            </div>
-          </div>
-        </div>
-      </td>
-    </tr>
-  );
+/** System (public) monster full statblock, lazily fetched on first expand. */
+function SystemMonsterDetail({ monsterId }: { monsterId: string }) {
+  const t = useT();
+  const q = usePublicMonster(monsterId);
+  if (q.isLoading) return <DetailStatus>{t('best.com.loading')}</DetailStatus>;
+  if (q.isError) return <DetailStatus>{t('best.mon.loadError')}</DetailStatus>;
+  return q.data ? <MonsterStatblock monster={q.data} /> : null;
 }
 
 type Tab = 'system' | 'campaign';
@@ -135,7 +128,7 @@ export default function CampaignBestiaryPage() {
           ]).map((tb) => (
             <button
               key={tb.v}
-              onClick={() => setTab(tb.v)}
+              onClick={() => { setTab(tb.v); setExpandedId(null); }}
               className={cn(s.tab, tab === tb.v && s.active)}
             >
               {tb.label}
@@ -170,10 +163,15 @@ export default function CampaignBestiaryPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredSystem.map((m) => (
-                    <tr key={m.id}>
-                      <td>
+                  {filteredSystem.map((m) => {
+                    const isOpen = expandedId === m.id;
+                    const toggle = () => setExpandedId(isOpen ? null : m.id);
+                    return (
+                    <Fragment key={m.id}>
+                    <tr className={cn(s.rowClickable, isOpen && s.rowOpen)}>
+                      <td onClick={toggle}>
                         <div className={s.nameCell}>
+                          <ExpandChevron open={isOpen} />
                           <Diamond size={7} color="var(--bronze)" />
                           <div className={s.nameInner}>
                             <div className={s.monName}>{m.nameRusloc}</div>
@@ -181,8 +179,8 @@ export default function CampaignBestiaryPage() {
                           </div>
                         </div>
                       </td>
-                      <td><SizeBadge size={m.size} lang={lang} /></td>
-                      <td className={s.centerCell}><span className={s.crValue}>{m.crRating}</span></td>
+                      <td onClick={toggle}><SizeBadge size={m.size} lang={lang} /></td>
+                      <td className={s.centerCell} onClick={toggle}><span className={s.crValue}>{m.crRating}</span></td>
                       <td>
                         <div className={s.actionsCell}>
                           <button className="ao-btn ao-btn--ghost ao-btn--sm" disabled={clone.isPending} onClick={() => clone.mutate(m.id, { onSuccess: () => setTab('campaign') })}>
@@ -191,7 +189,10 @@ export default function CampaignBestiaryPage() {
                         </div>
                       </td>
                     </tr>
-                  ))}
+                    <ExpandableRow open={isOpen} colSpan={4}><SystemMonsterDetail monsterId={m.id} /></ExpandableRow>
+                    </Fragment>
+                    );
+                  })}
                   {!systemQ.isLoading && filteredSystem.length === 0 && (
                     <tr><td colSpan={4} className={s.emptyCell}>{systemQ.isError ? t('best.mon.loadError') : t('best.mon.empty')}</td></tr>
                   )}
@@ -223,7 +224,7 @@ export default function CampaignBestiaryPage() {
                     <tr className={cn(s.rowClickable, isOpen && s.rowOpen)}>
                       <td onClick={() => setExpandedId(isOpen ? null : m.id)}>
                         <div className={s.nameCell}>
-                          <ChevronDown size={15} className={cn(s.chevron, isOpen && s.open)} />
+                          <ExpandChevron open={isOpen} />
                           <Diamond size={7} color="var(--bronze)" />
                           <div>
                             <div className={s.monName}>{m.nameRusloc}</div>
@@ -250,7 +251,7 @@ export default function CampaignBestiaryPage() {
                         </td>
                       )}
                     </tr>
-                    <MonsterDetailRow campaignId={campaignId} monsterId={m.id} open={isOpen} colSpan={isGM ? 5 : 4} />
+                    <ExpandableRow open={isOpen} colSpan={isGM ? 5 : 4}><CampaignMonsterDetail campaignId={campaignId} monsterId={m.id} /></ExpandableRow>
                     </Fragment>
                     );
                   })}

@@ -91,6 +91,8 @@ export const hooks: DictModule = {
     'hk.buff.updateFailed': 'Не удалось обновить бафф/дебафф',
     'hk.buff.deleted': 'Бафф/Дебафф удалён!',
     'hk.buff.deleteFailed': 'Не удалось удалить бафф/дебафф',
+    'hk.spellWarn.resolved': 'Заклинание обновлено',
+    'hk.spellWarn.resolveFailed': 'Не удалось сохранить изменения',
     'hk.buff.deleteInUse': 'Удаление невозможно: бафф/дебафф используется',
 
     /* ── useAdmin: enchantment types ─────────────────── */
@@ -403,6 +405,8 @@ export const hooks: DictModule = {
     'hk.buff.updateFailed': 'Failed to update buff/debuff',
     'hk.buff.deleted': 'Buff/Debuff deleted!',
     'hk.buff.deleteFailed': 'Failed to delete buff/debuff',
+    'hk.spellWarn.resolved': 'Spell updated',
+    'hk.spellWarn.resolveFailed': 'Could not save changes',
     'hk.buff.deleteInUse': 'Cannot delete: this buff/debuff is in use',
 
     /* ── useAdmin: enchantment types ─────────────────── */

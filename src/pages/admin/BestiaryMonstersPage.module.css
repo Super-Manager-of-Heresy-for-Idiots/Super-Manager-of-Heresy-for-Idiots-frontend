@@ -27,6 +27,7 @@
 
 .row { cursor: pointer; }
 .row.inactive { opacity: 0.6; }
+.rowOpen { background: rgba(176, 141, 78, 0.06); }
 .monsterCell { display: flex; align-items: center; gap: 12px; }
 .monsterMeta { min-width: 0; }
 .monsterName { font-family: var(--font-serif); font-size: 17px; font-weight: 600; color: var(--ink-bright); }

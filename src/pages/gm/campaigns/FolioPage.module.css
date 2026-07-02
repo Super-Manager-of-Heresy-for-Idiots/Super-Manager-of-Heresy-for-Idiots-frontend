@@ -31,6 +31,10 @@
 .spellsKnown { padding: 14px 16px; border-bottom: 1px solid var(--hairline); }
 .spellList { display: flex; flex-direction: column; gap: 6px; }
 .spellRow { display: flex; align-items: center; gap: 10px; }
+.spellRowClickable { cursor: pointer; padding: 3px 4px; margin: 0 -4px; }
+.spellRowClickable:hover { background: rgba(255, 255, 255, 0.03); }
+.spellRowOpen { background: rgba(176, 141, 78, 0.06); }
+.spellDetailInner { padding: 6px 4px 12px 26px; }
 .spellLevel { width: 30px; flex-shrink: 0; color: var(--arcane); font-size: 12px; }
 .spellName { flex: 1; color: var(--ink-bright); font-size: 13px; }
 .spellSchool { color: var(--ink-faint); font-size: 11px; }

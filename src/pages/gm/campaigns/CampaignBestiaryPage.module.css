@@ -68,8 +68,6 @@
 
 .rowClickable { cursor: pointer; }
 .rowOpen { background: rgba(176, 141, 78, 0.06); }
-.chevron { flex-shrink: 0; color: var(--ink-faint); transform: rotate(-90deg); transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1); }
-.chevron.open { color: var(--gold-pale); transform: rotate(0deg); }
 .visState { display: inline-flex; align-items: center; gap: 7px; font-family: var(--font-mono); font-size: 11px; }
 .visOpen { color: var(--gold-pale); }
 .visHidden { color: var(--ink-faint); }
@@ -77,16 +75,6 @@
 .iconVisOff { color: var(--ink-faint); border-color: var(--rule); }
 .iconDanger { border-color: rgba(179, 70, 26, 0.4); color: #d8896a; }
 .playerNote { font-family: var(--font-mono); font-size: 11px; color: var(--ink-faint); margin-top: 12px; display: flex; align-items: center; gap: 8px; }
-
-/* ── expandable detail row ── */
-.detailCell { padding: 0; background: rgba(0, 0, 0, 0.18); border-bottom: none; }
-.detailCell.open { border-bottom: 1px solid var(--rule); }
-.detailGrid { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 360ms cubic-bezier(0.4, 0, 0.2, 1); }
-.detailGrid.open { grid-template-rows: 1fr; }
-.detailClip { overflow: hidden; }
-.detailInner { padding: clamp(12px, 2vw, 20px); opacity: 0; transition: opacity 280ms ease; }
-.detailInner.open { opacity: 1; }
-.detailStatus { text-align: center; padding: 24px 0; font-family: var(--font-serif); font-style: italic; color: var(--ink-quiet); }
 
 /* ── delete modal ── */
 .modalOverlay {

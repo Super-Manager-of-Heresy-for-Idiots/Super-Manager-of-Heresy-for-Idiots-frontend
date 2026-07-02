@@ -63,6 +63,7 @@ const adminNav: NavEntry[] = [
   { labelKey: 'nav.bestiaryDicts', path: '/admin/bestiary/dictionaries', glyph: 'book' },
   { labelKey: 'nav.homebrew', path: '/admin/homebrew', glyph: 'scroll' },
   { labelKey: 'nav.contentQuality', path: '/admin/content-quality', glyph: 'diamond' },
+  { labelKey: 'nav.spellWarnings', path: '/admin/spell-warnings', glyph: 'tri-inv' },
 ];
 
 function getNavItems(role?: Role): NavEntry[] {

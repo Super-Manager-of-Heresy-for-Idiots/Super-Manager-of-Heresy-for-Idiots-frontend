@@ -5,7 +5,8 @@ import { Rune } from '@/components/ordo';
 import { useSpell } from '@/hooks/useContentCatalog';
 import { useT, useI18n } from '@/i18n/I18nContext';
 import { localizedName } from '@/lib/contentAdapters';
-import type { SpellReferenceResponse, SpellDetail } from '@/types';
+import { spellComponentsText, spellMaterialText, spellRangeText } from '@/lib/spells';
+import type { SpellReferenceResponse } from '@/types';
 import s from './SpellGrantPicker.module.css';
 
 /* ── grouped spell picker ────────────────────────────────────────
@@ -159,20 +160,6 @@ export function SpellGrantPicker({ pool, chosen, need, onToggle, campaignId }: S
   );
 }
 
-function rangeText(d: SpellDetail): string | undefined {
-  if (d.rangeDistance != null && d.rangeUnit) return `${d.rangeDistance} ${d.rangeUnit}`;
-  return d.rangeType ?? undefined;
-}
-
-function componentsText(d: SpellDetail): string | undefined {
-  const parts = (d.components ?? []).map((c) => c.component).filter((x): x is string => !!x);
-  return parts.length ? parts.join(', ') : undefined;
-}
-
-function materialText(d: SpellDetail): string | undefined {
-  return (d.components ?? []).find((c) => c.materialText)?.materialText ?? undefined;
-}
-
 function SpellDetailPane({
   spellRef,
   campaignId,
@@ -202,15 +189,20 @@ function SpellDetailPane({
   const stats: { k: string; v: string }[] = [];
   if (detail) {
     const ct = detail.castingTimeRaw ?? detail.castingActionSlug;
-    const rng = rangeText(detail);
+    const rng = spellRangeText(detail);
     const dur = detail.durationRaw ?? detail.durationType;
-    const comp = componentsText(detail);
+    const comp = spellComponentsText(detail);
     if (ct) stats.push({ k: t('camp.lvl.spell.castingTime'), v: ct });
     if (rng) stats.push({ k: t('camp.lvl.spell.range'), v: rng });
     if (dur) stats.push({ k: t('camp.lvl.spell.duration'), v: dur });
     if (comp) stats.push({ k: t('camp.lvl.spell.components'), v: comp });
+    const dmg = (detail.damage ?? [])
+      .map((d) => [d.dice, d.damageType?.name].filter(Boolean).join(' ') || d.raw)
+      .filter(Boolean)
+      .join(', ');
+    if (dmg) stats.push({ k: t('camp.lvl.spell.damage'), v: dmg });
   }
-  const material = detail ? materialText(detail) : undefined;
+  const material = detail ? spellMaterialText(detail) : undefined;
 
   return (
     <>
@@ -228,8 +220,18 @@ function SpellDetailPane({
           </div>
         </div>
 
-        {detail && (detail.ritual || detail.concentration) && (
+        {detail && (detail.ritual || detail.concentration || detail.saveAbility || detail.attackRoll) && (
           <div className={s.badges}>
+            {detail.saveAbility && (
+              <span className={s.badge}>
+                <Rune kind="shield" size={11} color="var(--gold-pale)" /> {t('camp.lvl.spell.save')}: {t(`best.ability.${detail.saveAbility}`)}
+              </span>
+            )}
+            {detail.attackRoll && (
+              <span className={s.badge}>
+                <Rune kind="sword" size={11} color="var(--gold-pale)" /> {t('camp.lvl.spell.attackRoll')}
+              </span>
+            )}
             {detail.concentration && (
               <span className={s.badge}>
                 <Rune kind="eye" size={11} color="var(--gold-pale)" /> {t('camp.lvl.spell.concentration')}

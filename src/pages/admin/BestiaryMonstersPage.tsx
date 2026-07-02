@@ -1,8 +1,10 @@
-import { useMemo, useState } from 'react';
+import { Fragment, useMemo, useState } from 'react';
 import type { CSSProperties } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Plus, Pencil, Trash2, SlidersHorizontal, X, AlertTriangle } from 'lucide-react';
-import { useAdminMonsters, useDeleteAdminMonster, useSetAdminMonsterActive } from '@/hooks/useBestiary';
+import { useAdminMonster, useAdminMonsters, useDeleteAdminMonster, useSetAdminMonsterActive } from '@/hooks/useBestiary';
+import MonsterStatblock from '@/components/bestiary/MonsterStatblock';
+import { DetailStatus, ExpandChevron, ExpandableRow } from '@/components/common/ExpandableRow';
 import { SIZE_VALUES, dictName, sizeKey, type TFunc } from '@/components/bestiary/constants';
 import { useI18n, useT } from '@/i18n/I18nContext';
 import type { CreatureSize, DictionaryRef, MonsterSummaryResponse } from '@/types';
@@ -51,6 +53,15 @@ function Select<T extends string>({ value, onChange, options }: { value: T; onCh
   );
 }
 
+/** Lazily-loaded full statblock rendered inside the expandable detail row. */
+function AdminMonsterDetail({ monsterId }: { monsterId: string }) {
+  const t = useT();
+  const q = useAdminMonster(monsterId);
+  if (q.isLoading) return <DetailStatus>{t('best.com.loading')}</DetailStatus>;
+  if (q.isError) return <DetailStatus>{t('best.mon.loadError')}</DetailStatus>;
+  return q.data ? <MonsterStatblock monster={q.data} /> : null;
+}
+
 export default function BestiaryMonstersPage() {
   const navigate = useNavigate();
   const t = useT();
@@ -63,6 +74,7 @@ export default function BestiaryMonstersPage() {
   const [sizeFilter, setSizeFilter] = useState<CreatureSize | 'ALL'>('ALL');
   const [crFilter, setCrFilter] = useState('ALL');
   const [confirmDel, setConfirmDel] = useState<MonsterSummaryResponse | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const sizeOptions = [{ v: 'ALL' as const, label: t('best.mon.allSizes') }, ...SIZE_VALUES.map((v) => ({ v, label: t(sizeKey(v)) }))];
   const crOptions = CR_RANGES.map((r) => ({ v: r.v, label: t(r.labelKey) }));
@@ -117,10 +129,15 @@ export default function BestiaryMonstersPage() {
               </tr>
             </thead>
             <tbody>
-              {filtered.map((m) => (
-                <tr key={m.id} className={cn(s.row, !m.isActive && s.inactive)}>
-                  <td onClick={() => navigate(m.id)}>
+              {filtered.map((m) => {
+                const isOpen = expandedId === m.id;
+                const toggle = () => setExpandedId(isOpen ? null : m.id);
+                return (
+                <Fragment key={m.id}>
+                <tr className={cn(s.row, isOpen && s.rowOpen, !m.isActive && s.inactive)}>
+                  <td onClick={toggle}>
                     <div className={s.monsterCell}>
+                      <ExpandChevron open={isOpen} />
                       <Diamond size={7} color="var(--bronze)" />
                       <div className={s.monsterMeta}>
                         <div className={s.monsterName}>{m.nameRusloc}</div>
@@ -128,8 +145,8 @@ export default function BestiaryMonstersPage() {
                       </div>
                     </div>
                   </td>
-                  <td><SizeBadge size={m.size} lang={lang} /></td>
-                  <td className={s.center}><span className={s.crValue}>{m.crRating}</span></td>
+                  <td onClick={toggle}><SizeBadge size={m.size} lang={lang} /></td>
+                  <td className={s.center} onClick={toggle}><span className={s.crValue}>{m.crRating}</span></td>
                   <td><StatusDot active={m.isActive} t={t} /></td>
                   <td className={s.center}><Toggle on={m.isActive} disabled={setActive.isPending} onChange={() => setActive.mutate({ id: m.id, active: !m.isActive })} /></td>
                   <td>
@@ -139,7 +156,10 @@ export default function BestiaryMonstersPage() {
                     </div>
                   </td>
                 </tr>
-              ))}
+                <ExpandableRow open={isOpen} colSpan={6}><AdminMonsterDetail monsterId={m.id} /></ExpandableRow>
+                </Fragment>
+                );
+              })}
               {!isLoading && filtered.length === 0 && (
                 <tr><td colSpan={6} className={s.emptyCell}>{isError ? t('best.mon.loadError') : t('best.mon.empty')}</td></tr>
               )}

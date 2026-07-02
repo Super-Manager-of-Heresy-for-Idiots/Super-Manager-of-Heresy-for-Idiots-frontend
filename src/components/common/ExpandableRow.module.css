@@ -1,0 +1,26 @@
+/* Shared expandable-detail primitive.
+   Extracted verbatim from the campaign-bestiary row expander so every
+   list (bestiary, spells, items, buffs…) animates identically. */
+
+/* rotating disclosure chevron */
+.chevron {
+  flex-shrink: 0;
+  color: var(--ink-faint);
+  transform: rotate(-90deg);
+  transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.chevronOpen { color: var(--gold-pale); transform: rotate(0deg); }
+
+/* table detail <td> chrome */
+.cell { padding: 0; background: rgba(0, 0, 0, 0.18); border-bottom: none; }
+.cellOpen { border-bottom: 1px solid var(--rule); }
+
+/* the animated reveal (grid-rows 0fr → 1fr keeps content out of layout when closed) */
+.grid { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 360ms cubic-bezier(0.4, 0, 0.2, 1); }
+.gridOpen { grid-template-rows: 1fr; }
+.clip { overflow: hidden; }
+.inner { padding: clamp(12px, 2vw, 20px); opacity: 0; transition: opacity 280ms ease; }
+.innerOpen { opacity: 1; }
+
+/* loading / error placeholder shown while the detail query resolves */
+.status { text-align: center; padding: 24px 0; font-family: var(--font-serif); font-style: italic; color: var(--ink-quiet); }

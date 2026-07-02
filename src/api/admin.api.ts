@@ -20,6 +20,8 @@ import type {
   CreateEnchantmentTypeRequest,
   SetSkillEffectsRequest,
   SkillEffectResponse,
+  SpellWarningResponse,
+  SpellResolutionRequest,
 } from '@/types';
 
 export const adminApi = {
@@ -210,6 +212,16 @@ export const adminApi = {
   // === Users (read-only, ADMIN) ===
   getUsers: async (): Promise<ApiResponse<UserResponse[]>> => {
     const response = await api.get<ApiResponse<UserResponse[]>>('/admin/users');
+    return response.data;
+  },
+
+  // === Spell resolution review (data-quality) ===
+  getSpellWarnings: async (lang: string): Promise<ApiResponse<SpellWarningResponse[]>> => {
+    const response = await api.get<ApiResponse<SpellWarningResponse[]>>('/admin/content/spell-warnings', { params: { lang } });
+    return response.data;
+  },
+  resolveSpell: async (id: string, data: SpellResolutionRequest, lang: string): Promise<ApiResponse<SpellWarningResponse>> => {
+    const response = await api.patch<ApiResponse<SpellWarningResponse>>(`/admin/content/spells/${id}/resolution`, data, { params: { lang } });
     return response.data;
   },
 

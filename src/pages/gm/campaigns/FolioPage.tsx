@@ -12,6 +12,8 @@ import {
 } from '@/components/ordo';
 import { CharStatusBadge } from '@/components/campaigns';
 import { CompatibilityBanner } from '@/components/CompatibilityBanner';
+import { ExpandChevron, ExpandablePanel } from '@/components/common/ExpandableRow';
+import { SpellDetailCard } from '@/components/spells/SpellDetailCard';
 import {
   MulticlassPanel,
   AbilityCheckPanel,
@@ -122,6 +124,7 @@ export default function FolioPage() {
   const [hpModalOpen, setHpModalOpen] = useState(false);
   const [checkResult, setCheckResult] = useState<{ statName: string; total: number; breakdown: { source: string; value: number }[] } | null>(null);
   const [activeStatId, setActiveStatId] = useState<string | null>(null);
+  const [expandedSpellId, setExpandedSpellId] = useState<string | null>(null);
 
   const weapons = useMemo<ItemInstanceResponse[]>(
     () => (equipped ?? []).filter((i) => i.slot && WEAPON_SLOTS.includes(i.slot)),
@@ -259,15 +262,27 @@ export default function FolioPage() {
               <div className={s.spellsKnown}>
                 <div className={cn('ao-overline', s.mb10)}>{t('camp2.folio.spells.known')}</div>
                 <div className={s.spellList}>
-                  {[...knownSpells].sort((a, b) => a.level - b.level).map((sp) => (
-                    <div key={sp.spellId} className={s.spellRow}>
-                      <span className={cn('ao-num', s.spellLevel)}>
-                        {sp.level === 0 ? t('camp2.folio.spells.cantrip') : t('camp2.folio.spells.levelShort', { level: sp.level })}
-                      </span>
-                      <span className={s.spellName}>{sp.name}</span>
-                      {sp.school && <span className={cn('ao-italic', s.spellSchool)}>{sp.school}</span>}
+                  {[...knownSpells].sort((a, b) => a.level - b.level).map((sp) => {
+                    const isOpen = expandedSpellId === sp.spellId;
+                    return (
+                    <div key={sp.spellId}>
+                      <div
+                        className={cn(s.spellRow, s.spellRowClickable, isOpen && s.spellRowOpen)}
+                        onClick={() => setExpandedSpellId(isOpen ? null : sp.spellId)}
+                      >
+                        <ExpandChevron open={isOpen} size={13} />
+                        <span className={cn('ao-num', s.spellLevel)}>
+                          {sp.level === 0 ? t('camp2.folio.spells.cantrip') : t('camp2.folio.spells.levelShort', { level: sp.level })}
+                        </span>
+                        <span className={s.spellName}>{sp.name}</span>
+                        {sp.school && <span className={cn('ao-italic', s.spellSchool)}>{sp.school}</span>}
+                      </div>
+                      <ExpandablePanel open={isOpen} innerClassName={s.spellDetailInner}>
+                        <SpellDetailCard spellId={sp.spellId} campaignId={campaignId} />
+                      </ExpandablePanel>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             )}

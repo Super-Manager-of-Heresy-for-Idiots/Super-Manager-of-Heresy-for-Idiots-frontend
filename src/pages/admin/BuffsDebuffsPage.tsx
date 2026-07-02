@@ -1,7 +1,8 @@
 import { useState, useMemo } from 'react';
-import type { CSSProperties } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import { Loader2 } from 'lucide-react';
 import { Rune, OrdoPanel, OrdoField, OrdoChip } from '@/components/ordo';
+import { ExpandChevron, ExpandablePanel } from '@/components/common/ExpandableRow';
 import {
   Dialog,
   DialogContent,
@@ -109,6 +110,43 @@ function ModifierTag({
   );
 }
 
+function DetailField({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div className={s.detailField}>
+      <span className={cn('ao-overline', s.detailFieldLabel)}>{label}</span>
+      <span className={s.detailFieldValue}>{children}</span>
+    </div>
+  );
+}
+
+/** Expanded detail card for a buff/debuff — surfaces the full (un-clamped)
+    description plus every field already present on BuffDebuffResponse. */
+function BuffDetail({ item }: { item: BuffDebuffResponse }) {
+  const t = useT();
+  return (
+    <div className={s.detailWrap}>
+      {item.description && <p className={cn('ao-italic', s.detailDesc)}>{item.description}</p>}
+      <div className={s.detailMeta}>
+        <DetailField label={t('adm.buffs.colNature')}><BuffBadge isBuff={item.isBuff} /></DetailField>
+        <DetailField label={t('adm.buffs.effectTypeLabel')}><EffectTypeBadge type={item.effectType} /></DetailField>
+        {item.targetStatName && (
+          <DetailField label={t('adm.buffs.targetStatLabel')}><span className={s.detailPlain}>{item.targetStatName}</span></DetailField>
+        )}
+        <DetailField label={t('adm.buffs.colModifier')}>
+          {item.modifierValue != null
+            ? <ModifierTag value={item.modifierValue} stat={item.targetStatName} />
+            : <span className={s.modEmpty}>&mdash;</span>}
+        </DetailField>
+        <DetailField label={t('adm.buffs.colDuration')}><DurationDisplay rounds={item.durationRounds} /></DetailField>
+        <DetailField label={t('adm.buffs.detailId')}><span className="ao-codex">{item.id}</span></DetailField>
+        {item.createdAt && (
+          <DetailField label={t('adm.buffs.detailCreated')}><span className="ao-codex">{item.createdAt}</span></DetailField>
+        )}
+      </div>
+    </div>
+  );
+}
+
 /* ---------- page component ---------- */
 
 export default function BuffsDebuffsPage() {
@@ -122,6 +160,7 @@ export default function BuffsDebuffsPage() {
   const [filter, setFilter] = useState<FilterTab>('ALL');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<BuffDebuffResponse | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   // Form state
   const [formName, setFormName] = useState('');
@@ -296,19 +335,28 @@ export default function BuffsDebuffsPage() {
           </div>
 
           {/* Rows */}
-          {filteredData.map((item) => (
-            <div key={item.id} className={cn('ao-rgrid', s.gridRow)}>
+          {filteredData.map((item) => {
+            const isOpen = expandedId === item.id;
+            return (
+            <div key={item.id}>
+            <div
+              className={cn('ao-rgrid', s.gridRow, s.rowClickable, isOpen && s.rowOpen)}
+              onClick={() => setExpandedId(isOpen ? null : item.id)}
+            >
               {/* Effect */}
               <div className={s.effectCell}>
-                <div className={s.effectName}>{item.name}</div>
-                <div className={cn('ao-codex', s.effectId)}>
-                  {item.id.slice(0, 8).toUpperCase()}
-                </div>
-                {item.description && (
-                  <div className={cn('ao-italic', s.effectDesc)}>
-                    {item.description}
+                <ExpandChevron open={isOpen} className={s.effectChevron} />
+                <div className={s.effectCellBody}>
+                  <div className={s.effectName}>{item.name}</div>
+                  <div className={cn('ao-codex', s.effectId)}>
+                    {item.id.slice(0, 8).toUpperCase()}
                   </div>
-                )}
+                  {item.description && (
+                    <div className={cn('ao-italic', s.effectDesc)}>
+                      {item.description}
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Nature */}
@@ -339,7 +387,7 @@ export default function BuffsDebuffsPage() {
               </div>
 
               {/* Actions */}
-              <div className={s.actions}>
+              <div className={s.actions} onClick={(e) => e.stopPropagation()}>
                 <button
                   className={cn('ao-iconbtn', s.iconBtn)}
                   onClick={() => handleEdit(item)}
@@ -376,7 +424,12 @@ export default function BuffsDebuffsPage() {
                 </AlertDialog>
               </div>
             </div>
-          ))}
+            <ExpandablePanel open={isOpen} className={s.detailPanel}>
+              <BuffDetail item={item} />
+            </ExpandablePanel>
+            </div>
+            );
+          })}
 
           {/* Footer */}
           <div className={s.footer}>

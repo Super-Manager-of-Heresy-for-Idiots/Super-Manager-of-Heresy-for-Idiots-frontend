@@ -2545,6 +2545,11 @@ export interface SpellComponent {
   materialText: string | null;
   consumed: boolean | null;
 }
+export interface SpellDamage {
+  dice: string | null;
+  damageType: ContentLabel | null;
+  raw: string | null;
+}
 export interface SpellDetail {
   id: string;
   slug: string;
@@ -2564,12 +2569,35 @@ export interface SpellDetail {
   durationAmount: number | null;
   durationUnit: string | null;
   concentration: boolean | null;
+  saveAbility: string | null;
+  attackRoll: boolean | null;
   description: string | null;
   higherLevels: string | null;
   packageId: string | null;
   components: SpellComponent[];
+  damage: SpellDamage[];
   classes: ContentLabel[];
   subclasses: ContentLabel[];
+}
+
+/** Admin review row for a spell flagged as needing manual resolution. */
+export interface SpellWarningResponse {
+  id: string;
+  slug: string;
+  name: string;
+  level: number | null;
+  schoolName: string | null;
+  saveAbility: string | null;
+  attackRoll: boolean | null;
+  warning: boolean | null;
+  warningReason: string | null;
+  description: string | null;
+}
+/** Admin correction of a spell's parsed resolution. */
+export interface SpellResolutionRequest {
+  saveAbility?: string | null;
+  attackRoll?: boolean;
+  warning?: boolean;
 }
 
 // ---------- Species (2024 race model) ----------
