@@ -127,13 +127,19 @@ export default function MapSessionPage() {
         actorUserId: me?.id ?? '',
         updatedAt: Date.now(),
       });
-      realtime.sendMoveToken({
+      const sent = realtime.sendMoveToken({
         tokenId,
         expectedRevision: currentRevision,
         to: { gridX: cell.gridX, gridY: cell.gridY },
       });
+      if (!sent) {
+        pendingMove.current = null;
+        setLocalDragPreview(null);
+        toast.error(t('map.conn.offline'));
+        realtime.resync();
+      }
     },
-    [tokensById, currentRevision, me?.id, realtime, setLocalDragPreview],
+    [tokensById, currentRevision, me?.id, realtime, setLocalDragPreview, t],
   );
 
   const onTokenDragCancel = useCallback(() => {

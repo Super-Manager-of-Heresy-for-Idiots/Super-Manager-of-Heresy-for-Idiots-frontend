@@ -35,7 +35,7 @@ export interface UseMapRealtimeResult {
   isLoading: boolean;
   /** Last surfaced error (snapshot load, or a user-queue command error). */
   error: MapApiError | null;
-  sendMoveToken: (payload: MoveTokenPayload) => void;
+  sendMoveToken: (payload: MoveTokenPayload) => boolean;
   sendDragPreview: (payload: DragPreviewPayload) => void;
   sendCursor: (payload: CursorPayload) => void;
   sendPing: (payload: PingPayload) => void;
@@ -154,7 +154,7 @@ export function useMapRealtime(sessionId: UUID | null): UseMapRealtimeResult {
   }, []);
 
   const sendMoveToken = useCallback((payload: MoveTokenPayload) => {
-    clientRef.current?.sendMoveToken(payload);
+    return clientRef.current?.sendMoveToken(payload) ?? false;
   }, []);
   const sendDragPreview = useCallback((payload: DragPreviewPayload) => {
     clientRef.current?.sendDragPreview(payload);

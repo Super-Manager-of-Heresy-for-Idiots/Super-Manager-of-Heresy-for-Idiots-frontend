@@ -291,14 +291,21 @@ export function TacticalMapCenterPanel({
         actorUserId: me?.id ?? '',
         updatedAt: Date.now(),
       });
-      realtime.sendMoveToken({
+      const sent = realtime.sendMoveToken({
         tokenId,
         expectedRevision: currentRevision,
         to: { gridX: cell.gridX, gridY: cell.gridY },
       });
+      if (!sent) {
+        pendingMove.current = null;
+        setLocalDragPreview(null);
+        toast.error(t('map.conn.offline'));
+        realtime.resync();
+        return;
+      }
       armMoveWatchdog();
     },
-    [tokensById, currentRevision, me?.id, realtime, setLocalDragPreview, armMoveWatchdog],
+    [tokensById, currentRevision, me?.id, realtime, setLocalDragPreview, t, armMoveWatchdog],
   );
 
   const onTokenDragCancel = useCallback(() => {
@@ -375,16 +382,23 @@ export function TacticalMapCenterPanel({
       actorUserId: me?.id ?? '',
       updatedAt: Date.now(),
     });
-    realtime.sendMoveToken({
+    const sent = realtime.sendMoveToken({
       tokenId: movement.activeTokenId,
       expectedRevision: currentRevision,
       to: { gridX: pendingCell.gridX, gridY: pendingCell.gridY },
       path: reconstructPath(reach, pendingCell).map((c) => ({ gridX: c.gridX, gridY: c.gridY })),
     });
+    if (!sent) {
+      pendingMove.current = null;
+      setLocalDragPreview(null);
+      toast.error(t('map.conn.offline'));
+      realtime.resync();
+      return;
+    }
     armMoveWatchdog();
     setMoveUsed((used) => used + stepDistance(origin, pendingCell));
     clearCombatAction();
-  }, [movement, reach, origin, pendingCell, currentRevision, me?.id, realtime, setLocalDragPreview, clearCombatAction, armMoveWatchdog]);
+  }, [movement, reach, origin, pendingCell, currentRevision, me?.id, realtime, setLocalDragPreview, t, clearCombatAction, armMoveWatchdog]);
 
   const cancelAction = useCallback(() => {
     clearCombatAction();
@@ -424,11 +438,18 @@ export function TacticalMapCenterPanel({
       actorUserId: me?.id ?? '',
       updatedAt: Date.now(),
     });
-    realtime.sendMoveToken({
+    const sent = realtime.sendMoveToken({
       tokenId: pushTargetTokenId,
       expectedRevision: currentRevision,
       to: away,
     });
+    if (!sent) {
+      pendingMove.current = null;
+      setLocalDragPreview(null);
+      toast.error(t('map.conn.offline'));
+      realtime.resync();
+      return;
+    }
     armMoveWatchdog();
     clearCombatAction();
   }, [movement, pushTargetTokenId, map, tokensById, tokens, permissions, currentRevision, me?.id, realtime, setLocalDragPreview, clearCombatAction, t, armMoveWatchdog]);

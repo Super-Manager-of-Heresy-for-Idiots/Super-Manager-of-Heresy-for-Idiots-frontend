@@ -85,8 +85,11 @@ export const map: DictModule = {
     'map.err.INVALID_IMAGE': 'Не удалось обработать изображение.',
     'map.err.GRID_CONFIG_INVALID': 'Неверная конфигурация сетки.',
     'map.err.REVISION_CONFLICT': 'Карта изменилась. Состояние обновлено.',
+    'map.err.CONFLICT': 'Конфликт состояния. Обновите данные и попробуйте снова.',
     'map.err.TOKEN_LOCKED': 'Фишка заблокирована.',
     'map.err.SESSION_CLOSED': 'Сессия закрыта.',
+    'map.err.UPSTREAM_UNAVAILABLE': 'Связанный сервис недоступен.',
+    'map.err.UPSTREAM_PROTOCOL_ERROR': 'Связанный сервис вернул неожиданный ответ.',
     'map.err.INTERNAL_ERROR': 'Картографический сервис недоступен.',
     'map.err.UNKNOWN': 'Что-то пошло не так.',
 
@@ -330,8 +333,11 @@ export const map: DictModule = {
     'map.err.INVALID_IMAGE': 'The image could not be processed.',
     'map.err.GRID_CONFIG_INVALID': 'The grid configuration is invalid.',
     'map.err.REVISION_CONFLICT': 'The map changed. State has been resynced.',
+    'map.err.CONFLICT': 'State conflict. Refresh the data and try again.',
     'map.err.TOKEN_LOCKED': 'The token is locked.',
     'map.err.SESSION_CLOSED': 'The session is closed.',
+    'map.err.UPSTREAM_UNAVAILABLE': 'A linked service is unavailable.',
+    'map.err.UPSTREAM_PROTOCOL_ERROR': 'A linked service returned an unexpected response.',
     'map.err.INTERNAL_ERROR': 'The map service is unavailable.',
     'map.err.UNKNOWN': 'Something went wrong.',
 

@@ -1,6 +1,6 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from 'axios';
 import { useAuthStore } from '@/store/authStore';
-import { refreshSession } from '@/lib/authSession';
+import { ensureFreshAccessToken, refreshSession } from '@/lib/authSession';
 import { MAP_API_BASE_URL } from './mapApiConfig';
 import { buildBearerAuthHeader, buildDevMapIdentityHeaders } from './mapAuthHeaders';
 
@@ -47,14 +47,18 @@ function isAuthEndpoint(url: string | undefined): boolean {
  * (`Authorization: Bearer …`) plus the opt-in dev identity shim (a no-op in prod).
  * Never attaches forged `X-User-Id`/`X-Username`/`X-Authorities` in a prod build.
  */
-export function attachMapAuth<T extends InternalAxiosRequestConfig>(config: T): T {
-  const token = useAuthStore.getState().token;
+export function attachMapAuth<T extends InternalAxiosRequestConfig>(config: T, token = useAuthStore.getState().token): T {
   Object.assign(config.headers, buildDevMapIdentityHeaders());
   Object.assign(config.headers, buildBearerAuthHeader(token));
   return config;
 }
 
-mapHttp.interceptors.request.use(attachMapAuth);
+mapHttp.interceptors.request.use(async (config) => {
+  const token = isAuthEndpoint(config.url)
+    ? useAuthStore.getState().token
+    : await ensureFreshAccessToken();
+  return attachMapAuth(config, token);
+});
 
 mapHttp.interceptors.response.use(
   (response) => response,

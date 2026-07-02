@@ -1,6 +1,6 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from 'axios';
 import { useAuthStore } from '@/store/authStore';
-import { refreshSession } from '@/lib/authSession';
+import { ensureFreshAccessToken, refreshSession } from '@/lib/authSession';
 import { getStoredLang } from '@/i18n/lang';
 
 const api = axios.create({
@@ -25,11 +25,13 @@ function isAuthEndpoint(url: string | undefined): boolean {
   return url.includes('/auth/login') || url.includes('/auth/refresh') || url.includes('/auth/logout');
 }
 
-api.interceptors.request.use((config) => {
+api.interceptors.request.use(async (config) => {
   // The access token is also sent in the Authorization header. REST is authorized by
   // cookie; this header is the auth path for setups where the cookie can't ride along
   // and is a harmless fallback otherwise.
-  const token = useAuthStore.getState().token;
+  const token = isAuthEndpoint(config.url)
+    ? useAuthStore.getState().token
+    : await ensureFreshAccessToken();
   if (token && token !== 'undefined' && token !== 'null') {
     config.headers.Authorization = `Bearer ${token}`;
   }

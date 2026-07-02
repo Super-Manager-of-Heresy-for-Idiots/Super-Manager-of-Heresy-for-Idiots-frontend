@@ -16,8 +16,11 @@ export type MapErrorCode =
   | 'INVALID_IMAGE'
   | 'GRID_CONFIG_INVALID'
   | 'REVISION_CONFLICT'
+  | 'CONFLICT'
   | 'TOKEN_LOCKED'
   | 'SESSION_CLOSED'
+  | 'UPSTREAM_UNAVAILABLE'
+  | 'UPSTREAM_PROTOCOL_ERROR'
   | 'INTERNAL_ERROR';
 
 /** Unified error body returned by the map-service (`ApiErrorResponse`). */
