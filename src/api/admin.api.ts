@@ -2,12 +2,10 @@ import api from './axios';
 import type {
   ApiResponse,
   StatTypeResponse,
-  ItemTypeResponse,
   UserResponse,
   BuffDebuffResponse,
   EnchantmentTypeResponse,
   CreateStatTypeRequest,
-  CreateItemTypeRequest,
   CreateBuffDebuffRequest,
   CreateEnchantmentTypeRequest,
   SpellWarningResponse,
@@ -36,28 +34,6 @@ export const adminApi = {
   },
   deleteStatType: async (id: string): Promise<ApiResponse<void>> => {
     const response = await api.delete<ApiResponse<void>>(`/admin/stat-types/${id}`);
-    return response.data;
-  },
-
-  // === Item Types ===
-  getItemTypes: async (): Promise<ApiResponse<ItemTypeResponse[]>> => {
-    const response = await api.get<ApiResponse<ItemTypeResponse[]>>('/admin/item-types');
-    return response.data;
-  },
-  createItemType: async (data: CreateItemTypeRequest): Promise<ApiResponse<ItemTypeResponse>> => {
-    const response = await api.post<ApiResponse<ItemTypeResponse>>('/admin/item-types', data);
-    return response.data;
-  },
-  getItemType: async (id: string): Promise<ApiResponse<ItemTypeResponse>> => {
-    const response = await api.get<ApiResponse<ItemTypeResponse>>(`/admin/item-types/${id}`);
-    return response.data;
-  },
-  updateItemType: async (id: string, data: CreateItemTypeRequest): Promise<ApiResponse<ItemTypeResponse>> => {
-    const response = await api.put<ApiResponse<ItemTypeResponse>>(`/admin/item-types/${id}`, data);
-    return response.data;
-  },
-  deleteItemType: async (id: string): Promise<ApiResponse<void>> => {
-    const response = await api.delete<ApiResponse<void>>(`/admin/item-types/${id}`);
     return response.data;
   },
 

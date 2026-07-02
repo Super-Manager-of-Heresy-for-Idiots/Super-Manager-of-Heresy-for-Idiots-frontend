@@ -108,8 +108,8 @@ const MonsterFormPage = lazy(() => import('@/pages/bestiary/MonsterFormPage'));
 const AdminDashboardPage = lazy(() => import('@/pages/admin/AdminDashboardPage'));
 const UsersListPage = lazy(() => import('@/pages/admin/UsersListPage'));
 const StatTypesPage = lazy(() => import('@/pages/admin/StatTypesPage'));
-const ItemTypesPage = lazy(() => import('@/pages/admin/ItemTypesPage'));
 const CharacterClassesPage = lazy(() => import('@/pages/admin/CharacterClassesPage'));
+const SpeciesPage = lazy(() => import('@/pages/admin/SpeciesPage'));
 const BuffsDebuffsPage = lazy(() => import('@/pages/admin/BuffsDebuffsPage'));
 const EnchantmentTypesPage = lazy(() => import('@/pages/admin/EnchantmentTypesPage'));
 const ItemTemplatesPage = lazy(() => import('@/pages/admin/ItemTemplatesPage'));
@@ -306,13 +306,15 @@ export const router = createBrowserRouter([
           { path: '/admin/users', element: <UsersListPage /> },
           { path: '/admin/characters', element: <TodoPage title="Characters" /> },
           { path: '/admin/stat-types', element: <StatTypesPage /> },
-          { path: '/admin/item-types', element: <ItemTypesPage /> },
+          { path: '/admin/item-types', element: <Navigate to="/library/items" replace /> },
           { path: '/admin/item-templates', element: <ItemTemplatesPage /> },
           { path: '/admin/character-classes', element: <CharacterClassesPage /> },
+          { path: '/admin/species', element: <SpeciesPage /> },
           { path: '/admin/content-quality', element: <ContentQualityPage /> },
           { path: '/admin/spell-warnings', element: <SpellWarningsPage /> },
           { path: '/admin/spells', element: <SpellEditorPage /> },
-          { path: '/admin/character-races', element: <Navigate to="/admin/content-quality" replace /> },
+          { path: '/admin/character-races', element: <Navigate to="/admin/species" replace /> },
+          { path: '/admin/races', element: <Navigate to="/admin/species" replace /> },
           { path: '/admin/skills', element: <Navigate to="/admin/character-classes" replace /> },
           { path: '/admin/subclasses', element: <Navigate to="/admin/character-classes" replace /> },
           { path: '/admin/feats', element: <Navigate to="/admin/character-classes" replace /> },

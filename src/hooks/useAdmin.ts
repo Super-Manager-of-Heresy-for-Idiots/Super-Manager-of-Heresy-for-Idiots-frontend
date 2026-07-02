@@ -7,7 +7,6 @@ import { useI18n, useT } from '@/i18n/I18nContext';
 import type {
   ApiError,
   CreateStatTypeRequest,
-  CreateItemTypeRequest,
   CreateItemTemplateRequest,
   CreateBuffDebuffRequest,
   CreateEnchantmentTypeRequest,
@@ -71,63 +70,6 @@ export function useDeleteStatType() {
     },
     onError: (error: AxiosError<ApiError>) => {
       toast.error(error.response?.data?.message || t('hk.statType.deleteFailed'));
-    },
-  });
-}
-
-// === Item Types ===
-export function useItemTypes() {
-  return useQuery({
-    queryKey: ['item-types'],
-    queryFn: async () => {
-      const response = await adminApi.getItemTypes();
-      return response.data;
-    },
-  });
-}
-
-export function useCreateItemType() {
-  const queryClient = useQueryClient();
-  const t = useT();
-  return useMutation({
-    mutationFn: (data: CreateItemTypeRequest) => adminApi.createItemType(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['item-types'] });
-      toast.success(t('hk.itemType.created'));
-    },
-    onError: (error: AxiosError<ApiError>) => {
-      toast.error(error.response?.data?.message || t('hk.itemType.createFailed'));
-    },
-  });
-}
-
-export function useUpdateItemType() {
-  const queryClient = useQueryClient();
-  const t = useT();
-  return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: CreateItemTypeRequest }) =>
-      adminApi.updateItemType(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['item-types'] });
-      toast.success(t('hk.itemType.updated'));
-    },
-    onError: (error: AxiosError<ApiError>) => {
-      toast.error(error.response?.data?.message || t('hk.itemType.updateFailed'));
-    },
-  });
-}
-
-export function useDeleteItemType() {
-  const queryClient = useQueryClient();
-  const t = useT();
-  return useMutation({
-    mutationFn: (id: string) => adminApi.deleteItemType(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['item-types'] });
-      toast.success(t('hk.itemType.deleted'));
-    },
-    onError: (error: AxiosError<ApiError>) => {
-      toast.error(error.response?.data?.message || t('hk.itemType.deleteFailed'));
     },
   });
 }

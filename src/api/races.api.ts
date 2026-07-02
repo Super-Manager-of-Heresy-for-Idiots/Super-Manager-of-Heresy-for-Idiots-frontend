@@ -3,31 +3,6 @@ import type { ApiResponse, RaceRequest, RaceResponse } from '@/types';
 
 export const racesApi = {
   // === ADMIN — SYSTEM races ===
-  adminList: async (): Promise<ApiResponse<RaceResponse[]>> => {
-    const response = await api.get<ApiResponse<RaceResponse[]>>('/admin/races');
-    return response.data;
-  },
-  adminGet: async (raceId: string): Promise<ApiResponse<RaceResponse>> => {
-    const response = await api.get<ApiResponse<RaceResponse>>(`/admin/races/${raceId}`);
-    return response.data;
-  },
-  adminCreate: async (data: RaceRequest): Promise<ApiResponse<RaceResponse>> => {
-    const response = await api.post<ApiResponse<RaceResponse>>('/admin/races', data);
-    return response.data;
-  },
-  adminUpdate: async (raceId: string, data: RaceRequest): Promise<ApiResponse<RaceResponse>> => {
-    const response = await api.put<ApiResponse<RaceResponse>>(`/admin/races/${raceId}`, data);
-    return response.data;
-  },
-  adminEnable: async (raceId: string): Promise<ApiResponse<RaceResponse>> => {
-    const response = await api.post<ApiResponse<RaceResponse>>(`/admin/races/${raceId}/enable`);
-    return response.data;
-  },
-  adminDisable: async (raceId: string): Promise<ApiResponse<RaceResponse>> => {
-    const response = await api.post<ApiResponse<RaceResponse>>(`/admin/races/${raceId}/disable`);
-    return response.data;
-  },
-
   // === GM HOMEBREW — DRAFT package races ===
   homebrewCreate: async (packageId: string, data: RaceRequest): Promise<ApiResponse<RaceResponse>> => {
     const response = await api.post<ApiResponse<RaceResponse>>(

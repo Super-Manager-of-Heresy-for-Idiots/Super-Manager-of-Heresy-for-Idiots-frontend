@@ -74,6 +74,11 @@ export const referenceApi = {
     };
   },
 
+  getSpecies: async (): Promise<ApiResponse<SpeciesDetail[]>> => {
+    const response = await api.get<ApiResponse<SpeciesDetail[]>>('/reference/species');
+    return response.data;
+  },
+
   /**
    * Backgrounds now come from the normalized content model (Content Catalog);
    * the legacy `/reference/backgrounds` shape was superseded. Mapped back to the

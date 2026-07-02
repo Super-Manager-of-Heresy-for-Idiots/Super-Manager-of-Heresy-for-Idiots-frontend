@@ -5,95 +5,10 @@ import { racesApi } from '@/api/races.api';
 import { useT } from '@/i18n/I18nContext';
 import type { ApiError, RaceRequest } from '@/types';
 
-const adminListKey = ['races', 'admin'];
 const homebrewListKey = (packageId: string) => ['races', 'homebrew', packageId];
 const campaignListKey = (campaignId: string) => ['races', 'campaign', campaignId];
 
 // === ADMIN ===
-
-export function useAdminRaces() {
-  return useQuery({
-    queryKey: adminListKey,
-    queryFn: async () => {
-      const response = await racesApi.adminList();
-      return response.data ?? [];
-    },
-  });
-}
-
-export function useAdminRace(raceId: string | undefined) {
-  return useQuery({
-    queryKey: ['races', 'admin', raceId],
-    queryFn: async () => {
-      const response = await racesApi.adminGet(raceId!);
-      return response.data;
-    },
-    enabled: !!raceId,
-  });
-}
-
-export function useCreateAdminRace() {
-  const qc = useQueryClient();
-  const t = useT();
-  return useMutation({
-    mutationFn: (data: RaceRequest) => racesApi.adminCreate(data),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['races', 'admin'] });
-      qc.invalidateQueries({ queryKey: ['character-races'] });
-      toast.success(t('hk.races.created'));
-    },
-    onError: (error: AxiosError<ApiError>) => {
-      toast.error(error.response?.data?.message || t('hk.races.createFailed'));
-    },
-  });
-}
-
-export function useUpdateAdminRace() {
-  const qc = useQueryClient();
-  const t = useT();
-  return useMutation({
-    mutationFn: ({ raceId, data }: { raceId: string; data: RaceRequest }) =>
-      racesApi.adminUpdate(raceId, data),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['races', 'admin'] });
-      qc.invalidateQueries({ queryKey: ['character-races'] });
-      toast.success(t('hk.races.updated'));
-    },
-    onError: (error: AxiosError<ApiError>) => {
-      toast.error(error.response?.data?.message || t('hk.races.updateFailed'));
-    },
-  });
-}
-
-export function useEnableAdminRace() {
-  const qc = useQueryClient();
-  const t = useT();
-  return useMutation({
-    mutationFn: (raceId: string) => racesApi.adminEnable(raceId),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['races', 'admin'] });
-      toast.success(t('hk.races.enabled'));
-    },
-    onError: (error: AxiosError<ApiError>) => {
-      toast.error(error.response?.data?.message || t('hk.races.enableFailed'));
-    },
-  });
-}
-
-export function useDisableAdminRace() {
-  const qc = useQueryClient();
-  const t = useT();
-  return useMutation({
-    mutationFn: (raceId: string) => racesApi.adminDisable(raceId),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['races', 'admin'] });
-      toast.success(t('hk.races.disabled'));
-    },
-    onError: (error: AxiosError<ApiError>) => {
-      toast.error(error.response?.data?.message || t('hk.races.disableFailed'));
-    },
-  });
-}
 
 // === GM HOMEBREW ===
 
