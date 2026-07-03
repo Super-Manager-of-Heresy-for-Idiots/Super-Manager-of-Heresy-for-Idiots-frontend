@@ -2100,6 +2100,7 @@ export interface DictionaryEntryResponse {
 export interface DictionaryRef {
   id: string;
   code: string;
+  name?: string | null;
   nameRusloc: string;
   nameEngloc?: string | null;
   homebrewId?: string | null;
@@ -2108,6 +2109,7 @@ export interface DictionaryRef {
 export interface MonsterSummaryResponse {
   id: string;
   slug: string;
+  name?: string | null;
   nameRusloc: string;
   nameEngloc?: string | null;
   size: DictionaryRef;
@@ -2166,11 +2168,13 @@ export interface MonsterFeatureRow {
   id: string;
   section: string;
   sortOrder: number;
+  name?: string | null;
   nameRusloc: string;
   nameEngloc?: string | null;
   kind: string;
   rechargeMin?: number | null;
   rechargeMax?: number | null;
+  description?: string | null;
   descriptionRusloc: string;
   descriptionEngloc?: string | null;
   attackType?: string | null;
@@ -2191,6 +2195,7 @@ export interface MonsterResponse {
   homebrewId: string | null;
   campaignId: string | null;
   sourceMonsterId: string | null;
+  name?: string | null;
   nameRusloc: string;
   nameEngloc?: string | null;
   alignment: DictionaryRef | null;

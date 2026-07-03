@@ -54,7 +54,7 @@ export function rangeCellsFromSpeed(speedFt: number, cellWorldSize: number): num
 function matchSpeed(turn: CombatantTurnResponse | null | undefined, test: (label: string) => boolean) {
   const speeds = turn?.monster?.speeds ?? [];
   const hit = speeds.find((sp) =>
-    test(`${sp.movementType?.code ?? ''} ${sp.movementType?.nameRusloc ?? ''}`.toLowerCase()),
+    test(`${sp.movementType?.code ?? ''} ${sp.movementType?.name ?? ''} ${sp.movementType?.nameRusloc ?? ''} ${sp.movementType?.nameEngloc ?? ''}`.toLowerCase()),
   );
   return typeof hit?.ft === 'number' && hit.ft > 0 ? hit.ft : null;
 }

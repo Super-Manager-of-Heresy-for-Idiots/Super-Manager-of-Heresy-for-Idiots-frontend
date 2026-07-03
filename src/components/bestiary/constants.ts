@@ -1,4 +1,5 @@
 import type { AbilityEnum, CreatureSize, DamageType, DictionaryKind, MonsterScope } from '@/types';
+import { localizedName } from '@/lib/localized';
 
 /** Translate function signature (matches useT). */
 export type TFunc = (key: string, vars?: Record<string, string | number>) => string;
@@ -44,9 +45,9 @@ export const dictSubKey = (k: DictionaryKind) => `best.dict.${k}.sub`;
 // === DictionaryRef display helper ===
 /** Locale-aware name for an expanded dictionary reference. */
 export const dictName = (
-  r: { nameRusloc: string; nameEngloc?: string | null } | null | undefined,
+  r: { name?: string | null; nameRusloc: string; nameEngloc?: string | null } | null | undefined,
   lang: string,
-): string => (r == null ? '' : lang === 'en' ? (r.nameEngloc || r.nameRusloc) : r.nameRusloc);
+): string => localizedName(r, lang === 'en' ? 'en' : 'ru');
 
 // === Localised select option builders ===
 export const sizeOptions = (t: TFunc) => SIZE_VALUES.map((v) => ({ v, label: t(sizeKey(v)) }));

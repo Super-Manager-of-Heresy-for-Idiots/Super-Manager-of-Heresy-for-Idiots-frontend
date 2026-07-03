@@ -24,6 +24,13 @@ function Diamond({ size = 8, color = 'var(--gold)' }: { size?: number; color?: s
 function SizeBadge({ size, lang }: { size: DictionaryRef; lang: string }) {
   return <span className={s.sizeBadge}><Diamond size={6} color="var(--bronze)" />{dictName(size, lang)}</span>;
 }
+function monsterName(m: MonsterSummaryResponse, lang: string): string {
+  return m.name || (lang === 'en' ? m.nameEngloc || m.nameRusloc : m.nameRusloc);
+}
+function secondaryMonsterName(m: MonsterSummaryResponse, lang: string): string | null {
+  const secondary = lang === 'en' ? m.nameRusloc : m.nameEngloc ?? null;
+  return secondary && secondary !== monsterName(m, lang) ? secondary : null;
+}
 
 interface DraftState { id: string | null; code: string; nameRusloc: string; nameEngloc: string; bookCode: string; isUnique: boolean; }
 const EMPTY_DRAFT: DraftState = { id: null, code: '', nameRusloc: '', nameEngloc: '', bookCode: '', isUnique: false };
@@ -53,7 +60,12 @@ export default function HomebrewBestiaryPage() {
 
   const monsters = monstersQ.data ?? [];
   const entries = dictQ.data ?? [];
-  const forkList = (forkSourcesQ.data ?? []).filter((src) => !forkFilter.trim() || src.nameRusloc.toLowerCase().includes(forkFilter.trim().toLowerCase()));
+  const forkList = (forkSourcesQ.data ?? []).filter((src) => {
+    const q = forkFilter.trim().toLowerCase();
+    return !q || monsterName(src, lang).toLowerCase().includes(q)
+      || src.nameRusloc.toLowerCase().includes(q)
+      || (src.nameEngloc ?? '').toLowerCase().includes(q);
+  });
   const isSources = activeKind === 'sources';
 
   const saveDraft = () => {
@@ -110,8 +122,8 @@ export default function HomebrewBestiaryPage() {
                         <div className={s.monNameCell}>
                           <Diamond size={7} color="var(--bronze)" />
                           <div>
-                            <div className={s.monName}>{m.nameRusloc}</div>
-                            <div className={s.monSlug}>{m.nameEngloc ?? 'â€”'} Â· {m.slug}</div>
+                            <div className={s.monName}>{monsterName(m, lang)}</div>
+                            <div className={s.monSlug}>{secondaryMonsterName(m, lang) ?? '—'} · {m.slug}</div>
                           </div>
                         </div>
                       </td>
@@ -197,7 +209,7 @@ export default function HomebrewBestiaryPage() {
                   <button key={src.id} className={cn('ao-panel--inset', s.forkItem)} disabled={duplicate.isPending} onClick={() => duplicate.mutate(src.id, { onSuccess: () => setForkOpen(false) })}>
                     <Diamond size={7} color="var(--bronze)" />
                     <div className={s.forkItemMain}>
-                      <div className={s.forkItemName}>{src.nameRusloc}</div>
+                      <div className={s.forkItemName}>{monsterName(src, lang)}</div>
                       <div className={s.forkItemCr}>{t('best.com.cr')} {src.crRating}</div>
                     </div>
                     <BookOpen size={15} className={s.iconFaint} />
@@ -227,7 +239,7 @@ export default function HomebrewBestiaryPage() {
 
       {confirmMonster && (
         <DictModal title={t('best.hb.delMonsterTitle')} danger onClose={() => setConfirmMonster(null)}>
-          <p className={s.confirmText}>{t('best.hb.delMonsterBody', { name: confirmMonster.nameRusloc })}</p>
+          <p className={s.confirmText}>{t('best.hb.delMonsterBody', { name: monsterName(confirmMonster, lang) })}</p>
           <div className={s.modalActions}>
             <button className="ao-btn ao-btn--ghost" onClick={() => setConfirmMonster(null)}>{t('best.com.cancel')}</button>
             <button className="ao-btn ao-btn--danger" disabled={deleteMonster.isPending} onClick={() => deleteMonster.mutate(confirmMonster.id, { onSuccess: () => setConfirmMonster(null) })}><Trash2 size={13} /> {t('best.com.delete')}</button>

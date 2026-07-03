@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 import { useBattleCurrentTurn } from '@/hooks/useBattles';
-import { useT } from '@/i18n/I18nContext';
+import { useI18n, useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
 import type { BattleResponse } from '@/types';
 import { AttackForm } from '../AttackForm';
@@ -25,11 +25,12 @@ interface TurnTabProps {
 
 export function TurnTab({ campaignId, battle, movement }: TurnTabProps) {
   const t = useT();
+  const { lang } = useI18n();
   const current = currentTurnCombatant(battle.combatants);
   const isMonsterTurn = current?.type === 'MONSTER';
   const { data: turn } = useBattleCurrentTurn(campaignId, battle.id, !!isMonsterTurn);
 
-  const attacks = useMemo(() => monsterAttackOptions(turn), [turn]);
+  const attacks = useMemo(() => monsterAttackOptions(turn, lang), [lang, turn]);
   const targets = useMemo(
     () => (current ? liveTargets(battle.combatants, current) : []),
     [battle.combatants, current],

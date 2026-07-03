@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { useT } from '@/i18n/I18nContext';
+import { useI18n, useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
 import type { BattleResponse } from '@/types';
 import { useBattleCurrentTurn } from '@/hooks/useBattles';
@@ -33,6 +33,7 @@ export function TacticalBattleLeftPanel({
   placementEnabled,
 }: TacticalBattleLeftPanelProps) {
   const t = useT();
+  const { lang } = useI18n();
   const placement = useMapTransientStore((st) => st.placement);
   const setPlacement = useMapTransientStore((st) => st.setPlacement);
   const clearPlacement = useMapTransientStore((st) => st.clearPlacement);
@@ -47,7 +48,7 @@ export function TacticalBattleLeftPanel({
   const active = battle ? currentTurnCombatant(battle.combatants) : null;
   const controlsActive =
     !!active && (isGm || (active.type === 'CHARACTER' && active.ownerUserId === currentUserId));
-  const attackNames = useMemo(() => attackNamesFromTurn(turn), [turn]);
+  const attackNames = useMemo(() => attackNamesFromTurn(turn, lang), [lang, turn]);
   const showAttackPicker = isActive && controlsActive && attackNames.length > 0;
 
   const placedCombatantIds = useMemo(

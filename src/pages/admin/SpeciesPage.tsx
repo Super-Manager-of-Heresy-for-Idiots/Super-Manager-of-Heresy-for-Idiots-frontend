@@ -3,13 +3,15 @@ import { useQuery } from '@tanstack/react-query';
 import { referenceApi } from '@/api/reference.api';
 import { OrdoPanel } from '@/components/ordo';
 import { PanelHeader } from '@/components/ordo';
+import { useI18n } from '@/i18n/I18nContext';
+import { localizedName } from '@/lib/localized';
 import { cn } from '@/lib/utils';
 import { isRetryableError } from '@/lib/errors';
 import type { SpeciesDetail } from '@/types';
 import s from './AdminCrud.module.css';
 
-function speciesName(species: SpeciesDetail): string {
-  return species.nameRu || species.nameEn || species.name;
+function speciesName(species: SpeciesDetail, lang: ReturnType<typeof useI18n>['lang']): string {
+  return localizedName(species, lang);
 }
 
 function speciesSpeed(species: SpeciesDetail): string {
@@ -23,14 +25,15 @@ function speciesSpeed(species: SpeciesDetail): string {
   return speeds.length ? speeds.join(', ') : '-';
 }
 
-function labelList(items: { name?: string | null; nameRu?: string | null; nameEn?: string | null }[]): string {
-  return items.map((item) => item.nameRu || item.nameEn || item.name).filter(Boolean).join(', ') || '-';
+function labelList(items: { name?: string | null; nameRu?: string | null; nameEn?: string | null }[], lang: ReturnType<typeof useI18n>['lang']): string {
+  return items.map((item) => localizedName(item, lang)).filter(Boolean).join(', ') || '-';
 }
 
 export default function SpeciesPage() {
+  const { lang } = useI18n();
   const [search, setSearch] = useState('');
   const query = useQuery({
-    queryKey: ['admin', 'species'],
+    queryKey: ['admin', 'species', lang],
     queryFn: async () => (await referenceApi.getSpecies()).data ?? [],
   });
 
@@ -123,11 +126,11 @@ export default function SpeciesPage() {
             {filtered.map((row) => (
               <tr key={row.id}>
                 <td className={s.cellName}>
-                  {speciesName(row)}
+                  {speciesName(row, lang)}
                   {row.slug && <div className="ao-codex">{row.slug}</div>}
                 </td>
-                <td>{row.creatureType?.nameRu || row.creatureType?.nameEn || row.creatureType?.name || '-'}</td>
-                <td>{labelList(row.sizeOptions)}</td>
+                <td>{localizedName(row.creatureType, lang) || '-'}</td>
+                <td>{labelList(row.sizeOptions, lang)}</td>
                 <td>{speciesSpeed(row)}</td>
                 <td>{row.traits.length}</td>
               </tr>

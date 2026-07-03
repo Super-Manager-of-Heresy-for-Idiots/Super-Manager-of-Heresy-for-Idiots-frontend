@@ -10,6 +10,7 @@ import {
 } from '@/hooks/useBattles';
 import { useIsMobile } from '@/hooks/useMediaQuery';
 import { useT, useI18n } from '@/i18n/I18nContext';
+import { localizedName } from '@/lib/localized';
 import { cn } from '@/lib/utils';
 import { BattleTacticalMapButton } from '@/features/map/tactical';
 import type { BattleResponse, MonsterSummaryResponse } from '@/types';
@@ -53,7 +54,7 @@ export function BattleAssembly({ battle, campaignId }: BattleAssemblyProps) {
   }, [displayedXp]);
 
   const mName = (m: MonsterSummaryResponse) =>
-    lang === 'en' ? m.nameEngloc || m.nameRusloc : m.nameRusloc;
+    localizedName(m, lang);
 
   const group = useMemo(
     () =>
@@ -81,6 +82,7 @@ export function BattleAssembly({ battle, campaignId }: BattleAssemblyProps) {
     if (!q) return list;
     return list.filter(
       (m) =>
+        mName(m).toLowerCase().includes(q) ||
         m.nameRusloc.toLowerCase().includes(q) ||
         (m.nameEngloc ?? '').toLowerCase().includes(q),
     );

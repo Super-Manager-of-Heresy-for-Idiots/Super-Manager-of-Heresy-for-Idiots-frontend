@@ -1,6 +1,7 @@
 import { Plus, X } from 'lucide-react';
 import { OrdoField } from '@/components/ordo';
-import { useT } from '@/i18n/I18nContext';
+import { useI18n, useT } from '@/i18n/I18nContext';
+import { localizedName } from '@/lib/localized';
 import { cn } from '@/lib/utils';
 import type {
   CharacterClassDetailResponse,
@@ -37,6 +38,9 @@ interface Props {
 
 export function NpcFormFields({ value: v, onChange, classes, races, spells, monsters, spellsLoading }: Props) {
   const t = useT();
+  const { lang } = useI18n();
+  const monsterName = (m: MonsterSummaryResponse) =>
+    localizedName(m, lang);
 
   const sources: { key: NpcSourceType | null; label: string }[] = [
     { key: null, label: t('camp2.npcForm.source.free') },
@@ -165,7 +169,7 @@ export function NpcFormFields({ value: v, onChange, classes, races, spells, mons
               >
                 <option value="" className={s.opt}>{t('camp2.npcForm.monsterPlaceholder')}</option>
                 {monsters.map((mo) => (
-                  <option key={mo.id} value={mo.id} className={s.opt}>{mo.nameRusloc}</option>
+                  <option key={mo.id} value={mo.id} className={s.opt}>{monsterName(mo)}</option>
                 ))}
               </select>
             )}

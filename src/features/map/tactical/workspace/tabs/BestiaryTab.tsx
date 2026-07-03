@@ -9,6 +9,7 @@ import { Rune } from '@/components/ordo';
 import { useCampaignMonsters, usePublicMonsters } from '@/hooks/useBestiary';
 import { useAddBattleMonster } from '@/hooks/useBattles';
 import { useI18n, useT } from '@/i18n/I18nContext';
+import { localizedName } from '@/lib/localized';
 import { cn } from '@/lib/utils';
 import type { BattleResponse, MonsterSummaryResponse } from '@/types';
 import s from '../workspace.module.css';
@@ -28,7 +29,7 @@ export function BestiaryTab({ campaignId, battle }: BestiaryTabProps) {
   const addMonster = useAddBattleMonster();
 
   const mName = (m: MonsterSummaryResponse) =>
-    lang === 'en' ? m.nameEngloc || m.nameRusloc : m.nameRusloc;
+    localizedName(m, lang);
 
   const countByMonster = useMemo(() => {
     const map = new Map<string, number>();

@@ -9,7 +9,7 @@ import {
 } from '@/api/bestiary.api';
 import { referenceApi } from '@/api/reference.api';
 import { DICTIONARY_KINDS } from '@/components/bestiary/constants';
-import { useT } from '@/i18n/I18nContext';
+import { useI18n, useT } from '@/i18n/I18nContext';
 import type {
   ApiError,
   DictionaryEntryRequest,
@@ -56,8 +56,9 @@ export function useBestiaryDictionaries(packageId?: string) {
 
 /** Proficiency skills power the `skillProficiencies` select. */
 export function useProficiencySkills() {
+  const { lang } = useI18n();
   return useQuery({
-    queryKey: ['reference', 'skills'],
+    queryKey: ['reference', 'skills', lang],
     queryFn: async () => (await referenceApi.getSkills()).data ?? [],
     staleTime: 10 * 60 * 1000,
   });
@@ -68,15 +69,17 @@ export function useProficiencySkills() {
 // ============================================================
 
 export function useAdminMonsters() {
+  const { lang } = useI18n();
   return useQuery({
-    queryKey: ['bestiary', 'admin', 'monsters'],
+    queryKey: ['bestiary', 'admin', 'monsters', lang],
     queryFn: async () => (await adminBestiaryApi.getMonsters()).data ?? [],
   });
 }
 
 export function useAdminMonster(id?: string) {
+  const { lang } = useI18n();
   return useQuery({
-    queryKey: ['bestiary', 'admin', 'monster', id],
+    queryKey: ['bestiary', 'admin', 'monster', id, lang],
     queryFn: async () => (await adminBestiaryApi.getMonster(id!)).data,
     enabled: !!id,
   });
@@ -191,8 +194,9 @@ export function useDeleteAdminDictionaryEntry() {
 // ============================================================
 
 export function usePublicMonster(id?: string) {
+  const { lang } = useI18n();
   return useQuery({
-    queryKey: ['bestiary', 'public', 'monster', id],
+    queryKey: ['bestiary', 'public', 'monster', id, lang],
     queryFn: async () => (await bestiaryApi.getMonster(id!)).data,
     enabled: !!id,
   });
@@ -200,8 +204,9 @@ export function usePublicMonster(id?: string) {
 
 /** Active system monsters — used as clone/fork sources. */
 export function usePublicMonsters(enabled = true) {
+  const { lang } = useI18n();
   return useQuery({
-    queryKey: ['bestiary', 'public', 'monsters'],
+    queryKey: ['bestiary', 'public', 'monsters', lang],
     queryFn: async () => (await bestiaryApi.getMonsters()).data ?? [],
     enabled,
     staleTime: 5 * 60 * 1000,
@@ -213,16 +218,18 @@ export function usePublicMonsters(enabled = true) {
 // ============================================================
 
 export function useHomebrewMonsters(packageId?: string) {
+  const { lang } = useI18n();
   return useQuery({
-    queryKey: ['bestiary', 'homebrew', packageId, 'monsters'],
+    queryKey: ['bestiary', 'homebrew', packageId, 'monsters', lang],
     queryFn: async () => (await homebrewBestiaryApi.getMonsters(packageId!)).data ?? [],
     enabled: !!packageId,
   });
 }
 
 export function useHomebrewMonster(packageId?: string, id?: string) {
+  const { lang } = useI18n();
   return useQuery({
-    queryKey: ['bestiary', 'homebrew', packageId, 'monster', id],
+    queryKey: ['bestiary', 'homebrew', packageId, 'monster', id, lang],
     queryFn: async () => (await homebrewBestiaryApi.getMonster(packageId!, id!)).data,
     enabled: !!packageId && !!id,
   });
@@ -339,16 +346,18 @@ export function useDeleteHomebrewDictionaryEntry(packageId: string) {
 // ============================================================
 
 export function useCampaignMonsters(campaignId?: string) {
+  const { lang } = useI18n();
   return useQuery({
-    queryKey: ['bestiary', 'campaign', campaignId, 'monsters'],
+    queryKey: ['bestiary', 'campaign', campaignId, 'monsters', lang],
     queryFn: async () => (await campaignMonsterApi.getMonsters(campaignId!)).data ?? [],
     enabled: !!campaignId,
   });
 }
 
 export function useCampaignMonster(campaignId?: string, id?: string) {
+  const { lang } = useI18n();
   return useQuery({
-    queryKey: ['bestiary', 'campaign', campaignId, 'monster', id],
+    queryKey: ['bestiary', 'campaign', campaignId, 'monster', id, lang],
     queryFn: async () => (await campaignMonsterApi.getMonster(campaignId!, id!)).data,
     enabled: !!campaignId && !!id,
     retry: false, // a hidden monster is a deliberate 404 — don't hammer it

@@ -1,7 +1,8 @@
 import React, { useState, type CSSProperties } from 'react';
 import { Plus, X, Save, Ban, GripVertical, ChevronLeft, ChevronRight } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { useT } from '@/i18n/I18nContext';
+import { useI18n, useT } from '@/i18n/I18nContext';
+import { localizedName } from '@/lib/localized';
 import { cn } from '@/lib/utils';
 import type { DictionaryEntryResponse, DictionaryKind, MonsterRequest, MonsterScope } from '@/types';
 import {
@@ -65,7 +66,7 @@ function Check({ on, onChange, label }: { on: boolean; onChange: () => void; lab
     </button>
   );
 }
-function ChipMulti({ ids, onChange, options, emptyLabel }: { ids: string[]; onChange: (v: string[]) => void; options: { id: string; nameRusloc: string }[]; emptyLabel: string }) {
+function ChipMulti({ ids, onChange, options, emptyLabel }: { ids: string[]; onChange: (v: string[]) => void; options: { id: string; label: string }[]; emptyLabel: string }) {
   const toggle = (id: string) => onChange(ids.includes(id) ? ids.filter((x) => x !== id) : [...ids, id]);
   if (options.length === 0) return <div className={s.empty}>{emptyLabel}</div>;
   return (
@@ -74,7 +75,7 @@ function ChipMulti({ ids, onChange, options, emptyLabel }: { ids: string[]; onCh
         const on = ids.includes(o.id);
         return (
           <button type="button" key={o.id} onClick={() => toggle(o.id)} className={cn(s.chip, on && s.on)}>
-            {on ? <X size={11} /> : <Plus size={11} />}{o.nameRusloc}
+            {on ? <X size={11} /> : <Plus size={11} />}{o.label}
           </button>
         );
       })}
@@ -109,7 +110,8 @@ function SubHead({ children }: { children: React.ReactNode }) {
   return <div className={s.subHead}><Diamond size={6} color="var(--bronze)" />{children}</div>;
 }
 
-const dictOpts = (list: DictionaryEntryResponse[]) => list.map((x) => ({ v: x.id, label: x.nameRusloc }));
+const dictOpts = (list: DictionaryEntryResponse[], lang: ReturnType<typeof useI18n>['lang']) => list.map((x) => ({ v: x.id, label: localizedName(x, lang) }));
+const chipOpts = (list: DictionaryEntryResponse[], lang: ReturnType<typeof useI18n>['lang']) => list.map((x) => ({ id: x.id, label: localizedName(x, lang) }));
 
 type StepKey = 'basic' | 'defense' | 'abilities' | 'refs' | 'lists' | 'features' | 'lore';
 const STEPS: { key: StepKey; index: string; titleKey: string; subKey: string }[] = [
@@ -140,6 +142,7 @@ function StepPanel({ index, title, sub, children }: { index: string; title: stri
 
 export default function MonsterFormBody({ initial, dictionaries, skills, scope, contextLabel, submitting, onSubmit, onCancel }: Props) {
   const t = useT() as TFunc;
+  const { lang } = useI18n();
   const [m, setM] = useState<MonsterFormState>(initial);
   const [step, setStep] = useState<StepKey>('basic');
   const set = <K extends keyof MonsterFormState>(k: K, v: MonsterFormState[K]) => setM((p) => ({ ...p, [k]: v }));
@@ -148,9 +151,9 @@ export default function MonsterFormBody({ initial, dictionaries, skills, scope, 
   const rmRow = <K extends keyof MonsterFormState>(key: K, id: number) => set(key, (m[key] as { _id: number }[]).filter((r) => r._id !== id) as MonsterFormState[K]);
   const setRow = <K extends keyof MonsterFormState>(key: K, id: number, patch: object) => set(key, (m[key] as { _id: number }[]).map((r) => (r._id === id ? { ...r, ...patch } : r)) as MonsterFormState[K]);
 
-  const sizeOpts = dictOpts(dictionaries.sizes);
-  const abilityOpts = dictOpts(dictionaries.abilities);
-  const damageOpts = dictOpts(dictionaries['damage-types']);
+  const sizeOpts = dictOpts(dictionaries.sizes, lang);
+  const abilityOpts = dictOpts(dictionaries.abilities, lang);
+  const damageOpts = dictOpts(dictionaries['damage-types'], lang);
   const skillOpts = skills.map((sk) => ({ v: sk.id, label: sk.name }));
   const sectionOpts = SECTION_PRESETS.map((sct) => ({ v: sct, label: t(sectionKey(sct)) }));
 
@@ -183,7 +186,7 @@ export default function MonsterFormBody({ initial, dictionaries, skills, scope, 
           <Diamond size={9} />
           <div>
             <div className={s.appTitle}>{t('best.form.title')}</div>
-            <div className={s.appSub}>{m.nameRusloc || t('best.form.newMonster')} · {contextLabel}</div>
+            <div className={s.appSub}>{localizedName(m, lang) || t('best.form.newMonster')} · {contextLabel}</div>
           </div>
         </div>
         <div className="ao-row ao-gap-8">
@@ -221,7 +224,7 @@ export default function MonsterFormBody({ initial, dictionaries, skills, scope, 
             <FieldBlock label={t('best.form.nameRu')} required><Text value={m.nameRusloc} onChange={(v) => set('nameRusloc', v)} placeholder={t('best.form.namePh')} /></FieldBlock>
             <FieldBlock label={t('best.form.nameEn')}><Text value={m.nameEngloc} onChange={(v) => set('nameEngloc', v)} placeholder="Goblin" /></FieldBlock>
             <FieldBlock label={t('best.form.slug')} hint={t('best.form.slugHint')}><Text value={m.slug} onChange={(v) => set('slug', v)} placeholder="goblin" mono /></FieldBlock>
-            <FieldBlock label={t('best.form.alignment')}><Sel value={m.alignmentId} onChange={(v) => set('alignmentId', v)} options={dictOpts(dictionaries.alignments)} placeholder={t('best.form.noneSelected')} /></FieldBlock>
+            <FieldBlock label={t('best.form.alignment')}><Sel value={m.alignmentId} onChange={(v) => set('alignmentId', v)} options={dictOpts(dictionaries.alignments, lang)} placeholder={t('best.form.noneSelected')} /></FieldBlock>
             <FieldBlock label={t('best.form.size')} required><Sel value={m.sizeId} onChange={(v) => set('sizeId', v)} options={sizeOpts} placeholder={t('best.form.pickSize')} /></FieldBlock>
             <FieldBlock label={t('best.form.sizeSecondary')}><Sel value={m.sizeSecondaryId} onChange={(v) => set('sizeSecondaryId', v)} options={sizeOpts} placeholder={t('best.form.none')} /></FieldBlock>
           </Grid>
@@ -279,12 +282,12 @@ export default function MonsterFormBody({ initial, dictionaries, skills, scope, 
         )}
         {step === 'refs' && (
         <StepPanel index="04" title={t('best.form.s04')} sub={t('best.form.s04sub')}>
-          <SubHead>{t('best.form.creatureTypes')}</SubHead><ChipMulti ids={m.creatureTypeIds} onChange={(v) => set('creatureTypeIds', v)} options={dictionaries['creature-types']} emptyLabel={t('best.form.emptyDict')} />
-          <SubHead>{t('best.form.languages')}</SubHead><ChipMulti ids={m.languageIds} onChange={(v) => set('languageIds', v)} options={dictionaries.languages} emptyLabel={t('best.form.emptyDict')} />
-          <SubHead>{t('best.form.condImmunities')}</SubHead><ChipMulti ids={m.conditionImmunityIds} onChange={(v) => set('conditionImmunityIds', v)} options={dictionaries.conditions} emptyLabel={t('best.form.emptyDict')} />
-          <SubHead>{t('best.form.habitats')}</SubHead><ChipMulti ids={m.habitatIds} onChange={(v) => set('habitatIds', v)} options={dictionaries.habitats} emptyLabel={t('best.form.emptyDict')} />
-          <SubHead>{t('best.form.treasureTags')}</SubHead><ChipMulti ids={m.treasureTagIds} onChange={(v) => set('treasureTagIds', v)} options={dictionaries['treasure-tags']} emptyLabel={t('best.form.emptyDict')} />
-          <SubHead>{t('best.form.sources')}</SubHead><ChipMulti ids={m.sourceIds} onChange={(v) => set('sourceIds', v)} options={dictionaries.sources} emptyLabel={t('best.form.emptyDict')} />
+          <SubHead>{t('best.form.creatureTypes')}</SubHead><ChipMulti ids={m.creatureTypeIds} onChange={(v) => set('creatureTypeIds', v)} options={chipOpts(dictionaries['creature-types'], lang)} emptyLabel={t('best.form.emptyDict')} />
+          <SubHead>{t('best.form.languages')}</SubHead><ChipMulti ids={m.languageIds} onChange={(v) => set('languageIds', v)} options={chipOpts(dictionaries.languages, lang)} emptyLabel={t('best.form.emptyDict')} />
+          <SubHead>{t('best.form.condImmunities')}</SubHead><ChipMulti ids={m.conditionImmunityIds} onChange={(v) => set('conditionImmunityIds', v)} options={chipOpts(dictionaries.conditions, lang)} emptyLabel={t('best.form.emptyDict')} />
+          <SubHead>{t('best.form.habitats')}</SubHead><ChipMulti ids={m.habitatIds} onChange={(v) => set('habitatIds', v)} options={chipOpts(dictionaries.habitats, lang)} emptyLabel={t('best.form.emptyDict')} />
+          <SubHead>{t('best.form.treasureTags')}</SubHead><ChipMulti ids={m.treasureTagIds} onChange={(v) => set('treasureTagIds', v)} options={chipOpts(dictionaries['treasure-tags'], lang)} emptyLabel={t('best.form.emptyDict')} />
+          <SubHead>{t('best.form.sources')}</SubHead><ChipMulti ids={m.sourceIds} onChange={(v) => set('sourceIds', v)} options={chipOpts(dictionaries.sources, lang)} emptyLabel={t('best.form.emptyDict')} />
         </StepPanel>
         )}
         {step === 'lists' && (
@@ -292,7 +295,7 @@ export default function MonsterFormBody({ initial, dictionaries, skills, scope, 
           <SubHead>{t('best.form.speeds')}</SubHead>
           {m.speeds.map((r) => (
             <RowShell key={r._id} removeTitle={t('best.form.removeRow')} onRemove={() => rmRow('speeds', r._id)}>
-              <div className={s.f160}><Sel value={r.movementTypeId} onChange={(v) => setRow('speeds', r._id, { movementTypeId: v })} options={dictOpts(dictionaries['movement-types'])} placeholder={t('best.form.pickType')} /></div>
+              <div className={s.f160}><Sel value={r.movementTypeId} onChange={(v) => setRow('speeds', r._id, { movementTypeId: v })} options={dictOpts(dictionaries['movement-types'], lang)} placeholder={t('best.form.pickType')} /></div>
               <Num value={r.ft} onChange={(v) => setRow('speeds', r._id, { ft: v })} w={80} />
               <Check on={r.hover} onChange={() => setRow('speeds', r._id, { hover: !r.hover })} label={t('best.form.hover')} />
             </RowShell>
@@ -302,7 +305,7 @@ export default function MonsterFormBody({ initial, dictionaries, skills, scope, 
           <SubHead>{t('best.form.senses')}</SubHead>
           {m.senses.map((r) => (
             <RowShell key={r._id} removeTitle={t('best.form.removeRow')} onRemove={() => rmRow('senses', r._id)}>
-              <div className={s.f160}><Sel value={r.senseTypeId} onChange={(v) => setRow('senses', r._id, { senseTypeId: v })} options={dictOpts(dictionaries['sense-types'])} placeholder={t('best.form.pickType')} /></div>
+              <div className={s.f160}><Sel value={r.senseTypeId} onChange={(v) => setRow('senses', r._id, { senseTypeId: v })} options={dictOpts(dictionaries['sense-types'], lang)} placeholder={t('best.form.pickType')} /></div>
               <Num value={r.ft} onChange={(v) => setRow('senses', r._id, { ft: v })} w={80} />
             </RowShell>
           ))}
@@ -345,7 +348,7 @@ export default function MonsterFormBody({ initial, dictionaries, skills, scope, 
           <SubHead>{t('best.form.gear')}</SubHead>
           {m.gear.map((r) => (
             <RowShell key={r._id} removeTitle={t('best.form.removeRow')} onRemove={() => rmRow('gear', r._id)}>
-              <div className={s.f160}><Sel value={r.itemId} onChange={(v) => setRow('gear', r._id, { itemId: v })} options={dictOpts(dictionaries['gear-items'])} placeholder={t('best.form.pickItem')} /></div>
+              <div className={s.f160}><Sel value={r.itemId} onChange={(v) => setRow('gear', r._id, { itemId: v })} options={dictOpts(dictionaries['gear-items'], lang)} placeholder={t('best.form.pickItem')} /></div>
               <Num value={r.qty} onChange={(v) => setRow('gear', r._id, { qty: v })} w={70} />
             </RowShell>
           ))}

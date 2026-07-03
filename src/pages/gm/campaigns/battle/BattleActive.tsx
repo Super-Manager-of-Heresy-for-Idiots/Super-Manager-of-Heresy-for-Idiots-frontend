@@ -15,7 +15,8 @@ import {
   useAdjustActionEconomy,
 } from '@/hooks/useBattles';
 import { useIsMobile } from '@/hooks/useMediaQuery';
-import { useT } from '@/i18n/I18nContext';
+import { useI18n, useT } from '@/i18n/I18nContext';
+import { localizedName } from '@/lib/localized';
 import { cn } from '@/lib/utils';
 import { BattleTacticalMapButton } from '@/features/map/tactical';
 import type {
@@ -291,6 +292,7 @@ function GmControls({
   current?: BattleCombatantResponse;
 }) {
   const t = useT();
+  const { lang } = useI18n();
   const endTurn = useEndTurn();
   const endBattle = useEndBattle();
   const [confirming, setConfirming] = useState(false);
@@ -303,11 +305,11 @@ function GmControls({
       (turn?.monster?.features ?? [])
         .filter((f) => f.attackType)
         .map((f) => ({
-          name: f.nameRusloc,
+          name: localizedName(f, lang),
           damage: f.damages?.[0]?.dice ?? null,
-          damageType: f.damages?.[0]?.damageType?.nameRusloc ?? null,
+          damageType: localizedName(f.damages?.[0]?.damageType, lang) || null,
         })),
-    [turn?.monster?.features],
+    [lang, turn?.monster?.features],
   );
   const npcTargets = useMemo(
     () => (current ? liveTargets(battle.combatants, current) : []),

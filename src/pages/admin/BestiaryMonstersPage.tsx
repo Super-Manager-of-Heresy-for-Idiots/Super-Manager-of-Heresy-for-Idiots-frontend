@@ -45,6 +45,13 @@ function StatusDot({ active, t }: { active: boolean; t: TFunc }) {
     </span>
   );
 }
+function monsterName(m: MonsterSummaryResponse, lang: string): string {
+  return m.name || (lang === 'en' ? m.nameEngloc || m.nameRusloc : m.nameRusloc);
+}
+function secondaryMonsterName(m: MonsterSummaryResponse, lang: string): string | null {
+  const secondary = lang === 'en' ? m.nameRusloc : m.nameEngloc ?? null;
+  return secondary && secondary !== monsterName(m, lang) ? secondary : null;
+}
 function Select<T extends string>({ value, onChange, options }: { value: T; onChange: (v: T) => void; options: { v: T; label: string }[] }) {
   return (
     <select className={cn('ao-input', s.filterSelect)} value={value} onChange={(e) => onChange(e.target.value as T)}>
@@ -83,12 +90,14 @@ export default function BestiaryMonstersPage() {
     const cr = CR_RANGES.find((r) => r.v === crFilter)!;
     return rows.filter((m) => {
       const q = query.trim().toLowerCase();
-      const matchQ = !q || m.nameRusloc.toLowerCase().includes(q) || (m.nameEngloc ?? '').toLowerCase().includes(q);
+      const matchQ = !q || monsterName(m, lang).toLowerCase().includes(q)
+        || m.nameRusloc.toLowerCase().includes(q)
+        || (m.nameEngloc ?? '').toLowerCase().includes(q);
       const matchSize = sizeFilter === 'ALL' || m.size.code === sizeFilter;
       const matchCr = m.crValue >= cr.min && m.crValue <= cr.max;
       return matchQ && matchSize && matchCr;
     });
-  }, [rows, query, sizeFilter, crFilter]);
+  }, [rows, query, sizeFilter, crFilter, lang]);
 
   return (
     <div className={s.page}>
@@ -132,6 +141,8 @@ export default function BestiaryMonstersPage() {
               {filtered.map((m) => {
                 const isOpen = expandedId === m.id;
                 const toggle = () => setExpandedId(isOpen ? null : m.id);
+                const displayName = monsterName(m, lang);
+                const secondaryName = secondaryMonsterName(m, lang);
                 return (
                 <Fragment key={m.id}>
                 <tr className={cn(s.row, isOpen && s.rowOpen, !m.isActive && s.inactive)}>
@@ -140,8 +151,8 @@ export default function BestiaryMonstersPage() {
                       <ExpandChevron open={isOpen} />
                       <Diamond size={7} color="var(--bronze)" />
                       <div className={s.monsterMeta}>
-                        <div className={s.monsterName}>{m.nameRusloc}</div>
-                        <div className={s.monsterSub}>{m.nameEngloc ?? 'â€”'} Â· {m.slug}</div>
+                        <div className={s.monsterName}>{displayName}</div>
+                        <div className={s.monsterSub}>{secondaryName ?? '—'} · {m.slug}</div>
                       </div>
                     </div>
                   </td>
@@ -185,7 +196,7 @@ export default function BestiaryMonstersPage() {
             </div>
             <div className={s.modalBody}>
               <p className={s.modalText}>
-                {t('best.mon.delBody', { name: confirmDel.nameRusloc })}
+                {t('best.mon.delBody', { name: monsterName(confirmDel, lang) })}
               </p>
               <div className={s.modalActions}>
                 <button className="ao-btn ao-btn--ghost" onClick={() => setConfirmDel(null)}>{t('best.com.cancel')}</button>

@@ -5,6 +5,8 @@
  */
 
 import type { BattleCombatantResponse, CombatantTurnResponse } from '@/types';
+import type { Lang } from '@/i18n/translations';
+import { localizedName } from '@/lib/localized';
 
 export interface AttackOption {
   name: string;
@@ -43,12 +45,13 @@ export function characterAttackOptions(
 /** A monster's attack-typed features from the current-turn detail. */
 export function monsterAttackOptions(
   turn: CombatantTurnResponse | null | undefined,
+  lang: Lang,
 ): AttackOption[] {
   return (turn?.monster?.features ?? [])
     .filter((f) => f.attackType)
     .map((f) => ({
-      name: f.nameRusloc,
+      name: localizedName(f, lang),
       damage: f.damages?.[0]?.dice ?? null,
-      damageType: f.damages?.[0]?.damageType?.nameRusloc ?? null,
+      damageType: localizedName(f.damages?.[0]?.damageType, lang) || null,
     }));
 }

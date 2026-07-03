@@ -35,8 +35,8 @@ function App() {
   }, []);
 
   return (
-    <I18nProvider>
     <QueryClientProvider client={queryClient}>
+    <I18nProvider>
       <BugReportErrorBoundary>
         {authReady ? <RouterProvider router={router} /> : <PageFallback />}
       </BugReportErrorBoundary>
@@ -64,8 +64,8 @@ function App() {
           },
         }}
       />
-    </QueryClientProvider>
     </I18nProvider>
+    </QueryClientProvider>
   );
 }
 

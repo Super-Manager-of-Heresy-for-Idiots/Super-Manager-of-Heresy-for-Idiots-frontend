@@ -30,6 +30,10 @@ function isAuthEndpoint(url: string | undefined): boolean {
   return url.includes('/auth/login') || url.includes('/auth/refresh') || url.includes('/auth/logout');
 }
 
+function shouldAttachLangParam(url: string | undefined): boolean {
+  return Boolean(url) && !isAuthEndpoint(url);
+}
+
 api.interceptors.request.use(async (config) => {
   markNetworkRequestStarted(config);
   if (isUnsafeMethod(config.method)) {
@@ -45,12 +49,12 @@ api.interceptors.request.use(async (config) => {
   if (token && token !== 'undefined' && token !== 'null') {
     config.headers.Authorization = `Bearer ${token}`;
   }
-  // Reference data (PHB spells/races/classes/backgrounds/skills/currencies) is
-  // localized server-side by a `lang` query param. Attach the active UI language
-  // to every reference request so all roles get RU/EN text. `stat-types` has no
-  // translations, so it is left untouched.
-  if (config.url?.includes('/reference/') && !config.url.includes('/reference/stat-types')) {
-    config.params = { ...config.params, lang: getStoredLang() };
+  // Every core API response that can feed the UI is language-scoped. Some
+  // current entities still have no localized columns, but keeping `lang` on the
+  // request makes cache/request behavior correct when server-side localization
+  // is added and avoids stale UI data after switching languages.
+  if (shouldAttachLangParam(config.url)) {
+    config.params = { ...config.params, lang: config.params?.lang ?? getStoredLang() };
   }
   return config;
 });

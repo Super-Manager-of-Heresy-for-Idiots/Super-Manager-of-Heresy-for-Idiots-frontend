@@ -33,6 +33,13 @@ function Diamond({ size = 8, color = 'var(--gold)' }: { size?: number; color?: s
 function SizeBadge({ size, lang }: { size: DictionaryRef; lang: string }) {
   return <span className={s.sizeBadge}><Diamond size={6} color="var(--bronze)" />{dictName(size, lang)}</span>;
 }
+function monsterName(m: MonsterSummaryResponse, lang: string): string {
+  return m.name || (lang === 'en' ? m.nameEngloc || m.nameRusloc : m.nameRusloc);
+}
+function secondaryMonsterName(m: MonsterSummaryResponse, lang: string): string | null {
+  const secondary = lang === 'en' ? m.nameRusloc : m.nameEngloc ?? null;
+  return secondary && secondary !== monsterName(m, lang) ? secondary : null;
+}
 function Select<T extends string>({ value, onChange, options }: { value: T; onChange: (v: T) => void; options: { v: T; label: string }[] }) {
   return (
     <select className={cn('ao-input', s.filterSelect)} value={value} onChange={(e) => onChange(e.target.value as T)}>
@@ -97,12 +104,14 @@ export default function CampaignBestiaryPage() {
     const cr = CR_RANGES.find((r) => r.v === crFilter)!;
     return systemRows.filter((m) => {
       const q = query.trim().toLowerCase();
-      const matchQ = !q || m.nameRusloc.toLowerCase().includes(q) || (m.nameEngloc ?? '').toLowerCase().includes(q);
+      const matchQ = !q || monsterName(m, lang).toLowerCase().includes(q)
+        || m.nameRusloc.toLowerCase().includes(q)
+        || (m.nameEngloc ?? '').toLowerCase().includes(q);
       const matchSize = sizeFilter === 'ALL' || m.size.code === sizeFilter;
       const matchCr = m.crValue >= cr.min && m.crValue <= cr.max;
       return matchQ && matchSize && matchCr;
     });
-  }, [systemRows, query, sizeFilter, crFilter]);
+  }, [systemRows, query, sizeFilter, crFilter, lang]);
 
   return (
     <div className={s.page}>
@@ -166,6 +175,8 @@ export default function CampaignBestiaryPage() {
                   {filteredSystem.map((m) => {
                     const isOpen = expandedId === m.id;
                     const toggle = () => setExpandedId(isOpen ? null : m.id);
+                    const displayName = monsterName(m, lang);
+                    const secondaryName = secondaryMonsterName(m, lang);
                     return (
                     <Fragment key={m.id}>
                     <tr className={cn(s.rowClickable, isOpen && s.rowOpen)}>
@@ -174,8 +185,8 @@ export default function CampaignBestiaryPage() {
                           <ExpandChevron open={isOpen} />
                           <Diamond size={7} color="var(--bronze)" />
                           <div className={s.nameInner}>
-                            <div className={s.monName}>{m.nameRusloc}</div>
-                            <div className={s.monSub}>{m.nameEngloc ?? 'â€”'} Â· {m.slug}</div>
+                            <div className={s.monName}>{displayName}</div>
+                            <div className={s.monSub}>{secondaryName ?? '—'} · {m.slug}</div>
                           </div>
                         </div>
                       </td>
@@ -219,6 +230,8 @@ export default function CampaignBestiaryPage() {
                 <tbody>
                   {monsters.map((m) => {
                     const isOpen = expandedId === m.id;
+                    const displayName = monsterName(m, lang);
+                    const secondaryName = secondaryMonsterName(m, lang);
                     return (
                     <Fragment key={m.id}>
                     <tr className={cn(s.rowClickable, isOpen && s.rowOpen)}>
@@ -227,8 +240,8 @@ export default function CampaignBestiaryPage() {
                           <ExpandChevron open={isOpen} />
                           <Diamond size={7} color="var(--bronze)" />
                           <div>
-                            <div className={s.monName}>{m.nameRusloc}</div>
-                            <div className={s.monSubPlain}>{m.nameEngloc ?? 'â€”'}{m.sourceMonsterId ? ` Â· ${t('best.cmp.cloneTag')}` : ''}</div>
+                            <div className={s.monName}>{displayName}</div>
+                            <div className={s.monSubPlain}>{secondaryName ?? '—'}{m.sourceMonsterId ? ` · ${t('best.cmp.cloneTag')}` : ''}</div>
                           </div>
                         </div>
                       </td>
@@ -282,7 +295,7 @@ export default function CampaignBestiaryPage() {
               <button className="ao-iconbtn" onClick={() => setConfirmDel(null)} title={t('best.com.close')}><X size={14} /></button>
             </div>
             <div className={s.modalBody}>
-              <p className={s.modalText}>{t('best.cmp.delBody', { name: confirmDel.nameRusloc })}</p>
+              <p className={s.modalText}>{t('best.cmp.delBody', { name: monsterName(confirmDel, lang) })}</p>
               <div className={s.modalActions}>
                 <button className="ao-btn ao-btn--ghost" onClick={() => setConfirmDel(null)}>{t('best.com.cancel')}</button>
                 <button className="ao-btn ao-btn--danger" disabled={del.isPending} onClick={() => del.mutate(confirmDel.id, { onSuccess: () => setConfirmDel(null) })}><Trash2 size={13} /> {t('best.com.delete')}</button>

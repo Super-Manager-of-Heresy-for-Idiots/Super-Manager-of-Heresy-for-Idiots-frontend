@@ -2,6 +2,7 @@ import axios, { AxiosError, type InternalAxiosRequestConfig } from 'axios';
 import { useAuthStore } from '@/store/authStore';
 import { ensureFreshAccessToken, refreshSession } from '@/lib/authSession';
 import { markNetworkRequestStarted, recordNetworkFailure, recordNetworkSuccess } from '@/lib/bugReport';
+import { getStoredLang } from '@/i18n/lang';
 import { MAP_API_BASE_URL } from './mapApiConfig';
 import { buildBearerAuthHeader, buildDevMapIdentityHeaders } from './mapAuthHeaders';
 
@@ -59,6 +60,9 @@ mapHttp.interceptors.request.use(async (config) => {
   const token = isAuthEndpoint(config.url)
     ? useAuthStore.getState().token
     : await ensureFreshAccessToken();
+  if (!isAuthEndpoint(config.url)) {
+    config.params = { ...config.params, lang: config.params?.lang ?? getStoredLang() };
+  }
   return attachMapAuth(config, token);
 });
 

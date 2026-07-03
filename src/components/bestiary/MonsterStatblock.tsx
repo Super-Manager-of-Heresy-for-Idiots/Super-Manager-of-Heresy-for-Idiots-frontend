@@ -58,6 +58,9 @@ function DefenseTile({ icon, value, label }: { icon: React.ReactNode; value: Rea
 }
 
 function FeatureCard({ f, t, lang }: { f: MonsterFeatureRow; t: TFunc; lang: string }) {
+  const featureName = f.name || (lang === 'en' ? f.nameEngloc || f.nameRusloc : f.nameRusloc);
+  const featureDescription = f.description || (lang === 'en' ? f.descriptionEngloc || f.descriptionRusloc : f.descriptionRusloc);
+  const secondaryName = lang === 'en' ? f.nameRusloc : f.nameEngloc;
   const recharge = f.rechargeMin != null
     ? ` (${t('best.atk.recharge', { range: `${f.rechargeMin}${f.rechargeMax && f.rechargeMax !== f.rechargeMin ? `–${f.rechargeMax}` : ''}` })})`
     : '';
@@ -72,12 +75,12 @@ function FeatureCard({ f, t, lang }: { f: MonsterFeatureRow; t: TFunc; lang: str
   return (
     <div className={s.feature}>
       <span className={s.featName}>
-        {f.nameRusloc}
-        {f.nameEngloc ? <span className={s.featEng}> · {f.nameEngloc}</span> : null}
+        {featureName}
+        {secondaryName && secondaryName !== featureName ? <span className={s.featEng}> � {secondaryName}</span> : null}
         {recharge}.
       </span>{' '}
       {attackBits.length > 0 && <span className={s.featAttack}>{attackBits.join(', ')}. </span>}
-      {f.descriptionRusloc}
+      {featureDescription}
       {f.damages.length > 0 && (
         <span>
           {' '}
@@ -100,6 +103,8 @@ function FeatureCard({ f, t, lang }: { f: MonsterFeatureRow; t: TFunc; lang: str
 
 export default function MonsterStatblock({ monster: m }: { monster: MonsterResponse }) {
   const { t, lang } = useI18n();
+  const monsterName = m.name || (lang === 'en' ? m.nameEngloc || m.nameRusloc : m.nameRusloc);
+  const secondaryMonsterName = lang === 'en' ? m.nameRusloc : m.nameEngloc;
   const locale = lang === 'en' ? 'en-US' : 'ru-RU';
   const fmtDate = (iso?: string): string => (iso ? new Date(iso).toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' }) : '—');
   const xpText = (() => {
@@ -109,8 +114,8 @@ export default function MonsterStatblock({ monster: m }: { monster: MonsterRespo
 
   const subtitle = [
     `${dictName(m.size, lang)}${m.sizeSecondary ? ` / ${dictName(m.sizeSecondary, lang)}` : ''}${m.isSwarm && m.swarmSize ? ` ${t('best.sb.swarmOf', { size: dictName(m.swarmSize, lang).toLowerCase() })}` : ''}`,
-    m.creatureTypes.map((ct) => ct.nameRusloc.toLowerCase()).join(', '),
-    m.alignment ? m.alignment.nameRusloc.toLowerCase() : t('best.sb.unaligned'),
+    m.creatureTypes.map((ct) => dictName(ct, lang).toLowerCase()).join(', '),
+    m.alignment ? dictName(m.alignment, lang).toLowerCase() : t('best.sb.unaligned'),
   ].filter(Boolean).join(' · ');
 
   const sections = SECTION_ORDER.filter((sec) => m.features.some((f) => f.section === sec));
@@ -123,8 +128,8 @@ export default function MonsterStatblock({ monster: m }: { monster: MonsterRespo
       <header className={s.header}>
         <div className={s.headerRow}>
           <div className={s.headerMain}>
-            <h1 className={cn('ao-h2', s.title)}>{m.nameRusloc}</h1>
-            {m.nameEngloc && <div className={s.titleEng}>{m.nameEngloc}</div>}
+            <h1 className={cn('ao-h2', s.title)}>{monsterName}</h1>
+            {secondaryMonsterName && secondaryMonsterName !== monsterName && <div className={s.titleEng}>{secondaryMonsterName}</div>}
             <p className={s.subtitle}>{subtitle}</p>
           </div>
           <div className={s.crWrap}>
@@ -145,7 +150,7 @@ export default function MonsterStatblock({ monster: m }: { monster: MonsterRespo
           <DefenseTile icon={<Shield size={20} />} value={m.armorClass} label={`${t('best.sb.ac')}${m.armorClassText ? ` · ${m.armorClassText}` : ''}`} />
           <DefenseTile icon={<Heart size={20} />} value={m.hpAverage ?? '—'} label={`${t('best.sb.hp')}${m.hpFormula ? ` · ${m.hpFormula}` : ''}`} />
           <DefenseTile icon={<Gauge size={20} />} value={<>{m.initiativeBonus != null ? signed(m.initiativeBonus) : '—'}{m.initiativeScore != null && <span className={s.initScore}> ({m.initiativeScore})</span>}</>} label={t('best.sb.initiative')} />
-          <DefenseTile icon={<Wind size={20} />} value={<span className={s.speedText}>{m.speeds.map((sp) => `${sp.movementType.nameRusloc.toLowerCase()} ${sp.ft}${sp.hover ? ` ${t('best.sb.hover')}` : ''}`).join(', ') || '—'}</span>} label={t('best.sb.speed')} />
+          <DefenseTile icon={<Wind size={20} />} value={<span className={s.speedText}>{m.speeds.map((sp) => `${dictName(sp.movementType, lang).toLowerCase()} ${sp.ft}${sp.hover ? ` ${t('best.sb.hover')}` : ''}`).join(', ') || '—'}</span>} label={t('best.sb.speed')} />
         </div>
 
         <div className={cn(s.abilGrid, 'bd-abil')}>
@@ -173,18 +178,18 @@ export default function MonsterStatblock({ monster: m }: { monster: MonsterRespo
           {m.damageVulnerabilities.length > 0 && <PropLine label={t('best.prop.vulnerabilities')}>{m.damageVulnerabilities.map((d) => `${d.damageType ? dictName(d.damageType, lang) : ''}${d.note ? ` (${d.note})` : ''}`).join(', ')}</PropLine>}
           {m.damageResistances.length > 0 && <PropLine label={t('best.prop.resistances')}>{m.damageResistances.map((d) => `${d.damageType ? dictName(d.damageType, lang) : ''}${d.note ? ` (${d.note})` : ''}`).join(', ')}</PropLine>}
           {m.damageImmunities.length > 0 && <PropLine label={t('best.prop.dmgImmunities')}>{m.damageImmunities.map((d) => `${d.damageType ? dictName(d.damageType, lang) : ''}${d.note ? ` (${d.note})` : ''}`).join(', ')}</PropLine>}
-          {m.conditionImmunities.length > 0 && <PropLine label={t('best.prop.condImmunities')}>{m.conditionImmunities.map((c) => c.nameRusloc).join(', ')}</PropLine>}
+          {m.conditionImmunities.length > 0 && <PropLine label={t('best.prop.condImmunities')}>{m.conditionImmunities.map((c) => dictName(c, lang)).join(', ')}</PropLine>}
           {(m.senses.length > 0 || m.passivePerception != null) && (
             <PropLine label={t('best.prop.senses')}>
-              {[...m.senses.map((sp) => `${sp.senseType.nameRusloc.toLowerCase()} ${sp.ft} ${ft}`), m.passivePerception != null ? t('best.sb.passivePerception', { n: m.passivePerception }) : null].filter(Boolean).join(', ')}
+              {[...m.senses.map((sp) => `${dictName(sp.senseType, lang).toLowerCase()} ${sp.ft} ${ft}`), m.passivePerception != null ? t('best.sb.passivePerception', { n: m.passivePerception }) : null].filter(Boolean).join(', ')}
             </PropLine>
           )}
           {(m.languages.length > 0 || m.telepathyFt != null) && (
-            <PropLine label={t('best.prop.languages')}>{[...m.languages.map((l) => l.nameRusloc), m.telepathyFt != null ? t('best.sb.telepathy', { n: m.telepathyFt }) : null].filter(Boolean).join(', ')}</PropLine>
+            <PropLine label={t('best.prop.languages')}>{[...m.languages.map((l) => dictName(l, lang)), m.telepathyFt != null ? t('best.sb.telepathy', { n: m.telepathyFt }) : null].filter(Boolean).join(', ')}</PropLine>
           )}
-          {m.gear.length > 0 && <PropLine label={t('best.prop.gear')}>{m.gear.map((g) => `${g.item.nameRusloc}${g.qty > 1 ? ` ×${g.qty}` : ''}`).join(', ')}</PropLine>}
-          {m.habitats.length > 0 && <PropLine label={t('best.prop.habitats')}>{m.habitats.map((h) => h.nameRusloc).join(', ')}</PropLine>}
-          {m.treasureTags.length > 0 && <PropLine label={t('best.prop.treasure')}>{m.treasureTags.map((tt) => tt.nameRusloc).join(', ')}</PropLine>}
+          {m.gear.length > 0 && <PropLine label={t('best.prop.gear')}>{m.gear.map((g) => `${dictName(g.item, lang)}${g.qty > 1 ? ` ×${g.qty}` : ''}`).join(', ')}</PropLine>}
+          {m.habitats.length > 0 && <PropLine label={t('best.prop.habitats')}>{m.habitats.map((h) => dictName(h, lang)).join(', ')}</PropLine>}
+          {m.treasureTags.length > 0 && <PropLine label={t('best.prop.treasure')}>{m.treasureTags.map((tt) => dictName(tt, lang)).join(', ')}</PropLine>}
           {m.proficiencyBonus != null && <PropLine label={t('best.prop.profBonus')}>{signed(m.proficiencyBonus)}</PropLine>}
         </div>
 
@@ -220,7 +225,7 @@ export default function MonsterStatblock({ monster: m }: { monster: MonsterRespo
           {m.sourceMonsterId && <span className={s.footChip}><Copy size={13} /> {t('best.sb.clone')}</span>}
           {m.createdByUsername && <span className={s.footChip}><User size={13} /> {m.createdByUsername}</span>}
           <span className={s.footChip}><Clock size={13} /> {t('best.sb.createdUpdated', { created: fmtDate(m.createdAt), updated: fmtDate(m.updatedAt) })}</span>
-          {m.sources.length > 0 && <span className={s.footChip}><BookOpen size={13} /> {m.sources.map((sr) => sr.nameRusloc).join(', ')}</span>}
+          {m.sources.length > 0 && <span className={s.footChip}><BookOpen size={13} /> {m.sources.map((sr) => dictName(sr, lang)).join(', ')}</span>}
         </div>
       </footer>
     </article>

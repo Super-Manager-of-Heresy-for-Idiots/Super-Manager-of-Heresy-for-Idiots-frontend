@@ -14,6 +14,8 @@ import type {
   ApplyCombatantHpRequest,
   CombatantTurnResponse,
 } from '@/types';
+import type { Lang } from '@/i18n/translations';
+import { localizedName } from '@/lib/localized';
 import type { TacticalTokenView } from './tacticalView';
 
 /** What the inspector is currently looking at. Mirrors the prompt's discriminated union. */
@@ -87,12 +89,12 @@ export function buildHpDeltaRequest(delta: number): ApplyCombatantHpRequest {
  * empty list between turns or when the detail has not loaded — the names are passed
  * verbatim to the core attack endpoint, so this never invents map-side data.
  */
-export function attackNamesFromTurn(turn: CombatantTurnResponse | null | undefined): string[] {
+export function attackNamesFromTurn(turn: CombatantTurnResponse | null | undefined, lang: Lang = 'ru'): string[] {
   if (!turn) return [];
   const characterAttacks = (turn.character?.attacks ?? []).map((a) => a.name);
   const monsterAttacks = (turn.monster?.features ?? [])
     .filter((f) => f.attackType)
-    .map((f) => f.nameRusloc);
+    .map((f) => localizedName(f, lang));
   const names = [...characterAttacks, ...monsterAttacks].filter((n): n is string => !!n);
   return Array.from(new Set(names));
 }
