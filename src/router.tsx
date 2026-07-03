@@ -61,6 +61,10 @@ const MapEditorPage = lazy(() => import('@/features/map/pages/MapEditorPage'));
 const MapSessionPage = lazy(() => import('@/features/map/pages/MapSessionPage'));
 const TacticalBattlePage = lazy(() => import('@/features/map/tactical/TacticalBattlePage'));
 
+// Social: friends + ephemeral messenger (isolated feature module).
+const FriendsPage = lazy(() => import('@/pages/social/FriendsPage'));
+const MessengerPage = lazy(() => import('@/features/messenger/pages/MessengerPage'));
+
 // Combat / Loot prototype preview pages (screens only, no API wiring)
 const CombatPreviewIndexPage = lazy(() => import('@/pages/gm/combat/CombatPreviewIndexPage'));
 const CombatTrackerGMPage = lazy(() => import('@/pages/gm/combat/CombatTrackerGMPage'));
@@ -146,6 +150,11 @@ export const router = createBrowserRouter([
 
           // Item reference catalog (read-only, every role)
           { path: '/library/items', element: <ItemCatalogPage /> },
+
+          // Social — friends graph + ephemeral 1:1 messenger (master-detail)
+          { path: '/friends', element: <FriendsPage /> },
+          { path: '/messages', element: <MessengerPage /> },
+          { path: '/messages/:sessionId', element: <MessengerPage /> },
 
           // Combat/Loot prototype index — dev-only, physically absent from prod builds.
           ...(import.meta.env.DEV

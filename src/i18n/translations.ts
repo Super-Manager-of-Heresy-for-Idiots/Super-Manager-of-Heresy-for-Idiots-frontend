@@ -34,6 +34,8 @@ const core: Record<Lang, Dict> = {
     /* ── Navigation ─────────────────────────────────── */
     'nav.campaigns': 'Кампании',
     'nav.myCharacters': 'Мои персонажи',
+    'nav.friends': 'Друзья',
+    'nav.messages': 'Сообщения',
     'nav.marketplace': 'Базар',
     'nav.blueprintMarket': 'Шаблоны кампаний',
     'nav.myBlueprints': 'Мои шаблоны',
@@ -65,6 +67,8 @@ const core: Record<Lang, Dict> = {
     /* ── Navigation descriptions (rail / drawer) ────── */
     'nav.desc.campaigns': 'Ваши кампании и сессии',
     'nav.desc.myCharacters': 'Шаблоны и заготовки персонажей',
+    'nav.desc.friends': 'Заявки, друзья и блокировки',
+    'nav.desc.messages': 'Личная переписка с друзьями',
     'nav.desc.marketplace': 'Торговая площадка предметов и доктрин',
     'nav.desc.blueprintMarket': 'Готовые шаблоны кампаний',
     'nav.desc.myBlueprints': 'Ваши черновики и форки шаблонов',
@@ -216,6 +220,8 @@ const core: Record<Lang, Dict> = {
     /* ── Navigation ─────────────────────────────────── */
     'nav.campaigns': 'Campaigns',
     'nav.myCharacters': 'My Characters',
+    'nav.friends': 'Friends',
+    'nav.messages': 'Messages',
     'nav.marketplace': 'Marketplace',
     'nav.blueprintMarket': 'Campaign Blueprints',
     'nav.myBlueprints': 'My Blueprints',
@@ -247,6 +253,8 @@ const core: Record<Lang, Dict> = {
     /* ── Navigation descriptions (rail / drawer) ────── */
     'nav.desc.campaigns': 'Your campaigns and sessions',
     'nav.desc.myCharacters': 'Character templates and drafts',
+    'nav.desc.friends': 'Requests, friends and blocks',
+    'nav.desc.messages': 'Private chat with friends',
     'nav.desc.marketplace': 'Marketplace of items and doctrines',
     'nav.desc.blueprintMarket': 'Ready-made campaign blueprints',
     'nav.desc.myBlueprints': 'Your blueprint drafts and forks',

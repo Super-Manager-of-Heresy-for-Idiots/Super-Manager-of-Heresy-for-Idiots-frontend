@@ -10,6 +10,7 @@
 import type { ProxyOptions } from 'vite';
 
 export const MAP_SERVICE_DEV_TARGET = 'http://localhost:8081';
+export const MESSENGER_SERVICE_DEV_TARGET = 'http://localhost:8082';
 export const CORE_BACKEND_DEV_TARGET = 'http://localhost:8080';
 
 export const devProxy: Record<string, ProxyOptions> = {
@@ -23,6 +24,10 @@ export const devProxy: Record<string, ProxyOptions> = {
 
   // ── map-service realtime (native WebSocket; must precede `/ws`) ──────────
   '/ws/map': { target: MAP_SERVICE_DEV_TARGET, changeOrigin: true, ws: true },
+
+  // ── messenger-service REST + realtime (must precede the generic `/api` & `/ws`) ──
+  '/api/chat-sessions': { target: MESSENGER_SERVICE_DEV_TARGET, changeOrigin: true },
+  '/ws/messenger': { target: MESSENGER_SERVICE_DEV_TARGET, changeOrigin: true, ws: true },
 
   // ── core backend REST + realtime ────────────────────────────────────────
   '/api': { target: CORE_BACKEND_DEV_TARGET, changeOrigin: true },

@@ -1,0 +1,228 @@
+.layout {
+  display: grid;
+  grid-template-columns: minmax(240px, 320px) 1fr;
+  gap: var(--s-4);
+  min-height: 0;
+  height: 100%;
+}
+
+@media (max-width: 720px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+  .masterHiddenOnMobile {
+    display: none;
+  }
+}
+
+.master {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border: 1px solid var(--rule);
+  background: var(--panel);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.detail {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border: 1px solid var(--rule);
+  background: var(--panel);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+/* ── session list ─────────────────────────────────────────── */
+.sessionList {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.sessionItem {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+  padding: var(--s-3) var(--s-4);
+  border: none;
+  border-bottom: 1px solid var(--hairline);
+  background: transparent;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+}
+
+.sessionItem:hover {
+  background: var(--panel-raised);
+}
+
+.sessionItemActive {
+  background: var(--panel-raised);
+  box-shadow: inset 3px 0 0 var(--gold);
+}
+
+.sessionTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-2);
+}
+
+.sessionName {
+  color: var(--ink-bright);
+  font-weight: 600;
+}
+
+.preview {
+  color: var(--ink-quiet);
+  font-size: var(--t-body);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.unread {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  background: var(--ember);
+  color: var(--ink-bright);
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.closedTag {
+  color: var(--ink-faint);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* ── chat header ─────────────────────────────────────────── */
+.chatHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-3);
+  padding: var(--s-3) var(--s-4);
+  border-bottom: 1px solid var(--rule);
+}
+
+.chatPeer {
+  color: var(--ink-bright);
+  font-weight: 600;
+}
+
+/* ── ephemeral banner ────────────────────────────────────── */
+.banner {
+  padding: var(--s-2) var(--s-4);
+  background: rgba(90, 142, 148, 0.12);
+  color: var(--ink-quiet);
+  font-size: 13px;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.bannerClosed {
+  background: rgba(179, 70, 26, 0.14);
+  color: var(--ink);
+}
+
+/* ── messages ────────────────────────────────────────────── */
+.msgList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  padding: var(--s-4);
+  overflow-y: auto;
+  min-height: 0;
+  flex: 1;
+}
+
+.loadOlder {
+  align-self: center;
+}
+
+.msgRow {
+  display: flex;
+  flex-direction: column;
+  max-width: 78%;
+  align-self: flex-start;
+}
+
+.msgOwn {
+  align-self: flex-end;
+  align-items: flex-end;
+}
+
+.msgBubble {
+  padding: var(--s-2) var(--s-3);
+  border-radius: 8px;
+  background: var(--ash);
+  color: var(--ink-bright);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.msgOwn .msgBubble {
+  background: var(--panel-raised);
+}
+
+.msgMeta {
+  color: var(--ink-faint);
+  font-size: 11px;
+  margin-top: 2px;
+}
+
+.typing {
+  min-height: 18px;
+  padding: 0 var(--s-4) var(--s-1);
+  color: var(--ink-quiet);
+  font-size: 12px;
+  font-style: italic;
+}
+
+/* ── input ───────────────────────────────────────────────── */
+.inputBar {
+  display: flex;
+  gap: var(--s-2);
+  padding: var(--s-3) var(--s-4);
+  border-top: 1px solid var(--rule);
+}
+
+.textarea {
+  flex: 1;
+  resize: none;
+  min-height: 40px;
+  max-height: 120px;
+  padding: var(--s-2) var(--s-3);
+  background: var(--stone);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  color: var(--ink-bright);
+  font-family: var(--font-sans);
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-3);
+  height: 100%;
+  color: var(--ink-quiet);
+  padding: var(--s-6);
+  text-align: center;
+}
+
+.status {
+  padding: var(--s-4);
+  color: var(--ink-quiet);
+}

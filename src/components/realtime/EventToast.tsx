@@ -37,6 +37,9 @@ const EVENT_STYLE: Record<WsEventType, EventVisual> = {
   BATTLE_TURN_CHANGED:     { glyph: 'arrow-r', color: 'var(--gold-pale)', border: 'var(--gold-pale)' },
   BATTLE_ACTION:           { glyph: 'sword',   color: 'var(--ember)',     border: 'var(--ember)' },
   BATTLE_ENDED:            { glyph: 'flame',   color: 'var(--ember)',     border: 'var(--ember)' },
+  FRIEND_REQUEST_RECEIVED: { glyph: 'eye',     color: 'var(--gold)',      border: 'var(--gold)' },
+  FRIEND_REQUEST_ACCEPTED: { glyph: 'check',   color: 'var(--arcane)',    border: 'var(--arcane)' },
+  FRIEND_REMOVED:          { glyph: 'minus',   color: 'var(--ink-quiet)', border: 'var(--ink-quiet)' },
 };
 
 /* ── component ───────────────────────────────────────────── */

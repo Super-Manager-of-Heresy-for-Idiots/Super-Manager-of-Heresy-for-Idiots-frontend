@@ -1728,7 +1728,11 @@ export type WsEventType =
   | 'COMBATANT_JOINED'
   | 'BATTLE_TURN_CHANGED'
   | 'BATTLE_ACTION'
-  | 'BATTLE_ENDED';
+  | 'BATTLE_ENDED'
+  // Social graph — payloads carry { relationshipId, userId, username }; REST is the source of truth.
+  | 'FRIEND_REQUEST_RECEIVED'
+  | 'FRIEND_REQUEST_ACCEPTED'
+  | 'FRIEND_REMOVED';
 
 export interface WsEvent<T = unknown> {
   type: WsEventType;
@@ -1738,6 +1742,52 @@ export interface WsEvent<T = unknown> {
   timestamp: string;
   triggeredBy: string;
   triggeredByName?: string;
+}
+
+/** Payload of the FRIEND_* user-queue notifications (see core FriendNotificationData). */
+export interface FriendEventData {
+  relationshipId: string;
+  userId: string;
+  username: string;
+}
+
+// ── Friends (social graph) DTOs — mirror the core backend responses ──────────
+export type FriendRelationshipView =
+  | 'NONE'
+  | 'PENDING_OUTGOING'
+  | 'PENDING_INCOMING'
+  | 'FRIENDS'
+  | 'BLOCKED';
+
+export type FriendRequestDirection = 'INCOMING' | 'OUTGOING';
+
+export interface UserSearchResultResponse {
+  id: string;
+  username: string;
+  role: string;
+  relationship: FriendRelationshipView;
+}
+
+export interface FriendRequestResponse {
+  relationshipId: string;
+  userId: string;
+  username: string;
+  role: string;
+  direction: FriendRequestDirection;
+  createdAt: string;
+}
+
+export interface FriendResponse {
+  id: string;
+  username: string;
+  role: string;
+  friendsSince: string;
+}
+
+export interface BlockedUserResponse {
+  id: string;
+  username: string;
+  role: string;
 }
 
 /** Payload shape shared by every battle WS event (notification only). */

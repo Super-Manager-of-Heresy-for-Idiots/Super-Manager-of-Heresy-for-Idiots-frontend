@@ -1,6 +1,7 @@
 import { Suspense, useEffect, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
+import { useUnreadCount } from '@/features/messenger/hooks/useMessengerQueries';
 import { Rune, Sigil } from '@/components/ordo';
 import { useT } from '@/i18n/I18nContext';
 import { useIsMobile } from '@/hooks/useMediaQuery';
@@ -25,6 +26,8 @@ interface NavEntry {
 const playerNav: NavEntry[] = [
   { labelKey: 'nav.campaigns', path: '/campaigns', glyph: 'helm' },
   { labelKey: 'nav.myCharacters', path: '/characters/templates', glyph: 'shield' },
+  { labelKey: 'nav.friends', path: '/friends', glyph: 'eye' },
+  { labelKey: 'nav.messages', path: '/messages', glyph: 'scroll' },
   { labelKey: 'nav.marketplace', path: '/marketplace', glyph: 'book' },
   { labelKey: 'nav.blueprintMarket', path: '/blueprints/marketplace', glyph: 'hex' },
   { labelKey: 'nav.itemCatalog', path: '/library/items', glyph: 'sword' },
@@ -33,6 +36,8 @@ const playerNav: NavEntry[] = [
 const gmNav: NavEntry[] = [
   { labelKey: 'nav.campaigns', path: '/campaigns', glyph: 'helm' },
   { labelKey: 'nav.myCharacters', path: '/characters/templates', glyph: 'shield' },
+  { labelKey: 'nav.friends', path: '/friends', glyph: 'eye' },
+  { labelKey: 'nav.messages', path: '/messages', glyph: 'scroll' },
   { labelKey: 'nav.marketplace', path: '/marketplace', glyph: 'book' },
   { labelKey: 'nav.blueprintMarket', path: '/blueprints/marketplace', glyph: 'hex' },
   { labelKey: 'nav.itemCatalog', path: '/library/items', glyph: 'sword' },
@@ -45,6 +50,8 @@ const gmNav: NavEntry[] = [
 const adminNav: NavEntry[] = [
   { labelKey: 'nav.campaigns', path: '/campaigns', glyph: 'helm' },
   { labelKey: 'nav.myCharacters', path: '/characters/templates', glyph: 'shield' },
+  { labelKey: 'nav.friends', path: '/friends', glyph: 'eye' },
+  { labelKey: 'nav.messages', path: '/messages', glyph: 'scroll' },
   { labelKey: 'nav.admin', path: '/admin', glyph: 'book', exact: true },
   { labelKey: 'nav.users', path: '/admin/users', glyph: 'helm' },
   { labelKey: 'nav.characters', path: '/admin/characters', glyph: 'shield' },
@@ -86,6 +93,7 @@ export function AppLayout() {
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const navItems = getNavItems(user?.role);
+  const unreadCount = useUnreadCount();
 
   const isActive = (item: NavEntry) =>
     item.exact ? location.pathname === item.path : location.pathname.startsWith(item.path);
@@ -132,7 +140,12 @@ export function AppLayout() {
                   )}
                 </span>
                 <span className="ao-rail-btn-text">
-                  <span className="ao-rail-btn-label">{t(item.labelKey)}</span>
+                  <span className="ao-rail-btn-label">
+                    {t(item.labelKey)}
+                    {item.labelKey === 'nav.messages' && unreadCount > 0 && (
+                      <span className="ao-chip ao-chip--gold">{unreadCount}</span>
+                    )}
+                  </span>
                   <span className="ao-rail-btn-desc">{t(descKey(item.labelKey))}</span>
                 </span>
               </button>
@@ -190,7 +203,12 @@ export function AppLayout() {
                   color={active ? 'var(--gold)' : 'var(--ink-faint)'}
                 />
                 <span className="ao-drawer-link-text">
-                  <span className="ao-drawer-link-label">{t(item.labelKey)}</span>
+                  <span className="ao-drawer-link-label">
+                    {t(item.labelKey)}
+                    {item.labelKey === 'nav.messages' && unreadCount > 0 && (
+                      <span className="ao-chip ao-chip--gold">{unreadCount}</span>
+                    )}
+                  </span>
                   <span className="ao-drawer-link-desc">{t(descKey(item.labelKey))}</span>
                 </span>
               </button>
