@@ -1,4 +1,9 @@
-version: "3.8"
+# Standalone full-stack bring-up for FRONTEND developers who have the backend
+# repo checked out as a sibling folder. Values are kept in sync with the
+# canonical orchestrator at ../infra/docker-compose.yml (DB name "dndapp",
+# user/pass "dnd"/"dnd"). For the complete multi-pod stack (REST x2 + WS tier +
+# RabbitMQ relay), use ../infra/docker-compose.yml instead — that is the
+# single source of truth.
 
 services:
   # ── PostgreSQL ─────────────────────────────────────────────
@@ -7,35 +12,40 @@ services:
     container_name: dnd-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_DB: dnd_manager
-      POSTGRES_USER: dnd
-      POSTGRES_PASSWORD: dnd_secret
+      POSTGRES_DB: ${POSTGRES_DB:-dndapp}
+      POSTGRES_USER: ${POSTGRES_USER:-dnd}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-dnd}
     ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U dnd -d dnd_manager"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-dnd} -d $${POSTGRES_DB:-dndapp}"]
       interval: 5s
       timeout: 3s
       retries: 10
 
   # ── Spring Boot Backend ────────────────────────────────────
+  # Build context points at the backend repo checked out next to this one.
   backend:
-    # Бекендер должен предоставить образ или Dockerfile (см. README ниже)
     build:
-      context: ../Super-Manager-of-Heresy-for-Idiots   # <-- путь к проекту бекенда
+      context: ../Super-Manager-of-Heresy-for-Idiots-1.0-features-vibeTest-1
       dockerfile: Dockerfile
     container_name: dnd-backend
     restart: unless-stopped
     ports:
       - "8080:8080"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/dnd_manager
-      SPRING_DATASOURCE_USERNAME: dnd
-      SPRING_DATASOURCE_PASSWORD: dnd_secret
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-dndapp}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-dnd}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-dnd}
       SPRING_JPA_HIBERNATE_DDL_AUTO: validate
       SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
+      # Required by the app; a per-stack dev default keeps the backend from
+      # crash-looping on startup. Override via host env for anything shared.
+      JWT_SECRET: ${JWT_SECRET:-local-dev-shared-jwt-secret-change-me-32+bytes-long}
+      JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS:-3600000}
+      APP_CORS_ALLOWED_ORIGINS: ${APP_CORS_ALLOWED_ORIGINS:-http://localhost,http://localhost:5173}
     depends_on:
       postgres:
         condition: service_healthy
