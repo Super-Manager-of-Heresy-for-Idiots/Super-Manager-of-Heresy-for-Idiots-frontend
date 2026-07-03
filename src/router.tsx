@@ -116,6 +116,7 @@ const ItemTemplatesPage = lazy(() => import('@/pages/admin/ItemTemplatesPage'));
 const AdminHomebrewPage = lazy(() => import('@/pages/admin/AdminHomebrewPage'));
 const ContentQualityPage = lazy(() => import('@/pages/admin/ContentQualityPage'));
 const SpellWarningsPage = lazy(() => import('@/pages/admin/SpellWarningsPage'));
+const ClassFeatureWarningsPage = lazy(() => import('@/pages/admin/ClassFeatureWarningsPage'));
 const SpellEditorPage = lazy(() => import('@/pages/admin/SpellEditorPage'));
 
 export const router = createBrowserRouter([
@@ -312,6 +313,7 @@ export const router = createBrowserRouter([
           { path: '/admin/species', element: <SpeciesPage /> },
           { path: '/admin/content-quality', element: <ContentQualityPage /> },
           { path: '/admin/spell-warnings', element: <SpellWarningsPage /> },
+          { path: '/admin/class-feature-warnings', element: <ClassFeatureWarningsPage /> },
           { path: '/admin/spells', element: <SpellEditorPage /> },
           { path: '/admin/character-races', element: <Navigate to="/admin/species" replace /> },
           { path: '/admin/races', element: <Navigate to="/admin/species" replace /> },

@@ -430,6 +430,15 @@ export interface ClassFeatureSummary {
   sortOrder?: number;
   title: string;
   description?: string;
+  activationType?: string | null;
+  attackRoll?: boolean | null;
+  saveAbility?: string | null;
+  damageDice?: string | null;
+  damageType?: string | null;
+  healingDice?: string | null;
+  healingFlat?: number | null;
+  warning?: boolean | null;
+  warningReason?: string | null;
 }
 
 // Mirrors the structured fields already modelled on SkillResponse / FeatResponse /
@@ -2666,6 +2675,38 @@ export interface SpellWarningResponse {
 export interface SpellResolutionRequest {
   saveAbility?: string | null;
   attackRoll?: boolean;
+  warning?: boolean;
+}
+
+/** Admin review row for a class feature flagged as needing manual mechanics review. */
+export interface ClassFeatureWarningResponse {
+  id: string;
+  slug: string;
+  title: string;
+  className: string | null;
+  subclassName: string | null;
+  level: number | null;
+  activationType: string | null;
+  attackRoll: boolean | null;
+  saveAbility: string | null;
+  damageDice: string | null;
+  damageType: string | null;
+  healingDice: string | null;
+  healingFlat: number | null;
+  warning: boolean | null;
+  warningReason: string | null;
+  description: string | null;
+}
+
+/** Admin correction of a class feature's parsed mechanics. */
+export interface ClassFeatureResolutionRequest {
+  activationType?: string | null;
+  attackRoll?: boolean;
+  saveAbility?: string | null;
+  damageDice?: string | null;
+  damageType?: string | null;
+  healingDice?: string | null;
+  healingFlat?: number | null;
   warning?: boolean;
 }
 

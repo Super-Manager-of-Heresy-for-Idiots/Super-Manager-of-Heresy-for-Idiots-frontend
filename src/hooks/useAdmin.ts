@@ -13,6 +13,7 @@ import type {
   UserResponse,
   Page,
   SpellResolutionRequest,
+  ClassFeatureResolutionRequest,
   UpdateSpellRequest,
 } from '@/types';
 import { AxiosError } from 'axios';
@@ -309,6 +310,36 @@ export function useResolveSpell() {
     },
     onError: (error: AxiosError<ApiError>) => {
       toast.error(error.response?.data?.message || t('hk.spellWarn.resolveFailed'));
+    },
+  });
+}
+
+// === Class feature mechanics review (data-quality) ===
+export function useClassFeatureWarnings() {
+  const { lang } = useI18n();
+  return useQuery({
+    queryKey: ['class-feature-warnings', lang],
+    queryFn: async () => {
+      const response = await adminApi.getClassFeatureWarnings(lang);
+      return response.data ?? [];
+    },
+  });
+}
+
+export function useResolveClassFeature() {
+  const queryClient = useQueryClient();
+  const t = useT();
+  const { lang } = useI18n();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: ClassFeatureResolutionRequest }) =>
+      adminApi.resolveClassFeature(id, data, lang),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['class-feature-warnings'] });
+      queryClient.invalidateQueries({ queryKey: ['content', 'classes'] });
+      toast.success(t('hk.classFeatureWarn.resolved'));
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error.response?.data?.message || t('hk.classFeatureWarn.resolveFailed'));
     },
   });
 }

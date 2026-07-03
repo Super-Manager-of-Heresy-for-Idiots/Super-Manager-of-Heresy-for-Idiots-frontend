@@ -10,6 +10,8 @@ import type {
   CreateEnchantmentTypeRequest,
   SpellWarningResponse,
   SpellResolutionRequest,
+  ClassFeatureWarningResponse,
+  ClassFeatureResolutionRequest,
   SpellDetail,
   UpdateSpellRequest,
 } from '@/types';
@@ -99,6 +101,14 @@ export const adminApi = {
   },
   resolveSpell: async (id: string, data: SpellResolutionRequest, lang: string): Promise<ApiResponse<SpellWarningResponse>> => {
     const response = await api.patch<ApiResponse<SpellWarningResponse>>(`/admin/content/spells/${id}/resolution`, data, { params: { lang } });
+    return response.data;
+  },
+  getClassFeatureWarnings: async (lang: string): Promise<ApiResponse<ClassFeatureWarningResponse[]>> => {
+    const response = await api.get<ApiResponse<ClassFeatureWarningResponse[]>>('/admin/content/class-feature-warnings', { params: { lang } });
+    return response.data;
+  },
+  resolveClassFeature: async (id: string, data: ClassFeatureResolutionRequest, lang: string): Promise<ApiResponse<ClassFeatureWarningResponse>> => {
+    const response = await api.patch<ApiResponse<ClassFeatureWarningResponse>>(`/admin/content/class-features/${id}/resolution`, data, { params: { lang } });
     return response.data;
   },
   updateSpell: async (id: string, data: UpdateSpellRequest, lang: string): Promise<ApiResponse<SpellDetail>> => {
