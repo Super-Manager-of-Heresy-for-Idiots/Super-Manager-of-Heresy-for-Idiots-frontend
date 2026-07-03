@@ -2,6 +2,8 @@ import { Client, ReconnectionTimeMode, type IMessage, type StompSubscription } f
 import SockJS from 'sockjs-client';
 import { ensureFreshAccessToken } from '@/lib/authSession';
 import { useWsStore } from '@/store/wsStore';
+import { useAuthStore } from '@/store/authStore';
+import { shouldStoreNotification } from '@/lib/notificationText';
 import type { WsEvent } from '@/types';
 
 /**
@@ -197,7 +199,9 @@ class WebSocketService {
 
   private dispatchEvent(event: WsEvent): void {
     // Persist into notification store
-    useWsStore.getState().addNotification(event);
+    if (shouldStoreNotification(event, useAuthStore.getState().user?.id)) {
+      useWsStore.getState().addNotification(event);
+    }
 
     // Fan out to registered handlers
     this.handlers.forEach((h) => {

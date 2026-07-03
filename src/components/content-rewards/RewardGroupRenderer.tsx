@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import { OrdoPanel, PanelHeader, OrdoChip, Rune } from '@/components/ordo';
+import { ExpandChevron, ExpandablePanel } from '@/components/common/ExpandableRow';
 import { useI18n, useT } from '@/i18n/I18nContext';
 import { localizedName, rewardGroupChoose } from '@/lib/contentAdapters';
 import { cn } from '@/lib/utils';
@@ -97,14 +99,25 @@ function grantDetailText(grant: ContentRewardGrant, kind: GrantKind, lang: Lang,
 }
 
 /** A single typed grant line (FEATURE / SUBCLASS / FEAT / SPELL / SKILL / ABILITY /
- *  MODIFIER / CUSTOM). Unknown grant types fall back to a custom/manual line — never crash. */
+ *  MODIFIER / CUSTOM). Unknown grant types fall back to a custom/manual line — never crash.
+ *
+ *  When the grant carries revealable prose (a class-feature description, or a grant-level
+ *  description on FEAT/SUBCLASS/etc.) the head becomes a click-to-expand disclosure that
+ *  reveals the full text — the same affordance spells get via their detail pane. Grants
+ *  without prose (ability/skill/spell picks) stay as a plain, non-interactive line. */
 export function RewardGrantLine({ grant, compact }: { grant: ContentRewardGrant; compact?: boolean }) {
   const t = useT();
   const { lang } = useI18n();
+  const [open, setOpen] = useState(false);
   const kind = grantKind(grant.grantType);
   const detail = grantDetailText(grant, kind, lang, t);
-  return (
-    <div className={cn(s.grant, compact && s.grantCompact)}>
+  // Prose worth revealing: the class-feature's own description first, else a grant-level one.
+  // (CUSTOM already surfaces grant.body inline via grantDetailText, so it's not repeated here.)
+  const detailBody = grant.feature?.description ?? grant.description;
+  const expandable = !!detailBody;
+
+  const head = (
+    <>
       <Rune kind={GRANT_GLYPH[kind]} size={compact ? 13 : 16} color="var(--brass)" />
       <div className={s.grantMain}>
         <div className={s.grantHead}>
@@ -115,8 +128,35 @@ export function RewardGrantLine({ grant, compact }: { grant: ContentRewardGrant;
           )}
         </div>
         {detail && <span className={cn('ao-codex', s.grantDetail)}>{detail}</span>}
-        {grant.description && <span className={cn('ao-italic', s.grantDesc)}>{grant.description}</span>}
       </div>
+      {expandable && <ExpandChevron open={open} className={s.grantChevron} />}
+    </>
+  );
+
+  return (
+    <div className={cn(s.grant, compact && s.grantCompact)}>
+      {expandable ? (
+        <button
+          type="button"
+          className={s.grantToggle}
+          aria-expanded={open}
+          onClick={(e) => {
+            // Inside a selectable option card the parent onClick toggles selection —
+            // don't let expanding the description flip that choice.
+            e.stopPropagation();
+            setOpen((v) => !v);
+          }}
+        >
+          {head}
+        </button>
+      ) : (
+        <div className={s.grantToggle}>{head}</div>
+      )}
+      {expandable && (
+        <ExpandablePanel open={open}>
+          <div className={cn('ao-italic', s.grantDetailBody)}>{detailBody}</div>
+        </ExpandablePanel>
+      )}
     </div>
   );
 }

@@ -1705,6 +1705,8 @@ export type WsEventType =
   | 'CHARACTER_UPDATED'
   | 'NPC_REVEALED'
   | 'NPC_HIDDEN'
+  | 'LOCATION_REVEALED'
+  | 'LOCATION_HIDDEN'
   | 'MONSTER_REVEALED'
   | 'MONSTER_HIDDEN'
   | 'QUEST_UPDATED'
@@ -1726,6 +1728,7 @@ export interface WsEvent<T = unknown> {
   data: T;
   timestamp: string;
   triggeredBy: string;
+  triggeredByName?: string;
 }
 
 /** Payload shape shared by every battle WS event (notification only). */

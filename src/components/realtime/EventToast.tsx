@@ -23,6 +23,8 @@ const EVENT_STYLE: Record<WsEventType, EventVisual> = {
   CHARACTER_UPDATED:       { glyph: 'scroll',  color: 'var(--ink)',       border: 'var(--bronze)' },
   NPC_REVEALED:            { glyph: 'eye',     color: 'var(--arcane)',    border: 'var(--arcane)' },
   NPC_HIDDEN:              { glyph: 'eye',     color: 'var(--ink-faint)', border: 'var(--ink-faint)' },
+  LOCATION_REVEALED:       { glyph: 'eye',     color: 'var(--arcane)',    border: 'var(--arcane)' },
+  LOCATION_HIDDEN:         { glyph: 'eye',     color: 'var(--ink-faint)', border: 'var(--ink-faint)' },
   MONSTER_REVEALED:        { glyph: 'eye',     color: 'var(--ember)',     border: 'var(--ember)' },
   MONSTER_HIDDEN:          { glyph: 'eye',     color: 'var(--ink-faint)', border: 'var(--ink-faint)' },
   QUEST_UPDATED:           { glyph: 'book',    color: 'var(--gold)',      border: 'var(--gold)' },

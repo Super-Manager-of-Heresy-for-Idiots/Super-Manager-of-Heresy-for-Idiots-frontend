@@ -5,40 +5,10 @@ import toast from 'react-hot-toast';
 import { wsService, type WsEventHandler } from '@/lib/websocket';
 import { useAuthStore } from '@/store/authStore';
 import { useWsStore, type ConnectionState } from '@/store/wsStore';
-import type { CharacterResponse, WsEvent, WsEventType } from '@/types';
+import type { CharacterResponse, WsEvent } from '@/types';
 import { EventToast } from '@/components/realtime/EventToast';
-
-/* ── toast style per event type ──────────────────────────── */
-
-interface EventStyle {
-  glyph: string;
-  color: string;
-  label: string;
-}
-
-const EVENT_STYLE: Record<WsEventType, EventStyle> = {
-  ITEM_GRANTED:             { glyph: 'coin',     color: 'var(--gold)',      label: 'Item Granted' },
-  ITEM_REMOVED:             { glyph: 'x',        color: 'var(--ember)',     label: 'Item Removed' },
-  BUFF_APPLIED:             { glyph: 'shield',   color: 'var(--arcane)',    label: 'Buff Applied' },
-  BUFF_REMOVED:             { glyph: 'minus',    color: 'var(--ink-quiet)', label: 'Buff Removed' },
-  XP_GRANTED:               { glyph: 'flame',    color: 'var(--gold-pale)', label: 'XP Granted' },
-  HP_CHANGED:               { glyph: 'cross',    color: 'var(--ember)',     label: 'HP Changed' },
-  CHARACTER_UPDATED:        { glyph: 'scroll',   color: 'var(--ink)',       label: 'Character Updated' },
-  NPC_REVEALED:             { glyph: 'eye',      color: 'var(--arcane)',    label: 'NPC Revealed' },
-  NPC_HIDDEN:               { glyph: 'eye',      color: 'var(--ink-faint)', label: 'NPC Hidden' },
-  MONSTER_REVEALED:         { glyph: 'eye',      color: 'var(--ember)',     label: 'Monster Revealed' },
-  MONSTER_HIDDEN:           { glyph: 'eye',      color: 'var(--ink-faint)', label: 'Monster Hidden' },
-  QUEST_UPDATED:            { glyph: 'book',     color: 'var(--gold)',      label: 'Quest Updated' },
-  CAMPAIGN_STATUS_CHANGED:  { glyph: 'hex',      color: 'var(--gold-pale)', label: 'Campaign Status' },
-  MEMBER_KICKED:            { glyph: 'lock',     color: 'var(--ember)',     label: 'Member Kicked' },
-  WALLET_CHANGED:           { glyph: 'coin',     color: 'var(--gold)',      label: 'Wallet Changed' },
-  BATTLE_STARTED:           { glyph: 'sword',    color: 'var(--gold)',      label: 'Battle Started' },
-  BATTLE_UPDATED:           { glyph: 'sword',    color: 'var(--ink)',       label: 'Battle Updated' },
-  COMBATANT_JOINED:         { glyph: 'helm',     color: 'var(--arcane)',    label: 'Combatant Joined' },
-  BATTLE_TURN_CHANGED:      { glyph: 'arrow-r',  color: 'var(--gold-pale)', label: 'Turn Changed' },
-  BATTLE_ACTION:            { glyph: 'sword',    color: 'var(--ember)',     label: 'Battle Strike' },
-  BATTLE_ENDED:             { glyph: 'flame',    color: 'var(--ember)',     label: 'Battle Ended' },
-};
+import { formatNotificationBody, getNotificationTitle, shouldStoreNotification } from '@/lib/notificationText';
+import { useT } from '@/i18n/I18nContext';
 
 /* ── the hook ────────────────────────────────────────────── */
 
@@ -53,6 +23,7 @@ export function useWebSocket(campaignId: string | undefined): { connectionState:
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const currentUserId = useAuthStore((s) => s.user?.id);
+  const t = useT();
 
   const handleEvent: WsEventHandler = useCallback(
     (event: WsEvent) => {
@@ -192,6 +163,8 @@ export function useWebSocket(campaignId: string | undefined): { connectionState:
 
       if (isOwn) return;
 
+      if (!shouldStoreNotification(event, currentUserId)) return;
+
       // Hiding a monster updates caches silently — don't surface a toast that
       // would reveal to players that a (previously unseen) monster ever existed.
       if (event.type === 'MONSTER_HIDDEN') return;
@@ -207,19 +180,15 @@ export function useWebSocket(campaignId: string | undefined): { connectionState:
         return;
       }
 
-      const style = EVENT_STYLE[event.type];
-      if (!style) return;
-      const body =
-        typeof event.data === 'object' && event.data !== null && 'message' in event.data
-          ? String((event.data as { message?: string }).message)
-          : `Triggered by ${event.triggeredBy}`;
+      const title = getNotificationTitle(event, t);
+      const body = formatNotificationBody(event, t);
 
       toast.custom(
         (tst) => (
           <div style={{ opacity: tst.visible ? 1 : 0, transition: 'opacity 300ms ease' }}>
             <EventToast
               type={event.type}
-              title={style.label}
+              title={title}
               body={body}
               time={event.timestamp}
             />
@@ -228,7 +197,7 @@ export function useWebSocket(campaignId: string | undefined): { connectionState:
         { duration: 5000 },
       );
     },
-    [queryClient, currentUserId, navigate],
+    [queryClient, currentUserId, navigate, t],
   );
 
   useEffect(() => {

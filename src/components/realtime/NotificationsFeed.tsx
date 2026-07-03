@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import { useT } from '@/i18n/I18nContext';
 import type { WsEventType } from '@/types';
 import s from './NotificationsFeed.module.css';
+import { formatNotificationBody, getNotificationTitle } from '@/lib/notificationText';
 
 /* ── visual config per event type ────────────────────────── */
 
@@ -24,6 +25,8 @@ const EVENT_VISUAL: Record<WsEventType, EventVisual> = {
   CHARACTER_UPDATED:       { glyph: 'scroll',  color: 'var(--ink)' },
   NPC_REVEALED:            { glyph: 'eye',     color: 'var(--arcane)' },
   NPC_HIDDEN:              { glyph: 'eye',     color: 'var(--ink-faint)' },
+  LOCATION_REVEALED:       { glyph: 'eye',     color: 'var(--arcane)' },
+  LOCATION_HIDDEN:         { glyph: 'eye',     color: 'var(--ink-faint)' },
   MONSTER_REVEALED:        { glyph: 'eye',     color: 'var(--ember)' },
   MONSTER_HIDDEN:          { glyph: 'eye',     color: 'var(--ink-faint)' },
   QUEST_UPDATED:           { glyph: 'book',    color: 'var(--gold)' },
@@ -38,46 +41,14 @@ const EVENT_VISUAL: Record<WsEventType, EventVisual> = {
   BATTLE_ENDED:            { glyph: 'flame',   color: 'var(--ember)' },
 };
 
-/* human-readable label keys */
-const EVENT_LABEL_KEY: Record<WsEventType, string> = {
-  ITEM_GRANTED:            'cmp2.event.ITEM_GRANTED',
-  ITEM_REMOVED:            'cmp2.event.ITEM_REMOVED',
-  BUFF_APPLIED:            'cmp2.event.BUFF_APPLIED',
-  BUFF_REMOVED:            'cmp2.event.BUFF_REMOVED',
-  XP_GRANTED:              'cmp2.event.XP_GRANTED',
-  HP_CHANGED:              'cmp2.event.HP_CHANGED',
-  CHARACTER_UPDATED:       'cmp2.event.CHARACTER_UPDATED',
-  NPC_REVEALED:            'cmp2.event.NPC_REVEALED',
-  NPC_HIDDEN:              'cmp2.event.NPC_HIDDEN',
-  MONSTER_REVEALED:        'cmp2.event.MONSTER_REVEALED',
-  MONSTER_HIDDEN:          'cmp2.event.MONSTER_HIDDEN',
-  QUEST_UPDATED:           'cmp2.event.QUEST_UPDATED',
-  CAMPAIGN_STATUS_CHANGED: 'cmp2.event.CAMPAIGN_STATUS_CHANGED',
-  MEMBER_KICKED:           'cmp2.event.MEMBER_KICKED',
-  WALLET_CHANGED:          'cmp2.event.WALLET_CHANGED',
-  BATTLE_STARTED:          'cmp2.event.BATTLE_STARTED',
-  BATTLE_UPDATED:          'cmp2.event.BATTLE_UPDATED',
-  COMBATANT_JOINED:        'cmp2.event.COMBATANT_JOINED',
-  BATTLE_TURN_CHANGED:     'cmp2.event.BATTLE_TURN_CHANGED',
-  BATTLE_ACTION:           'cmp2.event.BATTLE_ACTION',
-  BATTLE_ENDED:            'cmp2.event.BATTLE_ENDED',
-};
-
 /* ── single notification row ─────────────────────────────── */
 
 function NotificationRow({ notif }: { notif: Notification }) {
   const t = useT();
   const { markRead } = useWsStore();
   const visual = EVENT_VISUAL[notif.event.type] ?? { glyph: 'cir', color: 'var(--ink-quiet)' };
-  const labelKey = EVENT_LABEL_KEY[notif.event.type];
-  const label = labelKey ? t(labelKey) : notif.event.type;
-
-  const body =
-    typeof notif.event.data === 'object' &&
-    notif.event.data !== null &&
-    'message' in notif.event.data
-      ? String((notif.event.data as { message: string }).message)
-      : t('cmp2.notif.by', { name: notif.event.triggeredBy });
+  const label = getNotificationTitle(notif.event, t);
+  const body = formatNotificationBody(notif.event, t);
 
   return (
     <div
