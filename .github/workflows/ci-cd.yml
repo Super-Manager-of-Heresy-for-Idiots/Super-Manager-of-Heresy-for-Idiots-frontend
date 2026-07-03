@@ -6,8 +6,8 @@ on:
       - '**'
   pull_request:
 
-# Минимально необходимые права. Деплой пишет во ВНЕШНИЙ GitOps-репозиторий
-# через PAT (GITOPS_REPO_TOKEN), права на запись в текущий репо не нужны.
+# Минимальные права по умолчанию. Deploy job отдельно повышает contents до write,
+# потому что после успешного GitOps deploy коммитит bump версии обратно в app repo.
 permissions:
   contents: read
 
@@ -58,12 +58,12 @@ jobs:
           if-no-files-found: warn
 
   # ---------------------------------------------------------------------------
-  # 2. BUILD + 3. PUBLISH — только после успешного test и только на master
+  # 2. BUILD + 3. PUBLISH — только после успешного test и только на main
   # ---------------------------------------------------------------------------
   build:
     name: Build & Push image
     needs: test
-    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -114,7 +114,7 @@ jobs:
   deploy:
     name: Deploy (GitOps)
     needs: build
-    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
     environment: production
     permissions:
@@ -136,7 +136,7 @@ jobs:
       - name: Checkout app repo
         uses: actions/checkout@v4
         with:
-          ref: master
+          ref: ${{ github.ref_name }}
           path: app
 
       - name: Set up Node
