@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
+    "test:version-bump": "node --test scripts/bump-version.test.mjs",
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest"
   },

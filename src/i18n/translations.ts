@@ -113,9 +113,9 @@ const core: Record<Lang, Dict> = {
     'common.loading': 'Загрузка…',
 
     /* ── Auth — shared atmospheric panel ────────────── */
-    'auth.brandSub': 'Имперский Архив · MMDXLIV',
-    'auth.cohort': 'Когорта VII — Хранилище Пепла и Латуни',
-    'auth.version': 'в · 4.21.3 — позолочено',
+    'auth.brandSub': 'Имперский Архив · {currentYearRoman}',
+    'auth.cohort': 'Когорта {cohortNumber} — {releaseName}',
+    'auth.version': 'в · {version} — позолочено',
     'auth.showPassword': 'Показать пароль',
     'auth.hidePassword': 'Скрыть пароль',
 
@@ -128,6 +128,7 @@ const core: Record<Lang, Dict> = {
     'auth.login.statChapters': 'Главы',
     'auth.login.statSouls': 'Записано душ',
     'auth.login.statVigil': 'Бдение длится',
+    'auth.login.statVigilValue': '{days} d',
     'auth.login.presentSeal': 'Предъяви свою Печать',
     'auth.login.awaits': 'Архив ожидает дозволения',
     'auth.login.sigilAddress': 'Адрес Сигила',
@@ -290,11 +291,11 @@ const core: Record<Lang, Dict> = {
     'common.loading': 'Loading…',
 
     /* ── Auth — shared atmospheric panel ────────────── */
-    'auth.brandSub': 'Imperial Archive · MMDXLIV',
+    'auth.brandSub': 'Imperial Archive · {currentYearRoman}',
     'auth.showPassword': 'Show password',
     'auth.hidePassword': 'Hide password',
-    'auth.cohort': 'Cohort VII — Vault of Ash and Brass',
-    'auth.version': 'v · 4.21.3 — gilded',
+    'auth.cohort': 'Cohort {cohortNumber} — {releaseName}',
+    'auth.version': 'v · {version} — gilded',
 
     /* ── Login ──────────────────────────────────────── */
     'auth.login.sacramentum': '— SACRAMENTUM —',
@@ -304,7 +305,8 @@ const core: Record<Lang, Dict> = {
     'auth.login.sealOfEntry': 'SEAL OF ENTRY',
     'auth.login.statChapters': 'Chapters',
     'auth.login.statSouls': 'Souls Recorded',
-    'auth.login.statVigil': 'Vigil Continues',
+    'auth.login.statVigil': 'Vigil Duration',
+    'auth.login.statVigilValue': '{days} d',
     'auth.login.presentSeal': 'Present Thy Seal',
     'auth.login.awaits': 'The Archive awaits authorisation',
     'auth.login.sigilAddress': 'Sigil Address',

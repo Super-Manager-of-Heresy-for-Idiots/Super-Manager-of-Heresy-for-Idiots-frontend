@@ -59,6 +59,20 @@ export interface ApiError {
   fields?: Record<string, string>;
 }
 
+export interface LoginPageStatsResponse {
+  campaignCount: number;
+  userCount: number;
+  vigilDays: number;
+}
+
+export interface AppReleaseConfig {
+  version: string;
+  releaseName: {
+    ru: string;
+    en: string;
+  };
+}
+
 // === Auth ===
 
 export interface RegisterRequest {

@@ -20,6 +20,8 @@ env:
   # Путь к kustomization.yaml в GitOps-репозитории, где лежит блок images:.
   # Блок images: лежит в оверлее prod, НЕ в base.
   GITOPS_KUSTOMIZATION_PATH: apps/dnd-frontend/overlays/prod/kustomization.yaml
+  # Runtime release config, mounted into nginx by the GitOps frontend Deployment.
+  GITOPS_APP_RELEASE_CONFIG_PATH: apps/dnd-frontend/base/app-release-config.yaml
 
 jobs:
   # ---------------------------------------------------------------------------
@@ -44,6 +46,9 @@ jobs:
       - name: Run tests + coverage
         run: npm run test:coverage
 
+      - name: Run version bump tests
+        run: npm run test:version-bump
+
       - name: Upload coverage report
         if: always()
         uses: actions/upload-artifact@v4
@@ -53,12 +58,12 @@ jobs:
           if-no-files-found: warn
 
   # ---------------------------------------------------------------------------
-  # 2. BUILD + 3. PUBLISH — только после успешного test и только на main
+  # 2. BUILD + 3. PUBLISH — только после успешного test и только на master
   # ---------------------------------------------------------------------------
   build:
     name: Build & Push image
     needs: test
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -109,9 +114,11 @@ jobs:
   deploy:
     name: Deploy (GitOps)
     needs: build
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
     runs-on: ubuntu-latest
     environment: production
+    permissions:
+      contents: write
     # Не допускаем параллельных деплоев; новые в очередь, текущий не прерываем.
     concurrency:
       group: deploy-production
@@ -125,6 +132,25 @@ jobs:
             echo "::error::Variable GITOPS_REPO_SLUG is empty. Set it to Super-Manager-of-Heresy-for-Idiots/dnd-gitops"
             exit 1
           fi
+
+      - name: Checkout app repo
+        uses: actions/checkout@v4
+        with:
+          ref: master
+          path: app
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Bump runtime app version
+        id: release
+        working-directory: app
+        run: |
+          NEXT_VERSION="$(node scripts/bump-version.mjs public/app-release.json --print)"
+          echo "version=${NEXT_VERSION}" >> "$GITHUB_OUTPUT"
+          echo "Runtime app version bumped to ${NEXT_VERSION}"
 
       - name: Checkout GitOps repo
         uses: actions/checkout@v4
@@ -150,15 +176,39 @@ jobs:
           echo "----- resulting images block -----"
           yq '.images' "${FILE}"
 
+      - name: Update runtime release config in GitOps
+        working-directory: gitops
+        run: |
+          FILE="${GITOPS_APP_RELEASE_CONFIG_PATH}"
+          if [ ! -f "${FILE}" ]; then
+            echo "::error::${FILE} not found in GitOps repo ${{ vars.GITOPS_REPO_SLUG }}"
+            exit 1
+          fi
+          yq -i '.data["app-release.json"] = load_str("../app/public/app-release.json")' "${FILE}"
+          echo "Runtime release config -> version ${{ steps.release.outputs.version }}"
+
       - name: Commit & push to GitOps repo
         working-directory: gitops
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add "${GITOPS_KUSTOMIZATION_PATH}"
+          git add "${GITOPS_KUSTOMIZATION_PATH}" "${GITOPS_APP_RELEASE_CONFIG_PATH}"
           if git diff --cached --quiet; then
-            echo "No changes — image tag already up to date."
+            echo "No changes — image tag and release config already up to date."
             exit 0
           fi
-          git commit -m "chore: update image tag to ${{ github.sha }} [skip ci]"
+          git commit -m "chore: deploy frontend ${{ github.sha }} app v${{ steps.release.outputs.version }} [skip ci]"
+          git push
+
+      - name: Commit app version bump
+        working-directory: app
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add public/app-release.json
+          if git diff --cached --quiet; then
+            echo "No app release config changes."
+            exit 0
+          fi
+          git commit -m "chore: bump app version to ${{ steps.release.outputs.version }} [skip ci]"
           git push

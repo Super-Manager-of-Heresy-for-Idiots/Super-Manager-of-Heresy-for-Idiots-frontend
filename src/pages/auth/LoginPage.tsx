@@ -7,9 +7,16 @@ import { useLogin } from '@/hooks/useAuth';
 import { useAuthStore } from '@/store/authStore';
 import { getRoleRedirectPath } from '@/lib/utils';
 import { Rune, Sigil, OrdoDivider, OrdoPanel } from '@/components/ordo';
-import { useT } from '@/i18n/I18nContext';
+import { useI18n } from '@/i18n/I18nContext';
 import { LanguageSwitcher } from '@/components/layout/LanguageSwitcher';
 import { cn } from '@/lib/utils';
+import { useAppReleaseConfig, useLoginPageStats } from '@/hooks/useLoginPageMeta';
+import {
+  cohortNumberFromVersion,
+  currentYearRoman,
+  formatCount,
+  releaseNameForLang,
+} from '@/lib/loginPageMeta';
 import s from './LoginPage.module.css';
 
 const loginSchema = z.object({
@@ -29,7 +36,13 @@ export default function LoginPage() {
   const addingAccount = searchParams.get('add') === '1';
   // `?user=<name>` pre-fills the username when switching from the account list.
   const prefillUser = searchParams.get('user') ?? '';
-  const t = useT();
+  const { lang, t } = useI18n();
+  const { data: stats } = useLoginPageStats();
+  const { data: releaseConfig } = useAppReleaseConfig();
+  const releaseVersion = releaseConfig?.version ?? '...';
+  const releaseName = releaseConfig ? releaseNameForLang(releaseConfig, lang) : '...';
+  const cohortNumber = releaseConfig ? cohortNumberFromVersion(releaseConfig.version) : '...';
+  const yearRoman = currentYearRoman();
 
   const {
     register,
@@ -67,7 +80,7 @@ export default function LoginPage() {
           <Sigil size={48} glyph="sigil-3" />
           <div>
             <div className={cn('ao-engraved', s.brandName)}>{t('app.name')}</div>
-            <div className="ao-codex">{t('auth.brandSub')}</div>
+            <div className="ao-codex">{t('auth.brandSub', { currentYearRoman: yearRoman })}</div>
           </div>
         </div>
 
@@ -83,9 +96,12 @@ export default function LoginPage() {
 
           <div className={s.statRow}>
             {[
-              { label: t('auth.login.statChapters'), value: '148' },
-              { label: t('auth.login.statSouls'), value: '3,402' },
-              { label: t('auth.login.statVigil'), value: '912 d' },
+              { label: t('auth.login.statChapters'), value: formatCount(stats?.campaignCount, lang) },
+              { label: t('auth.login.statSouls'), value: formatCount(stats?.userCount, lang) },
+              {
+                label: t('auth.login.statVigil'),
+                value: stats ? t('auth.login.statVigilValue', { days: stats.vigilDays }) : '...',
+              },
             ].map((stat) => (
               <div key={stat.label}>
                 <div className="ao-overline">{stat.label}</div>
@@ -97,8 +113,8 @@ export default function LoginPage() {
 
         {/* Bottom — version */}
         <div className={s.versionRow}>
-          <div className="ao-codex">{t('auth.cohort')}</div>
-          <div className="ao-codex">{t('auth.version')}</div>
+          <div className="ao-codex">{t('auth.cohort', { cohortNumber, releaseName })}</div>
+          <div className="ao-codex">{t('auth.version', { version: releaseVersion })}</div>
         </div>
       </div>
 
