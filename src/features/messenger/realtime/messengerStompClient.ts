@@ -1,6 +1,6 @@
 import { Client, ReconnectionTimeMode, type IMessage } from '@stomp/stompjs';
 import { ensureFreshAccessToken } from '@/lib/authSession';
-import { useAuthStore } from '@/store/authStore';
+import { buildBearerAuthHeader, buildDevMessengerIdentityHeaders } from '../api/messengerAuthHeaders';
 import type { UUID } from '../types';
 import { MESSENGER_WS_URL } from './messengerWsConfig';
 import { messengerWsDestinations } from './messengerWsDestinations';
@@ -8,21 +8,9 @@ import type { MessengerMessageRouter } from './messengerMessageRouter';
 
 export type MessengerConnectionState = 'connecting' | 'connected' | 'reconnecting' | 'offline';
 
-/** Local-only opt-in identity shim for a gateway-less dev messenger (mirrors the map dev shim). */
-function buildDevIdentityHeaders(): Record<string, string> {
-  if (import.meta.env.VITE_MESSENGER_DEV_IDENTITY !== 'true') return {};
-  const user = useAuthStore.getState().user;
-  const headers: Record<string, string> = {};
-  if (user?.id) headers['X-User-Id'] = user.id;
-  if (user?.username) headers['X-Username'] = user.username;
-  return headers;
-}
-
 export function buildMessengerConnectHeaders(token: string | null | undefined): Record<string, string> {
-  const headers: Record<string, string> = buildDevIdentityHeaders();
-  if (token && token !== 'undefined' && token !== 'null') {
-    headers.Authorization = `Bearer ${token}`;
-  }
+  const headers: Record<string, string> = buildDevMessengerIdentityHeaders();
+  Object.assign(headers, buildBearerAuthHeader(token));
   return headers;
 }
 
@@ -108,7 +96,7 @@ export class MessengerStompClient {
     if (!this.client?.connected) return false;
     this.client.publish({
       destination: messengerWsDestinations.appTyping(this.sessionId),
-      headers: buildDevIdentityHeaders(),
+      headers: buildDevMessengerIdentityHeaders(),
       body: JSON.stringify({ typing }),
     });
     return true;
