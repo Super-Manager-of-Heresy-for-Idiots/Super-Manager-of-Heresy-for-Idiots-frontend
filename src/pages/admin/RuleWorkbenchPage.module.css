@@ -1,0 +1,218 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.lede {
+  max-width: 72ch;
+  color: var(--ink-quiet);
+  line-height: 1.5;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 12px 14px;
+}
+
+.filters .ao-input {
+  min-width: 150px;
+}
+
+.tablePanel {
+  padding: 0;
+  overflow: hidden;
+}
+
+.rowClickable {
+  cursor: pointer;
+}
+
+/* ── Badges ─────────────────────────────────────────────── */
+.badge {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  line-height: 1.5;
+  border: 1px solid var(--rule);
+  white-space: nowrap;
+}
+
+.badgeNeutral {
+  color: var(--ink-quiet);
+}
+
+.statusDraft {
+  color: var(--ink-quiet);
+}
+
+.statusNeedsReview {
+  color: var(--gold);
+  border-color: var(--gold);
+}
+
+.statusApproved {
+  color: #4b9e6a;
+  border-color: #4b9e6a;
+}
+
+.statusDisabled {
+  color: var(--ink-faint);
+  text-decoration: line-through;
+}
+
+.sevInfo {
+  color: var(--ink-bright);
+}
+
+.sevWarn {
+  color: var(--gold);
+  border-color: var(--gold);
+}
+
+.sevError {
+  color: #c0563b;
+  border-color: #c0563b;
+}
+
+/* ── Expanded card ──────────────────────────────────────── */
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 14px 16px;
+}
+
+.cardSection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.description {
+  color: var(--ink-quiet);
+  line-height: 1.55;
+  white-space: pre-line;
+}
+
+.muted {
+  color: var(--ink-faint);
+  font-size: 0.85rem;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.listItem {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+}
+
+.listItem.resolved {
+  opacity: 0.55;
+}
+
+.listMain {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.ruleTitle {
+  font-weight: 600;
+}
+
+.issueType {
+  color: var(--ink-quiet);
+  font-size: 0.85rem;
+}
+
+.resolvedIcon {
+  color: #4b9e6a;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.addRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  padding-top: 4px;
+}
+
+.addRow .ao-input {
+  min-width: 160px;
+}
+
+/* ── Revisions ──────────────────────────────────────────── */
+.revChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.72rem;
+  color: var(--ink-quiet);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  padding: 1px 8px;
+}
+
+.revApproved {
+  color: #4b9e6a;
+}
+
+.historyBlock {
+  flex-basis: 100%;
+  width: 100%;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--rule);
+}
+
+.revList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.revItem {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+}
+
+.revNum {
+  font-weight: 600;
+  min-width: 2.5em;
+}

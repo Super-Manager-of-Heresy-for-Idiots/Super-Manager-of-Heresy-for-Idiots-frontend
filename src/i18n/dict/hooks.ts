@@ -320,6 +320,24 @@ export const hooks: DictModule = {
     /* ── useXp ───────────────────────────────────────── */
     'hk.xp.granted': 'Опыт дарован!',
     'hk.xp.grantFailed': 'Не удалось даровать опыт',
+
+    /* ── useFeatureRules (Rule Workbench) ────────────── */
+    'hk.featureRule.created': 'Правило создано',
+    'hk.featureRule.createFailed': 'Не удалось создать правило',
+    'hk.featureRule.updated': 'Правило обновлено',
+    'hk.featureRule.updateFailed': 'Не удалось обновить правило',
+    'hk.featureRule.approved': 'Правило утверждено',
+    'hk.featureRule.approveFailed': 'Не удалось утвердить правило',
+    'hk.featureRule.disabled': 'Правило отключено',
+    'hk.featureRule.disableFailed': 'Не удалось отключить правило',
+    'hk.featureRule.issueCreated': 'Проблема создана',
+    'hk.featureRule.issueCreateFailed': 'Не удалось создать проблему',
+    'hk.featureRule.issueResolved': 'Проблема закрыта',
+    'hk.featureRule.issueResolveFailed': 'Не удалось закрыть проблему',
+    'hk.featureRule.draftCreated': 'Черновик создан',
+    'hk.featureRule.draftCreateFailed': 'Не удалось создать черновик',
+    'hk.featureRule.rolledBack': 'Откат выполнен',
+    'hk.featureRule.rollbackFailed': 'Не удалось выполнить откат',
   },
 
   en: {
@@ -640,5 +658,23 @@ export const hooks: DictModule = {
     /* ── useXp ───────────────────────────────────────── */
     'hk.xp.granted': 'XP granted!',
     'hk.xp.grantFailed': 'Failed to grant XP',
+
+    /* ── useFeatureRules (Rule Workbench) ────────────── */
+    'hk.featureRule.created': 'Rule created',
+    'hk.featureRule.createFailed': 'Failed to create rule',
+    'hk.featureRule.updated': 'Rule updated',
+    'hk.featureRule.updateFailed': 'Failed to update rule',
+    'hk.featureRule.approved': 'Rule approved',
+    'hk.featureRule.approveFailed': 'Failed to approve rule',
+    'hk.featureRule.disabled': 'Rule disabled',
+    'hk.featureRule.disableFailed': 'Failed to disable rule',
+    'hk.featureRule.issueCreated': 'Issue created',
+    'hk.featureRule.issueCreateFailed': 'Failed to create issue',
+    'hk.featureRule.issueResolved': 'Issue resolved',
+    'hk.featureRule.issueResolveFailed': 'Failed to resolve issue',
+    'hk.featureRule.draftCreated': 'Draft created',
+    'hk.featureRule.draftCreateFailed': 'Failed to create draft',
+    'hk.featureRule.rolledBack': 'Rolled back',
+    'hk.featureRule.rollbackFailed': 'Failed to roll back',
   },
 };

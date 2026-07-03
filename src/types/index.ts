@@ -2963,3 +2963,237 @@ export interface MagicItemDetail {
   packageId: string | null;
   allowedEquipment: MagicItemAllowedEquipment[];
 }
+
+/* ── Feature rules runtime (Rule Workbench) ─────────────────────────────── */
+
+export type FeatureRuleReviewStatus = 'draft' | 'needs_review' | 'approved' | 'disabled';
+export type FeatureRuleSeverity = 'info' | 'warn' | 'error';
+
+export interface CodeLabel {
+  code: string;
+  label: string;
+}
+
+export interface FeatureRuleMetadata {
+  ruleTypes: CodeLabel[];
+  reviewStatuses: CodeLabel[];
+  severities: CodeLabel[];
+  issueTypes: CodeLabel[];
+  sources: CodeLabel[];
+}
+
+export interface FeatureRuleResponse {
+  id: string;
+  ownerType: string;
+  ownerId: string;
+  ruleType: string;
+  ruleTypeLabel: string;
+  enabled: boolean;
+  reviewStatus: FeatureRuleReviewStatus;
+  confidence: number | null;
+  source: string;
+  sortOrder: number;
+  notes: string | null;
+  createdAt: string;
+  updatedAt: string;
+  currentRevisionId: string | null;
+  approvedRevisionId: string | null;
+  currentRevisionNumber: number | null;
+  approvedRevisionNumber: number | null;
+  revisionCount: number;
+  rulesetId: string | null;
+  ruleSourceId: string | null;
+  priority: number | null;
+  openIssueCount: number;
+  hasUnresolvedError: boolean;
+}
+
+export interface FeatureRuleRevisionResponse {
+  id: string;
+  featureRuleId: string;
+  revisionNumber: number;
+  status: FeatureRuleReviewStatus;
+  rulePayloadSnapshot: string | null;
+  changeReason: string | null;
+  createdBy: string | null;
+  createdAt: string;
+  approvedBy: string | null;
+  approvedAt: string | null;
+  disabledBy: string | null;
+  disabledAt: string | null;
+  current: boolean;
+  approvedActive: boolean;
+}
+
+export interface RulesetOption {
+  id: string;
+  key: string;
+  displayName: string;
+  edition: string | null;
+  enabled: boolean;
+}
+
+export interface RuleSourceOption {
+  id: string;
+  key: string;
+  displayName: string;
+  sourceType: string | null;
+  rulesetId: string | null;
+}
+
+export interface RevisionActionRequest {
+  targetRevisionId?: string;
+  changeReason?: string;
+}
+
+export interface FeatureRuleIssueResponse {
+  id: string;
+  ownerType: string;
+  ownerId: string;
+  featureRuleId: string | null;
+  issueType: string;
+  severity: FeatureRuleSeverity;
+  message: string;
+  sourceTextFragment: string | null;
+  resolved: boolean;
+  resolvedBy: string | null;
+  resolvedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  featureTitle: string | null;
+  className: string | null;
+  subclassName: string | null;
+  level: number | null;
+}
+
+export interface ProblemFeatureSummary {
+  featureId: string;
+  slug: string;
+  title: string;
+  className: string | null;
+  subclassName: string | null;
+  level: number | null;
+  ruleCount: number;
+  approvedRuleCount: number;
+  issueCount: number;
+  openIssueCount: number;
+  hasUnresolvedError: boolean;
+  maxOpenSeverity: FeatureRuleSeverity | null;
+}
+
+export interface FeatureGrantSummary {
+  id: string;
+  featureRuleId: string;
+  kind: 'proficiency' | 'language';
+  proficiencyType: string | null;
+  targetId: string | null;
+  languageId: string | null;
+  expertise: boolean;
+  grantTiming: string | null;
+  filterRuleId: string | null;
+}
+
+export interface FeatureChoiceOptionSummary {
+  id: string;
+  optionType: string;
+  targetEntityId: string | null;
+  filterRuleId: string | null;
+  sortOrder: number | null;
+}
+
+export interface FeatureChoiceSummary {
+  id: string;
+  featureRuleId: string;
+  choiceKey: string;
+  minChoices: number | null;
+  maxChoicesFormulaId: string | null;
+  choiceTiming: string | null;
+  replacePolicy: string | null;
+  options: FeatureChoiceOptionSummary[];
+}
+
+export interface FeatureRuleDetail {
+  featureId: string;
+  slug: string;
+  title: string;
+  className: string | null;
+  subclassName: string | null;
+  level: number | null;
+  description: string | null;
+  rules: FeatureRuleResponse[];
+  issues: FeatureRuleIssueResponse[];
+  grants: FeatureGrantSummary[];
+  choices: FeatureChoiceSummary[];
+}
+
+export interface FeatureRuleValidationResponse {
+  valid: boolean;
+  problems: string[];
+}
+
+/* ── Formula engine (Stage 3) ── */
+
+export type FormulaResultType = 'integer' | 'decimal' | 'boolean' | 'duration' | 'dice' | 'modifier';
+export type FormulaRoundingMode = 'floor' | 'ceil' | 'nearest' | 'none';
+
+export interface FormulaContextPayload {
+  scalars?: Record<string, number>;
+  classLevels?: Record<string, number>;
+  abilityMods?: Record<string, number>;
+  resourceCounts?: Record<string, number>;
+  targetConditions?: Record<string, boolean>;
+}
+
+export interface FeatureFormulaValidateRequest {
+  expression: string;
+  resultType: FormulaResultType;
+}
+
+export interface FeatureFormulaValidation {
+  valid: boolean;
+  message: string;
+  requiredContext: string[] | null;
+  sampleResult: string | null;
+}
+
+export interface FeatureFormulaEvaluateRequest {
+  expression: string;
+  resultType: FormulaResultType;
+  roundingMode?: FormulaRoundingMode;
+  minValue?: number;
+  maxValue?: number;
+  context?: FormulaContextPayload;
+}
+
+export interface FeatureFormulaEvaluateResult {
+  ok: boolean;
+  message: string | null;
+  resultType: string;
+  displayValue: string | null;
+  numericValue: number | null;
+  booleanValue: boolean | null;
+  diceValue: string | null;
+}
+
+export interface CreateFeatureRuleRequest {
+  ruleType: string;
+  enabled?: boolean;
+  sortOrder?: number;
+  notes?: string;
+}
+
+export interface UpdateFeatureRuleRequest {
+  ruleType?: string;
+  enabled?: boolean;
+  sortOrder?: number;
+  notes?: string;
+  confidence?: number;
+}
+
+export interface CreateFeatureRuleIssueRequest {
+  featureRuleId?: string | null;
+  issueType: string;
+  severity: FeatureRuleSeverity;
+  message: string;
+  sourceTextFragment?: string;
+}

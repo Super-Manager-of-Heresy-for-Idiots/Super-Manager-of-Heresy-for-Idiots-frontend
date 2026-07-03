@@ -68,6 +68,7 @@ const adminNav: NavEntry[] = [
   { labelKey: 'nav.homebrew', path: '/admin/homebrew', glyph: 'scroll' },
   { labelKey: 'nav.spellWarnings', path: '/admin/spell-warnings', glyph: 'tri-inv' },
   { labelKey: 'nav.classFeatureWarnings', path: '/admin/class-feature-warnings', glyph: 'tri-inv' },
+  { labelKey: 'nav.ruleWorkbench', path: '/admin/rule-workbench', glyph: 'diamond' },
 ];
 
 function getNavItems(role?: Role): NavEntry[] {
