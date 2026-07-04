@@ -18,6 +18,14 @@ import {
   MulticlassPanel,
   AbilityCheckPanel,
   DamageHealModal,
+  SpellbookAddModal,
+  FeatureResourcesPanel,
+  FeatureEffectsPanel,
+  FeatureActionsPanel,
+  PendingPromptsPanel,
+  KnownFormsPanel,
+  CompanionsPanel,
+  FeatureChoicesPanel,
   EditableSheetField,
   SpellSlotsPanel,
 } from '@/components/characters';
@@ -31,9 +39,11 @@ import {
 import { useCharacterEffects } from '@/hooks/useEffects';
 import { useEquippedInventory } from '@/hooks/useInventory';
 import { useCharacterRewards } from '@/hooks/useLevelUp';
+import { useCapabilityProfile } from '@/hooks/useCapabilityProfile';
+import { useForgetSpell } from '@/hooks/useSpellbook';
 import { useGlobalReferenceContent } from '@/hooks/useTemplates';
 import { useAuthStore } from '@/store/authStore';
-import { useT } from '@/i18n/I18nContext';
+import { useT, useI18n } from '@/i18n/I18nContext';
 import { useGameTerms } from '@/i18n/gameTerms';
 import { REWARD_TYPE_LABELS } from '@/types';
 import type { CharacterStatResponse, ItemInstanceResponse } from '@/types';
@@ -100,6 +110,7 @@ function VoidBody({ note }: { note: string }) {
 
 export default function FolioPage() {
   const t = useT();
+  const { lang } = useI18n();
   const gt = useGameTerms();
   const navigate = useNavigate();
   const { campaignId, characterId } = useParams<{ campaignId: string; characterId: string }>();
@@ -111,9 +122,11 @@ export default function FolioPage() {
   const { data: effects } = useCharacterEffects(campaignId!, characterId!);
   const { data: equipped } = useEquippedInventory(campaignId!, characterId!);
   const { data: rewards } = useCharacterRewards(characterId!);
+  const { data: capability } = useCapabilityProfile(characterId);
   const { data: refContent } = useGlobalReferenceContent();
   const abilityCheck = useAbilityCheck();
   const updateCharacter = useUpdateCharacter();
+  const forgetSpell = useForgetSpell(campaignId!, characterId!);
 
   const saveSheetField = (field: 'proficiencies' | 'equipment', next: string) => {
     if (!campaignId || !characterId) return;
@@ -125,6 +138,7 @@ export default function FolioPage() {
   const [checkResult, setCheckResult] = useState<{ statName: string; total: number; breakdown: { source: string; value: number }[] } | null>(null);
   const [activeStatId, setActiveStatId] = useState<string | null>(null);
   const [expandedSpellId, setExpandedSpellId] = useState<string | null>(null);
+  const [spellbookOpen, setSpellbookOpen] = useState(false);
 
   const weapons = useMemo<ItemInstanceResponse[]>(
     () => (equipped ?? []).filter((i) => i.slot && WEAPON_SLOTS.includes(i.slot)),
@@ -250,46 +264,121 @@ export default function FolioPage() {
   const perceptionProf = perceptionSkill ? profSkillIds.has(perceptionSkill.id) : false;
   const passivePerception = 10 + wisMod + (perceptionProf ? profBonus : 0);
 
+  /* ── class-aware tab visibility ───────────────────────────── */
+  // The Spells tab is shown only for spellcasters. A non-caster (Barbarian/Monk/Rogue…) never sees it.
+  // Fallback to knownSpells so a legacy/racial caster with spells but no resolved class profile keeps it.
+  const isCaster = capability?.spellcasting?.caster ?? false;
+  const showSpellsTab = isCaster || knownSpells.length > 0;
+  const visibleTabs = useMemo(
+    () => TABS.filter((td) => td.id !== 'spells' || showSpellsTab),
+    [showSpellsTab],
+  );
+  const effectiveTab: TabId = visibleTabs.some((td) => td.id === tab)
+    ? tab
+    : (visibleTabs[0]?.id ?? 'features');
+
   /* ── tab content (left main column) ───────────────────────── */
   function renderTab(): ReactNode {
     if (!character) return null;
-    switch (tab) {
-      case 'spells':
+    switch (effectiveTab) {
+      case 'spells': {
+        const sc = capability?.spellcasting;
+        const cantrips = knownSpells.filter((sp) => sp.level === 0);
+        const leveled = [...knownSpells].filter((sp) => sp.level > 0).sort((a, b) => a.level - b.level);
+        const abilityName = sc
+          ? (lang === 'ru' ? sc.abilityNameRu : sc.abilityNameEn) ?? sc.abilityNameEn ?? sc.abilityNameRu
+          : null;
+        const casterTypeKnown = ['FULL', 'HALF', 'THIRD', 'PACT', 'MULTI'].includes(sc?.casterType ?? '');
+        const renderSpellRow = (sp: (typeof knownSpells)[number]) => {
+          const isOpen = expandedSpellId === sp.spellId;
+          return (
+            <div key={sp.spellId}>
+              <div
+                className={cn(s.spellRow, s.spellRowClickable, isOpen && s.spellRowOpen)}
+                onClick={() => setExpandedSpellId(isOpen ? null : sp.spellId)}
+              >
+                <ExpandChevron open={isOpen} size={13} />
+                <span className={cn('ao-num', s.spellLevel)}>
+                  {sp.level === 0 ? t('camp2.folio.spells.cantrip') : t('camp2.folio.spells.levelShort', { level: sp.level })}
+                </span>
+                <span className={s.spellName}>{sp.name}</span>
+                {sp.school && <span className={cn('ao-italic', s.spellSchool)}>{sp.school}</span>}
+                {canManageSlots && (
+                  <button
+                    className={cn('ao-btn', 'ao-btn--ghost', 'ao-btn--sm', s.spellRemoveBtn)}
+                    title={t('spellbook.forget')}
+                    aria-label={t('spellbook.forget')}
+                    disabled={forgetSpell.isPending}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      forgetSpell.mutate(sp.spellId);
+                    }}
+                  >
+                    ×
+                  </button>
+                )}
+              </div>
+              <ExpandablePanel open={isOpen} innerClassName={s.spellDetailInner}>
+                <SpellDetailCard spellId={sp.spellId} campaignId={campaignId} />
+              </ExpandablePanel>
+            </div>
+          );
+        };
         return (
           <>
             <PanelHeader title={t('camp2.folio.spells.title')} sub={t('camp2.folio.spells.sub', { count: knownSpells.length })} glyph="hex" tone="arcane" />
-            {knownSpells.length > 0 && (
+            {canManageSlots && sc?.caster && (
+              <div className={s.spellToolbar}>
+                <button className={cn('ao-btn', 'ao-btn--sm', 'ao-btn--primary')} onClick={() => setSpellbookOpen(true)}>
+                  {t('spellbook.button.add')}
+                </button>
+              </div>
+            )}
+            {sc?.caster && (
+              <div className={s.spellStatBar}>
+                <div className={s.spellStatCell}>
+                  <div className="ao-overline">{t('camp2.folio.spells.stat.ability')}</div>
+                  <div className={s.spellStatValueSm}>{abilityName ?? NA}</div>
+                </div>
+                <div className={s.spellStatCell}>
+                  <div className="ao-overline">{t('camp2.folio.spells.stat.dc')}</div>
+                  <div className={s.spellStatValue}>{sc.spellSaveDc ?? NA}</div>
+                </div>
+                <div className={s.spellStatCell}>
+                  <div className="ao-overline">{t('camp2.folio.spells.stat.attack')}</div>
+                  <div className={s.spellStatValue}>{sc.spellAttackBonus != null ? fmtMod(sc.spellAttackBonus) : NA}</div>
+                </div>
+                <div className={s.spellStatCell}>
+                  <div className="ao-overline">{t('camp2.folio.spells.stat.caster')}</div>
+                  <div className={s.spellStatValueSm}>
+                    {casterTypeKnown ? t(`camp2.folio.spells.casterType.${sc.casterType}`) : (sc.casterType || NA)}
+                  </div>
+                </div>
+                {sc.preparation && (
+                  <div className={s.spellStatCell}>
+                    <div className="ao-overline">{t('camp2.folio.spells.stat.preparation')}</div>
+                    <div className={s.spellStatValueSm}>{t(`camp2.folio.spells.preparation.${sc.preparation}`)}</div>
+                  </div>
+                )}
+              </div>
+            )}
+            {cantrips.length > 0 && (
+              <div className={s.spellsKnown}>
+                <div className={cn('ao-overline', s.mb10)}>{t('camp2.folio.spells.cantrips')}</div>
+                <div className={s.spellList}>{cantrips.map(renderSpellRow)}</div>
+              </div>
+            )}
+            {leveled.length > 0 && (
               <div className={s.spellsKnown}>
                 <div className={cn('ao-overline', s.mb10)}>{t('camp2.folio.spells.known')}</div>
-                <div className={s.spellList}>
-                  {[...knownSpells].sort((a, b) => a.level - b.level).map((sp) => {
-                    const isOpen = expandedSpellId === sp.spellId;
-                    return (
-                    <div key={sp.spellId}>
-                      <div
-                        className={cn(s.spellRow, s.spellRowClickable, isOpen && s.spellRowOpen)}
-                        onClick={() => setExpandedSpellId(isOpen ? null : sp.spellId)}
-                      >
-                        <ExpandChevron open={isOpen} size={13} />
-                        <span className={cn('ao-num', s.spellLevel)}>
-                          {sp.level === 0 ? t('camp2.folio.spells.cantrip') : t('camp2.folio.spells.levelShort', { level: sp.level })}
-                        </span>
-                        <span className={s.spellName}>{sp.name}</span>
-                        {sp.school && <span className={cn('ao-italic', s.spellSchool)}>{sp.school}</span>}
-                      </div>
-                      <ExpandablePanel open={isOpen} innerClassName={s.spellDetailInner}>
-                        <SpellDetailCard spellId={sp.spellId} campaignId={campaignId} />
-                      </ExpandablePanel>
-                    </div>
-                    );
-                  })}
-                </div>
+                <div className={s.spellList}>{leveled.map(renderSpellRow)}</div>
               </div>
             )}
             {knownSpells.length === 0 && <VoidBody note={t('camp2.folio.spells.void')} />}
             <SpellSlotsPanel characterId={characterId!} canManage={canManageSlots} className={s.slotsBlock} />
           </>
         );
+      }
       case 'features':
         return (
           <>
@@ -849,8 +938,8 @@ export default function FolioPage() {
       {/* ── TABS ───────────────────────────────────────────────── */}
       <div id="folio-codex" className={s.tabsWrap}>
         <div className="ao-tabs">
-          {TABS.map((tabDef) => (
-            <button key={tabDef.id} className={cn('ao-tab', tab === tabDef.id && 'is-active')} onClick={() => setTab(tabDef.id)}>
+          {visibleTabs.map((tabDef) => (
+            <button key={tabDef.id} className={cn('ao-tab', effectiveTab === tabDef.id && 'is-active')} onClick={() => setTab(tabDef.id)}>
               {t(`camp2.folio.tab.${tabDef.id}`)}
             </button>
           ))}
@@ -873,6 +962,29 @@ export default function FolioPage() {
                 classLevel: c.classLevel,
               }))}
             />
+          )}
+
+          {/* Class runtime: reaction prompts → choices → actions → resources → effects (shown when present) */}
+          {(capability?.pendingPrompts ?? 0) > 0 && (
+            <PendingPromptsPanel campaignId={campaignId!} characterId={characterId!} canManage={canManageSlots} />
+          )}
+          {(capability?.pendingChoices ?? 0) > 0 && (
+            <FeatureChoicesPanel campaignId={campaignId!} characterId={characterId!} canManage={canManageSlots} />
+          )}
+          {capability?.hasFeatureActions && (
+            <FeatureActionsPanel campaignId={campaignId!} characterId={characterId!} canManage={canManageSlots} />
+          )}
+          {capability?.hasFeatureResources && (
+            <FeatureResourcesPanel campaignId={campaignId!} characterId={characterId!} canManage={canManageSlots} />
+          )}
+          {capability?.hasActiveEffects && (
+            <FeatureEffectsPanel campaignId={campaignId!} characterId={characterId!} canManage={canManageSlots} />
+          )}
+          {capability?.wildShape && (
+            <KnownFormsPanel campaignId={campaignId!} characterId={characterId!} canManage={canManageSlots} />
+          )}
+          {capability?.hasCompanions && (
+            <CompanionsPanel campaignId={campaignId!} characterId={characterId!} canManage={canManageSlots} />
           )}
 
           {/* Sacred Marks = active effects */}
@@ -924,6 +1036,16 @@ export default function FolioPage() {
         characterId={characterId!}
         currentHp={currentHp}
         maxHp={maxHp}
+      />
+
+      {/* Spellbook: record newly learned spells */}
+      <SpellbookAddModal
+        open={spellbookOpen}
+        onOpenChange={setSpellbookOpen}
+        campaignId={campaignId!}
+        characterId={characterId!}
+        classIds={(capability?.classes ?? []).map((c) => c.classId)}
+        knownSpellIds={knownSpells.map((sp) => sp.spellId)}
       />
     </div>
   );

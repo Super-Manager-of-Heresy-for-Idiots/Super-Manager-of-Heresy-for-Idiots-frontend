@@ -1,0 +1,37 @@
+.body { padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
+.hint { color: var(--ink-faint); font-size: 12px; text-align: center; padding: 18px 0; }
+.name { color: var(--ink-bright); font-size: 13px; }
+.cr { font-size: 11px; color: var(--gold-pale); }
+
+/* transformation bar */
+.transformBar { display: flex; align-items: center; gap: 10px; padding: 8px 10px; background: rgba(120, 100, 180, 0.10); border: 1px solid var(--arcane); }
+.transformLabel { flex: 1; min-width: 0; color: var(--ink-bright); font-size: 13px; }
+
+/* form / companion rows */
+.formRow { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--hairline); }
+.formMain { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.formMeta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.stat { font-size: 11px; color: var(--ink-quiet); }
+.formControls { display: flex; gap: 6px; flex-shrink: 0; }
+.addBtn { align-self: flex-start; margin-top: 4px; }
+.pendingChip {
+  font-family: var(--font-display); text-transform: uppercase; letter-spacing: var(--track-eng);
+  font-size: 9px; color: var(--ember); border: 1px solid var(--ember); padding: 2px 6px; opacity: 0.85;
+}
+
+/* feature choices */
+.choiceGroup { display: flex; flex-direction: column; gap: 4px; padding-bottom: 8px; border-bottom: 1px solid var(--hairline); }
+.choiceHead { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 2px; }
+.optionRow { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 4px 0 4px 12px; }
+.optName { flex: 1; min-width: 0; color: var(--ink-quiet); font-size: 12.5px; }
+
+/* monster picker */
+.search { width: 100%; margin-bottom: 12px; }
+.pickerList { max-height: 60vh; overflow-y: auto; display: flex; flex-direction: column; }
+.pickerRow {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 9px 6px; border-bottom: 1px solid var(--hairline); background: transparent;
+  border-left: none; border-right: none; border-top: none; cursor: pointer; text-align: left; width: 100%;
+}
+.pickerRow:hover { background: rgba(255, 255, 255, 0.03); }
+.pickerRow:disabled { opacity: 0.5; cursor: default; }

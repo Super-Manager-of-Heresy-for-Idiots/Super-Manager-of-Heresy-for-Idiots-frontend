@@ -15,6 +15,14 @@ export { AbilityCheckPanel } from './AbilityCheckPanel';
 export { StatusControlPanel } from './StatusControlPanel';
 export { ReadOnlyOverlay } from './ReadOnlyOverlay';
 export { DamageHealModal } from './DamageHealModal';
+export { SpellbookAddModal } from './SpellbookAddModal';
+export { FeatureResourcesPanel } from './FeatureResourcesPanel';
+export { FeatureEffectsPanel } from './FeatureEffectsPanel';
+export { FeatureActionsPanel } from './FeatureActionsPanel';
+export { PendingPromptsPanel } from './PendingPromptsPanel';
+export { KnownFormsPanel } from './KnownFormsPanel';
+export { CompanionsPanel } from './CompanionsPanel';
+export { FeatureChoicesPanel } from './FeatureChoicesPanel';
 export { EditableSheetField } from './EditableSheetField';
 export { WalletPanel } from './WalletPanel';
 

@@ -1,0 +1,9 @@
+.search { width: 100%; margin-bottom: 12px; }
+.list { max-height: 60vh; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
+.group { display: flex; flex-direction: column; gap: 2px; }
+.groupHead { margin-bottom: 4px; }
+.row { display: flex; align-items: center; gap: 10px; padding: 6px 4px; border-bottom: 1px solid var(--hairline); }
+.name { flex: 1; min-width: 0; color: var(--ink-bright); font-size: 13px; }
+.school { color: var(--ink-faint); font-size: 11px; }
+.addBtn { flex-shrink: 0; }
+.hint { color: var(--ink-faint); font-size: 12px; text-align: center; padding: 24px 0; }
