@@ -51,12 +51,21 @@ const SEVERITY_CLASS: Record<string, string> = {
   error: s.sevError,
 };
 
+/** Localize a backend code (severity / status / issueType) via i18n, falling back to a label or the code. */
+function localizedCode(t: (k: string) => string, kind: string, code: string, fallback?: string): string {
+  const key = `adm.fr.${kind}.${code}`;
+  const label = t(key);
+  return label === key ? (fallback ?? code) : label;
+}
+
 function StatusBadge({ code, label }: { code: string; label?: string }) {
-  return <span className={cn(s.badge, STATUS_CLASS[code] ?? s.badgeNeutral)}>{label ?? code}</span>;
+  const t = useT();
+  return <span className={cn(s.badge, STATUS_CLASS[code] ?? s.badgeNeutral)}>{localizedCode(t, 'status', code, label)}</span>;
 }
 
 function SeverityBadge({ code }: { code: string }) {
-  return <span className={cn(s.badge, SEVERITY_CLASS[code] ?? s.badgeNeutral)}>{code}</span>;
+  const t = useT();
+  return <span className={cn(s.badge, SEVERITY_CLASS[code] ?? s.badgeNeutral)}>{localizedCode(t, 'severity', code)}</span>;
 }
 
 /* ── Setup: how-to README + backfill / coverage / bulk-approve ───────────── */
@@ -84,6 +93,15 @@ function WorkbenchSetup() {
             <li>{t('adm.ruleWorkbench.readme.step4')}</li>
           </ol>
           <p className={s.muted}>{t('adm.ruleWorkbench.readme.note')}</p>
+
+          <p className="ao-overline">{t('adm.ruleWorkbench.readme.formulaTitle')}</p>
+          <p>{t('adm.ruleWorkbench.readme.formulaIntro')}</p>
+          <ul className={s.readmeSteps}>
+            <li>{t('adm.ruleWorkbench.readme.formulaVars')}</li>
+            <li>{t('adm.ruleWorkbench.readme.formulaFns')}</li>
+            <li>{t('adm.ruleWorkbench.readme.formulaOps')}</li>
+          </ul>
+          <p className={s.muted}>{t('adm.ruleWorkbench.readme.formulaExamples')}</p>
         </div>
       )}
 
@@ -187,13 +205,13 @@ export default function RuleWorkbenchPage() {
         <select className="ao-input" value={reviewStatus} onChange={(e) => setReviewStatus(e.target.value)}>
           <option value="">{t('adm.ruleWorkbench.filter.allStatuses')}</option>
           {metadata?.reviewStatuses.map((o) => (
-            <option key={o.code} value={o.code}>{o.label}</option>
+            <option key={o.code} value={o.code}>{localizedCode(t, 'status', o.code, o.label)}</option>
           ))}
         </select>
         <select className="ao-input" value={severity} onChange={(e) => setSeverity(e.target.value)}>
           <option value="">{t('adm.ruleWorkbench.filter.allSeverities')}</option>
           {metadata?.severities.map((o) => (
-            <option key={o.code} value={o.code}>{o.label}</option>
+            <option key={o.code} value={o.code}>{localizedCode(t, 'severity', o.code, o.label)}</option>
           ))}
         </select>
       </div>
@@ -245,7 +263,7 @@ export default function RuleWorkbenchPage() {
                       </td>
                       <td>
                         {feature.hasUnresolvedError ? (
-                          <span className={cn(s.badge, s.sevError)}>error</span>
+                          <span className={cn(s.badge, s.sevError)}>{localizedCode(t, 'severity', 'error')}</span>
                         ) : feature.maxOpenSeverity ? (
                           <SeverityBadge code={feature.maxOpenSeverity} />
                         ) : (
@@ -389,7 +407,7 @@ function RulesSection({
                   <span className={s.ruleTitle}>{rule.ruleTypeLabel}</span>
                   <StatusBadge code={rule.reviewStatus} />
                   {!rule.enabled && <span className={cn(s.badge, s.badgeNeutral)}>{t('adm.ruleWorkbench.card.off')}</span>}
-                  {rule.hasUnresolvedError && <span className={cn(s.badge, s.sevError)}>error</span>}
+                  {rule.hasUnresolvedError && <span className={cn(s.badge, s.sevError)}>{localizedCode(t, 'severity', 'error')}</span>}
                   {rule.currentRevisionNumber != null && (
                     <span className={s.revChip} title={t('adm.ruleWorkbench.card.revisionTip')}>
                       <GitBranch size={12} /> r{rule.currentRevisionNumber}
@@ -538,7 +556,7 @@ function IssuesSection({
             <li key={issue.id} className={cn(s.listItem, issue.resolved && s.resolved)}>
               <div className={s.listMain}>
                 <SeverityBadge code={issue.severity} />
-                <span className={s.issueType}>{issue.issueType}</span>
+                <span className={s.issueType}>{localizedCode(t, 'issueType', issue.issueType)}</span>
                 <span>{issue.message}</span>
                 {issue.resolved && <Check size={14} className={s.resolvedIcon} />}
               </div>
@@ -562,7 +580,7 @@ function IssuesSection({
         <select className="ao-input" value={issueType} onChange={(e) => setIssueType(e.target.value)}>
           <option value="">{t('adm.ruleWorkbench.card.pickIssueType')}</option>
           {metadata?.issueTypes.map((o) => (
-            <option key={o.code} value={o.code}>{o.label}</option>
+            <option key={o.code} value={o.code}>{localizedCode(t, 'issueType', o.code, o.label)}</option>
           ))}
         </select>
         <select
@@ -572,7 +590,7 @@ function IssuesSection({
         >
           <option value="">{t('adm.ruleWorkbench.card.pickSeverity')}</option>
           {metadata?.severities.map((o) => (
-            <option key={o.code} value={o.code}>{o.label}</option>
+            <option key={o.code} value={o.code}>{localizedCode(t, 'severity', o.code, o.label)}</option>
           ))}
         </select>
         <input
