@@ -9,6 +9,7 @@ import {
   OrdoChip,
   OrdoDivider,
   Placeholder,
+  OrdoAssetIcon,
 } from '@/components/ordo';
 import { CharStatusBadge } from '@/components/campaigns';
 import { CompatibilityBanner } from '@/components/CompatibilityBanner';
@@ -271,10 +272,7 @@ export default function FolioPage() {
   // Fallback to knownSpells so a legacy/racial caster with spells but no resolved class profile keeps it.
   const isCaster = capability?.spellcasting?.caster ?? false;
   const showSpellsTab = isCaster || knownSpells.length > 0;
-  const visibleTabs = useMemo(
-    () => TABS.filter((td) => td.id !== 'spells' || showSpellsTab),
-    [showSpellsTab],
-  );
+  const visibleTabs = TABS.filter((td) => td.id !== 'spells' || showSpellsTab);
   const effectiveTab: TabId = visibleTabs.some((td) => td.id === tab)
     ? tab
     : (visibleTabs[0]?.id ?? 'features');
@@ -300,6 +298,13 @@ export default function FolioPage() {
                 onClick={() => setExpandedSpellId(isOpen ? null : sp.spellId)}
               >
                 <ExpandChevron open={isOpen} size={13} />
+                <span className={s.spellIcon} aria-hidden="true">
+                  <OrdoAssetIcon
+                    names={[sp.name]}
+                    source="spells"
+                    fallback={<Rune kind="hex" size={12} color="var(--arcane)" />}
+                  />
+                </span>
                 <span className={cn('ao-num', s.spellLevel)}>
                   {sp.level === 0 ? t('camp2.folio.spells.cantrip') : t('camp2.folio.spells.levelShort', { level: sp.level })}
                 </span>

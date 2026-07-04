@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'react';
-import { Rune, OrdoChip } from '@/components/ordo';
+import { Rune, OrdoChip, OrdoAssetIcon } from '@/components/ordo';
 import { RarityBadge, rarityHue } from './RarityBadge';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
@@ -57,7 +57,12 @@ export function InvRow({ item, onRename, onTransfer, onMore }: InvRowProps) {
       {/* ── Slot icon with rarity tint & stack overlay ── */}
       <div className={s.iconWrap}>
         <div className={s.slot} style={{ '--rar': rarityColor } as CSSProperties}>
-          <Rune kind={slotGlyph} size={18} color={rarityColor} />
+          <OrdoAssetIcon
+            names={[item.templateName, item.name, item.displayName]}
+            source="item"
+            imgClassName={s.assetIcon}
+            fallback={<Rune kind={slotGlyph} size={18} color={rarityColor} />}
+          />
         </div>
 
         {/* Stack quantity overlay */}

@@ -7,16 +7,19 @@ import {
 } from '@/components/common/ExpandableRow';
 import {
   useApproveRule,
+  useBatchApprove,
   useCreateDraft,
   useCreateFeatureRule,
   useCreateIssue,
   useDisableRule,
+  useFeatureCoverage,
   useFeatureDetail,
   useFeatureRuleMetadata,
   useProblemFeatures,
   useResolveIssue,
   useRollback,
   useRuleRevisions,
+  useRunBackfill,
   useValidateRule,
 } from '@/hooks/useFeatureRules';
 import type { ProblemFeatureFilters } from '@/api/featureRules.api';
@@ -54,6 +57,60 @@ function StatusBadge({ code, label }: { code: string; label?: string }) {
 
 function SeverityBadge({ code }: { code: string }) {
   return <span className={cn(s.badge, SEVERITY_CLASS[code] ?? s.badgeNeutral)}>{code}</span>;
+}
+
+/* ── Setup: how-to README + backfill / coverage / bulk-approve ───────────── */
+
+function WorkbenchSetup() {
+  const t = useT();
+  const { data: coverage } = useFeatureCoverage();
+  const backfill = useRunBackfill();
+  const batchApprove = useBatchApprove();
+  const [readmeOpen, setReadmeOpen] = useState(false);
+  const busy = backfill.isPending || batchApprove.isPending;
+
+  return (
+    <div className={cn('ao-panel', s.setup)}>
+      <button className={s.readmeToggle} onClick={() => setReadmeOpen((o) => !o)}>
+        <ExpandChevron open={readmeOpen} /> {t('adm.ruleWorkbench.readme.title')}
+      </button>
+      {readmeOpen && (
+        <div className={s.readmeBody}>
+          <p>{t('adm.ruleWorkbench.readme.intro')}</p>
+          <ol className={s.readmeSteps}>
+            <li>{t('adm.ruleWorkbench.readme.step1')}</li>
+            <li>{t('adm.ruleWorkbench.readme.step2')}</li>
+            <li>{t('adm.ruleWorkbench.readme.step3')}</li>
+            <li>{t('adm.ruleWorkbench.readme.step4')}</li>
+          </ol>
+          <p className={s.muted}>{t('adm.ruleWorkbench.readme.note')}</p>
+        </div>
+      )}
+
+      <div className={s.setupRow}>
+        <span className={s.coverage}>
+          {coverage
+            ? t('adm.ruleWorkbench.setup.coverage', {
+                withRules: coverage.featuresWithRules,
+                total: coverage.runtimeFeatures,
+                approved: coverage.featuresWithApprovedRules,
+              })
+            : t('adm.ruleWorkbench.setup.noCoverage')}
+        </span>
+        <div className={s.setupActions}>
+          <button className="ao-btn" onClick={() => backfill.mutate(false)} disabled={busy}>
+            {t('adm.ruleWorkbench.setup.dryRun')}
+          </button>
+          <button className="ao-btn ao-btn--primary" onClick={() => backfill.mutate(true)} disabled={busy}>
+            {t('adm.ruleWorkbench.setup.runBackfill')}
+          </button>
+          <button className="ao-btn" onClick={() => batchApprove.mutate('static_grant')} disabled={busy}>
+            {t('adm.ruleWorkbench.setup.batchApprove')}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default function RuleWorkbenchPage() {
@@ -100,6 +157,8 @@ export default function RuleWorkbenchPage() {
         <h2 className="ao-h2">{t('adm.ruleWorkbench.title')}</h2>
         <p className={s.lede}>{t('adm.ruleWorkbench.lede')}</p>
       </header>
+
+      <WorkbenchSetup />
 
       <FormulaLab />
 

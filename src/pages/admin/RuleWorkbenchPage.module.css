@@ -4,6 +4,19 @@
   gap: 18px;
 }
 
+/* ── setup: readme + backfill/coverage ── */
+.setup { display: flex; flex-direction: column; gap: 12px; padding: 14px 16px; }
+.readmeToggle {
+  display: inline-flex; align-items: center; gap: 8px; background: transparent; border: none;
+  cursor: pointer; color: var(--gold-pale); font-family: var(--font-display);
+  text-transform: uppercase; letter-spacing: var(--track-eng); font-size: var(--t-micro); padding: 0;
+}
+.readmeBody { color: var(--ink-quiet); font-size: 13px; line-height: 1.55; display: flex; flex-direction: column; gap: 8px; }
+.readmeSteps { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 4px; }
+.setupRow { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding-top: 4px; border-top: 1px solid var(--hairline); }
+.coverage { color: var(--ink-bright); font-size: 13px; }
+.setupActions { display: flex; gap: 8px; flex-wrap: wrap; }
+
 .header {
   display: flex;
   flex-direction: column;

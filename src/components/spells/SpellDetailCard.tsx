@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 import { useSpell } from '@/hooks/useContentCatalog';
 import { useT } from '@/i18n/I18nContext';
 import { spellComponentsText, spellMaterialText, spellRangeText } from '@/lib/spells';
+import { OrdoAssetIcon, Rune } from '@/components/ordo';
 import s from './SpellDetailCard.module.css';
 
 /**
@@ -52,6 +53,23 @@ export function SpellDetailCard({ spellId, campaignId }: { spellId: string; camp
 
   return (
     <div className={s.card}>
+      <div className={s.head}>
+        <span className={s.icon} aria-hidden="true">
+          <OrdoAssetIcon
+            names={[detail.nameEn, detail.name]}
+            source="spells"
+            fallback={<Rune kind="hex" size={16} color="var(--arcane)" />}
+          />
+        </span>
+        <div className={s.headText}>
+          <div className={s.title}>{detail.name}</div>
+          <div className={s.sub}>
+            {detail.level === 0 ? t('wiz.spells.cantrip') : t('wiz.spells.lvl', { level: detail.level ?? 0 })}
+            {detail.school?.name ? ` · ${detail.school.name}` : ''}
+          </div>
+        </div>
+      </div>
+
       {(detail.concentration || detail.ritual || detail.saveAbility || detail.attackRoll || detail.checkAbility) && (
         <div className={s.badges}>
           {detail.saveAbility && (

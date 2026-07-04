@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
 import { useParams } from 'react-router-dom';
-import { Rune, OrdoChip, EmptyVault, ErrorAltar } from '@/components/ordo';
+import { Rune, OrdoChip, EmptyVault, ErrorAltar, OrdoAssetIcon } from '@/components/ordo';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
   Select,
@@ -138,7 +138,7 @@ function EquipmentCatalog({ campaignId }: { campaignId?: string }) {
   const [source, setSource] = useState(ALL);
   const [selected, setSelected] = useState<EquipmentItemDetail | null>(null);
 
-  const items = data ?? [];
+  const items = useMemo(() => data ?? [], [data]);
 
   const kindOptions = useMemo<ChipOption[]>(() => {
     const set = new Set<string>();
@@ -248,7 +248,12 @@ function EquipmentCatalog({ campaignId }: { campaignId?: string }) {
                     {it.category?.name && <div className={s.cardSub}>{it.category.name}</div>}
                   </div>
                   <span className={s.iconBox}>
-                    <Rune kind={kindGlyph(it.kind)} size={18} color={c} />
+                    <OrdoAssetIcon
+                      names={[it.nameEn, it.name]}
+                      source="equipment"
+                      imgClassName={s.assetIcon}
+                      fallback={<Rune kind={kindGlyph(it.kind)} size={18} color={c} />}
+                    />
                   </span>
                 </div>
 
@@ -408,7 +413,7 @@ function MagicCatalog({ campaignId }: { campaignId?: string }) {
   const [source, setSource] = useState(ALL);
   const [selected, setSelected] = useState<MagicItemDetail | null>(null);
 
-  const items = data ?? [];
+  const items = useMemo(() => data ?? [], [data]);
 
   const rawRarity = (it: MagicItemDetail) => it.rarity?.slug ?? it.rarity?.name ?? '';
 
@@ -524,7 +529,12 @@ function MagicCatalog({ campaignId }: { campaignId?: string }) {
                     {it.type?.name && <div className={s.cardSub}>{it.type.name}</div>}
                   </div>
                   <span className={s.iconBox}>
-                    <Rune kind="hex" size={18} color={c} />
+                    <OrdoAssetIcon
+                      names={[it.nameEn, it.name]}
+                      source="items"
+                      imgClassName={s.assetIcon}
+                      fallback={<Rune kind="hex" size={18} color={c} />}
+                    />
                   </span>
                 </div>
 

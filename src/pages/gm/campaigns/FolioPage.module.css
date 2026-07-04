@@ -35,6 +35,21 @@
 .spellRowClickable:hover { background: rgba(255, 255, 255, 0.03); }
 .spellRowOpen { background: rgba(176, 141, 78, 0.06); }
 .spellDetailInner { padding: 6px 4px 12px 26px; }
+.spellIcon {
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid color-mix(in srgb, var(--arcane) 28%, transparent);
+  background: color-mix(in srgb, var(--arcane) 7%, var(--abyss));
+}
+.spellIcon img {
+  width: 20px;
+  height: 20px;
+  filter: drop-shadow(0 0 7px color-mix(in srgb, var(--arcane) 30%, transparent));
+}
 .spellLevel { width: 30px; flex-shrink: 0; color: var(--arcane); font-size: 12px; }
 .spellName { flex: 1; color: var(--ink-bright); font-size: 13px; }
 .spellSchool { color: var(--ink-faint); font-size: 11px; }

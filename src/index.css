@@ -849,6 +849,17 @@
   display: flex; align-items: center; justify-content: space-between; gap: 8px;
   padding: 10px 14px; background: transparent; border: 0; cursor: pointer; text-align: left;
 }
+.wiz-spell-icon {
+  flex: none; width: 30px; height: 30px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: 1px solid color-mix(in srgb, var(--arcane) 30%, transparent);
+  background: color-mix(in srgb, var(--arcane) 8%, var(--abyss));
+}
+.wiz-spell-icon img {
+  width: 22px;
+  height: 22px;
+  filter: drop-shadow(0 0 8px color-mix(in srgb, var(--arcane) 35%, transparent));
+}
 .wiz-spell-main { display: flex; flex-direction: column; gap: 2px; }
 .wiz-spell-name { font-family: var(--font-serif); font-size: 15px; color: var(--ink-bright); }
 .wiz-spell-desc {

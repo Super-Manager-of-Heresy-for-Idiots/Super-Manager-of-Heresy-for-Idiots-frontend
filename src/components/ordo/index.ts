@@ -15,3 +15,4 @@ export { EmptyVault } from './EmptyVault';
 export { ErrorAltar } from './ErrorAltar';
 export { RoleBadge } from './RoleBadge';
 export { Placeholder } from './Placeholder';
+export { OrdoAssetIcon } from './OrdoAssetIcon';

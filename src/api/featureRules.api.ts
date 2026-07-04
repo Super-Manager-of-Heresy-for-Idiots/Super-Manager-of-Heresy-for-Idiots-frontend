@@ -36,6 +36,31 @@ export interface IssueFilters {
   classId?: string;
 }
 
+/** Coverage of the runtime features by the feature-rules model (Stage 12). */
+export interface FeatureRuleCoverage {
+  runtimeFeatures: number;
+  featuresWithRules: number;
+  featuresWithApprovedRules: number;
+  featuresWithoutRules: number;
+  featuresWithUnresolvedError: number;
+  totalRules: number;
+  approvedRules: number;
+  needsReviewRules: number;
+  rulesByType: Record<string, number>;
+  rulesByStatus: Record<string, number>;
+  coverageByClass: Record<string, number>;
+}
+
+export interface FeatureRuleBackfillResult {
+  applied: boolean;
+  runtimeFeatures: number;
+  featuresTouched: number;
+  featuresSkipped: number;
+  rulesCreated: number;
+  issuesCreated: number;
+  formulasCreated: number;
+}
+
 /** Rule Workbench admin client. Mirrors the core /api/admin conventions (ApiResponse envelope). */
 export const featureRulesApi = {
   getMetadata: async (): Promise<ApiResponse<FeatureRuleMetadata>> => {
@@ -173,6 +198,28 @@ export const featureRulesApi = {
       '/admin/feature-formulas/evaluate-preview',
       data,
     );
+    return response.data;
+  },
+
+  // ── Backfill, coverage & bulk review (Stage 12) ──
+  getCoverage: async (): Promise<ApiResponse<FeatureRuleCoverage>> => {
+    const response = await api.get<ApiResponse<FeatureRuleCoverage>>('/admin/feature-rules/coverage');
+    return response.data;
+  },
+
+  runBackfill: async (apply: boolean): Promise<ApiResponse<FeatureRuleBackfillResult>> => {
+    const response = await api.post<ApiResponse<FeatureRuleBackfillResult>>(
+      '/admin/feature-rules/backfill',
+      null,
+      { params: { apply } },
+    );
+    return response.data;
+  },
+
+  batchApprove: async (ruleType: string): Promise<ApiResponse<number>> => {
+    const response = await api.post<ApiResponse<number>>('/admin/feature-rules/batch-approve', null, {
+      params: { ruleType },
+    });
     return response.data;
   },
 };

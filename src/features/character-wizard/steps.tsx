@@ -5,6 +5,7 @@ import {
   Rune,
   OrdoDivider,
   OrdoChip,
+  OrdoAssetIcon,
 } from '@/components/ordo';
 import {
   ABILITIES,
@@ -804,6 +805,13 @@ export function StepSpells({ c, A, n, total, availability }: StepProps) {
           <span className={cn(css.pip13, on && css.pipOn)} />
         </button>
         <button type="button" className="wiz-spell-body" onClick={() => setOpen(open === s.id ? null : s.id)}>
+          <span className="wiz-spell-icon" aria-hidden="true">
+            <OrdoAssetIcon
+              names={[s.nameEn, s.name]}
+              source="spells"
+              fallback={<Rune kind="hex" size={14} color="var(--arcane)" />}
+            />
+          </span>
           <div className="wiz-spell-main">
             <span className="wiz-spell-name">{s.name}</span>
             <span className={cn('ao-codex', css.fs10)}>{isCantrip ? t('wiz.spells.cantrip') : t('wiz.spells.lvl', { level: s.level })}{s.school ? ' · ' + s.school : ''}</span>

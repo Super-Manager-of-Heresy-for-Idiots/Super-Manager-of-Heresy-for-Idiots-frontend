@@ -206,6 +206,48 @@ export function usePreviewFormula() {
   });
 }
 
+// ── Backfill / coverage / bulk review (Stage 12) ──
+
+export function useFeatureCoverage() {
+  return useQuery({
+    queryKey: ['fr-coverage'],
+    queryFn: async () => (await featureRulesApi.getCoverage()).data,
+    staleTime: 30 * 1000,
+  });
+}
+
+export function useRunBackfill() {
+  const t = useT();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (apply: boolean) => featureRulesApi.runBackfill(apply),
+    onSuccess: (_res, apply) => {
+      queryClient.invalidateQueries({ queryKey: ['fr-coverage'] });
+      queryClient.invalidateQueries({ queryKey: ['fr-problem-features'] });
+      toast.success(apply ? t('hk.featureRule.backfillApplied') : t('hk.featureRule.backfillDryRun'));
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error.response?.data?.message || t('hk.featureRule.backfillFailed'));
+    },
+  });
+}
+
+export function useBatchApprove() {
+  const t = useT();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (ruleType: string) => featureRulesApi.batchApprove(ruleType),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['fr-coverage'] });
+      queryClient.invalidateQueries({ queryKey: ['fr-problem-features'] });
+      toast.success(t('hk.featureRule.batchApproved'));
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error.response?.data?.message || t('hk.featureRule.batchApproveFailed'));
+    },
+  });
+}
+
 export function useCreateIssue() {
   const t = useT();
   const invalidate = useFeatureInvalidator();
