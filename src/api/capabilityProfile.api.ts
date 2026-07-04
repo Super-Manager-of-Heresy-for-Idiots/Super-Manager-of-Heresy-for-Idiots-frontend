@@ -57,10 +57,28 @@ export interface CapabilityProfile {
   pendingPrompts: number;
 }
 
+/** A structured class feature the character actually has (Reckless Attack, Wild Shape, …). */
+export interface CharacterClassFeature {
+  id: string;
+  classId?: string | null;
+  className?: string | null;
+  level?: number | null;
+  title: string;
+  description?: string | null;
+  activationType?: string | null;
+}
+
 export const capabilityProfileApi = {
   get: async (characterId: string): Promise<ApiResponse<CapabilityProfile>> => {
     const response = await api.get<ApiResponse<CapabilityProfile>>(
       `/characters/${characterId}/capability-profile`,
+    );
+    return response.data;
+  },
+
+  getClassFeatures: async (characterId: string): Promise<ApiResponse<CharacterClassFeature[]>> => {
+    const response = await api.get<ApiResponse<CharacterClassFeature[]>>(
+      `/characters/${characterId}/class-features`,
     );
     return response.data;
   },

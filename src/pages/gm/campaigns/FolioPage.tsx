@@ -39,7 +39,7 @@ import {
 import { useCharacterEffects } from '@/hooks/useEffects';
 import { useEquippedInventory } from '@/hooks/useInventory';
 import { useCharacterRewards } from '@/hooks/useLevelUp';
-import { useCapabilityProfile } from '@/hooks/useCapabilityProfile';
+import { useCapabilityProfile, useClassFeatures } from '@/hooks/useCapabilityProfile';
 import { useForgetSpell } from '@/hooks/useSpellbook';
 import { useGlobalReferenceContent } from '@/hooks/useTemplates';
 import { useAuthStore } from '@/store/authStore';
@@ -123,6 +123,7 @@ export default function FolioPage() {
   const { data: equipped } = useEquippedInventory(campaignId!, characterId!);
   const { data: rewards } = useCharacterRewards(characterId!);
   const { data: capability } = useCapabilityProfile(characterId);
+  const { data: classFeatures } = useClassFeatures(characterId);
   const { data: refContent } = useGlobalReferenceContent();
   const abilityCheck = useAbilityCheck();
   const updateCharacter = useUpdateCharacter();
@@ -138,6 +139,7 @@ export default function FolioPage() {
   const [checkResult, setCheckResult] = useState<{ statName: string; total: number; breakdown: { source: string; value: number }[] } | null>(null);
   const [activeStatId, setActiveStatId] = useState<string | null>(null);
   const [expandedSpellId, setExpandedSpellId] = useState<string | null>(null);
+  const [expandedFeatureId, setExpandedFeatureId] = useState<string | null>(null);
   const [spellbookOpen, setSpellbookOpen] = useState(false);
 
   const weapons = useMemo<ItemInstanceResponse[]>(
@@ -404,6 +406,33 @@ export default function FolioPage() {
                     </div>
                   </div>
                 ))}
+                {(classFeatures ?? []).length > 0 && (
+                  <div className={s.featuresBlock}>
+                    <div className={cn('ao-overline', s.mb10)}>{t('camp2.folio.features.abilities')}</div>
+                    <div className={s.spellList}>
+                      {(classFeatures ?? []).map((f) => {
+                        const isOpen = expandedFeatureId === f.id;
+                        return (
+                          <div key={f.id}>
+                            <div
+                              className={cn(s.spellRow, s.spellRowClickable, isOpen && s.spellRowOpen)}
+                              onClick={() => setExpandedFeatureId(isOpen ? null : f.id)}
+                            >
+                              <ExpandChevron open={isOpen} size={13} />
+                              {f.level != null && (
+                                <span className={cn('ao-num', s.spellLevel)}>{t('camp2.folio.spells.levelShort', { level: f.level })}</span>
+                              )}
+                              <span className={s.spellName}>{f.title}</span>
+                            </div>
+                            <ExpandablePanel open={isOpen} innerClassName={s.spellDetailInner}>
+                              <p className={cn('ao-italic', s.featuresText)}>{f.description || NA}</p>
+                            </ExpandablePanel>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
                 {features && (
                   <div className={s.featuresBlock}>
                     <div className={cn('ao-overline', s.mb8)}>{t('camp2.folio.features.recorded')}</div>
