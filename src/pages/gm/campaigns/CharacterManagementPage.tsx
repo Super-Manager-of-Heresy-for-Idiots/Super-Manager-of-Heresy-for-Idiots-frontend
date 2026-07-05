@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { OrdoPanel, PanelHeader, Rune, Bar } from '@/components/ordo';
+import { OrdoInterfaceIcon, OrdoPanel, PanelHeader, Rune, Bar, type OrdoInterfaceIconKey } from '@/components/ordo';
 import { CharStatusBadge } from '@/components/campaigns';
 import {
   AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle,
@@ -18,7 +18,7 @@ import s from './CharacterManagementPage.module.css';
 interface ManagementTile {
   title: string;
   body: string;
-  glyph: string;
+  icon: OrdoInterfaceIconKey;
   to: string;
   ready: boolean;
 }
@@ -39,28 +39,28 @@ export default function CharacterManagementPage() {
       {
         title: t('camp.mgmt.tile.sheet.title'),
         body: t('camp.mgmt.tile.sheet.body'),
-        glyph: 'book',
+        icon: 'character',
         to: `${base}/sheet`,
         ready: true,
       },
       {
         title: t('camp.mgmt.tile.arsenal.title'),
         body: t('camp.mgmt.tile.arsenal.body'),
-        glyph: 'sword',
+        icon: 'item',
         to: `${base}/inventory`,
         ready: true,
       },
       {
         title: t('camp.mgmt.tile.wallet.title'),
         body: t('camp.mgmt.tile.wallet.body'),
-        glyph: 'coin',
+        icon: 'wallet',
         to: `${base}/wallet`,
         ready: true,
       },
       {
         title: t('camp.mgmt.tile.resources.title'),
         body: t('camp.mgmt.tile.resources.body'),
-        glyph: 'hex',
+        icon: 'resource',
         to: `${base}/resources`,
         ready: false,
       },
@@ -193,7 +193,7 @@ export default function CharacterManagementPage() {
             onClick={() => navigate(tile.to)}
           >
             <span className={s.tileIcon}>
-              <Rune kind={tile.glyph} size={16} color="var(--ink-quiet)" />
+              <OrdoInterfaceIcon icon={tile.icon} size={16} style={{ color: 'var(--ink-quiet)' }} />
             </span>
             <span className={s.tileMain}>
               <span className={s.tileTitleRow}>

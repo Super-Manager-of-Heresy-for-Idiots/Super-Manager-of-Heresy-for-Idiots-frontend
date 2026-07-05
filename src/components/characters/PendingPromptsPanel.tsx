@@ -26,7 +26,7 @@ export function PendingPromptsPanel({ campaignId, characterId, canManage }: Pend
 
   return (
     <OrdoPanel frame padding={0}>
-      <PanelHeader title={t('featureRuntime.prompts.title')} sub={t('featureRuntime.prompts.sub')} glyph="flame" tone="ember" />
+      <PanelHeader title={t('featureRuntime.prompts.title')} sub={t('featureRuntime.prompts.sub')} icon="pending-prompt" tone="ember" />
       <div className={s.body}>
         {prompts.map((p) => (
           <div key={p.id} className={s.effectRow}>

@@ -1,4 +1,4 @@
-import { OrdoPanel, PanelHeader, Rune } from '@/components/ordo';
+import { OrdoInterfaceIcon, OrdoPanel, PanelHeader } from '@/components/ordo';
 import { useFeatureResources, useSpendFeatureResource, useAdjustFeatureResource } from '@/hooks/useFeatureRuntime';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
@@ -25,7 +25,7 @@ export function FeatureResourcesPanel({ campaignId, characterId, canManage }: Fe
 
   return (
     <OrdoPanel frame padding={0}>
-      <PanelHeader title={t('featureRuntime.resources.title')} sub={t('featureRuntime.resources.sub')} glyph="hex" tone="arcane" />
+      <PanelHeader title={t('featureRuntime.resources.title')} sub={t('featureRuntime.resources.sub')} icon="resource" tone="arcane" />
       <div className={s.body}>
         {resources.map((r) => {
           const max = r.maxValue ?? 0;
@@ -65,7 +65,7 @@ export function FeatureResourcesPanel({ campaignId, characterId, canManage }: Fe
                     onClick={() => adjust.mutate({ resourceId: r.id, value: max })}
                     title={t('featureRuntime.resources.restore')}
                   >
-                    <Rune kind="diamond-fill" size={9} color="var(--gold-pale)" />
+                    <OrdoInterfaceIcon icon="resource-restored" size={9} style={{ color: 'var(--gold-pale)' }} />
                   </button>
                 </div>
               )}

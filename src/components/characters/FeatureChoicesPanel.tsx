@@ -43,7 +43,7 @@ export function FeatureChoicesPanel({ campaignId, characterId, canManage }: Feat
 
   return (
     <OrdoPanel frame padding={0}>
-      <PanelHeader title={t('choices.title')} sub={t('choices.sub')} glyph="hex" tone="arcane" />
+      <PanelHeader title={t('choices.title')} sub={t('choices.sub')} icon="feature-choice" tone="arcane" />
       <div className={s.body}>
         {groups.map((g) => {
           const chosenTargets = new Set(g.selections.map((sel) => sel.targetEntityId));

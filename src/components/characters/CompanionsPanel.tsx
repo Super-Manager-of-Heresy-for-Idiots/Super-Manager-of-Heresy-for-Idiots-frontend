@@ -39,7 +39,7 @@ export function CompanionsPanel({ campaignId, characterId, canManage }: Companio
 
   return (
     <OrdoPanel frame padding={0}>
-      <PanelHeader title={t('companions.title')} sub={t('companions.sub')} glyph="hex" tone="arcane" />
+      <PanelHeader title={t('companions.title')} sub={t('companions.sub')} icon="companion" tone="arcane" />
       <div className={s.body}>
         {list.length === 0 && <div className={s.hint}>{t('companions.empty')}</div>}
         {list.map((c) => (

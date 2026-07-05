@@ -43,14 +43,14 @@ export function HPRailPanel({
     <OrdoPanel frame>
       <PanelHeader
         title={t('cmp.hp.title')}
-        glyph="flame"
+        icon="hp"
         tone="ember"
         right={
           <div className={s.headerRight}>
             {isDown ? (
               <CharStatusBadge status="DOWN" />
             ) : (
-              <OrdoChip tone="gold" glyph="cir-dot">
+              <OrdoChip tone="gold" icon="healing">
                 {t('cmp.hp.hale')}
               </OrdoChip>
             )}

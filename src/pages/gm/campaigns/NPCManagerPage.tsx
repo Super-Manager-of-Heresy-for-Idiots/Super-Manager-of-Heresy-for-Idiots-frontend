@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
-import { OrdoPanel, Rune, EmptyVault, ErrorAltar } from '@/components/ordo';
+import { OrdoInterfaceIcon, OrdoPanel, Rune, EmptyVault, ErrorAltar } from '@/components/ordo';
 import { CodexID } from '@/components/homebrew/CodexID';
 import { VisibilityToggle } from '@/components/narrative';
 import {
@@ -31,12 +31,6 @@ import s from './NPCManagerPage.module.css';
 
 /* ── helpers ─────────────────────────────────────────────────── */
 
-const GLYPH_POOL = ['helm', 'shield', 'sigil-1', 'sigil-2', 'sigil-3', 'flame', 'sword', 'eye'];
-
-function glyphForNpc(id: string): string {
-  const idx = id.charCodeAt(0) % GLYPH_POOL.length;
-  return GLYPH_POOL[idx];
-}
 
 /* ── page ────────────────────────────────────────────────────── */
 
@@ -169,7 +163,6 @@ export default function NPCManagerPage() {
       ) : (
         <div className={s.list}>
           {npcs.map((npc) => {
-            const glyph = glyphForNpc(npc.id);
             const srcLabel = sourceLabel(npc);
             return (
               <OrdoPanel key={npc.id} frame padding={0}>
@@ -178,7 +171,17 @@ export default function NPCManagerPage() {
                   <div className={s.topRow}>
                     {/* Icon box */}
                     <div className={cn(s.iconBox, !npc.isVisibleToPlayers && s.dimmed)}>
-                      <Rune kind={glyph} size={22} color="var(--gold)" />
+                      <OrdoInterfaceIcon
+                        icon={
+                          npc.sourceType === 'MONSTER_BASED'
+                            ? 'npc-monster-based'
+                            : npc.sourceType === 'CLASS_BASED'
+                              ? 'npc-class-based'
+                              : 'npc-freeform'
+                        }
+                        size={22}
+                        style={{ color: 'var(--gold)' }}
+                      />
                     </div>
 
                     {/* Name block */}

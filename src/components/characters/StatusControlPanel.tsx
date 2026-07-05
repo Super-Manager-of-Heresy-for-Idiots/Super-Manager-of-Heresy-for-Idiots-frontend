@@ -44,7 +44,7 @@ export function StatusControlPanel({
   const t = useT();
   return (
     <OrdoPanel frame>
-      <PanelHeader title={t('cmp.status.title')} glyph="sigil-1" />
+      <PanelHeader title={t('cmp.status.title')} icon="character-active" />
 
       <div className={s.list}>
         {STATUS_OPTIONS.map((opt) => {

@@ -23,7 +23,7 @@ export function FeatureEffectsPanel({ campaignId, characterId, canManage }: Feat
 
   return (
     <OrdoPanel frame padding={0}>
-      <PanelHeader title={t('featureRuntime.effects.title')} sub={t('featureRuntime.effects.sub')} glyph="hex" tone="arcane" />
+      <PanelHeader title={t('featureRuntime.effects.title')} sub={t('featureRuntime.effects.sub')} icon="feature-effect" tone="arcane" />
       <div className={s.body}>
         {effects.map((e) => (
           <div key={e.id} className={s.effectRow}>

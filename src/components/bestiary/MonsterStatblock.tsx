@@ -76,7 +76,7 @@ function FeatureCard({ f, t, lang }: { f: MonsterFeatureRow; t: TFunc; lang: str
     <div className={s.feature}>
       <span className={s.featName}>
         {featureName}
-        {secondaryName && secondaryName !== featureName ? <span className={s.featEng}> · {secondaryName}</span> : null}
+        {secondaryName && secondaryName !== featureName ? <span className={s.featEng}> Â· {secondaryName}</span> : null}
         {recharge}.
       </span>{' '}
       {attackBits.length > 0 && <span className={s.featAttack}>{attackBits.join(', ')}. </span>}

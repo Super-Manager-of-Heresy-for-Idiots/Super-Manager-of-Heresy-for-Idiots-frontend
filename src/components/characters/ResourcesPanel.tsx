@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'react';
-import { OrdoPanel, PanelHeader, Rune, OrdoDivider } from '@/components/ordo';
+import { OrdoInterfaceIcon, OrdoPanel, PanelHeader, Rune, OrdoDivider } from '@/components/ordo';
 import { useT } from '@/i18n/I18nContext';
 import type { ResourceEntry } from '@/types';
 import s from './ResourcesPanel.module.css';
@@ -26,7 +26,7 @@ export function ResourcesPanel({
 
   return (
     <OrdoPanel frame padding={0}>
-      <PanelHeader title={t('cmp.resources.title')} glyph="hex" tone="arcane" />
+      <PanelHeader title={t('cmp.resources.title')} icon="resource" tone="arcane" />
 
       {resources.length === 0 ? (
         <div className={s.empty}>{t('cmp.resources.empty')}</div>
@@ -44,7 +44,7 @@ export function ResourcesPanel({
                 <div className={s.item} style={{ '--tone': tone } as CSSProperties}>
                   {/* Name + counter + controls */}
                   <div className={s.head}>
-                    <Rune kind="sigil-2" size={11} color={tone} />
+                    <OrdoInterfaceIcon icon="resource" size={11} style={{ color: tone }} />
                     <span className={s.name}>{res.name}</span>
 
                     <span className={`ao-num ${s.count}`}>

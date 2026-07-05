@@ -137,7 +137,6 @@ export default function CampaignMembersPage() {
               <div>
                 <OrdoChip
                   tone={member.roleInCampaign === 'GM' ? 'arcane' : 'gold'}
-                  glyph={member.roleInCampaign === 'GM' ? 'sigil-1' : 'helm'}
                   icon={member.roleInCampaign === 'GM' ? 'role-game-master' : 'role-player'}
                 >
                   {t(`role.${member.roleInCampaign}`)}

@@ -13,6 +13,7 @@ import {
   OrdoInterfaceIcon,
   Placeholder,
   ErrorAltar,
+  equipmentSlotIconForSlot,
   itemIconForInstance,
 } from '@/components/ordo';
 import {
@@ -358,7 +359,7 @@ export default function InventoryPage() {
             <OrdoDivider glyph="diamond-fill" color="var(--rule)">{t('camp2.inv.loadout')}</OrdoDivider>
 
             <div className={cn('ao-rgrid', s.quad, s.slotGrid)}>
-              {SLOT_LAYOUT.map(({ slot, glyph }) => {
+              {SLOT_LAYOUT.map(({ slot }) => {
                 const it = equippedBySlot.get(slot);
                 const isSel = it != null && it.id === selectedId;
                 const label = t(`camp2.inv.slotLabel.${slot}`);
@@ -370,7 +371,7 @@ export default function InventoryPage() {
                     className={cn(it ? slotClass(it.rarity) : 'ao-slot', s.slotCell, !it && s.empty, isSel && s.selected)}
                   >
                     {it ? (
-                      <Rune kind={glyph} size={20} color={rarityColor(it.rarity)} />
+                      <OrdoInterfaceIcon icon={equipmentSlotIconForSlot(slot)} size={20} style={{ color: rarityColor(it.rarity) }} />
                     ) : (
                       <span className={s.slotPlus}>+</span>
                     )}

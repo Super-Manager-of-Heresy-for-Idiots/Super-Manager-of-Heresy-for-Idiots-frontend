@@ -319,7 +319,7 @@ export default function NPCDetailPage() {
           <OrdoPanel frame padding={0}>
             <PanelHeader
               title={t('camp2.npcDetail.origin')}
-              glyph={npc.sourceType === 'MONSTER_BASED' ? 'flame' : 'helm'}
+              icon={npc.sourceType === 'MONSTER_BASED' ? 'npc-monster-based' : 'npc-class-based'}
               tone="gold"
             />
             <div className={s.boxPad}>

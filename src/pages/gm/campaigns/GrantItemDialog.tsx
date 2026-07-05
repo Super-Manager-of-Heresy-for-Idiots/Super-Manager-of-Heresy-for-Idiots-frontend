@@ -3,7 +3,7 @@ import type { CSSProperties } from 'react';
 import { Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
-import { Rune } from '@/components/ordo';
+import { OrdoInterfaceIcon, Rune, type OrdoInterfaceIconKey } from '@/components/ordo';
 import { RarityBadge, rarityLabelKey } from '@/components/items/RarityBadge';
 import { useGrantItem } from '@/hooks/useInventory';
 import { useEquipmentItems, useMagicItems } from '@/hooks/useContentCatalog';
@@ -32,12 +32,12 @@ type ItemCategory = 'weapon' | 'armor' | 'gear' | 'tool' | 'magic';
 
 const CATEGORY_ORDER: ItemCategory[] = ['weapon', 'armor', 'gear', 'tool', 'magic'];
 
-const CATEGORY_GLYPH: Record<ItemCategory, string> = {
-  weapon: 'sword',
-  armor: 'shield',
-  gear: 'scroll',
-  tool: 'cross-pat',
-  magic: 'hex',
+const CATEGORY_ICON: Record<ItemCategory, OrdoInterfaceIconKey> = {
+  weapon: 'weapon',
+  armor: 'armor',
+  gear: 'equipment',
+  tool: 'tool',
+  magic: 'magic-item',
 };
 
 const DESC_WORD_LIMIT = 40;
@@ -381,7 +381,7 @@ export function GrantItemDialog({
                     <div key={g.key} className={s.group}>
                       <div className={s.groupHead}>
                         <span className={s.groupName}>
-                          <Rune kind={CATEGORY_GLYPH[g.key]} size={13} color="var(--accent)" />
+                          <OrdoInterfaceIcon icon={CATEGORY_ICON[g.key]} size={13} style={{ color: 'var(--accent)' }} />
                           {t(`camp2.inv.cat.${g.key}`)}
                         </span>
                         <span className={cn('ao-num', s.groupCount)}>{g.items.length}</span>
@@ -399,10 +399,10 @@ export function GrantItemDialog({
                               onClick={() => selectEntry(e.id)}
                             >
                               <span className={s.optIcon}>
-                                <Rune
-                                  kind={CATEGORY_GLYPH[e.category]}
+                                <OrdoInterfaceIcon
+                                  icon={CATEGORY_ICON[e.category]}
                                   size={17}
-                                  color={rarityColor(e.rarity)}
+                                  style={{ color: rarityColor(e.rarity) }}
                                 />
                               </span>
                               <span className={s.optMain}>
@@ -436,10 +436,10 @@ export function GrantItemDialog({
                 <div className={s.detailScroll}>
                   <div className={s.itemHead}>
                     <div className={s.itemIcon}>
-                      <Rune
-                        kind={CATEGORY_GLYPH[selected.category]}
+                      <OrdoInterfaceIcon
+                        icon={CATEGORY_ICON[selected.category]}
                         size={28}
-                        color={rarityColor(selected.rarity)}
+                        style={{ color: rarityColor(selected.rarity) }}
                       />
                     </div>
                     <div className={s.itemHeadMain}>

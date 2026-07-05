@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { OrdoPanel, PanelHeader, Rune } from '@/components/ordo';
+import { OrdoInterfaceIcon, OrdoPanel, PanelHeader } from '@/components/ordo';
 import {
   useKnownForms,
   useTransformation,
@@ -48,11 +48,11 @@ export function KnownFormsPanel({ campaignId, characterId, canManage }: KnownFor
 
   return (
     <OrdoPanel frame padding={0}>
-      <PanelHeader title={t('forms.title')} sub={t('forms.sub')} glyph="hex" tone="arcane" />
+      <PanelHeader title={t('forms.title')} sub={t('forms.sub')} icon="known-form" tone="arcane" />
       <div className={s.body}>
         {transformation && (
           <div className={s.transformBar}>
-            <Rune kind="hex" size={12} color="var(--arcane)" />
+            <OrdoInterfaceIcon icon="transformation" size={12} style={{ color: 'var(--arcane)' }} />
             <span className={s.transformLabel}>{t('forms.current', { name: nameOf(transformation.monsterId) })}</span>
             {canManage && (
               <button className={cn('ao-btn', 'ao-btn--sm', 'ao-btn--ghost')} disabled={busy} onClick={() => revert.mutate()}>
