@@ -122,6 +122,7 @@ const ContentQualityPage = lazy(() => import('@/pages/admin/ContentQualityPage')
 const SpellWarningsPage = lazy(() => import('@/pages/admin/SpellWarningsPage'));
 const ClassFeatureWarningsPage = lazy(() => import('@/pages/admin/ClassFeatureWarningsPage'));
 const RuleWorkbenchPage = lazy(() => import('@/pages/admin/RuleWorkbenchPage'));
+const ResourceTypesPage = lazy(() => import('@/pages/admin/ResourceTypesPage'));
 const SpellEditorPage = lazy(() => import('@/pages/admin/SpellEditorPage'));
 
 export const router = createBrowserRouter([
@@ -325,6 +326,7 @@ export const router = createBrowserRouter([
           { path: '/admin/spell-warnings', element: <SpellWarningsPage /> },
           { path: '/admin/class-feature-warnings', element: <ClassFeatureWarningsPage /> },
           { path: '/admin/rule-workbench', element: <RuleWorkbenchPage /> },
+          { path: '/admin/resource-types', element: <ResourceTypesPage /> },
           { path: '/admin/spells', element: <SpellEditorPage /> },
           { path: '/admin/character-races', element: <Navigate to="/admin/species" replace /> },
           { path: '/admin/races', element: <Navigate to="/admin/species" replace /> },

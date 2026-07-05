@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useReducer } from 'react';
 import toast from 'react-hot-toast';
 import { Rune, Sigil } from '@/components/ordo';
+import { RotaPerforataLogo } from '@/components/brand/RotaPerforataLogo';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/store/authStore';
@@ -480,7 +481,7 @@ export function CharacterCreationWizard({
     <div className="wiz-shell">
       <header className="wiz-progress">
         <div className="wiz-brand">
-          <Sigil size={34} glyph="sigil-2" />
+          <RotaPerforataLogo size={34} label={t('wiz.rite')} />
           <div>
             <div className={cn('ao-engraved', css.eng13)}>{t('wiz.rite')}</div>
             <div className={cn('ao-codex', css.codex10)}>

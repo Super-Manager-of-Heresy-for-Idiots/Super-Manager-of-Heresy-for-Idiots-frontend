@@ -3,9 +3,19 @@ import { AxiosError } from 'axios';
 import toast from 'react-hot-toast';
 import {
   featureRulesApi,
+  type ActionCostEdit,
+  type ActiveEffectEdit,
+  type DamageRuleEdit,
+  type HealingRuleEdit,
   type IssueFilters,
+  type MonsterFormEdit,
   type ProblemFeatureFilters,
+  type ResolutionRuleEdit,
+  type ResourceDefinitionEdit,
+  type SpellGrantEdit,
+  type TriggerEdit,
 } from '@/api/featureRules.api';
+import { referenceApi } from '@/api/reference.api';
 import { useT } from '@/i18n/I18nContext';
 import type {
   ApiError,
@@ -230,6 +240,264 @@ export function useRunBackfill() {
       toast.error(error.response?.data?.message || t('hk.featureRule.backfillFailed'));
     },
   });
+}
+
+// ── Resource rule editor ──
+
+export function useResourceDefinition(ruleId: string | null, enabled: boolean) {
+  return useQuery({
+    queryKey: ['fr-resource-def', ruleId ?? ''],
+    queryFn: async () => (await featureRulesApi.getResourceDefinition(ruleId as string)).data ?? null,
+    enabled: !!ruleId && enabled,
+  });
+}
+
+export function useSaveResourceDefinition() {
+  const t = useT();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ ruleId, data }: { ruleId: string; featureId: string; data: ResourceDefinitionEdit }) =>
+      featureRulesApi.saveResourceDefinition(ruleId, data),
+    onSuccess: (_res, { ruleId, featureId }) => {
+      queryClient.invalidateQueries({ queryKey: ['fr-resource-def', ruleId] });
+      queryClient.invalidateQueries({ queryKey: keys.detail(featureId) });
+      queryClient.invalidateQueries({ queryKey: keys.rules(featureId) });
+      toast.success(t('adm.ruleWorkbench.resource.saved'));
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error.response?.data?.message || t('adm.ruleWorkbench.resource.saveFailed'));
+    },
+  });
+}
+
+// ── Damage rule editor ──
+
+export function useDamageTypes() {
+  return useQuery({
+    queryKey: ['ref-damage-types'],
+    queryFn: async () => (await referenceApi.getDamageTypes()).data ?? [],
+    staleTime: 60 * 60 * 1000,
+  });
+}
+
+export function useDamageRule(ruleId: string | null, enabled: boolean) {
+  return useQuery({
+    queryKey: ['fr-damage-rule', ruleId ?? ''],
+    queryFn: async () => (await featureRulesApi.getDamageRule(ruleId as string)).data ?? null,
+    enabled: !!ruleId && enabled,
+  });
+}
+
+export function useSaveDamageRule() {
+  const t = useT();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ ruleId, data }: { ruleId: string; featureId: string; data: DamageRuleEdit }) =>
+      featureRulesApi.saveDamageRule(ruleId, data),
+    onSuccess: (_res, { ruleId, featureId }) => {
+      queryClient.invalidateQueries({ queryKey: ['fr-damage-rule', ruleId] });
+      queryClient.invalidateQueries({ queryKey: keys.detail(featureId) });
+      queryClient.invalidateQueries({ queryKey: keys.rules(featureId) });
+      toast.success(t('adm.ruleWorkbench.resource.saved'));
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error.response?.data?.message || t('adm.ruleWorkbench.resource.saveFailed'));
+    },
+  });
+}
+
+// ── Action-cost rule editor ──
+
+export function useActionTypes() {
+  return useQuery({
+    queryKey: ['fr-action-types'],
+    queryFn: async () => (await featureRulesApi.getActionTypes()).data ?? [],
+    staleTime: 60 * 60 * 1000,
+  });
+}
+
+export function useActionCost(ruleId: string | null, enabled: boolean) {
+  return useQuery({
+    queryKey: ['fr-action-cost', ruleId ?? ''],
+    queryFn: async () => (await featureRulesApi.getActionCost(ruleId as string)).data ?? null,
+    enabled: !!ruleId && enabled,
+  });
+}
+
+export function useSaveActionCost() {
+  const t = useT();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ ruleId, data }: { ruleId: string; featureId: string; data: ActionCostEdit }) =>
+      featureRulesApi.saveActionCost(ruleId, data),
+    onSuccess: (_res, { ruleId, featureId }) => {
+      queryClient.invalidateQueries({ queryKey: ['fr-action-cost', ruleId] });
+      queryClient.invalidateQueries({ queryKey: keys.detail(featureId) });
+      queryClient.invalidateQueries({ queryKey: keys.rules(featureId) });
+      toast.success(t('adm.ruleWorkbench.resource.saved'));
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error.response?.data?.message || t('adm.ruleWorkbench.resource.saveFailed'));
+    },
+  });
+}
+
+export function useTargetTypes() {
+  return useQuery({
+    queryKey: ['fr-target-types'],
+    queryFn: async () => (await featureRulesApi.getTargetTypes()).data ?? [],
+    staleTime: 60 * 60 * 1000,
+  });
+}
+
+export function useHealingRule(ruleId: string | null, enabled: boolean) {
+  return useQuery({
+    queryKey: ['fr-healing-rule', ruleId ?? ''],
+    queryFn: async () => (await featureRulesApi.getHealingRule(ruleId as string)).data ?? null,
+    enabled: !!ruleId && enabled,
+  });
+}
+
+export function useSaveHealingRule() {
+  const t = useT();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ ruleId, data }: { ruleId: string; featureId: string; data: HealingRuleEdit }) =>
+      featureRulesApi.saveHealingRule(ruleId, data),
+    onSuccess: (_res, { ruleId, featureId }) => {
+      queryClient.invalidateQueries({ queryKey: ['fr-healing-rule', ruleId] });
+      queryClient.invalidateQueries({ queryKey: keys.detail(featureId) });
+      queryClient.invalidateQueries({ queryKey: keys.rules(featureId) });
+      toast.success(t('adm.ruleWorkbench.resource.saved'));
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error.response?.data?.message || t('adm.ruleWorkbench.resource.saveFailed'));
+    },
+  });
+}
+
+export function useEffectMetadata() {
+  return useQuery({
+    queryKey: ['fr-effect-metadata'],
+    queryFn: async () => (await featureRulesApi.getEffectMetadata()).data ?? null,
+    staleTime: 60 * 60 * 1000,
+  });
+}
+
+export function useActiveEffect(ruleId: string | null, enabled: boolean) {
+  return useQuery({
+    queryKey: ['fr-active-effect', ruleId ?? ''],
+    queryFn: async () => (await featureRulesApi.getActiveEffect(ruleId as string)).data ?? null,
+    enabled: !!ruleId && enabled,
+  });
+}
+
+export function useSaveActiveEffect() {
+  const t = useT();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ ruleId, data }: { ruleId: string; featureId: string; data: ActiveEffectEdit }) =>
+      featureRulesApi.saveActiveEffect(ruleId, data),
+    onSuccess: (_res, { ruleId, featureId }) => {
+      queryClient.invalidateQueries({ queryKey: ['fr-active-effect', ruleId] });
+      queryClient.invalidateQueries({ queryKey: keys.detail(featureId) });
+      queryClient.invalidateQueries({ queryKey: keys.rules(featureId) });
+      toast.success(t('adm.ruleWorkbench.resource.saved'));
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error.response?.data?.message || t('adm.ruleWorkbench.resource.saveFailed'));
+    },
+  });
+}
+
+export function useResolutionMetadata() {
+  return useQuery({
+    queryKey: ['fr-resolution-metadata'],
+    queryFn: async () => (await featureRulesApi.getResolutionMetadata()).data ?? null,
+    staleTime: 60 * 60 * 1000,
+  });
+}
+
+export function useResolutionRule(ruleId: string | null, enabled: boolean) {
+  return useQuery({
+    queryKey: ['fr-resolution-rule', ruleId ?? ''],
+    queryFn: async () => (await featureRulesApi.getResolutionRule(ruleId as string)).data ?? null,
+    enabled: !!ruleId && enabled,
+  });
+}
+
+export function useSaveResolutionRule() {
+  const t = useT();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ ruleId, data }: { ruleId: string; featureId: string; data: ResolutionRuleEdit }) =>
+      featureRulesApi.saveResolutionRule(ruleId, data),
+    onSuccess: (_res, { ruleId, featureId }) => {
+      queryClient.invalidateQueries({ queryKey: ['fr-resolution-rule', ruleId] });
+      queryClient.invalidateQueries({ queryKey: keys.detail(featureId) });
+      queryClient.invalidateQueries({ queryKey: keys.rules(featureId) });
+      toast.success(t('adm.ruleWorkbench.resource.saved'));
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error.response?.data?.message || t('adm.ruleWorkbench.resource.saveFailed'));
+    },
+  });
+}
+
+function useSaveHelper<TData>(
+  keyPrefix: string,
+  fn: (ruleId: string, data: TData) => Promise<unknown>,
+) {
+  const t = useT();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ ruleId, data }: { ruleId: string; featureId: string; data: TData }) => fn(ruleId, data),
+    onSuccess: (_res, { ruleId, featureId }) => {
+      queryClient.invalidateQueries({ queryKey: [keyPrefix, ruleId] });
+      queryClient.invalidateQueries({ queryKey: keys.detail(featureId) });
+      queryClient.invalidateQueries({ queryKey: keys.rules(featureId) });
+      toast.success(t('adm.ruleWorkbench.resource.saved'));
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error.response?.data?.message || t('adm.ruleWorkbench.resource.saveFailed'));
+    },
+  });
+}
+
+export function useMonsterForm(ruleId: string | null, enabled: boolean) {
+  return useQuery({
+    queryKey: ['fr-monster-form', ruleId ?? ''],
+    queryFn: async () => (await featureRulesApi.getMonsterForm(ruleId as string)).data ?? null,
+    enabled: !!ruleId && enabled,
+  });
+}
+
+export function useSaveMonsterForm() {
+  return useSaveHelper<MonsterFormEdit>('fr-monster-form', featureRulesApi.saveMonsterForm);
+}
+
+export function useTrigger(ruleId: string | null, enabled: boolean) {
+  return useQuery({
+    queryKey: ['fr-trigger', ruleId ?? ''],
+    queryFn: async () => (await featureRulesApi.getTrigger(ruleId as string)).data ?? null,
+    enabled: !!ruleId && enabled,
+  });
+}
+
+export function useSaveTrigger() {
+  return useSaveHelper<TriggerEdit>('fr-trigger', featureRulesApi.saveTrigger);
+}
+
+export function useSpellGrant(ruleId: string | null, enabled: boolean) {
+  return useQuery({
+    queryKey: ['fr-spell-grant', ruleId ?? ''],
+    queryFn: async () => (await featureRulesApi.getSpellGrant(ruleId as string)).data ?? null,
+    enabled: !!ruleId && enabled,
+  });
+}
+
+export function useSaveSpellGrant() {
+  return useSaveHelper<SpellGrantEdit>('fr-spell-grant', featureRulesApi.saveSpellGrant);
 }
 
 export function useBatchApprove() {

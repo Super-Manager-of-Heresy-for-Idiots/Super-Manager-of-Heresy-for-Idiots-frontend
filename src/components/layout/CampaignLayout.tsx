@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 import { NavLink, Outlet, useOutletContext, useParams } from 'react-router-dom';
 import { BackLink, CampaignStatusPill } from '@/components/campaigns';
+import { OrdoInterfaceIcon, type OrdoInterfaceIconKey } from '@/components/ordo';
 import { ConnectionIndicator } from '@/components/realtime/ConnectionIndicator';
 import { useCampaign } from '@/hooks/useCampaigns';
 import { useWebSocket } from '@/hooks/useWebSocket';
@@ -18,6 +19,7 @@ interface SubNavEntry {
   /** Relative path from `/campaigns/:campaignId` (empty string = index). */
   to: string;
   labelKey: string;
+  icon: OrdoInterfaceIconKey;
   /** When true the link is only visible to GM/ADMIN. */
   gm?: boolean;
   /** Match the index route exactly (no prefix matching). */
@@ -25,19 +27,19 @@ interface SubNavEntry {
 }
 
 const SUBNAV: SubNavEntry[] = [
-  { to: '', labelKey: 'camp.nav.overview', end: true },
-  { to: 'members', labelKey: 'camp.dash.drill.roster' },
-  { to: 'bestiary', labelKey: 'camp.dash.drill.bestiary' },
-  { to: 'storage', labelKey: 'camp.dash.drill.storage' },
-  { to: 'items', labelKey: 'camp.dash.drill.items' },
-  { to: 'invite', labelKey: 'camp.dash.drill.invite', gm: true },
-  { to: 'npcs', labelKey: 'camp.dash.drill.npcs', gm: true },
-  { to: 'quests', labelKey: 'camp.dash.drill.quests', gm: true },
-  { to: 'locations', labelKey: 'camp.dash.drill.locations', gm: true },
-  { to: 'maps', labelKey: 'camp.dash.drill.maps', gm: true },
-  { to: 'notes', labelKey: 'camp.dash.drill.notes', gm: true },
-  { to: 'xp', labelKey: 'camp.dash.drill.grantXp', gm: true },
-  { to: 'wallet', labelKey: 'camp.dash.drill.balances', gm: true },
+  { to: '', labelKey: 'camp.nav.overview', icon: 'campaign', end: true },
+  { to: 'members', labelKey: 'camp.dash.drill.roster', icon: 'character-in-campaign' },
+  { to: 'bestiary', labelKey: 'camp.dash.drill.bestiary', icon: 'bestiary' },
+  { to: 'storage', labelKey: 'camp.dash.drill.storage', icon: 'shared-storage' },
+  { to: 'items', labelKey: 'camp.dash.drill.items', icon: 'item' },
+  { to: 'invite', labelKey: 'camp.dash.drill.invite', icon: 'friend-request', gm: true },
+  { to: 'npcs', labelKey: 'camp.dash.drill.npcs', icon: 'npc', gm: true },
+  { to: 'quests', labelKey: 'camp.dash.drill.quests', icon: 'quest', gm: true },
+  { to: 'locations', labelKey: 'camp.dash.drill.locations', icon: 'location', gm: true },
+  { to: 'maps', labelKey: 'camp.dash.drill.maps', icon: 'map', gm: true },
+  { to: 'notes', labelKey: 'camp.dash.drill.notes', icon: 'session-note', gm: true },
+  { to: 'xp', labelKey: 'camp.dash.drill.grantXp', icon: 'reward-xp', gm: true },
+  { to: 'wallet', labelKey: 'camp.dash.drill.balances', icon: 'wallet', gm: true },
 ];
 
 /* ── Outlet context ─────────────────────────────────────── */
@@ -122,6 +124,7 @@ export function CampaignLayout() {
             end={item.end}
             className={({ isActive }) => cn('ao-tab', isActive && 'is-active')}
           >
+            <OrdoInterfaceIcon icon={item.icon} size={13} className={s.navIcon} />
             {t(item.labelKey)}
           </NavLink>
         ))}

@@ -8,7 +8,8 @@ import { useAuthStore } from '@/store/authStore';
 import { getRoleRedirectPath, cn } from '@/lib/utils';
 import type { ApiError } from '@/types';
 import { AxiosError } from 'axios';
-import { Rune, Sigil, OrdoDivider, OrdoPanel, OrdoField } from '@/components/ordo';
+import { Rune, OrdoDivider, OrdoPanel, OrdoField } from '@/components/ordo';
+import { RotaPerforataLogo } from '@/components/brand/RotaPerforataLogo';
 import { useT } from '@/i18n/I18nContext';
 import { LanguageSwitcher } from '@/components/layout/LanguageSwitcher';
 import s from './RegisterPage.module.css';
@@ -116,7 +117,7 @@ export default function RegisterPage() {
 
         {/* Top — branding */}
         <div className={cn('ao-row ao-gap-14', s.rel)}>
-          <Sigil size={48} glyph="sigil-3" />
+          <RotaPerforataLogo size={48} label={t('app.name')} />
           <div>
             <div className={cn('ao-engraved', s.brandName)}>{t('app.name')}</div>
             <div className="ao-codex">{t('auth.brandSub')}</div>

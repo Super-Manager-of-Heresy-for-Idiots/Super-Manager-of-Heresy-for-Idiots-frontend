@@ -16,3 +16,5 @@ export { ErrorAltar } from './ErrorAltar';
 export { RoleBadge } from './RoleBadge';
 export { Placeholder } from './Placeholder';
 export { OrdoAssetIcon } from './OrdoAssetIcon';
+export { OrdoInterfaceIcon } from './OrdoInterfaceIcon';
+export type { OrdoInterfaceIconKey } from './OrdoInterfaceIcon';

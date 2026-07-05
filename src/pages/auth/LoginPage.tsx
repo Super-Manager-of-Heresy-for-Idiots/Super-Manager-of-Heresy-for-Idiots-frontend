@@ -6,7 +6,8 @@ import { z } from 'zod';
 import { useLogin } from '@/hooks/useAuth';
 import { useAuthStore } from '@/store/authStore';
 import { getRoleRedirectPath } from '@/lib/utils';
-import { Rune, Sigil, OrdoDivider, OrdoPanel } from '@/components/ordo';
+import { Rune, OrdoDivider, OrdoPanel } from '@/components/ordo';
+import { RotaPerforataLogo } from '@/components/brand/RotaPerforataLogo';
 import { useI18n } from '@/i18n/I18nContext';
 import { LanguageSwitcher } from '@/components/layout/LanguageSwitcher';
 import { cn } from '@/lib/utils';
@@ -77,7 +78,7 @@ export default function LoginPage() {
 
         {/* Top — branding */}
         <div className={cn('ao-row ao-gap-14', s.rel)}>
-          <Sigil size={48} glyph="sigil-3" />
+          <RotaPerforataLogo size={48} label={t('app.name')} />
           <div>
             <div className={cn('ao-engraved', s.brandName)}>{t('app.name')}</div>
             <div className="ao-codex">{t('auth.brandSub', { currentYearRoman: yearRoman })}</div>

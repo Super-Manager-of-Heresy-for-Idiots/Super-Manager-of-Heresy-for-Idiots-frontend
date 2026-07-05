@@ -2,7 +2,8 @@ import { Suspense, useEffect, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 import { useUnreadCount } from '@/features/messenger/hooks/useMessengerQueries';
-import { Rune, Sigil } from '@/components/ordo';
+import { OrdoInterfaceIcon, Rune, type OrdoInterfaceIconKey } from '@/components/ordo';
+import { RotaPerforataLogo } from '@/components/brand/RotaPerforataLogo';
 import { useT } from '@/i18n/I18nContext';
 import { useIsMobile } from '@/hooks/useMediaQuery';
 import { cn } from '@/lib/utils';
@@ -19,56 +20,57 @@ const descKey = (labelKey: string) => labelKey.replace('nav.', 'nav.desc.');
 interface NavEntry {
   labelKey: string;
   path: string;
-  glyph: string;
+  icon: OrdoInterfaceIconKey;
   exact?: boolean;
 }
 
 const playerNav: NavEntry[] = [
-  { labelKey: 'nav.campaigns', path: '/campaigns', glyph: 'helm' },
-  { labelKey: 'nav.myCharacters', path: '/characters/templates', glyph: 'shield' },
-  { labelKey: 'nav.friends', path: '/friends', glyph: 'eye' },
-  { labelKey: 'nav.messages', path: '/messages', glyph: 'scroll' },
-  { labelKey: 'nav.marketplace', path: '/marketplace', glyph: 'book' },
-  { labelKey: 'nav.blueprintMarket', path: '/blueprints/marketplace', glyph: 'hex' },
-  { labelKey: 'nav.itemCatalog', path: '/library/items', glyph: 'sword' },
+  { labelKey: 'nav.campaigns', path: '/campaigns', icon: 'campaign' },
+  { labelKey: 'nav.myCharacters', path: '/characters/templates', icon: 'character-template' },
+  { labelKey: 'nav.friends', path: '/friends', icon: 'friends' },
+  { labelKey: 'nav.messages', path: '/messages', icon: 'messages' },
+  { labelKey: 'nav.marketplace', path: '/marketplace', icon: 'homebrew-package' },
+  { labelKey: 'nav.blueprintMarket', path: '/blueprints/marketplace', icon: 'campaign-blueprint' },
+  { labelKey: 'nav.itemCatalog', path: '/library/items', icon: 'item' },
 ];
 
 const gmNav: NavEntry[] = [
-  { labelKey: 'nav.campaigns', path: '/campaigns', glyph: 'helm' },
-  { labelKey: 'nav.myCharacters', path: '/characters/templates', glyph: 'shield' },
-  { labelKey: 'nav.friends', path: '/friends', glyph: 'eye' },
-  { labelKey: 'nav.messages', path: '/messages', glyph: 'scroll' },
-  { labelKey: 'nav.marketplace', path: '/marketplace', glyph: 'book' },
-  { labelKey: 'nav.blueprintMarket', path: '/blueprints/marketplace', glyph: 'hex' },
-  { labelKey: 'nav.itemCatalog', path: '/library/items', glyph: 'sword' },
-  { labelKey: 'nav.myBlueprints', path: '/blueprints/my', glyph: 'sigil-2' },
-  { labelKey: 'nav.myDoctrines', path: '/gm/homebrew/my', glyph: 'scroll' },
-  { labelKey: 'nav.installed', path: '/gm/homebrew/installed', glyph: 'check' },
-  { labelKey: 'nav.library', path: '/gm/homebrew/library', glyph: 'book' },
+  { labelKey: 'nav.campaigns', path: '/campaigns', icon: 'campaign' },
+  { labelKey: 'nav.myCharacters', path: '/characters/templates', icon: 'character-template' },
+  { labelKey: 'nav.friends', path: '/friends', icon: 'friends' },
+  { labelKey: 'nav.messages', path: '/messages', icon: 'messages' },
+  { labelKey: 'nav.marketplace', path: '/marketplace', icon: 'homebrew-package' },
+  { labelKey: 'nav.blueprintMarket', path: '/blueprints/marketplace', icon: 'campaign-blueprint' },
+  { labelKey: 'nav.itemCatalog', path: '/library/items', icon: 'item' },
+  { labelKey: 'nav.myBlueprints', path: '/blueprints/my', icon: 'blueprint-draft' },
+  { labelKey: 'nav.myDoctrines', path: '/gm/homebrew/my', icon: 'homebrew-draft' },
+  { labelKey: 'nav.installed', path: '/gm/homebrew/installed', icon: 'homebrew-installed' },
+  { labelKey: 'nav.library', path: '/gm/homebrew/library', icon: 'admin-content' },
 ];
 
 const adminNav: NavEntry[] = [
-  { labelKey: 'nav.campaigns', path: '/campaigns', glyph: 'helm' },
-  { labelKey: 'nav.myCharacters', path: '/characters/templates', glyph: 'shield' },
-  { labelKey: 'nav.friends', path: '/friends', glyph: 'eye' },
-  { labelKey: 'nav.messages', path: '/messages', glyph: 'scroll' },
-  { labelKey: 'nav.admin', path: '/admin', glyph: 'book', exact: true },
-  { labelKey: 'nav.users', path: '/admin/users', glyph: 'helm' },
-  { labelKey: 'nav.characters', path: '/admin/characters', glyph: 'shield' },
-  { labelKey: 'nav.statTypes', path: '/admin/stat-types', glyph: 'diamond' },
-  { labelKey: 'nav.itemTemplates', path: '/admin/item-templates', glyph: 'scroll' },
-  { labelKey: 'nav.itemCatalog', path: '/library/items', glyph: 'sword' },
-  { labelKey: 'nav.classes', path: '/admin/character-classes', glyph: 'shield' },
-  { labelKey: 'nav.species', path: '/admin/species', glyph: 'sigil-3' },
-  { labelKey: 'nav.contentQuality', path: '/admin/content-quality', glyph: 'diamond' },
-  { labelKey: 'nav.buffsDebuffs', path: '/admin/buffs-debuffs', glyph: 'hex' },
-  { labelKey: 'nav.enchantments', path: '/admin/enchantment-types', glyph: 'eye' },
-  { labelKey: 'nav.bestiary', path: '/admin/bestiary/monsters', glyph: 'sword' },
-  { labelKey: 'nav.bestiaryDicts', path: '/admin/bestiary/dictionaries', glyph: 'book' },
-  { labelKey: 'nav.homebrew', path: '/admin/homebrew', glyph: 'scroll' },
-  { labelKey: 'nav.spellWarnings', path: '/admin/spell-warnings', glyph: 'tri-inv' },
-  { labelKey: 'nav.classFeatureWarnings', path: '/admin/class-feature-warnings', glyph: 'tri-inv' },
-  { labelKey: 'nav.ruleWorkbench', path: '/admin/rule-workbench', glyph: 'diamond' },
+  { labelKey: 'nav.campaigns', path: '/campaigns', icon: 'campaign' },
+  { labelKey: 'nav.myCharacters', path: '/characters/templates', icon: 'character-template' },
+  { labelKey: 'nav.friends', path: '/friends', icon: 'friends' },
+  { labelKey: 'nav.messages', path: '/messages', icon: 'messages' },
+  { labelKey: 'nav.admin', path: '/admin', icon: 'admin-dashboard', exact: true },
+  { labelKey: 'nav.users', path: '/admin/users', icon: 'admin-users' },
+  { labelKey: 'nav.characters', path: '/admin/characters', icon: 'character' },
+  { labelKey: 'nav.statTypes', path: '/admin/stat-types', icon: 'ability-check' },
+  { labelKey: 'nav.itemTemplates', path: '/admin/item-templates', icon: 'item-template' },
+  { labelKey: 'nav.itemCatalog', path: '/library/items', icon: 'item' },
+  { labelKey: 'nav.classes', path: '/admin/character-classes', icon: 'class' },
+  { labelKey: 'nav.species', path: '/admin/species', icon: 'species' },
+  { labelKey: 'nav.contentQuality', path: '/admin/content-quality', icon: 'validation-warning' },
+  { labelKey: 'nav.buffsDebuffs', path: '/admin/buffs-debuffs', icon: 'active-effect' },
+  { labelKey: 'nav.enchantments', path: '/admin/enchantment-types', icon: 'enchantment' },
+  { labelKey: 'nav.bestiary', path: '/admin/bestiary/monsters', icon: 'bestiary' },
+  { labelKey: 'nav.bestiaryDicts', path: '/admin/bestiary/dictionaries', icon: 'dictionary' },
+  { labelKey: 'nav.homebrew', path: '/admin/homebrew', icon: 'homebrew-package' },
+  { labelKey: 'nav.spellWarnings', path: '/admin/spell-warnings', icon: 'spell' },
+  { labelKey: 'nav.classFeatureWarnings', path: '/admin/class-feature-warnings', icon: 'class-feature' },
+  { labelKey: 'nav.ruleWorkbench', path: '/admin/rule-workbench', icon: 'rule-workbench' },
+  { labelKey: 'nav.resourceTypes', path: '/admin/resource-types', icon: 'resource' },
 ];
 
 function getNavItems(role?: Role): NavEntry[] {
@@ -98,6 +100,8 @@ export function AppLayout() {
 
   const isActive = (item: NavEntry) =>
     item.exact ? location.pathname === item.path : location.pathname.startsWith(item.path);
+  const navIcon = (item: NavEntry) =>
+    item.labelKey === 'nav.messages' && unreadCount > 0 ? 'unread-message' : item.icon;
 
   const goTo = (path: string) => {
     navigate(path);
@@ -119,7 +123,7 @@ export function AppLayout() {
       <div className="ao-scroll ao-rail-inner">
         <div className="ao-rail-brand">
           <span className="ao-rail-brand-mark">
-            <Sigil size={36} glyph="sigil-1" color="var(--gold)" />
+            <RotaPerforataLogo size={36} variant="mechanism" label={t('app.name')} />
           </span>
           <span className="ao-rail-brand-name ao-engraved">{t('app.name')}</span>
         </div>
@@ -135,7 +139,7 @@ export function AppLayout() {
                 className={cn('ao-rail-btn', active && 'is-active')}
               >
                 <span className="ao-rail-btn-ico">
-                  <Rune kind={item.glyph} size={18} />
+                  <OrdoInterfaceIcon icon={navIcon(item)} size={18} />
                   {item.labelKey === 'nav.admin' && user?.role === 'ADMIN' && (
                     <span className="ao-rail-dot" />
                   )}
@@ -170,7 +174,7 @@ export function AppLayout() {
       <div className="ao-scroll ao-grain ao-drawer-panel">
         {/* Drawer header */}
         <div className="ao-drawer-head">
-          <Sigil size={40} glyph="sigil-1" color="var(--gold)" />
+          <RotaPerforataLogo size={40} label={t('app.name')} />
           <div className="ao-drawer-head-meta">
             <div className="ao-engraved ao-drawer-head-name">{t('app.name')}</div>
             {user && (
@@ -198,10 +202,10 @@ export function AppLayout() {
                 onClick={() => goTo(item.path)}
                 className={cn('ao-drawer-link', active && 'is-active')}
               >
-                <Rune
-                  kind={item.glyph}
+                <OrdoInterfaceIcon
+                  icon={navIcon(item)}
                   size={16}
-                  color={active ? 'var(--gold)' : 'var(--ink-faint)'}
+                  style={{ color: active ? 'var(--gold)' : 'var(--ink-faint)' }}
                 />
                 <span className="ao-drawer-link-text">
                   <span className="ao-drawer-link-label">

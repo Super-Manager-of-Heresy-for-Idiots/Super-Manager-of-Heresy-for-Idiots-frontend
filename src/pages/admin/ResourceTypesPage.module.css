@@ -1,0 +1,16 @@
+.page { display: flex; flex-direction: column; gap: 18px; }
+.header { display: flex; flex-direction: column; gap: 6px; }
+.lede { max-width: 72ch; color: var(--ink-quiet); }
+.muted { color: var(--ink-faint); font-size: 12.5px; }
+
+.form { display: flex; flex-direction: column; gap: 10px; padding: 16px; }
+.formRow { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.formRow > input, .formRow > select { flex: 1; min-width: 180px; }
+.label { flex: 0 0 150px; color: var(--ink-quiet); font-size: 12.5px; }
+.formActions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 4px; }
+
+.tablePanel { padding: 0; overflow: hidden; }
+.row { cursor: pointer; }
+.row:hover { background: rgba(255, 255, 255, 0.03); }
+.formulaCell { color: var(--arcane); font-size: 12px; }
+.actionsCell { text-align: right; white-space: nowrap; }

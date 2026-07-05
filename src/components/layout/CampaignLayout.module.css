@@ -20,6 +20,17 @@
   margin-bottom: 24px;
 }
 
+.nav :global(.ao-tab) {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.navIcon {
+  color: currentColor;
+  opacity: 0.86;
+}
+
 .body { display: block; }
 
 /* ── loading / error ─────────────────────────────────────── */

@@ -20,7 +20,6 @@ import {
   AbilityCheckPanel,
   DamageHealModal,
   SpellbookAddModal,
-  FeatureResourcesPanel,
   FeatureEffectsPanel,
   FeatureActionsPanel,
   PendingPromptsPanel,
@@ -1007,9 +1006,6 @@ export default function FolioPage() {
           )}
           {capability?.hasFeatureActions && (
             <FeatureActionsPanel campaignId={campaignId!} characterId={characterId!} canManage={canManageSlots} />
-          )}
-          {capability?.hasFeatureResources && (
-            <FeatureResourcesPanel campaignId={campaignId!} characterId={characterId!} canManage={canManageSlots} />
           )}
           {capability?.hasActiveEffects && (
             <FeatureEffectsPanel campaignId={campaignId!} characterId={characterId!} canManage={canManageSlots} />

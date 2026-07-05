@@ -1,0 +1,12 @@
+.icon {
+  --ordo-interface-icon-size: 16px;
+
+  display: inline-block;
+  width: var(--ordo-interface-icon-size);
+  height: var(--ordo-interface-icon-size);
+  flex: 0 0 var(--ordo-interface-icon-size);
+  color: currentColor;
+  background-color: currentColor;
+  mask: var(--ordo-interface-icon-url) center / contain no-repeat;
+  -webkit-mask: var(--ordo-interface-icon-url) center / contain no-repeat;
+}
