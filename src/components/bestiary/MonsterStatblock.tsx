@@ -1,8 +1,8 @@
 import React from 'react';
 import type { CSSProperties } from 'react';
-import { Shield, Heart, Wind, Gauge, BookOpen, User, Clock, Copy } from 'lucide-react';
 import { useI18n } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
+import { OrdoInterfaceIcon, type OrdoInterfaceIconKey } from '@/components/ordo';
 import type { MonsterFeatureRow, MonsterResponse } from '@/types';
 import {
   ABILITY_SCORE_FIELDS,
@@ -20,6 +20,14 @@ const mod = (score: number): string => {
   return m >= 0 ? `+${m}` : `${m}`;
 };
 const signed = (n: number): string => (n >= 0 ? `+${n}` : `${n}`);
+const speedIconForMonster = (speeds: MonsterResponse['speeds']): OrdoInterfaceIconKey => {
+  const codes = new Set(speeds.map((sp) => sp.movementType.code.toLowerCase()));
+  if (codes.has('fly')) return 'speed-fly';
+  if (codes.has('swim')) return 'speed-swim';
+  if (codes.has('climb')) return 'speed-climb';
+  if (codes.has('burrow')) return 'speed-burrow';
+  return 'speed-walk';
+};
 
 function Diamond({ size = 7, color = 'var(--bronze)' }: { size?: number; color?: string }) {
   return <span className={s.diamond} style={{ '--d-size': `${size}px`, '--d-color': color } as CSSProperties} />;
@@ -147,10 +155,10 @@ export default function MonsterStatblock({ monster: m }: { monster: MonsterRespo
 
       <div className={s.body}>
         <div className={s.defGrid}>
-          <DefenseTile icon={<Shield size={20} />} value={m.armorClass} label={`${t('best.sb.ac')}${m.armorClassText ? ` · ${m.armorClassText}` : ''}`} />
-          <DefenseTile icon={<Heart size={20} />} value={m.hpAverage ?? '—'} label={`${t('best.sb.hp')}${m.hpFormula ? ` · ${m.hpFormula}` : ''}`} />
-          <DefenseTile icon={<Gauge size={20} />} value={<>{m.initiativeBonus != null ? signed(m.initiativeBonus) : '—'}{m.initiativeScore != null && <span className={s.initScore}> ({m.initiativeScore})</span>}</>} label={t('best.sb.initiative')} />
-          <DefenseTile icon={<Wind size={20} />} value={<span className={s.speedText}>{m.speeds.map((sp) => `${dictName(sp.movementType, lang).toLowerCase()} ${sp.ft}${sp.hover ? ` ${t('best.sb.hover')}` : ''}`).join(', ') || '—'}</span>} label={t('best.sb.speed')} />
+          <DefenseTile icon={<OrdoInterfaceIcon icon="armor" size={20} />} value={m.armorClass} label={`${t('best.sb.ac')}${m.armorClassText ? ` · ${m.armorClassText}` : ''}`} />
+          <DefenseTile icon={<OrdoInterfaceIcon icon="hp" size={20} />} value={m.hpAverage ?? '—'} label={`${t('best.sb.hp')}${m.hpFormula ? ` · ${m.hpFormula}` : ''}`} />
+          <DefenseTile icon={<OrdoInterfaceIcon icon="ability-check" size={20} />} value={<>{m.initiativeBonus != null ? signed(m.initiativeBonus) : '—'}{m.initiativeScore != null && <span className={s.initScore}> ({m.initiativeScore})</span>}</>} label={t('best.sb.initiative')} />
+          <DefenseTile icon={<OrdoInterfaceIcon icon={speedIconForMonster(m.speeds)} size={20} />} value={<span className={s.speedText}>{m.speeds.map((sp) => `${dictName(sp.movementType, lang).toLowerCase()} ${sp.ft}${sp.hover ? ` ${t('best.sb.hover')}` : ''}`).join(', ') || '—'}</span>} label={t('best.sb.speed')} />
         </div>
 
         <div className={cn(s.abilGrid, 'bd-abil')}>
@@ -220,12 +228,13 @@ export default function MonsterStatblock({ monster: m }: { monster: MonsterRespo
         <div className={s.footerRow}>
           <span className="ao-chip ao-chip--gold">{t(scopeKey(m.scope))}</span>
           <span className={cn(s.footChip, m.isVisibleToPlayers && s.visible)}>
+            <OrdoInterfaceIcon icon={m.isVisibleToPlayers ? 'visible' : 'hidden'} size={13} />
             {m.isVisibleToPlayers ? t('best.sb.visible') : t('best.sb.hiddenF')}
           </span>
-          {m.sourceMonsterId && <span className={s.footChip}><Copy size={13} /> {t('best.sb.clone')}</span>}
-          {m.createdByUsername && <span className={s.footChip}><User size={13} /> {m.createdByUsername}</span>}
-          <span className={s.footChip}><Clock size={13} /> {t('best.sb.createdUpdated', { created: fmtDate(m.createdAt), updated: fmtDate(m.updatedAt) })}</span>
-          {m.sources.length > 0 && <span className={s.footChip}><BookOpen size={13} /> {m.sources.map((sr) => dictName(sr, lang)).join(', ')}</span>}
+          {m.sourceMonsterId && <span className={s.footChip}><OrdoInterfaceIcon icon="monster" size={13} /> {t('best.sb.clone')}</span>}
+          {m.createdByUsername && <span className={s.footChip}><OrdoInterfaceIcon icon="author" size={13} /> {m.createdByUsername}</span>}
+          <span className={s.footChip}><OrdoInterfaceIcon icon="session-note" size={13} /> {t('best.sb.createdUpdated', { created: fmtDate(m.createdAt), updated: fmtDate(m.updatedAt) })}</span>
+          {m.sources.length > 0 && <span className={s.footChip}><OrdoInterfaceIcon icon="source-book" size={13} /> {m.sources.map((sr) => dictName(sr, lang)).join(', ')}</span>}
         </div>
       </footer>
     </article>
