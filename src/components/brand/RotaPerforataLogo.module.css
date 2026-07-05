@@ -17,7 +17,8 @@
   color: var(--rota-gold);
 }
 
-.svg {
+.svg,
+.svgImage {
   overflow: visible;
   width: var(--rota-size);
   height: var(--rota-size);
@@ -25,18 +26,32 @@
     drop-shadow(0 calc(5px * var(--rota-scale)) calc(14px * var(--rota-scale)) var(--rota-shadow));
 }
 
+.svgImage {
+  display: block;
+  object-fit: contain;
+}
+
 .stage {
   position: relative;
   width: var(--rota-size);
   height: var(--rota-size);
   border-radius: 50%;
+  background: transparent;
+  box-shadow: none;
+}
+
+.flicker .stage {
   background: radial-gradient(circle at 50% 42%, rgba(176, 141, 78, 0.1), rgba(176, 141, 78, 0) 64%);
   box-shadow: inset 0 0 calc(46px * var(--rota-scale)) rgba(0, 0, 0, 0.5);
 }
 
 .mark {
   position: absolute;
-  inset: calc(6px * var(--rota-scale));
+  top: 50%;
+  left: 50%;
+  width: calc(188px * var(--rota-scale));
+  height: calc(188px * var(--rota-scale));
+  transform: translate(-50%, -50%);
   filter: drop-shadow(0 0 calc(18px * var(--rota-scale)) rgba(122, 99, 64, 0.2))
     drop-shadow(0 calc(5px * var(--rota-scale)) calc(14px * var(--rota-scale)) var(--rota-shadow));
 }
@@ -58,7 +73,7 @@
 .ringOuter {
   width: calc(169.2px * var(--rota-scale));
   height: calc(169.2px * var(--rota-scale));
-  border: calc(1.6px * var(--rota-scale)) solid var(--rota-gold);
+  border: max(calc(1.6px * var(--rota-scale)), 1px) solid var(--rota-gold);
   border-top-color: #d4b478;
   border-bottom-color: var(--rota-gold-soft);
   border-radius: 50%;
@@ -68,7 +83,7 @@
 .ringInner {
   width: calc(157.9px * var(--rota-scale));
   height: calc(157.9px * var(--rota-scale));
-  border: calc(0.8px * var(--rota-scale)) solid rgba(176, 141, 78, 0.22);
+  border: max(calc(0.8px * var(--rota-scale)), 0.75px) solid rgba(176, 141, 78, 0.28);
   border-radius: 50%;
   transform: translate(-50%, -50%);
 }
@@ -76,7 +91,7 @@
 .squareLarge {
   width: calc(116.6px * var(--rota-scale));
   height: calc(116.6px * var(--rota-scale));
-  border: calc(1.1px * var(--rota-scale)) solid rgba(154, 124, 74, 0.3);
+  border: max(calc(1.1px * var(--rota-scale)), 0.9px) solid rgba(154, 124, 74, 0.42);
   border-radius: calc(2px * var(--rota-scale));
   transform: translate(-50%, -50%);
 }
@@ -84,7 +99,7 @@
 .squareSmall {
   width: calc(82.7px * var(--rota-scale));
   height: calc(82.7px * var(--rota-scale));
-  border: calc(1.1px * var(--rota-scale)) solid var(--rota-line);
+  border: max(calc(1.1px * var(--rota-scale)), 0.9px) solid rgba(154, 124, 74, 0.44);
   border-radius: calc(2px * var(--rota-scale));
   transform: translate(-50%, -50%) rotate(45deg);
 }
@@ -99,8 +114,8 @@
   position: absolute;
   top: 50%;
   left: 50%;
-  width: calc(3.2px * var(--rota-scale));
-  height: calc(19.8px * var(--rota-scale));
+  width: max(calc(3.2px * var(--rota-scale)), 1.35px);
+  height: max(calc(19.8px * var(--rota-scale)), 4px);
   border-radius: calc(1px * var(--rota-scale));
   background: #cfa962;
   transform-origin: 50% 50%;
@@ -118,7 +133,7 @@
 .wheelRing {
   width: calc(81.5px * var(--rota-scale));
   height: calc(81.5px * var(--rota-scale));
-  border: calc(4.5px * var(--rota-scale)) solid var(--rota-gold);
+  border: max(calc(4.5px * var(--rota-scale)), 1.8px) solid var(--rota-gold);
   border-top-color: var(--rota-gold-bright);
   border-bottom-color: #6a5128;
   border-radius: 50%;
@@ -128,7 +143,7 @@
 .wheelInner {
   width: calc(63.9px * var(--rota-scale));
   height: calc(63.9px * var(--rota-scale));
-  border: calc(0.8px * var(--rota-scale)) solid rgba(176, 141, 78, 0.3);
+  border: max(calc(0.8px * var(--rota-scale)), 0.75px) solid rgba(176, 141, 78, 0.36);
   border-radius: 50%;
   transform: translate(-50%, -50%);
 }
@@ -136,7 +151,7 @@
 .hub {
   width: calc(22.6px * var(--rota-scale));
   height: calc(22.6px * var(--rota-scale));
-  border: calc(2.2px * var(--rota-scale)) solid #cfa962;
+  border: max(calc(2.2px * var(--rota-scale)), 1px) solid #cfa962;
   border-radius: 50%;
   transform: translate(-50%, -50%);
 }

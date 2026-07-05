@@ -123,7 +123,7 @@ export function AppLayout() {
       <div className="ao-scroll ao-rail-inner">
         <div className="ao-rail-brand">
           <span className="ao-rail-brand-mark">
-            <RotaPerforataLogo size={36} variant="mechanism" label={t('app.name')} />
+            <RotaPerforataLogo size={36} label={t('app.name')} />
           </span>
           <span className="ao-rail-brand-name ao-engraved">{t('app.name')}</span>
         </div>

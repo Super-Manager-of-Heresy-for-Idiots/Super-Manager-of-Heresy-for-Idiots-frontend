@@ -26,6 +26,7 @@ import {
   useProblemFeatures,
   useResolutionMetadata,
   useResolutionRule,
+  useResourceKeys,
   useSpellGrant,
   useTrigger,
   useResolveIssue,
@@ -47,6 +48,7 @@ import {
   useValidateRule,
 } from '@/hooks/useFeatureRules';
 import { useSpells } from '@/hooks/useContentCatalog';
+import FormulaInput from '@/components/admin/FormulaInput';
 import type {
   EffectEndConditionEdit,
   EffectModifierEdit,
@@ -191,11 +193,10 @@ function MonsterFormRuleEditor({ rule, featureId }: { rule: FeatureRuleResponse;
       </div>
       <div className={s.editorRow}>
         <label className={s.editorLabel}>{t('adm.ruleWorkbench.form.maxCr')}</label>
-        <input
-          className="ao-input"
+        <FormulaInput
           placeholder='max(0.25, floor(class_level("druid")/3))'
           value={maxCr}
-          onChange={(e) => { setMaxCr(e.target.value); setValidationMsg(null); }}
+          onChange={(v) => { setMaxCr(v); setValidationMsg(null); }}
         />
         <button className="ao-btn" onClick={onValidate} disabled={validate.isPending || !maxCr.trim()}>
           {t('adm.ruleWorkbench.card.validate')}
@@ -295,11 +296,10 @@ function TriggerRuleEditor({ rule, featureId }: { rule: FeatureRuleResponse; fea
       </div>
       <div className={s.editorRow}>
         <label className={s.editorLabel}>{t('adm.ruleWorkbench.trigger.predicate')}</label>
-        <input
-          className="ao-input"
+        <FormulaInput
           placeholder='combat_round >= 1'
           value={predicate}
-          onChange={(e) => { setPredicate(e.target.value); setValidationMsg(null); }}
+          onChange={(v) => { setPredicate(v); setValidationMsg(null); }}
         />
         <button className="ao-btn" onClick={onValidate} disabled={validate.isPending || !predicate.trim()}>
           {t('adm.ruleWorkbench.card.validate')}
@@ -477,11 +477,10 @@ function ResolutionRuleEditor({ rule, featureId }: { rule: FeatureRuleResponse; 
       </div>
       <div className={s.editorRow}>
         <label className={s.editorLabel}>{t('adm.ruleWorkbench.resolution.dc')}</label>
-        <input
-          className="ao-input"
+        <FormulaInput
           placeholder='8+proficiency_bonus+ability_mod("WIS")'
           value={dc}
-          onChange={(e) => { setDc(e.target.value); setValidationMsg(null); }}
+          onChange={(v) => { setDc(v); setValidationMsg(null); }}
         />
         <button className="ao-btn" onClick={onValidate} disabled={validate.isPending || !dc.trim()}>
           {t('adm.ruleWorkbench.card.validate')}
@@ -605,11 +604,10 @@ function ActiveEffectRuleEditor({ rule, featureId }: { rule: FeatureRuleResponse
       </div>
       <div className={s.editorRow}>
         <label className={s.editorLabel}>{t('adm.ruleWorkbench.effect.duration')}</label>
-        <input
-          className="ao-input"
+        <FormulaInput
           placeholder="10"
           value={duration}
-          onChange={(e) => { setDuration(e.target.value); setValidationMsg(null); }}
+          onChange={(v) => { setDuration(v); setValidationMsg(null); }}
         />
         <button className="ao-btn" onClick={onValidate} disabled={validate.isPending || !duration.trim()}>
           {t('adm.ruleWorkbench.card.validate')}
@@ -667,11 +665,10 @@ function ActiveEffectRuleEditor({ rule, featureId }: { rule: FeatureRuleResponse
               value={m.modifierType ?? ''}
               onChange={(e) => patchModifier(i, { modifierType: e.target.value })}
             />
-            <input
-              className="ao-input"
+            <FormulaInput
               placeholder={t('adm.ruleWorkbench.effect.value')}
               value={m.valueFormula ?? ''}
-              onChange={(e) => patchModifier(i, { valueFormula: e.target.value })}
+              onChange={(v) => patchModifier(i, { valueFormula: v })}
             />
             <select className="ao-input" value={m.damageTypeId ?? ''} onChange={(e) => patchModifier(i, { damageTypeId: e.target.value })}>
               <option value="">{t('adm.ruleWorkbench.effect.noDamageType')}</option>
@@ -785,11 +782,10 @@ function HealingRuleEditor({ rule, featureId }: { rule: FeatureRuleResponse; fea
     <div className={s.editor}>
       <div className={s.editorRow}>
         <label className={s.editorLabel}>{t('adm.ruleWorkbench.healing.amount')}</label>
-        <input
-          className="ao-input"
+        <FormulaInput
           placeholder={amountType === 'dice' ? '1d8+ability_mod("WIS")' : '5*class_level("paladin")'}
           value={amount}
-          onChange={(e) => { setAmount(e.target.value); setValidationMsg(null); }}
+          onChange={(v) => { setAmount(v); setValidationMsg(null); }}
         />
         <button className="ao-btn" onClick={onValidate} disabled={validate.isPending || !amount.trim()}>
           {t('adm.ruleWorkbench.card.validate')}
@@ -899,12 +895,11 @@ function ActionCostRuleEditor({ rule, featureId }: { rule: FeatureRuleResponse; 
       </div>
       <div className={s.editorRow}>
         <label className={s.editorLabel}>{t('adm.ruleWorkbench.actionCost.condition')}</label>
-        <input
-          className="ao-input"
+        <FormulaInput
           placeholder='character_level >= 5'
           value={condition}
-          onChange={(e) => {
-            setCondition(e.target.value);
+          onChange={(v) => {
+            setCondition(v);
             setValidationMsg(null);
           }}
         />
@@ -979,14 +974,14 @@ function DamageRuleEditor({ rule, featureId }: { rule: FeatureRuleResponse; feat
     <div className={s.editor}>
       <div className={s.editorRow}>
         <label className={s.editorLabel}>{t('adm.ruleWorkbench.damage.dice')}</label>
-        <input className="ao-input" placeholder="2d6" value={dice} onChange={(e) => { setDice(e.target.value); setValidationMsg(null); }} />
+        <FormulaInput placeholder="2d6" value={dice} onChange={(v) => { setDice(v); setValidationMsg(null); }} />
         <button className="ao-btn" onClick={() => onValidate(dice, 'dice')} disabled={validate.isPending || !dice.trim()}>
           {t('adm.ruleWorkbench.card.validate')}
         </button>
       </div>
       <div className={s.editorRow}>
         <label className={s.editorLabel}>{t('adm.ruleWorkbench.damage.flat')}</label>
-        <input className="ao-input" placeholder='ability_mod("STR")' value={flat} onChange={(e) => { setFlat(e.target.value); setValidationMsg(null); }} />
+        <FormulaInput placeholder='ability_mod("STR")' value={flat} onChange={(v) => { setFlat(v); setValidationMsg(null); }} />
         <button className="ao-btn" onClick={() => onValidate(flat, 'integer')} disabled={validate.isPending || !flat.trim()}>
           {t('adm.ruleWorkbench.card.validate')}
         </button>
@@ -1025,6 +1020,7 @@ function DamageRuleEditor({ rule, featureId }: { rule: FeatureRuleResponse; feat
 function ResourceRuleEditor({ rule, featureId }: { rule: FeatureRuleResponse; featureId: string }) {
   const t = useT();
   const { data: def } = useResourceDefinition(rule.id, true);
+  const { data: resourceKeys } = useResourceKeys();
   const save = useSaveResourceDefinition();
   const validate = useValidateFormula();
 
@@ -1080,7 +1076,18 @@ function ResourceRuleEditor({ rule, featureId }: { rule: FeatureRuleResponse; fe
     <div className={s.editor}>
       <div className={s.editorRow}>
         <label className={s.editorLabel}>{t('adm.ruleWorkbench.resource.key')}</label>
-        <input className="ao-input" value={resourceKey} placeholder="rage" onChange={(e) => setResourceKey(e.target.value)} />
+        <input
+          className="ao-input"
+          value={resourceKey}
+          placeholder="rage"
+          list="fr-resource-keys"
+          onChange={(e) => setResourceKey(e.target.value)}
+        />
+        <datalist id="fr-resource-keys">
+          {(resourceKeys ?? []).map((k) => (
+            <option key={k} value={k} />
+          ))}
+        </datalist>
       </div>
       <div className={s.editorRow}>
         <label className={s.editorLabel}>{t('adm.ruleWorkbench.resource.name')}</label>
@@ -1093,12 +1100,11 @@ function ResourceRuleEditor({ rule, featureId }: { rule: FeatureRuleResponse; fe
       </div>
       <div className={s.editorRow}>
         <label className={s.editorLabel}>{t('adm.ruleWorkbench.resource.maxFormula')}</label>
-        <input
-          className="ao-input"
+        <FormulaInput
           value={maxFormula}
           placeholder='ability_mod("INT")'
-          onChange={(e) => {
-            setMaxFormula(e.target.value);
+          onChange={(v) => {
+            setMaxFormula(v);
             setValidationMsg(null);
           }}
         />

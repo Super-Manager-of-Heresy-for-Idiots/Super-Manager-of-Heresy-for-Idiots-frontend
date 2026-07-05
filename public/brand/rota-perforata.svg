@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <defs>
+    <linearGradient id="rp-gold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e3c98c"/>
+      <stop offset="0.46" stop-color="#b08d4e"/>
+      <stop offset="1" stop-color="#6a5128"/>
+    </linearGradient>
+    <linearGradient id="rp-gold-soft" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#d4b478"/>
+      <stop offset="1" stop-color="#836a3a"/>
+    </linearGradient>
+    <radialGradient id="rp-glow" cx="50%" cy="42%" r="58%">
+      <stop offset="0" stop-color="#b08d4e" stop-opacity="0.30"/>
+      <stop offset="0.60" stop-color="#b08d4e" stop-opacity="0.06"/>
+      <stop offset="1" stop-color="#b08d4e" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <circle cx="100" cy="100" r="98" fill="url(#rp-glow)"/>
+  <circle cx="100" cy="100" r="90" stroke="url(#rp-gold-soft)" stroke-width="1.6"/>
+  <circle cx="100" cy="100" r="84" stroke="#b08d4e" stroke-opacity="0.22" stroke-width="0.8"/>
+  <rect x="38" y="38" width="124" height="124" rx="2" stroke="#9a7c4a" stroke-opacity="0.3" stroke-width="1.1"/>
+  <rect x="56" y="56" width="88" height="88" rx="2" stroke="#9a7c4a" stroke-opacity="0.32" stroke-width="1.1" transform="rotate(45 100 100)"/>
+  <circle cx="100" cy="100" r="41" stroke="url(#rp-gold)" stroke-width="4.5"/>
+  <circle cx="100" cy="100" r="34" stroke="#b08d4e" stroke-opacity="0.3" stroke-width="0.8"/>
+  <g stroke="#cfa962" stroke-width="3.4">
+    <line x1="100" y1="84" x2="100" y2="63" transform="rotate(0 100 100)"/>
+    <line x1="100" y1="84" x2="100" y2="63" transform="rotate(45 100 100)"/>
+    <line x1="100" y1="84" x2="100" y2="63" transform="rotate(90 100 100)"/>
+    <line x1="100" y1="84" x2="100" y2="63" transform="rotate(135 100 100)"/>
+    <line x1="100" y1="84" x2="100" y2="63" transform="rotate(180 100 100)"/>
+    <line x1="100" y1="84" x2="100" y2="63" transform="rotate(225 100 100)"/>
+    <line x1="100" y1="84" x2="100" y2="63" transform="rotate(270 100 100)"/>
+    <line x1="100" y1="84" x2="100" y2="63" transform="rotate(315 100 100)"/>
+  </g>
+  <circle cx="100" cy="100" r="12" stroke="#cfa962" stroke-width="2.2"/>
+</svg>

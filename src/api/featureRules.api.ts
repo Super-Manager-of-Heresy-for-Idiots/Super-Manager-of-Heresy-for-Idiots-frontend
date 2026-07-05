@@ -114,6 +114,23 @@ export interface ActionTypeOption {
   label: string;
 }
 
+/** One DSL vocabulary entry (function or scalar) for the formula autocomplete — served by the backend. */
+export interface FormulaVocabEntry {
+  name: string;
+  kind: 'function' | 'scalar';
+  insertText: string;
+  signature: string;
+  /** For keyed functions: which dynamic list fills the string arg. */
+  argKind?: 'ability' | 'class' | 'resource_key' | 'target' | 'dice' | null;
+  description?: string | null;
+}
+
+export interface FormulaVocabulary {
+  functions: FormulaVocabEntry[];
+  scalars: FormulaVocabEntry[];
+  abilityCodes: string[];
+}
+
 export interface ActionCostAdmin {
   id?: string | null;
   actionTypeId?: string | null;
@@ -503,6 +520,12 @@ export const featureRulesApi = {
 
   getActionTypes: async (): Promise<ApiResponse<ActionTypeOption[]>> =>
     (await api.get<ApiResponse<ActionTypeOption[]>>('/admin/feature-rules/action-types')).data,
+
+  getResourceKeys: async (): Promise<ApiResponse<string[]>> =>
+    (await api.get<ApiResponse<string[]>>('/admin/feature-rules/resource-keys')).data,
+
+  getFormulaVocabulary: async (lang?: string): Promise<ApiResponse<FormulaVocabulary>> =>
+    (await api.get<ApiResponse<FormulaVocabulary>>('/admin/feature-formulas/vocabulary', { params: { lang } })).data,
 
   getActionCost: async (ruleId: string): Promise<ApiResponse<ActionCostAdmin | null>> =>
     (await api.get<ApiResponse<ActionCostAdmin | null>>(`/admin/feature-rules/${ruleId}/action-cost`)).data,

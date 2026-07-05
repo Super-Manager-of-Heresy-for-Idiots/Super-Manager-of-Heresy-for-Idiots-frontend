@@ -16,7 +16,7 @@ import {
   type TriggerEdit,
 } from '@/api/featureRules.api';
 import { referenceApi } from '@/api/reference.api';
-import { useT } from '@/i18n/I18nContext';
+import { useT, useI18n } from '@/i18n/I18nContext';
 import type {
   ApiError,
   CreateFeatureRuleIssueRequest,
@@ -312,6 +312,23 @@ export function useActionTypes() {
   return useQuery({
     queryKey: ['fr-action-types'],
     queryFn: async () => (await featureRulesApi.getActionTypes()).data ?? [],
+    staleTime: 60 * 60 * 1000,
+  });
+}
+
+export function useResourceKeys() {
+  return useQuery({
+    queryKey: ['fr-resource-keys'],
+    queryFn: async () => (await featureRulesApi.getResourceKeys()).data ?? [],
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+export function useFormulaVocabulary() {
+  const { lang } = useI18n();
+  return useQuery({
+    queryKey: ['fr-formula-vocab', lang],
+    queryFn: async () => (await featureRulesApi.getFormulaVocabulary(lang)).data ?? null,
     staleTime: 60 * 60 * 1000,
   });
 }
