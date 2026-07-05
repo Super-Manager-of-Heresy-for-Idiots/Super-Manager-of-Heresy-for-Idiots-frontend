@@ -1,4 +1,5 @@
-import { Rune } from './Rune';
+import { OrdoInterfaceIcon } from './OrdoInterfaceIcon';
+import { damageIconForType } from './entityIcons';
 
 interface DamageBadgeProps {
   dice: string;
@@ -9,7 +10,7 @@ interface DamageBadgeProps {
 export function DamageBadge({ dice, type, bonus }: DamageBadgeProps) {
   return (
     <span className="ao-dmgbadge">
-      <Rune kind="sword" size={11} color="var(--ink-quiet)" />
+      <OrdoInterfaceIcon icon={damageIconForType(type)} size={12} style={{ color: 'var(--ink-quiet)' }} />
       <span>{dice}{bonus ? `+${bonus}` : ''}</span>
       <span className="ao-dmgbadge-type">{type}</span>
     </span>

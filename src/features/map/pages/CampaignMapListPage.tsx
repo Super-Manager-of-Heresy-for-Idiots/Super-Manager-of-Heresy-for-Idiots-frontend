@@ -6,8 +6,8 @@
 
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Loader2, MapIcon, Pencil, Play } from 'lucide-react';
-import { EmptyVault, ErrorAltar, OrdoPanel } from '@/components/ordo';
+import { Loader2, Pencil, Play } from 'lucide-react';
+import { EmptyVault, ErrorAltar, OrdoInterfaceIcon, OrdoPanel } from '@/components/ordo';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
 import { MapAssetImage } from '../components';
@@ -61,6 +61,7 @@ export default function CampaignMapListPage() {
       <div>
         <Header t={t} onNew={() => goEditor()} />
         <ErrorAltar
+          icon="map"
           title={t('map.list.loadError')}
           error={error}
           onRetry={() => refetch()}
@@ -77,6 +78,7 @@ export default function CampaignMapListPage() {
       {!maps || maps.length === 0 ? (
         <EmptyVault
           glyph="sigil-3"
+          icon="map"
           title={t('map.list.empty.title')}
           body={t('map.list.empty.body')}
           action={
@@ -98,7 +100,7 @@ export default function CampaignMapListPage() {
                       alt=""
                     />
                   ) : (
-                    <MapIcon size={28} aria-hidden="true" className={s.thumbIcon} />
+                    <OrdoInterfaceIcon icon="map" size={28} className={s.thumbIcon} />
                   )}
                 </div>
                 <h5 className={cn('ao-h5', s.name)}>{map.name}</h5>

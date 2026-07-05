@@ -12,6 +12,9 @@
 }
 
 .level {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   min-width: 96px;
   color: var(--ink-quiet);
 }

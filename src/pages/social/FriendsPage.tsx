@@ -2,6 +2,7 @@ import { Fragment, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { OrdoInterfaceIcon } from '@/components/ordo';
 import { ExpandableRow, ExpandChevron } from '@/components/common/ExpandableRow';
 import { useOpenSession } from '@/features/messenger/hooks/useMessengerQueries';
 import {
@@ -32,12 +33,15 @@ export default function FriendsPage() {
 
       <div className={cn('ao-tabs', s.tabs)}>
         <button className={cn('ao-tab', tab === 'friends' && 'is-active')} onClick={() => setTab('friends')}>
+          <OrdoInterfaceIcon icon="friends" size={13} />
           Друзья
         </button>
         <button className={cn('ao-tab', tab === 'requests' && 'is-active')} onClick={() => setTab('requests')}>
+          <OrdoInterfaceIcon icon="friend-request" size={13} />
           Заявки
         </button>
         <button className={cn('ao-tab', tab === 'blocked' && 'is-active')} onClick={() => setTab('blocked')}>
+          <OrdoInterfaceIcon icon="blocked-user" size={13} />
           Заблокированные
         </button>
       </div>

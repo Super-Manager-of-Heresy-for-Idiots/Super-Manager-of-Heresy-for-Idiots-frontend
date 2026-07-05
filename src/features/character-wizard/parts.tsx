@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Rune } from '@/components/ordo';
+import { OrdoInterfaceIcon, Rune, entityIconForGlyph, type OrdoInterfaceIconKey } from '@/components/ordo';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
 import type {
@@ -47,13 +47,15 @@ interface WizCardProps {
   active: boolean;
   onClick: () => void;
   glyph: string;
+  icon?: OrdoInterfaceIconKey;
   title: string;
   sub?: string;
   disabled?: boolean;
   children?: ReactNode;
 }
 
-export function WizCard({ active, onClick, glyph, title, sub, disabled, children }: WizCardProps) {
+export function WizCard({ active, onClick, glyph, icon, title, sub, disabled, children }: WizCardProps) {
+  const interfaceIcon = icon ?? entityIconForGlyph(glyph);
   return (
     <button
       type="button"
@@ -62,7 +64,11 @@ export function WizCard({ active, onClick, glyph, title, sub, disabled, children
       disabled={disabled}
     >
       <div className="wiz-card-top">
-        <Rune kind={glyph} size={18} color={active ? 'var(--gold)' : 'var(--ink-quiet)'} />
+        {interfaceIcon ? (
+          <OrdoInterfaceIcon icon={interfaceIcon} size={18} style={{ color: active ? 'var(--gold)' : 'var(--ink-quiet)' }} />
+        ) : (
+          <Rune kind={glyph} size={18} color={active ? 'var(--gold)' : 'var(--ink-quiet)'} />
+        )}
         <span className={cn('ao-engraved', s.cardTitle)}>{title}</span>
         {active && (
           <span className="wiz-card-check">

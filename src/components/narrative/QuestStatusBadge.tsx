@@ -1,15 +1,15 @@
 import type { CSSProperties } from 'react';
-import { Rune } from '@/components/ordo';
+import { OrdoInterfaceIcon, type OrdoInterfaceIconKey } from '@/components/ordo';
 import { useT } from '@/i18n/I18nContext';
 import type { QuestStatus } from '@/types';
 import s from './QuestStatusBadge.module.css';
 
-const STATUS_MAP: Record<QuestStatus, { labelKey: string; color: string; glyph: string }> = {
-  ACTIVE:    { labelKey: 'cmp.quest.ACTIVE',    color: '#d4b478', glyph: 'diamond-fill' },
-  COMPLETED: { labelKey: 'cmp.quest.COMPLETED', color: '#6db86a', glyph: 'check' },
-  FAILED:    { labelKey: 'cmp.quest.FAILED',    color: '#c87a3a', glyph: 'x' },
-  HIDDEN:    { labelKey: 'cmp.quest.HIDDEN',    color: 'var(--ink-ghost)', glyph: 'lock' },
-  ARCHIVED:  { labelKey: 'cmp.quest.ARCHIVED',  color: 'var(--ink-faint)', glyph: 'book' },
+const STATUS_MAP: Record<QuestStatus, { labelKey: string; color: string; icon: OrdoInterfaceIconKey }> = {
+  ACTIVE:    { labelKey: 'cmp.quest.ACTIVE',    color: '#d4b478', icon: 'quest-active' },
+  COMPLETED: { labelKey: 'cmp.quest.COMPLETED', color: '#6db86a', icon: 'quest-completed' },
+  FAILED:    { labelKey: 'cmp.quest.FAILED',    color: '#c87a3a', icon: 'quest-failed' },
+  HIDDEN:    { labelKey: 'cmp.quest.HIDDEN',    color: 'var(--ink-ghost)', icon: 'quest-hidden' },
+  ARCHIVED:  { labelKey: 'cmp.quest.ARCHIVED',  color: 'var(--ink-faint)', icon: 'quest-archived' },
 };
 
 interface QuestStatusBadgeProps {
@@ -22,7 +22,7 @@ export function QuestStatusBadge({ status }: QuestStatusBadgeProps) {
 
   return (
     <span className={s.badge} style={{ '--tone': meta.color } as CSSProperties}>
-      <Rune kind={meta.glyph} size={8} color={meta.color} />
+      <OrdoInterfaceIcon icon={meta.icon} size={10} style={{ color: meta.color }} />
       {t(meta.labelKey)}
     </span>
   );

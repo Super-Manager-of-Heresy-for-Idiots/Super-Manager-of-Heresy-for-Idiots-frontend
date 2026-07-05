@@ -1,4 +1,4 @@
-import { MousePointer2 } from 'lucide-react';
+import { OrdoInterfaceIcon } from '@/components/ordo';
 import type { GridConfig } from '../types';
 import type { RemoteCursor } from '../state';
 import { gridToImagePoint } from '../engine';
@@ -17,7 +17,7 @@ export function MapCursorLayer({ grid, cursors }: MapCursorLayerProps) {
         const point = gridToImagePoint(cursor.gridX, cursor.gridY, grid);
         return (
           <div key={cursor.userId} className={s.cursor} style={{ left: point.imageX, top: point.imageY }}>
-            <MousePointer2 size={16} aria-hidden="true" />
+            <OrdoInterfaceIcon icon="map-cursor" size={16} />
             <span className={s.cursorLabel}>{cursor.userId.slice(0, 6)}</span>
           </div>
         );

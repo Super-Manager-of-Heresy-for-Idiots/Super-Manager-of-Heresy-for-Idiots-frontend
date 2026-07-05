@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Sparkles, BookOpen, Loader2, Plus } from 'lucide-react';
-import { OrdoPanel, PanelHeader, Bar } from '@/components/ordo';
+import { Loader2 } from 'lucide-react';
+import { OrdoInterfaceIcon, OrdoPanel, PanelHeader, Bar } from '@/components/ordo';
 import { BackLink } from '@/components/campaigns';
 import {
   AlertDialog,
@@ -78,13 +78,13 @@ export default function AddCharacterPage() {
       {mode === 'choice' && (
         <div className={s.choiceGrid}>
           <ChoiceCard
-            glyph={<Sparkles className={cn('h-5 w-5', s.iconGold)} />}
+            glyph={<OrdoInterfaceIcon icon="character" size={20} className={s.iconGold} />}
             title={t('camp.add.createNew.title')}
             body={t('camp.add.createNew.body')}
             onClick={() => navigate(`/campaigns/${campaignId}/characters/create`)}
           />
           <ChoiceCard
-            glyph={<BookOpen className={cn('h-5 w-5', s.iconArcane)} />}
+            glyph={<OrdoInterfaceIcon icon="character-template" size={20} className={s.iconArcane} />}
             title={t('camp.add.fromTemplate.title')}
             body={t('camp.add.fromTemplate.body')}
             onClick={() => setMode('pick-template')}
@@ -126,13 +126,13 @@ export default function AddCharacterPage() {
             </div>
           ) : availableTemplates.length === 0 ? (
             <OrdoPanel frame padding={0}>
-              <PanelHeader title={t('camp.add.noTemplates.title')} glyph="scroll" />
+              <PanelHeader title={t('camp.add.noTemplates.title')} icon="character-template" />
               <div className={s.emptyBody}>
                 <p className={cn('ao-italic', s.emptyText)}>
                   {t('camp.add.noTemplates.body')}
                 </p>
                 <button className="ao-btn ao-btn--primary" onClick={() => navigate('/characters/templates/new')}>
-                  <Plus className="h-3 w-3" /> <span className={s.ml6}>{t('camp.add.createTemplate')}</span>
+                  <OrdoInterfaceIcon icon="character-template" size={12} /> <span className={s.ml6}>{t('camp.add.createTemplate')}</span>
                 </button>
               </div>
             </OrdoPanel>
@@ -212,7 +212,7 @@ function TemplateChooserCard({
     : `LVL ${character.totalLevel}`;
   return (
     <OrdoPanel frame padding={0}>
-      <PanelHeader title={character.name} glyph="helm" tone="gold" sub={`${classLabel} · ${character.race?.name ?? '—'}`} />
+      <PanelHeader title={character.name} icon="character-template" tone="gold" sub={`${classLabel} · ${character.race?.name ?? '—'}`} />
       <div className={s.tplBody}>
         <Bar value={character.currentHp ?? 0} max={Math.max(1, character.maxHp ?? 0)} tone="ember" height={5} />
         <div className={cn('ao-codex', s.tplMeta)}>

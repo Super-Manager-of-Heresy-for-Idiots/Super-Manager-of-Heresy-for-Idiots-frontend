@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'react';
-import { Rune, OrdoChip, OrdoAssetIcon } from '@/components/ordo';
+import { Rune, OrdoChip, OrdoAssetIcon, OrdoInterfaceIcon, equipmentSlotIconForSlot } from '@/components/ordo';
 import { RarityBadge, rarityHue } from './RarityBadge';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
@@ -7,19 +7,6 @@ import type { ItemInstanceResponse } from '@/types';
 import s from './InvRow.module.css';
 
 /* ── Slot icon label mapping ───────────────────────────────────── */
-
-const SLOT_ICON: Record<string, string> = {
-  HEAD: 'helm',
-  CHEST: 'shield',
-  LEGS: 'shield',
-  FEET: 'shield',
-  MAIN_HAND: 'sword',
-  OFF_HAND: 'shield',
-  RING_LEFT: 'cir-dot',
-  RING_RIGHT: 'cir-dot',
-  NECK: 'cir',
-  CLOAK: 'tri-inv',
-};
 
 const SLOT_LABEL_KEY: Record<string, string> = {
   HEAD: 'cmp.slot.HEAD',
@@ -46,7 +33,7 @@ interface InvRowProps {
 export function InvRow({ item, onRename, onTransfer, onMore }: InvRowProps) {
   const t = useT();
   const rarityColor = rarityHue(item.rarity);
-  const slotGlyph = item.slot ? SLOT_ICON[item.slot] ?? 'square' : 'square';
+  const slotIcon = equipmentSlotIconForSlot(item.slot);
   const slotLabel = item.slot
     ? (SLOT_LABEL_KEY[item.slot] ? t(SLOT_LABEL_KEY[item.slot]) : item.slot)
     : null;
@@ -61,7 +48,7 @@ export function InvRow({ item, onRename, onTransfer, onMore }: InvRowProps) {
             names={[item.templateName, item.name, item.displayName]}
             source="item"
             imgClassName={s.assetIcon}
-            fallback={<Rune kind={slotGlyph} size={18} color={rarityColor} />}
+            fallback={<OrdoInterfaceIcon icon={slotIcon} size={18} style={{ color: rarityColor }} />}
           />
         </div>
 
@@ -78,10 +65,10 @@ export function InvRow({ item, onRename, onTransfer, onMore }: InvRowProps) {
           <span className={cn('ao-h5', s.name)}>{displayName}</span>
 
           {item.isUnique && (
-            <OrdoChip tone="arcane" glyph="sigil-1">{t('cmp.inv.unique')}</OrdoChip>
+            <OrdoChip tone="arcane" icon="magic-item">{t('cmp.inv.unique')}</OrdoChip>
           )}
           {item.slot && (
-            <OrdoChip tone="rune">{t('cmp.inv.equipped')}</OrdoChip>
+            <OrdoChip tone="rune" icon="item-equipped">{t('cmp.inv.equipped')}</OrdoChip>
           )}
         </div>
 

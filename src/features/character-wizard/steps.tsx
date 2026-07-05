@@ -6,6 +6,8 @@ import {
   OrdoDivider,
   OrdoChip,
   OrdoAssetIcon,
+  OrdoInterfaceIcon,
+  spellLevelIcon,
 } from '@/components/ordo';
 import {
   ABILITIES,
@@ -170,6 +172,7 @@ export function StepRace({ c, A, n, total, availability }: StepProps) {
                   active={c.raceKey === option.key}
                   onClick={() => pickRace(option)}
                   glyph="hex"
+                  icon="species"
                   title={option.entry.name}
                   sub={(detail ? dbAsiText(detail.abilityScoreIncreases, gt.abilityAbbr) + ' \u00b7 ' + (detail.speed ?? 30) + ' ' + t('wiz.race.ft') : '30 ' + t('wiz.race.ft')) + ' \u00b7 ' + source}
                 />
@@ -183,7 +186,7 @@ export function StepRace({ c, A, n, total, availability }: StepProps) {
 
         <div className="wiz-side">
           <OrdoPanel frame padding={0}>
-            <PanelHeader title={selectedRaceDetail?.name || selectedRace?.entry.name || t('wiz.race.selectRace')} glyph="hex" />
+            <PanelHeader title={selectedRaceDetail?.name || selectedRace?.entry.name || t('wiz.race.selectRace')} icon="species" />
             <div className={css.pad16}>
               {selectedRaceDetail ? (
                 <>
@@ -336,6 +339,7 @@ export function StepClass({ c, A, n, total, availability }: StepProps) {
                     proficiencies: detail?.armorWeaponProficiencies ? 'Weapons & armour: ' + detail.armorWeaponProficiencies : undefined,
                   })}
                   glyph={glyphForClass(detail?.slug, option.entry.name)}
+                  icon="class"
                   title={option.entry.name}
                   sub={(detail
                     ? 'd' + (detail.hitDie || 8) + ' \u00b7 ' + (primaryStat ? gt.abilityAbbr(shortStatName(primaryStat.name)) : 'DB') + (isSpellcaster ? ' \u00b7 ' + t('wiz.class.caster') : '')
@@ -350,7 +354,7 @@ export function StepClass({ c, A, n, total, availability }: StepProps) {
         </div>
         <div className="wiz-side">
           <OrdoPanel frame padding={0}>
-            <PanelHeader title={selectedClassDetail?.name || selectedClass?.entry.name || t('wiz.class.selectClass')} glyph={glyphForClass(selectedClassDetail?.slug, selectedClass?.entry.name)} />
+            <PanelHeader title={selectedClassDetail?.name || selectedClass?.entry.name || t('wiz.class.selectClass')} icon="class" />
             <div className={css.pad16}>
               {selectedClassDetail ? (
                 <>
@@ -672,6 +676,7 @@ export function StepBackground({ c, A, n, total, availability }: StepProps) {
                     extra: option.entry.grantedExtras,
                   })}
                   glyph="scroll"
+                  icon="source-book"
                   title={option.entry.name || t('wiz.bg.backgroundFallback')}
                   sub={(option.entry.skillProficiencyNames || []).map((nm) => gt.skill(nm)).join(' \u00b7 ')}
                 />
@@ -684,7 +689,7 @@ export function StepBackground({ c, A, n, total, availability }: StepProps) {
         </div>
         <div className="wiz-side">
           <OrdoPanel frame padding={0}>
-            <PanelHeader title={t('wiz.bg.grants')} glyph="scroll" />
+            <PanelHeader title={t('wiz.bg.grants')} icon="grant-feature" />
             <div className={css.pad16}>
               {dbBackground ? (
                 <>
@@ -704,7 +709,7 @@ export function StepBackground({ c, A, n, total, availability }: StepProps) {
             <PanelHeader
               title={t('wiz.bg.classSkills')}
               sub={selectedClass ? t('wiz.bg.chooseFrom', { limit, class: selectedClass.entry.name }) : t('wiz.bg.selectClassFirst')}
-              glyph="diamond-fill"
+              icon="skill"
               right={<span className={cn('ao-codex', chosen.length === limit ? css.goldPale : css.inkQuiet)}>{chosen.length} / {limit}</span>}
             />
             <div className={css.pad12}>
@@ -809,7 +814,7 @@ export function StepSpells({ c, A, n, total, availability }: StepProps) {
             <OrdoAssetIcon
               names={[s.nameEn, s.name]}
               source="spells"
-              fallback={<Rune kind="hex" size={14} color="var(--arcane)" />}
+              fallback={<OrdoInterfaceIcon icon={spellLevelIcon(s.level)} size={14} style={{ color: 'var(--arcane)' }} />}
             />
           </span>
           <div className="wiz-spell-main">
@@ -849,7 +854,7 @@ export function StepSpells({ c, A, n, total, availability }: StepProps) {
         <OrdoPanel frame padding={0}>
           <PanelHeader
             title={t('wiz.spells.cantrips')}
-            glyph="flame"
+            icon="spell-cantrip"
             tone="arcane"
             right={<span className={cn('ao-codex', cantripsChosen.length === limits.cantrips ? css.goldPale : css.inkQuiet)}>{cantripsChosen.length} / {limits.cantrips}</span>}
           />
@@ -864,7 +869,7 @@ export function StepSpells({ c, A, n, total, availability }: StepProps) {
         <OrdoPanel frame padding={0}>
           <PanelHeader
             title={t('wiz.spells.spells')}
-            glyph="book"
+            icon="spellbook"
             tone="arcane"
             right={<span className={cn('ao-codex', knownChosen.length === limits.spells ? css.goldPale : css.inkQuiet)}>{knownChosen.length} / {limits.spells}</span>}
           />

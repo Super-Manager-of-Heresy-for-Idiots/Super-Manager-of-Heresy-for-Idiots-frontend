@@ -8,7 +8,7 @@ import { useAuthStore } from '@/store/authStore';
 import { getRoleRedirectPath, cn } from '@/lib/utils';
 import type { ApiError } from '@/types';
 import { AxiosError } from 'axios';
-import { Rune, OrdoDivider, OrdoPanel, OrdoField } from '@/components/ordo';
+import { OrdoInterfaceIcon, Rune, OrdoDivider, OrdoPanel, OrdoField } from '@/components/ordo';
 import { RotaPerforataLogo } from '@/components/brand/RotaPerforataLogo';
 import { useT } from '@/i18n/I18nContext';
 import { LanguageSwitcher } from '@/components/layout/LanguageSwitcher';
@@ -218,7 +218,11 @@ export default function RegisterPage() {
                 >
                   <div className="ao-row ao-between">
                     <span className={cn(s.roleIcon, selectedRole === 'PLAYER' && s.activeGold)}>
-                      <Rune kind="shield" size={22} color={selectedRole === 'PLAYER' ? 'var(--gold)' : 'var(--ink-quiet)'} />
+                      <OrdoInterfaceIcon
+                        icon="role-player"
+                        size={22}
+                        style={{ color: selectedRole === 'PLAYER' ? 'var(--gold)' : 'var(--ink-quiet)' }}
+                      />
                     </span>
                     <span className={cn(s.roleCheck, selectedRole === 'PLAYER' && s.activeGold)}>
                       {selectedRole === 'PLAYER' && <Rune kind="check" size={10} color="var(--abyss)" />}
@@ -238,7 +242,11 @@ export default function RegisterPage() {
                 >
                   <div className="ao-row ao-between">
                     <span className={cn(s.roleIcon, selectedRole === 'GAME_MASTER' && s.activeArcane)}>
-                      <Rune kind="helm" size={22} color={selectedRole === 'GAME_MASTER' ? 'var(--arcane)' : 'var(--ink-quiet)'} />
+                      <OrdoInterfaceIcon
+                        icon="role-game-master"
+                        size={22}
+                        style={{ color: selectedRole === 'GAME_MASTER' ? 'var(--arcane)' : 'var(--ink-quiet)' }}
+                      />
                     </span>
                     <span className={cn(s.roleCheck, selectedRole === 'GAME_MASTER' && s.activeArcane)}>
                       {selectedRole === 'GAME_MASTER' && <Rune kind="check" size={10} color="var(--abyss)" />}

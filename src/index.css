@@ -415,6 +415,9 @@
 .ao-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--rule); }
 
 .ao-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
   font-family: var(--font-display);
   text-transform: uppercase;
   letter-spacing: var(--track-eng);

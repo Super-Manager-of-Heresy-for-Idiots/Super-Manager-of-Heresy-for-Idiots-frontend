@@ -1,4 +1,4 @@
-import { OrdoPanel, PanelHeader, Rune } from '@/components/ordo';
+import { OrdoInterfaceIcon, OrdoPanel, PanelHeader, Rune, spellLevelIcon } from '@/components/ordo';
 import { useSpellSlots, useSpellSlotActions } from '@/hooks/useSpellSlots';
 import { useT } from '@/i18n/I18nContext';
 import { isRetryableError } from '@/lib/errors';
@@ -38,7 +38,7 @@ export function SpellSlotsPanel({
   if (error) {
     return (
       <OrdoPanel frame padding={0} className={className}>
-        <PanelHeader title={t('camp.slots.title')} glyph="hex" tone="arcane" />
+        <PanelHeader title={t('camp.slots.title')} icon="spell-slot" tone="arcane" />
         <div className={s.notice}>
           <span className="ao-italic">{t('camp.slots.error')}</span>
           {isRetryableError(error) && (
@@ -59,7 +59,7 @@ export function SpellSlotsPanel({
       <PanelHeader
         title={t('camp.slots.title')}
         sub={t('camp.slots.sub')}
-        glyph="hex"
+        icon="spell-slot"
         tone="arcane"
         right={
           canManage ? (
@@ -87,6 +87,7 @@ export function SpellSlotsPanel({
         {levels.map((lvl) => (
           <div key={lvl.spellLevel} className={s.row}>
             <span className={cn('ao-overline', s.level)}>
+              <OrdoInterfaceIcon icon={spellLevelIcon(lvl.spellLevel)} size={12} />
               {t('camp.slots.level', { level: lvl.spellLevel })}
             </span>
 
@@ -94,11 +95,11 @@ export function SpellSlotsPanel({
               {Array.from({ length: lvl.max }).map((_, i) => {
                 const filled = i < lvl.available;
                 return (
-                  <Rune
+                  <OrdoInterfaceIcon
                     key={i}
-                    kind={filled ? 'diamond-fill' : 'diamond'}
+                    icon={filled ? 'spell-slot-available' : 'spell-slot-used'}
                     size={14}
-                    color={filled ? 'var(--gold-pale)' : 'var(--ink-ghost)'}
+                    style={{ color: filled ? 'var(--gold-pale)' : 'var(--ink-ghost)' }}
                   />
                 );
               })}

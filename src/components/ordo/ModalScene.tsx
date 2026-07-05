@@ -1,5 +1,6 @@
 import type { CSSProperties, ReactNode } from 'react';
 import { Rune, type GlyphKind } from './Rune';
+import { OrdoInterfaceIcon, type OrdoInterfaceIconKey } from './OrdoInterfaceIcon';
 import {
   Dialog,
   DialogContent,
@@ -14,6 +15,7 @@ interface ModalSceneProps {
   title: string;
   sub?: string;
   rune?: GlyphKind;
+  icon?: OrdoInterfaceIconKey;
   tone?: string;
   danger?: boolean;
   width?: number;
@@ -29,6 +31,7 @@ export function ModalScene({
   title,
   sub,
   rune,
+  icon,
   tone,
   danger,
   width = 480,
@@ -50,9 +53,13 @@ export function ModalScene({
           {codexId && <div className="ao-codex ao-modal-codex">{codexId}</div>}
           {overline && <div className="ao-overline ao-modal-overline">{overline}</div>}
           <div className="ao-modal-titlerow">
-            {rune && (
+            {(icon || rune) && (
               <div className="ao-modal-rune">
-                <Rune kind={rune} size={18} color={accentColor} />
+                {icon ? (
+                  <OrdoInterfaceIcon icon={icon} size={18} style={{ color: accentColor }} />
+                ) : rune ? (
+                  <Rune kind={rune} size={18} color={accentColor} />
+                ) : null}
               </div>
             )}
             <div>

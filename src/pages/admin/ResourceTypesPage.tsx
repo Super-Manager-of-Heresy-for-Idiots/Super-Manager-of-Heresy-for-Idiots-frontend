@@ -12,10 +12,19 @@ import { useFeats } from '@/hooks/useContentCatalog';
 import { useGlobalReferenceContent } from '@/hooks/useTemplates';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
+import { MAX_LEVEL, buildStepFormula, parseStepTable } from '@/lib/stepTable';
+import FormulaInput from '@/components/admin/FormulaInput';
 import type { ResourceTypeAdmin, ResourceTypeRequest } from '@/api/resourceTypes.api';
 import s from './ResourceTypesPage.module.css';
 
-const EMPTY: ResourceTypeRequest = { name: '', description: '', maxValue: null, maxFormula: '', classBoundId: null, featBoundId: null, resetOn: 'none' };
+type MaxMode = 'number' | 'formula' | 'table';
+
+const EMPTY: ResourceTypeRequest = {
+  name: '', description: '', maxValue: null, maxFormula: '', classBoundId: null, featBoundId: null,
+  resetOn: 'none', shortRestRecovery: 'none', shortRestFormula: '', longRestRecovery: 'none', longRestFormula: '',
+};
+
+const emptyLevels = () => new Array(MAX_LEVEL + 1).fill('');
 
 export default function ResourceTypesPage() {
   const t = useT();
@@ -29,15 +38,22 @@ export default function ResourceTypesPage() {
 
   const [editing, setEditing] = useState<{ id: string | null; form: ResourceTypeRequest } | null>(null);
   const [validationMsg, setValidationMsg] = useState<string | null>(null);
+  const [maxMode, setMaxMode] = useState<MaxMode>('number');
+  const [levels, setLevels] = useState<string[]>(emptyLevels());
 
   const classes = useMemo(() => refContent?.classes ?? [], [refContent]);
   const featList = useMemo(() => feats ?? [], [feats]);
 
   const startNew = () => {
     setEditing({ id: null, form: { ...EMPTY } });
+    setMaxMode('number');
+    setLevels(emptyLevels());
     setValidationMsg(null);
   };
   const startEdit = (r: ResourceTypeAdmin) => {
+    const table = parseStepTable(r.maxFormula);
+    setMaxMode(table ? 'table' : r.maxFormula ? 'formula' : 'number');
+    setLevels(table ?? emptyLevels());
     setEditing({
       id: r.id,
       form: {
@@ -48,6 +64,10 @@ export default function ResourceTypesPage() {
         classBoundId: r.classBoundId ?? null,
         featBoundId: r.featBoundId ?? null,
         resetOn: r.resetOn ?? 'none',
+        shortRestRecovery: r.shortRestRecovery ?? 'none',
+        shortRestFormula: r.shortRestFormula ?? '',
+        longRestRecovery: r.longRestRecovery ?? 'none',
+        longRestFormula: r.longRestFormula ?? '',
       },
     });
     setValidationMsg(null);
@@ -75,14 +95,22 @@ export default function ResourceTypesPage() {
       toast.error(t('adm.resourceTypes.nameRequired'));
       return;
     }
+    const tableFormula = maxMode === 'table' ? buildStepFormula(levels) : null;
+    const maxFormula =
+      maxMode === 'table' ? tableFormula || null : maxMode === 'formula' ? editing.form.maxFormula?.trim() || null : null;
+    const maxValue = editing.form.maxValue ?? null;
     const data: ResourceTypeRequest = {
       name: editing.form.name.trim(),
       description: editing.form.description?.trim() || null,
-      maxValue: editing.form.maxValue ?? null,
-      maxFormula: editing.form.maxFormula?.trim() || null,
+      maxValue,
+      maxFormula,
       classBoundId: editing.form.classBoundId || null,
       featBoundId: editing.form.featBoundId || null,
       resetOn: editing.form.resetOn || 'none',
+      shortRestRecovery: editing.form.shortRestRecovery || 'none',
+      shortRestFormula: editing.form.shortRestRecovery === 'formula' ? editing.form.shortRestFormula?.trim() || null : null,
+      longRestRecovery: editing.form.longRestRecovery || 'none',
+      longRestFormula: editing.form.longRestRecovery === 'formula' ? editing.form.longRestFormula?.trim() || null : null,
     };
     const done = () => setEditing(null);
     if (editing.id) update.mutate({ id: editing.id, data }, { onSuccess: done });
@@ -134,37 +162,98 @@ export default function ResourceTypesPage() {
             </select>
           </div>
           <div className={s.formRow}>
-            <label className={s.label}>{t('adm.resourceTypes.maxValue')}</label>
-            <input
-              className="ao-input"
-              type="number"
-              value={editing.form.maxValue ?? ''}
-              onChange={(e) => setF({ maxValue: e.target.value === '' ? null : Number(e.target.value) })}
-            />
+            <label className={s.label}>{t('adm.resourceTypes.maxMode')}</label>
+            <div className="ao-row ao-gap-8">
+              {(['number', 'formula', 'table'] as MaxMode[]).map((m) => (
+                <button
+                  key={m}
+                  className={cn('ao-btn', maxMode === m && 'ao-btn--primary')}
+                  onClick={() => setMaxMode(m)}
+                >
+                  {t(`adm.resourceTypes.maxMode.${m}`)}
+                </button>
+              ))}
+            </div>
           </div>
+          {maxMode === 'number' && (
+            <div className={s.formRow}>
+              <label className={s.label}>{t('adm.resourceTypes.maxValue')}</label>
+              <input
+                className="ao-input"
+                type="number"
+                value={editing.form.maxValue ?? ''}
+                onChange={(e) => setF({ maxValue: e.target.value === '' ? null : Number(e.target.value) })}
+              />
+            </div>
+          )}
+          {maxMode === 'formula' && (
+            <>
+              <div className={s.formRow}>
+                <label className={s.label}>{t('adm.resourceTypes.maxFormula')}</label>
+                <FormulaInput
+                  placeholder='class_level("monk")'
+                  value={editing.form.maxFormula ?? ''}
+                  onChange={(v) => {
+                    setF({ maxFormula: v });
+                    setValidationMsg(null);
+                  }}
+                />
+                <button className="ao-btn" onClick={onValidate} disabled={validate.isPending || !editing.form.maxFormula?.trim()}>
+                  <ShieldCheck size={14} /> {t('adm.resourceTypes.validate')}
+                </button>
+              </div>
+              {validationMsg && <p className={s.muted}>{validationMsg}</p>}
+            </>
+          )}
+          {maxMode === 'table' && (
+            <div className={s.formRow}>
+              <label className={s.label}>{t('adm.resourceTypes.levelTable')}</label>
+              <div className={s.levelGrid}>
+                {Array.from({ length: MAX_LEVEL }, (_, i) => i + 1).map((lvl) => (
+                  <label key={lvl} className={s.levelCell}>
+                    <span className={s.levelNum}>{lvl}</span>
+                    <input
+                      className="ao-input"
+                      type="number"
+                      value={levels[lvl] ?? ''}
+                      onChange={(e) => setLevels((arr) => arr.map((v, i) => (i === lvl ? e.target.value : v)))}
+                    />
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
+          {maxMode === 'table' && <p className={s.muted}>{t('adm.resourceTypes.levelTableHint')}</p>}
+
           <div className={s.formRow}>
-            <label className={s.label}>{t('adm.resourceTypes.maxFormula')}</label>
-            <input
-              className="ao-input"
-              placeholder='class_level("monk")'
-              value={editing.form.maxFormula ?? ''}
-              onChange={(e) => {
-                setF({ maxFormula: e.target.value });
-                setValidationMsg(null);
-              }}
-            />
-            <button className="ao-btn" onClick={onValidate} disabled={validate.isPending || !editing.form.maxFormula?.trim()}>
-              <ShieldCheck size={14} /> {t('adm.resourceTypes.validate')}
-            </button>
-          </div>
-          {validationMsg && <p className={s.muted}>{validationMsg}</p>}
-          <div className={s.formRow}>
-            <label className={s.label}>{t('adm.resourceTypes.resetOn')}</label>
-            <select className="ao-input" value={editing.form.resetOn ?? 'none'} onChange={(e) => setF({ resetOn: e.target.value })}>
-              <option value="none">{t('adm.resourceTypes.resetNone')}</option>
-              <option value="short_rest">{t('adm.resourceTypes.resetShort')}</option>
-              <option value="long_rest">{t('adm.resourceTypes.resetLong')}</option>
+            <label className={s.label}>{t('adm.resourceTypes.shortRest')}</label>
+            <select className="ao-input" value={editing.form.shortRestRecovery ?? 'none'} onChange={(e) => setF({ shortRestRecovery: e.target.value })}>
+              <option value="none">{t('adm.resourceTypes.recNone')}</option>
+              <option value="full">{t('adm.resourceTypes.recFull')}</option>
+              <option value="formula">{t('adm.resourceTypes.recFormula')}</option>
             </select>
+            {editing.form.shortRestRecovery === 'formula' && (
+              <FormulaInput
+                placeholder='ceil(class_level("wizard")/2)'
+                value={editing.form.shortRestFormula ?? ''}
+                onChange={(v) => setF({ shortRestFormula: v })}
+              />
+            )}
+          </div>
+          <div className={s.formRow}>
+            <label className={s.label}>{t('adm.resourceTypes.longRest')}</label>
+            <select className="ao-input" value={editing.form.longRestRecovery ?? 'none'} onChange={(e) => setF({ longRestRecovery: e.target.value })}>
+              <option value="none">{t('adm.resourceTypes.recNone')}</option>
+              <option value="full">{t('adm.resourceTypes.recFull')}</option>
+              <option value="formula">{t('adm.resourceTypes.recFormula')}</option>
+            </select>
+            {editing.form.longRestRecovery === 'formula' && (
+              <FormulaInput
+                placeholder='class_level("druid")'
+                value={editing.form.longRestFormula ?? ''}
+                onChange={(v) => setF({ longRestFormula: v })}
+              />
+            )}
           </div>
           <p className={s.muted}>{t('adm.resourceTypes.hint')}</p>
           <div className={s.formActions}>

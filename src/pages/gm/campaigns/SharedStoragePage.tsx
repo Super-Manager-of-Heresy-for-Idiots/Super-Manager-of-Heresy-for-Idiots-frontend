@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import type { CSSProperties } from 'react';
 import { useParams } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
-import { OrdoPanel, Rune, OrdoField, EmptyVault, ErrorAltar, OrdoChip, OrdoDivider, Placeholder } from '@/components/ordo';
+import { OrdoPanel, Rune, OrdoField, EmptyVault, ErrorAltar, OrdoChip, OrdoDivider, Placeholder, OrdoInterfaceIcon, itemIconForInstance } from '@/components/ordo';
 import {
   Dialog,
   DialogContent,
@@ -19,7 +19,7 @@ import {
 import { useCampaignCharacters } from '@/hooks/useCharacter';
 import { useCharacterInventory } from '@/hooks/useInventory';
 import { useAuthStore } from '@/store/authStore';
-import { rarityColor, slotClass, itemGlyph } from '@/lib/itemVisuals';
+import { rarityColor, slotClass } from '@/lib/itemVisuals';
 import { RarityBadge, rarityLabelKey } from '@/components/items/RarityBadge';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
@@ -269,7 +269,7 @@ function StorageItemPreview({
       <div className={s.chipRow}>
         {rarity && <RarityBadge rarity={rarity} size="md" />}
         {item.isUnique && (
-          <OrdoChip tone="arcane" glyph="diamond">{t('camp2.storage.unique')}</OrdoChip>
+          <OrdoChip tone="arcane" icon="magic-item">{t('camp2.storage.unique')}</OrdoChip>
         )}
       </div>
 
@@ -375,7 +375,7 @@ function StorageContainerCard({
                     onClick={() => setSelectedId(item.id)}
                     title={itemLabel(item)}
                   >
-                    <Rune kind={itemGlyph(item)} size={18} color={rarityColor(item.rarity)} />
+                    <OrdoInterfaceIcon icon={itemIconForInstance(item)} size={18} style={{ color: rarityColor(item.rarity) }} />
                     {item.quantity > 1 && (
                       <span className={cn('ao-num', s.qtyBadge)}>{item.quantity}</span>
                     )}

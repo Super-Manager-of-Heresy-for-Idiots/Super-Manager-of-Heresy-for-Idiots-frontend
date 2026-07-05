@@ -1,5 +1,5 @@
 import type { KeyboardEvent, PointerEvent as ReactPointerEvent } from 'react';
-import { Lock } from 'lucide-react';
+import { OrdoInterfaceIcon } from '@/components/ordo';
 import { cn } from '@/lib/utils';
 import type { GridConfig, MapTokenDto, TokenType, UUID } from '../types';
 import type { TokenDragPreview } from '../state';
@@ -103,7 +103,7 @@ export function MapTokenLayer({
             onKeyDown={onKeyDown}
           >
             <span className={s.tokenLabel}>{label}</span>
-            {token.locked && <Lock className={s.tokenLock} size={12} aria-hidden="true" />}
+            {token.locked && <OrdoInterfaceIcon icon="token-locked" size={12} className={s.tokenLock} />}
           </div>
         );
       })}

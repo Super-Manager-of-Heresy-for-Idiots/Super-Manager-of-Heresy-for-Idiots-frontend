@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'react';
-import { Rune } from '@/components/ordo';
+import { OrdoInterfaceIcon, rarityIconForKey } from '@/components/ordo';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
 import { normalizeRarity, type RarityKey } from '@/lib/itemVisuals';
@@ -57,7 +57,6 @@ export function RarityBadge({ rarity, size = 'sm' }: RarityBadgeProps) {
   const t = useT();
   const key = normalizeRarity(rarity) ?? 'common';
   const color = RARITY_HUE[key];
-  const glyph = RARITY_GLYPH[key];
   const label = t(RARITY_LABEL_KEY[key]);
   const isLegendary = key === 'legendary' || key === 'artifact';
   const iconSize = size === 'md' ? 10 : 8;
@@ -67,7 +66,7 @@ export function RarityBadge({ rarity, size = 'sm' }: RarityBadgeProps) {
       className={cn(s.badge, size === 'md' && s.md, isLegendary && s.legendary)}
       style={{ '--rar': color } as CSSProperties}
     >
-      <Rune kind={glyph} size={iconSize} color={color} />
+      <OrdoInterfaceIcon icon={rarityIconForKey(key)} size={iconSize} style={{ color }} />
       {label}
     </span>
   );

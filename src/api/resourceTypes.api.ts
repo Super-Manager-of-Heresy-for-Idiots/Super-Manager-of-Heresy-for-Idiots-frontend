@@ -15,6 +15,10 @@ export interface ResourceTypeAdmin {
   featBoundId?: string | null;
   featName?: string | null;
   resetOn?: string | null;
+  shortRestRecovery?: string | null;
+  shortRestFormula?: string | null;
+  longRestRecovery?: string | null;
+  longRestFormula?: string | null;
   homebrew: boolean;
 }
 
@@ -26,6 +30,10 @@ export interface ResourceTypeRequest {
   classBoundId?: string | null;
   featBoundId?: string | null;
   resetOn?: string | null;
+  shortRestRecovery?: string | null;
+  shortRestFormula?: string | null;
+  longRestRecovery?: string | null;
+  longRestFormula?: string | null;
 }
 
 export const resourceTypesApi = {

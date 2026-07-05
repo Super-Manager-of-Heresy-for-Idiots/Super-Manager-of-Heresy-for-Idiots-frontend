@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
-import { OrdoPanel, PanelHeader, Rune, OrdoChip, EmptyVault } from '@/components/ordo';
+import { OrdoInterfaceIcon, OrdoPanel, PanelHeader, Rune, OrdoChip, EmptyVault } from '@/components/ordo';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -96,6 +96,7 @@ export default function CampaignMembersPage() {
       {members.length === 0 ? (
         <EmptyVault
           glyph="helm"
+          icon="character-in-campaign"
           title={t('camp.members.empty.title')}
           body={t('camp.members.empty.body')}
         />
@@ -104,6 +105,7 @@ export default function CampaignMembersPage() {
           <PanelHeader
             title={t('camp.members.swornMembers')}
             glyph="helm"
+            icon="character-in-campaign"
             sub={`${members.length} ${t('camp.members.totalSuffix')}`}
           />
 
@@ -120,7 +122,7 @@ export default function CampaignMembersPage() {
             <div key={member.userId} className={cn('ao-rgrid', s.memberGrid, s.memberRow)}>
               {/* Username */}
               <div className={s.nameCell}>
-                <Rune kind="helm" size={14} color="var(--brass)" />
+                <OrdoInterfaceIcon icon="user" size={14} style={{ color: 'var(--brass)' }} />
                 <span className={s.nameText}>
                   {member.username}
                 </span>
@@ -136,6 +138,7 @@ export default function CampaignMembersPage() {
                 <OrdoChip
                   tone={member.roleInCampaign === 'GM' ? 'arcane' : 'gold'}
                   glyph={member.roleInCampaign === 'GM' ? 'sigil-1' : 'helm'}
+                  icon={member.roleInCampaign === 'GM' ? 'role-game-master' : 'role-player'}
                 >
                   {t(`role.${member.roleInCampaign}`)}
                 </OrdoChip>

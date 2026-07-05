@@ -10,8 +10,8 @@
  * No map library state is duplicated here — the list comes from {@link useCampaignMaps}.
  */
 
-import { Loader2, MapIcon } from 'lucide-react';
-import { ModalScene } from '@/components/ordo';
+import { Loader2 } from 'lucide-react';
+import { ModalScene, OrdoInterfaceIcon } from '@/components/ordo';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
@@ -82,6 +82,7 @@ export function BattleMapSelectionModal({
       open={open}
       onOpenChange={onOpenChange}
       rune="sigil-3"
+      icon="tactical-map"
       overline={t('tactical.mapSelect.overline')}
       title={t('tactical.mapSelect.title')}
       sub={battleName}
@@ -158,7 +159,7 @@ function MapRow({
           {map.imageAssetId ? (
             <MapAssetImage className={s.thumbImg} assetId={map.imageAssetId} alt="" />
           ) : (
-            <MapIcon size={20} aria-hidden="true" className={s.thumbIcon} />
+            <OrdoInterfaceIcon icon={source === 'IMAGE' ? 'map-image' : 'grid-square'} size={20} className={s.thumbIcon} />
           )}
         </span>
         <span className={s.rowMain}>

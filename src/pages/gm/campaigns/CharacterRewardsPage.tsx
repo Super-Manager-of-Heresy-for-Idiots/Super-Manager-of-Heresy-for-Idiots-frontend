@@ -1,8 +1,7 @@
 import { useNavigate, useParams } from 'react-router-dom';
-import { Trophy } from 'lucide-react';
 import { BackLink } from '@/components/campaigns';
 import { useT } from '@/i18n/I18nContext';
-import { OrdoPanel, PanelHeader, OrdoDivider } from '@/components/ordo';
+import { OrdoInterfaceIcon, OrdoPanel, PanelHeader, OrdoDivider } from '@/components/ordo';
 import { useCharacterRewards } from '@/hooks/useLevelUp';
 import { useCharacter } from '@/hooks/useCharacter';
 import { REWARD_TYPE_LABELS } from '@/types';
@@ -70,7 +69,7 @@ export default function CharacterRewardsPage() {
           <OrdoPanel key={cls.classId} frame padding={0} className={s.classPanel}>
             <PanelHeader
               title={cls.className}
-              glyph="helm"
+              icon="class"
               tone="gold"
               sub={`${t('camp.rewards.classLevel', { level: cls.classLevel })}${cls.subclass ? ` · ${cls.subclass.name}` : ''}`}
             />
@@ -95,7 +94,7 @@ export default function CharacterRewardsPage() {
                     </div>
                     {rewards.map((r, idx) => (
                       <div key={`${r.name}-${idx}`} className={s.rewardRow}>
-                        <Trophy className={cn('h-3 w-3', s.trophyIcon)} />
+                        <OrdoInterfaceIcon icon="reward" size={12} className={s.trophyIcon} />
                         <span className={s.rewardName}>{r.name}</span>
                         <span className={cn('ao-codex', s.rewardDate)}>
                           {formatDate(r.acquiredAt)}

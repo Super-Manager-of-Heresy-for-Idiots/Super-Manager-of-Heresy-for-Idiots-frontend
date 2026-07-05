@@ -9,6 +9,11 @@
 .label { flex: 0 0 150px; color: var(--ink-quiet); font-size: 12.5px; }
 .formActions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 4px; }
 
+.levelGrid { flex: 1; min-width: 260px; display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 6px; }
+.levelCell { display: flex; align-items: center; gap: 4px; }
+.levelCell > input { width: 100%; padding: 4px 6px; }
+.levelNum { flex: 0 0 22px; text-align: right; color: var(--ink-quiet); font-size: 12px; }
+
 .tablePanel { padding: 0; overflow: hidden; }
 .row { cursor: pointer; }
 .row:hover { background: rgba(255, 255, 255, 0.03); }

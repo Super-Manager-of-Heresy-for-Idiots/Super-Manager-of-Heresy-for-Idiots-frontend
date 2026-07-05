@@ -1,10 +1,16 @@
 import { Link } from 'react-router-dom';
-import { Loader2, PawPrint } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useSpell } from '@/hooks/useContentCatalog';
 import { useT } from '@/i18n/I18nContext';
 import { spellComponentsText, spellMaterialText, spellRangeText } from '@/lib/spells';
-import { OrdoAssetIcon, Rune } from '@/components/ordo';
+import {
+  OrdoAssetIcon,
+  OrdoInterfaceIcon,
+  abilityIconForCode,
+  damageIconForType,
+  spellLevelIcon,
+} from '@/components/ordo';
 import s from './SpellDetailCard.module.css';
 
 /**
@@ -58,12 +64,13 @@ export function SpellDetailCard({ spellId, campaignId }: { spellId: string; camp
           <OrdoAssetIcon
             names={[detail.nameEn, detail.name]}
             source="spells"
-            fallback={<Rune kind="hex" size={16} color="var(--arcane)" />}
+            fallback={<OrdoInterfaceIcon icon={spellLevelIcon(detail.level)} size={16} style={{ color: 'var(--arcane)' }} />}
           />
         </span>
         <div className={s.headText}>
           <div className={s.title}>{detail.name}</div>
           <div className={s.sub}>
+            <OrdoInterfaceIcon icon={spellLevelIcon(detail.level)} size={11} />
             {detail.level === 0 ? t('wiz.spells.cantrip') : t('wiz.spells.lvl', { level: detail.level ?? 0 })}
             {detail.school?.name ? ` · ${detail.school.name}` : ''}
           </div>
@@ -74,20 +81,26 @@ export function SpellDetailCard({ spellId, campaignId }: { spellId: string; camp
         <div className={s.badges}>
           {detail.saveAbility && (
             <span className={cn(s.badge, s.badgeResolve)}>
+              <OrdoInterfaceIcon icon={abilityIconForCode(detail.saveAbility)} size={11} />
+              <OrdoInterfaceIcon icon="spell-saving-throw" size={11} />
               {t('camp.lvl.spell.save')}: {t(`best.ability.${detail.saveAbility}`)}
             </span>
           )}
           {detail.attackRoll && (
-            <span className={cn(s.badge, s.badgeResolve)}>{t('camp.lvl.spell.attackRoll')}</span>
+            <span className={cn(s.badge, s.badgeResolve)}>
+              <OrdoInterfaceIcon icon="spell-attack-roll" size={11} />
+              {t('camp.lvl.spell.attackRoll')}
+            </span>
           )}
           {detail.checkAbility && (
             <span className={cn(s.badge, s.badgeResolve)}>
+              <OrdoInterfaceIcon icon={abilityIconForCode(detail.checkAbility)} size={11} />
               {t('camp.lvl.spell.check')}: {t(`best.ability.${detail.checkAbility}`)}
               {detail.checkSkill ? ` (${detail.checkSkill})` : ''}
             </span>
           )}
-          {detail.concentration && <span className={s.badge}>{t('camp.lvl.spell.concentration')}</span>}
-          {detail.ritual && <span className={s.badge}>{t('camp.lvl.spell.ritual')}</span>}
+          {detail.concentration && <span className={s.badge}><OrdoInterfaceIcon icon="concentration" size={11} />{t('camp.lvl.spell.concentration')}</span>}
+          {detail.ritual && <span className={s.badge}><OrdoInterfaceIcon icon="ritual" size={11} />{t('camp.lvl.spell.ritual')}</span>}
         </div>
       )}
 
@@ -108,6 +121,7 @@ export function SpellDetailCard({ spellId, campaignId }: { spellId: string; camp
           <div className={s.damageChips}>
             {damage.map((d, i) => (
               <span key={i} className={s.damageChip}>
+                <OrdoInterfaceIcon icon={damageIconForType(d.damageType?.name)} size={12} />
                 {d.dice && <span className={s.damageDice}>{d.dice}</span>}
                 {d.damageType?.name
                   ? <span className={s.damageType}>{d.damageType.name}</span>
@@ -124,6 +138,7 @@ export function SpellDetailCard({ spellId, campaignId }: { spellId: string; camp
           <div className={s.healChips}>
             {healing.map((h, i) => (
               <span key={i} className={s.healChip}>
+                <OrdoInterfaceIcon icon="spell-healing" size={12} />
                 {h.dice || h.flat != null ? (
                   <span className={s.healAmount}>{h.dice ?? h.flat}</span>
                 ) : (
@@ -146,7 +161,7 @@ export function SpellDetailCard({ spellId, campaignId }: { spellId: string; camp
                 className={s.summonChip}
                 title={t('camp.lvl.spell.summonsHint')}
               >
-                <PawPrint size={12} className={s.summonIcon} />
+                <OrdoInterfaceIcon icon="spell-summon" size={12} className={s.summonIcon} />
                 <span className={s.summonName}>{m.name}</span>
                 {m.crRating && <span className={s.summonCr}>CR {m.crRating}</span>}
               </Link>

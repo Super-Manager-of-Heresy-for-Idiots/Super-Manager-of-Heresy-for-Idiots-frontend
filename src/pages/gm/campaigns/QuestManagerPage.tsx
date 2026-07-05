@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
-import { OrdoPanel, Rune, OrdoField, EmptyVault, ErrorAltar } from '@/components/ordo';
+import { OrdoInterfaceIcon, OrdoPanel, Rune, OrdoField, EmptyVault, ErrorAltar } from '@/components/ordo';
 import { VisibilityToggle, QuestStatusBadge } from '@/components/narrative';
 import {
   Dialog,
@@ -100,6 +100,7 @@ export default function QuestManagerPage() {
     return (
       <div>
         <ErrorAltar
+          icon="quest"
           title={t('camp2.questMgr.loadError')}
           error={error}
           onRetry={() => refetch()}
@@ -143,6 +144,7 @@ export default function QuestManagerPage() {
       {sorted.length === 0 ? (
         <EmptyVault
           glyph="scroll"
+          icon="quest"
           title={t('camp2.questMgr.empty.title')}
           body={t('camp2.questMgr.empty.body')}
           action={
@@ -169,7 +171,7 @@ export default function QuestManagerPage() {
               <div key={quest.id} className={cn('ao-rgrid', css.questGrid, css.row, isArchived && css.archived)}>
                 {/* Quest name + subtitle */}
                 <div className={css.nameCell}>
-                  <Rune kind="scroll" size={16} color="var(--brass)" />
+                  <OrdoInterfaceIcon icon="quest" size={16} style={{ color: 'var(--brass)' }} />
                   <div className={css.nameMain}>
                     <div className={css.questTitle}>
                       {quest.title}

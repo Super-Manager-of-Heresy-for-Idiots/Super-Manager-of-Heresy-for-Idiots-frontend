@@ -1,5 +1,5 @@
 import type { PointerEvent as ReactPointerEvent } from 'react';
-import { Grid3x3, Maximize, RotateCcw, ZoomIn, ZoomOut } from 'lucide-react';
+import { OrdoInterfaceIcon } from '@/components/ordo';
 import { cn } from '@/lib/utils';
 import s from './MapViewport.module.css';
 
@@ -40,18 +40,18 @@ export function MapToolbar({
     <div className={s.toolbar} onPointerDown={stop}>
       <div className={s.toolbarRow}>
         <button type="button" className="ao-iconbtn" onClick={onZoomIn} aria-label={labels.zoomIn} title={labels.zoomIn}>
-          <ZoomIn size={16} aria-hidden="true" />
+          <OrdoInterfaceIcon icon="zoom-in" size={16} />
         </button>
         <button type="button" className="ao-iconbtn" onClick={onZoomOut} aria-label={labels.zoomOut} title={labels.zoomOut}>
-          <ZoomOut size={16} aria-hidden="true" />
+          <OrdoInterfaceIcon icon="zoom-out" size={16} />
         </button>
       </div>
       <div className={s.toolbarRow}>
         <button type="button" className="ao-iconbtn" onClick={onFit} aria-label={labels.fit} title={labels.fit}>
-          <Maximize size={16} aria-hidden="true" />
+          <OrdoInterfaceIcon icon="fit-map" size={16} />
         </button>
         <button type="button" className="ao-iconbtn" onClick={onReset} aria-label={labels.reset} title={labels.reset}>
-          <RotateCcw size={16} aria-hidden="true" />
+          <OrdoInterfaceIcon icon="reset-view" size={16} />
         </button>
       </div>
       <div className={s.toolbarRow}>
@@ -63,7 +63,7 @@ export function MapToolbar({
           aria-pressed={showGrid}
           title={labels.toggleGrid}
         >
-          <Grid3x3 size={16} aria-hidden="true" />
+          <OrdoInterfaceIcon icon="toggle-grid" size={16} />
         </button>
       </div>
       <div className={s.scaleReadout}>{Math.round(scale * 100)}%</div>

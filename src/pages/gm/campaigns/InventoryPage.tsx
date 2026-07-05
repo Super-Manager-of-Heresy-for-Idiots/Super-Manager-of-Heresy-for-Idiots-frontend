@@ -10,8 +10,10 @@ import {
   Rune,
   OrdoDivider,
   OrdoChip,
+  OrdoInterfaceIcon,
   Placeholder,
   ErrorAltar,
+  itemIconForInstance,
 } from '@/components/ordo';
 import {
   Dialog,
@@ -33,7 +35,7 @@ import {
 } from '@/hooks/useInventory';
 import { useCharacter, useCharacterWallet, useCampaignCharacters } from '@/hooks/useCharacter';
 import { useAuthStore } from '@/store/authStore';
-import { rarityColor, slotClass, itemGlyph } from '@/lib/itemVisuals';
+import { rarityColor, slotClass } from '@/lib/itemVisuals';
 import { RarityBadge, rarityLabelKey } from '@/components/items/RarityBadge';
 import { useT } from '@/i18n/I18nContext';
 import { formatApproxGold, stackGoldValue } from '@/lib/price';
@@ -441,7 +443,7 @@ export default function InventoryPage() {
                     onClick={() => setSelectedId(item.id)}
                     title={item.displayName}
                   >
-                    <Rune kind={itemGlyph(item)} size={18} color={rarityColor(item.rarity)} />
+                    <OrdoInterfaceIcon icon={itemIconForInstance(item)} size={18} style={{ color: rarityColor(item.rarity) }} />
                     {item.quantity > 1 && (
                       <span className={cn('ao-num', s.qtyBadge)}>
                         {item.quantity}
@@ -721,8 +723,8 @@ function RelicDetail({
 
       <div className={s.chipRow}>
         {rarity && <RarityBadge rarity={rarity} size="md" />}
-        {item.slot && <OrdoChip tone="ember" glyph="flame">{t('camp2.inv.relic.equipped')}</OrdoChip>}
-        {item.isUnique && <OrdoChip tone="arcane" glyph="diamond">{t('camp2.inv.relic.unique')}</OrdoChip>}
+        {item.slot && <OrdoChip tone="ember" icon="item-equipped">{t('camp2.inv.relic.equipped')}</OrdoChip>}
+        {item.isUnique && <OrdoChip tone="arcane" icon="magic-item">{t('camp2.inv.relic.unique')}</OrdoChip>}
       </div>
 
       <div className={cn('ao-h5', s.relicName)}>{item.artifactName ?? item.displayName}</div>

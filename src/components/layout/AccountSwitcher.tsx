@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 import { useLogout } from '@/hooks/useAuth';
-import { Rune } from '@/components/ordo';
+import { OrdoInterfaceIcon, Rune } from '@/components/ordo';
 import { useT } from '@/i18n/I18nContext';
 
 interface AccountSwitcherProps {
@@ -51,7 +51,11 @@ export function AccountSwitcher({ onNavigate }: AccountSwitcherProps) {
       {user && (
         <div className="ao-acct-current">
           <span className="ao-acct-avatar">
-            <Rune kind="helm" size={16} color="var(--gold)" />
+            <OrdoInterfaceIcon
+              icon={user.role === 'ADMIN' ? 'user-admin' : user.role === 'GAME_MASTER' ? 'user-game-master' : 'user-player'}
+              size={16}
+              style={{ color: 'var(--gold)' }}
+            />
           </span>
           <span className="ao-acct-meta">
             <span className="ao-acct-name">{user.username}</span>
@@ -71,7 +75,11 @@ export function AccountSwitcher({ onNavigate }: AccountSwitcherProps) {
             title={t('acct.switch')}
           >
             <span className="ao-acct-avatar ao-acct-avatar--dim">
-              <Rune kind="helm" size={16} color="var(--ink-faint)" />
+              <OrdoInterfaceIcon
+                icon={acc.user.role === 'ADMIN' ? 'user-admin' : acc.user.role === 'GAME_MASTER' ? 'user-game-master' : 'user-player'}
+                size={16}
+                style={{ color: 'var(--ink-faint)' }}
+              />
             </span>
             <span className="ao-acct-meta">
               <span className="ao-acct-name">{acc.user.username}</span>

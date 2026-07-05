@@ -1,5 +1,5 @@
-import { Users, ScrollText, Swords, ShieldCheck, Wand2, Dna } from 'lucide-react';
 import { DashboardCard } from '@/components/admin/DashboardCard';
+import { OrdoInterfaceIcon } from '@/components/ordo';
 import { useUsers, useStatTypes, useCharacterClasses } from '@/hooks/useAdmin';
 import { useQuery } from '@tanstack/react-query';
 import { referenceApi } from '@/api/reference.api';
@@ -24,42 +24,42 @@ export default function AdminDashboardPage() {
         <DashboardCard
           title={t('adm.dashboard.totalUsers')}
           value={users?.length}
-          icon={<Users className="h-6 w-6" />}
+          icon={<OrdoInterfaceIcon icon="admin-users" size={24} />}
           href="/admin/users"
           isLoading={usersLoading}
         />
         <DashboardCard
           title={t('adm.dashboard.statTypes')}
           value={statTypes?.length}
-          icon={<ScrollText className="h-6 w-6" />}
+          icon={<OrdoInterfaceIcon icon="ability-check" size={24} />}
           href="/admin/stat-types"
           isLoading={statTypesLoading}
         />
         <DashboardCard
           title={t('adm.dashboard.characterClasses')}
           value={classes?.length}
-          icon={<Swords className="h-6 w-6" />}
+          icon={<OrdoInterfaceIcon icon="class" size={24} />}
           href="/admin/character-classes"
           isLoading={classesLoading}
         />
         <DashboardCard
           title={t('nav.species')}
           value={speciesQuery.data?.length}
-          icon={<Dna className="h-6 w-6" />}
+          icon={<OrdoInterfaceIcon icon="species" size={24} />}
           href="/admin/species"
           isLoading={speciesQuery.isLoading}
         />
         <DashboardCard
           title={t('nav.contentQuality')}
           value={classes?.length}
-          icon={<ShieldCheck className="h-6 w-6" />}
+          icon={<OrdoInterfaceIcon icon="validation-ok" size={24} />}
           href="/admin/content-quality"
           isLoading={classesLoading}
         />
         <DashboardCard
           title={t('adm.dashboard.spells')}
           value={spells?.length}
-          icon={<Wand2 className="h-6 w-6" />}
+          icon={<OrdoInterfaceIcon icon="spell" size={24} />}
           href="/admin/spells"
           isLoading={spellsLoading}
         />

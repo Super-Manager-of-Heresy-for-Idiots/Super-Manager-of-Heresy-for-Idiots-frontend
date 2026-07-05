@@ -35,6 +35,9 @@
 }
 
 .sub {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   margin-top: 2px;
   font-family: var(--font-mono);
   font-size: 10px;

@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
 import { useParams } from 'react-router-dom';
-import { Rune, OrdoChip, EmptyVault, ErrorAltar, OrdoAssetIcon } from '@/components/ordo';
+import { OrdoInterfaceIcon, Rune, OrdoChip, EmptyVault, ErrorAltar, OrdoAssetIcon } from '@/components/ordo';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
   Select,
@@ -228,7 +228,7 @@ function EquipmentCatalog({ campaignId }: { campaignId?: string }) {
       <div className={cn('ao-overline', s.count)}>{t('cat.count', { n: filtered.length })}</div>
 
       {filtered.length === 0 ? (
-        <EmptyVault glyph="sword" title={t('cat.empty.title')} body={t('cat.empty.body')} />
+        <EmptyVault glyph="sword" icon="equipment" title={t('cat.empty.title')} body={t('cat.empty.body')} />
       ) : (
         <div className={cn('ao-rgrid', s.grid)}>
           {filtered.map((it) => {
@@ -508,7 +508,7 @@ function MagicCatalog({ campaignId }: { campaignId?: string }) {
       <div className={cn('ao-overline', s.count)}>{t('cat.count', { n: filtered.length })}</div>
 
       {filtered.length === 0 ? (
-        <EmptyVault glyph="hex" title={t('cat.empty.title')} body={t('cat.empty.body')} />
+        <EmptyVault glyph="hex" icon="magic-item" title={t('cat.empty.title')} body={t('cat.empty.body')} />
       ) : (
         <div className={cn('ao-rgrid', s.grid)}>
           {filtered.map((it) => {
@@ -655,14 +655,14 @@ export default function ItemCatalogPage() {
           className={cn('ao-tab', s.tab, tab === 'equipment' && 'is-active')}
           onClick={() => setTab('equipment')}
         >
-          <Rune kind="sword" size={13} /> {t('cat.tab.equipment')}
+          <OrdoInterfaceIcon icon="equipment" size={13} /> {t('cat.tab.equipment')}
         </button>
         <button
           type="button"
           className={cn('ao-tab', s.tab, tab === 'magic' && 'is-active')}
           onClick={() => setTab('magic')}
         >
-          <Rune kind="hex" size={13} /> {t('cat.tab.magic')}
+          <OrdoInterfaceIcon icon="magic-item" size={13} /> {t('cat.tab.magic')}
         </button>
       </div>
 

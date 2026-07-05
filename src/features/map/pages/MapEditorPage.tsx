@@ -12,8 +12,8 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, ImagePlus, Loader2 } from 'lucide-react';
-import { ErrorAltar } from '@/components/ordo';
+import { ArrowLeft, Loader2 } from 'lucide-react';
+import { ErrorAltar, OrdoInterfaceIcon } from '@/components/ordo';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
 import { MapViewport, type MapToolbarLabels } from '../components';
@@ -210,6 +210,7 @@ export default function MapEditorPage() {
   if (isEdit && mapQuery.error) {
     return (
       <ErrorAltar
+        icon="map-editor"
         title={t('map.editor.loadError')}
         error={mapQuery.error}
         onRetry={() => mapQuery.refetch()}
@@ -304,7 +305,7 @@ export default function MapEditorPage() {
                   {uploadAsset.isPending ? (
                     <Loader2 className={s.spin} size={14} aria-hidden="true" />
                   ) : (
-                    <ImagePlus size={14} aria-hidden="true" />
+                    <OrdoInterfaceIcon icon="asset-upload" size={14} />
                   )}{' '}
                   {assetId ? t('map.editor.changeImage') : t('map.editor.uploadImage')}
                 </button>

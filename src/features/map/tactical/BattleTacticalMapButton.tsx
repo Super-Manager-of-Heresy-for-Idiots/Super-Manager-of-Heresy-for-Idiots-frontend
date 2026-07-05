@@ -5,7 +5,7 @@
  */
 
 import { useState } from 'react';
-import { Map as MapGlyph } from 'lucide-react';
+import { OrdoInterfaceIcon } from '@/components/ordo';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/store/authStore';
@@ -41,7 +41,7 @@ export function BattleTacticalMapButton({
         className={cn('ao-btn ao-btn--ghost', block && 'ao-btn--block', className)}
         onClick={() => setOpen(true)}
       >
-        <MapGlyph size={14} aria-hidden="true" />
+        <OrdoInterfaceIcon icon="tactical-map" size={14} />
         <span>{t('tactical.mapSelect.button')}</span>
       </button>
 

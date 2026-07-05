@@ -18,3 +18,13 @@ export { Placeholder } from './Placeholder';
 export { OrdoAssetIcon } from './OrdoAssetIcon';
 export { OrdoInterfaceIcon } from './OrdoInterfaceIcon';
 export type { OrdoInterfaceIconKey } from './OrdoInterfaceIcon';
+export {
+  abilityIconForCode,
+  damageIconForType,
+  entityIconForGlyph,
+  equipmentSlotIconForSlot,
+  grantIconForKind,
+  itemIconForInstance,
+  rarityIconForKey,
+  spellLevelIcon,
+} from './entityIcons';

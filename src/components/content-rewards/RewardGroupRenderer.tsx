@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { OrdoPanel, PanelHeader, OrdoChip, Rune } from '@/components/ordo';
+import { OrdoPanel, PanelHeader, OrdoChip, Rune, OrdoInterfaceIcon, grantIconForKind } from '@/components/ordo';
 import { ExpandChevron, ExpandablePanel } from '@/components/common/ExpandableRow';
 import { useI18n, useT } from '@/i18n/I18nContext';
 import { localizedName, rewardGroupChoose } from '@/lib/contentAdapters';
@@ -10,18 +10,6 @@ import { grantKind, type GrantKind } from './grants';
 import s from './RewardGroupRenderer.module.css';
 
 type T = (key: string, vars?: Record<string, string | number>) => string;
-
-const GRANT_GLYPH: Record<GrantKind, string> = {
-  FEATURE: 'sigil-1',
-  SUBCLASS: 'shield',
-  FEAT: 'diamond-fill',
-  SPELL: 'sigil-3',
-  SKILL: 'scroll',
-  ABILITY: 'sigil-2',
-  MODIFIER: 'diamond',
-  CUSTOM: 'book',
-  UNKNOWN: 'diamond',
-};
 
 function grantTypeLabel(t: T, kind: GrantKind): string {
   return t(`camp.lvl.rg.${kind.toLowerCase()}`);
@@ -118,13 +106,13 @@ export function RewardGrantLine({ grant, compact }: { grant: ContentRewardGrant;
 
   const head = (
     <>
-      <Rune kind={GRANT_GLYPH[kind]} size={compact ? 13 : 16} color="var(--brass)" />
+      <OrdoInterfaceIcon icon={grantIconForKind(kind)} size={compact ? 13 : 16} style={{ color: 'var(--brass)' }} />
       <div className={s.grantMain}>
         <div className={s.grantHead}>
           <span className={cn('ao-overline', s.grantType)}>{grantTypeLabel(t, kind)}</span>
           <span className={s.grantName}>{grantPrimaryText(grant, kind, lang, t)}</span>
           {kind === 'UNKNOWN' && (
-            <OrdoChip tone="ember" glyph="diamond">{grant.grantType || '??'}</OrdoChip>
+            <OrdoChip tone="ember" icon="grant-unknown">{grant.grantType || '??'}</OrdoChip>
           )}
         </div>
         {detail && <span className={cn('ao-codex', s.grantDetail)}>{detail}</span>}
@@ -186,7 +174,7 @@ function RewardOptionCard({
         </span>
         <span className={cn('ao-h5', s.optionName)}>{option.label}</span>
         {option.recommended && (
-          <OrdoChip glyph="diamond-fill" tone="gold">{t('camp.lvl.rg.recommended')}</OrdoChip>
+          <OrdoChip icon="reward-choice" tone="gold">{t('camp.lvl.rg.recommended')}</OrdoChip>
         )}
       </div>
       {option.description && <p className={cn('ao-italic', s.optionDesc)}>{option.description}</p>}
@@ -235,7 +223,7 @@ export function RewardGroupView({ group, selectedOptionIds, onChange }: RewardGr
   const title = group.prompt || group.groupKind || t('camp.lvl.rg.reward');
   return (
     <OrdoPanel frame padding={0} className={s.group}>
-      <PanelHeader title={title} glyph="scroll" sub={chooseRuleLabel(t, options.length, min, max)} tone="arcane" />
+      <PanelHeader title={title} icon="reward" sub={chooseRuleLabel(t, options.length, min, max)} tone="arcane" />
       <div className={s.body}>
         {group.description && <p className={cn('ao-italic', s.desc)}>{group.description}</p>}
         {directGrants.length > 0 && (
