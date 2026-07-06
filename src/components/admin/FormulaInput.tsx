@@ -61,7 +61,7 @@ function functionBeforeQuote(text: string, openQuote: number): string | null {
   while (i >= 0 && /\s/.test(text[i])) i -= 1;
   if (i < 0 || text[i] !== '(') return null;
   i -= 1;
-  let end = i + 1;
+  const end = i + 1;
   while (i >= 0 && /[A-Za-z0-9_]/.test(text[i])) i -= 1;
   const name = text.slice(i + 1, end);
   return name || null;

@@ -8,6 +8,8 @@ import {
 import {
   useApproveRule,
   useBatchApprove,
+  useChoiceRule,
+  useCompanionDefinitions,
   useCreateDraft,
   useCreateFeatureRule,
   useCreateIssue,
@@ -28,6 +30,7 @@ import {
   useResolutionRule,
   useResourceKeys,
   useSpellGrant,
+  useStaticGrants,
   useTrigger,
   useResolveIssue,
   useResourceDefinition,
@@ -37,13 +40,18 @@ import {
   useRunBackgroundBackfill,
   useSaveActionCost,
   useSaveActiveEffect,
+  useSaveChoiceRule,
+  useSaveCompanionDefinitions,
   useSaveDamageRule,
+  useSaveGenericFormulas,
   useSaveHealingRule,
   useSaveMonsterForm,
   useSaveResolutionRule,
   useSaveResourceDefinition,
   useSaveSpellGrant,
+  useSaveStaticGrants,
   useSaveTrigger,
+  useGenericFormulas,
   useTargetTypes,
   useValidateFormula,
   useValidateRule,
@@ -53,7 +61,13 @@ import FormulaInput from '@/components/admin/FormulaInput';
 import type {
   EffectEndConditionEdit,
   EffectModifierEdit,
+  ChoiceGroupAdmin,
+  ChoiceOptionAdmin,
+  CompanionDefinitionRow,
+  GenericFormulaRow,
   ProblemFeatureFilters,
+  StaticLanguageGrant,
+  StaticProficiencyGrant,
 } from '@/api/featureRules.api';
 import type {
   FeatureRuleIssueResponse,
@@ -107,6 +121,18 @@ function RuleMechanicsEditor({ rule, featureId }: { rule: FeatureRuleResponse; f
   if (rule.ruleType === 'resource') {
     return <ResourceRuleEditor rule={rule} featureId={featureId} />;
   }
+  if (rule.ruleType === 'rest_reset') {
+    return <ResourceRuleEditor rule={rule} featureId={featureId} restOnly />;
+  }
+  if (rule.ruleType === 'static_grant') {
+    return <StaticGrantRuleEditor rule={rule} featureId={featureId} />;
+  }
+  if (rule.ruleType === 'choice') {
+    return <ChoiceRuleEditor rule={rule} featureId={featureId} />;
+  }
+  if (rule.ruleType === 'formula' || rule.ruleType === 'manual_adjudication') {
+    return <GenericFormulaRuleEditor rule={rule} featureId={featureId} />;
+  }
   if (rule.ruleType === 'damage') {
     return <DamageRuleEditor rule={rule} featureId={featureId} />;
   }
@@ -132,9 +158,237 @@ function RuleMechanicsEditor({ rule, featureId }: { rule: FeatureRuleResponse; f
     return <SpellGrantRuleEditor rule={rule} featureId={featureId} />;
   }
   if (rule.ruleType === 'companion') {
-    return <p className={s.muted}>{t('adm.ruleWorkbench.companion.note')}</p>;
+    return <CompanionDefinitionRuleEditor rule={rule} featureId={featureId} />;
   }
   return <p className={s.muted}>{t('adm.ruleWorkbench.resource.notYet')}</p>;
+}
+
+const PROFICIENCY_TYPES = ['skill', 'weapon', 'armor', 'tool', 'saving_throw'];
+const GRANT_TIMINGS = ['level_up', 'always', 'rest', 'feature_use'];
+const CHOICE_TIMINGS = ['level_up', 'long_rest', 'short_rest', 'always_available', 'manual_admin'];
+const CHOICE_REPLACE_POLICIES = ['never', 'on_level_up', 'on_rest', 'on_rule_text'];
+const CHOICE_OPTION_TYPES = ['spell', 'skill', 'language', 'proficiency', 'monster', 'item', 'feature', 'damage_type'];
+const FORMULA_RESULT_TYPES = ['integer', 'decimal', 'boolean', 'duration', 'dice', 'modifier'];
+const FORMULA_ROUNDING = ['none', 'floor', 'ceil', 'nearest'];
+
+function StaticGrantRuleEditor({ rule, featureId }: { rule: FeatureRuleResponse; featureId: string }) {
+  const { data: def } = useStaticGrants(rule.id, true);
+  const save = useSaveStaticGrants();
+  const [proficiencyGrants, setProficiencyGrants] = useState<StaticProficiencyGrant[]>([]);
+  const [languageGrants, setLanguageGrants] = useState<StaticLanguageGrant[]>([]);
+
+  useEffect(() => {
+    if (def) {
+      setProficiencyGrants(def.proficiencyGrants ?? []);
+      setLanguageGrants(def.languageGrants ?? []);
+    }
+  }, [def]);
+
+  const patchProf = (index: number, patch: Partial<StaticProficiencyGrant>) =>
+    setProficiencyGrants((rows) => rows.map((row, i) => (i === index ? { ...row, ...patch } : row)));
+  const patchLang = (index: number, patch: Partial<StaticLanguageGrant>) =>
+    setLanguageGrants((rows) => rows.map((row, i) => (i === index ? { ...row, ...patch } : row)));
+  const onSave = () => save.mutate({ ruleId: rule.id, featureId, data: { proficiencyGrants, languageGrants } });
+
+  return (
+    <div className={s.editor}>
+      <div className={s.subGroup}>
+        <div className={s.subGroupHead}>
+          <span>Proficiency grants</span>
+          <button className="ao-btn" onClick={() => setProficiencyGrants((rows) => [...rows, { proficiencyType: 'skill', expertise: false, grantTiming: 'level_up' }])}>
+            Add
+          </button>
+        </div>
+        {proficiencyGrants.map((grant, index) => (
+          <div className={s.subItem} key={index}>
+            <select className="ao-input" value={grant.proficiencyType ?? 'skill'} onChange={(e) => patchProf(index, { proficiencyType: e.target.value })}>
+              {PROFICIENCY_TYPES.map((type) => <option key={type} value={type}>{type}</option>)}
+            </select>
+            <input className="ao-input" placeholder="target UUID" value={grant.targetId ?? ''} onChange={(e) => patchProf(index, { targetId: e.target.value || null })} />
+            <input className="ao-input" placeholder="filter rule UUID" value={grant.filterRuleId ?? ''} onChange={(e) => patchProf(index, { filterRuleId: e.target.value || null })} />
+            <select className="ao-input" value={grant.grantTiming ?? 'level_up'} onChange={(e) => patchProf(index, { grantTiming: e.target.value })}>
+              {GRANT_TIMINGS.map((timing) => <option key={timing} value={timing}>{timing}</option>)}
+            </select>
+            <label className={s.editorCheck}>
+              <input type="checkbox" checked={grant.expertise} onChange={(e) => patchProf(index, { expertise: e.target.checked })} />
+              expertise
+            </label>
+            <button className="ao-btn" onClick={() => setProficiencyGrants((rows) => rows.filter((_, i) => i !== index))}>Remove</button>
+          </div>
+        ))}
+      </div>
+      <div className={s.subGroup}>
+        <div className={s.subGroupHead}>
+          <span>Language grants</span>
+          <button className="ao-btn" onClick={() => setLanguageGrants((rows) => [...rows, { grantTiming: 'level_up' }])}>Add</button>
+        </div>
+        {languageGrants.map((grant, index) => (
+          <div className={s.subItem} key={index}>
+            <input className="ao-input" placeholder="language UUID" value={grant.languageId ?? ''} onChange={(e) => patchLang(index, { languageId: e.target.value || null })} />
+            <input className="ao-input" placeholder="filter rule UUID" value={grant.filterRuleId ?? ''} onChange={(e) => patchLang(index, { filterRuleId: e.target.value || null })} />
+            <select className="ao-input" value={grant.grantTiming ?? 'level_up'} onChange={(e) => patchLang(index, { grantTiming: e.target.value })}>
+              {GRANT_TIMINGS.map((timing) => <option key={timing} value={timing}>{timing}</option>)}
+            </select>
+            <button className="ao-btn" onClick={() => setLanguageGrants((rows) => rows.filter((_, i) => i !== index))}>Remove</button>
+          </div>
+        ))}
+      </div>
+      <div className={s.editorActions}>
+        <button className="ao-btn ao-btn--primary" onClick={onSave} disabled={save.isPending}>Save</button>
+      </div>
+    </div>
+  );
+}
+
+function ChoiceRuleEditor({ rule, featureId }: { rule: FeatureRuleResponse; featureId: string }) {
+  const { data: def } = useChoiceRule(rule.id, true);
+  const save = useSaveChoiceRule();
+  const [groups, setGroups] = useState<ChoiceGroupAdmin[]>([]);
+
+  useEffect(() => {
+    if (def) setGroups(def.groups ?? []);
+  }, [def]);
+
+  const patchGroup = (index: number, patch: Partial<ChoiceGroupAdmin>) =>
+    setGroups((rows) => rows.map((row, i) => (i === index ? { ...row, ...patch } : row)));
+  const patchOption = (groupIndex: number, optionIndex: number, patch: Partial<ChoiceOptionAdmin>) =>
+    setGroups((rows) => rows.map((group, i) => {
+      if (i !== groupIndex) return group;
+      return {
+        ...group,
+        options: (group.options ?? []).map((option, j) => (j === optionIndex ? { ...option, ...patch } : option)),
+      };
+    }));
+  const onSave = () => save.mutate({ ruleId: rule.id, featureId, data: { groups } });
+
+  return (
+    <div className={s.editor}>
+      <div className={s.subGroupHead}>
+        <span>Choice groups</span>
+        <button className="ao-btn" onClick={() => setGroups((rows) => [...rows, { choiceKey: '', minChoices: 1, choiceTiming: 'level_up', replacePolicy: 'never', options: [] }])}>Add group</button>
+      </div>
+      {groups.map((group, groupIndex) => (
+        <div className={s.subGroup} key={groupIndex}>
+          <div className={s.subItem}>
+            <input className="ao-input" placeholder="choice key" value={group.choiceKey ?? ''} onChange={(e) => patchGroup(groupIndex, { choiceKey: e.target.value })} />
+            <input className="ao-input" type="number" min={0} value={group.minChoices ?? 1} onChange={(e) => patchGroup(groupIndex, { minChoices: Number(e.target.value) })} />
+            <FormulaInput placeholder="max choices formula" value={group.maxChoicesFormula ?? ''} onChange={(v) => patchGroup(groupIndex, { maxChoicesFormula: v })} />
+            <select className="ao-input" value={group.choiceTiming ?? 'level_up'} onChange={(e) => patchGroup(groupIndex, { choiceTiming: e.target.value })}>
+              {CHOICE_TIMINGS.map((timing) => <option key={timing} value={timing}>{timing}</option>)}
+            </select>
+            <select className="ao-input" value={group.replacePolicy ?? 'never'} onChange={(e) => patchGroup(groupIndex, { replacePolicy: e.target.value })}>
+              {CHOICE_REPLACE_POLICIES.map((policy) => <option key={policy} value={policy}>{policy}</option>)}
+            </select>
+            <button className="ao-btn" onClick={() => setGroups((rows) => rows.filter((_, i) => i !== groupIndex))}>Remove</button>
+          </div>
+          <div className={s.subGroupHead}>
+            <span>Options</span>
+            <button className="ao-btn" onClick={() => patchGroup(groupIndex, { options: [...(group.options ?? []), { optionType: 'skill', sortOrder: group.options?.length ?? 0 }] })}>Add option</button>
+          </div>
+          {(group.options ?? []).map((option, optionIndex) => (
+            <div className={s.subItem} key={optionIndex}>
+              <select className="ao-input" value={option.optionType ?? 'skill'} onChange={(e) => patchOption(groupIndex, optionIndex, { optionType: e.target.value })}>
+                {CHOICE_OPTION_TYPES.map((type) => <option key={type} value={type}>{type}</option>)}
+              </select>
+              <input className="ao-input" placeholder="target UUID" value={option.targetEntityId ?? ''} onChange={(e) => patchOption(groupIndex, optionIndex, { targetEntityId: e.target.value || null })} />
+              <input className="ao-input" placeholder="filter rule UUID" value={option.filterRuleId ?? ''} onChange={(e) => patchOption(groupIndex, optionIndex, { filterRuleId: e.target.value || null })} />
+              <input className="ao-input" type="number" value={option.sortOrder ?? optionIndex} onChange={(e) => patchOption(groupIndex, optionIndex, { sortOrder: Number(e.target.value) })} />
+              <button className="ao-btn" onClick={() => patchGroup(groupIndex, { options: (group.options ?? []).filter((_, i) => i !== optionIndex) })}>Remove</button>
+            </div>
+          ))}
+        </div>
+      ))}
+      <div className={s.editorActions}>
+        <button className="ao-btn ao-btn--primary" onClick={onSave} disabled={save.isPending}>Save</button>
+      </div>
+    </div>
+  );
+}
+
+function GenericFormulaRuleEditor({ rule, featureId }: { rule: FeatureRuleResponse; featureId: string }) {
+  const { data: def } = useGenericFormulas(rule.id, true);
+  const save = useSaveGenericFormulas();
+  const [formulas, setFormulas] = useState<GenericFormulaRow[]>([]);
+
+  useEffect(() => {
+    if (def) setFormulas(def.formulas ?? []);
+  }, [def]);
+
+  const patch = (index: number, rowPatch: Partial<GenericFormulaRow>) =>
+    setFormulas((rows) => rows.map((row, i) => (i === index ? { ...row, ...rowPatch } : row)));
+  const onSave = () => save.mutate({ ruleId: rule.id, featureId, data: { formulas } });
+
+  return (
+    <div className={s.editor}>
+      <div className={s.subGroupHead}>
+        <span>Formulas</span>
+        <button className="ao-btn" onClick={() => setFormulas((rows) => [...rows, { formulaKey: '', expression: '', resultType: 'integer', roundingMode: 'none', sortOrder: rows.length }])}>Add</button>
+      </div>
+      {formulas.map((row, index) => (
+        <div className={s.subItem} key={index}>
+          <input className="ao-input" placeholder="key" value={row.formulaKey ?? ''} onChange={(e) => patch(index, { formulaKey: e.target.value })} />
+          <input className="ao-input" placeholder="label" value={row.label ?? ''} onChange={(e) => patch(index, { label: e.target.value })} />
+          <FormulaInput placeholder="expression" value={row.expression ?? ''} onChange={(v) => patch(index, { expression: v })} />
+          <select className="ao-input" value={row.resultType ?? 'integer'} onChange={(e) => patch(index, { resultType: e.target.value })}>
+            {FORMULA_RESULT_TYPES.map((type) => <option key={type} value={type}>{type}</option>)}
+          </select>
+          <select className="ao-input" value={row.roundingMode ?? 'none'} onChange={(e) => patch(index, { roundingMode: e.target.value })}>
+            {FORMULA_ROUNDING.map((mode) => <option key={mode} value={mode}>{mode}</option>)}
+          </select>
+          <input className="ao-input" type="number" placeholder="min" value={row.minValue ?? ''} onChange={(e) => patch(index, { minValue: e.target.value === '' ? null : Number(e.target.value) })} />
+          <input className="ao-input" type="number" placeholder="max" value={row.maxValue ?? ''} onChange={(e) => patch(index, { maxValue: e.target.value === '' ? null : Number(e.target.value) })} />
+          <button className="ao-btn" onClick={() => setFormulas((rows) => rows.filter((_, i) => i !== index))}>Remove</button>
+          {row.validationStatus && <span className={s.muted}>{row.validationStatus}</span>}
+        </div>
+      ))}
+      <div className={s.editorActions}>
+        <button className="ao-btn ao-btn--primary" onClick={onSave} disabled={save.isPending}>Save</button>
+      </div>
+    </div>
+  );
+}
+
+function CompanionDefinitionRuleEditor({ rule, featureId }: { rule: FeatureRuleResponse; featureId: string }) {
+  const { data: def } = useCompanionDefinitions(rule.id, true);
+  const save = useSaveCompanionDefinitions();
+  const [companions, setCompanions] = useState<CompanionDefinitionRow[]>([]);
+
+  useEffect(() => {
+    if (def) setCompanions(def.companions ?? []);
+  }, [def]);
+
+  const patch = (index: number, rowPatch: Partial<CompanionDefinitionRow>) =>
+    setCompanions((rows) => rows.map((row, i) => (i === index ? { ...row, ...rowPatch } : row)));
+  const onSave = () => save.mutate({ ruleId: rule.id, featureId, data: { companions } });
+
+  return (
+    <div className={s.editor}>
+      <div className={s.subGroupHead}>
+        <span>Companion definitions</span>
+        <button className="ao-btn" onClick={() => setCompanions((rows) => [...rows, { companionKey: '', sortOrder: rows.length }])}>Add</button>
+      </div>
+      {companions.map((row, index) => (
+        <div className={s.subGroup} key={index}>
+          <div className={s.subItem}>
+            <input className="ao-input" placeholder="key" value={row.companionKey ?? ''} onChange={(e) => patch(index, { companionKey: e.target.value })} />
+            <input className="ao-input" placeholder="monster UUID" value={row.monsterId ?? ''} onChange={(e) => patch(index, { monsterId: e.target.value || null })} />
+            <input className="ao-input" placeholder="name template" value={row.nameTemplate ?? ''} onChange={(e) => patch(index, { nameTemplate: e.target.value })} />
+            <input className="ao-input" placeholder="summon timing" value={row.summonTiming ?? ''} onChange={(e) => patch(index, { summonTiming: e.target.value })} />
+            <button className="ao-btn" onClick={() => setCompanions((rows) => rows.filter((_, i) => i !== index))}>Remove</button>
+          </div>
+          <div className={s.subItem}>
+            <FormulaInput placeholder="HP formula" value={row.hpFormula ?? ''} onChange={(v) => patch(index, { hpFormula: v })} />
+            <FormulaInput placeholder="AC formula" value={row.acFormula ?? ''} onChange={(v) => patch(index, { acFormula: v })} />
+            <FormulaInput placeholder="Attack bonus formula" value={row.attackBonusFormula ?? ''} onChange={(v) => patch(index, { attackBonusFormula: v })} />
+          </div>
+          <textarea className="ao-input" placeholder="notes" value={row.notes ?? ''} onChange={(e) => patch(index, { notes: e.target.value })} />
+        </div>
+      ))}
+      <div className={s.editorActions}>
+        <button className="ao-btn ao-btn--primary" onClick={onSave} disabled={save.isPending}>Save</button>
+      </div>
+    </div>
+  );
 }
 
 function MonsterFormRuleEditor({ rule, featureId }: { rule: FeatureRuleResponse; featureId: string }) {
@@ -1018,7 +1272,7 @@ function DamageRuleEditor({ rule, featureId }: { rule: FeatureRuleResponse; feat
   );
 }
 
-function ResourceRuleEditor({ rule, featureId }: { rule: FeatureRuleResponse; featureId: string }) {
+function ResourceRuleEditor({ rule, featureId, restOnly = false }: { rule: FeatureRuleResponse; featureId: string; restOnly?: boolean }) {
   const t = useT();
   const { data: def } = useResourceDefinition(rule.id, true);
   const { data: resourceKeys } = useResourceKeys();
@@ -1029,6 +1283,8 @@ function ResourceRuleEditor({ rule, featureId }: { rule: FeatureRuleResponse; fe
   const [displayName, setDisplayName] = useState('');
   const [maxFormula, setMaxFormula] = useState('');
   const [resetRestType, setResetRestType] = useState('');
+  const [resetAmountFormula, setResetAmountFormula] = useState('');
+  const [spendPerUseFormula, setSpendPerUseFormula] = useState('');
   const [allowNegative, setAllowNegative] = useState(false);
   const [validationMsg, setValidationMsg] = useState<string | null>(null);
 
@@ -1038,6 +1294,8 @@ function ResourceRuleEditor({ rule, featureId }: { rule: FeatureRuleResponse; fe
       setDisplayName(def.displayName ?? '');
       setMaxFormula(def.maxFormula ?? '');
       setResetRestType(def.resetRestType ?? '');
+      setResetAmountFormula(def.resetAmountFormula ?? '');
+      setSpendPerUseFormula(def.spendPerUseFormula ?? '');
       setAllowNegative(def.allowNegative);
     }
   }, [def]);
@@ -1068,6 +1326,8 @@ function ResourceRuleEditor({ rule, featureId }: { rule: FeatureRuleResponse; fe
         displayName: displayName.trim() || undefined,
         maxFormula: maxFormula.trim() || undefined,
         resetRestType: resetRestType || undefined,
+        resetAmountFormula: resetAmountFormula.trim() || undefined,
+        spendPerUseFormula: spendPerUseFormula.trim() || undefined,
         allowNegative,
       },
     });
@@ -1090,30 +1350,34 @@ function ResourceRuleEditor({ rule, featureId }: { rule: FeatureRuleResponse; fe
           ))}
         </datalist>
       </div>
-      <div className={s.editorRow}>
-        <label className={s.editorLabel}>{t('adm.ruleWorkbench.resource.name')}</label>
-        <input
-          className="ao-input"
-          value={displayName}
-          placeholder={t('adm.ruleWorkbench.resource.namePlaceholder')}
-          onChange={(e) => setDisplayName(e.target.value)}
-        />
-      </div>
-      <div className={s.editorRow}>
-        <label className={s.editorLabel}>{t('adm.ruleWorkbench.resource.maxFormula')}</label>
-        <FormulaInput
-          value={maxFormula}
-          placeholder='ability_mod("INT")'
-          onChange={(v) => {
-            setMaxFormula(v);
-            setValidationMsg(null);
-          }}
-        />
-        <button className="ao-btn" onClick={onValidate} disabled={validate.isPending || !maxFormula.trim()}>
-          {t('adm.ruleWorkbench.card.validate')}
-        </button>
-      </div>
-      {validationMsg && <p className={s.muted}>{validationMsg}</p>}
+      {!restOnly && (
+        <>
+          <div className={s.editorRow}>
+            <label className={s.editorLabel}>{t('adm.ruleWorkbench.resource.name')}</label>
+            <input
+              className="ao-input"
+              value={displayName}
+              placeholder={t('adm.ruleWorkbench.resource.namePlaceholder')}
+              onChange={(e) => setDisplayName(e.target.value)}
+            />
+          </div>
+          <div className={s.editorRow}>
+            <label className={s.editorLabel}>{t('adm.ruleWorkbench.resource.maxFormula')}</label>
+            <FormulaInput
+              value={maxFormula}
+              placeholder='ability_mod("INT")'
+              onChange={(v) => {
+                setMaxFormula(v);
+                setValidationMsg(null);
+              }}
+            />
+            <button className="ao-btn" onClick={onValidate} disabled={validate.isPending || !maxFormula.trim()}>
+              {t('adm.ruleWorkbench.card.validate')}
+            </button>
+          </div>
+          {validationMsg && <p className={s.muted}>{validationMsg}</p>}
+        </>
+      )}
       <div className={s.editorRow}>
         <label className={s.editorLabel}>{t('adm.ruleWorkbench.resource.reset')}</label>
         <select className="ao-input" value={resetRestType} onChange={(e) => setResetRestType(e.target.value)}>
@@ -1126,6 +1390,24 @@ function ResourceRuleEditor({ rule, featureId }: { rule: FeatureRuleResponse; fe
         <input type="checkbox" checked={allowNegative} onChange={(e) => setAllowNegative(e.target.checked)} />
         {t('adm.ruleWorkbench.resource.allowNegative')}
       </label>
+      <div className={s.editorRow}>
+        <label className={s.editorLabel}>Reset amount</label>
+        <FormulaInput
+          value={resetAmountFormula}
+          placeholder="1"
+          onChange={(v) => setResetAmountFormula(v)}
+        />
+      </div>
+      {!restOnly && (
+        <div className={s.editorRow}>
+          <label className={s.editorLabel}>Spend per use</label>
+          <FormulaInput
+            value={spendPerUseFormula}
+            placeholder="1"
+            onChange={(v) => setSpendPerUseFormula(v)}
+          />
+        </div>
+      )}
       <div className={s.editorActions}>
         <button className="ao-btn ao-btn--primary" onClick={onSave} disabled={save.isPending}>
           {t('adm.ruleWorkbench.resource.save')}

@@ -71,6 +71,12 @@ export interface ResourceDefinitionAdmin {
   maxFormulaStatus?: string | null;
   maxFormulaMessage?: string | null;
   resetRestType?: string | null;
+  resetAmountFormula?: string | null;
+  resetAmountFormulaStatus?: string | null;
+  resetAmountFormulaMessage?: string | null;
+  spendPerUseFormula?: string | null;
+  spendPerUseFormulaStatus?: string | null;
+  spendPerUseFormulaMessage?: string | null;
   allowNegative: boolean;
   sharedPoolKey?: string | null;
 }
@@ -80,6 +86,8 @@ export interface ResourceDefinitionEdit {
   displayName?: string;
   maxFormula?: string;
   resetRestType?: string;
+  resetAmountFormula?: string;
+  spendPerUseFormula?: string;
   allowNegative: boolean;
   sharedPoolKey?: string;
 }
@@ -329,6 +337,110 @@ export interface SpellGrantEdit {
   alwaysPrepared: boolean;
   castWithoutSlot: boolean;
   spellcastingAbilityOverrideId?: string | null;
+}
+
+export interface StaticGrantAdmin {
+  proficiencyGrants: StaticProficiencyGrant[];
+  languageGrants: StaticLanguageGrant[];
+}
+
+export interface StaticProficiencyGrant {
+  id?: string | null;
+  proficiencyType?: string | null;
+  targetId?: string | null;
+  filterRuleId?: string | null;
+  expertise: boolean;
+  grantTiming?: string | null;
+}
+
+export interface StaticLanguageGrant {
+  id?: string | null;
+  languageId?: string | null;
+  filterRuleId?: string | null;
+  grantTiming?: string | null;
+}
+
+export interface StaticGrantEdit {
+  proficiencyGrants: StaticProficiencyGrant[];
+  languageGrants: StaticLanguageGrant[];
+}
+
+export interface ChoiceRuleAdmin {
+  groups: ChoiceGroupAdmin[];
+}
+
+export interface ChoiceGroupAdmin {
+  id?: string | null;
+  choiceKey?: string | null;
+  minChoices?: number | null;
+  maxChoicesFormula?: string | null;
+  maxChoicesFormulaStatus?: string | null;
+  maxChoicesFormulaMessage?: string | null;
+  choiceTiming?: string | null;
+  replacePolicy?: string | null;
+  options: ChoiceOptionAdmin[];
+}
+
+export interface ChoiceOptionAdmin {
+  id?: string | null;
+  optionType?: string | null;
+  targetEntityId?: string | null;
+  filterRuleId?: string | null;
+  sortOrder?: number | null;
+}
+
+export interface ChoiceRuleEdit {
+  groups: ChoiceGroupAdmin[];
+}
+
+export interface GenericFormulaRuleAdmin {
+  formulas: GenericFormulaRow[];
+}
+
+export interface GenericFormulaRow {
+  id?: string | null;
+  formulaKey?: string | null;
+  label?: string | null;
+  expression?: string | null;
+  expressionType?: string | null;
+  resultType?: string | null;
+  roundingMode?: string | null;
+  minValue?: number | null;
+  maxValue?: number | null;
+  validationStatus?: string | null;
+  validationMessage?: string | null;
+  sortOrder?: number | null;
+}
+
+export interface GenericFormulaRuleEdit {
+  formulas: GenericFormulaRow[];
+}
+
+export interface CompanionDefinitionAdmin {
+  companions: CompanionDefinitionRow[];
+}
+
+export interface CompanionDefinitionRow {
+  id?: string | null;
+  companionKey?: string | null;
+  monsterId?: string | null;
+  nameTemplate?: string | null;
+  hpFormula?: string | null;
+  hpFormulaStatus?: string | null;
+  hpFormulaMessage?: string | null;
+  acFormula?: string | null;
+  acFormulaStatus?: string | null;
+  acFormulaMessage?: string | null;
+  attackBonusFormula?: string | null;
+  attackBonusFormulaStatus?: string | null;
+  attackBonusFormulaMessage?: string | null;
+  summonTiming?: string | null;
+  sortOrder?: number | null;
+  notes?: string | null;
+}
+
+export interface CompanionDefinitionEdit {
+  companions: CompanionDefinitionRow[];
 }
 
 /** Rule Workbench admin client. Mirrors the core /api/admin conventions (ApiResponse envelope). */
@@ -587,4 +699,39 @@ export const featureRulesApi = {
 
   saveSpellGrant: async (ruleId: string, data: SpellGrantEdit): Promise<ApiResponse<SpellGrantAdmin>> =>
     (await api.put<ApiResponse<SpellGrantAdmin>>(`/admin/feature-rules/${ruleId}/spell-grant`, data)).data,
+
+  getStaticGrants: async (ruleId: string): Promise<ApiResponse<StaticGrantAdmin | null>> =>
+    (await api.get<ApiResponse<StaticGrantAdmin | null>>(`/admin/feature-rules/${ruleId}/static-grants`)).data,
+
+  saveStaticGrants: async (ruleId: string, data: StaticGrantEdit): Promise<ApiResponse<StaticGrantAdmin>> =>
+    (await api.put<ApiResponse<StaticGrantAdmin>>(`/admin/feature-rules/${ruleId}/static-grants`, data)).data,
+
+  getChoiceRule: async (ruleId: string): Promise<ApiResponse<ChoiceRuleAdmin | null>> =>
+    (await api.get<ApiResponse<ChoiceRuleAdmin | null>>(`/admin/feature-rules/${ruleId}/choice-groups`)).data,
+
+  saveChoiceRule: async (ruleId: string, data: ChoiceRuleEdit): Promise<ApiResponse<ChoiceRuleAdmin>> =>
+    (await api.put<ApiResponse<ChoiceRuleAdmin>>(`/admin/feature-rules/${ruleId}/choice-groups`, data)).data,
+
+  getGenericFormulas: async (ruleId: string): Promise<ApiResponse<GenericFormulaRuleAdmin | null>> =>
+    (await api.get<ApiResponse<GenericFormulaRuleAdmin | null>>(`/admin/feature-rules/${ruleId}/generic-formulas`)).data,
+
+  saveGenericFormulas: async (
+    ruleId: string,
+    data: GenericFormulaRuleEdit,
+  ): Promise<ApiResponse<GenericFormulaRuleAdmin>> =>
+    (await api.put<ApiResponse<GenericFormulaRuleAdmin>>(`/admin/feature-rules/${ruleId}/generic-formulas`, data)).data,
+
+  getCompanionDefinitions: async (ruleId: string): Promise<ApiResponse<CompanionDefinitionAdmin | null>> =>
+    (await api.get<ApiResponse<CompanionDefinitionAdmin | null>>(
+      `/admin/feature-rules/${ruleId}/companion-definitions`,
+    )).data,
+
+  saveCompanionDefinitions: async (
+    ruleId: string,
+    data: CompanionDefinitionEdit,
+  ): Promise<ApiResponse<CompanionDefinitionAdmin>> =>
+    (await api.put<ApiResponse<CompanionDefinitionAdmin>>(
+      `/admin/feature-rules/${ruleId}/companion-definitions`,
+      data,
+    )).data,
 };

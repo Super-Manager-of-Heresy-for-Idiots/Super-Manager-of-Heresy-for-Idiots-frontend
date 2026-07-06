@@ -5,7 +5,10 @@ import {
   featureRulesApi,
   type ActionCostEdit,
   type ActiveEffectEdit,
+  type ChoiceRuleEdit,
+  type CompanionDefinitionEdit,
   type DamageRuleEdit,
+  type GenericFormulaRuleEdit,
   type HealingRuleEdit,
   type IssueFilters,
   type MonsterFormEdit,
@@ -13,6 +16,7 @@ import {
   type ResolutionRuleEdit,
   type ResourceDefinitionEdit,
   type SpellGrantEdit,
+  type StaticGrantEdit,
   type TriggerEdit,
 } from '@/api/featureRules.api';
 import { referenceApi } from '@/api/reference.api';
@@ -530,6 +534,57 @@ export function useSpellGrant(ruleId: string | null, enabled: boolean) {
 
 export function useSaveSpellGrant() {
   return useSaveHelper<SpellGrantEdit>('fr-spell-grant', featureRulesApi.saveSpellGrant);
+}
+
+export function useStaticGrants(ruleId: string | null, enabled: boolean) {
+  return useQuery({
+    queryKey: ['fr-static-grants', ruleId ?? ''],
+    queryFn: async () => (await featureRulesApi.getStaticGrants(ruleId as string)).data ?? null,
+    enabled: !!ruleId && enabled,
+  });
+}
+
+export function useSaveStaticGrants() {
+  return useSaveHelper<StaticGrantEdit>('fr-static-grants', featureRulesApi.saveStaticGrants);
+}
+
+export function useChoiceRule(ruleId: string | null, enabled: boolean) {
+  return useQuery({
+    queryKey: ['fr-choice-rule', ruleId ?? ''],
+    queryFn: async () => (await featureRulesApi.getChoiceRule(ruleId as string)).data ?? null,
+    enabled: !!ruleId && enabled,
+  });
+}
+
+export function useSaveChoiceRule() {
+  return useSaveHelper<ChoiceRuleEdit>('fr-choice-rule', featureRulesApi.saveChoiceRule);
+}
+
+export function useGenericFormulas(ruleId: string | null, enabled: boolean) {
+  return useQuery({
+    queryKey: ['fr-generic-formulas', ruleId ?? ''],
+    queryFn: async () => (await featureRulesApi.getGenericFormulas(ruleId as string)).data ?? null,
+    enabled: !!ruleId && enabled,
+  });
+}
+
+export function useSaveGenericFormulas() {
+  return useSaveHelper<GenericFormulaRuleEdit>('fr-generic-formulas', featureRulesApi.saveGenericFormulas);
+}
+
+export function useCompanionDefinitions(ruleId: string | null, enabled: boolean) {
+  return useQuery({
+    queryKey: ['fr-companion-definitions', ruleId ?? ''],
+    queryFn: async () => (await featureRulesApi.getCompanionDefinitions(ruleId as string)).data ?? null,
+    enabled: !!ruleId && enabled,
+  });
+}
+
+export function useSaveCompanionDefinitions() {
+  return useSaveHelper<CompanionDefinitionEdit>(
+    'fr-companion-definitions',
+    featureRulesApi.saveCompanionDefinitions,
+  );
 }
 
 export function useBatchApprove() {
