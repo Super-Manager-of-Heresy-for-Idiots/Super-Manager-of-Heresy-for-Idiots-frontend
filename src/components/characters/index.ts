@@ -24,6 +24,7 @@ export { KnownFormsPanel } from './KnownFormsPanel';
 export { CompanionsPanel } from './CompanionsPanel';
 export { FeatureChoicesPanel } from './FeatureChoicesPanel';
 export { CharacterFeatsPanel } from './CharacterFeatsPanel';
+export { HitDicePanel } from './HitDicePanel';
 export { EditableSheetField } from './EditableSheetField';
 export { WalletPanel } from './WalletPanel';
 

@@ -32,6 +32,13 @@ export interface CharacterFeat {
   grantedAt: string | null;
 }
 
+/** A hit-dice pool of one die size. */
+export interface HitDie {
+  die: number;
+  total: number;
+  remaining: number;
+}
+
 export const charactersApi = {
   createInCampaign: async (campaignId: string, data: CreateCharacterInCampaignRequest): Promise<ApiResponse<CharacterResponse>> => {
     const response = await api.post<ApiResponse<CharacterResponse>>(`/campaigns/${campaignId}/characters`, data);
@@ -114,6 +121,29 @@ export const charactersApi = {
   removeFeat: async (campaignId: string, characterId: string, featId: string): Promise<ApiResponse<void>> => {
     const response = await api.delete<ApiResponse<void>>(
       `/campaigns/${campaignId}/characters/${characterId}/feats/${featId}`,
+    );
+    return response.data;
+  },
+
+  // Hit dice (structured; short-rest spend heals die + CON modifier).
+  listHitDice: async (campaignId: string, characterId: string): Promise<ApiResponse<HitDie[]>> => {
+    const response = await api.get<ApiResponse<HitDie[]>>(
+      `/campaigns/${campaignId}/characters/${characterId}/hit-dice`,
+    );
+    return response.data;
+  },
+
+  spendHitDice: async (
+    campaignId: string,
+    characterId: string,
+    die: number,
+    count: number,
+    rolledTotal: number,
+  ): Promise<ApiResponse<unknown>> => {
+    const response = await api.post<ApiResponse<unknown>>(
+      `/campaigns/${campaignId}/characters/${characterId}/hit-dice/spend`,
+      null,
+      { params: { die, count, rolledTotal } },
     );
     return response.data;
   },

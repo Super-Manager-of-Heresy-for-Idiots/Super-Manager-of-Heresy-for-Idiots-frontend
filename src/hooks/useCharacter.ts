@@ -411,6 +411,39 @@ export function useRemoveFeat() {
   });
 }
 
+export function useHitDice(campaignId: string, characterId: string) {
+  return useQuery({
+    queryKey: ['campaigns', campaignId, 'characters', characterId, 'hit-dice'],
+    queryFn: async () => (await charactersApi.listHitDice(campaignId, characterId)).data ?? [],
+    enabled: !!campaignId && !!characterId,
+  });
+}
+
+interface SpendHitDiceVars {
+  campaignId: string;
+  characterId: string;
+  die: number;
+  count: number;
+  rolledTotal: number;
+}
+
+export function useSpendHitDice() {
+  const t = useT();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ campaignId, characterId, die, count, rolledTotal }: SpendHitDiceVars) =>
+      charactersApi.spendHitDice(campaignId, characterId, die, count, rolledTotal),
+    onSuccess: (_res, { campaignId, characterId }) => {
+      queryClient.invalidateQueries({ queryKey: ['campaigns', campaignId, 'characters', characterId, 'hit-dice'] });
+      queryClient.invalidateQueries({ queryKey: ['campaigns', campaignId, 'characters', characterId] });
+      toast.success(t('hk.character.hitDiceSpent'));
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error.response?.data?.message || t('hk.character.hitDiceFailed'));
+    },
+  });
+}
+
 export function useAbilityCheck() {
   const t = useT();
   return useMutation({

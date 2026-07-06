@@ -158,6 +158,8 @@ export const hooks: DictModule = {
     'hk.character.featAdded': 'Черта добавлена',
     'hk.character.featRemoved': 'Черта убрана',
     'hk.character.featActionFailed': 'Не удалось изменить черты',
+    'hk.character.hitDiceSpent': 'Кости хитов потрачены',
+    'hk.character.hitDiceFailed': 'Не удалось потратить кости хитов',
     'hk.character.abilityCheckFailed': 'Не удалось выполнить проверку характеристики',
 
     /* ── useCreateFullCharacter ──────────────────────── */
@@ -533,6 +535,8 @@ export const hooks: DictModule = {
     'hk.character.featAdded': 'Feat added',
     'hk.character.featRemoved': 'Feat removed',
     'hk.character.featActionFailed': 'Could not change feats',
+    'hk.character.hitDiceSpent': 'Hit dice spent',
+    'hk.character.hitDiceFailed': 'Could not spend hit dice',
     'hk.character.abilityCheckFailed': 'Failed to perform ability check',
 
     /* ── useCreateFullCharacter ──────────────────────── */
