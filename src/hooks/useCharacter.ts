@@ -363,6 +363,54 @@ export function useRest() {
   });
 }
 
+export function useCharacterFeats(campaignId: string, characterId: string) {
+  return useQuery({
+    queryKey: ['campaigns', campaignId, 'characters', characterId, 'feats'],
+    queryFn: async () => (await charactersApi.listFeats(campaignId, characterId)).data ?? [],
+    enabled: !!campaignId && !!characterId,
+  });
+}
+
+interface FeatMutationVars {
+  campaignId: string;
+  characterId: string;
+  featId: string;
+}
+
+export function useAddFeat() {
+  const t = useT();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ campaignId, characterId, featId }: FeatMutationVars) =>
+      charactersApi.addFeat(campaignId, characterId, featId),
+    onSuccess: (_res, { campaignId, characterId }) => {
+      queryClient.invalidateQueries({ queryKey: ['campaigns', campaignId, 'characters', characterId, 'feats'] });
+      // adding a feat may auto-provision feat-bound resources
+      queryClient.invalidateQueries({ queryKey: ['campaigns', campaignId, 'characters', characterId, 'resources'] });
+      toast.success(t('hk.character.featAdded'));
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error.response?.data?.message || t('hk.character.featActionFailed'));
+    },
+  });
+}
+
+export function useRemoveFeat() {
+  const t = useT();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ campaignId, characterId, featId }: FeatMutationVars) =>
+      charactersApi.removeFeat(campaignId, characterId, featId),
+    onSuccess: (_res, { campaignId, characterId }) => {
+      queryClient.invalidateQueries({ queryKey: ['campaigns', campaignId, 'characters', characterId, 'feats'] });
+      toast.success(t('hk.character.featRemoved'));
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error.response?.data?.message || t('hk.character.featActionFailed'));
+    },
+  });
+}
+
 export function useAbilityCheck() {
   const t = useT();
   return useMutation({

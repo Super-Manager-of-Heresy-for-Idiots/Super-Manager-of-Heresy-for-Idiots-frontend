@@ -155,6 +155,9 @@ export const hooks: DictModule = {
     'hk.character.restLongDone': 'Долгий отдых завершён',
     'hk.character.restShortDone': 'Короткий отдых завершён',
     'hk.character.restFailed': 'Не удалось выполнить отдых',
+    'hk.character.featAdded': 'Черта добавлена',
+    'hk.character.featRemoved': 'Черта убрана',
+    'hk.character.featActionFailed': 'Не удалось изменить черты',
     'hk.character.abilityCheckFailed': 'Не удалось выполнить проверку характеристики',
 
     /* ── useCreateFullCharacter ──────────────────────── */
@@ -527,6 +530,9 @@ export const hooks: DictModule = {
     'hk.character.restLongDone': 'Long rest complete',
     'hk.character.restShortDone': 'Short rest complete',
     'hk.character.restFailed': 'Rest failed',
+    'hk.character.featAdded': 'Feat added',
+    'hk.character.featRemoved': 'Feat removed',
+    'hk.character.featActionFailed': 'Could not change feats',
     'hk.character.abilityCheckFailed': 'Failed to perform ability check',
 
     /* ── useCreateFullCharacter ──────────────────────── */

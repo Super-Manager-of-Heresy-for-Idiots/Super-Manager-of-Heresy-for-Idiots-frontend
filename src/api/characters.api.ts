@@ -23,6 +23,15 @@ export interface RestResult {
   hp?: { currentHp: number; tempHp: number; maxHp: number; reachedZero: boolean } | null;
 }
 
+/** A feat a character has (structured character_feats record). */
+export interface CharacterFeat {
+  id: string;
+  featId: string;
+  featName: string | null;
+  source: string;
+  grantedAt: string | null;
+}
+
 export const charactersApi = {
   createInCampaign: async (campaignId: string, data: CreateCharacterInCampaignRequest): Promise<ApiResponse<CharacterResponse>> => {
     const response = await api.post<ApiResponse<CharacterResponse>>(`/campaigns/${campaignId}/characters`, data);
@@ -81,6 +90,30 @@ export const charactersApi = {
       `/campaigns/${campaignId}/characters/${characterId}/rest`,
       null,
       { params: { type } },
+    );
+    return response.data;
+  },
+
+  // Feats (S1: structured character_feats; adding auto-provisions feat-bound resources).
+  listFeats: async (campaignId: string, characterId: string): Promise<ApiResponse<CharacterFeat[]>> => {
+    const response = await api.get<ApiResponse<CharacterFeat[]>>(
+      `/campaigns/${campaignId}/characters/${characterId}/feats`,
+    );
+    return response.data;
+  },
+
+  addFeat: async (campaignId: string, characterId: string, featId: string): Promise<ApiResponse<CharacterFeat>> => {
+    const response = await api.post<ApiResponse<CharacterFeat>>(
+      `/campaigns/${campaignId}/characters/${characterId}/feats`,
+      null,
+      { params: { featId } },
+    );
+    return response.data;
+  },
+
+  removeFeat: async (campaignId: string, characterId: string, featId: string): Promise<ApiResponse<void>> => {
+    const response = await api.delete<ApiResponse<void>>(
+      `/campaigns/${campaignId}/characters/${characterId}/feats/${featId}`,
     );
     return response.data;
   },

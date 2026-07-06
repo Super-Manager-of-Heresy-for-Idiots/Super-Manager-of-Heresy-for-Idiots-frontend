@@ -26,6 +26,7 @@ import {
   KnownFormsPanel,
   CompanionsPanel,
   FeatureChoicesPanel,
+  CharacterFeatsPanel,
   EditableSheetField,
   SpellSlotsPanel,
 } from '@/components/characters';
@@ -447,6 +448,13 @@ export default function FolioPage() {
                     </p>
                   </div>
                 )}
+                <div className={s.featuresBlock}>
+                  <CharacterFeatsPanel
+                    campaignId={campaignId!}
+                    characterId={characterId!}
+                    canManage={canManageSlots}
+                  />
+                </div>
               </div>
             )}
           </>

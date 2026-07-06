@@ -23,6 +23,7 @@ export { PendingPromptsPanel } from './PendingPromptsPanel';
 export { KnownFormsPanel } from './KnownFormsPanel';
 export { CompanionsPanel } from './CompanionsPanel';
 export { FeatureChoicesPanel } from './FeatureChoicesPanel';
+export { CharacterFeatsPanel } from './CharacterFeatsPanel';
 export { EditableSheetField } from './EditableSheetField';
 export { WalletPanel } from './WalletPanel';
 
