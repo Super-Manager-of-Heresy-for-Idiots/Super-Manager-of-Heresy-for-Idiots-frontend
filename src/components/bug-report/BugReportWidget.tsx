@@ -53,7 +53,7 @@ export function BugReportWidget() {
       <Button
         type="button"
         onClick={() => setOpen(true)}
-        className="fixed bottom-4 right-4 z-40 h-11 gap-2 border border-[var(--rule-strong)] bg-[var(--burgundy-deep)] px-4 text-[var(--ink-bright)] shadow-[var(--shadow-high)] hover:bg-[var(--burgundy)]"
+        className="fixed bottom-20 right-4 z-40 h-11 gap-2 border border-[var(--rule-strong)] bg-[var(--burgundy-deep)] px-4 text-[var(--ink-bright)] shadow-[var(--shadow-high)] hover:bg-[var(--burgundy)]"
       >
         <Bug className="h-4 w-4" />
         Сообщить об ошибке

@@ -9,8 +9,6 @@ import { SuspenseOutlet } from '@/components/layout/SuspenseOutlet';
 import LoginPage from '@/pages/auth/LoginPage';
 import RegisterPage from '@/pages/auth/RegisterPage';
 
-const TodoPage = lazy(() => import('@/pages/TodoPage'));
-
 // Campaign pages
 const CampaignListPage = lazy(() => import('@/pages/gm/campaigns/CampaignListPage'));
 const CampaignDashboardPage = lazy(() => import('@/pages/gm/campaigns/CampaignDashboardPage'));
@@ -111,6 +109,7 @@ const MonsterFormPage = lazy(() => import('@/pages/bestiary/MonsterFormPage'));
 
 const AdminDashboardPage = lazy(() => import('@/pages/admin/AdminDashboardPage'));
 const UsersListPage = lazy(() => import('@/pages/admin/UsersListPage'));
+const AdminCharactersPage = lazy(() => import('@/pages/admin/AdminCharactersPage'));
 const StatTypesPage = lazy(() => import('@/pages/admin/StatTypesPage'));
 const CharacterClassesPage = lazy(() => import('@/pages/admin/CharacterClassesPage'));
 const SpeciesPage = lazy(() => import('@/pages/admin/SpeciesPage'));
@@ -316,7 +315,7 @@ export const router = createBrowserRouter([
         children: [
           { path: '/admin', element: <AdminDashboardPage /> },
           { path: '/admin/users', element: <UsersListPage /> },
-          { path: '/admin/characters', element: <TodoPage title="Characters" /> },
+          { path: '/admin/characters', element: <AdminCharactersPage /> },
           { path: '/admin/stat-types', element: <StatTypesPage /> },
           { path: '/admin/item-types', element: <Navigate to="/library/items" replace /> },
           { path: '/admin/item-templates', element: <ItemTemplatesPage /> },
