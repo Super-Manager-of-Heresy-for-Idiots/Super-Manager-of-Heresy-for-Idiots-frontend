@@ -486,6 +486,16 @@ export const featureRulesApi = {
     return response.data;
   },
 
+  // S1: static skill-grant rules for backgrounds (owner_type=BACKGROUND); returns rules created.
+  runBackgroundBackfill: async (apply: boolean): Promise<ApiResponse<number>> => {
+    const response = await api.post<ApiResponse<number>>(
+      '/admin/feature-rules/backfill-backgrounds',
+      null,
+      { params: { apply } },
+    );
+    return response.data;
+  },
+
   batchApprove: async (ruleType: string): Promise<ApiResponse<number>> => {
     const response = await api.post<ApiResponse<number>>('/admin/feature-rules/batch-approve', null, {
       params: { ruleType },

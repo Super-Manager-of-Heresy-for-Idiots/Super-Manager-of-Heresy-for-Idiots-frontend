@@ -242,6 +242,21 @@ export function useRunBackfill() {
   });
 }
 
+export function useRunBackgroundBackfill() {
+  const t = useT();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (apply: boolean) => featureRulesApi.runBackgroundBackfill(apply),
+    onSuccess: (_res, apply) => {
+      queryClient.invalidateQueries({ queryKey: ['fr-coverage'] });
+      toast.success(apply ? t('hk.featureRule.bgBackfillApplied') : t('hk.featureRule.backfillDryRun'));
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error.response?.data?.message || t('hk.featureRule.backfillFailed'));
+    },
+  });
+}
+
 // ── Resource rule editor ──
 
 export function useResourceDefinition(ruleId: string | null, enabled: boolean) {

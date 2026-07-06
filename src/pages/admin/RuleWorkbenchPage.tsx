@@ -34,6 +34,7 @@ import {
   useRollback,
   useRuleRevisions,
   useRunBackfill,
+  useRunBackgroundBackfill,
   useSaveActionCost,
   useSaveActiveEffect,
   useSaveDamageRule,
@@ -1141,9 +1142,10 @@ function WorkbenchSetup() {
   const t = useT();
   const { data: coverage } = useFeatureCoverage();
   const backfill = useRunBackfill();
+  const backfillBackgrounds = useRunBackgroundBackfill();
   const batchApprove = useBatchApprove();
   const [readmeOpen, setReadmeOpen] = useState(false);
-  const busy = backfill.isPending || batchApprove.isPending;
+  const busy = backfill.isPending || batchApprove.isPending || backfillBackgrounds.isPending;
 
   return (
     <div className={cn('ao-panel', s.setup)}>
@@ -1191,6 +1193,9 @@ function WorkbenchSetup() {
           </button>
           <button className="ao-btn" onClick={() => batchApprove.mutate('static_grant')} disabled={busy}>
             {t('adm.ruleWorkbench.setup.batchApprove')}
+          </button>
+          <button className="ao-btn" onClick={() => backfillBackgrounds.mutate(true)} disabled={busy}>
+            {t('adm.ruleWorkbench.setup.backfillBackgrounds')}
           </button>
         </div>
       </div>
