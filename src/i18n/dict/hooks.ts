@@ -152,6 +152,9 @@ export const hooks: DictModule = {
     'hk.character.walletUpdateFailed': 'Не удалось обновить кошель',
     'hk.character.resourceUpdated': 'Ресурс обновлён!',
     'hk.character.resourceUpdateFailed': 'Не удалось обновить ресурс',
+    'hk.character.restLongDone': 'Долгий отдых завершён',
+    'hk.character.restShortDone': 'Короткий отдых завершён',
+    'hk.character.restFailed': 'Не удалось выполнить отдых',
     'hk.character.abilityCheckFailed': 'Не удалось выполнить проверку характеристики',
 
     /* ── useCreateFullCharacter ──────────────────────── */
@@ -520,6 +523,9 @@ export const hooks: DictModule = {
     'hk.character.walletUpdateFailed': 'Failed to update wallet',
     'hk.character.resourceUpdated': 'Resource updated!',
     'hk.character.resourceUpdateFailed': 'Failed to update resource',
+    'hk.character.restLongDone': 'Long rest complete',
+    'hk.character.restShortDone': 'Short rest complete',
+    'hk.character.restFailed': 'Rest failed',
     'hk.character.abilityCheckFailed': 'Failed to perform ability check',
 
     /* ── useCreateFullCharacter ──────────────────────── */

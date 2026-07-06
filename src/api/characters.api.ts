@@ -17,6 +17,12 @@ import type {
   CharacterStatResponse,
 } from '@/types';
 
+/** Combined result of one orchestrated rest (resources + feature resources + spell slots + HP). */
+export interface RestResult {
+  restType: string;
+  hp?: { currentHp: number; tempHp: number; maxHp: number; reachedZero: boolean } | null;
+}
+
 export const charactersApi = {
   createInCampaign: async (campaignId: string, data: CreateCharacterInCampaignRequest): Promise<ApiResponse<CharacterResponse>> => {
     const response = await api.post<ApiResponse<CharacterResponse>>(`/campaigns/${campaignId}/characters`, data);
@@ -62,6 +68,20 @@ export const charactersApi = {
   // HP
   modifyHp: async (campaignId: string, characterId: string, data: UpdateHpRequest): Promise<ApiResponse<CharacterResponse>> => {
     const response = await api.post<ApiResponse<CharacterResponse>>(`/campaigns/${campaignId}/characters/${characterId}/hp`, data);
+    return response.data;
+  },
+
+  // Rest: one transactional call restoring resources, feature resources, spell slots and HP.
+  rest: async (
+    campaignId: string,
+    characterId: string,
+    type: 'long' | 'short',
+  ): Promise<ApiResponse<RestResult>> => {
+    const response = await api.post<ApiResponse<RestResult>>(
+      `/campaigns/${campaignId}/characters/${characterId}/rest`,
+      null,
+      { params: { type } },
+    );
     return response.data;
   },
 

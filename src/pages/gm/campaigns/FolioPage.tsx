@@ -35,6 +35,7 @@ import {
   useCharacterWallet,
   useAbilityCheck,
   useUpdateCharacter,
+  useRest,
 } from '@/hooks/useCharacter';
 import { useCharacterEffects } from '@/hooks/useEffects';
 import { useEquippedInventory } from '@/hooks/useInventory';
@@ -127,6 +128,7 @@ export default function FolioPage() {
   const { data: refContent } = useGlobalReferenceContent();
   const abilityCheck = useAbilityCheck();
   const updateCharacter = useUpdateCharacter();
+  const rest = useRest();
   const forgetSpell = useForgetSpell(campaignId!, characterId!);
 
   const saveSheetField = (field: 'proficiencies' | 'equipment', next: string) => {
@@ -591,6 +593,24 @@ export default function FolioPage() {
           <button className="ao-btn ao-btn--primary" onClick={() => setHpModalOpen(true)}>
             <Rune kind="flame" size={11} /> <span className={s.btnLabel}>{t('camp2.folio.adjustVitae')}</span>
           </button>
+          {canManageSlots && (
+            <>
+              <button
+                className="ao-btn ao-btn--ghost"
+                disabled={rest.isPending}
+                onClick={() => rest.mutate({ campaignId: campaignId!, characterId: characterId!, type: 'long' })}
+              >
+                <span className={s.btnLabel}>{t('camp2.folio.rest.long')}</span>
+              </button>
+              <button
+                className="ao-btn ao-btn--ghost ao-btn--sm"
+                disabled={rest.isPending}
+                onClick={() => rest.mutate({ campaignId: campaignId!, characterId: characterId!, type: 'short' })}
+              >
+                {t('camp2.folio.rest.short')}
+              </button>
+            </>
+          )}
           <button className="ao-btn ao-btn--ghost" onClick={() => navigate(`/campaigns/${campaignId}/characters/${characterId}`)}>
             <Rune kind="arrow-l" size={13} /> <span className={s.btnLabel}>{t('camp2.back.character')}</span>
           </button>

@@ -327,6 +327,42 @@ export function useModifyResource() {
   });
 }
 
+interface RestVars {
+  campaignId: string;
+  characterId: string;
+  type: 'long' | 'short';
+}
+
+/**
+ * One orchestrated rest (long/short): restores legacy resources, feature resources, spell slots and
+ * HP in a single backend transaction, then refreshes everything the sheet shows so the player does
+ * not have to trigger (and reconcile) several separate rest calls.
+ */
+export function useRest() {
+  const queryClient = useQueryClient();
+  const t = useT();
+
+  return useMutation({
+    mutationFn: ({ campaignId, characterId, type }: RestVars) =>
+      charactersApi.rest(campaignId, characterId, type),
+    onSuccess: (_data, { type }) => {
+      toast.success(type === 'long' ? t('hk.character.restLongDone') : t('hk.character.restShortDone'));
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error.response?.data?.message || t('hk.character.restFailed'));
+    },
+    onSettled: (_data, _error, { campaignId, characterId }) => {
+      // Broad refresh: character (HP), resources, effects and stats all sit under this prefix.
+      queryClient.invalidateQueries({ queryKey: ['campaigns', campaignId, 'characters', characterId] });
+      queryClient.invalidateQueries({ queryKey: ['spell-slots', characterId] });
+      queryClient.invalidateQueries({ queryKey: ['feature-resources', characterId] });
+      queryClient.invalidateQueries({ queryKey: ['feature-effects', characterId] });
+      queryClient.invalidateQueries({ queryKey: ['feature-actions', characterId] });
+      queryClient.invalidateQueries({ queryKey: ['capability-profile', characterId] });
+    },
+  });
+}
+
 export function useAbilityCheck() {
   const t = useT();
   return useMutation({

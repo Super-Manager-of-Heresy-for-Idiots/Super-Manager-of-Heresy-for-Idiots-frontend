@@ -118,9 +118,16 @@ export const featureRuntimeApi = {
     return response.data;
   },
 
-  useFeature: async (characterId: string, featureId: string): Promise<ApiResponse<unknown>> => {
+  useFeature: async (
+    characterId: string,
+    featureId: string,
+    combatId?: string,
+  ): Promise<ApiResponse<unknown>> => {
+    // Passing combatId (in a battle) makes the backend spend the feature's action-economy slot;
+    // out of combat it is omitted. The in-combat call site is the deferred battle feature UI (Phase 5).
     const response = await api.post<ApiResponse<unknown>>(
       `/characters/${characterId}/features/${featureId}/use`,
+      combatId ? { combatId } : undefined,
     );
     return response.data;
   },
