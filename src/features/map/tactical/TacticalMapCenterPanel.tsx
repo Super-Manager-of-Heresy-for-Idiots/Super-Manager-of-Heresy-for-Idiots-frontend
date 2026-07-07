@@ -15,7 +15,9 @@
  *    (manual shove for whoever may move the target; full contested resolution is a
  *    backend task — see BACKEND_REQUIREMENTS.md).
  *
- * The map-service does not enforce range/turn/occupancy, so those rules live here.
+ * The map-service enforces turn/budget/occupancy during an active battle (server is
+ * the authority and rejects illegal moves with MOVE_REJECTED); these client rules
+ * stay as preview + guards so the UI discourages illegal moves before sending them.
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';

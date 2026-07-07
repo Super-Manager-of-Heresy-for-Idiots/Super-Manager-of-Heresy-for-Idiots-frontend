@@ -3,9 +3,12 @@
  * speed, reachable-cell flood fill (respecting occupied cells + map bounds), and
  * path reconstruction are all unit-testable in isolation.
  *
- * The map-service does NOT enforce range/turn/occupancy on a move (it only guards
- * the revision + permissions), so these rules live on the frontend as movement
- * guards + preview. Coordinates are grid cells only — never pixels.
+ * The map-service now enforces turn order, movement budget and occupancy on a
+ * committed move during an active battle (see backend MovementValidator, which
+ * defers turn/budget to core). These frontend helpers stay as an optimistic
+ * preview + guard so illegal moves are discouraged before they are sent; the
+ * server is the authority and rejects the rest. Coordinates are grid cells only —
+ * never pixels.
  */
 
 import { getCalibrationDimensions } from '../../engine';
