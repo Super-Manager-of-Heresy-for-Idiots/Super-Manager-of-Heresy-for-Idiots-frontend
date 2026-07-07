@@ -221,6 +221,8 @@ export const map: DictModule = {
     /* ── Подтверждение перемещения/толчка на карте ── */
     'tactical.move.confirm': 'Подтвердить',
     'tactical.move.cancel': 'Отмена',
+    'tactical.gmForce.label': 'Двигать вне правил',
+    'tactical.gmForce.hint': 'ГМ: свободно двигать любой токен в бою, минуя ход, скорость и занятость (ход помечается как обход правил).',
     'tactical.move.pickCell': 'Кликните доступную клетку',
     'tactical.move.distance': 'Дистанция: {n} кл.',
     'tactical.push.confirm': 'Оттолкнуть',
@@ -470,6 +472,8 @@ export const map: DictModule = {
     /* ── On-map move / shove confirmation ── */
     'tactical.move.confirm': 'Confirm',
     'tactical.move.cancel': 'Cancel',
+    'tactical.gmForce.label': 'Move off the rules',
+    'tactical.gmForce.hint': 'GM: freely move any token in battle, bypassing turn, speed and occupancy (the move is logged as an override).',
     'tactical.move.pickCell': 'Click a reachable cell',
     'tactical.move.distance': 'Distance: {n} cells',
     'tactical.push.confirm': 'Shove',

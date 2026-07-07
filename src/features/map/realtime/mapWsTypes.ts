@@ -47,6 +47,10 @@ export interface MoveTokenPayload {
   expectedRevision: number;
   to: MapGridPosition;
   path?: MapGridPosition[];
+  /** GM out-of-rules move: the server skips turn/budget/occupancy and marks the event `gmOverride`. */
+  force?: boolean;
+  /** Idempotency key for the move command (server-side dedup lands in Phase 2.14). */
+  clientCommandId?: UUID;
 }
 
 export interface DragPreviewPayload {

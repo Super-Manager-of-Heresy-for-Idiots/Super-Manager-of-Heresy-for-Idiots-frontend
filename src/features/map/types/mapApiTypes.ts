@@ -363,8 +363,9 @@ export interface MapCombatantDto {
 }
 
 /**
- * Current turn pointer (snapshot `turnState`). `currentTurnCombatantId` is null until
- * the first `turns/next` advance.
+ * Current turn pointer for a STANDALONE map session (snapshot `turnState`). It is `null`
+ * for battle-linked sessions — turn order is authoritative in core BE (`battleLink.combatAuthority
+ * = 'CORE'`), and the frontend reads the active turn from the core battle, not from here.
  */
 export interface TurnStateDto {
   roundNumber: number;

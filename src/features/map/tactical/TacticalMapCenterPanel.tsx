@@ -129,6 +129,11 @@ export function TacticalMapCenterPanel({
     [remoteCursorsByUserId, me?.id],
   );
 
+  // GM "out of rules" mode: lets the GM drag ANY token during an active battle, sending
+  // `force` so the server (which now enforces turn/budget/occupancy) applies the move as a
+  // logged GM override instead of rejecting it. No effect for non-GMs or outside battle.
+  const [forceMode, setForceMode] = useState(false);
+
   const toolbarLabels = useMemo<MapToolbarLabels>(
     () => ({
       zoomIn: t('map.toolbar.zoomIn'),
@@ -255,12 +260,14 @@ export function TacticalMapCenterPanel({
   const canDragToken = useCallback(
     (tokenId: UUID) => {
       if (!isConnected || sessionClosed) return false;
-      if (battleActive) return false;
+      // In an active battle movement is turn-based; only a GM in explicit "out of rules"
+      // mode may free-drag (the move is sent as a logged override).
+      if (battleActive) return Boolean(isGm && forceMode);
       if (isGm) return true;
       if (!permissions) return false;
       return permissions.canMoveAnyToken || permissions.movableTokenIds.includes(tokenId);
     },
-    [isConnected, sessionClosed, permissions, battleActive, isGm],
+    [isConnected, sessionClosed, permissions, battleActive, isGm, forceMode],
   );
 
   const onTokenDragMove = useCallback(
@@ -297,6 +304,8 @@ export function TacticalMapCenterPanel({
         tokenId,
         expectedRevision: currentRevision,
         to: { gridX: cell.gridX, gridY: cell.gridY },
+        force: Boolean(isGm && forceMode),
+        clientCommandId: crypto.randomUUID(),
       });
       if (!sent) {
         pendingMove.current = null;
@@ -307,7 +316,7 @@ export function TacticalMapCenterPanel({
       }
       armMoveWatchdog();
     },
-    [tokensById, currentRevision, me?.id, realtime, setLocalDragPreview, t, armMoveWatchdog],
+    [tokensById, currentRevision, me?.id, realtime, setLocalDragPreview, t, armMoveWatchdog, isGm, forceMode],
   );
 
   const onTokenDragCancel = useCallback(() => {
@@ -389,6 +398,8 @@ export function TacticalMapCenterPanel({
       expectedRevision: currentRevision,
       to: { gridX: pendingCell.gridX, gridY: pendingCell.gridY },
       path: reconstructPath(reach, pendingCell).map((c) => ({ gridX: c.gridX, gridY: c.gridY })),
+      force: Boolean(isGm && forceMode),
+      clientCommandId: crypto.randomUUID(),
     });
     if (!sent) {
       pendingMove.current = null;
@@ -400,7 +411,7 @@ export function TacticalMapCenterPanel({
     armMoveWatchdog();
     setMoveUsed((used) => used + stepDistance(origin, pendingCell));
     clearCombatAction();
-  }, [movement, reach, origin, pendingCell, currentRevision, me?.id, realtime, setLocalDragPreview, t, clearCombatAction, armMoveWatchdog]);
+  }, [movement, reach, origin, pendingCell, currentRevision, me?.id, realtime, setLocalDragPreview, t, clearCombatAction, armMoveWatchdog, isGm, forceMode]);
 
   const cancelAction = useCallback(() => {
     clearCombatAction();
@@ -444,6 +455,8 @@ export function TacticalMapCenterPanel({
       tokenId: pushTargetTokenId,
       expectedRevision: currentRevision,
       to: away,
+      force: Boolean(isGm && forceMode),
+      clientCommandId: crypto.randomUUID(),
     });
     if (!sent) {
       pendingMove.current = null;
@@ -454,7 +467,7 @@ export function TacticalMapCenterPanel({
     }
     armMoveWatchdog();
     clearCombatAction();
-  }, [movement, pushTargetTokenId, map, tokensById, tokens, permissions, currentRevision, me?.id, realtime, setLocalDragPreview, clearCombatAction, t, armMoveWatchdog]);
+  }, [movement, pushTargetTokenId, map, tokensById, tokens, permissions, currentRevision, me?.id, realtime, setLocalDragPreview, clearCombatAction, t, armMoveWatchdog, isGm, forceMode]);
 
   // Resolve a pending move once the committed token reaches the target (TOKEN_MOVED).
   useEffect(() => {
@@ -548,6 +561,17 @@ export function TacticalMapCenterPanel({
           ) : null
         }
       />
+
+      {isGm && battleActive && (
+        <label className={cn('ao-panel', s.gmForceToggle)} title={t('tactical.gmForce.hint')}>
+          <input
+            type="checkbox"
+            checked={forceMode}
+            onChange={(e) => setForceMode(e.target.checked)}
+          />
+          <span>{t('tactical.gmForce.label')}</span>
+        </label>
+      )}
 
       {combatAction && (
         <div className={cn('ao-panel', s.actionBar)} role="status">

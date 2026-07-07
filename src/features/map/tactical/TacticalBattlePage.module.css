@@ -111,6 +111,21 @@
 .ml6 {
   margin-left: 6px;
 }
+.gmForceToggle {
+  position: absolute;
+  top: var(--s-3);
+  right: var(--s-3);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  padding: var(--s-2) var(--s-3);
+  border-color: var(--brass);
+  font-family: var(--font-display);
+  font-size: var(--t-small);
+  color: var(--ink-bright);
+  cursor: pointer;
+}
 
 /* ── Center status (loading / no map) ────────────────────── */
 .centerStatus {

@@ -146,7 +146,8 @@ describe('MapSnapshotDto contract', () => {
         },
       ],
       battleLink: { externalBattleId: 'battle-1', combatAuthority: 'CORE' },
-      turnState: { roundNumber: 1, currentTurnCombatantId: 'comb-1' },
+      // Battle-linked session: turn order is authoritative in core BE, so the snapshot omits turnState.
+      turnState: null,
       tileStates: [
         {
           id: 'tile-1',
@@ -187,6 +188,6 @@ describe('MapSnapshotDto contract', () => {
     expect(snapshot.tileStates?.[0].terrainName).toBe('HIGH_GROUND');
     expect(snapshot.mapElements?.[0].elementType).toBe('WALL');
     expect(snapshot.combatants?.[0].turnOrder).toBe(1);
-    expect(snapshot.turnState?.currentTurnCombatantId).toBe('comb-1');
+    expect(snapshot.turnState).toBeNull();
   });
 });
