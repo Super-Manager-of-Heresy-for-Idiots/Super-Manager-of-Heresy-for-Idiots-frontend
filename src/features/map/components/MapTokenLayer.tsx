@@ -103,6 +103,15 @@ export function MapTokenLayer({
             onKeyDown={onKeyDown}
           >
             <span className={s.tokenLabel}>{label}</span>
+            {token.elevationFt !== 0 && (
+              <span
+                className={s.tokenElevation}
+                title={`${token.elevationFt > 0 ? '+' : ''}${token.elevationFt} ft`}
+              >
+                {token.elevationFt > 0 ? '↑' : '↓'}
+                {Math.abs(token.elevationFt)}
+              </span>
+            )}
             {token.locked && <OrdoInterfaceIcon icon="token-locked" size={12} className={s.tokenLock} />}
           </div>
         );

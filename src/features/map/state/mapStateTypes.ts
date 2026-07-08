@@ -17,6 +17,7 @@ import type {
   MapPermissions,
   MapSnapshotMap,
   MapSnapshotSession,
+  MapTileStateDto,
   MapTokenCombatLinkDto,
   MapTokenDto,
   UUID,
@@ -49,6 +50,11 @@ export interface MapCommittedState {
    * combat HP/turn is NEVER duplicated into the committed map store.
    */
   tokenCombatLinks: MapTokenCombatLinkDto[];
+  /**
+   * Non-default terrain cells from the snapshot (level 1/2 high ground). Static in MVP — seeded
+   * from the snapshot and not advanced by events; drives the terrain layer + the elevation hook.
+   */
+  tileStates: MapTileStateDto[];
   /** Fog-of-war blob — opaque in MVP. */
   fog: unknown | null;
   permissions: MapPermissions | null;

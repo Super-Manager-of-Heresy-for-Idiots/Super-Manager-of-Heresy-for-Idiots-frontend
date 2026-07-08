@@ -6,15 +6,18 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { Bar, Rune } from '@/components/ordo';
 import { useCampaignCharacters } from '@/hooks/useCharacter';
+import { useBackpackInventory } from '@/hooks/useInventory';
 import {
   useBattleCurrentTurn,
   useEndTurn,
   useInitiativeBonus,
   useJoinBattle,
 } from '@/hooks/useBattles';
+import { battlesApi } from '@/api/battles.api';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
 import type { BattleCombatantResponse, BattleResponse, CharacterV2Response } from '@/types';
@@ -158,6 +161,10 @@ function ActionPanel({
             />
           </div>
 
+          {current.characterId && (
+            <ItemsSection campaignId={campaignId} battleId={battle.id} characterId={current.characterId} />
+          )}
+
           {spells.length > 0 && (
             <div className={s.block}>
               <div className={cn('ao-overline', s.fieldLabel)}>{t('battle.action.spells')}</div>
@@ -205,6 +212,57 @@ function ActionPanel({
   );
 }
 
+/* ── items (consume a carried item on their turn) ──────────── */
+
+function ItemsSection({
+  campaignId,
+  battleId,
+  characterId,
+}: {
+  campaignId: string;
+  battleId: string;
+  characterId: string;
+}) {
+  const t = useT();
+  const qc = useQueryClient();
+  const { data: backpack } = useBackpackInventory(campaignId, characterId);
+  const items = useMemo(() => (backpack ?? []).filter((i) => i.quantity > 0), [backpack]);
+
+  const useItem = useMutation({
+    mutationFn: (itemInstanceId: string) => battlesApi.useItem(campaignId, battleId, { itemInstanceId }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['campaigns', campaignId, 'battles'] });
+      qc.invalidateQueries({ queryKey: ['campaigns', campaignId, 'characters', characterId, 'inventory'] });
+      toast.success(t('battle.action.item.used'));
+    },
+    onError: () => toast.error(t('battle.action.item.failed')),
+  });
+
+  if (!items.length) return null;
+
+  return (
+    <div className={s.block}>
+      <div className={cn('ao-overline', s.fieldLabel)}>{t('battle.action.items')}</div>
+      <div className={s.itemList}>
+        {items.map((it) => (
+          <button
+            key={it.id}
+            type="button"
+            className={cn('ao-btn ao-btn--sm', s.itemBtn)}
+            disabled={useItem.isPending}
+            onClick={() => useItem.mutate(it.id)}
+            title={t('battle.action.item.use')}
+          >
+            <span className={s.itemName}>{it.displayName}</span>
+            {it.quantity > 1 && <span className={s.chipMeta}>×{it.quantity}</span>}
+          </button>
+        ))}
+      </div>
+      <div className={cn('ao-italic', s.hint)}>{t('battle.action.item.hint')}</div>
+    </div>
+  );
+}
+
 /* ── join panel ────────────────────────────────────────────── */
 
 function JoinPanel({
@@ -226,22 +284,21 @@ function JoinPanel({
     if (!chars.some((c) => c.id === charId)) setCharId(chars[0]?.id ?? '');
   }, [chars, charId]);
 
-  const roll = () => {
-    const n = Math.floor(Math.random() * 20) + 1;
-    setInitStr(String(n));
-    toast.success(t('battle.toast.dieRolled', { n }));
-  };
-
   const initNum = parseInt(initStr, 10);
-  const d20Valid = Number.isFinite(initNum) && initNum >= 1 && initNum <= 20;
-  const valid = !!charId && d20Valid;
-  const total = d20Valid && bonus != null ? initNum + bonus : null;
+  const d20Manual = Number.isFinite(initNum) && initNum >= 1 && initNum <= 20;
+  // No d20 entered ⇒ the server rolls the initiative die (A2 — no client Math.random).
+  const valid = !!charId;
+  const total = d20Manual && bonus != null ? initNum + bonus : null;
   const fmtSigned = (n: number) => (n >= 0 ? `+${n}` : `${n}`);
 
   const submit = () => {
     if (!valid) return;
     join.mutate(
-      { campaignId, battleId: battle.id, data: { characters: [{ characterId: charId, d20: initNum }] } },
+      {
+        campaignId,
+        battleId: battle.id,
+        data: { characters: [{ characterId: charId, ...(d20Manual ? { d20: initNum } : {}) }] },
+      },
       { onSuccess: () => setInitStr('') },
     );
   };
@@ -271,23 +328,17 @@ function JoinPanel({
 
       <div className={s.block}>
         <div className={cn('ao-overline', s.fieldLabel)}>{t('battle.join.initiative')}</div>
-        <div className={s.inlineRow}>
-          <input
-            className={cn('ao-input', s.numField)}
-            inputMode="numeric"
-            value={initStr}
-            placeholder="—"
-            onChange={(e) => setInitStr(e.target.value.replace(/[^0-9]/g, ''))}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') submit();
-            }}
-          />
-          <button className="ao-btn ao-btn--ghost" onClick={roll} type="button">
-            <Rune kind="diamond" size={14} color="currentColor" />
-            <span className={s.ml6}>{t('battle.join.rollDie')}</span>
-          </button>
-        </div>
-        <div className={s.hint}>{t('battle.join.manualHint')}</div>
+        <input
+          className={cn('ao-input', s.numField)}
+          inputMode="numeric"
+          value={initStr}
+          placeholder="—"
+          onChange={(e) => setInitStr(e.target.value.replace(/[^0-9]/g, ''))}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') submit();
+          }}
+        />
+        <div className={s.hint}>{t('battle.join.serverRollHint')}</div>
         {total != null && bonus != null && (
           <div className={s.initResult}>
             <span className={cn('ao-overline', s.fieldLabel)}>{t('battle.join.computed')}</span>

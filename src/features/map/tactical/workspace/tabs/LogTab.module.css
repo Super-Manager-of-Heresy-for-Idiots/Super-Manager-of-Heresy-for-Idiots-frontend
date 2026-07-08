@@ -1,0 +1,94 @@
+.log {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1, 4px);
+}
+
+.status {
+  color: var(--ink-quiet);
+  padding: var(--s-3, 12px) 0;
+}
+
+.entry {
+  border-bottom: 1px solid var(--hairline, rgba(212, 180, 120, 0.12));
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2, 8px);
+  width: 100%;
+  padding: var(--s-2, 8px) var(--s-1, 4px);
+  background: none;
+  border: 0;
+  text-align: left;
+  color: inherit;
+  font: inherit;
+  cursor: default;
+}
+.rowClickable {
+  cursor: pointer;
+}
+.rowClickable:hover {
+  background: color-mix(in srgb, var(--gold) 6%, transparent);
+}
+
+.badge {
+  flex: 0 0 auto;
+  min-width: 4.5rem;
+  padding: 1px 6px;
+  border-radius: var(--radius-sm, 4px);
+  border-left: 3px solid var(--bronze);
+  background: color-mix(in srgb, var(--abyss) 60%, transparent);
+  font-size: var(--t-micro);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+.catOffense { border-left-color: var(--ember); }
+.catSupport { border-left-color: var(--arcane); }
+.catFlow { border-left-color: var(--gold-pale); }
+.catState { border-left-color: var(--violet, var(--arcane)); }
+.catMisc { border-left-color: var(--bronze); }
+
+.summary {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: var(--t-small, 0.85rem);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gmOnly {
+  flex: 0 0 auto;
+  padding: 0 4px;
+  border-radius: var(--radius-sm, 4px);
+  background: color-mix(in srgb, var(--arcane) 22%, transparent);
+  color: var(--arcane);
+  font-size: var(--t-micro);
+  letter-spacing: 0.04em;
+}
+
+.detail {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--s-2, 8px) var(--s-1, 4px) var(--s-2, 8px) 5rem;
+}
+.detailRow {
+  display: flex;
+  gap: var(--s-2, 8px);
+  font-size: var(--t-micro);
+}
+.detailRow dt {
+  flex: 0 0 8rem;
+  color: var(--ink-quiet);
+}
+.detailRow dd {
+  flex: 1 1 auto;
+  margin: 0;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  word-break: break-word;
+}

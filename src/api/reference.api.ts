@@ -127,6 +127,12 @@ export const referenceApi = {
     return response.data;
   },
 
+  /** Combat conditions (Blinded, Prone, …) for the battle tracker's condition picker. */
+  getConditions: async (): Promise<ApiResponse<ContentLabel[]>> => {
+    const response = await api.get<ApiResponse<ContentLabel[]>>('/reference/conditions');
+    return response.data;
+  },
+
   /** Feat options (paginated/searchable) for authoring dropdowns. */
   getFeatOptions: async (query?: string): Promise<ApiResponse<ReferenceFeatOption[]>> => {
     const response = await api.get<ApiResponse<ReferenceFeatOption[]>>('/reference/feats', {

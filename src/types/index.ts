@@ -1728,6 +1728,7 @@ export type WsEventType =
   | 'COMBATANT_JOINED'
   | 'BATTLE_TURN_CHANGED'
   | 'BATTLE_ACTION'
+  | 'BATTLE_LOG_APPENDED'
   | 'COMBATANT_CONDITIONS_CHANGED'
   | 'BATTLE_ENDED'
   // Social graph — payloads carry { relationshipId, userId, username }; REST is the source of truth.
@@ -1835,6 +1836,11 @@ export interface BattleCombatantResponse {
   reactionUsed: boolean;
   /** Live conditions on this combatant (Blinded, Prone, …); may be omitted or empty. */
   conditions?: CombatantCondition[];
+  /** Death-save pips for a dying character (0 HP); both 0 for monsters and healthy characters. */
+  deathSaveSuccesses?: number;
+  deathSaveFailures?: number;
+  /** True when the character is dead (three death-save failures). */
+  dead?: boolean;
 }
 
 /** A live condition instance on a battle combatant (Phase 1.1). */
@@ -1845,6 +1851,38 @@ export interface CombatantCondition {
   sourceText: string | null;
   /** Rounds left; null = until removed. */
   remainingRounds: number | null;
+}
+
+/** Kinds of {@link BattleLogEntry} (mirrors core `BattleLogType`). */
+export type BattleLogType =
+  | 'ATTACK'
+  | 'SAVE'
+  | 'DAMAGE'
+  | 'HEAL'
+  | 'HP_SET'
+  | 'TURN'
+  | 'ROUND'
+  | 'CONDITION'
+  | 'EFFECT'
+  | 'DEATH_SAVE'
+  | 'GM_OVERRIDE'
+  | 'ITEM'
+  | 'SPELL';
+
+/**
+ * One persistent combat-log entry (Phase 1.2). `seq` is monotonic within a battle and drives
+ * ordering + afterSeq pagination. `payload` is the parsed JSON detail (roll formula, dice, modifier)
+ * the UI expands. GM_ONLY entries are never delivered to players (filtered server-side).
+ */
+export interface BattleLogEntry {
+  id: string;
+  seq: number;
+  type: BattleLogType;
+  actorCombatantId: string | null;
+  targetCombatantId: string | null;
+  payload: Record<string, unknown> | null;
+  visibility: 'PUBLIC' | 'GM_ONLY';
+  createdAt: string;
 }
 
 export type ActionEconomySlot = 'ACTION' | 'BONUS_ACTION' | 'LEGENDARY_ACTION' | 'REACTION';
@@ -1931,11 +1969,25 @@ export interface JoinBattleRequest {
 }
 
 /** The active combatant strikes a target. The attacker rolls their own d20 (1–20). */
+export type AttackRollMode = 'NORMAL' | 'ADVANTAGE' | 'DISADVANTAGE';
+
 export interface BattleAttackRequest {
   targetCombatantId: string;
   /** Attack name as shown on the character sheet / monster feature. */
   attackName: string;
-  d20: number;
+  /** Roll mode; NORMAL when omitted. */
+  rollMode?: AttackRollMode;
+  /** Manual single d20 (NORMAL). Omit all dice to have the server roll. */
+  d20?: number;
+  /** Manual dice for ADVANTAGE/DISADVANTAGE (server keeps the higher/lower). */
+  d20A?: number;
+  d20B?: number;
+  advantageReason?: string;
+  /** Roll mode for the TARGET's saving throw on a save-based attack. */
+  saveRollMode?: AttackRollMode;
+  saveD20?: number;
+  saveD20A?: number;
+  saveD20B?: number;
 }
 
 /** GM manual HP change on a combatant: negative `delta` damages, positive heals. */
@@ -1953,13 +2005,28 @@ export interface BattleActionResultResponse {
   targetName: string;
   attackName: string;
   d20: number;
+  /** Roll breakdown: mode + the two dice considered + the selected d20 (advantage/disadvantage). */
+  rollMode?: string | null;
+  d20A?: number | null;
+  d20B?: number | null;
+  effectiveD20?: number | null;
+  advantageReason?: string | null;
   attackBonus: number;
   total: number;
   targetAc: number;
-  outcome: AttackOutcome;
+  /** Save-based attacks: the DC, the ability the target saved with, its bonus and total. */
+  saveDc?: number | null;
+  saveAbility?: string | null;
+  saveBonus?: number | null;
+  saveTotal?: number | null;
+  saveRollMode?: string | null;
+  /** HIT | MISS | CRIT for attack rolls; SUCCESS | FAIL for saving throws. */
+  outcome: AttackOutcome | 'SUCCESS' | 'FAIL' | string;
   /** Damage dealt; `null` on a miss. */
   damage: number | null;
   damageType: string | null;
+  /** How the target's defences changed the damage: NONE | RESISTED | IMMUNE | VULNERABLE. */
+  damageModifier?: string | null;
   targetCurrentHp: number | null;
   targetMaxHp: number | null;
   targetDown: boolean;

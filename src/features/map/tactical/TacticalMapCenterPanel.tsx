@@ -95,6 +95,7 @@ export function TacticalMapCenterPanel({
   const map = useMapSessionStore((st) => st.map);
   const tokensById = useMapSessionStore((st) => st.tokensById);
   const tokenIds = useMapSessionStore((st) => st.tokenIds);
+  const tileStates = useMapSessionStore((st) => st.tileStates);
   const permissions = useMapSessionStore((st) => st.permissions);
   const currentRevision = useMapSessionStore((st) => st.currentRevision);
 
@@ -203,6 +204,11 @@ export function TacticalMapCenterPanel({
       : movement.walkRangeCells
     : 0;
   const effectiveRange = Math.max(0, rangeForMode - moveUsed);
+  // Server-authoritative budget is spent per 0.1; here we mirror it in feet for the HUD
+  // (moveUsed/range are in cells — convert with the grid's ft-per-cell).
+  const cellWorldSizeFt = Number(map?.gridConfig?.cellWorldSize) || 5;
+  const spentFt = Math.round(moveUsed * cellWorldSizeFt);
+  const budgetFt = Math.round(rangeForMode * cellWorldSizeFt);
 
   const activeToken = movement ? tokensById[movement.activeTokenId] : undefined;
   const origin = useMemo<Cell | null>(
@@ -213,10 +219,18 @@ export function TacticalMapCenterPanel({
     [activeToken],
   );
 
-  // Pluggable terrain hook: no elevation data is wired yet, so the low→high ground
-  // rule is a no-op. Wiring tile terrain into this resolver switches the rule on
-  // (see BACKEND_REQUIREMENTS.md "High ground").
-  const elevationAt = useCallback(() => 0, []);
+  // Terrain hook (Phase 1.9): the snapshot's tileStates give each cell its ground level
+  // (0 default, 1/2 high ground). This switches the low→high reach rule on in computeReach;
+  // difficult-terrain movement COST stays out of scope (Phase 2.11).
+  const elevationByCell = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const tile of tileStates) m.set(cellKey(tile.gridX, tile.gridY), tile.terrainLevel);
+    return m;
+  }, [tileStates]);
+  const elevationAt = useCallback(
+    (gridX: number, gridY: number) => elevationByCell.get(cellKey(gridX, gridY)) ?? 0,
+    [elevationByCell],
+  );
 
   const reach = useMemo(() => {
     if (!movement || !origin || !map || !moveMode) return null;
@@ -525,6 +539,7 @@ export function TacticalMapCenterPanel({
         imageAssetId={map.imageAssetId}
         grid={map.gridConfig}
         tokens={tokens}
+        tiles={tileStates}
         selectedTokenId={selectedTokenId}
         remoteDragPreviews={remoteDragPreviews}
         localDragPreview={localDragPreview}
@@ -601,6 +616,11 @@ export function TacticalMapCenterPanel({
                 {pendingCell && origin
                   ? t('tactical.move.distance', { n: stepDistance(origin, pendingCell) })
                   : t('tactical.move.pickCell')}
+                {budgetFt > 0 && (
+                  <span className={s.moveBudget}>
+                    {t('tactical.move.budget', { spent: spentFt, total: budgetFt })}
+                  </span>
+                )}
               </span>
               <div className="ao-row ao-gap-8">
                 <button

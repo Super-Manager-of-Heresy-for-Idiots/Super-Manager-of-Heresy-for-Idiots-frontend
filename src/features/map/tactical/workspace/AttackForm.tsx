@@ -10,12 +10,16 @@
  */
 
 import { useEffect, useState } from 'react';
-import toast from 'react-hot-toast';
 import { Rune } from '@/components/ordo';
 import { useBattleAttack } from '@/hooks/useBattles';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
-import type { BattleActionResultResponse, BattleCombatantResponse } from '@/types';
+import type {
+  AttackRollMode,
+  BattleActionResultResponse,
+  BattleAttackRequest,
+  BattleCombatantResponse,
+} from '@/types';
 import type { AttackOption } from './combat';
 import s from './workspace.module.css';
 
@@ -32,7 +36,11 @@ export function AttackForm({ campaignId, battleId, attacks, targets, lockedTarge
   const attack = useBattleAttack();
   const [attackName, setAttackName] = useState(attacks[0]?.name ?? '');
   const [targetId, setTargetId] = useState(lockedTargetId ?? targets[0]?.id ?? '');
+  const [rollMode, setRollMode] = useState<AttackRollMode>('NORMAL');
+  const [serverRoll, setServerRoll] = useState(true);
   const [d20Str, setD20Str] = useState('');
+  const [d20aStr, setD20aStr] = useState('');
+  const [d20bStr, setD20bStr] = useState('');
   const [result, setResult] = useState<BattleActionResultResponse | null>(null);
 
   // Keep selections valid as the underlying lists change.
@@ -48,24 +56,35 @@ export function AttackForm({ campaignId, battleId, attacks, targets, lockedTarge
     if (!targets.some((c) => c.id === targetId)) setTargetId(targets[0]?.id ?? '');
   }, [targets, targetId]);
 
-  const roll = () => {
-    const n = Math.floor(Math.random() * 20) + 1;
-    setD20Str(String(n));
-    toast.success(t('battle.toast.dieRolled', { n }));
+  const num = (sv: string): number | null => {
+    const n = parseInt(sv, 10);
+    return Number.isFinite(n) && n >= 1 && n <= 20 ? n : null;
   };
-
-  const d20 = parseInt(d20Str, 10);
-  const d20Valid = Number.isFinite(d20) && d20 >= 1 && d20 <= 20;
-  const valid = !!attackName && !!targetId && d20Valid;
+  const single = num(d20Str);
+  const dieA = num(d20aStr);
+  const dieB = num(d20bStr);
+  const diceValid = serverRoll ? true : rollMode === 'NORMAL' ? single != null : dieA != null && dieB != null;
+  const valid = !!attackName && !!targetId && diceValid;
 
   const submit = () => {
     if (!valid) return;
+    const data: BattleAttackRequest = { targetCombatantId: targetId, attackName, rollMode };
+    // Server-authoritative rolls: send no dice and let the server roll (A2 — no client Math.random).
+    if (!serverRoll) {
+      if (rollMode === 'NORMAL') data.d20 = single ?? undefined;
+      else {
+        data.d20A = dieA ?? undefined;
+        data.d20B = dieB ?? undefined;
+      }
+    }
     attack.mutate(
-      { campaignId, battleId, data: { targetCombatantId: targetId, attackName, d20 } },
+      { campaignId, battleId, data },
       {
         onSuccess: (res) => {
           if (res.data) setResult(res.data);
           setD20Str('');
+          setD20aStr('');
+          setD20bStr('');
         },
       },
     );
@@ -124,23 +143,56 @@ export function AttackForm({ campaignId, battleId, attacks, targets, lockedTarge
         ))}
       </div>
 
-      <div className={cn('ao-overline', s.fieldLabel, s.mt12)}>{t('battle.attack.d20')}</div>
-      <div className={s.inlineRow}>
-        <input
-          className={cn('ao-input', s.numField)}
-          inputMode="numeric"
-          value={d20Str}
-          placeholder="—"
-          onChange={(e) => setD20Str(e.target.value.replace(/[^0-9]/g, ''))}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') submit();
-          }}
-        />
-        <button className="ao-btn ao-btn--ghost" onClick={roll} type="button">
-          <Rune kind="diamond" size={14} color="currentColor" />
-          <span className={s.ml6}>{t('battle.attack.rollDie')}</span>
-        </button>
+      <div className={cn('ao-overline', s.fieldLabel, s.mt12)}>{t('battle.attack.rollMode')}</div>
+      <div className="ao-row ao-gap-4">
+        {(['NORMAL', 'ADVANTAGE', 'DISADVANTAGE'] as const).map((m) => (
+          <button
+            key={m}
+            type="button"
+            className={cn('ao-btn ao-btn--sm', rollMode === m ? 'ao-btn--primary' : 'ao-btn--ghost')}
+            onClick={() => setRollMode(m)}
+          >
+            {t(`battle.attack.mode.${m}`)}
+          </button>
+        ))}
       </div>
+      <label className={cn('ao-row ao-gap-8', s.mt12)}>
+        <input type="checkbox" checked={serverRoll} onChange={(e) => setServerRoll(e.target.checked)} />
+        <span className={s.hint}>{t('battle.attack.serverRoll')}</span>
+      </label>
+      {!serverRoll && (
+        <div className={cn('ao-row ao-gap-8', s.mt12)}>
+          {rollMode === 'NORMAL' ? (
+            <input
+              className={cn('ao-input', s.numField)}
+              inputMode="numeric"
+              value={d20Str}
+              placeholder={t('battle.attack.d20')}
+              onChange={(e) => setD20Str(e.target.value.replace(/[^0-9]/g, ''))}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') submit();
+              }}
+            />
+          ) : (
+            <>
+              <input
+                className={cn('ao-input', s.numField)}
+                inputMode="numeric"
+                value={d20aStr}
+                placeholder="d20 A"
+                onChange={(e) => setD20aStr(e.target.value.replace(/[^0-9]/g, ''))}
+              />
+              <input
+                className={cn('ao-input', s.numField)}
+                inputMode="numeric"
+                value={d20bStr}
+                placeholder="d20 B"
+                onChange={(e) => setD20bStr(e.target.value.replace(/[^0-9]/g, ''))}
+              />
+            </>
+          )}
+        </div>
+      )}
       <div className={s.hint}>{t('battle.attack.hint')}</div>
 
       <button
@@ -175,12 +227,18 @@ function ResultCard({ result }: { result: BattleActionResultResponse }) {
       </div>
       <div className={s.resultLine}>
         {t('battle.attack.rollLine', {
-          d20: result.d20,
+          d20: result.effectiveD20 ?? result.d20,
           bonus: fmtSigned(result.attackBonus),
           total: result.total,
           ac: result.targetAc,
         })}
       </div>
+      {result.rollMode && result.rollMode !== 'NORMAL' && result.d20A != null && result.d20B != null && (
+        <div className={s.resultLine}>
+          {t(`battle.attack.mode.${result.rollMode}`)}: {result.d20A} / {result.d20B} →{' '}
+          {result.effectiveD20 ?? result.d20}
+        </div>
+      )}
       {result.damage != null && (
         <div className={s.resultDmg}>
           {t('battle.attack.dealt', { n: result.damage, type: result.damageType ?? '' })}

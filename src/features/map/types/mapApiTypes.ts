@@ -30,6 +30,8 @@ export type TokenType = 'CHARACTER' | 'NPC' | 'MONSTER' | 'OBJECT' | 'MARKER';
 export type MapEventType =
   | 'TOKEN_CREATED_EVENT'
   | 'TOKEN_MOVED_EVENT'
+  | 'TOKEN_UPDATED_EVENT'
+  | 'TOKEN_MOVE_WARNING'
   | 'TOKEN_DELETED_EVENT'
   | 'TOKEN_LOCKED_EVENT'
   | 'TOKEN_UNLOCKED_EVENT'
@@ -269,9 +271,26 @@ export interface MapTokenDto {
   heightCells: number;
   visible: boolean;
   locked: boolean;
+  /** Vertical offset in feet (0 = ground). Rendered as an "↑15 ft" badge. */
+  elevationFt: number;
+  /** GM-private display name; null for players (redacted server-side) — Phase 1.7. */
+  gmName: string | null;
+  /** GM-private notes; null for players (redacted server-side) — Phase 1.7. */
+  gmNotes: string | null;
   data: Record<string, unknown>;
   createdAt: IsoInstant;
   updatedAt: IsoInstant;
+}
+
+/** Partial token update (1.5 elevation, 1.7 visibility + GM fields). Only sent fields are applied. */
+export interface UpdateMapTokenRequest {
+  elevationFt?: number;
+  /** GM-only: hide/show the token from players. */
+  visible?: boolean;
+  /** GM-only: private display name; send "" to clear. */
+  gmName?: string;
+  /** GM-only: private notes; send "" to clear. */
+  gmNotes?: string;
 }
 
 export interface CreateTokenRequest {

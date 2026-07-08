@@ -25,6 +25,9 @@ function makeToken(id: UUID, gridX: number, gridY: number, over: Partial<MapToke
     heightCells: 1,
     visible: true,
     locked: false,
+    elevationFt: 0,
+    gmName: null,
+    gmNotes: null,
     data: {},
     createdAt: '2026-06-23T12:00:00Z',
     updatedAt: '2026-06-23T12:00:00Z',
@@ -79,6 +82,28 @@ describe('committedStateFromSnapshot', () => {
     expect(state.tokensById.t1.gridX).toBe(1);
     expect(state.permissions?.canManageMap).toBe(true);
     expect(state.session?.status).toBe('ACTIVE');
+  });
+
+  it('seeds tileStates (empty when the snapshot omits them; populated when present)', () => {
+    expect(committedStateFromSnapshot(makeSnapshot(5)).tileStates).toEqual([]);
+    const withTiles: MapSnapshotDto = {
+      ...makeSnapshot(5),
+      tileStates: [
+        {
+          id: 'tile-1',
+          mapSessionId: 'session-1',
+          gridX: 2,
+          gridY: 3,
+          terrainLevel: 1,
+          terrainName: 'HIGH_GROUND',
+          createdAt: '2026-07-08T00:00:00Z',
+          updatedAt: '2026-07-08T00:00:00Z',
+        },
+      ],
+    };
+    const state = committedStateFromSnapshot(withTiles);
+    expect(state.tileStates).toHaveLength(1);
+    expect(state.tileStates[0].terrainLevel).toBe(1);
   });
 
   it('normalizes snapshot gridConfig before storing runtime map state', () => {
@@ -173,6 +198,31 @@ describe('applyCommittedEvent — other committed events', () => {
     expect(state.tokensById.t1.locked).toBe(true);
     state = applyCommittedEvent(state, { type: 'TOKEN_UNLOCKED_EVENT', revision: 7, payload: { tokenId: 't1' } });
     expect(state.tokensById.t1.locked).toBe(false);
+  });
+
+  it('applies TOKEN_UPDATED_EVENT elevation + visibility without a resync (1.5/1.7)', () => {
+    const state = committedStateFromSnapshot(makeSnapshot(5));
+    const next = applyCommittedEvent(state, {
+      type: 'TOKEN_UPDATED_EVENT',
+      revision: 6,
+      payload: { tokenId: 't1', elevationFt: 15, visible: false },
+    });
+    expect(next.needsResync).toBe(false);
+    expect(next.currentRevision).toBe(6);
+    expect(next.tokensById.t1.elevationFt).toBe(15);
+    expect(next.tokensById.t1.visible).toBe(false);
+  });
+
+  it('treats TOKEN_MOVE_WARNING as a no-op that still advances the revision (0.1)', () => {
+    const state = committedStateFromSnapshot(makeSnapshot(5));
+    const next = applyCommittedEvent(state, {
+      type: 'TOKEN_MOVE_WARNING',
+      revision: 6,
+      payload: { tokenId: 't1', reason: 'MOVEMENT_BUDGET_EXCEEDED' },
+    });
+    expect(next.needsResync).toBe(false);
+    expect(next.currentRevision).toBe(6);
+    expect(next.tokensById.t1.gridX).toBe(1); // unchanged
   });
 
   it('marks the session CLOSED on MAP_SESSION_CLOSED_EVENT', () => {

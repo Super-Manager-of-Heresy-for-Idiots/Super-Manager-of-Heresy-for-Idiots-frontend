@@ -135,6 +135,7 @@ export function useWebSocket(campaignId: string | undefined): { connectionState:
         case 'COMBATANT_JOINED':
         case 'BATTLE_TURN_CHANGED':
         case 'BATTLE_ACTION':
+        case 'BATTLE_LOG_APPENDED':
         case 'COMBATANT_CONDITIONS_CHANGED':
         case 'BATTLE_ENDED': {
           // The payload only carries { battleId }; the REST GET is the source
@@ -176,7 +177,8 @@ export function useWebSocket(campaignId: string | undefined): { connectionState:
         event.type === 'BATTLE_UPDATED' ||
         event.type === 'COMBATANT_JOINED' ||
         event.type === 'BATTLE_TURN_CHANGED' ||
-        event.type === 'BATTLE_ACTION'
+        event.type === 'BATTLE_ACTION' ||
+        event.type === 'BATTLE_LOG_APPENDED'
       ) {
         return;
       }

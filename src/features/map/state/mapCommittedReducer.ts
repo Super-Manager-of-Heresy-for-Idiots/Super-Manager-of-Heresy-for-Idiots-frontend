@@ -27,6 +27,7 @@ export function createInitialCommittedState(): MapCommittedState {
     tokensById: {},
     tokenIds: [],
     tokenCombatLinks: [],
+    tileStates: [],
     fog: null,
     permissions: null,
     currentRevision: 0,
@@ -53,6 +54,7 @@ export function committedStateFromSnapshot(snapshot: MapSnapshotDto): MapCommitt
     tokensById,
     tokenIds,
     tokenCombatLinks: snapshot.tokenCombatLinks ?? [],
+    tileStates: snapshot.tileStates ?? [],
     fog: snapshot.fog ?? null,
     permissions: snapshot.permissions,
     currentRevision: snapshot.session.currentRevision,
@@ -101,6 +103,31 @@ function applyCommittedPayload(
         },
       };
     }
+
+    case 'TOKEN_UPDATED_EVENT': {
+      // Partial display-attribute update (1.5 elevation, 1.7 visibility). Each changed field is
+      // in the payload with its full new value, so we apply it without a resync.
+      const tokenId = parseTokenId(event.payload);
+      if (!tokenId) return resync(state);
+      const token = state.tokensById[tokenId];
+      if (!token) return resync(state);
+      const patch: Partial<MapTokenDto> = {};
+      const elevationFt = parseElevationFt(event.payload);
+      if (elevationFt != null) patch.elevationFt = elevationFt;
+      const visible = parseVisible(event.payload);
+      if (visible != null) patch.visible = visible;
+      if (Object.keys(patch).length === 0) return state; // nothing we know how to apply → no-op
+      return {
+        ...state,
+        tokensById: { ...state.tokensById, [tokenId]: { ...token, ...patch } },
+      };
+    }
+
+    // Advisory only (warn-mode move exceeded budget). It still carries its own revision,
+    // so we must advance past it — but there is no committed state change. Any user-facing
+    // toast is driven off the raw WS event elsewhere, not from committed state.
+    case 'TOKEN_MOVE_WARNING':
+      return state;
 
     case 'TOKEN_DELETED_EVENT': {
       const tokenId = parseTokenId(event.payload);
@@ -171,6 +198,16 @@ function parseGridPoint(value: unknown): GridPoint | null {
 function parseTokenId(payload: unknown): UUID | null {
   if (!isRecord(payload)) return null;
   return typeof payload.tokenId === 'string' ? payload.tokenId : null;
+}
+
+function parseElevationFt(payload: unknown): number | null {
+  if (!isRecord(payload)) return null;
+  return typeof payload.elevationFt === 'number' ? payload.elevationFt : null;
+}
+
+function parseVisible(payload: unknown): boolean | null {
+  if (!isRecord(payload)) return null;
+  return typeof payload.visible === 'boolean' ? payload.visible : null;
 }
 
 function parseTokenMoved(payload: unknown): TokenMovedPayload | null {

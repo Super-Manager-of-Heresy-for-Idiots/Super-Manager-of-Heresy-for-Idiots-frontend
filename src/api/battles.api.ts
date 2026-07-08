@@ -12,6 +12,8 @@ import type {
   BattleActionResultResponse,
   SpendActionRequest,
   AdjustActionEconomyRequest,
+  CombatantCondition,
+  BattleLogEntry,
 } from '@/types';
 
 /**
@@ -33,6 +35,23 @@ export const battlesApi = {
 
   getById: async (campaignId: string, battleId: string): Promise<ApiResponse<BattleResponse>> => {
     const response = await api.get<ApiResponse<BattleResponse>>(`${base(campaignId)}/${battleId}`);
+    return response.data;
+  },
+
+  /**
+   * Combat log, seq-ordered after `afterSeq` (default 0 = from the start). Players never receive
+   * GM_ONLY rows — the server filters by role. Used by the Log tab (Phase 1.2).
+   */
+  getLog: async (
+    campaignId: string,
+    battleId: string,
+    afterSeq = 0,
+    limit = 200,
+  ): Promise<ApiResponse<BattleLogEntry[]>> => {
+    const response = await api.get<ApiResponse<BattleLogEntry[]>>(
+      `${base(campaignId)}/${battleId}/log`,
+      { params: { afterSeq, limit } },
+    );
     return response.data;
   },
 
@@ -116,6 +135,22 @@ export const battlesApi = {
     return response.data;
   },
 
+  /**
+   * The active character consumes one carried item (potion/scroll…). The server validates it is a
+   * consumable they own and spends one unit; omit `targetCombatantId` to apply to self (Phase 1.8).
+   */
+  useItem: async (
+    campaignId: string,
+    battleId: string,
+    data: { itemInstanceId: string; targetCombatantId?: string },
+  ): Promise<ApiResponse<BattleActionResultResponse>> => {
+    const response = await api.post<ApiResponse<BattleActionResultResponse>>(
+      `${base(campaignId)}/${battleId}/use-item`,
+      data,
+    );
+    return response.data;
+  },
+
   /** GM adjusts a combatant's HP (negative damages, positive heals). */
   applyCombatantHp: async (
     campaignId: string,
@@ -165,6 +200,71 @@ export const battlesApi = {
 
   end: async (campaignId: string, battleId: string): Promise<ApiResponse<BattleResponse>> => {
     const response = await api.post<ApiResponse<BattleResponse>>(`${base(campaignId)}/${battleId}/end`);
+    return response.data;
+  },
+
+  /** GM (or the character's owner) applies a condition; returns the combatant's updated conditions. */
+  applyCondition: async (
+    campaignId: string,
+    battleId: string,
+    combatantId: string,
+    data: { conditionId: string; sourceText?: string | null; remainingRounds?: number | null },
+  ): Promise<ApiResponse<CombatantCondition[]>> => {
+    const response = await api.post<ApiResponse<CombatantCondition[]>>(
+      `${base(campaignId)}/${battleId}/combatants/${combatantId}/conditions`,
+      data,
+    );
+    return response.data;
+  },
+
+  /** Removes a condition from a combatant; returns the combatant's remaining conditions. */
+  removeCondition: async (
+    campaignId: string,
+    battleId: string,
+    combatantId: string,
+    conditionId: string,
+  ): Promise<ApiResponse<CombatantCondition[]>> => {
+    const response = await api.delete<ApiResponse<CombatantCondition[]>>(
+      `${base(campaignId)}/${battleId}/combatants/${combatantId}/conditions/${conditionId}`,
+    );
+    return response.data;
+  },
+
+  /** Roll a death saving throw for a dying (0 HP) character — omit `roll` for a server roll. */
+  deathSave: async (
+    campaignId: string,
+    battleId: string,
+    combatantId: string,
+    roll?: number,
+  ): Promise<ApiResponse<BattleResponse>> => {
+    const response = await api.post<ApiResponse<BattleResponse>>(
+      `${base(campaignId)}/${battleId}/combatants/${combatantId}/death-save`,
+      roll != null ? { roll } : {},
+    );
+    return response.data;
+  },
+
+  /** Stabilize a dying character (GM/healer). */
+  stabilize: async (
+    campaignId: string,
+    battleId: string,
+    combatantId: string,
+  ): Promise<ApiResponse<BattleResponse>> => {
+    const response = await api.post<ApiResponse<BattleResponse>>(
+      `${base(campaignId)}/${battleId}/combatants/${combatantId}/stabilize`,
+    );
+    return response.data;
+  },
+
+  /** GM rerolls a combatant's initiative (server d20 + DEX) and re-sorts the tracker (Phase 1.7). */
+  rerollInitiative: async (
+    campaignId: string,
+    battleId: string,
+    combatantId: string,
+  ): Promise<ApiResponse<BattleResponse>> => {
+    const response = await api.post<ApiResponse<BattleResponse>>(
+      `${base(campaignId)}/${battleId}/combatants/${combatantId}/reroll-initiative`,
+    );
     return response.data;
   },
 };

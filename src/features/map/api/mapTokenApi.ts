@@ -3,15 +3,16 @@ import type {
   CreateTokenFromCombatantRequest,
   CreateTokenRequest,
   MapTokenDto,
+  UpdateMapTokenRequest,
   UUID,
 } from '../types';
 
 /**
  * Map-service token endpoints (`/api/map-sessions/{sessionId}/tokens`).
  *
- * Note: there is intentionally NO `update`/move here. The backend exposes only
- * create/list/delete for tokens over REST; token MOVEMENT goes exclusively through
- * the WebSocket `MOVE_TOKEN` command (server-authoritative, revision-checked).
+ * Note: token MOVEMENT never rides REST — it goes exclusively through the WebSocket
+ * `MOVE_TOKEN` command (server-authoritative, revision-checked). The `update` PATCH is
+ * only for non-positional display attributes (Phase 1.5: elevation).
  */
 export const mapTokenApi = {
   /** POST /api/map-sessions/{sessionId}/tokens — place a token (GM). */
@@ -39,6 +40,22 @@ export const mapTokenApi = {
   /** GET /api/map-sessions/{sessionId}/tokens — all tokens in a session. */
   list: async (sessionId: UUID): Promise<MapTokenDto[]> => {
     const { data } = await mapHttp.get<MapTokenDto[]>(`/map-sessions/${sessionId}/tokens`);
+    return data;
+  },
+
+  /**
+   * PATCH /api/map-sessions/{sessionId}/tokens/{tokenId} — partial update of non-positional
+   * display attributes (Phase 1.5: elevation). Permission mirrors a move (controller or GM).
+   */
+  update: async (
+    sessionId: UUID,
+    tokenId: UUID,
+    request: UpdateMapTokenRequest,
+  ): Promise<MapTokenDto> => {
+    const { data } = await mapHttp.patch<MapTokenDto>(
+      `/map-sessions/${sessionId}/tokens/${tokenId}`,
+      request,
+    );
     return data;
   },
 

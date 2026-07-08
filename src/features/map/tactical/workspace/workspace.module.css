@@ -468,6 +468,34 @@
   color: var(--ink-faint);
   font-size: var(--t-nano);
 }
+
+/* ── Items (use a consumable in combat) — Phase 1.8 ─────────── */
+.itemList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-1);
+}
+.itemBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-1);
+  max-width: 100%;
+}
+.itemName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Movement budget read-out in the action bar — Phase 1.8 ──── */
+.moveBudget {
+  margin-left: var(--s-2);
+  padding-left: var(--s-2);
+  border-left: 1px solid var(--hairline, rgba(212, 180, 120, 0.18));
+  color: var(--gold-pale);
+  font-variant-numeric: tabular-nums;
+}
+
 .skWrap {
   display: flex;
   flex-direction: column;

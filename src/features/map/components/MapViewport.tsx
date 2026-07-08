@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
-import type { GridConfig, MapTokenDto, UUID } from '../types';
+import type { GridConfig, MapTileStateDto, MapTokenDto, UUID } from '../types';
 import type { GridCoord } from '../engine';
 import { viewportPointToGrid } from '../engine';
 import { normalizeGridConfig } from '../calibration/calibrationMath';
@@ -10,6 +10,7 @@ import { useMapViewport } from '../hooks/useMapViewport';
 import { useTokenDrag } from '../hooks/useTokenDrag';
 import { MapBackgroundLayer } from './MapBackgroundLayer';
 import { MapGridLayer } from './MapGridLayer';
+import { MapTerrainLayer } from './MapTerrainLayer';
 import { MapTokenLayer } from './MapTokenLayer';
 import { MapCursorLayer } from './MapCursorLayer';
 import { MapPingLayer } from './MapPingLayer';
@@ -21,6 +22,8 @@ export interface MapViewportProps {
   imageAssetId: UUID | null;
   grid: GridConfig;
   tokens?: MapTokenDto[];
+  /** Non-default terrain cells (high ground) drawn under the tokens; absent → none. */
+  tiles?: MapTileStateDto[];
   selectedTokenId?: UUID | null;
   remoteDragPreviews?: TokenDragPreview[];
   localDragPreview?: TokenDragPreview | null;
@@ -72,6 +75,7 @@ export function MapViewport({
   imageAssetId,
   grid,
   tokens = [],
+  tiles = [],
   selectedTokenId = null,
   remoteDragPreviews = [],
   localDragPreview = null,
@@ -191,6 +195,7 @@ export function MapViewport({
           <MapViewportContext.Provider value={{ viewport: vp.viewport, imageSize: vp.imageSize }}>
             <MapBackgroundLayer imageAssetId={imageAssetId} onImageSize={vp.setImageSize} />
             {gridVisible && <MapGridLayer grid={normalizedGrid} imageSize={vp.imageSize} />}
+            <MapTerrainLayer grid={normalizedGrid} tiles={tiles} />
             {underlay}
             <MapTokenLayer
               grid={normalizedGrid}

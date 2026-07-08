@@ -18,9 +18,10 @@ import { BestiaryTab } from './tabs/BestiaryTab';
 import { SummaryTab } from './tabs/SummaryTab';
 import { CharacterTab } from './tabs/CharacterTab';
 import { TargetTab } from './tabs/TargetTab';
+import { LogTab } from './tabs/LogTab';
 import s from './workspace.module.css';
 
-type TabKey = 'turn' | 'inspect' | 'bestiary' | 'summary' | 'character' | 'target';
+type TabKey = 'turn' | 'inspect' | 'bestiary' | 'summary' | 'character' | 'target' | 'log';
 
 interface RightDockProps {
   campaignId: string;
@@ -52,12 +53,15 @@ export function RightDock({
       list.push({ key: 'inspect', label: t('tactical.tab.inspect') });
       if (isAssembling) list.push({ key: 'bestiary', label: t('tactical.tab.bestiary') });
       list.push({ key: 'summary', label: t('tactical.tab.summary') });
+      if (!isAssembling) list.push({ key: 'log', label: t('tactical.tab.log') });
       return list;
     }
-    return [
+    const list: { key: TabKey; label: string }[] = [
       { key: 'character', label: t('tactical.tab.character') },
       { key: 'target', label: t('tactical.tab.target') },
     ];
+    if (!isAssembling) list.push({ key: 'log', label: t('tactical.tab.log') });
+    return list;
   }, [isGm, isActive, isAssembling, t]);
 
   const defaultTab: TabKey = isGm ? (isActive ? 'turn' : isAssembling ? 'bestiary' : 'summary') : 'character';
@@ -126,6 +130,7 @@ export function RightDock({
         {tab === 'target' && (
           <TargetTab tacticalTokens={tacticalTokens} activeCombatant={activeCombatant} />
         )}
+        {tab === 'log' && <LogTab campaignId={campaignId} battleId={battle.id} />}
       </div>
     </div>
   );
