@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
-import type { GridConfig, MapTileStateDto, MapTokenDto, UUID } from '../types';
+import type { FogStateDto, GridConfig, MapTileStateDto, MapTokenDto, UUID } from '../types';
 import type { GridCoord } from '../engine';
 import { viewportPointToGrid } from '../engine';
 import { normalizeGridConfig } from '../calibration/calibrationMath';
@@ -12,6 +12,7 @@ import { MapBackgroundLayer } from './MapBackgroundLayer';
 import { MapGridLayer } from './MapGridLayer';
 import { MapTerrainLayer } from './MapTerrainLayer';
 import { MapTokenLayer } from './MapTokenLayer';
+import { MapFogLayer } from './MapFogLayer';
 import { MapCursorLayer } from './MapCursorLayer';
 import { MapPingLayer } from './MapPingLayer';
 import { MapToolbar, type MapToolbarLabels } from './MapToolbar';
@@ -24,6 +25,10 @@ export interface MapViewportProps {
   tokens?: MapTokenDto[];
   /** Non-default terrain cells (high ground) drawn under the tokens; absent → none. */
   tiles?: MapTileStateDto[];
+  /** Manual fog-of-war state (Phase 1.6). `null`/absent → no fog drawn. */
+  fog?: FogStateDto | null;
+  /** Whether the current viewer is a GM (fog is drawn translucent for them). */
+  fogViewerIsGm?: boolean;
   selectedTokenId?: UUID | null;
   remoteDragPreviews?: TokenDragPreview[];
   localDragPreview?: TokenDragPreview | null;
@@ -76,6 +81,8 @@ export function MapViewport({
   grid,
   tokens = [],
   tiles = [],
+  fog = null,
+  fogViewerIsGm = false,
   selectedTokenId = null,
   remoteDragPreviews = [],
   localDragPreview = null,
@@ -206,6 +213,7 @@ export function MapViewport({
               onSelectToken={onSelectToken}
               onTokenPointerDown={tokenDrag.onTokenPointerDown}
             />
+            <MapFogLayer grid={normalizedGrid} fog={fog} isGm={fogViewerIsGm} />
             <MapPingLayer grid={normalizedGrid} pings={pings} />
             <MapCursorLayer grid={normalizedGrid} cursors={cursors} />
             {children}

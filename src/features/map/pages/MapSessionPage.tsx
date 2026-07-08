@@ -46,6 +46,7 @@ export default function MapSessionPage() {
   const tokensById = useMapSessionStore((st) => st.tokensById);
   const tokenIds = useMapSessionStore((st) => st.tokenIds);
   const permissions = useMapSessionStore((st) => st.permissions);
+  const fog = useMapSessionStore((st) => st.fog);
   const currentRevision = useMapSessionStore((st) => st.currentRevision);
 
   // Transient (local + presence) state.
@@ -220,6 +221,8 @@ export default function MapSessionPage() {
           imageAssetId={map.imageAssetId}
           grid={map.gridConfig}
           tokens={tokens}
+          fog={fog}
+          fogViewerIsGm={permissions?.canManageMap ?? false}
           selectedTokenId={selectedTokenId}
           remoteDragPreviews={remoteDragPreviews}
           localDragPreview={localDragPreview}

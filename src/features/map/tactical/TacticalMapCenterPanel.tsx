@@ -96,6 +96,7 @@ export function TacticalMapCenterPanel({
   const tokensById = useMapSessionStore((st) => st.tokensById);
   const tokenIds = useMapSessionStore((st) => st.tokenIds);
   const tileStates = useMapSessionStore((st) => st.tileStates);
+  const fog = useMapSessionStore((st) => st.fog);
   const permissions = useMapSessionStore((st) => st.permissions);
   const currentRevision = useMapSessionStore((st) => st.currentRevision);
 
@@ -540,6 +541,8 @@ export function TacticalMapCenterPanel({
         grid={map.gridConfig}
         tokens={tokens}
         tiles={tileStates}
+        fog={fog}
+        fogViewerIsGm={isGm}
         selectedTokenId={selectedTokenId}
         remoteDragPreviews={remoteDragPreviews}
         localDragPreview={localDragPreview}

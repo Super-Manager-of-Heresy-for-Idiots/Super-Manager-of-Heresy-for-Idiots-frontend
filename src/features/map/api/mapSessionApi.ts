@@ -1,6 +1,13 @@
 import { AxiosError } from 'axios';
 import mapHttp from './mapHttp';
-import type { CreateMapSessionRequest, MapSessionDto, MapSnapshotDto, UUID } from '../types';
+import type {
+  CreateMapSessionRequest,
+  FogShapeDto,
+  FogStateDto,
+  MapSessionDto,
+  MapSnapshotDto,
+  UUID,
+} from '../types';
 import { normalizeGridConfig } from '../calibration/calibrationMath';
 
 function normalizeSnapshot(snapshot: MapSnapshotDto): MapSnapshotDto {
@@ -51,5 +58,37 @@ export const mapSessionApi = {
   getSnapshot: async (sessionId: UUID): Promise<MapSnapshotDto> => {
     const { data } = await mapHttp.get<MapSnapshotDto>(`/map-sessions/${sessionId}/snapshot`);
     return normalizeSnapshot(data);
+  },
+
+  /* ── Fog of war (Phase 1.6) ──────────────────────────────────── */
+
+  /** GET /api/map-sessions/{sessionId}/fog — current revealed geometry (any viewer). */
+  getFog: async (sessionId: UUID): Promise<FogStateDto> => {
+    const { data } = await mapHttp.get<FogStateDto>(`/map-sessions/${sessionId}/fog`);
+    return data;
+  },
+
+  /** POST …/fog/reveal — reveal one shape (GM). Returns the full new fog state. */
+  revealFog: async (sessionId: UUID, shape: FogShapeDto): Promise<FogStateDto> => {
+    const { data } = await mapHttp.post<FogStateDto>(`/map-sessions/${sessionId}/fog/reveal`, { shape });
+    return data;
+  },
+
+  /** POST …/fog/hide — re-fog an area (GM). Returns the full new fog state. */
+  hideFog: async (sessionId: UUID, shape: FogShapeDto): Promise<FogStateDto> => {
+    const { data } = await mapHttp.post<FogStateDto>(`/map-sessions/${sessionId}/fog/hide`, { shape });
+    return data;
+  },
+
+  /** POST …/fog/reveal-all — reveal the whole map (GM). */
+  revealAllFog: async (sessionId: UUID): Promise<FogStateDto> => {
+    const { data } = await mapHttp.post<FogStateDto>(`/map-sessions/${sessionId}/fog/reveal-all`);
+    return data;
+  },
+
+  /** POST …/fog/hide-all — fully fog the map (GM). */
+  hideAllFog: async (sessionId: UUID): Promise<FogStateDto> => {
+    const { data } = await mapHttp.post<FogStateDto>(`/map-sessions/${sessionId}/fog/hide-all`);
+    return data;
   },
 };

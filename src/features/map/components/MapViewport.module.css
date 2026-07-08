@@ -46,10 +46,27 @@
 .tokenLayer,
 .cursorLayer,
 .pingLayer,
-.terrainLayer {
+.terrainLayer,
+.fogLayer {
   position: absolute;
   inset: 0;
   pointer-events: none;
+}
+
+/* ── Fog of war — Phase 1.6 ───────────────────────────────────── */
+.fogSvg {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+/* Opaque cover for players; the mask punches revealed areas back to transparent. */
+.fogFill {
+  fill: var(--abyss);
+  fill-opacity: 0.96;
+}
+/* The GM works through the fog, so it stays translucent for them. */
+.fogFillGm {
+  fill-opacity: 0.5;
 }
 
 /* ── Terrain (high ground) — Phase 1.9 ────────────────────────── */

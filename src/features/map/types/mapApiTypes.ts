@@ -411,6 +411,25 @@ export interface MapTileStateDto {
   updatedAt: IsoInstant;
 }
 
+/**
+ * A single revealed fog area in GRID coordinates (Phase 1.6). `RECT` uses `x/y/width/height`;
+ * `POLYGON` uses `points`. The map is fogged everywhere except the union of the revealed shapes.
+ */
+export interface FogShapeDto {
+  type: 'RECT' | 'POLYGON';
+  x: number | null;
+  y: number | null;
+  width: number | null;
+  height: number | null;
+  points: Array<{ x: number; y: number }> | null;
+}
+
+/** Current fog state for a session — the list of revealed shapes plus the session revision. */
+export interface FogStateDto {
+  revealed: FogShapeDto[];
+  revision: number;
+}
+
 export type MapElementType = 'WALL' | 'ROOF' | 'RECTANGLE' | 'CIRCLE' | 'POLYGON' | 'LINE';
 
 /**
@@ -494,8 +513,8 @@ export interface MapSnapshotDto {
   tileStates?: MapTileStateDto[];
   /** Map-definition wall/shape elements. Absent → none. */
   mapElements?: MapElementDto[];
-  /** Fog-of-war state — unused in MVP, shape intentionally opaque. */
-  fog: unknown | null;
+  /** Manual fog-of-war state (Phase 1.6). Absent/`null` → no revealed geometry yet (fully fogged). */
+  fog: FogStateDto | null;
   permissions: MapPermissions;
 }
 

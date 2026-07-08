@@ -10,7 +10,7 @@
  * resync instead of silently diverging.
  */
 
-import type { MapSnapshotDto, MapTokenDto, UUID } from '../types';
+import type { FogShapeDto, MapSnapshotDto, MapTokenDto, UUID } from '../types';
 import { normalizeGridConfig } from '../calibration/calibrationMath';
 import type {
   GridPoint,
@@ -165,11 +165,17 @@ function applyCommittedPayload(
         ? { ...state, session: { ...state.session, status: 'CLOSED' } }
         : resync(state);
 
-    // Payload is insufficient to apply in MVP (created token needs hydration; fog
-    // and map-definition blobs are opaque) → reload the snapshot.
-    case 'TOKEN_CREATED_EVENT':
+    // Fog events carry the full new revealed list (Phase 1.6) → replace fog state directly.
     case 'FOG_REVEALED_EVENT':
-    case 'FOG_HIDDEN_EVENT':
+    case 'FOG_HIDDEN_EVENT': {
+      const revealed = parseFogRevealed(event.payload);
+      if (!revealed) return resync(state);
+      return { ...state, fog: { revealed, revision: event.revision } };
+    }
+
+    // Payload is insufficient to apply in MVP (created token needs hydration; the
+    // map-definition blob is opaque) → reload the snapshot.
+    case 'TOKEN_CREATED_EVENT':
     case 'MAP_DEFINITION_CHANGED_EVENT':
       return resync(state);
 
@@ -208,6 +214,30 @@ function parseElevationFt(payload: unknown): number | null {
 function parseVisible(payload: unknown): boolean | null {
   if (!isRecord(payload)) return null;
   return typeof payload.visible === 'boolean' ? payload.visible : null;
+}
+
+function toFogShape(raw: Record<string, unknown>): FogShapeDto {
+  const num = (v: unknown): number | null => (typeof v === 'number' ? v : null);
+  const points = Array.isArray(raw.points)
+    ? raw.points
+        .filter(isRecord)
+        .map((p) => ({ x: typeof p.x === 'number' ? p.x : 0, y: typeof p.y === 'number' ? p.y : 0 }))
+    : null;
+  return {
+    type: raw.type === 'POLYGON' ? 'POLYGON' : 'RECT',
+    x: num(raw.x),
+    y: num(raw.y),
+    width: num(raw.width),
+    height: num(raw.height),
+    points,
+  };
+}
+
+function parseFogRevealed(payload: unknown): FogShapeDto[] | null {
+  if (!isRecord(payload)) return null;
+  const raw = payload.revealed;
+  if (!Array.isArray(raw)) return null;
+  return raw.filter(isRecord).map(toFogShape);
 }
 
 function parseTokenMoved(payload: unknown): TokenMovedPayload | null {

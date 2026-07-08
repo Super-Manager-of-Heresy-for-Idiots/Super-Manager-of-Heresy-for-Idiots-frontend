@@ -13,6 +13,7 @@
  */
 
 import type {
+  FogStateDto,
   MapEventType,
   MapPermissions,
   MapSnapshotMap,
@@ -55,8 +56,11 @@ export interface MapCommittedState {
    * from the snapshot and not advanced by events; drives the terrain layer + the elevation hook.
    */
   tileStates: MapTileStateDto[];
-  /** Fog-of-war blob — opaque in MVP. */
-  fog: unknown | null;
+  /**
+   * Manual fog-of-war state (Phase 1.6): the current list of revealed shapes. Seeded from the
+   * snapshot and advanced directly by FOG_REVEALED/HIDDEN events (payload carries the full list).
+   */
+  fog: FogStateDto | null;
   permissions: MapPermissions | null;
   currentRevision: number;
   /** A revision gap (or an unappliable event) was seen → caller must reload snapshot. */

@@ -243,6 +243,38 @@ describe('applyCommittedEvent — other committed events', () => {
     const next = applyCommittedEvent(state, movedEvent(6, 'ghost', { gridX: 1, gridY: 1 }));
     expect(next.needsResync).toBe(true);
   });
+
+  it('applies a FOG_REVEALED_EVENT from its payload without a resync', () => {
+    const state = committedStateFromSnapshot(makeSnapshot(5));
+    const next = applyCommittedEvent(state, {
+      type: 'FOG_REVEALED_EVENT',
+      revision: 6,
+      payload: { revealed: [{ type: 'RECT', x: 2, y: 3, width: 4, height: 5 }] },
+    });
+    expect(next.needsResync).toBe(false);
+    expect(next.currentRevision).toBe(6);
+    expect(next.fog?.revealed).toHaveLength(1);
+    expect(next.fog?.revealed[0]).toMatchObject({ type: 'RECT', x: 2, y: 3, width: 4, height: 5 });
+  });
+
+  it('applies a FOG_HIDDEN_EVENT that empties the revealed list (fully fogged)', () => {
+    let state = committedStateFromSnapshot(makeSnapshot(5));
+    state = applyCommittedEvent(state, {
+      type: 'FOG_REVEALED_EVENT',
+      revision: 6,
+      payload: { revealed: [{ type: 'RECT', x: 0, y: 0, width: 2, height: 2 }] },
+    });
+    const next = applyCommittedEvent(state, { type: 'FOG_HIDDEN_EVENT', revision: 7, payload: { revealed: [] } });
+    expect(next.needsResync).toBe(false);
+    expect(next.fog?.revealed).toEqual([]);
+  });
+
+  it('requests resync when a fog payload is malformed (no revealed array)', () => {
+    const state = committedStateFromSnapshot(makeSnapshot(5));
+    const next = applyCommittedEvent(state, { type: 'FOG_REVEALED_EVENT', revision: 6, payload: {} });
+    expect(next.needsResync).toBe(true);
+    expect(next.currentRevision).toBe(5);
+  });
 });
 
 /* ── 4. + 5. Transient isolation ────────────────────────────── */
