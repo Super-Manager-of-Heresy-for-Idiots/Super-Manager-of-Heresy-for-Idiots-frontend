@@ -285,6 +285,34 @@
   margin: 0;
 }
 
+/* Condition badges on a roster row (Phase 1.1). */
+.condRow {
+  margin-top: 4px;
+}
+.condChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 6px;
+  border: 1px solid var(--arcane);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--arcane) 14%, transparent);
+  color: var(--ink-bright);
+  font-family: var(--font-display);
+  font-size: var(--t-tiny, 11px);
+  line-height: 1.4;
+  white-space: nowrap;
+}
+.condRounds {
+  min-width: 14px;
+  padding: 0 3px;
+  border-radius: 7px;
+  background: var(--arcane);
+  color: var(--abyss);
+  font-size: var(--t-tiny, 11px);
+  text-align: center;
+}
+
 /* ── Right dock (tabs) ────────────────────────────────────── */
 .dock {
   display: flex;

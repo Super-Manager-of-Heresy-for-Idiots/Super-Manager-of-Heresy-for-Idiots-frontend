@@ -135,6 +135,7 @@ export function useWebSocket(campaignId: string | undefined): { connectionState:
         case 'COMBATANT_JOINED':
         case 'BATTLE_TURN_CHANGED':
         case 'BATTLE_ACTION':
+        case 'COMBATANT_CONDITIONS_CHANGED':
         case 'BATTLE_ENDED': {
           // The payload only carries { battleId }; the REST GET is the source
           // of truth. A prefix invalidate refreshes the list, the active battle

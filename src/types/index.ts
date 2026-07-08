@@ -1728,6 +1728,7 @@ export type WsEventType =
   | 'COMBATANT_JOINED'
   | 'BATTLE_TURN_CHANGED'
   | 'BATTLE_ACTION'
+  | 'COMBATANT_CONDITIONS_CHANGED'
   | 'BATTLE_ENDED'
   // Social graph — payloads carry { relationshipId, userId, username }; REST is the source of truth.
   | 'FRIEND_REQUEST_RECEIVED'
@@ -1832,6 +1833,18 @@ export interface BattleCombatantResponse {
   legendaryActionMax: number;
   legendaryActionSpent: number;
   reactionUsed: boolean;
+  /** Live conditions on this combatant (Blinded, Prone, …); may be omitted or empty. */
+  conditions?: CombatantCondition[];
+}
+
+/** A live condition instance on a battle combatant (Phase 1.1). */
+export interface CombatantCondition {
+  conditionId: string;
+  code: string;
+  name: string;
+  sourceText: string | null;
+  /** Rounds left; null = until removed. */
+  remainingRounds: number | null;
 }
 
 export type ActionEconomySlot = 'ACTION' | 'BONUS_ACTION' | 'LEGENDARY_ACTION' | 'REACTION';

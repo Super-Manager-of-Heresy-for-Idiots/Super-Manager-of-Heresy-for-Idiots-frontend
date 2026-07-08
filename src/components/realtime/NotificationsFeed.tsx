@@ -38,6 +38,7 @@ const EVENT_VISUAL: Record<WsEventType, EventVisual> = {
   COMBATANT_JOINED:        { glyph: 'helm',    color: 'var(--arcane)' },
   BATTLE_TURN_CHANGED:     { glyph: 'arrow-r', color: 'var(--gold-pale)' },
   BATTLE_ACTION:           { glyph: 'sword',   color: 'var(--ember)' },
+  COMBATANT_CONDITIONS_CHANGED: { glyph: 'eye', color: 'var(--arcane)' },
   BATTLE_ENDED:            { glyph: 'flame',   color: 'var(--ember)' },
   FRIEND_REQUEST_RECEIVED: { glyph: 'eye',     color: 'var(--gold)' },
   FRIEND_REQUEST_ACCEPTED: { glyph: 'check',   color: 'var(--arcane)' },

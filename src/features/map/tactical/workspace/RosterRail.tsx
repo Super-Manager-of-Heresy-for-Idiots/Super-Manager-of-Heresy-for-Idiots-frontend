@@ -115,6 +115,23 @@ export function RosterRail({ battle, tacticalTokens, currentUserId, placementEna
                   </div>
                 )}
 
+                {c.conditions && c.conditions.length > 0 && (
+                  <div className={cn('ao-row ao-wrap ao-gap-4', s.condRow)}>
+                    {c.conditions.map((cond) => (
+                      <span
+                        key={cond.conditionId}
+                        className={s.condChip}
+                        title={cond.sourceText ? `${cond.name} — ${cond.sourceText}` : cond.name}
+                      >
+                        {cond.name}
+                        {cond.remainingRounds != null && (
+                          <span className={s.condRounds}>{cond.remainingRounds}</span>
+                        )}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
                 {placementEnabled && !onMap && (
                   <div className={s.placeRow}>
                     {isPlacing ? (
