@@ -127,6 +127,26 @@
   cursor: pointer;
 }
 
+/* GM fog-of-war paint tools (Phase 1.6) — top-left overlay over the map. Wraps so the
+   button row never spills past the map edge on narrow screens. */
+.fogTools {
+  position: absolute;
+  top: var(--s-3);
+  left: var(--s-3);
+  z-index: 20;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-1);
+  max-width: calc(100% - var(--s-6));
+  padding: var(--s-2);
+  border-color: var(--brass);
+}
+.fogToolsLabel {
+  margin-right: var(--s-1);
+  color: var(--ink-quiet);
+}
+
 /* ── Center status (loading / no map) ────────────────────── */
 .centerStatus {
   display: flex;

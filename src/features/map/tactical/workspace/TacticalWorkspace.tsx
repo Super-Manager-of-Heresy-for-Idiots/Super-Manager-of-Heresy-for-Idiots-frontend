@@ -124,6 +124,8 @@ export function TacticalWorkspace({
             tacticalTokens={tacticalTokens}
             currentUserId={currentUserId}
             placementEnabled={isGm && !!mapSessionId}
+            isGm={isGm}
+            campaignId={campaignId}
           />
         </aside>
 

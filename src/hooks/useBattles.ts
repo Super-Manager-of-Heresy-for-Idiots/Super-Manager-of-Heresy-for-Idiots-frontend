@@ -296,3 +296,34 @@ export function useEndBattle() {
     onError: (e) => toast.error(errMsg(e, t('battle.toast.endFailed'))),
   });
 }
+
+/** GM rerolls one combatant's initiative (server d20 + DEX) and re-sorts the tracker (Phase 1.7). */
+export function useRerollInitiative() {
+  const sync = useSyncBattle();
+  const t = useT();
+  return useMutation({
+    mutationFn: ({ campaignId, battleId, combatantId }: { campaignId: string; battleId: string; combatantId: string }) =>
+      battlesApi.rerollInitiative(campaignId, battleId, combatantId),
+    onSuccess: (res) => sync(res.data),
+    onError: (e) => toast.error(errMsg(e, t('tactical.init.updateFailed'))),
+  });
+}
+
+/** GM reorders the initiative tracker (full initiative-value replacement, Phase 1.7). */
+export function useSetInitiativeOrder() {
+  const sync = useSyncBattle();
+  const t = useT();
+  return useMutation({
+    mutationFn: ({
+      campaignId,
+      battleId,
+      entries,
+    }: {
+      campaignId: string;
+      battleId: string;
+      entries: Array<{ combatantId: string; initiative: number }>;
+    }) => battlesApi.setInitiativeOrder(campaignId, battleId, entries),
+    onSuccess: (res) => sync(res.data),
+    onError: (e) => toast.error(errMsg(e, t('tactical.init.updateFailed'))),
+  });
+}

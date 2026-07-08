@@ -267,4 +267,20 @@ export const battlesApi = {
     );
     return response.data;
   },
+
+  /**
+   * GM replaces the whole tracker's initiative values in one shot (Phase 1.7 drag/reorder). Every
+   * combatant of the battle must be listed exactly once; the server re-sorts and keeps the turn.
+   */
+  setInitiativeOrder: async (
+    campaignId: string,
+    battleId: string,
+    entries: Array<{ combatantId: string; initiative: number }>,
+  ): Promise<ApiResponse<BattleResponse>> => {
+    const response = await api.patch<ApiResponse<BattleResponse>>(
+      `${base(campaignId)}/${battleId}/initiative-order`,
+      { entries },
+    );
+    return response.data;
+  },
 };

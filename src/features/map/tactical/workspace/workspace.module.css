@@ -294,6 +294,11 @@
 .condRow {
   margin-top: 4px;
 }
+
+/* GM per-combatant reorder/reroll controls on a roster row (Phase 1.7). */
+.initControls {
+  margin-top: 4px;
+}
 .condChip {
   display: inline-flex;
   align-items: center;

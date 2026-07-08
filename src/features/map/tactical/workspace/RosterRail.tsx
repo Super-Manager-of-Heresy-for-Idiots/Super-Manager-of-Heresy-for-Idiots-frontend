@@ -11,6 +11,7 @@ import { Rune } from '@/components/ordo';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
 import type { BattleResponse } from '@/types';
+import { useRerollInitiative, useSetInitiativeOrder } from '@/hooks/useBattles';
 import { useMapTransientStore } from '../../state';
 import { enterPlacement } from '../combatantPlacement';
 import type { TacticalTokenView } from '../tacticalView';
@@ -21,14 +22,27 @@ interface RosterRailProps {
   tacticalTokens: TacticalTokenView[];
   currentUserId: string | null;
   placementEnabled: boolean;
+  /** GM sees per-combatant reorder + reroll controls once the battle is active. */
+  isGm: boolean;
+  campaignId: string;
 }
 
-export function RosterRail({ battle, tacticalTokens, currentUserId, placementEnabled }: RosterRailProps) {
+export function RosterRail({
+  battle,
+  tacticalTokens,
+  currentUserId,
+  placementEnabled,
+  isGm,
+  campaignId,
+}: RosterRailProps) {
   const t = useT();
   const placement = useMapTransientStore((st) => st.placement);
   const setPlacement = useMapTransientStore((st) => st.setPlacement);
   const clearPlacement = useMapTransientStore((st) => st.clearPlacement);
   const setSelectedToken = useMapTransientStore((st) => st.setSelectedToken);
+  const rerollInitiative = useRerollInitiative();
+  const setInitiativeOrder = useSetInitiativeOrder();
+  const reorderBusy = setInitiativeOrder.isPending || rerollInitiative.isPending;
 
   // GM-chosen token footprint (creature size) applied to the next placement.
   const [placeSize, setPlaceSize] = useState(1);
@@ -51,6 +65,18 @@ export function RosterRail({ battle, tacticalTokens, currentUserId, placementEna
     );
   }, [battle.combatants, isActive]);
 
+  // GM reorder: swap the two combatants' initiative values. The server re-sorts by initiative,
+  // so the moved combatant lands above/below its neighbour while everyone keeps their number.
+  const moveInitiative = (index: number, dir: -1 | 1) => {
+    const target = index + dir;
+    if (target < 0 || target >= ordered.length || reorderBusy) return;
+    const entries = ordered.map((c) => ({ combatantId: c.id, initiative: c.initiative }));
+    const tmp = entries[index].initiative;
+    entries[index].initiative = entries[target].initiative;
+    entries[target].initiative = tmp;
+    setInitiativeOrder.mutate({ campaignId, battleId: battle.id, entries });
+  };
+
   return (
     <div className={s.roster}>
       <div className={cn('ao-row ao-between', s.rosterHead)}>
@@ -64,7 +90,7 @@ export function RosterRail({ battle, tacticalTokens, currentUserId, placementEna
         <p className={cn('ao-italic', s.muted)}>{t('battle.tracker.empty')}</p>
       ) : (
         <ul className={cn('ao-scroll', s.rosterList)}>
-          {ordered.map((c) => {
+          {ordered.map((c, index) => {
             const isMonster = c.type === 'MONSTER';
             const isYou = c.type === 'CHARACTER' && !!currentUserId && c.ownerUserId === currentUserId;
             const tokenId = tokenByCombatant.get(c.id);
@@ -129,6 +155,46 @@ export function RosterRail({ battle, tacticalTokens, currentUserId, placementEna
                         )}
                       </span>
                     ))}
+                  </div>
+                )}
+
+                {isActive && isGm && (
+                  <div
+                    className={cn('ao-row ao-gap-4', s.initControls)}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <button
+                      type="button"
+                      className="ao-btn ao-btn--sm ao-btn--ghost"
+                      title={t('tactical.init.moveUp')}
+                      aria-label={t('tactical.init.moveUp')}
+                      disabled={index === 0 || reorderBusy}
+                      onClick={() => moveInitiative(index, -1)}
+                    >
+                      ▲
+                    </button>
+                    <button
+                      type="button"
+                      className="ao-btn ao-btn--sm ao-btn--ghost"
+                      title={t('tactical.init.moveDown')}
+                      aria-label={t('tactical.init.moveDown')}
+                      disabled={index === ordered.length - 1 || reorderBusy}
+                      onClick={() => moveInitiative(index, 1)}
+                    >
+                      ▼
+                    </button>
+                    <button
+                      type="button"
+                      className="ao-btn ao-btn--sm ao-btn--ghost"
+                      title={t('tactical.init.reroll')}
+                      aria-label={t('tactical.init.reroll')}
+                      disabled={reorderBusy}
+                      onClick={() =>
+                        rerollInitiative.mutate({ campaignId, battleId: battle.id, combatantId: c.id })
+                      }
+                    >
+                      ⟳
+                    </button>
                   </div>
                 )}
 

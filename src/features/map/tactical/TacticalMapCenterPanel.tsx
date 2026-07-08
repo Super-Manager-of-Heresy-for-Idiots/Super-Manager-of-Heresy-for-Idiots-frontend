@@ -27,7 +27,9 @@ import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/store/authStore';
 import { ErrorAltar, Rune } from '@/components/ordo';
 import { MapViewport, type MapToolbarLabels } from '../components';
+import { mapSessionApi } from '../api';
 import { useCreateTokenFromCombatant } from '../hooks';
+import { isPointRevealed } from './fogGeometry';
 import { useMapRealtime } from '../realtime';
 import { useMapSessionStore, useMapTransientStore } from '../state';
 import {
@@ -38,7 +40,7 @@ import {
   mapErrorI18nKey,
 } from '../utils';
 import type { GridCoord } from '../engine';
-import type { UUID } from '../types';
+import type { FogShapeDto, UUID } from '../types';
 import { buildFromCombatantRequest } from './combatantPlacement';
 import { MovementOverlay } from './workspace/MovementOverlay';
 import {
@@ -118,10 +120,15 @@ export function TacticalMapCenterPanel({
   const setPushTarget = useMapTransientStore((st) => st.setPushTarget);
   const clearCombatAction = useMapTransientStore((st) => st.clearCombatAction);
 
-  const tokens = useMemo(
-    () => tokenIds.map((id) => tokensById[id]).filter(Boolean),
-    [tokenIds, tokensById],
-  );
+  const tokens = useMemo(() => {
+    const list = tokenIds.map((id) => tokensById[id]).filter(Boolean);
+    // Players don't see tokens standing in fogged cells (MVP client-side occlusion — the
+    // server doesn't yet filter by fog). The GM always sees every token (fog is translucent).
+    if (isGm || !fog) return list;
+    return list.filter((tk) =>
+      isPointRevealed(fog.revealed, tk.gridX + (tk.widthCells ?? 1) / 2, tk.gridY + (tk.heightCells ?? 1) / 2),
+    );
+  }, [tokenIds, tokensById, isGm, fog]);
   const remoteDragPreviews = useMemo(
     () => Object.values(remoteDragPreviewsByTokenId),
     [remoteDragPreviewsByTokenId],
@@ -135,6 +142,36 @@ export function TacticalMapCenterPanel({
   // `force` so the server (which now enforces turn/budget/occupancy) applies the move as a
   // logged GM override instead of rejecting it. No effect for non-GMs or outside battle.
   const [forceMode, setForceMode] = useState(false);
+
+  // GM fog paint tool (Phase 1.6): when 'reveal'/'hide', a grid-cell click paints a 1×1
+  // fog cell instead of selecting/moving. 'off' restores normal interaction. GM-only.
+  const [fogTool, setFogTool] = useState<'off' | 'reveal' | 'hide'>('off');
+
+  const paintFogCell = useCallback(
+    (cell: GridCoord) => {
+      const shape: FogShapeDto = {
+        type: 'RECT',
+        x: cell.gridX,
+        y: cell.gridY,
+        width: 1,
+        height: 1,
+        points: null,
+      };
+      const request = fogTool === 'hide' ? mapSessionApi.hideFog : mapSessionApi.revealFog;
+      // Fire-and-forget: the server broadcasts FOG_REVEALED/HIDDEN and the committed store
+      // applies it (revision-guarded), so every client — including this one — re-renders.
+      request(sessionId, shape).catch(() => toast.error(t('tactical.fog.error')));
+    },
+    [fogTool, sessionId, t],
+  );
+
+  const revealAllFog = useCallback(() => {
+    mapSessionApi.revealAllFog(sessionId).catch(() => toast.error(t('tactical.fog.error')));
+  }, [sessionId, t]);
+
+  const hideAllFog = useCallback(() => {
+    mapSessionApi.hideAllFog(sessionId).catch(() => toast.error(t('tactical.fog.error')));
+  }, [sessionId, t]);
 
   const toolbarLabels = useMemo<MapToolbarLabels>(
     () => ({
@@ -368,6 +405,10 @@ export function TacticalMapCenterPanel({
   // (MOVE/FLY action), else select the cell for the inspector.
   const onEmptyCellClick = useCallback(
     (cell: GridCoord) => {
+      if (isGm && fogTool !== 'off') {
+        paintFogCell(cell);
+        return;
+      }
       if (placement) {
         if (placeToken.isPending) return;
         const request = buildFromCombatantRequest(battleId, placement.combatantId, cell, {
@@ -388,7 +429,7 @@ export function TacticalMapCenterPanel({
       }
       setSelectedCell({ gridX: cell.gridX, gridY: cell.gridY });
     },
-    [placement, placeToken, battleId, clearPlacement, realtime, moveMode, reach, setMovePending, setSelectedCell],
+    [isGm, fogTool, paintFogCell, placement, placeToken, battleId, clearPlacement, realtime, moveMode, reach, setMovePending, setSelectedCell],
   );
 
   // Commit the staged move on confirm: send MOVE_TOKEN (with path), charge the budget,
@@ -579,6 +620,34 @@ export function TacticalMapCenterPanel({
           ) : null
         }
       />
+
+      {isGm && (
+        <div className={cn('ao-panel', s.fogTools)}>
+          <span className={cn('ao-overline', s.fogToolsLabel)}>{t('tactical.fog.title')}</span>
+          <button
+            type="button"
+            className={cn('ao-btn ao-btn--sm', fogTool === 'reveal' ? 'ao-btn--primary' : 'ao-btn--ghost')}
+            aria-pressed={fogTool === 'reveal'}
+            onClick={() => setFogTool((m) => (m === 'reveal' ? 'off' : 'reveal'))}
+          >
+            {t('tactical.fog.reveal')}
+          </button>
+          <button
+            type="button"
+            className={cn('ao-btn ao-btn--sm', fogTool === 'hide' ? 'ao-btn--primary' : 'ao-btn--ghost')}
+            aria-pressed={fogTool === 'hide'}
+            onClick={() => setFogTool((m) => (m === 'hide' ? 'off' : 'hide'))}
+          >
+            {t('tactical.fog.hide')}
+          </button>
+          <button type="button" className="ao-btn ao-btn--sm ao-btn--ghost" onClick={revealAllFog}>
+            {t('tactical.fog.revealAll')}
+          </button>
+          <button type="button" className="ao-btn ao-btn--sm ao-btn--ghost" onClick={hideAllFog}>
+            {t('tactical.fog.hideAll')}
+          </button>
+        </div>
+      )}
 
       {isGm && battleActive && (
         <label className={cn('ao-panel', s.gmForceToggle)} title={t('tactical.gmForce.hint')}>
