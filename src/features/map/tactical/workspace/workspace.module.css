@@ -111,6 +111,11 @@
   color: var(--ember-pale);
 }
 
+/* GM action buttons — a nowrap row on desktop; wraps on mobile (see responsive block). */
+.gmActions {
+  flex-wrap: nowrap;
+}
+
 /* ── 3-column grid ────────────────────────────────────────── */
 .grid {
   flex: 1;
@@ -768,21 +773,77 @@
 
 /* ── Responsive: stack below desktop ──────────────────────── */
 @media (max-width: 1024px) {
+  /* Stacked layout uses ONE natural page scroll. The desktop shell fixes its own
+     height and scrolls each column internally; on narrow screens that produced
+     three competing scroll regions (the painful part). Here the workspace grows to
+     its content and the page owns the scroll — no nested/awkward scrolling. */
   .workspace {
     height: auto;
+    min-height: 0;
   }
   .grid {
     grid-template-columns: 1fr;
   }
+  .col,
   .colLeft,
-  .colRight {
-    max-height: 70vh;
-  }
+  .colRight,
   .colCenter {
-    min-height: 420px;
+    overflow: visible;
+    min-height: 0;
+  }
+  .roster,
+  .dock {
+    height: auto;
+  }
+  .rosterList,
+  .dockBody {
+    overflow: visible;
+  }
+  /* The map is the primary surface — keep it usably tall while the roster/dock flow below.
+     A definite height (not min-height) is required so the map's height:100% chain resolves
+     once the workspace shell stops fixing its own height. */
+  .colCenter {
+    height: 60dvh;
   }
   .commandMeta {
     margin-left: 0;
     width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .command {
+    gap: var(--s-2) var(--s-3);
+    padding: var(--s-2) var(--s-3);
+  }
+  /* Don't cap the encounter name to 28ch on a phone — let it use the full width. */
+  .commandName {
+    max-width: 100%;
+  }
+  .colCenter {
+    height: 54dvh;
+  }
+  /* Keep every tab reachable via a horizontal swipe strip instead of clipping/overflowing. */
+  .dockTabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  /* GM action buttons wrap onto more rows rather than spilling past the bar edge. */
+  .gmActions {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 480px) {
+  .colCenter {
+    height: 48dvh;
+  }
+  /* Drop the forced min-widths so round/turn meta packs tight instead of overflowing. */
+  .metaStat,
+  .metaTurn {
+    min-width: 0;
+  }
+  .metaTurn {
+    padding-left: var(--s-2);
   }
 }

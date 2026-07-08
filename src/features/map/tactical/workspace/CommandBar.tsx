@@ -78,7 +78,7 @@ export function CommandBar({ campaignId, battle, isGm, currentUserId }: CommandB
         )}
 
         {isGm ? (
-          <div className="ao-row ao-gap-8">
+          <div className={cn('ao-row ao-gap-8', s.gmActions)}>
             {isAssembling && (
               <button
                 className="ao-btn ao-btn--primary"
