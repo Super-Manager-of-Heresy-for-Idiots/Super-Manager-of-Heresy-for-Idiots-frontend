@@ -11,10 +11,11 @@ import toast from 'react-hot-toast';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
-import type { BattleCombatantResponse, CombatantCondition } from '@/types';
+import type { BattleCombatantResponse, CombatantCondition, SpellSlotsResponse } from '@/types';
 import { useBattleAttack, useApplyCombatantHp } from '@/hooks/useBattles';
 import { referenceApi } from '@/api/reference.api';
 import { battlesApi } from '@/api/battles.api';
+import { spellSlotsApi } from '@/api/spellSlots.api';
 import { mapTokenApi } from '../api/mapTokenApi';
 import { useMapSessionStore, useMapTransientStore } from '../state';
 import {
@@ -110,6 +111,7 @@ function TokenInspector({
 }) {
   const t = useT();
   const rawToken = useMapSessionStore((st) => st.tokensById[tokenId]);
+  const forceMode = useMapTransientStore((st) => st.forceMode);
   const hpKnown = view?.currentHp != null && view?.maxHp != null;
   const combatant = view?.combatant ?? null;
 
@@ -204,6 +206,11 @@ function TokenInspector({
 
       {isGm && combatant && (
         <InitiativeReroll campaignId={campaignId} battleId={battleId} combatantId={combatant.id} />
+      )}
+
+      {/* GM spell-slot management for a character — unlocked by the "обход правил" toggle. */}
+      {isGm && forceMode && combatant?.characterId && (
+        <SpellSlotsGm characterId={combatant.characterId} campaignId={campaignId} />
       )}
 
       {isGm && rawToken && (
@@ -412,6 +419,83 @@ function InitiativeReroll({
         onClick={() => reroll.mutate()}
       >
         {t('tactical.inspect.reroll')}
+      </button>
+    </div>
+  );
+}
+
+/**
+ * GM spell-slot management for a character, unlocked by the "обход правил" toggle (Phase 2.1). The
+ * GM can spend (−) or restore (+) one slot per level, or restore all — for ANY character (the
+ * spell-slot API authorizes owner/GM/ADMIN). Refreshes the player's current-turn slot display too.
+ */
+function SpellSlotsGm({ characterId, campaignId }: { characterId: string; campaignId: string }) {
+  const t = useT();
+  const qc = useQueryClient();
+  const { data: slots } = useQuery({
+    queryKey: ['spell-slots', characterId],
+    queryFn: async () => (await spellSlotsApi.get(characterId)).data ?? null,
+  });
+  const sync = (data?: SpellSlotsResponse | null) => {
+    if (data) qc.setQueryData(['spell-slots', characterId], data);
+    // The player's current-turn panel shows the same slots — refresh it.
+    qc.invalidateQueries({ queryKey: ['campaigns', campaignId, 'battles'] });
+  };
+  const onErr = () => toast.error(t('tactical.slots.error'));
+  const spend = useMutation({
+    mutationFn: (lvl: number) => spellSlotsApi.expend(characterId, lvl),
+    onSuccess: (res) => sync(res.data),
+    onError: onErr,
+  });
+  const restore = useMutation({
+    mutationFn: (lvl: number) => spellSlotsApi.restoreOne(characterId, lvl),
+    onSuccess: (res) => sync(res.data),
+    onError: onErr,
+  });
+  const restoreAll = useMutation({
+    mutationFn: () => spellSlotsApi.restoreAll(characterId),
+    onSuccess: (res) => sync(res.data),
+    onError: onErr,
+  });
+  const busy = spend.isPending || restore.isPending || restoreAll.isPending;
+  const levels = slots?.levels ?? [];
+  if (!levels.length) {
+    return null;
+  }
+
+  return (
+    <div className={s.actionBlock}>
+      <p className={cn('ao-overline', s.actionOverline)}>{t('tactical.slots.gmTitle')}</p>
+      {levels.map((sl) => (
+        <div key={sl.spellLevel} className="ao-row ao-gap-8">
+          <span className="ao-grow">{t('battle.action.slot.level', { n: sl.spellLevel })}</span>
+          <span className="ao-num">
+            {sl.available}/{sl.max}
+          </span>
+          <button
+            type="button"
+            className="ao-btn ao-btn--sm ao-btn--ghost"
+            disabled={busy || sl.expended <= 0}
+            title={t('tactical.slots.restore')}
+            aria-label={t('tactical.slots.restore')}
+            onClick={() => restore.mutate(sl.spellLevel)}
+          >
+            +
+          </button>
+          <button
+            type="button"
+            className="ao-btn ao-btn--sm ao-btn--ghost"
+            disabled={busy || sl.available <= 0}
+            title={t('tactical.slots.spend')}
+            aria-label={t('tactical.slots.spend')}
+            onClick={() => spend.mutate(sl.spellLevel)}
+          >
+            −
+          </button>
+        </div>
+      ))}
+      <button type="button" className="ao-btn ao-btn--sm" disabled={busy} onClick={() => restoreAll.mutate()}>
+        {t('tactical.slots.restoreAll')}
       </button>
     </div>
   );

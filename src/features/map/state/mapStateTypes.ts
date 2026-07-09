@@ -161,4 +161,9 @@ export interface MapTransientState {
   movePending: GridPoint | null;
   /** PUSH target token chosen but not yet confirmed. */
   pushTargetTokenId: UUID | null;
+  /**
+   * GM "out of rules" (обход правил) toggle. Shared here so both the map center (free token
+   * dragging) and the inspector (GM spell-slot management for any character) react to it.
+   */
+  forceMode: boolean;
 }

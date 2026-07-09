@@ -141,7 +141,9 @@ export function TacticalMapCenterPanel({
   // GM "out of rules" mode: lets the GM drag ANY token during an active battle, sending
   // `force` so the server (which now enforces turn/budget/occupancy) applies the move as a
   // logged GM override instead of rejecting it. No effect for non-GMs or outside battle.
-  const [forceMode, setForceMode] = useState(false);
+  // Shared via the transient store so the inspector's GM slot tools react to the same toggle.
+  const forceMode = useMapTransientStore((st) => st.forceMode);
+  const setForceMode = useMapTransientStore((st) => st.setForceMode);
 
   // GM fog paint tool (Phase 1.6): when 'reveal'/'hide', a grid-cell click paints a 1×1
   // fog cell instead of selecting/moving. 'off' restores normal interaction. GM-only.

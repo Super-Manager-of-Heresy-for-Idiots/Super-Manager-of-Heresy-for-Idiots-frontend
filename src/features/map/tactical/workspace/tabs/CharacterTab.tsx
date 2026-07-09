@@ -105,6 +105,7 @@ function ActionPanel({
   const { data: turn, isLoading } = useBattleCurrentTurn(campaignId, battle.id, true);
 
   const resources = turn?.resources ?? [];
+  const spellSlotLevels = turn?.spellSlots?.levels ?? [];
   const attacks = useMemo(() => characterAttackOptions(turn), [turn]);
   const spells = turn?.character?.knownSpells ?? [];
   const effects = turn?.activeEffects ?? [];
@@ -164,6 +165,23 @@ function ActionPanel({
               ))
             )}
           </div>
+
+          {spellSlotLevels.length > 0 && (
+            <div className={s.block}>
+              <div className={cn('ao-overline', s.fieldLabel)}>{t('battle.action.slots')}</div>
+              {spellSlotLevels.map((sl) => (
+                <div key={sl.spellLevel} className={s.resItem}>
+                  <div className="ao-row ao-between">
+                    <span>{t('battle.action.slot.level', { n: sl.spellLevel })}</span>
+                    <span className="ao-num">
+                      {sl.available} / {sl.max}
+                    </span>
+                  </div>
+                  <Bar value={sl.available} max={sl.max} tone="arcane" height={6} showNumbers={false} />
+                </div>
+              ))}
+            </div>
+          )}
 
           <div className={s.block}>
             <div className={cn('ao-overline', s.fieldLabel)}>{t('battle.action.attacks')}</div>

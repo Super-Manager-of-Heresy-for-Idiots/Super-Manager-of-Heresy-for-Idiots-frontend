@@ -21,6 +21,13 @@ export const spellSlotsApi = {
     return response.data;
   },
 
+  restoreOne: async (characterId: string, spellLevel: number): Promise<ApiResponse<SpellSlotsResponse>> => {
+    const response = await api.post<ApiResponse<SpellSlotsResponse>>(
+      `/characters/${characterId}/spell-slots/${spellLevel}/restore`,
+    );
+    return response.data;
+  },
+
   restoreAll: async (characterId: string): Promise<ApiResponse<SpellSlotsResponse>> => {
     const response = await api.post<ApiResponse<SpellSlotsResponse>>(
       `/characters/${characterId}/spell-slots/restore-all`,

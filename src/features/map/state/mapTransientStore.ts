@@ -31,6 +31,8 @@ interface MapTransientStore extends MapTransientState {
   setCombatAction: (action: CombatActionIntent | null) => void;
   setMovePending: (cell: GridPoint | null) => void;
   setPushTarget: (tokenId: UUID | null) => void;
+  /** GM "out of rules" toggle (обход правил) — see {@link MapTransientState.forceMode}. */
+  setForceMode: (on: boolean) => void;
   /** Disarm the staged action and clear its target/pending cell. */
   clearCombatAction: () => void;
   setLocalDragPreview: (preview: TokenDragPreview | null) => void;
@@ -57,6 +59,7 @@ function createInitialTransientState(): MapTransientState {
     combatAction: null,
     movePending: null,
     pushTargetTokenId: null,
+    forceMode: false,
   };
 }
 
@@ -83,6 +86,8 @@ export const useMapTransientStore = create<MapTransientStore>((set) => ({
   setMovePending: (cell) => set({ movePending: cell }),
 
   setPushTarget: (tokenId) => set({ pushTargetTokenId: tokenId }),
+
+  setForceMode: (on) => set({ forceMode: on }),
 
   clearCombatAction: () =>
     set({ combatAction: null, movePending: null, pushTargetTokenId: null }),
