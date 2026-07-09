@@ -91,4 +91,19 @@ export const mapSessionApi = {
     const { data } = await mapHttp.post<FogStateDto>(`/map-sessions/${sessionId}/fog/hide-all`);
     return data;
   },
+
+  /**
+   * POST …/aoe-targets — which tokens does this AoE template cover (Phase 2.3)? Pure geometry;
+   * origin is the template's center (sphere/cube) or apex (cone/line) in grid cells.
+   */
+  aoeTargets: async (
+    sessionId: UUID,
+    req: { shape: string; sizeFt: number; originX: number; originY: number; rotationDeg?: number },
+  ): Promise<Array<{ tokenId: UUID; combatantId: UUID | null; name: string }>> => {
+    const { data } = await mapHttp.post<Array<{ tokenId: UUID; combatantId: UUID | null; name: string }>>(
+      `/map-sessions/${sessionId}/aoe-targets`,
+      { rotationDeg: 0, ...req },
+    );
+    return data;
+  },
 };

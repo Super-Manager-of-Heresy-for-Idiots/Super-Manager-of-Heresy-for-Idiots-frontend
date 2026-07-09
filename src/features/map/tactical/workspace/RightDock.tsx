@@ -31,6 +31,8 @@ interface RightDockProps {
   tacticalTokens: TacticalTokenView[];
   activeCombatant: BattleCombatantResponse | null;
   movement: MovementConfig | null;
+  /** Linked map session (AoE targeting, Phase 2.3); null when no live map. */
+  mapSessionId?: string | null;
 }
 
 export function RightDock({
@@ -41,6 +43,7 @@ export function RightDock({
   tacticalTokens,
   activeCombatant,
   movement,
+  mapSessionId = null,
 }: RightDockProps) {
   const t = useT();
   const isActive = battle.status === 'ACTIVE';
@@ -125,6 +128,7 @@ export function RightDock({
             currentUserId={currentUserId}
             tacticalTokens={tacticalTokens}
             movement={movement}
+            mapSessionId={mapSessionId}
           />
         )}
         {tab === 'target' && (

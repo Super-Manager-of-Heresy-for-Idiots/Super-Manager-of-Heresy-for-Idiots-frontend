@@ -24,6 +24,7 @@ import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
 import type { BattleCombatantResponse, BattleResponse, CharacterV2Response } from '@/types';
 import { useMapTransientStore } from '../../../state';
+import { mapSessionApi } from '../../../api';
 import { AttackForm } from '../AttackForm';
 import { DefaultActions } from '../DefaultActions';
 import { characterAttackOptions, liveTargets } from '../combat';
@@ -37,6 +38,8 @@ interface CharacterTabProps {
   currentUserId: string | null;
   tacticalTokens: TacticalTokenView[];
   movement: MovementConfig | null;
+  /** Linked map session (AoE targeting, Phase 2.3); null when no live map. */
+  mapSessionId?: string | null;
 }
 
 export function CharacterTab({
@@ -45,6 +48,7 @@ export function CharacterTab({
   currentUserId,
   tacticalTokens,
   movement,
+  mapSessionId = null,
 }: CharacterTabProps) {
   const t = useT();
   const { data: characters } = useCampaignCharacters(campaignId);
@@ -67,6 +71,7 @@ export function CharacterTab({
           current={current}
           tacticalTokens={tacticalTokens}
           movement={movement}
+          mapSessionId={mapSessionId}
         />
       ) : battle.status === 'ACTIVE' && available.length > 0 ? (
         <JoinPanel campaignId={campaignId} battle={battle} chars={available} />
@@ -93,12 +98,14 @@ function ActionPanel({
   current,
   tacticalTokens,
   movement,
+  mapSessionId,
 }: {
   campaignId: string;
   battle: BattleResponse;
   current: BattleCombatantResponse;
   tacticalTokens: TacticalTokenView[];
   movement: MovementConfig | null;
+  mapSessionId: string | null;
 }) {
   const t = useT();
   const endTurn = useEndTurn();
@@ -224,6 +231,7 @@ function ActionPanel({
               spells={spells}
               targets={spellTargets}
               lockedTargetId={spellLockedTargetId}
+              mapSessionId={mapSessionId}
             />
           )}
 
@@ -283,6 +291,7 @@ function SpellCastSection({
   spells,
   targets,
   lockedTargetId,
+  mapSessionId,
 }: {
   campaignId: string;
   battleId: string;
@@ -290,6 +299,7 @@ function SpellCastSection({
   spells: Array<{ spellId: string; name: string; level: number }>;
   targets: BattleCombatantResponse[];
   lockedTargetId: string | null;
+  mapSessionId: string | null;
 }) {
   const t = useT();
   const cast = useBattleCastSpell();
@@ -337,8 +347,32 @@ function SpellCastSection({
   const hasDamage = (plan?.damages?.length ?? 0) > 0;
   const manualNum = parseInt(manualStr, 10);
   const manualValid = Number.isFinite(manualNum) && manualNum >= 0;
-  // In manual mode you must enter the rolled total before casting a damage spell.
-  const canCast = !!spellId && !(hasDamage && manualMode && !manualValid);
+
+  // AoE (Phase 2.3): the template's origin is the cell selected on the map; map answers who is
+  // covered. Casting into an empty area is legal (zone spells like Web still create the zone).
+  const isAoe = !!mapSessionId && !!plan?.area?.shape && plan?.area?.sizeFt != null;
+  const selectedCell = useMapTransientStore((st) => st.selectedCell);
+  const origin = isAoe && selectedCell
+    ? { x: Math.floor(selectedCell.gridX), y: Math.floor(selectedCell.gridY) }
+    : null;
+  const { data: aoeCovered } = useQuery({
+    queryKey: ['aoe-targets', mapSessionId, plan?.area?.shape, plan?.area?.sizeFt, origin?.x, origin?.y],
+    queryFn: async () =>
+      mapSessionApi.aoeTargets(mapSessionId!, {
+        shape: plan!.area!.shape,
+        sizeFt: plan!.area!.sizeFt!,
+        originX: origin!.x,
+        originY: origin!.y,
+      }),
+    enabled: isAoe && !!origin,
+  });
+  const aoeCombatantIds = useMemo(
+    () => (aoeCovered ?? []).map((c) => c.combatantId).filter((id): id is string => !!id),
+    [aoeCovered],
+  );
+
+  // In manual mode you must enter the rolled total; an AoE cast needs its origin cell picked.
+  const canCast = !!spellId && !(hasDamage && manualMode && !manualValid) && (!isAoe || !!origin);
 
   const submit = () => {
     if (!canCast) return;
@@ -347,7 +381,10 @@ function SpellCastSection({
       battleId,
       data: {
         spellId,
-        targetCombatantId: targetId || undefined,
+        targetCombatantId: isAoe ? undefined : targetId || undefined,
+        targetCombatantIds: isAoe && aoeCombatantIds.length > 0 ? aoeCombatantIds : undefined,
+        originX: isAoe ? origin!.x : undefined,
+        originY: isAoe ? origin!.y : undefined,
         slotLevel: isLeveled ? slot : undefined,
         damageRollMode: hasDamage && manualMode ? 'MANUAL' : 'AUTO',
         manualDamage: hasDamage && manualMode && manualValid ? manualNum : undefined,
@@ -435,29 +472,55 @@ function SpellCastSection({
         </>
       )}
 
-      <div className={cn('ao-overline', s.fieldLabel, s.mt12)}>{t('battle.attack.pickTarget')}</div>
-      <div className={s.optGrid}>
-        {targets.map((c) => (
-          <button
-            key={c.id}
-            type="button"
-            className={cn(s.optBtn, targetId === c.id && s.optBtnActive)}
-            onClick={() => setTargetId(c.id)}
-          >
-            <Rune
-              kind={c.type === 'MONSTER' ? 'flame' : 'helm'}
-              size={10}
-              color={c.type === 'MONSTER' ? 'var(--ember)' : 'var(--gold)'}
-            />
-            <span className={s.optName}>{c.displayName}</span>
-            {c.currentHp != null && c.maxHp != null && (
-              <span className={s.optHp}>
-                {c.currentHp}/{c.maxHp}
-              </span>
-            )}
-          </button>
-        ))}
-      </div>
+      {isAoe ? (
+        <>
+          <div className={cn('ao-overline', s.fieldLabel, s.mt12)}>{t('battle.action.spell.aoe')}</div>
+          <div className={cn('ao-italic', s.hint)}>
+            {origin
+              ? t('battle.action.spell.aoeOrigin', { x: origin.x, y: origin.y })
+              : t('battle.action.spell.aoePickCell')}
+          </div>
+          {origin && (
+            <div className={s.chips}>
+              {(aoeCovered ?? []).length === 0 ? (
+                <span className={cn('ao-italic', s.hint)}>{t('battle.action.spell.aoeNobody')}</span>
+              ) : (
+                (aoeCovered ?? []).map((c) => (
+                  <span key={c.tokenId} className="ao-chip ao-chip--ember">
+                    {c.name}
+                  </span>
+                ))
+              )}
+            </div>
+          )}
+        </>
+      ) : (
+        <>
+          <div className={cn('ao-overline', s.fieldLabel, s.mt12)}>{t('battle.attack.pickTarget')}</div>
+          <div className={s.optGrid}>
+            {targets.map((c) => (
+              <button
+                key={c.id}
+                type="button"
+                className={cn(s.optBtn, targetId === c.id && s.optBtnActive)}
+                onClick={() => setTargetId(c.id)}
+              >
+                <Rune
+                  kind={c.type === 'MONSTER' ? 'flame' : 'helm'}
+                  size={10}
+                  color={c.type === 'MONSTER' ? 'var(--ember)' : 'var(--gold)'}
+                />
+                <span className={s.optName}>{c.displayName}</span>
+                {c.currentHp != null && c.maxHp != null && (
+                  <span className={s.optHp}>
+                    {c.currentHp}/{c.maxHp}
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
 
       <button
         className={cn('ao-btn ao-btn--primary ao-btn--block', s.mt12)}
@@ -478,7 +541,9 @@ function SpellPreview({ plan }: { plan: SpellPlan }) {
   const t = useT();
   const damages = plan.damages ?? [];
   const healings = plan.healings ?? [];
-  if (!damages.length && !healings.length && !plan.requiresManualAdjudication) return null;
+  if (!damages.length && !healings.length && !plan.requiresManualAdjudication && !plan.area && !plan.zone) {
+    return null;
+  }
 
   const fmtDice = (d: SpellPlanDamage) => {
     const dice = d.diceExpression ?? '';
@@ -488,6 +553,24 @@ function SpellPreview({ plan }: { plan: SpellPlan }) {
 
   return (
     <div className={cn(s.spellPreview, s.mt12)}>
+      {plan.area?.shape && (
+        <div className={s.spellPreviewLine}>
+          {t('battle.action.spell.preview.area', {
+            shape: t(`battle.action.spell.shape.${plan.area.shape}`),
+            n: plan.area.sizeFt ?? 0,
+          })}
+        </div>
+      )}
+      {plan.zone?.persists && (
+        <div className={s.spellPreviewLine}>
+          {[
+            plan.zone.terrain === 'DIFFICULT' ? t('battle.action.spell.preview.difficult') : null,
+            plan.zone.obscurement ? t(`battle.action.spell.preview.obscure.${plan.zone.obscurement}`) : null,
+          ]
+            .filter(Boolean)
+            .join(' · ')}
+        </div>
+      )}
       {damages.map((d, i) => (
         <div key={`d${i}`} className={s.spellPreviewLine}>
           {t('battle.action.spell.preview.damage', { dice: fmtDice(d) })}

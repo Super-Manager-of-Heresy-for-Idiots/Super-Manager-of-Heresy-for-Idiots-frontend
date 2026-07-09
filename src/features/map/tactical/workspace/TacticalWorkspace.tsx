@@ -170,6 +170,7 @@ export function TacticalWorkspace({
             tacticalTokens={tacticalTokens}
             activeCombatant={activeCombatant}
             movement={movement}
+            mapSessionId={mapSessionId}
           />
         </aside>
       </div>

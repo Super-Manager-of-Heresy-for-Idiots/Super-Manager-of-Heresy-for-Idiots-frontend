@@ -31,6 +31,12 @@ const base = (campaignId: string) => `/campaigns/${campaignId}/battles`;
 export interface CastSpellRequest {
   spellId: string;
   targetCombatantId?: string;
+  /** AoE cast (Phase 2.3): every covered combatant (wins over targetCombatantId). */
+  targetCombatantIds?: string[];
+  /** AoE template placement in grid cells + rotation (for the lingering zone). */
+  originX?: number;
+  originY?: number;
+  rotationDeg?: number;
   slotLevel?: number;
   damageRollMode?: 'AUTO' | 'MANUAL';
   manualDamage?: number;

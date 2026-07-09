@@ -23,6 +23,10 @@ export interface SpellPlan {
   requiresManualAdjudication?: boolean;
   damages?: SpellPlanDamage[] | null;
   healings?: SpellPlanHealing[] | null;
+  /** AoE template (Phase 2.3): SPHERE/CUBE/CONE/CYLINDER/LINE + size in feet. */
+  area?: { shape: string; sizeFt: number | null } | null;
+  /** Lingering zone the cast leaves (Web): difficult terrain / obscurement. */
+  zone?: { terrain: string | null; obscurement: string | null; persists: boolean } | null;
 }
 
 /**
