@@ -93,6 +93,12 @@ export const battle: DictModule = {
     'battle.action.waitingTurn': 'Дождитесь своей очереди',
     'battle.action.spell.level': 'Ур. {n}',
     'battle.action.spell.cantrip': 'Заговор',
+    'battle.action.spell.cast': 'Заклинание использовано.',
+    'battle.action.spell.castFailed': 'Не удалось использовать заклинание.',
+    'battle.action.spell.castTitle': 'Использовать заклинание',
+    'battle.action.spell.target': 'Цель: {name}',
+    'battle.action.spell.selfTarget': 'Цель не выбрана — по себе / области.',
+    'battle.action.spell.hint': 'Клик по токену на карте — выбрать цель. Слот тратит сервер; результат — в логе.',
 
     /* ── Action economy (действия / бонусные / легендарные) ─ */
     'battle.eco.title': 'Действия',
@@ -259,6 +265,12 @@ export const battle: DictModule = {
     'battle.action.waitingTurn': 'Wait for your turn',
     'battle.action.spell.level': 'Lvl {n}',
     'battle.action.spell.cantrip': 'Cantrip',
+    'battle.action.spell.cast': 'Spell cast.',
+    'battle.action.spell.castFailed': 'Failed to cast the spell.',
+    'battle.action.spell.castTitle': 'Cast spell',
+    'battle.action.spell.target': 'Target: {name}',
+    'battle.action.spell.selfTarget': 'No target selected — self / area.',
+    'battle.action.spell.hint': 'Click a token on the map to pick a target. The server spends the slot; result in the log.',
 
     /* ── Action economy (action / bonus / legendary) ─────── */
     'battle.eco.title': 'Actions',

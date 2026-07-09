@@ -309,6 +309,28 @@ export function useRerollInitiative() {
   });
 }
 
+/** Cast a spell on the caster's turn (Phase 2.1). Refreshes the battle + current-turn (slots). */
+export function useBattleCastSpell() {
+  const qc = useQueryClient();
+  const t = useT();
+  return useMutation({
+    mutationFn: ({
+      campaignId,
+      battleId,
+      data,
+    }: {
+      campaignId: string;
+      battleId: string;
+      data: { spellId: string; targetCombatantId?: string; slotLevel?: number; clientCommandId?: string };
+    }) => battlesApi.castSpell(campaignId, battleId, data),
+    onSuccess: (_res, { campaignId }) => {
+      qc.invalidateQueries({ queryKey: ['campaigns', campaignId, 'battles'] });
+      toast.success(t('battle.action.spell.cast'));
+    },
+    onError: (e) => toast.error(errMsg(e, t('battle.action.spell.castFailed'))),
+  });
+}
+
 /** GM reorders the initiative tracker (full initiative-value replacement, Phase 1.7). */
 export function useSetInitiativeOrder() {
   const sync = useSyncBattle();

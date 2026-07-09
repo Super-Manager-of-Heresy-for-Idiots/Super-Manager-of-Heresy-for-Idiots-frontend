@@ -12,6 +12,7 @@ import { Bar, Rune } from '@/components/ordo';
 import { useCampaignCharacters } from '@/hooks/useCharacter';
 import { useBackpackInventory } from '@/hooks/useInventory';
 import {
+  useBattleCastSpell,
   useBattleCurrentTurn,
   useEndTurn,
   useInitiativeBonus,
@@ -166,22 +167,13 @@ function ActionPanel({
           )}
 
           {spells.length > 0 && (
-            <div className={s.block}>
-              <div className={cn('ao-overline', s.fieldLabel)}>{t('battle.action.spells')}</div>
-              <div className={s.chips}>
-                {spells.map((sp) => (
-                  <span key={sp.spellId} className="ao-chip ao-chip--arcane">
-                    <Rune kind="book" size={10} color="var(--arcane)" />
-                    {sp.name}
-                    <span className={s.chipMeta}>
-                      {sp.level === 0
-                        ? t('battle.action.spell.cantrip')
-                        : t('battle.action.spell.level', { n: sp.level })}
-                    </span>
-                  </span>
-                ))}
-              </div>
-            </div>
+            <SpellCastSection
+              campaignId={campaignId}
+              battleId={battle.id}
+              spells={spells}
+              targets={targets}
+              lockedTargetId={lockedTargetId}
+            />
           )}
 
           {effects.length > 0 && (
@@ -208,6 +200,70 @@ function ActionPanel({
         <Rune kind="check" size={14} color="currentColor" />
         <span className={s.ml6}>{t('battle.action.endTurn')}</span>
       </button>
+    </div>
+  );
+}
+
+/* ── spells (cast on their turn) ───────────────────────────── */
+
+function SpellCastSection({
+  campaignId,
+  battleId,
+  spells,
+  targets,
+  lockedTargetId,
+}: {
+  campaignId: string;
+  battleId: string;
+  spells: Array<{ spellId: string; name: string; level: number }>;
+  targets: BattleCombatantResponse[];
+  lockedTargetId: string | null;
+}) {
+  const t = useT();
+  const cast = useBattleCastSpell();
+  const targetName = lockedTargetId
+    ? targets.find((c) => c.id === lockedTargetId)?.displayName ?? null
+    : null;
+
+  return (
+    <div className={s.block}>
+      <div className={cn('ao-overline', s.fieldLabel)}>{t('battle.action.spells')}</div>
+      <div className={cn('ao-italic', s.hint)}>
+        {targetName
+          ? t('battle.action.spell.target', { name: targetName })
+          : t('battle.action.spell.selfTarget')}
+      </div>
+      <div className={s.itemList}>
+        {spells.map((sp) => (
+          <button
+            key={sp.spellId}
+            type="button"
+            className={cn('ao-btn ao-btn--sm', s.itemBtn)}
+            disabled={cast.isPending}
+            onClick={() =>
+              cast.mutate({
+                campaignId,
+                battleId,
+                data: {
+                  spellId: sp.spellId,
+                  targetCombatantId: lockedTargetId ?? undefined,
+                  slotLevel: sp.level > 0 ? sp.level : undefined,
+                },
+              })
+            }
+            title={t('battle.action.spell.castTitle')}
+          >
+            <Rune kind="book" size={10} color="var(--arcane)" />
+            <span className={s.itemName}>{sp.name}</span>
+            <span className={s.chipMeta}>
+              {sp.level === 0
+                ? t('battle.action.spell.cantrip')
+                : t('battle.action.spell.level', { n: sp.level })}
+            </span>
+          </button>
+        ))}
+      </div>
+      <div className={cn('ao-italic', s.hint)}>{t('battle.action.spell.hint')}</div>
     </div>
   );
 }

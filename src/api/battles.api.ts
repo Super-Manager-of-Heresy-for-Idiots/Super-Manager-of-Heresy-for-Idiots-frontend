@@ -269,6 +269,22 @@ export const battlesApi = {
   },
 
   /**
+   * Cast a spell on the caster's turn (Phase 2.1). Caster = the active combatant (server-derived).
+   * `targetCombatantId`/`slotLevel` optional. Returns the cast result (execution plan + slots).
+   */
+  castSpell: async (
+    campaignId: string,
+    battleId: string,
+    data: { spellId: string; targetCombatantId?: string; slotLevel?: number; clientCommandId?: string },
+  ): Promise<ApiResponse<unknown>> => {
+    const response = await api.post<ApiResponse<unknown>>(
+      `${base(campaignId)}/${battleId}/cast-spell`,
+      data,
+    );
+    return response.data;
+  },
+
+  /**
    * GM replaces the whole tracker's initiative values in one shot (Phase 1.7 drag/reorder). Every
    * combatant of the battle must be listed exactly once; the server re-sorts and keeps the turn.
    */
