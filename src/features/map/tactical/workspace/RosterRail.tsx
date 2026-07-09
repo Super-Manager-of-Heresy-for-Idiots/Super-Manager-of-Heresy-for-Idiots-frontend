@@ -11,7 +11,7 @@ import { Rune } from '@/components/ordo';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
 import type { BattleResponse } from '@/types';
-import { useRerollInitiative, useSetInitiativeOrder } from '@/hooks/useBattles';
+import { useRerollInitiative, useResolveConcentration, useSetInitiativeOrder } from '@/hooks/useBattles';
 import { useMapTransientStore } from '../../state';
 import { enterPlacement } from '../combatantPlacement';
 import type { TacticalTokenView } from '../tacticalView';
@@ -146,6 +146,15 @@ export function RosterRail({
                   </div>
                 )}
 
+                {c.pendingConcentrationDc != null && (isYou || isGm) && (
+                  <ConcentrationPrompt
+                    campaignId={campaignId}
+                    battleId={battle.id}
+                    combatantId={c.id}
+                    dc={c.pendingConcentrationDc}
+                  />
+                )}
+
                 {c.conditions && c.conditions.length > 0 && (
                   <div className={cn('ao-row ao-wrap ao-gap-4', s.condRow)}>
                     {c.conditions.map((cond) => (
@@ -258,6 +267,63 @@ export function RosterRail({
       <p className={cn('ao-italic', s.rosterFootHint)}>
         {isActive ? t('tactical.roster.combatHint') : t('tactical.roster.prepHint')}
       </p>
+    </div>
+  );
+}
+
+/**
+ * Pending concentration save (Phase 2.2): the player rolls it themselves — enter the d20 for a manual
+ * roll, or hit AUTO to let the server roll. A failure breaks concentration; the prompt then clears.
+ */
+function ConcentrationPrompt({
+  campaignId,
+  battleId,
+  combatantId,
+  dc,
+}: {
+  campaignId: string;
+  battleId: string;
+  combatantId: string;
+  dc: number;
+}) {
+  const t = useT();
+  const resolve = useResolveConcentration();
+  const [d20, setD20] = useState('');
+  const num = parseInt(d20, 10);
+  const manualValid = Number.isFinite(num) && num >= 1 && num <= 20;
+
+  return (
+    <div
+      className={cn('ao-row ao-gap-4 ao-wrap', s.concPrompt)}
+      onClick={(e) => e.stopPropagation()}
+    >
+      <span className={cn('ao-overline', s.concPromptLabel)}>{t('tactical.conc.save', { dc })}</span>
+      <input
+        className={cn('ao-input', s.concInput)}
+        inputMode="numeric"
+        value={d20}
+        placeholder={t('tactical.conc.d20')}
+        onChange={(e) => setD20(e.target.value.replace(/[^0-9]/g, ''))}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' && manualValid) resolve.mutate({ campaignId, battleId, combatantId, d20: num });
+        }}
+      />
+      <button
+        type="button"
+        className="ao-btn ao-btn--sm ao-btn--primary"
+        disabled={resolve.isPending || !manualValid}
+        onClick={() => resolve.mutate({ campaignId, battleId, combatantId, d20: num })}
+      >
+        {t('tactical.conc.roll')}
+      </button>
+      <button
+        type="button"
+        className="ao-btn ao-btn--sm ao-btn--ghost"
+        disabled={resolve.isPending}
+        onClick={() => resolve.mutate({ campaignId, battleId, combatantId })}
+      >
+        {t('tactical.conc.auto')}
+      </button>
     </div>
   );
 }

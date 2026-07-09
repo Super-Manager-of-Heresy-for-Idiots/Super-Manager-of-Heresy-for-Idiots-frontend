@@ -1843,6 +1843,8 @@ export interface BattleCombatantResponse {
   dead?: boolean;
   /** True when the character is currently concentrating on a spell (Phase 2.2). */
   concentrating?: boolean;
+  /** DC of a pending concentration save the player must roll (Phase 2.2); null/absent when none. */
+  pendingConcentrationDc?: number | null;
 }
 
 /** A live condition instance on a battle combatant (Phase 1.1). */

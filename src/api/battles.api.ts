@@ -303,6 +303,23 @@ export const battlesApi = {
   },
 
   /**
+   * Resolve a pending concentration save (Phase 2.2). Omit `d20` for a server AUTO roll; pass 1–20 for
+   * a manual physical roll. The server checks the Con save vs the pending DC and breaks/keeps concentration.
+   */
+  resolveConcentration: async (
+    campaignId: string,
+    battleId: string,
+    combatantId: string,
+    d20?: number,
+  ): Promise<ApiResponse<BattleResponse>> => {
+    const response = await api.post<ApiResponse<BattleResponse>>(
+      `${base(campaignId)}/${battleId}/combatants/${combatantId}/concentration-check`,
+      d20 != null ? { d20 } : {},
+    );
+    return response.data;
+  },
+
+  /**
    * GM replaces the whole tracker's initiative values in one shot (Phase 1.7 drag/reorder). Every
    * combatant of the battle must be listed exactly once; the server re-sorts and keeps the turn.
    */

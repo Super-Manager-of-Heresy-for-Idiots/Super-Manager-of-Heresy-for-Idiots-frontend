@@ -310,6 +310,21 @@
   margin-top: 4px;
 }
 
+/* Pending concentration save prompt on a tracker row (Phase 2.2). */
+.concPrompt {
+  margin-top: 4px;
+  padding: var(--s-1) var(--s-2);
+  border: 1px solid var(--arcane);
+  background: color-mix(in srgb, var(--arcane) 10%, transparent);
+}
+.concPromptLabel {
+  color: var(--arcane);
+}
+.concInput {
+  width: 3.5rem;
+  text-align: center;
+}
+
 /* Spell roll-plan preview (Phase 2.1): damage dice / DC / healing before casting. */
 .spellPreview {
   padding: var(--s-2);

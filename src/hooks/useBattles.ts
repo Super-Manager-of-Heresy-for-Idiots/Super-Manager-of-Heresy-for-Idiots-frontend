@@ -336,6 +336,27 @@ export function useBattleCastSpell() {
   });
 }
 
+/** Resolve a pending concentration save (Phase 2.2) — the player's manual d20 or a server AUTO roll. */
+export function useResolveConcentration() {
+  const sync = useSyncBattle();
+  const t = useT();
+  return useMutation({
+    mutationFn: ({
+      campaignId,
+      battleId,
+      combatantId,
+      d20,
+    }: {
+      campaignId: string;
+      battleId: string;
+      combatantId: string;
+      d20?: number;
+    }) => battlesApi.resolveConcentration(campaignId, battleId, combatantId, d20),
+    onSuccess: (res) => sync(res.data),
+    onError: (e) => toast.error(errMsg(e, t('tactical.conc.failed'))),
+  });
+}
+
 /** GM reorders the initiative tracker (full initiative-value replacement, Phase 1.7). */
 export function useSetInitiativeOrder() {
   const sync = useSyncBattle();
