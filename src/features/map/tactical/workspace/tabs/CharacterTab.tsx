@@ -235,35 +235,80 @@ function SpellCastSection({
       </div>
       <div className={s.itemList}>
         {spells.map((sp) => (
-          <button
+          <SpellRow
             key={sp.spellId}
-            type="button"
-            className={cn('ao-btn ao-btn--sm', s.itemBtn)}
-            disabled={cast.isPending}
-            onClick={() =>
+            spell={sp}
+            pending={cast.isPending}
+            onCast={(slotLevel) =>
               cast.mutate({
                 campaignId,
                 battleId,
                 data: {
                   spellId: sp.spellId,
                   targetCombatantId: lockedTargetId ?? undefined,
-                  slotLevel: sp.level > 0 ? sp.level : undefined,
+                  slotLevel,
                 },
               })
             }
-            title={t('battle.action.spell.castTitle')}
-          >
-            <Rune kind="book" size={10} color="var(--arcane)" />
-            <span className={s.itemName}>{sp.name}</span>
-            <span className={s.chipMeta}>
-              {sp.level === 0
-                ? t('battle.action.spell.cantrip')
-                : t('battle.action.spell.level', { n: sp.level })}
-            </span>
-          </button>
+          />
         ))}
       </div>
       <div className={cn('ao-italic', s.hint)}>{t('battle.action.spell.hint')}</div>
+    </div>
+  );
+}
+
+/** One spell: cast button + (for leveled spells) an upcast slot-level selector. */
+function SpellRow({
+  spell,
+  pending,
+  onCast,
+}: {
+  spell: { spellId: string; name: string; level: number };
+  pending: boolean;
+  onCast: (slotLevel: number | undefined) => void;
+}) {
+  const t = useT();
+  // Cantrips (level 0) never consume a slot; leveled spells default to their own level and may upcast.
+  const [slot, setSlot] = useState(spell.level);
+  const upcastLevels = useMemo(
+    () => (spell.level > 0 ? Array.from({ length: 9 - spell.level + 1 }, (_, i) => spell.level + i) : []),
+    [spell.level],
+  );
+
+  return (
+    <div className="ao-row ao-gap-4 ao-wrap">
+      <button
+        type="button"
+        className={cn('ao-btn ao-btn--sm', s.itemBtn)}
+        disabled={pending}
+        onClick={() => onCast(spell.level > 0 ? slot : undefined)}
+        title={t('battle.action.spell.castTitle')}
+      >
+        <Rune kind="book" size={10} color="var(--arcane)" />
+        <span className={s.itemName}>{spell.name}</span>
+        <span className={s.chipMeta}>
+          {spell.level === 0
+            ? t('battle.action.spell.cantrip')
+            : t('battle.action.spell.level', { n: spell.level })}
+        </span>
+      </button>
+      {upcastLevels.length > 1 && (
+        <select
+          className={cn('ao-input', s.sizeSelect)}
+          value={slot}
+          disabled={pending}
+          onChange={(e) => setSlot(Number(e.target.value))}
+          title={t('battle.action.spell.upcast')}
+          aria-label={t('battle.action.spell.upcast')}
+        >
+          {upcastLevels.map((lvl) => (
+            <option key={lvl} value={lvl}>
+              {t('battle.action.spell.slotLevel', { n: lvl })}
+            </option>
+          ))}
+        </select>
+      )}
     </div>
   );
 }

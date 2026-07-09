@@ -99,6 +99,8 @@ export const battle: DictModule = {
     'battle.action.spell.target': 'Цель: {name}',
     'battle.action.spell.selfTarget': 'Цель не выбрана — по себе / области.',
     'battle.action.spell.hint': 'Клик по токену на карте — выбрать цель. Слот тратит сервер; результат — в логе.',
+    'battle.action.spell.upcast': 'Уровень слота (усиление)',
+    'battle.action.spell.slotLevel': 'Слот {n}',
 
     /* ── Action economy (действия / бонусные / легендарные) ─ */
     'battle.eco.title': 'Действия',
@@ -271,6 +273,8 @@ export const battle: DictModule = {
     'battle.action.spell.target': 'Target: {name}',
     'battle.action.spell.selfTarget': 'No target selected — self / area.',
     'battle.action.spell.hint': 'Click a token on the map to pick a target. The server spends the slot; result in the log.',
+    'battle.action.spell.upcast': 'Slot level (upcast)',
+    'battle.action.spell.slotLevel': 'Slot {n}',
 
     /* ── Action economy (action / bonus / legendary) ─────── */
     'battle.eco.title': 'Actions',
