@@ -261,6 +261,9 @@ function SpellCastSection({
   const selectedSpell = spells.find((sp) => sp.spellId === spellId);
   const isLeveled = !!selectedSpell && selectedSpell.level > 0;
   const [slot, setSlot] = useState(selectedSpell?.level ?? 0);
+  // Damage: AUTO (server rolls) by default, or MANUAL (player enters the rolled total).
+  const [manualMode, setManualMode] = useState(false);
+  const [manualStr, setManualStr] = useState('');
 
   // Keep the selections valid as the lists change; reset the upcast slot when the spell changes.
   useEffect(() => {
@@ -274,6 +277,7 @@ function SpellCastSection({
   }, [targets, targetId]);
   useEffect(() => {
     setSlot(selectedSpell?.level ?? 0);
+    setManualStr('');
   }, [spellId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const upcastLevels = useMemo(
@@ -293,12 +297,24 @@ function SpellCastSection({
     staleTime: 60_000,
   });
 
+  const hasDamage = (plan?.damages?.length ?? 0) > 0;
+  const manualNum = parseInt(manualStr, 10);
+  const manualValid = Number.isFinite(manualNum) && manualNum >= 0;
+  // In manual mode you must enter the rolled total before casting a damage spell.
+  const canCast = !!spellId && !(hasDamage && manualMode && !manualValid);
+
   const submit = () => {
-    if (!spellId) return;
+    if (!canCast) return;
     cast.mutate({
       campaignId,
       battleId,
-      data: { spellId, targetCombatantId: targetId || undefined, slotLevel: isLeveled ? slot : undefined },
+      data: {
+        spellId,
+        targetCombatantId: targetId || undefined,
+        slotLevel: isLeveled ? slot : undefined,
+        damageRollMode: hasDamage && manualMode ? 'MANUAL' : 'AUTO',
+        manualDamage: hasDamage && manualMode && manualValid ? manualNum : undefined,
+      },
     });
   };
 
@@ -345,6 +361,43 @@ function SpellCastSection({
 
       {plan && <SpellPreview plan={plan} />}
 
+      {hasDamage && (
+        <>
+          <div className={cn('ao-overline', s.fieldLabel, s.mt12)}>{t('battle.action.spell.damageRoll')}</div>
+          <div className="ao-row ao-gap-4 ao-wrap">
+            <button
+              type="button"
+              className={cn('ao-btn ao-btn--sm', !manualMode ? 'ao-btn--primary' : 'ao-btn--ghost')}
+              onClick={() => setManualMode(false)}
+            >
+              {t('battle.action.spell.auto')}
+            </button>
+            <button
+              type="button"
+              className={cn('ao-btn ao-btn--sm', manualMode ? 'ao-btn--primary' : 'ao-btn--ghost')}
+              onClick={() => setManualMode(true)}
+            >
+              {t('battle.action.spell.manual')}
+            </button>
+            {manualMode && (
+              <input
+                className={cn('ao-input', s.numField)}
+                inputMode="numeric"
+                value={manualStr}
+                placeholder={t('battle.action.spell.manualDmg')}
+                onChange={(e) => setManualStr(e.target.value.replace(/[^0-9]/g, ''))}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') submit();
+                }}
+              />
+            )}
+          </div>
+          <div className={cn('ao-italic', s.hint)}>
+            {manualMode ? t('battle.action.spell.manualHint') : t('battle.action.spell.autoHint')}
+          </div>
+        </>
+      )}
+
       <div className={cn('ao-overline', s.fieldLabel, s.mt12)}>{t('battle.attack.pickTarget')}</div>
       <div className={s.optGrid}>
         {targets.map((c) => (
@@ -372,7 +425,7 @@ function SpellCastSection({
       <button
         className={cn('ao-btn ao-btn--primary ao-btn--block', s.mt12)}
         onClick={submit}
-        disabled={!spellId || cast.isPending}
+        disabled={!canCast || cast.isPending}
         title={t('battle.action.spell.castTitle')}
       >
         <Rune kind="book" size={14} color="currentColor" />

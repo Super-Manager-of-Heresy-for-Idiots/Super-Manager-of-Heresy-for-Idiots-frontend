@@ -27,6 +27,23 @@ import type {
  */
 const base = (campaignId: string) => `/campaigns/${campaignId}/battles`;
 
+/** In-battle cast-spell request. */
+export interface CastSpellRequest {
+  spellId: string;
+  targetCombatantId?: string;
+  slotLevel?: number;
+  damageRollMode?: 'AUTO' | 'MANUAL';
+  manualDamage?: number;
+  clientCommandId?: string;
+}
+
+/** The bits of the cast result the battle UI shows: dealt damage + resistance modifier. */
+export interface SpellCastResultLite {
+  spellName?: string;
+  appliedDamage?: number | null;
+  appliedDamageModifier?: string | null;
+}
+
 export const battlesApi = {
   list: async (campaignId: string): Promise<ApiResponse<BattleResponse[]>> => {
     const response = await api.get<ApiResponse<BattleResponse[]>>(base(campaignId));
@@ -270,14 +287,15 @@ export const battlesApi = {
 
   /**
    * Cast a spell on the caster's turn (Phase 2.1). Caster = the active combatant (server-derived).
-   * `targetCombatantId`/`slotLevel` optional. Returns the cast result (execution plan + slots).
+   * `damageRollMode`: AUTO (server rolls the plan dice) or MANUAL (player supplies `manualDamage`);
+   * either way the server applies save-for-half + the target's resistance. Returns the dealt damage.
    */
   castSpell: async (
     campaignId: string,
     battleId: string,
-    data: { spellId: string; targetCombatantId?: string; slotLevel?: number; clientCommandId?: string },
-  ): Promise<ApiResponse<unknown>> => {
-    const response = await api.post<ApiResponse<unknown>>(
+    data: CastSpellRequest,
+  ): Promise<ApiResponse<SpellCastResultLite>> => {
+    const response = await api.post<ApiResponse<SpellCastResultLite>>(
       `${base(campaignId)}/${battleId}/cast-spell`,
       data,
     );

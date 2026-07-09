@@ -109,6 +109,13 @@ export const battle: DictModule = {
     'battle.action.spell.preview.attack': 'бросок атаки заклинанием',
     'battle.action.spell.preview.heal': 'Лечение: {n}',
     'battle.action.spell.preview.manual': 'Часть эффекта GM разрешает вручную.',
+    'battle.action.spell.damageRoll': 'Бросок урона',
+    'battle.action.spell.auto': 'АВТО',
+    'battle.action.spell.manual': 'Ручной',
+    'battle.action.spell.manualDmg': 'Урон с кубиков',
+    'battle.action.spell.manualHint': 'Киньте кубики сами и введите суммарный урон; сервер применит сейв и сопротивление стихии.',
+    'battle.action.spell.autoHint': 'Приложение само бросит кубики и посчитает урон с учётом сопротивления.',
+    'battle.action.spell.dealt': 'Нанесено урона: {n}',
 
     /* ── Action economy (действия / бонусные / легендарные) ─ */
     'battle.eco.title': 'Действия',
@@ -291,6 +298,13 @@ export const battle: DictModule = {
     'battle.action.spell.preview.attack': 'spell attack roll',
     'battle.action.spell.preview.heal': 'Healing: {n}',
     'battle.action.spell.preview.manual': 'Part of the effect is adjudicated by the GM.',
+    'battle.action.spell.damageRoll': 'Damage roll',
+    'battle.action.spell.auto': 'AUTO',
+    'battle.action.spell.manual': 'Manual',
+    'battle.action.spell.manualDmg': 'Rolled total',
+    'battle.action.spell.manualHint': 'Roll the dice yourself and enter the total; the server applies the save and elemental resistance.',
+    'battle.action.spell.autoHint': 'The app rolls the dice and applies damage with resistance.',
+    'battle.action.spell.dealt': 'Damage dealt: {n}',
 
     /* ── Action economy (action / bonus / legendary) ─────── */
     'battle.eco.title': 'Actions',

@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { AxiosError } from 'axios';
-import { battlesApi } from '@/api/battles.api';
+import { battlesApi, type CastSpellRequest } from '@/api/battles.api';
 import { useT } from '@/i18n/I18nContext';
 import type {
   ApiError,
@@ -321,11 +321,16 @@ export function useBattleCastSpell() {
     }: {
       campaignId: string;
       battleId: string;
-      data: { spellId: string; targetCombatantId?: string; slotLevel?: number; clientCommandId?: string };
+      data: CastSpellRequest;
     }) => battlesApi.castSpell(campaignId, battleId, data),
-    onSuccess: (_res, { campaignId }) => {
+    onSuccess: (res, { campaignId }) => {
       qc.invalidateQueries({ queryKey: ['campaigns', campaignId, 'battles'] });
-      toast.success(t('battle.action.spell.cast'));
+      const dealt = res.data?.appliedDamage;
+      if (dealt != null && dealt > 0) {
+        toast.success(t('battle.action.spell.dealt', { n: dealt }));
+      } else {
+        toast.success(t('battle.action.spell.cast'));
+      }
     },
     onError: (e) => toast.error(errMsg(e, t('battle.action.spell.castFailed'))),
   });
