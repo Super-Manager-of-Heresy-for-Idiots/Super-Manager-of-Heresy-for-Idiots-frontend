@@ -140,6 +140,24 @@ function ActionPanel({
 
       <DefaultActions movement={movement} />
 
+      <div className={s.block}>
+        <div className={cn('ao-overline', s.fieldLabel)}>{t('battle.action.economy')}</div>
+        <div className="ao-row ao-gap-12 ao-wrap">
+          <ActionPips label={t('battle.action.economy.action')} spent={current.actionSpent} max={current.actionMax} />
+          <ActionPips
+            label={t('battle.action.economy.bonus')}
+            spent={current.bonusActionSpent}
+            max={current.bonusActionMax}
+          />
+          <span className={s.economyStat}>
+            <span className={cn('ao-overline', s.fieldLabel)}>{t('battle.action.economy.reaction')}</span>
+            <span className={cn('ao-num', s.economyNum)}>
+              {t(current.reactionUsed ? 'battle.action.economy.used' : 'battle.action.economy.free')}
+            </span>
+          </span>
+        </div>
+      </div>
+
       {isLoading ? (
         <div className={cn('ao-breathe', s.skWrap)}>
           <div className="ao-ph" />
@@ -234,6 +252,25 @@ function ActionPanel({
         <span className={s.ml6}>{t('battle.action.endTurn')}</span>
       </button>
     </div>
+  );
+}
+
+/** Action-economy pips for one pool (action / bonus action): available filled, spent hollow. */
+function ActionPips({ label, spent, max }: { label: string; spent: number; max: number }) {
+  if (max <= 0) return null;
+  const available = Math.max(0, max - spent);
+  return (
+    <span className={s.economyStat}>
+      <span className={cn('ao-overline', s.fieldLabel)}>{label}</span>
+      <span className="ao-row ao-gap-2">
+        {Array.from({ length: max }, (_, i) => (
+          <span key={i} className={cn(s.pip, i < available ? s.pipFull : s.pipEmpty)} />
+        ))}
+        <span className={cn('ao-num', s.economyNum)}>
+          {available}/{max}
+        </span>
+      </span>
+    </span>
   );
 }
 

@@ -310,6 +310,31 @@
   margin-top: 4px;
 }
 
+/* Action-economy pips in the player action panel (2.1c UX). */
+.economyStat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.economyNum {
+  margin-left: var(--s-1);
+  color: var(--ink-quiet);
+}
+.pip {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  box-sizing: border-box;
+}
+.pipFull {
+  background: var(--gold);
+  border: 1px solid var(--gold);
+}
+.pipEmpty {
+  background: transparent;
+  border: 1px solid var(--rule-strong);
+}
+
 /* Pending concentration save prompt on a tracker row (Phase 2.2). */
 .concPrompt {
   margin-top: 4px;
