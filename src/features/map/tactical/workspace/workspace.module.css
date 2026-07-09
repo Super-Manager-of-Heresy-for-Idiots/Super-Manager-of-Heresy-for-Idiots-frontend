@@ -255,6 +255,16 @@
   text-transform: uppercase;
   letter-spacing: var(--track-eng);
 }
+/* Concentration marker on a tracker row (Phase 2.2). */
+.concTag {
+  flex: 0 0 auto;
+  padding: 0 4px;
+  border: 1px solid var(--arcane);
+  color: var(--arcane);
+  font-size: var(--t-nano);
+  text-transform: uppercase;
+  letter-spacing: var(--track-eng);
+}
 .placedTag {
   font-size: var(--t-nano);
   text-transform: uppercase;

@@ -1841,6 +1841,8 @@ export interface BattleCombatantResponse {
   deathSaveFailures?: number;
   /** True when the character is dead (three death-save failures). */
   dead?: boolean;
+  /** True when the character is currently concentrating on a spell (Phase 2.2). */
+  concentrating?: boolean;
 }
 
 /** A live condition instance on a battle combatant (Phase 1.1). */

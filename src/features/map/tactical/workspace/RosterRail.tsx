@@ -123,6 +123,11 @@ export function RosterRail({
                     <span className={s.rosterName}>
                       {c.displayName}
                       {isYou && <span className={s.youTag}>{t('battle.tracker.you')}</span>}
+                      {c.concentrating && (
+                        <span className={s.concTag} title={t('battle.tracker.concHint')}>
+                          {t('battle.tracker.conc')}
+                        </span>
+                      )}
                     </span>
                     <span className={cn(s.placedTag, onMap ? s.placedYes : s.placedNo)}>
                       {onMap ? t('tactical.left.placed') : t('tactical.left.unplaced')}
