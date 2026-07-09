@@ -430,7 +430,19 @@ export interface FogStateDto {
   revision: number;
 }
 
-export type MapElementType = 'WALL' | 'ROOF' | 'RECTANGLE' | 'CIRCLE' | 'POLYGON' | 'LINE';
+export type MapElementType =
+  | 'WALL'
+  | 'ROOF'
+  | 'RECTANGLE'
+  | 'CIRCLE'
+  | 'POLYGON'
+  | 'LINE'
+  // AoE templates / spell zones (Phase 2.3) — session-scoped runtime elements.
+  | 'CONE'
+  | 'CUBE'
+  | 'CYLINDER'
+  | 'SPHERE'
+  | 'AURA';
 
 /**
  * A wall/shape element belonging to the MAP DEFINITION (snapshot `mapElements[]`).
@@ -439,6 +451,8 @@ export type MapElementType = 'WALL' | 'ROOF' | 'RECTANGLE' | 'CIRCLE' | 'POLYGON
 export interface MapElementDto {
   id: UUID;
   mapId: UUID;
+  /** Set for session-scoped runtime elements (spell zones, Phase 2.3); null for builder elements. */
+  mapSessionId?: UUID | null;
   elementType: MapElementType;
   gridX: number;
   gridY: number;

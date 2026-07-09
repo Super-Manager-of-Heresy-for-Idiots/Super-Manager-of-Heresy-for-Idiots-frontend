@@ -99,6 +99,7 @@ export function TacticalMapCenterPanel({
   const tokenIds = useMapSessionStore((st) => st.tokenIds);
   const tileStates = useMapSessionStore((st) => st.tileStates);
   const fog = useMapSessionStore((st) => st.fog);
+  const mapElements = useMapSessionStore((st) => st.mapElements);
   const permissions = useMapSessionStore((st) => st.permissions);
   const currentRevision = useMapSessionStore((st) => st.currentRevision);
 
@@ -132,6 +133,11 @@ export function TacticalMapCenterPanel({
   const remoteDragPreviews = useMemo(
     () => Object.values(remoteDragPreviewsByTokenId),
     [remoteDragPreviewsByTokenId],
+  );
+  // Session-scoped AoE spell zones (Phase 2.3); builder elements are not drawn in the tactical view.
+  const aoeZones = useMemo(
+    () => mapElements.filter((el) => el.mapSessionId != null && (el.properties as Record<string, unknown>)?.aoe === true),
+    [mapElements],
   );
   const cursors = useMemo(
     () => Object.values(remoteCursorsByUserId).filter((c) => c.userId !== me?.id),
@@ -585,6 +591,7 @@ export function TacticalMapCenterPanel({
         tokens={tokens}
         tiles={tileStates}
         fog={fog}
+        aoeZones={aoeZones}
         fogViewerIsGm={isGm}
         selectedTokenId={selectedTokenId}
         remoteDragPreviews={remoteDragPreviews}

@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
-import type { FogStateDto, GridConfig, MapTileStateDto, MapTokenDto, UUID } from '../types';
+import type { FogStateDto, GridConfig, MapElementDto, MapTileStateDto, MapTokenDto, UUID } from '../types';
 import type { GridCoord } from '../engine';
 import { viewportPointToGrid } from '../engine';
 import { normalizeGridConfig } from '../calibration/calibrationMath';
@@ -13,6 +13,7 @@ import { MapGridLayer } from './MapGridLayer';
 import { MapTerrainLayer } from './MapTerrainLayer';
 import { MapTokenLayer } from './MapTokenLayer';
 import { MapFogLayer } from './MapFogLayer';
+import { MapAoeZoneLayer } from './MapAoeZoneLayer';
 import { MapCursorLayer } from './MapCursorLayer';
 import { MapPingLayer } from './MapPingLayer';
 import { MapToolbar, type MapToolbarLabels } from './MapToolbar';
@@ -27,6 +28,8 @@ export interface MapViewportProps {
   tiles?: MapTileStateDto[];
   /** Manual fog-of-war state (Phase 1.6). `null`/absent → no fog drawn. */
   fog?: FogStateDto | null;
+  /** Spell zones / AoE templates (Phase 2.3), drawn between terrain and tokens. */
+  aoeZones?: MapElementDto[];
   /** Whether the current viewer is a GM (fog is drawn translucent for them). */
   fogViewerIsGm?: boolean;
   selectedTokenId?: UUID | null;
@@ -82,6 +85,7 @@ export function MapViewport({
   tokens = [],
   tiles = [],
   fog = null,
+  aoeZones = [],
   fogViewerIsGm = false,
   selectedTokenId = null,
   remoteDragPreviews = [],
@@ -203,6 +207,7 @@ export function MapViewport({
             <MapBackgroundLayer imageAssetId={imageAssetId} onImageSize={vp.setImageSize} />
             {gridVisible && <MapGridLayer grid={normalizedGrid} imageSize={vp.imageSize} />}
             <MapTerrainLayer grid={normalizedGrid} tiles={tiles} />
+            <MapAoeZoneLayer grid={normalizedGrid} zones={aoeZones} />
             {underlay}
             <MapTokenLayer
               grid={normalizedGrid}

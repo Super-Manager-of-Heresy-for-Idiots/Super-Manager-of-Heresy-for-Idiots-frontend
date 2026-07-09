@@ -14,6 +14,7 @@
 
 import type {
   FogStateDto,
+  MapElementDto,
   MapEventType,
   MapPermissions,
   MapSnapshotMap,
@@ -61,6 +62,11 @@ export interface MapCommittedState {
    * snapshot and advanced directly by FOG_REVEALED/HIDDEN events (payload carries the full list).
    */
   fog: FogStateDto | null;
+  /**
+   * Map elements from the snapshot: builder shapes + session-scoped spell zones (Phase 2.3).
+   * Element events resync the snapshot (payload carries only the id), so this stays snapshot-fed.
+   */
+  mapElements: MapElementDto[];
   permissions: MapPermissions | null;
   currentRevision: number;
   /** A revision gap (or an unappliable event) was seen → caller must reload snapshot. */
