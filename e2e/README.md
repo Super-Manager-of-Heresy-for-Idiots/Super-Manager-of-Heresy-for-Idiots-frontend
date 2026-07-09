@@ -1,38 +1,62 @@
-# E2E (Playwright) — tactical battle happy path
+# E2E-тесты (Playwright) — happy-path тактического боя
 
-Scaffold for MAP_PLAN §1.10. This is the **skeleton** the Phase 2 scenarios grow from. It is
-intentionally isolated from the app build (`tsc -b`) and the unit run (`npm run test`), and it is
-**not wired up yet** — the one spec is `test.skip` until the items below are filled in.
+## Что это и зачем
 
-## One-time setup (needs the local dev stack)
+**E2E (end-to-end)** — это автотест, который запускает НАСТОЯЩИЙ браузер, открывает приложение как
+живой пользователь, кликает по кнопкам и проверяет, что весь путь работает от начала до конца
+(создать бой → расставить токены → инициатива → атака → урон → состояние → death save → конец боя).
+В отличие от юнит-тестов (`npm run test`, проверяют отдельные функции без браузера), E2E проверяет
+всю связку **фронт + бэкенд + карта** вместе.
 
+Это заготовка (скелет) из MAP_PLAN §1.10. Один сценарий уже написан структурно, но помечен
+`test.skip` — то есть **пока не запускается**, пока не выполнены шаги настройки ниже. Это сделано
+намеренно: E2E имеет смысл только против поднятого локального стека.
+
+## Что нужно, чтобы это заработало (по шагам)
+
+**Шаг 1. Поднять весь стек локально** (в отдельных терминалах):
+- core-бэкенд (`SuperManagerofHeresyforIdiots`) — обычно `:8080`;
+- map-service (`SuperManagerofHeresyforIdiots-map`) — `:8080` (другой порт/хост);
+- фронтенд: `npm run dev` (обычно `http://localhost:5173`).
+
+**Шаг 2. Установить Playwright** (один раз):
 ```bash
 npm i -D @playwright/test
 npx playwright install chromium
 ```
 
-Add the script to `package.json` (kept out of the committed file to avoid lockfile drift):
-
+**Шаг 3. Добавить npm-скрипт** в `package.json` (в блок `"scripts"`):
 ```json
 "test:e2e": "playwright test"
 ```
+(намеренно не закоммичен, чтобы не трогать lock-файл до установки зависимости.)
 
-## Run
+**Шаг 4. Подготовить данные** — нужна кампания с хотя бы одним персонажем и одним монстром и картой,
+чтобы сценарий было на чём гонять. Скопируй id кампании.
 
-Bring up the full stack (core backend + map-service + frontend), then:
-
+**Шаг 5. Запустить:**
 ```bash
-E2E_BASE_URL=http://localhost:5173 E2E_CAMPAIGN_ID=<seeded-campaign> npm run test:e2e
+E2E_BASE_URL=http://localhost:5173 E2E_CAMPAIGN_ID=<id-кампании> npm run test:e2e
 ```
+Полезные варианты:
+- `npm run test:e2e -- --headed` — видеть браузер вживую (не headless);
+- `npm run test:e2e -- --ui` — интерактивный режим Playwright (пошагово, с таймлайном).
 
-## What still needs filling in
+## Что ещё надо дописать в самом тесте (сейчас там TODO)
 
-1. **Auth** — add a Playwright global-setup that logs in a GM and saves `storageState`, then
-   reference it in `playwright.config.ts` (`use.storageState`). The app uses JWT via the auth store.
-2. **Seed data** — a campaign with at least one player character and one monster to add, plus a map
-   definition to attach. Capture its id in `E2E_CAMPAIGN_ID`.
-3. **Stable selectors** — the spec's steps are TODOs; add `data-testid`s (or rely on roles/labels)
-   on the command bar actions, roster rows, AttackForm controls, log entries and the fog/HP tools so
-   the steps don't couple to styling.
+Файл `tactical-battle.happy-path.spec.ts` содержит шаги happy-path как `test.step(...)`, но действия
+внутри — заглушки (TODO), потому что нужны:
+1. **Авторизация.** Приложение входит по JWT. Нужен Playwright global-setup, который логинит ГМ и
+   сохраняет `storageState` (cookie/localStorage), затем прописать его в `playwright.config.ts`
+   (`use: { storageState: '...' }`). Иначе тест упрётся в экран входа.
+2. **Сид данных** (шаг 4) — стабильные id кампании/персонажа/монстра/карты.
+3. **Стабильные селекторы.** Чтобы тест не ломался от вёрстки, на ключевые элементы (кнопки командной
+   панели, строки трекера, форма атаки, записи лога, инструменты тумана/HP) лучше повесить
+   `data-testid="..."` и цеплять тест за них (а не за CSS-классы/тексты).
 
-Once wired, remove the `test.skip` in `tactical-battle.happy-path.spec.ts`.
+Когда всё готово — убери `test.skip` в `tactical-battle.happy-path.spec.ts`, и тест начнёт гоняться.
+
+## Коротко: это НЕ то, что можно «просто запустить» сейчас
+
+Пока стек не поднят и не выполнены шаги 2–5 — тест намеренно пропускается. Это нормально: скелет —
+каркас, на который Фаза 2 будет навешивать реальные сценарии.

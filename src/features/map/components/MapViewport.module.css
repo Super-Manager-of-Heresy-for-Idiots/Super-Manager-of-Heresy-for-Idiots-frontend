@@ -53,20 +53,27 @@
   pointer-events: none;
 }
 
-/* ── Fog of war — Phase 1.6 ───────────────────────────────────── */
+/* ── Fog of war — Phase 1.6 (cloudy look) ─────────────────────── */
 .fogSvg {
   position: absolute;
   top: 0;
   left: 0;
 }
-/* Opaque cover for players; the mask punches revealed areas back to transparent. */
-.fogFill {
-  fill: var(--abyss);
-  fill-opacity: 0.96;
+/* Whole-cover opacity: near-opaque for players, translucent so the GM works through it. */
+.fogGroup {
+  opacity: 0.9;
 }
-/* The GM works through the fog, so it stays translucent for them. */
-.fogFillGm {
-  fill-opacity: 0.5;
+.fogGroupGm {
+  opacity: 0.5;
+}
+/* Base darkness of the fog (the mask punches revealed areas back to transparent). */
+.fogBase {
+  fill: var(--abyss);
+  fill-opacity: 0.82;
+}
+/* Cloud billows come from the feTurbulence filter on this rect; the fill is a harmless fallback. */
+.fogClouds {
+  fill: var(--abyss);
 }
 
 /* ── Terrain (high ground) — Phase 1.9 ────────────────────────── */
