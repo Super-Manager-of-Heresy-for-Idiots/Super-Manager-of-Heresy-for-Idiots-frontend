@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { Bar, Rune } from '@/components/ordo';
 import { useCampaignCharacters } from '@/hooks/useCharacter';
@@ -19,6 +19,7 @@ import {
   useJoinBattle,
 } from '@/hooks/useBattles';
 import { battlesApi } from '@/api/battles.api';
+import { spellbookApi, type SpellPlan, type SpellPlanDamage } from '@/api/spellbook.api';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
 import type { BattleCombatantResponse, BattleResponse, CharacterV2Response } from '@/types';
@@ -118,6 +119,19 @@ function ActionPanel({
     return id && targets.some((c) => c.id === id) ? id : null;
   }, [selectedTokenId, tacticalTokens, targets]);
 
+  // Spells can target ANY live combatant (enemy for damage, ally/self for heals/buffs) — unlike
+  // attacks, which are opposing-side only. Pre-select from the token clicked on the map, if valid.
+  const spellTargets = useMemo(
+    () => battle.combatants.filter((c) => c.currentHp == null || c.currentHp > 0),
+    [battle.combatants],
+  );
+  const spellLockedTargetId = useMemo(() => {
+    if (!selectedTokenId) return null;
+    const view = tacticalTokens.find((tk) => tk.tokenId === selectedTokenId);
+    const id = view?.linkedCombatantId ?? null;
+    return id && spellTargets.some((c) => c.id === id) ? id : null;
+  }, [selectedTokenId, tacticalTokens, spellTargets]);
+
   return (
     <div>
       <p className={cn('ao-overline', s.goldOverline)}>{t('battle.action.title')}</p>
@@ -166,13 +180,14 @@ function ActionPanel({
             <ItemsSection campaignId={campaignId} battleId={battle.id} characterId={current.characterId} />
           )}
 
-          {spells.length > 0 && (
+          {spells.length > 0 && current.characterId && (
             <SpellCastSection
               campaignId={campaignId}
               battleId={battle.id}
+              characterId={current.characterId}
               spells={spells}
-              targets={targets}
-              lockedTargetId={lockedTargetId}
+              targets={spellTargets}
+              lockedTargetId={spellLockedTargetId}
             />
           )}
 
@@ -209,105 +224,179 @@ function ActionPanel({
 function SpellCastSection({
   campaignId,
   battleId,
+  characterId,
   spells,
   targets,
   lockedTargetId,
 }: {
   campaignId: string;
   battleId: string;
+  characterId: string;
   spells: Array<{ spellId: string; name: string; level: number }>;
   targets: BattleCombatantResponse[];
   lockedTargetId: string | null;
 }) {
   const t = useT();
   const cast = useBattleCastSpell();
-  const targetName = lockedTargetId
-    ? targets.find((c) => c.id === lockedTargetId)?.displayName ?? null
-    : null;
+  const [spellId, setSpellId] = useState(spells[0]?.spellId ?? '');
+  const [targetId, setTargetId] = useState(lockedTargetId ?? targets[0]?.id ?? '');
+  const selectedSpell = spells.find((sp) => sp.spellId === spellId);
+  const isLeveled = !!selectedSpell && selectedSpell.level > 0;
+  const [slot, setSlot] = useState(selectedSpell?.level ?? 0);
+
+  // Keep the selections valid as the lists change; reset the upcast slot when the spell changes.
+  useEffect(() => {
+    if (!spells.some((sp) => sp.spellId === spellId)) setSpellId(spells[0]?.spellId ?? '');
+  }, [spells, spellId]);
+  useEffect(() => {
+    if (lockedTargetId && targets.some((c) => c.id === lockedTargetId)) setTargetId(lockedTargetId);
+  }, [lockedTargetId, targets]);
+  useEffect(() => {
+    if (!targets.some((c) => c.id === targetId)) setTargetId(targets[0]?.id ?? '');
+  }, [targets, targetId]);
+  useEffect(() => {
+    setSlot(selectedSpell?.level ?? 0);
+  }, [spellId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const upcastLevels = useMemo(
+    () =>
+      isLeveled && selectedSpell
+        ? Array.from({ length: 9 - selectedSpell.level + 1 }, (_, i) => selectedSpell.level + i)
+        : [],
+    [isLeveled, selectedSpell],
+  );
+
+  // Preview: the spell's roll plan (damage dice / DC / healing) WITHOUT casting or spending.
+  const { data: plan } = useQuery({
+    queryKey: ['spell-plan', characterId, spellId, isLeveled ? slot : 0],
+    queryFn: async () =>
+      (await spellbookApi.plan(characterId, spellId, isLeveled ? slot : undefined)).data ?? null,
+    enabled: !!characterId && !!spellId,
+    staleTime: 60_000,
+  });
+
+  const submit = () => {
+    if (!spellId) return;
+    cast.mutate({
+      campaignId,
+      battleId,
+      data: { spellId, targetCombatantId: targetId || undefined, slotLevel: isLeveled ? slot : undefined },
+    });
+  };
 
   return (
     <div className={s.block}>
       <div className={cn('ao-overline', s.fieldLabel)}>{t('battle.action.spells')}</div>
-      <div className={cn('ao-italic', s.hint)}>
-        {targetName
-          ? t('battle.action.spell.target', { name: targetName })
-          : t('battle.action.spell.selfTarget')}
-      </div>
-      <div className={s.itemList}>
+
+      <div className={s.optGrid}>
         {spells.map((sp) => (
-          <SpellRow
+          <button
             key={sp.spellId}
-            spell={sp}
-            pending={cast.isPending}
-            onCast={(slotLevel) =>
-              cast.mutate({
-                campaignId,
-                battleId,
-                data: {
-                  spellId: sp.spellId,
-                  targetCombatantId: lockedTargetId ?? undefined,
-                  slotLevel,
-                },
-              })
-            }
-          />
+            type="button"
+            className={cn(s.optBtn, spellId === sp.spellId && s.optBtnActive)}
+            onClick={() => setSpellId(sp.spellId)}
+          >
+            <Rune kind="book" size={10} color="var(--arcane)" />
+            <span className={s.optName}>{sp.name}</span>
+            <span className={s.optMeta}>
+              {sp.level === 0
+                ? t('battle.action.spell.cantrip')
+                : t('battle.action.spell.level', { n: sp.level })}
+            </span>
+          </button>
         ))}
       </div>
+
+      {upcastLevels.length > 1 && (
+        <div className={cn('ao-row ao-gap-8', s.mt12)}>
+          <span className={cn('ao-overline', s.fieldLabel)}>{t('battle.action.spell.upcast')}</span>
+          <select
+            className={cn('ao-input', s.sizeSelect)}
+            value={slot}
+            disabled={cast.isPending}
+            onChange={(e) => setSlot(Number(e.target.value))}
+          >
+            {upcastLevels.map((lvl) => (
+              <option key={lvl} value={lvl}>
+                {t('battle.action.spell.slotLevel', { n: lvl })}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+
+      {plan && <SpellPreview plan={plan} />}
+
+      <div className={cn('ao-overline', s.fieldLabel, s.mt12)}>{t('battle.attack.pickTarget')}</div>
+      <div className={s.optGrid}>
+        {targets.map((c) => (
+          <button
+            key={c.id}
+            type="button"
+            className={cn(s.optBtn, targetId === c.id && s.optBtnActive)}
+            onClick={() => setTargetId(c.id)}
+          >
+            <Rune
+              kind={c.type === 'MONSTER' ? 'flame' : 'helm'}
+              size={10}
+              color={c.type === 'MONSTER' ? 'var(--ember)' : 'var(--gold)'}
+            />
+            <span className={s.optName}>{c.displayName}</span>
+            {c.currentHp != null && c.maxHp != null && (
+              <span className={s.optHp}>
+                {c.currentHp}/{c.maxHp}
+              </span>
+            )}
+          </button>
+        ))}
+      </div>
+
+      <button
+        className={cn('ao-btn ao-btn--primary ao-btn--block', s.mt12)}
+        onClick={submit}
+        disabled={!spellId || cast.isPending}
+        title={t('battle.action.spell.castTitle')}
+      >
+        <Rune kind="book" size={14} color="currentColor" />
+        <span className={s.ml6}>{t('battle.action.spell.castTitle')}</span>
+      </button>
       <div className={cn('ao-italic', s.hint)}>{t('battle.action.spell.hint')}</div>
     </div>
   );
 }
 
-/** One spell: cast button + (for leveled spells) an upcast slot-level selector. */
-function SpellRow({
-  spell,
-  pending,
-  onCast,
-}: {
-  spell: { spellId: string; name: string; level: number };
-  pending: boolean;
-  onCast: (slotLevel: number | undefined) => void;
-}) {
+/** Read-only preview of a spell's roll plan (damage dice / DC / healing). */
+function SpellPreview({ plan }: { plan: SpellPlan }) {
   const t = useT();
-  // Cantrips (level 0) never consume a slot; leveled spells default to their own level and may upcast.
-  const [slot, setSlot] = useState(spell.level);
-  const upcastLevels = useMemo(
-    () => (spell.level > 0 ? Array.from({ length: 9 - spell.level + 1 }, (_, i) => spell.level + i) : []),
-    [spell.level],
-  );
+  const damages = plan.damages ?? [];
+  const healings = plan.healings ?? [];
+  if (!damages.length && !healings.length && !plan.requiresManualAdjudication) return null;
+
+  const fmtDice = (d: SpellPlanDamage) => {
+    const dice = d.diceExpression ?? '';
+    const flat = d.flatAmount ? (dice ? `+${d.flatAmount}` : `${d.flatAmount}`) : '';
+    return `${dice}${flat}`.trim() || '—';
+  };
 
   return (
-    <div className="ao-row ao-gap-4 ao-wrap">
-      <button
-        type="button"
-        className={cn('ao-btn ao-btn--sm', s.itemBtn)}
-        disabled={pending}
-        onClick={() => onCast(spell.level > 0 ? slot : undefined)}
-        title={t('battle.action.spell.castTitle')}
-      >
-        <Rune kind="book" size={10} color="var(--arcane)" />
-        <span className={s.itemName}>{spell.name}</span>
-        <span className={s.chipMeta}>
-          {spell.level === 0
-            ? t('battle.action.spell.cantrip')
-            : t('battle.action.spell.level', { n: spell.level })}
-        </span>
-      </button>
-      {upcastLevels.length > 1 && (
-        <select
-          className={cn('ao-input', s.sizeSelect)}
-          value={slot}
-          disabled={pending}
-          onChange={(e) => setSlot(Number(e.target.value))}
-          title={t('battle.action.spell.upcast')}
-          aria-label={t('battle.action.spell.upcast')}
-        >
-          {upcastLevels.map((lvl) => (
-            <option key={lvl} value={lvl}>
-              {t('battle.action.spell.slotLevel', { n: lvl })}
-            </option>
-          ))}
-        </select>
+    <div className={cn(s.spellPreview, s.mt12)}>
+      {damages.map((d, i) => (
+        <div key={`d${i}`} className={s.spellPreviewLine}>
+          {t('battle.action.spell.preview.damage', { dice: fmtDice(d) })}
+          {d.requiresSave && d.saveDc != null
+            ? ` · ${t('battle.action.spell.preview.save', { dc: d.saveDc })}${d.halfOnSave ? ` (${t('battle.action.spell.preview.half')})` : ''}`
+            : d.requiresAttackHit
+              ? ` · ${t('battle.action.spell.preview.attack')}`
+              : ''}
+        </div>
+      ))}
+      {healings.map((h, i) => (
+        <div key={`h${i}`} className={s.spellPreviewLine}>
+          {t('battle.action.spell.preview.heal', { n: h.amount ?? 0 })}
+        </div>
+      ))}
+      {plan.requiresManualAdjudication && (
+        <div className={cn('ao-italic', s.hint)}>{t('battle.action.spell.preview.manual')}</div>
       )}
     </div>
   );

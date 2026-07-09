@@ -101,6 +101,12 @@ export const battle: DictModule = {
     'battle.action.spell.hint': 'Клик по токену на карте — выбрать цель. Слот тратит сервер; результат — в логе.',
     'battle.action.spell.upcast': 'Уровень слота (усиление)',
     'battle.action.spell.slotLevel': 'Слот {n}',
+    'battle.action.spell.preview.damage': 'Урон: {dice}',
+    'battle.action.spell.preview.save': 'спасбросок DC {dc}',
+    'battle.action.spell.preview.half': 'половина при успехе',
+    'battle.action.spell.preview.attack': 'бросок атаки заклинанием',
+    'battle.action.spell.preview.heal': 'Лечение: {n}',
+    'battle.action.spell.preview.manual': 'Часть эффекта GM разрешает вручную.',
 
     /* ── Action economy (действия / бонусные / легендарные) ─ */
     'battle.eco.title': 'Действия',
@@ -275,6 +281,12 @@ export const battle: DictModule = {
     'battle.action.spell.hint': 'Click a token on the map to pick a target. The server spends the slot; result in the log.',
     'battle.action.spell.upcast': 'Slot level (upcast)',
     'battle.action.spell.slotLevel': 'Slot {n}',
+    'battle.action.spell.preview.damage': 'Damage: {dice}',
+    'battle.action.spell.preview.save': 'save DC {dc}',
+    'battle.action.spell.preview.half': 'half on save',
+    'battle.action.spell.preview.attack': 'spell attack roll',
+    'battle.action.spell.preview.heal': 'Healing: {n}',
+    'battle.action.spell.preview.manual': 'Part of the effect is adjudicated by the GM.',
 
     /* ── Action economy (action / bonus / legendary) ─────── */
     'battle.eco.title': 'Actions',

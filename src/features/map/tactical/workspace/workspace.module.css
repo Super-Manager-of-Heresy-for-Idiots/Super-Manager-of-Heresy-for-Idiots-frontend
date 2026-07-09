@@ -299,6 +299,21 @@
 .initControls {
   margin-top: 4px;
 }
+
+/* Spell roll-plan preview (Phase 2.1): damage dice / DC / healing before casting. */
+.spellPreview {
+  padding: var(--s-2);
+  border: 1px solid var(--hairline);
+  background: color-mix(in srgb, var(--arcane) 8%, transparent);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.spellPreviewLine {
+  font-family: var(--font-display);
+  font-size: var(--t-small);
+  color: var(--ink-bright);
+}
 .condChip {
   display: inline-flex;
   align-items: center;
