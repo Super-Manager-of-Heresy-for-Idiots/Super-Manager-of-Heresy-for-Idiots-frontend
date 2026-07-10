@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
+import { authApi } from '@/api/auth.api';
 import { useAuthStore } from '@/store/authStore';
-import { useLogout } from '@/hooks/useAuth';
+import { useLogout, useSwitchAccount } from '@/hooks/useAuth';
 import { OrdoInterfaceIcon, Rune } from '@/components/ordo';
 import { useT } from '@/i18n/I18nContext';
 
@@ -19,17 +20,30 @@ export function AccountSwitcher({ onNavigate }: AccountSwitcherProps) {
   const { user, savedAccounts, removeAccount } = useAuthStore();
   const navigate = useNavigate();
   const logout = useLogout();
+  const switchAccount = useSwitchAccount();
   const t = useT();
 
   const others = savedAccounts.filter((a) => a.user.id !== user?.id);
 
-  const handleSwitch = (username: string) => {
-    navigate(`/login?add=1&user=${encodeURIComponent(username)}`);
-    onNavigate?.();
+  const handleSwitch = (userId: string, username: string) => {
+    switchAccount.mutate(userId, {
+      onSuccess: () => {
+        onNavigate?.();
+      },
+      onError: () => {
+        navigate(`/login?add=1&user=${encodeURIComponent(username)}`);
+        onNavigate?.();
+      },
+    });
   };
 
-  const handleRemove = (e: React.MouseEvent, userId: string) => {
+  const handleRemove = async (e: React.MouseEvent, userId: string) => {
     e.stopPropagation();
+    try {
+      await authApi.forgetTrustedAccount(userId);
+    } catch {
+      /* local removal still wins; server trust may already be gone */
+    }
     removeAccount(userId);
   };
 
@@ -70,8 +84,9 @@ export function AccountSwitcher({ onNavigate }: AccountSwitcherProps) {
         <div key={acc.user.id} className="ao-acct-row">
           <button
             type="button"
-            onClick={() => handleSwitch(acc.user.username)}
+            onClick={() => handleSwitch(acc.user.id, acc.user.username)}
             className="ao-acct-pick"
+            disabled={switchAccount.isPending}
             title={t('acct.switch')}
           >
             <span className="ao-acct-avatar ao-acct-avatar--dim">

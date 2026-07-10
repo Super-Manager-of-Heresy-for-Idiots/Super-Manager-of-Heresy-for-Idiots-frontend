@@ -24,6 +24,18 @@ function asRecord(value: unknown): Record<string, unknown> {
   return value && typeof value === 'object' ? value as Record<string, unknown> : {};
 }
 
+function parseAuthResponse(response: unknown): { token: string; expiresIn: number; user: UserResponse } | null {
+  const body = response as AuthResponseLike;
+  const payload = asRecord(body.data ?? body);
+  const tokenValue = payload.token ?? payload.accessToken ?? payload.jwt;
+  const token = typeof tokenValue === 'string' ? tokenValue : undefined;
+  const user = (payload.user ?? body.user) as UserResponse | undefined;
+  const expiresInValue = payload.expiresIn;
+  const expiresIn = typeof expiresInValue === 'number' ? expiresInValue : 0;
+  if (!token || !user) return null;
+  return { token, expiresIn, user };
+}
+
 export function useLogin() {
   const navigate = useNavigate();
   const login = useAuthStore((s) => s.login);
@@ -37,15 +49,11 @@ export function useLogin() {
       // The login endpoint is an external boundary: tolerate both the `{ success, data }`
       // envelope and a flat body, plus common token field names. If the token is missing
       // we surface a clear error instead of redirecting into a session that 401/403s.
-      const body = response as AuthResponseLike;
-      const payload = asRecord(body.data ?? body);
-      const tokenValue = payload.token ?? payload.accessToken ?? payload.jwt;
-      const token = typeof tokenValue === 'string' ? tokenValue : undefined;
-      const user = (payload.user ?? body.user) as UserResponse | undefined;
-      const expiresInValue = payload.expiresIn;
-      const expiresIn = typeof expiresInValue === 'number' ? expiresInValue : 0;
+      const parsed = parseAuthResponse(response);
 
-      if (!token || !user) {
+      if (!parsed) {
+        const body = response as AuthResponseLike;
+        const payload = asRecord(body.data ?? body);
         console.error('[auth] Login response missing token/user.', {
           bodyKeys: body ? Object.keys(body) : null,
           payloadKeys: payload ? Object.keys(payload) : null,
@@ -57,15 +65,44 @@ export function useLogin() {
       // Drop any data cached under the previous identity (covers account switching,
       // which is now a re-login rather than an in-place token swap).
       queryClient.clear();
-      login(user, token);
-      scheduleProactiveRefresh(expiresIn);
+      login(parsed.user, parsed.token);
+      scheduleProactiveRefresh(parsed.expiresIn);
       await ensureCsrfToken(true);
-      toast.success(t('hk.auth.welcomeBack', { name: user.username }));
-      navigate(getRoleRedirectPath(user.role));
+      toast.success(t('hk.auth.welcomeBack', { name: parsed.user.username }));
+      navigate(getRoleRedirectPath(parsed.user.role));
     },
     onError: (error: AxiosError<ApiError>) => {
       const message = error.response?.data?.message || t('hk.auth.loginFailed');
       toast.error(message);
+    },
+  });
+}
+
+export function useSwitchAccount() {
+  const navigate = useNavigate();
+  const login = useAuthStore((s) => s.login);
+  const queryClient = useQueryClient();
+  const t = useT();
+
+  return useMutation({
+    mutationFn: (userId: string) => authApi.switchAccount({ userId }),
+    onSuccess: async (response) => {
+      const parsed = parseAuthResponse(response);
+      if (!parsed) {
+        toast.error(t('hk.auth.loginFailed'));
+        return;
+      }
+      cancelProactiveRefresh();
+      wsService.disconnect();
+      queryClient.clear();
+      login(parsed.user, parsed.token);
+      scheduleProactiveRefresh(parsed.expiresIn);
+      await ensureCsrfToken(true);
+      toast.success(t('hk.auth.welcomeBack', { name: parsed.user.username }));
+      navigate(getRoleRedirectPath(parsed.user.role));
+    },
+    onError: () => {
+      toast.error(t('hk.auth.loginFailed'));
     },
   });
 }

@@ -27,7 +27,10 @@ installUnsafeRequestCoalescing(api);
 /** Endpoints that must never trigger the reactive refresh (avoids 401→refresh→401 loops). */
 function isAuthEndpoint(url: string | undefined): boolean {
   if (!url) return false;
-  return url.includes('/auth/login') || url.includes('/auth/refresh') || url.includes('/auth/logout');
+  return url.includes('/auth/login')
+    || url.includes('/auth/refresh')
+    || url.includes('/auth/logout')
+    || url.includes('/auth/switch');
 }
 
 function shouldAttachLangParam(url: string | undefined): boolean {

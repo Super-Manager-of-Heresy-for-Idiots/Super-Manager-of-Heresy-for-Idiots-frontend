@@ -87,6 +87,10 @@ export interface LoginRequest {
   password: string;
 }
 
+export interface SwitchAccountRequest {
+  userId: string;
+}
+
 export interface UserResponse {
   id: string;
   username: string;
