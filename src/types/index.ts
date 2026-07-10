@@ -2001,7 +2001,12 @@ export interface BattleAttackRequest {
   attackerInMeleeThreat?: boolean;
   /** GM bypass of the range gate and any range-derived disadvantage. */
   gmOverrideRange?: boolean;
+  /** Target cover (Phase 2.6): HALF/THREE_QUARTERS raise AC & Dex saves; TOTAL rejects the attack. */
+  cover?: CoverType;
 }
+
+/** Cover the target benefits from (Phase 2.6). */
+export type CoverType = 'NONE' | 'HALF' | 'THREE_QUARTERS' | 'TOTAL';
 
 /** GM manual HP change on a combatant: negative `delta` damages, positive heals. */
 export interface ApplyCombatantHpRequest {
@@ -2040,6 +2045,8 @@ export interface BattleActionResultResponse {
   damageType: string | null;
   /** How the target's defences changed the damage: NONE | RESISTED | IMMUNE | VULNERABLE. */
   damageModifier?: string | null;
+  /** Target cover applied: HALF | THREE_QUARTERS | TOTAL; null/NONE when none (Phase 2.6). */
+  cover?: string | null;
   /** Chebyshev distance attacker→target in feet when positions were supplied; null otherwise (Phase 2.5). */
   distanceFt?: number | null;
   /** IN_REACH | OUT_OF_REACH | IN_RANGE | LONG_RANGE | RANGED_IN_MELEE | BEYOND_LONG_RANGE; null unchecked (Phase 2.5). */

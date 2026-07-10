@@ -19,6 +19,7 @@ import type {
   BattleActionResultResponse,
   BattleAttackRequest,
   BattleCombatantResponse,
+  CoverType,
 } from '@/types';
 import type { TacticalTokenView } from '../tacticalView';
 import { buildRangeFields, type AttackOption } from './combat';
@@ -58,6 +59,7 @@ export function AttackForm({
   const [d20aStr, setD20aStr] = useState('');
   const [d20bStr, setD20bStr] = useState('');
   const [gmOverrideRange, setGmOverrideRange] = useState(false);
+  const [cover, setCover] = useState<CoverType>('NONE');
   const [result, setResult] = useState<BattleActionResultResponse | null>(null);
 
   // Keep selections valid as the underlying lists change.
@@ -81,7 +83,7 @@ export function AttackForm({
   const dieA = num(d20aStr);
   const dieB = num(d20bStr);
   const diceValid = serverRoll ? true : rollMode === 'NORMAL' ? single != null : dieA != null && dieB != null;
-  const valid = !!attackName && !!targetId && diceValid;
+  const valid = !!attackName && !!targetId && diceValid && cover !== 'TOTAL';
 
   const submit = () => {
     if (!valid) return;
@@ -100,6 +102,7 @@ export function AttackForm({
       Object.assign(data, buildRangeFields(tacticalTokens, attackerCombatantId, targetId));
     }
     if (gmOverrideRange) data.gmOverrideRange = true;
+    if (cover !== 'NONE') data.cover = cover;
     attack.mutate(
       { campaignId, battleId, data },
       {
@@ -216,7 +219,22 @@ export function AttackForm({
           )}
         </div>
       )}
-      <div className={s.hint}>{t('battle.attack.hint')}</div>
+      <div className={cn('ao-overline', s.fieldLabel, s.mt12)}>{t('battle.attack.cover')}</div>
+      <div className="ao-row ao-gap-4 ao-wrap">
+        {(['NONE', 'HALF', 'THREE_QUARTERS', 'TOTAL'] as const).map((c) => (
+          <button
+            key={c}
+            type="button"
+            className={cn('ao-btn ao-btn--sm', cover === c ? 'ao-btn--primary' : 'ao-btn--ghost')}
+            onClick={() => setCover(c)}
+          >
+            {t(`battle.attack.cover.${c}`)}
+          </button>
+        ))}
+      </div>
+      {cover === 'TOTAL' && <div className={s.hint}>{t('battle.attack.cover.totalHint')}</div>}
+
+      <div className={cn(s.hint, s.mt12)}>{t('battle.attack.hint')}</div>
 
       {allowRangeOverride && (
         <label className={cn('ao-row ao-gap-8', s.mt8)}>
@@ -278,6 +296,9 @@ function ResultCard({ result }: { result: BattleActionResultResponse }) {
           {t(`battle.attack.range.${result.rangeNote}`)}
           {result.distanceFt != null && ` (${result.distanceFt} ${t('battle.attack.feet')})`}
         </div>
+      )}
+      {result.cover && result.cover !== 'NONE' && (
+        <div className={s.resultLine}>{t(`battle.attack.cover.${result.cover}`)}</div>
       )}
       {result.damage != null && (
         <div className={s.resultDmg}>
