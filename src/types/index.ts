@@ -1992,6 +1992,15 @@ export interface BattleAttackRequest {
   saveD20?: number;
   saveD20A?: number;
   saveD20B?: number;
+  /** Grid squares of both tokens (Phase 2.5). All four present → server gates by distance. */
+  attackerCol?: number;
+  attackerRow?: number;
+  targetCol?: number;
+  targetRow?: number;
+  /** An enemy threatens the (ranged) attacker in melee → ranged-in-melee disadvantage. */
+  attackerInMeleeThreat?: boolean;
+  /** GM bypass of the range gate and any range-derived disadvantage. */
+  gmOverrideRange?: boolean;
 }
 
 /** GM manual HP change on a combatant: negative `delta` damages, positive heals. */
@@ -2031,6 +2040,10 @@ export interface BattleActionResultResponse {
   damageType: string | null;
   /** How the target's defences changed the damage: NONE | RESISTED | IMMUNE | VULNERABLE. */
   damageModifier?: string | null;
+  /** Chebyshev distance attacker→target in feet when positions were supplied; null otherwise (Phase 2.5). */
+  distanceFt?: number | null;
+  /** IN_REACH | OUT_OF_REACH | IN_RANGE | LONG_RANGE | RANGED_IN_MELEE | BEYOND_LONG_RANGE; null unchecked (Phase 2.5). */
+  rangeNote?: string | null;
   targetCurrentHp: number | null;
   targetMaxHp: number | null;
   targetDown: boolean;

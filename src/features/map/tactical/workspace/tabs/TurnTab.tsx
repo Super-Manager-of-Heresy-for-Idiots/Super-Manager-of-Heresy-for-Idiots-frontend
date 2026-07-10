@@ -15,16 +15,17 @@ import { BulkActionsPanel } from '../BulkActionsPanel';
 import { DefaultActions } from '../DefaultActions';
 import { liveTargets, monsterAttackOptions } from '../combat';
 import type { MovementConfig } from '../movement';
-import { currentTurnCombatant } from '../../tacticalView';
+import { currentTurnCombatant, type TacticalTokenView } from '../../tacticalView';
 import s from '../workspace.module.css';
 
 interface TurnTabProps {
   campaignId: string;
   battle: BattleResponse;
   movement: MovementConfig | null;
+  tacticalTokens: TacticalTokenView[];
 }
 
-export function TurnTab({ campaignId, battle, movement }: TurnTabProps) {
+export function TurnTab({ campaignId, battle, movement, tacticalTokens }: TurnTabProps) {
   const t = useT();
   const { lang } = useI18n();
   const current = currentTurnCombatant(battle.combatants);
@@ -56,7 +57,15 @@ export function TurnTab({ campaignId, battle, movement }: TurnTabProps) {
       </p>
       <DefaultActions movement={movement} />
       {isMonsterTurn && (
-        <AttackForm campaignId={campaignId} battleId={battle.id} attacks={attacks} targets={targets} />
+        <AttackForm
+          campaignId={campaignId}
+          battleId={battle.id}
+          attacks={attacks}
+          targets={targets}
+          tacticalTokens={tacticalTokens}
+          attackerCombatantId={current.id}
+          allowRangeOverride
+        />
       )}
       <BulkActionsPanel campaignId={campaignId} battle={battle} />
     </div>

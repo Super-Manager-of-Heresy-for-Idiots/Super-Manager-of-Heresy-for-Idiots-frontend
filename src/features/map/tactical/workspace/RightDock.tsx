@@ -109,7 +109,14 @@ export function RightDock({
       </div>
 
       <div className={cn('ao-scroll', s.dockBody)}>
-        {tab === 'turn' && <TurnTab campaignId={campaignId} battle={battle} movement={movement} />}
+        {tab === 'turn' && (
+          <TurnTab
+            campaignId={campaignId}
+            battle={battle}
+            movement={movement}
+            tacticalTokens={tacticalTokens}
+          />
+        )}
         {tab === 'inspect' && (
           <TacticalInspectorPanel
             campaignId={campaignId}

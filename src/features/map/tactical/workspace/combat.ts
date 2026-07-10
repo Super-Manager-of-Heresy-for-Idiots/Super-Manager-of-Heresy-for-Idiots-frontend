@@ -7,11 +7,56 @@
 import type { BattleCombatantResponse, CombatantTurnResponse } from '@/types';
 import type { Lang } from '@/i18n/translations';
 import { localizedName } from '@/lib/localized';
+import type { TacticalTokenView } from '../tacticalView';
 
 export interface AttackOption {
   name: string;
   damage?: string | null;
   damageType?: string | null;
+}
+
+/** Grid positions + melee-threat flag fed to the core range gate (Phase 2.5). */
+export interface RangeFields {
+  attackerCol?: number;
+  attackerRow?: number;
+  targetCol?: number;
+  targetRow?: number;
+  attackerInMeleeThreat?: boolean;
+}
+
+/**
+ * Derive the range fields for an attack from the placed tokens: attacker & target grid squares,
+ * and whether an opposing combatant stands within one square of the attacker (ranged-in-melee).
+ * Returns {} when either token is unplaced — the server then skips the range gate.
+ */
+export function buildRangeFields(
+  tokens: TacticalTokenView[],
+  attackerCombatantId: string | null | undefined,
+  targetCombatantId: string,
+): RangeFields {
+  if (!attackerCombatantId) return {};
+  const atk = tokens.find((tk) => tk.linkedCombatantId === attackerCombatantId);
+  const tgt = tokens.find((tk) => tk.linkedCombatantId === targetCombatantId);
+  if (!atk || !tgt) return {};
+  const atkType = atk.combatant?.type;
+  const inMelee =
+    !!atkType &&
+    tokens.some(
+      (tk) =>
+        !!tk.linkedCombatantId &&
+        tk.linkedCombatantId !== attackerCombatantId &&
+        !!tk.combatant?.type &&
+        tk.combatant.type !== atkType &&
+        (tk.combatant.currentHp == null || tk.combatant.currentHp > 0) &&
+        Math.max(Math.abs(tk.gridX - atk.gridX), Math.abs(tk.gridY - atk.gridY)) <= 1,
+    );
+  return {
+    attackerCol: atk.gridX,
+    attackerRow: atk.gridY,
+    targetCol: tgt.gridX,
+    targetRow: tgt.gridY,
+    attackerInMeleeThreat: inMelee,
+  };
 }
 
 /**

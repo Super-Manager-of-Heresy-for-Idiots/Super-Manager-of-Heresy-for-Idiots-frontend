@@ -216,6 +216,8 @@ function ActionPanel({
               attacks={attacks}
               targets={targets}
               lockedTargetId={lockedTargetId}
+              tacticalTokens={tacticalTokens}
+              attackerCombatantId={current.id}
             />
           </div>
 

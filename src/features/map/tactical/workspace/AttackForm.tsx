@@ -20,7 +20,8 @@ import type {
   BattleAttackRequest,
   BattleCombatantResponse,
 } from '@/types';
-import type { AttackOption } from './combat';
+import type { TacticalTokenView } from '../tacticalView';
+import { buildRangeFields, type AttackOption } from './combat';
 import s from './workspace.module.css';
 
 interface AttackFormProps {
@@ -29,9 +30,24 @@ interface AttackFormProps {
   attacks: AttackOption[];
   targets: BattleCombatantResponse[];
   lockedTargetId?: string | null;
+  /** Placed tokens — used to send grid positions so the server can gate range/reach (Phase 2.5). */
+  tacticalTokens?: TacticalTokenView[];
+  /** The acting combatant (attacker) whose token position anchors the range check. */
+  attackerCombatantId?: string | null;
+  /** GM view: offer a "bypass range" toggle. Players never see it. */
+  allowRangeOverride?: boolean;
 }
 
-export function AttackForm({ campaignId, battleId, attacks, targets, lockedTargetId }: AttackFormProps) {
+export function AttackForm({
+  campaignId,
+  battleId,
+  attacks,
+  targets,
+  lockedTargetId,
+  tacticalTokens,
+  attackerCombatantId,
+  allowRangeOverride,
+}: AttackFormProps) {
   const t = useT();
   const attack = useBattleAttack();
   const [attackName, setAttackName] = useState(attacks[0]?.name ?? '');
@@ -41,6 +57,7 @@ export function AttackForm({ campaignId, battleId, attacks, targets, lockedTarge
   const [d20Str, setD20Str] = useState('');
   const [d20aStr, setD20aStr] = useState('');
   const [d20bStr, setD20bStr] = useState('');
+  const [gmOverrideRange, setGmOverrideRange] = useState(false);
   const [result, setResult] = useState<BattleActionResultResponse | null>(null);
 
   // Keep selections valid as the underlying lists change.
@@ -77,6 +94,12 @@ export function AttackForm({ campaignId, battleId, attacks, targets, lockedTarge
         data.d20B = dieB ?? undefined;
       }
     }
+    // Range/reach (Phase 2.5): relay both tokens' grid positions so the server can gate distance.
+    // Positions are map-authoritative; the server is the sole judge of in/out of range.
+    if (tacticalTokens) {
+      Object.assign(data, buildRangeFields(tacticalTokens, attackerCombatantId, targetId));
+    }
+    if (gmOverrideRange) data.gmOverrideRange = true;
     attack.mutate(
       { campaignId, battleId, data },
       {
@@ -195,6 +218,17 @@ export function AttackForm({ campaignId, battleId, attacks, targets, lockedTarge
       )}
       <div className={s.hint}>{t('battle.attack.hint')}</div>
 
+      {allowRangeOverride && (
+        <label className={cn('ao-row ao-gap-8', s.mt8)}>
+          <input
+            type="checkbox"
+            checked={gmOverrideRange}
+            onChange={(e) => setGmOverrideRange(e.target.checked)}
+          />
+          <span className={s.hint}>{t('battle.attack.rangeOverride')}</span>
+        </label>
+      )}
+
       <button
         className={cn('ao-btn ao-btn--primary ao-btn--block', s.mt12)}
         onClick={submit}
@@ -237,6 +271,12 @@ function ResultCard({ result }: { result: BattleActionResultResponse }) {
         <div className={s.resultLine}>
           {t(`battle.attack.mode.${result.rollMode}`)}: {result.d20A} / {result.d20B} →{' '}
           {result.effectiveD20 ?? result.d20}
+        </div>
+      )}
+      {result.rangeNote && (
+        <div className={s.resultLine}>
+          {t(`battle.attack.range.${result.rangeNote}`)}
+          {result.distanceFt != null && ` (${result.distanceFt} ${t('battle.attack.feet')})`}
         </div>
       )}
       {result.damage != null && (
