@@ -1860,6 +1860,11 @@ export interface BattleCombatantResponse {
   hidden?: boolean;
   /** An ally Helped this combatant: its next attack has advantage. */
   helpAdvantage?: boolean;
+  /** Monster runtime (Phase 2.9): Legendary Resistance uses per day (0 when none) and how many are spent. */
+  legendaryResistanceMax?: number;
+  legendaryResistanceUsed?: number;
+  /** Attacks a Multiattack monster may still make this turn; null/absent for single-attack combatants. */
+  attacksRemaining?: number | null;
 }
 
 /** A standard action a combatant can take on its turn (Phase 2.7). */

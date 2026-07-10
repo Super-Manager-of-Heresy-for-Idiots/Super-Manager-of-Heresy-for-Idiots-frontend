@@ -75,6 +75,20 @@ export function useBattleCurrentTurn(
   });
 }
 
+/** Any combatant's actionable detail (attacks) for off-turn reaction / OA resolution (Phase 2.8). */
+export function useCombatantTurn(
+  campaignId: string,
+  battleId: string | undefined,
+  combatantId: string | undefined,
+  enabled = true,
+) {
+  return useQuery({
+    queryKey: ['campaigns', campaignId, 'battles', battleId ?? '', 'combatant-turn', combatantId ?? ''],
+    queryFn: async () => (await battlesApi.combatantTurn(campaignId, battleId!, combatantId!)).data,
+    enabled: !!campaignId && !!battleId && !!combatantId && enabled,
+  });
+}
+
 /* ── mutations ───────────────────────────────────────────────── */
 
 /** Writes a fresh battle into caches so the UI updates without a round-trip. */
@@ -285,6 +299,21 @@ export function useStandardAction() {
       toast.success(t(`battle.standard.done.${data.type}`));
     },
     onError: (e) => toast.error(errMsg(e, t('battle.standard.failed'))),
+  });
+}
+
+/** GM spends a monster's Legendary Resistance use (Phase 2.9). */
+export function useLegendaryResistance() {
+  const sync = useSyncBattle();
+  const t = useT();
+  return useMutation({
+    mutationFn: ({ campaignId, battleId, combatantId }: { campaignId: string; battleId: string; combatantId: string }) =>
+      battlesApi.useLegendaryResistance(campaignId, battleId, combatantId),
+    onSuccess: (res) => {
+      sync(res.data);
+      toast.success(t('battle.legendary.resistanceUsed'));
+    },
+    onError: (e) => toast.error(errMsg(e, t('battle.legendary.failed'))),
   });
 }
 

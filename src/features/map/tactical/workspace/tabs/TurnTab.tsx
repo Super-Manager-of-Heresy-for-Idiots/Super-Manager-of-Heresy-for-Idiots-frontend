@@ -12,6 +12,8 @@ import { cn } from '@/lib/utils';
 import type { BattleResponse } from '@/types';
 import { AttackForm } from '../AttackForm';
 import { StandardActionsPanel } from '../StandardActionsPanel';
+import { ReactionAttackPanel } from '../ReactionAttackPanel';
+import { MonsterRuntimePanel } from '../MonsterRuntimePanel';
 import { BulkActionsPanel } from '../BulkActionsPanel';
 import { DefaultActions } from '../DefaultActions';
 import { liveTargets, monsterAttackOptions } from '../combat';
@@ -59,6 +61,11 @@ export function TurnTab({ campaignId, battle, movement, tacticalTokens }: TurnTa
       <DefaultActions movement={movement} tacticalTokens={tacticalTokens} />
       {isMonsterTurn && (
         <>
+          {current.attacksRemaining != null && (
+            <p className={cn('ao-num', s.tabSub)}>
+              {t('battle.multiattack.remaining', { n: current.attacksRemaining })}
+            </p>
+          )}
           <AttackForm
             campaignId={campaignId}
             battleId={battle.id}
@@ -71,6 +78,8 @@ export function TurnTab({ campaignId, battle, movement, tacticalTokens }: TurnTa
           <StandardActionsPanel campaignId={campaignId} battle={battle} combatant={current} />
         </>
       )}
+      <ReactionAttackPanel campaignId={campaignId} battle={battle} tacticalTokens={tacticalTokens} />
+      <MonsterRuntimePanel campaignId={campaignId} battle={battle} />
       <BulkActionsPanel campaignId={campaignId} battle={battle} />
     </div>
   );

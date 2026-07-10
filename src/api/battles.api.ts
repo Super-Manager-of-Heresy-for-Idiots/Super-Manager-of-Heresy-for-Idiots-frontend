@@ -233,6 +233,18 @@ export const battlesApi = {
     return response.data;
   },
 
+  /** GM spends a monster's Legendary Resistance use to auto-succeed a failed save (Phase 2.9). */
+  useLegendaryResistance: async (
+    campaignId: string,
+    battleId: string,
+    combatantId: string,
+  ): Promise<ApiResponse<BattleResponse>> => {
+    const response = await api.post<ApiResponse<BattleResponse>>(
+      `${base(campaignId)}/${battleId}/combatants/${combatantId}/legendary-resistance`,
+    );
+    return response.data;
+  },
+
   /** Marks a combatant's action / bonus action / legendary action / reaction as spent this turn. */
   spendAction: async (
     campaignId: string,
@@ -263,6 +275,18 @@ export const battlesApi = {
 
   currentTurn: async (campaignId: string, battleId: string): Promise<ApiResponse<CombatantTurnResponse>> => {
     const response = await api.get<ApiResponse<CombatantTurnResponse>>(`${base(campaignId)}/${battleId}/current-turn`);
+    return response.data;
+  },
+
+  /** Any combatant's actionable detail (attacks) — for off-turn reaction / OA resolution (Phase 2.8). */
+  combatantTurn: async (
+    campaignId: string,
+    battleId: string,
+    combatantId: string,
+  ): Promise<ApiResponse<CombatantTurnResponse>> => {
+    const response = await api.get<ApiResponse<CombatantTurnResponse>>(
+      `${base(campaignId)}/${battleId}/combatants/${combatantId}/turn`,
+    );
     return response.data;
   },
 

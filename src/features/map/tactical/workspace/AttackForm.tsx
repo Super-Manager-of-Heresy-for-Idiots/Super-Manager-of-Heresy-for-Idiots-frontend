@@ -37,6 +37,8 @@ interface AttackFormProps {
   attackerCombatantId?: string | null;
   /** GM view: offer a "bypass range" toggle. Players never see it. */
   allowRangeOverride?: boolean;
+  /** Resolve as a reaction / opportunity attack (Phase 2.8): out of turn, spends the reaction. */
+  reaction?: boolean;
 }
 
 export function AttackForm({
@@ -48,6 +50,7 @@ export function AttackForm({
   tacticalTokens,
   attackerCombatantId,
   allowRangeOverride,
+  reaction,
 }: AttackFormProps) {
   const t = useT();
   const attack = useBattleAttack();
@@ -103,6 +106,11 @@ export function AttackForm({
     }
     if (gmOverrideRange) data.gmOverrideRange = true;
     if (cover !== 'NONE') data.cover = cover;
+    // Reaction / opportunity attack (Phase 2.8): resolved out of turn for the reacting combatant.
+    if (reaction && attackerCombatantId) {
+      data.reaction = true;
+      data.attackerCombatantId = attackerCombatantId;
+    }
     attack.mutate(
       { campaignId, battleId, data },
       {
