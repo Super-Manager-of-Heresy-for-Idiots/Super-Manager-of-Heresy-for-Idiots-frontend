@@ -108,7 +108,13 @@ export function RosterRail({
                 <div className="ao-row ao-gap-8">
                   {isActive && (
                     <div className={s.initBadge}>
-                      <span className={s.initVal}>{c.initiative}</span>
+                      <span className={s.initVal}>
+                        {isMonster && !isGm ? (
+                          <span title={t('battle.tracker.initHidden')}>?</span>
+                        ) : (
+                          c.initiative
+                        )}
+                      </span>
                       <span className={cn('ao-overline', s.initLbl)}>{t('battle.tracker.init')}</span>
                     </div>
                   )}

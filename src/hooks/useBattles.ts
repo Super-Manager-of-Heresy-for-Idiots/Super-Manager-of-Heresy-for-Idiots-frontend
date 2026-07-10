@@ -336,6 +336,21 @@ export function useBattleCastSpell() {
   });
 }
 
+/** Roll one shared initiative die for a group of combatants (Phase 2.4). */
+export function useGroupInitiative() {
+  const sync = useSyncBattle();
+  const t = useT();
+  return useMutation({
+    mutationFn: ({ campaignId, battleId, combatantIds }: { campaignId: string; battleId: string; combatantIds: string[] }) =>
+      battlesApi.groupInitiative(campaignId, battleId, combatantIds),
+    onSuccess: (res) => {
+      sync(res.data);
+      toast.success(t('tactical.bulk.groupInitDone'));
+    },
+    onError: (e) => toast.error(errMsg(e, t('tactical.bulk.groupInitFailed'))),
+  });
+}
+
 /** Mass GM operation (damage/heal/condition) over several combatants (Phase 2.4). */
 export function useBulkAction() {
   const sync = useSyncBattle();

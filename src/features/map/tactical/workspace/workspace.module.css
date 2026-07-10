@@ -320,6 +320,11 @@
   margin-left: var(--s-1);
   color: var(--ink-quiet);
 }
+/* Condition picker in the bulk-actions panel (2.4). */
+.condSelect {
+  min-width: 12rem;
+  max-width: 100%;
+}
 .pip {
   width: 10px;
   height: 10px;

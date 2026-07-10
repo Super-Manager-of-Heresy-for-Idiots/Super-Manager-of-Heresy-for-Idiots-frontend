@@ -322,6 +322,19 @@ export const battlesApi = {
     return response.data;
   },
 
+  /** Roll one shared initiative die for a group of combatants (Phase 2.4, GM). */
+  groupInitiative: async (
+    campaignId: string,
+    battleId: string,
+    combatantIds: string[],
+  ): Promise<ApiResponse<BattleResponse>> => {
+    const response = await api.post<ApiResponse<BattleResponse>>(
+      `${base(campaignId)}/${battleId}/group-initiative`,
+      { combatantIds },
+    );
+    return response.data;
+  },
+
   /** Mass GM operation (damage/heal/condition) over several combatants at once (Phase 2.4). */
   bulkAction: async (
     campaignId: string,
