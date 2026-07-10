@@ -11,6 +11,7 @@ import { useI18n, useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
 import type { BattleResponse } from '@/types';
 import { AttackForm } from '../AttackForm';
+import { BulkActionsPanel } from '../BulkActionsPanel';
 import { DefaultActions } from '../DefaultActions';
 import { liveTargets, monsterAttackOptions } from '../combat';
 import type { MovementConfig } from '../movement';
@@ -57,6 +58,7 @@ export function TurnTab({ campaignId, battle, movement }: TurnTabProps) {
       {isMonsterTurn && (
         <AttackForm campaignId={campaignId} battleId={battle.id} attacks={attacks} targets={targets} />
       )}
+      <BulkActionsPanel campaignId={campaignId} battle={battle} />
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { AxiosError } from 'axios';
-import { battlesApi, type CastSpellRequest } from '@/api/battles.api';
+import { battlesApi, type BulkActionRequest, type CastSpellRequest } from '@/api/battles.api';
 import { useT } from '@/i18n/I18nContext';
 import type {
   ApiError,
@@ -333,6 +333,21 @@ export function useBattleCastSpell() {
       }
     },
     onError: (e) => toast.error(errMsg(e, t('battle.action.spell.castFailed'))),
+  });
+}
+
+/** Mass GM operation (damage/heal/condition) over several combatants (Phase 2.4). */
+export function useBulkAction() {
+  const sync = useSyncBattle();
+  const t = useT();
+  return useMutation({
+    mutationFn: ({ campaignId, battleId, data }: { campaignId: string; battleId: string; data: BulkActionRequest }) =>
+      battlesApi.bulkAction(campaignId, battleId, data),
+    onSuccess: (res) => {
+      sync(res.data);
+      toast.success(t('tactical.bulk.done'));
+    },
+    onError: (e) => toast.error(errMsg(e, t('tactical.bulk.failed'))),
   });
 }
 

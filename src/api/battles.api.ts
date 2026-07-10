@@ -50,6 +50,20 @@ export interface SpellCastResultLite {
   appliedDamageModifier?: string | null;
 }
 
+/** Mass GM operation over several combatants at once (Phase 2.4). */
+export interface BulkActionRequest {
+  combatantIds: string[];
+  type: 'DAMAGE' | 'HEAL' | 'CONDITION_ADD' | 'CONDITION_REMOVE';
+  amount?: number;
+  damageTypeId?: string;
+  saveDc?: number;
+  saveAbility?: string;
+  halfOnSave?: boolean;
+  conditionId?: string;
+  sourceText?: string;
+  remainingRounds?: number;
+}
+
 export const battlesApi = {
   list: async (campaignId: string): Promise<ApiResponse<BattleResponse[]>> => {
     const response = await api.get<ApiResponse<BattleResponse[]>>(base(campaignId));
@@ -303,6 +317,19 @@ export const battlesApi = {
   ): Promise<ApiResponse<SpellCastResultLite>> => {
     const response = await api.post<ApiResponse<SpellCastResultLite>>(
       `${base(campaignId)}/${battleId}/cast-spell`,
+      data,
+    );
+    return response.data;
+  },
+
+  /** Mass GM operation (damage/heal/condition) over several combatants at once (Phase 2.4). */
+  bulkAction: async (
+    campaignId: string,
+    battleId: string,
+    data: BulkActionRequest,
+  ): Promise<ApiResponse<BattleResponse>> => {
+    const response = await api.post<ApiResponse<BattleResponse>>(
+      `${base(campaignId)}/${battleId}/bulk-action`,
       data,
     );
     return response.data;
