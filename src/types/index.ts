@@ -1865,6 +1865,10 @@ export interface BattleCombatantResponse {
   legendaryResistanceUsed?: number;
   /** Attacks a Multiattack monster may still make this turn; null/absent for single-attack combatants. */
   attacksRemaining?: number | null;
+  /** Hidden identity (Phase 2.10): players should show {@link publicName} instead of {@link displayName}. */
+  identityHidden?: boolean;
+  /** Generic public label shown to players when the identity is hidden. */
+  publicName?: string | null;
 }
 
 /** A standard action a combatant can take on its turn (Phase 2.7). */

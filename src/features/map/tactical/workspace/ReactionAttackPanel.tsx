@@ -76,6 +76,7 @@ export function ReactionAttackPanel({
             attackerCombatantId={reactor.id}
             allowRangeOverride
             reaction
+            isGm
           />
         </div>
       )}

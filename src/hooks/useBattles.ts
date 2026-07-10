@@ -302,6 +302,27 @@ export function useStandardAction() {
   });
 }
 
+/** GM hides or reveals a monster's identity in the tracker (Phase 2.10). */
+export function useSetIdentityHidden() {
+  const sync = useSyncBattle();
+  const t = useT();
+  return useMutation({
+    mutationFn: ({
+      campaignId,
+      battleId,
+      combatantId,
+      hidden,
+    }: {
+      campaignId: string;
+      battleId: string;
+      combatantId: string;
+      hidden: boolean;
+    }) => battlesApi.setIdentityHidden(campaignId, battleId, combatantId, hidden),
+    onSuccess: (res) => sync(res.data),
+    onError: (e) => toast.error(errMsg(e, t('battle.identity.failed'))),
+  });
+}
+
 /** GM spends a monster's Legendary Resistance use (Phase 2.9). */
 export function useLegendaryResistance() {
   const sync = useSyncBattle();

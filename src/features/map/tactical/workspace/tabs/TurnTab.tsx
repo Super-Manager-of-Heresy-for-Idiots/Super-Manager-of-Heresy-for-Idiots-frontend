@@ -74,6 +74,7 @@ export function TurnTab({ campaignId, battle, movement, tacticalTokens }: TurnTa
             tacticalTokens={tacticalTokens}
             attackerCombatantId={current.id}
             allowRangeOverride
+            isGm
           />
           <StandardActionsPanel campaignId={campaignId} battle={battle} combatant={current} />
         </>

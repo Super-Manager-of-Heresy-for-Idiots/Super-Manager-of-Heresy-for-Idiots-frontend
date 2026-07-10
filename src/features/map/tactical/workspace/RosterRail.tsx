@@ -11,7 +11,13 @@ import { Rune } from '@/components/ordo';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
 import type { BattleResponse } from '@/types';
-import { useRerollInitiative, useResolveConcentration, useSetInitiativeOrder } from '@/hooks/useBattles';
+import {
+  useRerollInitiative,
+  useResolveConcentration,
+  useSetIdentityHidden,
+  useSetInitiativeOrder,
+} from '@/hooks/useBattles';
+import { combatantLabel } from './combat';
 import { useMapTransientStore } from '../../state';
 import { enterPlacement } from '../combatantPlacement';
 import type { TacticalTokenView } from '../tacticalView';
@@ -42,6 +48,7 @@ export function RosterRail({
   const setSelectedToken = useMapTransientStore((st) => st.setSelectedToken);
   const rerollInitiative = useRerollInitiative();
   const setInitiativeOrder = useSetInitiativeOrder();
+  const setIdentityHidden = useSetIdentityHidden();
   const reorderBusy = setInitiativeOrder.isPending || rerollInitiative.isPending;
 
   // GM-chosen token footprint (creature size) applied to the next placement.
@@ -127,7 +134,12 @@ export function RosterRail({
                   </div>
                   <div className={s.rosterMain}>
                     <span className={s.rosterName}>
-                      {c.displayName}
+                      {combatantLabel(c, isGm)}
+                      {isGm && c.identityHidden && (
+                        <span className={s.stateChip} title={t('battle.identity.hiddenHint')}>
+                          {t('battle.identity.hidden')}
+                        </span>
+                      )}
                       {isYou && <span className={s.youTag}>{t('battle.tracker.you')}</span>}
                       {c.concentrating && (
                         <span className={s.concTag} title={t('battle.tracker.concHint')}>
@@ -224,6 +236,25 @@ export function RosterRail({
                     >
                       ⟳
                     </button>
+                    {c.type === 'MONSTER' && (
+                      <button
+                        type="button"
+                        className="ao-btn ao-btn--sm ao-btn--ghost"
+                        title={t(c.identityHidden ? 'battle.identity.reveal' : 'battle.identity.hide')}
+                        aria-label={t(c.identityHidden ? 'battle.identity.reveal' : 'battle.identity.hide')}
+                        disabled={setIdentityHidden.isPending}
+                        onClick={() =>
+                          setIdentityHidden.mutate({
+                            campaignId,
+                            battleId: battle.id,
+                            combatantId: c.id,
+                            hidden: !c.identityHidden,
+                          })
+                        }
+                      >
+                        {c.identityHidden ? '🙈' : '👁'}
+                      </button>
+                    )}
                   </div>
                 )}
 

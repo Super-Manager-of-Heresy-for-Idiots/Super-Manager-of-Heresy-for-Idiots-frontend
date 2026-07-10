@@ -22,7 +22,7 @@ import type {
   CoverType,
 } from '@/types';
 import type { TacticalTokenView } from '../tacticalView';
-import { buildRangeFields, type AttackOption } from './combat';
+import { buildRangeFields, combatantLabel, type AttackOption } from './combat';
 import s from './workspace.module.css';
 
 interface AttackFormProps {
@@ -39,6 +39,8 @@ interface AttackFormProps {
   allowRangeOverride?: boolean;
   /** Resolve as a reaction / opportunity attack (Phase 2.8): out of turn, spends the reaction. */
   reaction?: boolean;
+  /** GM view: show real names for hidden-identity monsters (Phase 2.10). Players see the public label. */
+  isGm?: boolean;
 }
 
 export function AttackForm({
@@ -51,6 +53,7 @@ export function AttackForm({
   attackerCombatantId,
   allowRangeOverride,
   reaction,
+  isGm = false,
 }: AttackFormProps) {
   const t = useT();
   const attack = useBattleAttack();
@@ -167,7 +170,7 @@ export function AttackForm({
               size={10}
               color={c.type === 'MONSTER' ? 'var(--ember)' : 'var(--gold)'}
             />
-            <span className={s.optName}>{c.displayName}</span>
+            <span className={s.optName}>{combatantLabel(c, isGm)}</span>
             {c.currentHp != null && c.maxHp != null && (
               <span className={s.optHp}>
                 {c.currentHp}/{c.maxHp}

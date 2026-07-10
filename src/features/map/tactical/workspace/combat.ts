@@ -76,6 +76,15 @@ export function liveTargets(
   );
 }
 
+/**
+ * The name to show for a combatant (Phase 2.10): the GM always sees the real name; players see the
+ * generic public label when the monster's identity is hidden.
+ */
+export function combatantLabel(c: BattleCombatantResponse, isGm: boolean): string {
+  if (!isGm && c.identityHidden) return c.publicName ?? '???';
+  return c.displayName;
+}
+
 /** A character's attacks from the current-turn detail. */
 export function characterAttackOptions(
   turn: CombatantTurnResponse | null | undefined,

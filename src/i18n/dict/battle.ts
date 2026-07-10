@@ -283,6 +283,11 @@ export const battle: DictModule = {
     'battle.legendary.resistanceUsed': 'Легендарное сопротивление: спасбросок автоуспех',
     'battle.legendary.failed': 'Не удалось применить',
     'battle.multiattack.remaining': 'Мультиатака: осталось атак — {n}',
+    'battle.identity.hidden': 'Скрыт',
+    'battle.identity.hiddenHint': 'Игроки видят «Неизвестное существо»',
+    'battle.identity.hide': 'Скрыть личность от игроков',
+    'battle.identity.reveal': 'Раскрыть личность',
+    'battle.identity.failed': 'Не удалось изменить видимость личности',
   },
   en: {
     /* ── Tab + status ───────────────────────────────────── */
@@ -562,5 +567,10 @@ export const battle: DictModule = {
     'battle.legendary.resistanceUsed': 'Legendary Resistance: save auto-succeeds',
     'battle.legendary.failed': 'Could not apply',
     'battle.multiattack.remaining': 'Multiattack: attacks left — {n}',
+    'battle.identity.hidden': 'Hidden',
+    'battle.identity.hiddenHint': 'Players see "Unknown creature"',
+    'battle.identity.hide': 'Hide identity from players',
+    'battle.identity.reveal': 'Reveal identity',
+    'battle.identity.failed': 'Failed to change identity visibility',
   },
 };

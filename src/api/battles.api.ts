@@ -233,6 +233,19 @@ export const battlesApi = {
     return response.data;
   },
 
+  /** GM hides or reveals a monster's identity in the tracker (Phase 2.10). */
+  setIdentityHidden: async (
+    campaignId: string,
+    battleId: string,
+    combatantId: string,
+    hidden: boolean,
+  ): Promise<ApiResponse<BattleResponse>> => {
+    const response = await api.patch<ApiResponse<BattleResponse>>(
+      `${base(campaignId)}/${battleId}/combatants/${combatantId}/identity?hidden=${hidden}`,
+    );
+    return response.data;
+  },
+
   /** GM spends a monster's Legendary Resistance use to auto-succeed a failed save (Phase 2.9). */
   useLegendaryResistance: async (
     campaignId: string,
