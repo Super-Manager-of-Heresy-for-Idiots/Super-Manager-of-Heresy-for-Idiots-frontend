@@ -135,10 +135,40 @@ export function TacticalMapCenterPanel({
     [remoteDragPreviewsByTokenId],
   );
   // Session-scoped AoE spell zones (Phase 2.3); builder elements are not drawn in the tactical view.
-  const aoeZones = useMemo(
-    () => mapElements.filter((el) => el.mapSessionId != null && (el.properties as Record<string, unknown>)?.aoe === true),
-    [mapElements],
-  );
+  // The cast panel's aiming preview is appended as a pseudo-zone so the player sees the template live.
+  const aoePreview = useMapTransientStore((st) => st.aoePreview);
+  const aoeZones = useMemo(() => {
+    const zones = mapElements.filter(
+      (el) => el.mapSessionId != null && (el.properties as Record<string, unknown>)?.aoe === true,
+    );
+    if (!aoePreview) return zones;
+    return [
+      ...zones,
+      {
+        id: 'aoe-preview',
+        mapId: '',
+        mapSessionId: sessionId,
+        elementType: aoePreview.shape,
+        gridX: aoePreview.originX,
+        gridY: aoePreview.originY,
+        widthCells: 1,
+        heightCells: 1,
+        points: null,
+        style: {},
+        properties: {
+          aoe: true,
+          preview: true,
+          sizeFt: aoePreview.sizeFt,
+          rotationDeg: aoePreview.rotationDeg,
+          label: aoePreview.label,
+        },
+        zIndex: 0,
+        createdBy: '',
+        createdAt: '',
+        updatedAt: '',
+      } as unknown as (typeof zones)[number],
+    ];
+  }, [mapElements, aoePreview, sessionId]);
   const cursors = useMemo(
     () => Object.values(remoteCursorsByUserId).filter((c) => c.userId !== me?.id),
     [remoteCursorsByUserId, me?.id],

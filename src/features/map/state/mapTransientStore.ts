@@ -33,6 +33,8 @@ interface MapTransientStore extends MapTransientState {
   setPushTarget: (tokenId: UUID | null) => void;
   /** GM "out of rules" toggle (обход правил) — see {@link MapTransientState.forceMode}. */
   setForceMode: (on: boolean) => void;
+  /** Stage/clear the live AoE template preview (Phase 2.3) — see {@link MapTransientState.aoePreview}. */
+  setAoePreview: (preview: MapTransientState['aoePreview']) => void;
   /** Disarm the staged action and clear its target/pending cell. */
   clearCombatAction: () => void;
   setLocalDragPreview: (preview: TokenDragPreview | null) => void;
@@ -60,6 +62,7 @@ function createInitialTransientState(): MapTransientState {
     movePending: null,
     pushTargetTokenId: null,
     forceMode: false,
+    aoePreview: null,
   };
 }
 
@@ -88,6 +91,8 @@ export const useMapTransientStore = create<MapTransientStore>((set) => ({
   setPushTarget: (tokenId) => set({ pushTargetTokenId: tokenId }),
 
   setForceMode: (on) => set({ forceMode: on }),
+
+  setAoePreview: (aoePreview) => set({ aoePreview }),
 
   clearCombatAction: () =>
     set({ combatAction: null, movePending: null, pushTargetTokenId: null }),

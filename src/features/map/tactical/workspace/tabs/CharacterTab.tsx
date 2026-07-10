@@ -325,6 +325,7 @@ function SpellCastSection({
   useEffect(() => {
     setSlot(selectedSpell?.level ?? 0);
     setManualStr('');
+    setRotationDeg(0);
   }, [spellId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const upcastLevels = useMemo(
@@ -351,20 +352,47 @@ function SpellCastSection({
   // AoE (Phase 2.3): the template's origin is the cell selected on the map; map answers who is
   // covered. Casting into an empty area is legal (zone spells like Web still create the zone).
   const isAoe = !!mapSessionId && !!plan?.area?.shape && plan?.area?.sizeFt != null;
+  const aoeShape = plan?.area?.shape ?? '';
+  const aoeSizeFt = plan?.area?.sizeFt ?? 0;
+  // Cones and lines point somewhere; spheres/cubes are symmetric and need no direction.
+  const needsRotation = isAoe && (aoeShape === 'CONE' || aoeShape === 'LINE');
+  const [rotationDeg, setRotationDeg] = useState(0);
   const selectedCell = useMapTransientStore((st) => st.selectedCell);
+  const setAoePreview = useMapTransientStore((st) => st.setAoePreview);
   const origin = isAoe && selectedCell
     ? { x: Math.floor(selectedCell.gridX), y: Math.floor(selectedCell.gridY) }
     : null;
+  const originX = origin?.x ?? null;
+  const originY = origin?.y ?? null;
+
+  // Live template preview on the map while aiming (cleared on unmount/spell change/cast).
+  useEffect(() => {
+    if (isAoe && originX != null && originY != null) {
+      setAoePreview({
+        shape: aoeShape,
+        sizeFt: aoeSizeFt,
+        originX,
+        originY,
+        rotationDeg: needsRotation ? rotationDeg : 0,
+        label: selectedSpell?.name,
+      });
+    } else {
+      setAoePreview(null);
+    }
+    return () => setAoePreview(null);
+  }, [isAoe, aoeShape, aoeSizeFt, originX, originY, needsRotation, rotationDeg, selectedSpell?.name, setAoePreview]);
+
   const { data: aoeCovered } = useQuery({
-    queryKey: ['aoe-targets', mapSessionId, plan?.area?.shape, plan?.area?.sizeFt, origin?.x, origin?.y],
+    queryKey: ['aoe-targets', mapSessionId, aoeShape, aoeSizeFt, originX, originY, needsRotation ? rotationDeg : 0],
     queryFn: async () =>
       mapSessionApi.aoeTargets(mapSessionId!, {
-        shape: plan!.area!.shape,
-        sizeFt: plan!.area!.sizeFt!,
-        originX: origin!.x,
-        originY: origin!.y,
+        shape: aoeShape,
+        sizeFt: aoeSizeFt,
+        originX: originX!,
+        originY: originY!,
+        rotationDeg: needsRotation ? rotationDeg : 0,
       }),
-    enabled: isAoe && !!origin,
+    enabled: isAoe && originX != null && originY != null,
   });
   const aoeCombatantIds = useMemo(
     () => (aoeCovered ?? []).map((c) => c.combatantId).filter((id): id is string => !!id),
@@ -376,21 +404,40 @@ function SpellCastSection({
 
   const submit = () => {
     if (!canCast) return;
-    cast.mutate({
-      campaignId,
-      battleId,
-      data: {
-        spellId,
-        targetCombatantId: isAoe ? undefined : targetId || undefined,
-        targetCombatantIds: isAoe && aoeCombatantIds.length > 0 ? aoeCombatantIds : undefined,
-        originX: isAoe ? origin!.x : undefined,
-        originY: isAoe ? origin!.y : undefined,
-        slotLevel: isLeveled ? slot : undefined,
-        damageRollMode: hasDamage && manualMode ? 'MANUAL' : 'AUTO',
-        manualDamage: hasDamage && manualMode && manualValid ? manualNum : undefined,
+    cast.mutate(
+      {
+        campaignId,
+        battleId,
+        data: {
+          spellId,
+          targetCombatantId: isAoe ? undefined : targetId || undefined,
+          targetCombatantIds: isAoe && aoeCombatantIds.length > 0 ? aoeCombatantIds : undefined,
+          originX: isAoe ? origin!.x : undefined,
+          originY: isAoe ? origin!.y : undefined,
+          rotationDeg: needsRotation ? rotationDeg : undefined,
+          slotLevel: isLeveled ? slot : undefined,
+          damageRollMode: hasDamage && manualMode ? 'MANUAL' : 'AUTO',
+          manualDamage: hasDamage && manualMode && manualValid ? manualNum : undefined,
+        },
       },
-    });
+      {
+        onSuccess: () => {
+          // The zone (if any) now lives on the map — drop the aiming preview and the manual total.
+          setManualStr('');
+          setAoePreview(null);
+        },
+      },
+    );
   };
+
+  // Why the cast button is disabled — surfaced as a hint instead of a silently dead button.
+  const disabledReason = !spellId
+    ? null
+    : isAoe && !origin
+      ? t('battle.action.spell.aoePickCell')
+      : hasDamage && manualMode && !manualValid
+        ? t('battle.action.spell.manualDmg')
+        : null;
 
   return (
     <div className={s.block}>
@@ -480,6 +527,35 @@ function SpellCastSection({
               ? t('battle.action.spell.aoeOrigin', { x: origin.x, y: origin.y })
               : t('battle.action.spell.aoePickCell')}
           </div>
+          {needsRotation && (
+            <div className="ao-row ao-gap-8 ao-wrap">
+              <span className={cn('ao-overline', s.fieldLabel)}>{t('battle.action.spell.direction')}</span>
+              <div className="ao-row ao-gap-2">
+                {/* Grid Y grows downward on screen, so 90° points down. */}
+                {([
+                  [0, '→'],
+                  [45, '↘'],
+                  [90, '↓'],
+                  [135, '↙'],
+                  [180, '←'],
+                  [225, '↖'],
+                  [270, '↑'],
+                  [315, '↗'],
+                ] as const).map(([deg, arrow]) => (
+                  <button
+                    key={deg}
+                    type="button"
+                    className={cn('ao-btn ao-btn--sm', rotationDeg === deg ? 'ao-btn--primary' : 'ao-btn--ghost')}
+                    aria-label={t('battle.action.spell.directionDeg', { n: deg })}
+                    title={t('battle.action.spell.directionDeg', { n: deg })}
+                    onClick={() => setRotationDeg(deg)}
+                  >
+                    {arrow}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
           {origin && (
             <div className={s.chips}>
               {(aoeCovered ?? []).length === 0 ? (
@@ -526,12 +602,16 @@ function SpellCastSection({
         className={cn('ao-btn ao-btn--primary ao-btn--block', s.mt12)}
         onClick={submit}
         disabled={!canCast || cast.isPending}
-        title={t('battle.action.spell.castTitle')}
+        title={disabledReason ?? t('battle.action.spell.castTitle')}
       >
         <Rune kind="book" size={14} color="currentColor" />
-        <span className={s.ml6}>{t('battle.action.spell.castTitle')}</span>
+        <span className={s.ml6}>
+          {cast.isPending ? t('battle.action.spell.casting') : t('battle.action.spell.castTitle')}
+        </span>
       </button>
-      <div className={cn('ao-italic', s.hint)}>{t('battle.action.spell.hint')}</div>
+      <div className={cn('ao-italic', s.hint)}>
+        {disabledReason ? t('battle.action.spell.blocked', { reason: disabledReason }) : t('battle.action.spell.hint')}
+      </div>
     </div>
   );
 }

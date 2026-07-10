@@ -72,6 +72,13 @@
   stroke: var(--abyss);
   stroke-width: 3px;
 }
+/* Aiming preview while the caster picks the origin/direction — dashed, lighter than a real zone. */
+.aoePreviewShape {
+  fill: color-mix(in srgb, var(--gold) 12%, transparent);
+  stroke: color-mix(in srgb, var(--gold) 70%, transparent);
+  stroke-width: 1.5;
+  stroke-dasharray: 6 4;
+}
 
 /* ── Fog of war — Phase 1.6 (cloudy look) ─────────────────────── */
 .fogSvg {

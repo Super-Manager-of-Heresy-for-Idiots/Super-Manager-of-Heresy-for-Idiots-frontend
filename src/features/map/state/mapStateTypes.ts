@@ -172,4 +172,16 @@ export interface MapTransientState {
    * dragging) and the inspector (GM spell-slot management for any character) react to it.
    */
   forceMode: boolean;
+  /**
+   * Live AoE template preview while picking a cast origin (Phase 2.3): the cast panel stages the
+   * shape here and the map draws it under the tokens. Local-only; cleared on cast/spell change.
+   */
+  aoePreview: {
+    shape: string;
+    sizeFt: number;
+    originX: number;
+    originY: number;
+    rotationDeg: number;
+    label?: string;
+  } | null;
 }
