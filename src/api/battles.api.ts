@@ -11,6 +11,9 @@ import type {
   ApplyCombatantHpRequest,
   BattleActionResultResponse,
   SpendActionRequest,
+  StandardActionRequest,
+  ContestRequest,
+  ContestResultResponse,
   AdjustActionEconomyRequest,
   CombatantCondition,
   BattleLogEntry,
@@ -197,6 +200,34 @@ export const battlesApi = {
   ): Promise<ApiResponse<BattleResponse>> => {
     const response = await api.post<ApiResponse<BattleResponse>>(
       `${base(campaignId)}/${battleId}/combatants/${combatantId}/hp`,
+      data,
+    );
+    return response.data;
+  },
+
+  /** Take a standard action (Dash / Dodge / Disengage / Help / Hide) on the combatant's turn (Phase 2.7). */
+  standardAction: async (
+    campaignId: string,
+    battleId: string,
+    combatantId: string,
+    data: StandardActionRequest,
+  ): Promise<ApiResponse<BattleResponse>> => {
+    const response = await api.post<ApiResponse<BattleResponse>>(
+      `${base(campaignId)}/${battleId}/combatants/${combatantId}/standard-action`,
+      data,
+    );
+    return response.data;
+  },
+
+  /** Resolve an opposed Grapple/Shove contest against a target on the actor's turn (Phase 2.7). */
+  contest: async (
+    campaignId: string,
+    battleId: string,
+    combatantId: string,
+    data: ContestRequest,
+  ): Promise<ApiResponse<ContestResultResponse>> => {
+    const response = await api.post<ApiResponse<ContestResultResponse>>(
+      `${base(campaignId)}/${battleId}/combatants/${combatantId}/contest`,
       data,
     );
     return response.data;

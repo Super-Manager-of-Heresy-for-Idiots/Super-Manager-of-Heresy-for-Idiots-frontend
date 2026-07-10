@@ -134,6 +134,15 @@ export function RosterRail({
                           {t('battle.tracker.conc')}
                         </span>
                       )}
+                      {c.dashing && <span className={s.stateChip}>{t('battle.standard.state.dashing')}</span>}
+                      {c.dodging && <span className={s.stateChip}>{t('battle.standard.state.dodging')}</span>}
+                      {c.disengaged && (
+                        <span className={s.stateChip}>{t('battle.standard.state.disengaged')}</span>
+                      )}
+                      {c.hidden && <span className={s.stateChip}>{t('battle.standard.state.hidden')}</span>}
+                      {c.helpAdvantage && (
+                        <span className={s.stateChip}>{t('battle.standard.state.helpAdvantage')}</span>
+                      )}
                     </span>
                     <span className={cn(s.placedTag, onMap ? s.placedYes : s.placedNo)}>
                       {onMap ? t('tactical.left.placed') : t('tactical.left.unplaced')}

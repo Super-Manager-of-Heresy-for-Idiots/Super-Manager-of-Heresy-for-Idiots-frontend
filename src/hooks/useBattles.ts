@@ -13,6 +13,8 @@ import type {
   BattleAttackRequest,
   ApplyCombatantHpRequest,
   SpendActionRequest,
+  StandardActionRequest,
+  ContestRequest,
   AdjustActionEconomyRequest,
 } from '@/types';
 
@@ -259,6 +261,59 @@ export function useSpendAction() {
     }) => battlesApi.spendAction(campaignId, battleId, combatantId, data),
     onSuccess: (res) => sync(res.data),
     onError: (e) => toast.error(errMsg(e, t('battle.toast.actionFailed'))),
+  });
+}
+
+/** Take a standard action (Dash / Dodge / Disengage / Help / Hide) on a combatant's turn (Phase 2.7). */
+export function useStandardAction() {
+  const sync = useSyncBattle();
+  const t = useT();
+  return useMutation({
+    mutationFn: ({
+      campaignId,
+      battleId,
+      combatantId,
+      data,
+    }: {
+      campaignId: string;
+      battleId: string;
+      combatantId: string;
+      data: StandardActionRequest;
+    }) => battlesApi.standardAction(campaignId, battleId, combatantId, data),
+    onSuccess: (res, { data }) => {
+      sync(res.data);
+      toast.success(t(`battle.standard.done.${data.type}`));
+    },
+    onError: (e) => toast.error(errMsg(e, t('battle.standard.failed'))),
+  });
+}
+
+/** Resolve an opposed Grapple/Shove contest (Phase 2.7). */
+export function useContest() {
+  const sync = useSyncBattle();
+  const t = useT();
+  return useMutation({
+    mutationFn: ({
+      campaignId,
+      battleId,
+      combatantId,
+      data,
+    }: {
+      campaignId: string;
+      battleId: string;
+      combatantId: string;
+      data: ContestRequest;
+    }) => battlesApi.contest(campaignId, battleId, combatantId, data),
+    onSuccess: (res) => {
+      sync(res.data?.battle);
+      if (res.data) {
+        const msg = res.data.attackerWins
+          ? t('battle.contest.won', { total: res.data.attackerTotal, target: res.data.targetTotal })
+          : t('battle.contest.lost', { total: res.data.attackerTotal, target: res.data.targetTotal });
+        (res.data.attackerWins ? toast.success : toast)(msg);
+      }
+    },
+    onError: (e) => toast.error(errMsg(e, t('battle.contest.failed'))),
   });
 }
 

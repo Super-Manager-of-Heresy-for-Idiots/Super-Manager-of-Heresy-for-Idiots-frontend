@@ -137,13 +137,10 @@ export interface PlacementState {
 
 /**
  * A staged default action awaiting target + confirmation. MOVE/FLY pick a destination
- * cell ({@link MapTransientState.movePending}); PUSH picks an enemy token
- * ({@link MapTransientState.pushTargetTokenId}). Nothing commits until the user
- * confirms — local-only intent, never committed state.
+ * cell ({@link MapTransientState.movePending}). Nothing commits until the user confirms —
+ * local-only intent, never committed state. (Shove is a server contest, not a client move.)
  */
-export type CombatActionIntent =
-  | { type: 'MOVE'; mode: 'WALK' | 'FLY' }
-  | { type: 'PUSH' };
+export type CombatActionIntent = { type: 'MOVE'; mode: 'WALK' | 'FLY' };
 
 export interface MapTransientState {
   selectedTokenId: UUID | null;
@@ -161,12 +158,10 @@ export interface MapTransientState {
    * the core battle API — this is purely the "which attack" half of the selection.
    */
   attackName: string | null;
-  /** Staged default action (Move/Fly/Push) awaiting target + confirmation. */
+  /** Staged default action (Move/Fly) awaiting target + confirmation. */
   combatAction: CombatActionIntent | null;
   /** MOVE/FLY destination cell chosen but not yet confirmed (route-preview target). */
   movePending: GridPoint | null;
-  /** PUSH target token chosen but not yet confirmed. */
-  pushTargetTokenId: UUID | null;
   /**
    * GM "out of rules" (обход правил) toggle. Shared here so both the map center (free token
    * dragging) and the inspector (GM spell-slot management for any character) react to it.

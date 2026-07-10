@@ -27,10 +27,9 @@ interface MapTransientStore extends MapTransientState {
   setPlacement: (placement: PlacementState | null) => void;
   clearPlacement: () => void;
   setAttackName: (attackName: string | null) => void;
-  /** Arm a default action (Move/Fly/Push); clears any staged target/pending cell. */
+  /** Arm a default action (Move/Fly); clears any staged pending cell. */
   setCombatAction: (action: CombatActionIntent | null) => void;
   setMovePending: (cell: GridPoint | null) => void;
-  setPushTarget: (tokenId: UUID | null) => void;
   /** GM "out of rules" toggle (обход правил) — see {@link MapTransientState.forceMode}. */
   setForceMode: (on: boolean) => void;
   /** Stage/clear the live AoE template preview (Phase 2.3) — see {@link MapTransientState.aoePreview}. */
@@ -60,7 +59,6 @@ function createInitialTransientState(): MapTransientState {
     attackName: null,
     combatAction: null,
     movePending: null,
-    pushTargetTokenId: null,
     forceMode: false,
     aoePreview: null,
   };
@@ -82,20 +80,16 @@ export const useMapTransientStore = create<MapTransientStore>((set) => ({
 
   setAttackName: (attackName) => set({ attackName }),
 
-  // Arming an action starts a fresh staging (no leftover pending cell / push target).
-  setCombatAction: (combatAction) =>
-    set({ combatAction, movePending: null, pushTargetTokenId: null }),
+  // Arming an action starts a fresh staging (no leftover pending cell).
+  setCombatAction: (combatAction) => set({ combatAction, movePending: null }),
 
   setMovePending: (cell) => set({ movePending: cell }),
-
-  setPushTarget: (tokenId) => set({ pushTargetTokenId: tokenId }),
 
   setForceMode: (on) => set({ forceMode: on }),
 
   setAoePreview: (aoePreview) => set({ aoePreview }),
 
-  clearCombatAction: () =>
-    set({ combatAction: null, movePending: null, pushTargetTokenId: null }),
+  clearCombatAction: () => set({ combatAction: null, movePending: null }),
 
   setLocalDragPreview: (preview) => set({ localDragPreview: preview }),
 

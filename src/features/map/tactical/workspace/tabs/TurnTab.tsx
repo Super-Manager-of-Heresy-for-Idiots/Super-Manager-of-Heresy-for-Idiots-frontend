@@ -11,6 +11,7 @@ import { useI18n, useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
 import type { BattleResponse } from '@/types';
 import { AttackForm } from '../AttackForm';
+import { StandardActionsPanel } from '../StandardActionsPanel';
 import { BulkActionsPanel } from '../BulkActionsPanel';
 import { DefaultActions } from '../DefaultActions';
 import { liveTargets, monsterAttackOptions } from '../combat';
@@ -55,17 +56,20 @@ export function TurnTab({ campaignId, battle, movement, tacticalTokens }: TurnTa
       <p className={cn('ao-italic', s.tabSub)}>
         {isMonsterTurn ? t('tactical.turn.monsterHint') : t('tactical.turn.charHint')}
       </p>
-      <DefaultActions movement={movement} />
+      <DefaultActions movement={movement} tacticalTokens={tacticalTokens} />
       {isMonsterTurn && (
-        <AttackForm
-          campaignId={campaignId}
-          battleId={battle.id}
-          attacks={attacks}
-          targets={targets}
-          tacticalTokens={tacticalTokens}
-          attackerCombatantId={current.id}
-          allowRangeOverride
-        />
+        <>
+          <AttackForm
+            campaignId={campaignId}
+            battleId={battle.id}
+            attacks={attacks}
+            targets={targets}
+            tacticalTokens={tacticalTokens}
+            attackerCombatantId={current.id}
+            allowRangeOverride
+          />
+          <StandardActionsPanel campaignId={campaignId} battle={battle} combatant={current} />
+        </>
       )}
       <BulkActionsPanel campaignId={campaignId} battle={battle} />
     </div>

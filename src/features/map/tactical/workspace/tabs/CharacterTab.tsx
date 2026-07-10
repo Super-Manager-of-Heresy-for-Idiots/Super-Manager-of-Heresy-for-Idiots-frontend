@@ -26,6 +26,7 @@ import type { BattleCombatantResponse, BattleResponse, CharacterV2Response } fro
 import { useMapTransientStore } from '../../../state';
 import { mapSessionApi } from '../../../api';
 import { AttackForm } from '../AttackForm';
+import { StandardActionsPanel } from '../StandardActionsPanel';
 import { DefaultActions } from '../DefaultActions';
 import { characterAttackOptions, liveTargets } from '../combat';
 import type { MovementConfig } from '../movement';
@@ -145,7 +146,7 @@ function ActionPanel({
       <p className={cn('ao-overline', s.goldOverline)}>{t('battle.action.title')}</p>
       <h4 className={cn('ao-h4', s.tabTitle)}>{current.displayName}</h4>
 
-      <DefaultActions movement={movement} />
+      <DefaultActions movement={movement} tacticalTokens={tacticalTokens} />
 
       <div className={s.block}>
         <div className={cn('ao-overline', s.fieldLabel)}>{t('battle.action.economy')}</div>
@@ -220,6 +221,8 @@ function ActionPanel({
               attackerCombatantId={current.id}
             />
           </div>
+
+          <StandardActionsPanel campaignId={campaignId} battle={battle} combatant={current} />
 
           {current.characterId && (
             <ItemsSection campaignId={campaignId} battleId={battle.id} characterId={current.characterId} />

@@ -1845,6 +1845,66 @@ export interface BattleCombatantResponse {
   concentrating?: boolean;
   /** DC of a pending concentration save the player must roll (Phase 2.2); null/absent when none. */
   pendingConcentrationDc?: number | null;
+  // Standard-action turn state (Phase 2.7).
+  /** Dash taken: movement budget doubled this turn. */
+  dashing?: boolean;
+  /** Dodging: attackers have disadvantage, this combatant has advantage on Dex saves. */
+  dodging?: boolean;
+  /** Disengaged: movement provokes no opportunity attacks this turn. */
+  disengaged?: boolean;
+  /** Hidden from enemies; its next attack has advantage, then it is revealed. */
+  hidden?: boolean;
+  /** An ally Helped this combatant: its next attack has advantage. */
+  helpAdvantage?: boolean;
+}
+
+/** A standard action a combatant can take on its turn (Phase 2.7). */
+export type StandardActionType = 'DASH' | 'DODGE' | 'DISENGAGE' | 'HELP' | 'HIDE';
+
+/** An opposed melee contest (Phase 2.7). */
+export type ContestType = 'GRAPPLE' | 'SHOVE';
+
+/** Request to resolve a Grapple/Shove contest (Phase 2.7). */
+export interface ContestRequest {
+  type: ContestType;
+  targetCombatantId: string;
+  /** Manual attacker d20 (Athletics); omit for the server to roll. */
+  attackerD20?: number;
+  attackerBonus?: number;
+  /** Manual target d20 (Athletics/Acrobatics); omit for the server to roll. */
+  targetD20?: number;
+  targetBonus?: number;
+  /** SHOVE only: 'PRONE' (default) or 'PUSH' (forced movement, Phase 2.12). */
+  shoveMode?: 'PRONE' | 'PUSH';
+}
+
+/** Result of a Grapple/Shove contest (Phase 2.7). */
+export interface ContestResultResponse {
+  type: string;
+  attackerName: string;
+  targetName: string;
+  attackerRoll: number;
+  attackerTotal: number;
+  targetRoll: number;
+  targetTotal: number;
+  attackerWins: boolean;
+  condition?: string | null;
+  battle: BattleResponse;
+}
+
+/** Request to take a standard action (Phase 2.7). */
+export interface StandardActionRequest {
+  type: StandardActionType;
+  /** Action-economy slot; ACTION when omitted. */
+  slot?: 'ACTION' | 'BONUS_ACTION';
+  /** The aided ally for HELP. */
+  targetCombatantId?: string;
+  /** HIDE: manual Stealth d20; omit for the server to roll. */
+  stealthD20?: number;
+  /** HIDE: the actor's Stealth modifier. */
+  stealthBonus?: number;
+  /** HIDE: contest DC (highest enemy passive Perception); omit to auto-succeed. */
+  hideDc?: number;
 }
 
 /** A live condition instance on a battle combatant (Phase 1.1). */
@@ -2003,6 +2063,10 @@ export interface BattleAttackRequest {
   gmOverrideRange?: boolean;
   /** Target cover (Phase 2.6): HALF/THREE_QUARTERS raise AC & Dex saves; TOTAL rejects the attack. */
   cover?: CoverType;
+  /** Reaction/opportunity attack (Phase 2.8): resolved out of turn, spends the reaction not the action. */
+  reaction?: boolean;
+  /** The reacting attacker for a reaction strike; required when {@link reaction} is true. */
+  attackerCombatantId?: string;
 }
 
 /** Cover the target benefits from (Phase 2.6). */

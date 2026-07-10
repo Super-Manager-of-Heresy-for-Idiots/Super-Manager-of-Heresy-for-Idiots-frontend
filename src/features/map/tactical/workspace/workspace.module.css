@@ -265,6 +265,21 @@
   text-transform: uppercase;
   letter-spacing: var(--track-eng);
 }
+.stateChip {
+  flex: 0 0 auto;
+  padding: 1px 6px;
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  border-radius: 3px;
+  font-size: var(--t-nano);
+  text-transform: uppercase;
+  letter-spacing: var(--track-eng);
+}
+.oaWarn {
+  margin-top: var(--s-6);
+  color: var(--ember);
+  font-size: var(--t-nano);
+}
 .placedTag {
   font-size: var(--t-nano);
   text-transform: uppercase;

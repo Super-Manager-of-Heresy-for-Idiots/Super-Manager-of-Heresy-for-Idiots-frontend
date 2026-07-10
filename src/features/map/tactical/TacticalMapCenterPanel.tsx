@@ -11,9 +11,9 @@
  *    final-position preview is drawn, and nothing commits until they confirm (or they
  *    cancel and the creature stays put). Walk obeys the low→high ground rule (pluggable
  *    terrain hook); fly uses the fly range and ignores ground.
- *  - PUSH → the user clicks an adjacent enemy token; confirm shoves it one cell away
- *    (manual shove for whoever may move the target; full contested resolution is a
- *    backend task — see BACKEND_REQUIREMENTS.md).
+ *
+ * Shove/Grapple are server-authoritative opposed contests (the standard-actions panel),
+ * not a client-side token push.
  *
  * The map-service enforces turn/budget/occupancy during an active battle (server is
  * the authority and rejects illegal moves with MOVE_REJECTED); these client rules
@@ -116,9 +116,7 @@ export function TacticalMapCenterPanel({
 
   const combatAction = useMapTransientStore((st) => st.combatAction);
   const movePending = useMapTransientStore((st) => st.movePending);
-  const pushTargetTokenId = useMapTransientStore((st) => st.pushTargetTokenId);
   const setMovePending = useMapTransientStore((st) => st.setMovePending);
-  const setPushTarget = useMapTransientStore((st) => st.setPushTarget);
   const clearCombatAction = useMapTransientStore((st) => st.clearCombatAction);
 
   const tokens = useMemo(() => {
@@ -414,29 +412,12 @@ export function TacticalMapCenterPanel({
     setLocalDragPreview(null);
   }, [setLocalDragPreview]);
 
-  // Token click: in PUSH mode, an adjacent enemy becomes the shove target; otherwise
-  // normal selection (focuses the inspector).
+  // Token click: normal selection (focuses the inspector). Shove is now a server contest.
   const handleSelectToken = useCallback(
     (tokenId: UUID | null) => {
-      if (tokenId && combatAction?.type === 'PUSH' && movement && tokenId !== movement.activeTokenId) {
-        const target = tokensById[tokenId];
-        const active = tokensById[movement.activeTokenId];
-        if (
-          target &&
-          active &&
-          stepDistance(
-            { gridX: active.gridX, gridY: active.gridY },
-            { gridX: target.gridX, gridY: target.gridY },
-          ) === 1
-        ) {
-          setPushTarget(tokenId);
-          return;
-        }
-        return; // ignore non-adjacent clicks while shoving
-      }
       setSelectedToken(tokenId);
     },
-    [combatAction, movement, tokensById, setPushTarget, setSelectedToken],
+    [setSelectedToken],
   );
 
   // Empty-cell click: place a combatant (placement mode), stage a move destination
@@ -512,57 +493,6 @@ export function TacticalMapCenterPanel({
     setLocalDragPreview(null);
   }, [clearCombatAction, setLocalDragPreview]);
 
-  // Manual shove: move the target one cell directly away from the actor (whoever may
-  // move the target token). Full contested resolution + player support is backend work.
-  const confirmPush = useCallback(() => {
-    if (!movement || !pushTargetTokenId || !map) return;
-    const target = tokensById[pushTargetTokenId];
-    const active = tokensById[movement.activeTokenId];
-    if (!target || !active) return;
-    const dx = Math.sign(Math.round(target.gridX) - Math.round(active.gridX));
-    const dy = Math.sign(Math.round(target.gridY) - Math.round(active.gridY));
-    if (dx === 0 && dy === 0) return;
-    const away = { gridX: Math.round(target.gridX) + dx, gridY: Math.round(target.gridY) + dy };
-    const bounds = boundsFromGrid(map.gridConfig);
-    const offMap =
-      bounds &&
-      (away.gridX < bounds.minX || away.gridX > bounds.maxX || away.gridY < bounds.minY || away.gridY > bounds.maxY);
-    if (offMap || occupiedCells(tokens, pushTargetTokenId).has(cellKey(away.gridX, away.gridY))) {
-      toast.error(t('tactical.push.blocked'));
-      return;
-    }
-    const canMoveTarget =
-      permissions?.canMoveAnyToken || permissions?.movableTokenIds.includes(pushTargetTokenId);
-    if (!canMoveTarget) {
-      toast(t('tactical.push.needsServer'));
-      return;
-    }
-    pendingMove.current = { tokenId: pushTargetTokenId, gridX: away.gridX, gridY: away.gridY };
-    setLocalDragPreview({
-      tokenId: pushTargetTokenId,
-      gridX: away.gridX,
-      gridY: away.gridY,
-      actorUserId: me?.id ?? '',
-      updatedAt: Date.now(),
-    });
-    const sent = realtime.sendMoveToken({
-      tokenId: pushTargetTokenId,
-      expectedRevision: currentRevision,
-      to: away,
-      force: Boolean(isGm && forceMode),
-      clientCommandId: crypto.randomUUID(),
-    });
-    if (!sent) {
-      pendingMove.current = null;
-      setLocalDragPreview(null);
-      toast.error(t('map.conn.offline'));
-      realtime.resync();
-      return;
-    }
-    armMoveWatchdog();
-    clearCombatAction();
-  }, [movement, pushTargetTokenId, map, tokensById, tokens, permissions, currentRevision, me?.id, realtime, setLocalDragPreview, clearCombatAction, t, armMoveWatchdog, isGm, forceMode]);
-
   // Resolve a pending move once the committed token reaches the target (TOKEN_MOVED).
   useEffect(() => {
     const pm = pendingMove.current;
@@ -611,7 +541,6 @@ export function TacticalMapCenterPanel({
     );
   }
 
-  const pushTargetName = pushTargetTokenId ? tokensById[pushTargetTokenId]?.name : undefined;
 
   return (
     <div className={s.centerWrap}>
@@ -701,54 +630,30 @@ export function TacticalMapCenterPanel({
 
       {combatAction && (
         <div className={cn('ao-panel', s.actionBar)} role="status">
-          {combatAction.type === 'PUSH' ? (
-            <>
-              <span className={s.actionBarInfo}>
-                {pushTargetName ? t('tactical.push.target', { name: pushTargetName }) : t('tactical.push.pickTarget')}
+          <span className={s.actionBarInfo}>
+            {pendingCell && origin
+              ? t('tactical.move.distance', { n: stepDistance(origin, pendingCell) })
+              : t('tactical.move.pickCell')}
+            {budgetFt > 0 && (
+              <span className={s.moveBudget}>
+                {t('tactical.move.budget', { spent: spentFt, total: budgetFt })}
               </span>
-              <div className="ao-row ao-gap-8">
-                <button
-                  type="button"
-                  className="ao-btn ao-btn--sm ao-btn--danger"
-                  disabled={!pushTargetTokenId}
-                  onClick={confirmPush}
-                >
-                  <Rune kind="arrow-r" size={12} color="currentColor" />
-                  <span className={s.ml6}>{t('tactical.push.confirm')}</span>
-                </button>
-                <button type="button" className="ao-btn ao-btn--sm ao-btn--ghost" onClick={cancelAction}>
-                  {t('tactical.move.cancel')}
-                </button>
-              </div>
-            </>
-          ) : (
-            <>
-              <span className={s.actionBarInfo}>
-                {pendingCell && origin
-                  ? t('tactical.move.distance', { n: stepDistance(origin, pendingCell) })
-                  : t('tactical.move.pickCell')}
-                {budgetFt > 0 && (
-                  <span className={s.moveBudget}>
-                    {t('tactical.move.budget', { spent: spentFt, total: budgetFt })}
-                  </span>
-                )}
-              </span>
-              <div className="ao-row ao-gap-8">
-                <button
-                  type="button"
-                  className="ao-btn ao-btn--sm ao-btn--primary"
-                  disabled={!pendingCell}
-                  onClick={confirmMove}
-                >
-                  <Rune kind="check" size={12} color="currentColor" />
-                  <span className={s.ml6}>{t('tactical.move.confirm')}</span>
-                </button>
-                <button type="button" className="ao-btn ao-btn--sm ao-btn--ghost" onClick={cancelAction}>
-                  {t('tactical.move.cancel')}
-                </button>
-              </div>
-            </>
-          )}
+            )}
+          </span>
+          <div className="ao-row ao-gap-8">
+            <button
+              type="button"
+              className="ao-btn ao-btn--sm ao-btn--primary"
+              disabled={!pendingCell}
+              onClick={confirmMove}
+            >
+              <Rune kind="check" size={12} color="currentColor" />
+              <span className={s.ml6}>{t('tactical.move.confirm')}</span>
+            </button>
+            <button type="button" className="ao-btn ao-btn--sm ao-btn--ghost" onClick={cancelAction}>
+              {t('tactical.move.cancel')}
+            </button>
+          </div>
         </div>
       )}
     </div>
