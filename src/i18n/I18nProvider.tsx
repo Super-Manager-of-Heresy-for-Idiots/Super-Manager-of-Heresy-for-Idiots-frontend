@@ -1,12 +1,30 @@
-import { useState, useCallback, useMemo, type ReactNode } from 'react';
+import { useState, useCallback, useEffect, useMemo, type ReactNode } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { translations, type Lang } from './translations';
+import { coreTranslations, loadFeatureTranslations, type Dict, type Lang } from './translations';
 import { LANG_STORAGE_KEY, DEFAULT_LANG, getStoredLang } from './lang';
 import { I18nContext } from './I18nContext';
 
 export function I18nProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
   const [lang, setLangState] = useState<Lang>(getStoredLang);
+  const [translations, setTranslations] = useState<Record<Lang, Dict>>(coreTranslations);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    void loadFeatureTranslations().then((loaded) => {
+      if (!cancelled) {
+        setTranslations({
+          ru: { ...coreTranslations.ru, ...loaded.ru },
+          en: { ...coreTranslations.en, ...loaded.en },
+        });
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const setLang = useCallback((next: Lang) => {
     if (next === getStoredLang()) return;
@@ -30,7 +48,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
       }
       return value;
     },
-    [lang],
+    [lang, translations],
   );
 
   const value = useMemo(() => ({ lang, setLang, t }), [lang, setLang, t]);

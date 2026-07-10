@@ -1,15 +1,18 @@
-import { useEffect } from 'react';
-import { RouterProvider } from 'react-router-dom';
+import { lazy, Suspense, useEffect } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
-import { router } from './router';
 import { I18nProvider } from './i18n/I18nProvider';
 import { isRetryableError } from './lib/errors';
 import { bootstrapAuth } from './lib/authSession';
 import { useAuthStore } from './store/authStore';
 import { PageFallback } from './components/layout/PageFallback';
 import { BugReportErrorBoundary } from './components/bug-report/BugReportErrorBoundary';
-import { BugReportWidget } from './components/bug-report/BugReportWidget';
+
+const AppRouter = lazy(() => import('./AppRouter'));
+
+const BugReportWidget = lazy(() =>
+  import('./components/bug-report/BugReportWidget').then((m) => ({ default: m.BugReportWidget })),
+);
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -36,35 +39,43 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-    <I18nProvider>
-      <BugReportErrorBoundary>
-        {authReady ? <RouterProvider router={router} /> : <PageFallback />}
-      </BugReportErrorBoundary>
-      <BugReportWidget />
-      <Toaster
-        position="top-right"
-        toastOptions={{
-          duration: 4000,
-          style: {
-            background: 'hsl(222 40% 14%)',
-            color: 'hsl(38 30% 88%)',
-            border: '1px solid hsl(43 30% 25%)',
-          },
-          success: {
-            iconTheme: {
-              primary: '#D4AF37',
-              secondary: 'hsl(222 40% 14%)',
+      <I18nProvider>
+        <BugReportErrorBoundary>
+          {authReady ? (
+            <Suspense fallback={<PageFallback />}>
+              <AppRouter />
+            </Suspense>
+          ) : (
+            <PageFallback />
+          )}
+        </BugReportErrorBoundary>
+        <Suspense fallback={null}>
+          <BugReportWidget />
+        </Suspense>
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            duration: 4000,
+            style: {
+              background: 'hsl(222 40% 14%)',
+              color: 'hsl(38 30% 88%)',
+              border: '1px solid hsl(43 30% 25%)',
             },
-          },
-          error: {
-            iconTheme: {
-              primary: '#8B0000',
-              secondary: 'hsl(38 30% 88%)',
+            success: {
+              iconTheme: {
+                primary: '#D4AF37',
+                secondary: 'hsl(222 40% 14%)',
+              },
             },
-          },
-        }}
-      />
-    </I18nProvider>
+            error: {
+              iconTheme: {
+                primary: '#8B0000',
+                secondary: 'hsl(38 30% 88%)',
+              },
+            },
+          }}
+        />
+      </I18nProvider>
     </QueryClientProvider>
   );
 }

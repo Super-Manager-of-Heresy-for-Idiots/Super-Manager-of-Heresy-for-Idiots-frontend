@@ -7,8 +7,6 @@
  * Russian ('ru') is the default language; English ('en') is the toggle.
  */
 
-import { modules } from './dict';
-
 export type Lang = 'ru' | 'en';
 
 export const LANGS: Lang[] = ['ru', 'en'];
@@ -401,11 +399,26 @@ const core: Record<Lang, Dict> = {
 };
 
 /**
- * Final dictionary = core keys + every feature module merged in.
- * Modules live in `./dict` so different feature areas can be translated
- * independently without touching this file.
+ * Core dictionary is enough for the app chrome and auth screens. Feature
+ * dictionaries are loaded asynchronously so first paint is not blocked by all
+ * translation strings.
  */
-export const translations: Record<Lang, Dict> = {
-  ru: Object.assign({}, core.ru, ...modules.map((m) => m.ru)),
-  en: Object.assign({}, core.en, ...modules.map((m) => m.en)),
-};
+export const coreTranslations: Record<Lang, Dict> = core;
+
+export async function loadFeatureTranslations(): Promise<Record<Lang, Dict>> {
+  const { modules } = await import('./dict');
+
+  return {
+    ru: Object.assign({}, ...modules.map((m) => m.ru)),
+    en: Object.assign({}, ...modules.map((m) => m.en)),
+  };
+}
+
+export async function loadTranslations(): Promise<Record<Lang, Dict>> {
+  const featureTranslations = await loadFeatureTranslations();
+
+  return {
+    ru: { ...core.ru, ...featureTranslations.ru },
+    en: { ...core.en, ...featureTranslations.en },
+  };
+}

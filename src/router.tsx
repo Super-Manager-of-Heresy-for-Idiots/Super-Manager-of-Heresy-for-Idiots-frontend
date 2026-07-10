@@ -1,13 +1,21 @@
-import { lazy } from 'react';
+import { lazy, Suspense, type ReactNode } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router-dom';
-import { AppLayout } from '@/components/layout/AppLayout';
-import { CampaignLayout } from '@/components/layout/CampaignLayout';
 import { ProtectedRoute } from '@/components/layout/ProtectedRoute';
 import { SuspenseOutlet } from '@/components/layout/SuspenseOutlet';
+import { PageFallback } from '@/components/layout/PageFallback';
 
 // Auth pages — eager (first paint, no surrounding Suspense boundary)
-import LoginPage from '@/pages/auth/LoginPage';
-import RegisterPage from '@/pages/auth/RegisterPage';
+const withSuspense = (element: ReactNode) => (
+  <Suspense fallback={<PageFallback />}>{element}</Suspense>
+);
+
+const AppLayout = lazy(() => import('@/components/layout/AppLayout').then((m) => ({ default: m.AppLayout })));
+const CampaignLayout = lazy(() =>
+  import('@/components/layout/CampaignLayout').then((m) => ({ default: m.CampaignLayout })),
+);
+
+const LoginPage = lazy(() => import('@/pages/auth/LoginPage'));
+const RegisterPage = lazy(() => import('@/pages/auth/RegisterPage'));
 
 // Campaign pages
 const CampaignListPage = lazy(() => import('@/pages/gm/campaigns/CampaignListPage'));
@@ -126,15 +134,15 @@ const SpellEditorPage = lazy(() => import('@/pages/admin/SpellEditorPage'));
 
 export const router = createBrowserRouter([
   // Public routes
-  { path: '/login', element: <LoginPage /> },
-  { path: '/register', element: <RegisterPage /> },
+  { path: '/login', element: withSuspense(<LoginPage />) },
+  { path: '/register', element: withSuspense(<RegisterPage />) },
 
   // Authenticated app shell (PLAYER / GAME_MASTER / ADMIN)
   {
     element: <ProtectedRoute allowedRoles={['PLAYER', 'GAME_MASTER', 'ADMIN']} />,
     children: [
       {
-        element: <AppLayout />,
+        element: withSuspense(<AppLayout />),
         children: [
           { path: '/campaigns', element: <CampaignListPage /> },
 
@@ -165,7 +173,7 @@ export const router = createBrowserRouter([
           // ── Campaign shell: persistent header + role-aware sub-nav + WS ──
           {
             path: '/campaigns/:campaignId',
-            element: <CampaignLayout />,
+            element: withSuspense(<CampaignLayout />),
             children: [
               // Overview (dashboard) — URL-driven Sections / Characters / Battle tabs
               {
@@ -280,7 +288,7 @@ export const router = createBrowserRouter([
     element: <ProtectedRoute allowedRoles={['GAME_MASTER', 'ADMIN']} />,
     children: [
       {
-        element: <AppLayout />,
+        element: withSuspense(<AppLayout />),
         children: [
           { path: '/gm', element: <Navigate to="/campaigns" replace /> },
           // Campaign blueprints — authoring (own drafts, forks, editor)
@@ -311,7 +319,7 @@ export const router = createBrowserRouter([
     element: <ProtectedRoute allowedRoles={['ADMIN']} />,
     children: [
       {
-        element: <AppLayout />,
+        element: withSuspense(<AppLayout />),
         children: [
           { path: '/admin', element: <AdminDashboardPage /> },
           { path: '/admin/users', element: <UsersListPage /> },

@@ -1,12 +1,18 @@
-import { describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 import {
   formatNotificationBody,
   getNotificationTitle,
   shouldStoreNotification,
   type Translate,
 } from './notificationText';
-import { translations, type Lang } from '@/i18n/translations';
+import { loadTranslations, type Dict, type Lang } from '@/i18n/translations';
 import type { WsEvent } from '@/types';
+
+let translations: Record<Lang, Dict>;
+
+beforeAll(async () => {
+  translations = await loadTranslations();
+});
 
 function t(lang: Lang): Translate {
   return (key, vars) => {
