@@ -73,6 +73,19 @@ export const mapSessionApi = {
     await mapHttp.post(`/map-sessions/${sessionId}/tiles/toggle-difficult`, { gridX, gridY });
   },
 
+  /** POST …/auras — create a GM aura attached to a token that follows it (Phase 3.1). */
+  createAura: async (
+    sessionId: UUID,
+    body: { tokenId: UUID; sizeFt: number; side?: string; label?: string; color?: string },
+  ): Promise<void> => {
+    await mapHttp.post(`/map-sessions/${sessionId}/auras`, body);
+  },
+
+  /** DELETE …/auras/{elementId} — remove an aura (Phase 3.1). */
+  deleteAura: async (sessionId: UUID, elementId: UUID): Promise<void> => {
+    await mapHttp.delete(`/map-sessions/${sessionId}/auras/${elementId}`);
+  },
+
   /** POST …/fog/reveal — reveal one shape (GM). Returns the full new fog state. */
   revealFog: async (sessionId: UUID, shape: FogShapeDto): Promise<FogStateDto> => {
     const { data } = await mapHttp.post<FogStateDto>(`/map-sessions/${sessionId}/fog/reveal`, { shape });

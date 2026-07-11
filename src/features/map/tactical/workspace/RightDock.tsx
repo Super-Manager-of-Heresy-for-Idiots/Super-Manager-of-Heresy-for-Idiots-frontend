@@ -115,6 +115,7 @@ export function RightDock({
             battle={battle}
             movement={movement}
             tacticalTokens={tacticalTokens}
+            mapSessionId={mapSessionId}
           />
         )}
         {tab === 'inspect' && (

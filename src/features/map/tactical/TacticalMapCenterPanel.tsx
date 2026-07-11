@@ -140,9 +140,18 @@ export function TacticalMapCenterPanel({
   // The cast panel's aiming preview is appended as a pseudo-zone so the player sees the template live.
   const aoePreview = useMapTransientStore((st) => st.aoePreview);
   const aoeZones = useMemo(() => {
-    const zones = mapElements.filter(
-      (el) => el.mapSessionId != null && (el.properties as Record<string, unknown>)?.aoe === true,
-    );
+    // Auras (Phase 3.1) follow their attached token: render them at the token's live position.
+    const tokenPos = new Map(tokens.map((tk) => [tk.id, { gridX: tk.gridX, gridY: tk.gridY }]));
+    const zones = mapElements
+      .filter((el) => {
+        const p = el.properties as Record<string, unknown>;
+        return el.mapSessionId != null && (p?.aoe === true || p?.aura === true);
+      })
+      .map((el) => {
+        const attached = (el.properties as Record<string, unknown>)?.attachedTokenId as string | undefined;
+        const at = attached ? tokenPos.get(attached) : undefined;
+        return at ? { ...el, gridX: at.gridX, gridY: at.gridY } : el;
+      });
     if (!aoePreview) return zones;
     return [
       ...zones,
@@ -170,7 +179,7 @@ export function TacticalMapCenterPanel({
         updatedAt: '',
       } as unknown as (typeof zones)[number],
     ];
-  }, [mapElements, aoePreview, sessionId]);
+  }, [mapElements, aoePreview, sessionId, tokens]);
   const cursors = useMemo(
     () => Object.values(remoteCursorsByUserId).filter((c) => c.userId !== me?.id),
     [remoteCursorsByUserId, me?.id],

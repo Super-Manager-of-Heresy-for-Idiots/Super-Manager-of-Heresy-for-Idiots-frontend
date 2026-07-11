@@ -15,6 +15,7 @@ import { StandardActionsPanel } from '../StandardActionsPanel';
 import { ReactionAttackPanel } from '../ReactionAttackPanel';
 import { MonsterRuntimePanel } from '../MonsterRuntimePanel';
 import { ForcedMovementPanel } from '../ForcedMovementPanel';
+import { AuraPanel } from '../AuraPanel';
 import { BulkActionsPanel } from '../BulkActionsPanel';
 import { DefaultActions } from '../DefaultActions';
 import { liveTargets, monsterAttackOptions } from '../combat';
@@ -27,9 +28,10 @@ interface TurnTabProps {
   battle: BattleResponse;
   movement: MovementConfig | null;
   tacticalTokens: TacticalTokenView[];
+  mapSessionId?: string | null;
 }
 
-export function TurnTab({ campaignId, battle, movement, tacticalTokens }: TurnTabProps) {
+export function TurnTab({ campaignId, battle, movement, tacticalTokens, mapSessionId }: TurnTabProps) {
   const t = useT();
   const { lang } = useI18n();
   const current = currentTurnCombatant(battle.combatants);
@@ -83,6 +85,7 @@ export function TurnTab({ campaignId, battle, movement, tacticalTokens }: TurnTa
       <ReactionAttackPanel campaignId={campaignId} battle={battle} tacticalTokens={tacticalTokens} />
       <MonsterRuntimePanel campaignId={campaignId} battle={battle} />
       <ForcedMovementPanel campaignId={campaignId} battle={battle} tacticalTokens={tacticalTokens} />
+      {mapSessionId && <AuraPanel sessionId={mapSessionId} tacticalTokens={tacticalTokens} />}
       <BulkActionsPanel campaignId={campaignId} battle={battle} />
     </div>
   );
