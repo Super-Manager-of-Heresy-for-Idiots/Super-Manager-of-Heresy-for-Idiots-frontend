@@ -16,6 +16,7 @@ import type {
   ContestResultResponse,
   ForcedMoveRequest,
   TeleportRequest,
+  TrapTriggerRequest,
   AdjustActionEconomyRequest,
   CombatantCondition,
   BattleLogEntry,
@@ -243,6 +244,19 @@ export const battlesApi = {
   ): Promise<ApiResponse<ContestResultResponse>> => {
     const response = await api.post<ApiResponse<ContestResultResponse>>(
       `${base(campaignId)}/${battleId}/combatants/${combatantId}/contest`,
+      data,
+    );
+    return response.data;
+  },
+
+  /** Trigger a trap on a combatant — save/damage resolution (GM, Phase 3.2). */
+  triggerTrap: async (
+    campaignId: string,
+    battleId: string,
+    data: TrapTriggerRequest,
+  ): Promise<ApiResponse<BattleResponse>> => {
+    const response = await api.post<ApiResponse<BattleResponse>>(
+      `${base(campaignId)}/${battleId}/trap-trigger`,
       data,
     );
     return response.data;

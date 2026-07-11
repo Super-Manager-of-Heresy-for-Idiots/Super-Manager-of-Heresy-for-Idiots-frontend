@@ -1880,6 +1880,18 @@ export interface BattleCombatantResponse {
 /** A standard action a combatant can take on its turn (Phase 2.7). */
 export type StandardActionType = 'DASH' | 'DODGE' | 'DISENGAGE' | 'HELP' | 'HIDE';
 
+/** Request to trigger a trap on a combatant (Phase 3.2). */
+export interface TrapTriggerRequest {
+  targetCombatantId: string;
+  amount?: number;
+  saveDc?: number;
+  saveAbility?: string;
+  halfOnSave?: boolean;
+  damageTypeId?: string;
+  saveD20?: number;
+  label?: string;
+}
+
 /** Forced movement kind (Phase 2.12). */
 export type ForcedMoveType = 'PUSH' | 'PULL' | 'SLIDE';
 

@@ -17,6 +17,7 @@ import type {
   ContestRequest,
   ForcedMoveRequest,
   TeleportRequest,
+  TrapTriggerRequest,
   AdjustActionEconomyRequest,
 } from '@/types';
 
@@ -338,6 +339,21 @@ export function useSetSpeedOverride() {
     }) => battlesApi.setSpeedOverride(campaignId, battleId, combatantId, ft),
     onSuccess: (res) => sync(res.data),
     onError: (e) => toast.error(errMsg(e, t('tactical.speed.failed'))),
+  });
+}
+
+/** Trigger a trap on a combatant — save/damage resolution (Phase 3.2). */
+export function useTriggerTrap() {
+  const sync = useSyncBattle();
+  const t = useT();
+  return useMutation({
+    mutationFn: ({ campaignId, battleId, data }: { campaignId: string; battleId: string; data: TrapTriggerRequest }) =>
+      battlesApi.triggerTrap(campaignId, battleId, data),
+    onSuccess: (res) => {
+      sync(res.data);
+      toast.success(t('tactical.trap.triggered'));
+    },
+    onError: (e) => toast.error(errMsg(e, t('tactical.trap.failed'))),
   });
 }
 

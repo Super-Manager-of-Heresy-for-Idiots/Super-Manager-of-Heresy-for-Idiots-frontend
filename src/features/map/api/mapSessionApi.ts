@@ -86,6 +86,31 @@ export const mapSessionApi = {
     await mapHttp.delete(`/map-sessions/${sessionId}/auras/${elementId}`);
   },
 
+  /** POST …/traps — create a GM trap (session element, hidden from players) (Phase 3.2). */
+  createTrap: async (
+    sessionId: UUID,
+    body: {
+      gridX: number;
+      gridY: number;
+      widthCells?: number;
+      heightCells?: number;
+      saveDc?: number;
+      saveAbility?: string;
+      damage?: number;
+      halfOnSave?: boolean;
+      triggerType?: string;
+      hidden?: boolean;
+      label?: string;
+    },
+  ): Promise<void> => {
+    await mapHttp.post(`/map-sessions/${sessionId}/traps`, body);
+  },
+
+  /** DELETE …/traps/{elementId} — remove a trap (Phase 3.2). */
+  deleteTrap: async (sessionId: UUID, elementId: UUID): Promise<void> => {
+    await mapHttp.delete(`/map-sessions/${sessionId}/traps/${elementId}`);
+  },
+
   /** POST …/fog/reveal — reveal one shape (GM). Returns the full new fog state. */
   revealFog: async (sessionId: UUID, shape: FogShapeDto): Promise<FogStateDto> => {
     const { data } = await mapHttp.post<FogStateDto>(`/map-sessions/${sessionId}/fog/reveal`, { shape });
