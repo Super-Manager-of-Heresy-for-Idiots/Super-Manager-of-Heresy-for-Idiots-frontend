@@ -280,6 +280,19 @@
   color: var(--ember);
   font-size: var(--t-nano);
 }
+.flyToggle {
+  flex: 0 0 auto;
+  padding: 0 2px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: var(--t-micro);
+  line-height: 1;
+  opacity: 0.75;
+}
+.flyToggle:hover {
+  opacity: 1;
+}
 .placedTag {
   font-size: var(--t-nano);
   text-transform: uppercase;

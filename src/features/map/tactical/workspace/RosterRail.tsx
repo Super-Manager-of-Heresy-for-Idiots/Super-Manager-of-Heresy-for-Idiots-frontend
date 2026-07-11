@@ -14,6 +14,7 @@ import type { BattleResponse } from '@/types';
 import {
   useRerollInitiative,
   useResolveConcentration,
+  useSetFlying,
   useSetIdentityHidden,
   useSetInitiativeOrder,
 } from '@/hooks/useBattles';
@@ -49,6 +50,7 @@ export function RosterRail({
   const rerollInitiative = useRerollInitiative();
   const setInitiativeOrder = useSetInitiativeOrder();
   const setIdentityHidden = useSetIdentityHidden();
+  const setFlying = useSetFlying();
   const reorderBusy = setInitiativeOrder.isPending || rerollInitiative.isPending;
 
   // GM-chosen token footprint (creature size) applied to the next placement.
@@ -154,6 +156,26 @@ export function RosterRail({
                       {c.hidden && <span className={s.stateChip}>{t('battle.standard.state.hidden')}</span>}
                       {c.helpAdvantage && (
                         <span className={s.stateChip}>{t('battle.standard.state.helpAdvantage')}</span>
+                      )}
+                      {c.flying && (
+                        <span className={s.stateChip} title={c.hover ? t('battle.flying.hoverHint') : t('battle.flying.hint')}>
+                          {c.hover ? t('battle.flying.hover') : t('battle.flying.badge')}
+                        </span>
+                      )}
+                      {(isGm || isYou) && (
+                        <button
+                          type="button"
+                          className={s.flyToggle}
+                          title={t(c.flying ? 'battle.flying.land' : 'battle.flying.takeoff')}
+                          aria-label={t(c.flying ? 'battle.flying.land' : 'battle.flying.takeoff')}
+                          disabled={setFlying.isPending}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setFlying.mutate({ campaignId, battleId: battle.id, combatantId: c.id, on: !c.flying });
+                          }}
+                        >
+                          {c.flying ? '🛬' : '🕊'}
+                        </button>
                       )}
                     </span>
                     <span className={cn(s.placedTag, onMap ? s.placedYes : s.placedNo)}>

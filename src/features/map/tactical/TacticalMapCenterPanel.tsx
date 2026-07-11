@@ -79,6 +79,8 @@ interface TacticalMapCenterPanelProps {
   isGm?: boolean;
   /** Movement gating + preview for the acting combatant; omit to allow free moves. */
   movement?: MovementConfig | null;
+  /** Token ids of flying combatants (Phase 2.13) — float animation on the board. */
+  flyingTokenIds?: ReadonlySet<string>;
 }
 
 export function TacticalMapCenterPanel({
@@ -87,6 +89,7 @@ export function TacticalMapCenterPanel({
   battleActive,
   isGm,
   movement,
+  flyingTokenIds,
 }: TacticalMapCenterPanelProps) {
   const t = useT();
   const me = useAuthStore((st) => st.user);
@@ -594,6 +597,7 @@ export function TacticalMapCenterPanel({
         aoeZones={aoeZones}
         fogViewerIsGm={isGm}
         selectedTokenId={selectedTokenId}
+        flyingTokenIds={flyingTokenIds}
         remoteDragPreviews={remoteDragPreviews}
         localDragPreview={localDragPreview}
         cursors={cursors}

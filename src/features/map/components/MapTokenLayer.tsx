@@ -14,6 +14,8 @@ interface MapTokenLayerProps {
   localDragPreview: TokenDragPreview | null;
   onSelectToken?: (tokenId: UUID | null) => void;
   onTokenPointerDown?: (tokenId: UUID, e: ReactPointerEvent<HTMLDivElement>) => void;
+  /** Token ids of flying combatants (Phase 2.13): a lifted shadow + float animation + wing badge. */
+  flyingTokenIds?: ReadonlySet<UUID>;
 }
 
 const TYPE_CLASS: Record<TokenType, string> = {
@@ -38,6 +40,7 @@ export function MapTokenLayer({
   localDragPreview,
   onSelectToken,
   onTokenPointerDown,
+  flyingTokenIds,
 }: MapTokenLayerProps) {
   const previewByTokenId = new Map<UUID, TokenDragPreview>();
   for (const preview of remoteDragPreviews) previewByTokenId.set(preview.tokenId, preview);
@@ -85,6 +88,7 @@ export function MapTokenLayer({
               token.id === selectedTokenId && s.isSelected,
               token.locked && s.isLocked,
               preview && s.isGhost,
+              flyingTokenIds?.has(token.id) && s.tokenFlying,
             )}
             style={{
               left: point.imageX,
@@ -103,6 +107,11 @@ export function MapTokenLayer({
             onKeyDown={onKeyDown}
           >
             <span className={s.tokenLabel}>{label}</span>
+            {flyingTokenIds?.has(token.id) && (
+              <span className={s.tokenFlyingBadge} title="Flying" aria-hidden>
+                ⩓
+              </span>
+            )}
             {token.elevationFt !== 0 && (
               <span
                 className={s.tokenElevation}

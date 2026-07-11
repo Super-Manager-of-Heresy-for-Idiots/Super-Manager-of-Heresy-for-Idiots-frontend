@@ -73,6 +73,12 @@ export function TacticalWorkspace({
     [rawTokens, battle.combatants, tokenCombatLinks, currentUserId],
   );
 
+  // Flying combatants' token ids (Phase 2.13) — drive the board float animation + wing badge.
+  const flyingTokenIds = useMemo(
+    () => new Set(tacticalTokens.filter((tk) => tk.combatant?.flying).map((tk) => tk.tokenId)),
+    [tacticalTokens],
+  );
+
   const activeCombatant = currentTurnCombatant(battle.combatants);
 
   // Movement: the acting combatant's token may move on its turn, within range
@@ -152,6 +158,7 @@ export function TacticalWorkspace({
                 battleActive={isActive}
                 isGm={isGm}
                 movement={movement}
+                flyingTokenIds={flyingTokenIds}
               />
             </Suspense>
           ) : (

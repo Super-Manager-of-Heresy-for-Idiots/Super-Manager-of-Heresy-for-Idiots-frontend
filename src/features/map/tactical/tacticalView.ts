@@ -37,6 +37,8 @@ export interface TacticalTokenView {
   tokenId: string;
   gridX: number;
   gridY: number;
+  /** Token elevation in feet (Phase 2.13) — used for 3D distance in the range gate. */
+  elevationFt: number;
   tokenType: string;
   linkedCombatantId: string | null;
   combatant: BattleCombatantResponse | null;
@@ -98,6 +100,7 @@ export function deriveTacticalTokens({
       tokenId: token.id,
       gridX: token.gridX,
       gridY: token.gridY,
+      elevationFt: token.elevationFt ?? 0,
       tokenType: token.tokenType,
       linkedCombatantId,
       combatant,

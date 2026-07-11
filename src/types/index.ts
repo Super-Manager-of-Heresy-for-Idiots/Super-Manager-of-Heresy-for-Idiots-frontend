@@ -1871,6 +1871,10 @@ export interface BattleCombatantResponse {
   publicName?: string | null;
   /** Manual GM speed override in feet (Phase 2.11); null/absent when the sheet/statblock speed applies. */
   speedOverrideFt?: number | null;
+  /** Persistent flying state (Phase 2.13): the creature is aloft (stays flying between turns). */
+  flying?: boolean;
+  /** Can hover (from the monster statblock) — does not fall at 0 fly speed (Phase 2.13). */
+  hover?: boolean;
 }
 
 /** A standard action a combatant can take on its turn (Phase 2.7). */
@@ -2109,6 +2113,9 @@ export interface BattleAttackRequest {
   targetRow?: number;
   /** An enemy threatens the (ranged) attacker in melee → ranged-in-melee disadvantage. */
   attackerInMeleeThreat?: boolean;
+  /** Token elevations in feet for 3D distance (Phase 2.13): when both are set the range gate is 3D. */
+  attackerElevationFt?: number;
+  targetElevationFt?: number;
   /** GM bypass of the range gate and any range-derived disadvantage. */
   gmOverrideRange?: boolean;
   /** Target cover (Phase 2.6): HALF/THREE_QUARTERS raise AC & Dex saves; TOTAL rejects the attack. */

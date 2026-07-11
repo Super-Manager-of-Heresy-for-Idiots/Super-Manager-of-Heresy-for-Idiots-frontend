@@ -355,6 +355,18 @@ export function useTeleport() {
   });
 }
 
+/** Set a combatant's persistent flying state (Phase 2.13). */
+export function useSetFlying() {
+  const sync = useSyncBattle();
+  const t = useT();
+  return useMutation({
+    mutationFn: ({ campaignId, battleId, combatantId, on }: { campaignId: string; battleId: string; combatantId: string; on: boolean }) =>
+      battlesApi.setFlying(campaignId, battleId, combatantId, on),
+    onSuccess: (res) => sync(res.data),
+    onError: (e) => toast.error(errMsg(e, t('battle.flying.failed'))),
+  });
+}
+
 /** GM hides or reveals a monster's identity in the tracker (Phase 2.10). */
 export function useSetIdentityHidden() {
   const sync = useSyncBattle();

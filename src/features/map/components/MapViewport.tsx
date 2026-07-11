@@ -33,6 +33,8 @@ export interface MapViewportProps {
   /** Whether the current viewer is a GM (fog is drawn translucent for them). */
   fogViewerIsGm?: boolean;
   selectedTokenId?: UUID | null;
+  /** Token ids of flying combatants (Phase 2.13) — float animation + wing badge. */
+  flyingTokenIds?: ReadonlySet<UUID>;
   remoteDragPreviews?: TokenDragPreview[];
   localDragPreview?: TokenDragPreview | null;
   cursors?: RemoteCursor[];
@@ -88,6 +90,7 @@ export function MapViewport({
   aoeZones = [],
   fogViewerIsGm = false,
   selectedTokenId = null,
+  flyingTokenIds,
   remoteDragPreviews = [],
   localDragPreview = null,
   cursors = [],
@@ -213,6 +216,7 @@ export function MapViewport({
               grid={normalizedGrid}
               tokens={tokens}
               selectedTokenId={selectedTokenId}
+              flyingTokenIds={flyingTokenIds}
               remoteDragPreviews={remoteDragPreviews}
               localDragPreview={localDragPreview}
               onSelectToken={onSelectToken}

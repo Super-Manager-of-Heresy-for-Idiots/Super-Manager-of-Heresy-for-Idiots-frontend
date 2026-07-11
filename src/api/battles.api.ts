@@ -275,6 +275,19 @@ export const battlesApi = {
     return response.data;
   },
 
+  /** Set a combatant's persistent flying state (Phase 2.13). */
+  setFlying: async (
+    campaignId: string,
+    battleId: string,
+    combatantId: string,
+    on: boolean,
+  ): Promise<ApiResponse<BattleResponse>> => {
+    const response = await api.patch<ApiResponse<BattleResponse>>(
+      `${base(campaignId)}/${battleId}/combatants/${combatantId}/flying?on=${on}`,
+    );
+    return response.data;
+  },
+
   /** GM hides or reveals a monster's identity in the tracker (Phase 2.10). */
   setIdentityHidden: async (
     campaignId: string,

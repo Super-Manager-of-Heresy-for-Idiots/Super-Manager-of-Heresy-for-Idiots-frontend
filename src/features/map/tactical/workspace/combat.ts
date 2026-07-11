@@ -22,6 +22,8 @@ export interface RangeFields {
   targetCol?: number;
   targetRow?: number;
   attackerInMeleeThreat?: boolean;
+  attackerElevationFt?: number;
+  targetElevationFt?: number;
 }
 
 /**
@@ -56,6 +58,9 @@ export function buildRangeFields(
     targetCol: tgt.gridX,
     targetRow: tgt.gridY,
     attackerInMeleeThreat: inMelee,
+    // 3D distance (Phase 2.13): elevations let the range gate account for flying targets.
+    attackerElevationFt: atk.elevationFt,
+    targetElevationFt: tgt.elevationFt,
   };
 }
 
