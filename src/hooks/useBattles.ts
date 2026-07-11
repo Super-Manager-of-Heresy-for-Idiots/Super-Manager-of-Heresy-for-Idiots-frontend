@@ -15,6 +15,8 @@ import type {
   SpendActionRequest,
   StandardActionRequest,
   ContestRequest,
+  ForcedMoveRequest,
+  TeleportRequest,
   AdjustActionEconomyRequest,
 } from '@/types';
 
@@ -320,6 +322,36 @@ export function useSetSpeedOverride() {
     }) => battlesApi.setSpeedOverride(campaignId, battleId, combatantId, ft),
     onSuccess: (res) => sync(res.data),
     onError: (e) => toast.error(errMsg(e, t('tactical.speed.failed'))),
+  });
+}
+
+/** Forced movement — push/pull/slide a combatant (Phase 2.12). */
+export function useForcedMove() {
+  const sync = useSyncBattle();
+  const t = useT();
+  return useMutation({
+    mutationFn: ({ campaignId, battleId, data }: { campaignId: string; battleId: string; data: ForcedMoveRequest }) =>
+      battlesApi.forcedMove(campaignId, battleId, data),
+    onSuccess: (res) => {
+      sync(res.data);
+      toast.success(t('tactical.forced.done'));
+    },
+    onError: (e) => toast.error(errMsg(e, t('tactical.forced.failed'))),
+  });
+}
+
+/** Teleport a combatant, optionally bringing nearby allies (Phase 2.12). */
+export function useTeleport() {
+  const sync = useSyncBattle();
+  const t = useT();
+  return useMutation({
+    mutationFn: ({ campaignId, battleId, data }: { campaignId: string; battleId: string; data: TeleportRequest }) =>
+      battlesApi.teleport(campaignId, battleId, data),
+    onSuccess: (res) => {
+      sync(res.data);
+      toast.success(t('tactical.teleport.done'));
+    },
+    onError: (e) => toast.error(errMsg(e, t('tactical.teleport.failed'))),
   });
 }
 

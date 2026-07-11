@@ -1876,6 +1876,41 @@ export interface BattleCombatantResponse {
 /** A standard action a combatant can take on its turn (Phase 2.7). */
 export type StandardActionType = 'DASH' | 'DODGE' | 'DISENGAGE' | 'HELP' | 'HIDE';
 
+/** Forced movement kind (Phase 2.12). */
+export type ForcedMoveType = 'PUSH' | 'PULL' | 'SLIDE';
+
+/** Request to push/pull/slide a combatant (Phase 2.12). */
+export interface ForcedMoveRequest {
+  type: ForcedMoveType;
+  targetCombatantId: string;
+  toCol: number;
+  toRow: number;
+  fromCol?: number;
+  fromRow?: number;
+  maxDistanceFt?: number;
+}
+
+/** A nearby ally brought along by a teleport (Phase 2.12). */
+export interface TeleportAlly {
+  combatantId: string;
+  toCol: number;
+  toRow: number;
+  fromCol?: number;
+  fromRow?: number;
+}
+
+/** Request to teleport a combatant, optionally bringing nearby allies (Phase 2.12). */
+export interface TeleportRequest {
+  combatantId: string;
+  toCol: number;
+  toRow: number;
+  fromCol?: number;
+  fromRow?: number;
+  rangeFt?: number;
+  allyPickupFt?: number;
+  allies?: TeleportAlly[];
+}
+
 /** An opposed melee contest (Phase 2.7). */
 export type ContestType = 'GRAPPLE' | 'SHOVE';
 

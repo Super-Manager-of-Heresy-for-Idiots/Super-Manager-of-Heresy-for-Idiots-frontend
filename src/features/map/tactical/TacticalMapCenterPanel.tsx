@@ -183,6 +183,18 @@ export function TacticalMapCenterPanel({
   // GM fog paint tool (Phase 1.6): when 'reveal'/'hide', a grid-cell click paints a 1×1
   // fog cell instead of selecting/moving. 'off' restores normal interaction. GM-only.
   const [fogTool, setFogTool] = useState<'off' | 'reveal' | 'hide'>('off');
+  // GM difficult-terrain paint tool (Phase 2.11): a grid-cell click toggles the cell's difficult flag.
+  const [difficultTool, setDifficultTool] = useState(false);
+
+  const paintDifficultCell = useCallback(
+    (cell: GridCoord) => {
+      // Fire-and-forget: the server broadcasts TILE_TERRAIN_UPDATED and the committed store resyncs.
+      mapSessionApi.toggleDifficult(sessionId, cell.gridX, cell.gridY).catch(() =>
+        toast.error(t('tactical.terrain.error')),
+      );
+    },
+    [sessionId, t],
+  );
 
   const paintFogCell = useCallback(
     (cell: GridCoord) => {
@@ -273,10 +285,16 @@ export function TacticalMapCenterPanel({
   }, [movement?.turnKey, clearCombatAction, setLocalDragPreview, clearMoveWatchdog]);
 
   const moveMode = combatAction?.type === 'MOVE' ? combatAction.mode : null;
+  // Non-walk modes ignore the low→high ground rule and difficult ground (Phase 2.11).
+  const nonWalkMode = moveMode != null && moveMode !== 'WALK';
   const rangeForMode = movement
     ? moveMode === 'FLY'
       ? movement.flyRangeCells
-      : movement.walkRangeCells
+      : moveMode === 'SWIM'
+        ? movement.swimRangeCells
+        : moveMode === 'CLIMB'
+          ? movement.climbRangeCells
+          : movement.walkRangeCells
     : 0;
   const effectiveRange = Math.max(0, rangeForMode - moveUsed);
   // Server-authoritative budget is spent per 0.1; here we mirror it in feet for the HUD
@@ -331,9 +349,9 @@ export function TacticalMapCenterPanel({
       effectiveRange,
       occupiedCells(tokens, movement.activeTokenId),
       boundsFromGrid(map.gridConfig),
-      { elevationAt, ignoreGround: moveMode === 'FLY', difficultAt },
+      { elevationAt, ignoreGround: nonWalkMode, difficultAt },
     );
-  }, [movement, origin, map, moveMode, effectiveRange, tokens, elevationAt, difficultAt]);
+  }, [movement, origin, map, moveMode, nonWalkMode, effectiveRange, tokens, elevationAt, difficultAt]);
 
   const reachableCells = useMemo<Cell[]>(() => {
     if (!reach || !origin) return [];
@@ -446,6 +464,10 @@ export function TacticalMapCenterPanel({
         paintFogCell(cell);
         return;
       }
+      if (isGm && difficultTool) {
+        paintDifficultCell(cell);
+        return;
+      }
       if (placement) {
         if (placeToken.isPending) return;
         const request = buildFromCombatantRequest(battleId, placement.combatantId, cell, {
@@ -466,7 +488,7 @@ export function TacticalMapCenterPanel({
       }
       setSelectedCell({ gridX: cell.gridX, gridY: cell.gridY });
     },
-    [isGm, fogTool, paintFogCell, placement, placeToken, battleId, clearPlacement, realtime, moveMode, reach, setMovePending, setSelectedCell],
+    [isGm, fogTool, paintFogCell, difficultTool, paintDifficultCell, placement, placeToken, battleId, clearPlacement, realtime, moveMode, reach, setMovePending, setSelectedCell],
   );
 
   // Commit the staged move on confirm: send MOVE_TOKEN (with path), charge the budget,
@@ -493,6 +515,7 @@ export function TacticalMapCenterPanel({
       path: reconstructPath(reach, pendingCell).map((c) => ({ gridX: c.gridX, gridY: c.gridY })),
       force: Boolean(isGm && forceMode),
       clientCommandId: crypto.randomUUID(),
+      movementMode: moveMode ?? 'WALK',
     });
     if (!sent) {
       pendingMove.current = null;
@@ -504,7 +527,7 @@ export function TacticalMapCenterPanel({
     armMoveWatchdog();
     setMoveUsed((used) => used + stepDistance(origin, pendingCell));
     clearCombatAction();
-  }, [movement, reach, origin, pendingCell, currentRevision, me?.id, realtime, setLocalDragPreview, t, clearCombatAction, armMoveWatchdog, isGm, forceMode]);
+  }, [movement, reach, origin, pendingCell, currentRevision, me?.id, realtime, setLocalDragPreview, t, clearCombatAction, armMoveWatchdog, isGm, forceMode, moveMode]);
 
   const cancelAction = useCallback(() => {
     clearCombatAction();
@@ -614,7 +637,10 @@ export function TacticalMapCenterPanel({
             type="button"
             className={cn('ao-btn ao-btn--sm', fogTool === 'reveal' ? 'ao-btn--primary' : 'ao-btn--ghost')}
             aria-pressed={fogTool === 'reveal'}
-            onClick={() => setFogTool((m) => (m === 'reveal' ? 'off' : 'reveal'))}
+            onClick={() => {
+              setDifficultTool(false);
+              setFogTool((m) => (m === 'reveal' ? 'off' : 'reveal'));
+            }}
           >
             {t('tactical.fog.reveal')}
           </button>
@@ -622,7 +648,10 @@ export function TacticalMapCenterPanel({
             type="button"
             className={cn('ao-btn ao-btn--sm', fogTool === 'hide' ? 'ao-btn--primary' : 'ao-btn--ghost')}
             aria-pressed={fogTool === 'hide'}
-            onClick={() => setFogTool((m) => (m === 'hide' ? 'off' : 'hide'))}
+            onClick={() => {
+              setDifficultTool(false);
+              setFogTool((m) => (m === 'hide' ? 'off' : 'hide'));
+            }}
           >
             {t('tactical.fog.hide')}
           </button>
@@ -631,6 +660,18 @@ export function TacticalMapCenterPanel({
           </button>
           <button type="button" className="ao-btn ao-btn--sm ao-btn--ghost" onClick={hideAllFog}>
             {t('tactical.fog.hideAll')}
+          </button>
+          <button
+            type="button"
+            className={cn('ao-btn ao-btn--sm', difficultTool ? 'ao-btn--primary' : 'ao-btn--ghost')}
+            aria-pressed={difficultTool}
+            title={t('tactical.terrain.difficultHint')}
+            onClick={() => {
+              setFogTool('off');
+              setDifficultTool((on) => !on);
+            }}
+          >
+            {t('tactical.terrain.difficult')}
           </button>
         </div>
       )}

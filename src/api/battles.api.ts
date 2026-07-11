@@ -14,6 +14,8 @@ import type {
   StandardActionRequest,
   ContestRequest,
   ContestResultResponse,
+  ForcedMoveRequest,
+  TeleportRequest,
   AdjustActionEconomyRequest,
   CombatantCondition,
   BattleLogEntry,
@@ -228,6 +230,32 @@ export const battlesApi = {
   ): Promise<ApiResponse<ContestResultResponse>> => {
     const response = await api.post<ApiResponse<ContestResultResponse>>(
       `${base(campaignId)}/${battleId}/combatants/${combatantId}/contest`,
+      data,
+    );
+    return response.data;
+  },
+
+  /** Forced movement — push/pull/slide a combatant (Phase 2.12). */
+  forcedMove: async (
+    campaignId: string,
+    battleId: string,
+    data: ForcedMoveRequest,
+  ): Promise<ApiResponse<BattleResponse>> => {
+    const response = await api.post<ApiResponse<BattleResponse>>(
+      `${base(campaignId)}/${battleId}/forced-move`,
+      data,
+    );
+    return response.data;
+  },
+
+  /** Teleport a combatant, optionally bringing nearby allies (Phase 2.12). */
+  teleport: async (
+    campaignId: string,
+    battleId: string,
+    data: TeleportRequest,
+  ): Promise<ApiResponse<BattleResponse>> => {
+    const response = await api.post<ApiResponse<BattleResponse>>(
+      `${base(campaignId)}/${battleId}/teleport`,
       data,
     );
     return response.data;

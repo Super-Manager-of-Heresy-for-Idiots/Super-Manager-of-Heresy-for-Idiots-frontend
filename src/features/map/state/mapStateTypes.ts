@@ -140,7 +140,7 @@ export interface PlacementState {
  * cell ({@link MapTransientState.movePending}). Nothing commits until the user confirms —
  * local-only intent, never committed state. (Shove is a server contest, not a client move.)
  */
-export type CombatActionIntent = { type: 'MOVE'; mode: 'WALK' | 'FLY' };
+export type CombatActionIntent = { type: 'MOVE'; mode: 'WALK' | 'FLY' | 'SWIM' | 'CLIMB' };
 
 export interface MapTransientState {
   selectedTokenId: UUID | null;

@@ -32,6 +32,10 @@ export interface MovementConfig {
   walkRangeCells: number;
   /** Fly range in cells (fly speed ÷ cell); 0 when the creature can't fly. */
   flyRangeCells: number;
+  /** Swim range in cells (swim speed ÷ cell); 0 when the creature has no swim speed (Phase 2.11). */
+  swimRangeCells: number;
+  /** Climb range in cells (climb speed ÷ cell); 0 when the creature has no climb speed (Phase 2.11). */
+  climbRangeCells: number;
   kind: 'CHARACTER' | 'MONSTER';
   /** `combatantId:round` — changing it resets the per-turn movement budget. */
   turnKey: string;
@@ -81,6 +85,16 @@ export function combatantSpeedFt(turn: CombatantTurnResponse | null | undefined)
  */
 export function combatantFlySpeedFt(turn: CombatantTurnResponse | null | undefined): number | null {
   return matchSpeed(turn, (l) => l.includes('fly') || l.includes('полёт') || l.includes('полет') || l.includes('лет'));
+}
+
+/** The active combatant's SWIM speed (ft), or null if it has none (Phase 2.11). Monsters only today. */
+export function combatantSwimSpeedFt(turn: CombatantTurnResponse | null | undefined): number | null {
+  return matchSpeed(turn, (l) => l.includes('swim') || l.includes('плав'));
+}
+
+/** The active combatant's CLIMB speed (ft), or null if it has none (Phase 2.11). Monsters only today. */
+export function combatantClimbSpeedFt(turn: CombatantTurnResponse | null | undefined): number | null {
+  return matchSpeed(turn, (l) => l.includes('climb') || l.includes('лаз') || l.includes('карабк'));
 }
 
 /**

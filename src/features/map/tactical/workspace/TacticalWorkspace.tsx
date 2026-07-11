@@ -21,6 +21,8 @@ import { useMapSessionStore } from '../../state';
 import { currentTurnCombatant, deriveTacticalTokens } from '../tacticalView';
 import {
   combatantFlySpeedFt,
+  combatantSwimSpeedFt,
+  combatantClimbSpeedFt,
   combatantSpeedFt,
   rangeCellsFromSpeed,
   type MovementConfig,
@@ -91,13 +93,19 @@ export function TacticalWorkspace({
     const cell = mapDef?.gridConfig.cellWorldSize ?? 5;
     const walkFt = combatantSpeedFt(turn);
     const flyFt = combatantFlySpeedFt(turn);
+    const swimFt = combatantSwimSpeedFt(turn);
+    const climbFt = combatantClimbSpeedFt(turn);
     const walkRangeCells = walkFt != null ? rangeCellsFromSpeed(walkFt, cell) : 0;
     const flyRangeCells = flyFt != null ? rangeCellsFromSpeed(flyFt, cell) : 0;
-    if (walkRangeCells <= 0 && flyRangeCells <= 0) return null;
+    const swimRangeCells = swimFt != null ? rangeCellsFromSpeed(swimFt, cell) : 0;
+    const climbRangeCells = climbFt != null ? rangeCellsFromSpeed(climbFt, cell) : 0;
+    if (walkRangeCells <= 0 && flyRangeCells <= 0 && swimRangeCells <= 0 && climbRangeCells <= 0) return null;
     return {
       activeTokenId: activeView.tokenId,
       walkRangeCells,
       flyRangeCells,
+      swimRangeCells,
+      climbRangeCells,
       kind: activeCombatant.type === 'MONSTER' ? 'MONSTER' : 'CHARACTER',
       turnKey: `${activeCombatant.id}:${battle.roundNumber}`,
     };

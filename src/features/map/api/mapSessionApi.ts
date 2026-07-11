@@ -68,6 +68,11 @@ export const mapSessionApi = {
     return data;
   },
 
+  /** POST …/tiles/toggle-difficult — toggle difficult terrain on a cell (GM, Phase 2.11). */
+  toggleDifficult: async (sessionId: UUID, gridX: number, gridY: number): Promise<void> => {
+    await mapHttp.post(`/map-sessions/${sessionId}/tiles/toggle-difficult`, { gridX, gridY });
+  },
+
   /** POST …/fog/reveal — reveal one shape (GM). Returns the full new fog state. */
   revealFog: async (sessionId: UUID, shape: FogShapeDto): Promise<FogStateDto> => {
     const { data } = await mapHttp.post<FogStateDto>(`/map-sessions/${sessionId}/fog/reveal`, { shape });

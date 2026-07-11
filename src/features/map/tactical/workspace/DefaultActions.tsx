@@ -62,14 +62,22 @@ export function DefaultActions({ movement, tacticalTokens }: DefaultActionsProps
 
   const canWalk = movement.walkRangeCells > 0;
   const canFly = movement.flyRangeCells > 0;
+  const canSwim = movement.swimRangeCells > 0;
+  const canClimb = movement.climbRangeCells > 0;
   const isMove = combatAction?.type === 'MOVE' && combatAction.mode === 'WALK';
   const isFly = combatAction?.type === 'MOVE' && combatAction.mode === 'FLY';
+  const isSwim = combatAction?.type === 'MOVE' && combatAction.mode === 'SWIM';
+  const isClimb = combatAction?.type === 'MOVE' && combatAction.mode === 'CLIMB';
 
   const armedHint = isFly
     ? t('tactical.actions.flyHint')
-    : isMove
-      ? t('tactical.actions.moveHint')
-      : null;
+    : isSwim
+      ? t('tactical.actions.swimHint')
+      : isClimb
+        ? t('tactical.actions.climbHint')
+        : isMove
+          ? t('tactical.actions.moveHint')
+          : null;
 
   return (
     <div className={s.block}>
@@ -93,6 +101,26 @@ export function DefaultActions({ movement, tacticalTokens }: DefaultActionsProps
           >
             <Rune kind="arrow-up" size={12} color="currentColor" />
             {t('tactical.actions.fly')}
+          </button>
+        )}
+        {canSwim && (
+          <button
+            type="button"
+            className={cn(s.actionChip, isSwim && s.actionChipActive)}
+            onClick={() => setCombatAction(isSwim ? null : { type: 'MOVE', mode: 'SWIM' })}
+          >
+            <Rune kind="arrow-r" size={12} color="currentColor" />
+            {t('tactical.actions.swim')}
+          </button>
+        )}
+        {canClimb && (
+          <button
+            type="button"
+            className={cn(s.actionChip, isClimb && s.actionChipActive)}
+            onClick={() => setCombatAction(isClimb ? null : { type: 'MOVE', mode: 'CLIMB' })}
+          >
+            <Rune kind="arrow-up" size={12} color="currentColor" />
+            {t('tactical.actions.climb')}
           </button>
         )}
       </div>

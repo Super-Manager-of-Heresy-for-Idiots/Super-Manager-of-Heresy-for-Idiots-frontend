@@ -51,6 +51,8 @@ export interface MoveTokenPayload {
   force?: boolean;
   /** Idempotency key for the move command (server-side dedup lands in Phase 2.14). */
   clientCommandId?: UUID;
+  /** Movement mode (Phase 2.11): WALK | FLY | SWIM | CLIMB — picks the speed budget in core. */
+  movementMode?: 'WALK' | 'FLY' | 'SWIM' | 'CLIMB';
 }
 
 export interface DragPreviewPayload {

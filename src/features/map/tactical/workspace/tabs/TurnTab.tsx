@@ -14,6 +14,7 @@ import { AttackForm } from '../AttackForm';
 import { StandardActionsPanel } from '../StandardActionsPanel';
 import { ReactionAttackPanel } from '../ReactionAttackPanel';
 import { MonsterRuntimePanel } from '../MonsterRuntimePanel';
+import { ForcedMovementPanel } from '../ForcedMovementPanel';
 import { BulkActionsPanel } from '../BulkActionsPanel';
 import { DefaultActions } from '../DefaultActions';
 import { liveTargets, monsterAttackOptions } from '../combat';
@@ -81,6 +82,7 @@ export function TurnTab({ campaignId, battle, movement, tacticalTokens }: TurnTa
       )}
       <ReactionAttackPanel campaignId={campaignId} battle={battle} tacticalTokens={tacticalTokens} />
       <MonsterRuntimePanel campaignId={campaignId} battle={battle} />
+      <ForcedMovementPanel campaignId={campaignId} battle={battle} tacticalTokens={tacticalTokens} />
       <BulkActionsPanel campaignId={campaignId} battle={battle} />
     </div>
   );
