@@ -159,8 +159,21 @@ export const battlesApi = {
     return response.data;
   },
 
-  endTurn: async (campaignId: string, battleId: string): Promise<ApiResponse<BattleResponse>> => {
-    const response = await api.post<ApiResponse<BattleResponse>>(`${base(campaignId)}/${battleId}/end-turn`);
+  endTurn: async (
+    campaignId: string,
+    battleId: string,
+    // Realtime reliability (Phase 2.14): idempotency key + expected turn/round guard the double-click
+    // and network-retry against advancing the turn twice.
+    guard?: { expectedTurnIndex?: number; expectedRound?: number; clientCommandId?: string },
+  ): Promise<ApiResponse<BattleResponse>> => {
+    const params = new URLSearchParams();
+    if (guard?.expectedTurnIndex != null) params.set('expectedTurnIndex', String(guard.expectedTurnIndex));
+    if (guard?.expectedRound != null) params.set('expectedRound', String(guard.expectedRound));
+    if (guard?.clientCommandId) params.set('clientCommandId', guard.clientCommandId);
+    const qs = params.toString();
+    const response = await api.post<ApiResponse<BattleResponse>>(
+      `${base(campaignId)}/${battleId}/end-turn${qs ? `?${qs}` : ''}`,
+    );
     return response.data;
   },
 

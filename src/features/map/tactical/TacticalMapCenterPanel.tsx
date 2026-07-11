@@ -199,6 +199,25 @@ export function TacticalMapCenterPanel({
     [sessionId, t],
   );
 
+  // Presence throttle (Phase 2.14): the cursor fires on every mouse move; cap the broadcast to ~12/s
+  // so a busy table doesn't flood the WS with presence frames. The last position still lands.
+  const lastCursorSentAt = useRef(0);
+  const sendCursorThrottled = useCallback(
+    (cell: { gridX: number; gridY: number; screenX: number; screenY: number } | null) => {
+      if (!cell) return;
+      const now = Date.now();
+      if (now - lastCursorSentAt.current < 80) return;
+      lastCursorSentAt.current = now;
+      realtime.sendCursor({
+        gridX: cell.gridX,
+        gridY: cell.gridY,
+        screenX: cell.screenX,
+        screenY: cell.screenY,
+      });
+    },
+    [realtime],
+  );
+
   const paintFogCell = useCallback(
     (cell: GridCoord) => {
       const shape: FogShapeDto = {
@@ -608,16 +627,7 @@ export function TacticalMapCenterPanel({
         onTokenDragEnd={onTokenDragEnd}
         onTokenDragCancel={onTokenDragCancel}
         onEmptyCellClick={onEmptyCellClick}
-        onCursorMove={(cell) => {
-          if (cell) {
-            realtime.sendCursor({
-              gridX: cell.gridX,
-              gridY: cell.gridY,
-              screenX: cell.screenX,
-              screenY: cell.screenY,
-            });
-          }
-        }}
+        onCursorMove={sendCursorThrottled}
         toolbarLabels={toolbarLabels}
         emptyLabel={t('map.session.noImage')}
         underlay={

@@ -113,6 +113,21 @@ export function MapViewport({
   const [gridVisible, setGridVisible] = useState(showSystemGrid ?? showGrid ?? true);
   const normalizedGrid = useMemo(() => normalizeGridConfig(grid), [grid]);
 
+  // Visible image-space rect (Phase 2.14) for token virtualization: invert the affine transform
+  // (screen = image·scale + offset) at the container's corners. Recomputed on pan/zoom; when the
+  // container size is unknown yet, left undefined so the token layer renders everything.
+  const { offsetX, offsetY, scale } = vp.viewport;
+  const visibleImageRect = useMemo(() => {
+    const rect = vp.containerRef.current?.getBoundingClientRect();
+    if (!rect || rect.width === 0 || rect.height === 0 || scale === 0) return undefined;
+    return {
+      minX: -offsetX / scale,
+      minY: -offsetY / scale,
+      maxX: (rect.width - offsetX) / scale,
+      maxY: (rect.height - offsetY) / scale,
+    };
+  }, [offsetX, offsetY, scale, vp.containerRef]);
+
   // Token drag lives here (the live transform/container rect are only available
   // inside the viewport); the page owns the network/permission side via callbacks.
   const tokenDrag = useTokenDrag({
@@ -217,6 +232,7 @@ export function MapViewport({
               tokens={tokens}
               selectedTokenId={selectedTokenId}
               flyingTokenIds={flyingTokenIds}
+              visibleImageRect={visibleImageRect}
               remoteDragPreviews={remoteDragPreviews}
               localDragPreview={localDragPreview}
               onSelectToken={onSelectToken}

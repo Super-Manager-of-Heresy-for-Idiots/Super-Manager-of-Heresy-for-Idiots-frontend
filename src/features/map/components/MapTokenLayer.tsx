@@ -16,6 +16,8 @@ interface MapTokenLayerProps {
   onTokenPointerDown?: (tokenId: UUID, e: ReactPointerEvent<HTMLDivElement>) => void;
   /** Token ids of flying combatants (Phase 2.13): a lifted shadow + float animation + wing badge. */
   flyingTokenIds?: ReadonlySet<UUID>;
+  /** Visible image-space rect for viewport culling (Phase 2.14); omit to render every token. */
+  visibleImageRect?: { minX: number; minY: number; maxX: number; maxY: number };
 }
 
 const TYPE_CLASS: Record<TokenType, string> = {
@@ -41,6 +43,7 @@ export function MapTokenLayer({
   onSelectToken,
   onTokenPointerDown,
   flyingTokenIds,
+  visibleImageRect,
 }: MapTokenLayerProps) {
   const previewByTokenId = new Map<UUID, TokenDragPreview>();
   for (const preview of remoteDragPreviews) previewByTokenId.set(preview.tokenId, preview);
@@ -64,6 +67,19 @@ export function MapTokenLayer({
           token.heightCells,
           grid,
         );
+        // Viewport virtualization (Phase 2.14): skip tokens fully outside the visible image rect
+        // (plus a one-token margin). When no rect is supplied, everything renders (correctness first).
+        if (visibleImageRect) {
+          const margin = Math.max(metrics.widthPx, metrics.heightPx);
+          if (
+            point.imageX + metrics.widthPx < visibleImageRect.minX - margin ||
+            point.imageX > visibleImageRect.maxX + margin ||
+            point.imageY + metrics.heightPx < visibleImageRect.minY - margin ||
+            point.imageY > visibleImageRect.maxY + margin
+          ) {
+            return null;
+          }
+        }
         const label = token.name.trim().slice(0, 3) || '?';
 
         const select = () => onSelectToken?.(token.id);

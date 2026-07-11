@@ -258,7 +258,14 @@ function ActionPanel({
 
       <button
         className={cn('ao-btn ao-btn--primary ao-btn--block', s.mt12)}
-        onClick={() => endTurn.mutate({ campaignId, battleId: battle.id })}
+        onClick={() =>
+          endTurn.mutate({
+            campaignId,
+            battleId: battle.id,
+            expectedTurnIndex: battle.currentTurnIndex,
+            expectedRound: battle.roundNumber,
+          })
+        }
         disabled={endTurn.isPending}
       >
         <Rune kind="check" size={14} color="currentColor" />

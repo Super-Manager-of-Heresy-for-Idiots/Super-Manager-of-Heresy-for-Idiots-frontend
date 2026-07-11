@@ -212,8 +212,24 @@ export function useEndTurn() {
   const sync = useSyncBattle();
   const t = useT();
   return useMutation({
-    mutationFn: ({ campaignId, battleId }: { campaignId: string; battleId: string }) =>
-      battlesApi.endTurn(campaignId, battleId),
+    mutationFn: ({
+      campaignId,
+      battleId,
+      expectedTurnIndex,
+      expectedRound,
+    }: {
+      campaignId: string;
+      battleId: string;
+      expectedTurnIndex?: number;
+      expectedRound?: number;
+    }) =>
+      // Realtime reliability (Phase 2.14): a fresh idempotency key + the expected turn/round the
+      // client saw — a double-click's second call is rejected as stale, a retry is deduped.
+      battlesApi.endTurn(campaignId, battleId, {
+        expectedTurnIndex,
+        expectedRound,
+        clientCommandId: crypto.randomUUID(),
+      }),
     onSuccess: (res) => sync(res.data),
     onError: (e) => toast.error(errMsg(e, t('battle.toast.turnEndFailed'))),
   });

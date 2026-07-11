@@ -94,7 +94,14 @@ export function CommandBar({ campaignId, battle, isGm, currentUserId }: CommandB
               <>
                 <button
                   className="ao-btn ao-btn--primary"
-                  onClick={() => endTurn.mutate({ campaignId, battleId: battle.id })}
+                  onClick={() =>
+                    endTurn.mutate({
+                      campaignId,
+                      battleId: battle.id,
+                      expectedTurnIndex: battle.currentTurnIndex,
+                      expectedRound: battle.roundNumber,
+                    })
+                  }
                   disabled={!current || endTurn.isPending}
                 >
                   <Rune kind="arrow-r" size={14} color="currentColor" />
