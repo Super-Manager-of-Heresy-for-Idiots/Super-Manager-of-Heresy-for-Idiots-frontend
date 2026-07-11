@@ -302,6 +302,27 @@ export function useStandardAction() {
   });
 }
 
+/** GM sets or clears a combatant's manual speed override (Phase 2.11). */
+export function useSetSpeedOverride() {
+  const sync = useSyncBattle();
+  const t = useT();
+  return useMutation({
+    mutationFn: ({
+      campaignId,
+      battleId,
+      combatantId,
+      ft,
+    }: {
+      campaignId: string;
+      battleId: string;
+      combatantId: string;
+      ft: number | null;
+    }) => battlesApi.setSpeedOverride(campaignId, battleId, combatantId, ft),
+    onSuccess: (res) => sync(res.data),
+    onError: (e) => toast.error(errMsg(e, t('tactical.speed.failed'))),
+  });
+}
+
 /** GM hides or reveals a monster's identity in the tracker (Phase 2.10). */
 export function useSetIdentityHidden() {
   const sync = useSyncBattle();

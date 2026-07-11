@@ -233,6 +233,20 @@ export const battlesApi = {
     return response.data;
   },
 
+  /** GM sets (ft) or clears (null) a combatant's manual speed override (Phase 2.11). */
+  setSpeedOverride: async (
+    campaignId: string,
+    battleId: string,
+    combatantId: string,
+    ft: number | null,
+  ): Promise<ApiResponse<BattleResponse>> => {
+    const query = ft == null ? '' : `?ft=${ft}`;
+    const response = await api.patch<ApiResponse<BattleResponse>>(
+      `${base(campaignId)}/${battleId}/combatants/${combatantId}/speed${query}`,
+    );
+    return response.data;
+  },
+
   /** GM hides or reveals a monster's identity in the tracker (Phase 2.10). */
   setIdentityHidden: async (
     campaignId: string,

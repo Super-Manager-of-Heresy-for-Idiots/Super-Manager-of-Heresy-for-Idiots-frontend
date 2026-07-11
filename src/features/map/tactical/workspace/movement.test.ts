@@ -200,6 +200,21 @@ describe('computeReach', () => {
     const fly = computeReach({ gridX: 0, gridY: 0 }, 3, new Set(), null, { elevationAt, ignoreGround: true });
     expect(isReachable(fly, { gridX: 1, gridY: 1 })).toBe(true);
   });
+
+  it('doubles the cost of entering difficult terrain (Phase 2.11)', () => {
+    // Column x=1 is difficult; entering it costs 2. Budget 2 reaches (1,0) but not (2,0) beyond it.
+    const difficultAt = (x: number) => x === 1;
+    const reach = computeReach({ gridX: 0, gridY: 0 }, 2, new Set(), null, { difficultAt });
+    expect(reach.distance.get(cellKey(1, 0))).toBe(2); // entering difficult cell costs 2
+    expect(isReachable(reach, { gridX: 2, gridY: 0 })).toBe(false); // 2 (into) + 1 (out) = 3 > budget 2
+  });
+
+  it('flight is not slowed by difficult terrain', () => {
+    const difficultAt = (x: number) => x === 1;
+    const fly = computeReach({ gridX: 0, gridY: 0 }, 2, new Set(), null, { difficultAt, ignoreGround: true });
+    expect(fly.distance.get(cellKey(1, 0))).toBe(1); // normal cost while flying
+    expect(isReachable(fly, { gridX: 2, gridY: 0 })).toBe(true);
+  });
 });
 
 describe('reconstructPath', () => {

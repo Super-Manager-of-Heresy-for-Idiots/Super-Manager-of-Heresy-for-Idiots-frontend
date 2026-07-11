@@ -1869,6 +1869,8 @@ export interface BattleCombatantResponse {
   identityHidden?: boolean;
   /** Generic public label shown to players when the identity is hidden. */
   publicName?: string | null;
+  /** Manual GM speed override in feet (Phase 2.11); null/absent when the sheet/statblock speed applies. */
+  speedOverrideFt?: number | null;
 }
 
 /** A standard action a combatant can take on its turn (Phase 2.7). */

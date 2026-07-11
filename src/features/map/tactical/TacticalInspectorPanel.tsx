@@ -12,7 +12,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
 import type { BattleCombatantResponse, CombatantCondition, SpellSlotsResponse } from '@/types';
-import { useBattleAttack, useApplyCombatantHp } from '@/hooks/useBattles';
+import { useBattleAttack, useApplyCombatantHp, useSetSpeedOverride } from '@/hooks/useBattles';
 import { referenceApi } from '@/api/reference.api';
 import { battlesApi } from '@/api/battles.api';
 import { spellSlotsApi } from '@/api/spellSlots.api';
@@ -205,6 +205,15 @@ function TokenInspector({
       )}
 
       {isGm && combatant && (
+        <SpeedOverrideControl
+          campaignId={campaignId}
+          battleId={battleId}
+          combatantId={combatant.id}
+          current={combatant.speedOverrideFt ?? null}
+        />
+      )}
+
+      {isGm && combatant && (
         <InitiativeReroll campaignId={campaignId} battleId={battleId} combatantId={combatant.id} />
       )}
 
@@ -315,6 +324,61 @@ function HpAdjuster({
         >
           {t('tactical.inspect.heal')}
         </button>
+      </div>
+    </div>
+  );
+}
+
+/** GM manual speed override (Phase 2.11): set a combatant's movement speed in feet, or clear it. */
+function SpeedOverrideControl({
+  campaignId,
+  battleId,
+  combatantId,
+  current,
+}: {
+  campaignId: string;
+  battleId: string;
+  combatantId: string;
+  current: number | null;
+}) {
+  const t = useT();
+  const setSpeed = useSetSpeedOverride();
+  const [ftStr, setFtStr] = useState('');
+  const ft = parseInt(ftStr, 10);
+  const valid = Number.isFinite(ft) && ft >= 0;
+
+  return (
+    <div className={s.actionBlock}>
+      <p className={cn('ao-overline', s.actionOverline)}>
+        {t('tactical.speed.title')}
+        {current != null && <span> · {t('tactical.speed.current', { ft: current })}</span>}
+      </p>
+      <div className="ao-row ao-gap-8">
+        <input
+          className={cn('ao-input', s.amountField)}
+          inputMode="numeric"
+          value={ftStr}
+          placeholder={t('tactical.speed.ftPlaceholder')}
+          onChange={(e) => setFtStr(e.target.value.replace(/[^0-9]/g, ''))}
+        />
+        <button
+          type="button"
+          className="ao-btn ao-btn--sm ao-btn--primary"
+          disabled={!valid || setSpeed.isPending}
+          onClick={() => setSpeed.mutate({ campaignId, battleId, combatantId, ft }, { onSuccess: () => setFtStr('') })}
+        >
+          {t('tactical.speed.set')}
+        </button>
+        {current != null && (
+          <button
+            type="button"
+            className="ao-btn ao-btn--sm ao-btn--ghost"
+            disabled={setSpeed.isPending}
+            onClick={() => setSpeed.mutate({ campaignId, battleId, combatantId, ft: null })}
+          >
+            {t('tactical.speed.clear')}
+          </button>
+        )}
       </div>
     </div>
   );

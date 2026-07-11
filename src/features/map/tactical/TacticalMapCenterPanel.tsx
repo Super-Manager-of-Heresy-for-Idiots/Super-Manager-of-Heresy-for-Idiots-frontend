@@ -43,6 +43,7 @@ import type { GridCoord } from '../engine';
 import type { FogShapeDto, UUID } from '../types';
 import { buildFromCombatantRequest } from './combatantPlacement';
 import { MovementOverlay } from './workspace/MovementOverlay';
+import { zoneCoversCell } from './workspace/aoeCoverage';
 import {
   boundsFromGrid,
   cellKey,
@@ -294,8 +295,7 @@ export function TacticalMapCenterPanel({
   );
 
   // Terrain hook (Phase 1.9): the snapshot's tileStates give each cell its ground level
-  // (0 default, 1/2 high ground). This switches the low→high reach rule on in computeReach;
-  // difficult-terrain movement COST stays out of scope (Phase 2.11).
+  // (0 default, 1/2 high ground). This switches the low→high reach rule on in computeReach.
   const elevationByCell = useMemo(() => {
     const m = new Map<string, number>();
     for (const tile of tileStates) m.set(cellKey(tile.gridX, tile.gridY), tile.terrainLevel);
@@ -306,6 +306,24 @@ export function TacticalMapCenterPanel({
     [elevationByCell],
   );
 
+  // Difficult terrain (Phase 2.11): GM-painted difficult tiles + AoE spell zones that impose it
+  // (Web, properties.terrain=DIFFICULT). Doubles the entry cost in the preview to mirror the server.
+  const difficultTiles = useMemo(() => {
+    const set = new Set<string>();
+    for (const tile of tileStates) if (tile.difficult) set.add(cellKey(tile.gridX, tile.gridY));
+    return set;
+  }, [tileStates]);
+  const difficultZones = useMemo(
+    () => mapElements.filter((z) => z.properties?.terrain === 'DIFFICULT'),
+    [mapElements],
+  );
+  const difficultAt = useCallback(
+    (gridX: number, gridY: number) =>
+      difficultTiles.has(cellKey(gridX, gridY)) ||
+      difficultZones.some((z) => zoneCoversCell(z, gridX, gridY)),
+    [difficultTiles, difficultZones],
+  );
+
   const reach = useMemo(() => {
     if (!movement || !origin || !map || !moveMode) return null;
     return computeReach(
@@ -313,9 +331,9 @@ export function TacticalMapCenterPanel({
       effectiveRange,
       occupiedCells(tokens, movement.activeTokenId),
       boundsFromGrid(map.gridConfig),
-      { elevationAt, ignoreGround: moveMode === 'FLY' },
+      { elevationAt, ignoreGround: moveMode === 'FLY', difficultAt },
     );
-  }, [movement, origin, map, moveMode, effectiveRange, tokens, elevationAt]);
+  }, [movement, origin, map, moveMode, effectiveRange, tokens, elevationAt, difficultAt]);
 
   const reachableCells = useMemo<Cell[]>(() => {
     if (!reach || !origin) return [];

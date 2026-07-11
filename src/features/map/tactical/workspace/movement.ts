@@ -152,12 +152,20 @@ const DIRECTIONS: ReadonlyArray<readonly [number, number]> = [
 export interface ReachTerrainOptions {
   elevationAt?: (gridX: number, gridY: number) => number;
   ignoreGround?: boolean;
+  /**
+   * Difficult terrain (Phase 2.11): when it returns true for a cell, ENTERING that cell costs 2
+   * instead of 1 (Web / swamp). Ignored when {@link ignoreGround} is set (flight is unaffected).
+   * Mirrors the map-service MovementValidator cost so the preview matches what the server charges.
+   */
+  difficultAt?: (gridX: number, gridY: number) => boolean;
 }
 
 /**
- * Flood fill reachable cells within `range` steps (8-directional, each step costs 1
- * — D&D "every square is 5 ft"), blocked by occupied cells, the map bounds, and
- * (optionally) the low→high ground rule via {@link ReachTerrainOptions}.
+ * Reachable cells within a `range` cost budget (8-directional). Each step costs 1 by default and 2
+ * when entering difficult terrain, so this is a Dijkstra over step-cost rather than a plain flood
+ * fill — the shortest path may now be the cheaper one, not the fewest-cells one. Blocked by occupied
+ * cells, the map bounds, and (optionally) the low→high ground rule via {@link ReachTerrainOptions}.
+ * `distance` holds accumulated cost from the origin; the difficult-terrain cost is skipped for flight.
  */
 export function computeReach(
   origin: Cell,
@@ -175,13 +183,22 @@ export function computeReach(
   prev.set(originKey, null);
   if (range <= 0) return { distance, prev };
 
-  const queue: Array<[number, number]> = [[ox, oy]];
-  let head = 0;
-  while (head < queue.length) {
-    const [cx, cy] = queue[head];
-    head += 1;
-    const d = distance.get(cellKey(cx, cy))!;
-    if (d >= range) continue;
+  // Dijkstra: repeatedly settle the cheapest unsettled cell and relax its neighbours. Grids in the
+  // preview are small, so linear min-extraction is fine.
+  const settled = new Set<string>();
+  for (;;) {
+    let bestKey: string | null = null;
+    let bestCost = Infinity;
+    for (const [key, cost] of distance) {
+      if (!settled.has(key) && cost < bestCost) {
+        bestCost = cost;
+        bestKey = key;
+      }
+    }
+    if (bestKey === null) break;
+    settled.add(bestKey);
+    if (bestCost >= range) continue;
+    const [cx, cy] = bestKey.split(',').map(Number);
     for (const [dx, dy] of DIRECTIONS) {
       const nx = cx + dx;
       const ny = cy + dy;
@@ -189,14 +206,19 @@ export function computeReach(
         continue;
       }
       const nKey = cellKey(nx, ny);
-      if (occupied.has(nKey) || distance.has(nKey)) continue;
+      if (occupied.has(nKey)) continue;
       // Low→high ground rule (no-op until terrain is wired): can't step up.
       if (terrain?.elevationAt && !terrain.ignoreGround && terrain.elevationAt(nx, ny) > terrain.elevationAt(cx, cy)) {
         continue;
       }
-      distance.set(nKey, d + 1);
-      prev.set(nKey, cellKey(cx, cy));
-      queue.push([nx, ny]);
+      const difficult = !terrain?.ignoreGround && !!terrain?.difficultAt?.(nx, ny);
+      const nCost = bestCost + (difficult ? 2 : 1);
+      if (nCost > range) continue;
+      const known = distance.get(nKey);
+      if (known == null || nCost < known) {
+        distance.set(nKey, nCost);
+        prev.set(nKey, bestKey);
+      }
     }
   }
   return { distance, prev };

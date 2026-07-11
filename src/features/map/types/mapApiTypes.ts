@@ -407,6 +407,8 @@ export interface MapTileStateDto {
   gridY: number;
   terrainLevel: 0 | 1 | 2;
   terrainName: TerrainName;
+  /** Difficult terrain (Phase 2.11): entering this cell costs double movement. */
+  difficult?: boolean;
   createdAt: IsoInstant;
   updatedAt: IsoInstant;
 }

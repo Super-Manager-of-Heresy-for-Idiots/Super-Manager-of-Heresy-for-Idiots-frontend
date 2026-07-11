@@ -119,6 +119,17 @@
   background: color-mix(in srgb, var(--ember) 16%, transparent);
   border-color: color-mix(in srgb, var(--ember) 40%, transparent);
 }
+/* Difficult terrain (Phase 2.11): entering costs double movement — hatched overlay. */
+.terrainDifficult {
+  background: repeating-linear-gradient(
+    45deg,
+    color-mix(in srgb, var(--arcane) 22%, transparent),
+    color-mix(in srgb, var(--arcane) 22%, transparent) 3px,
+    transparent 3px,
+    transparent 7px
+  );
+  border-color: color-mix(in srgb, var(--arcane) 45%, transparent);
+}
 .terrainBadge {
   padding: 0 2px;
   font-size: var(--t-micro);
