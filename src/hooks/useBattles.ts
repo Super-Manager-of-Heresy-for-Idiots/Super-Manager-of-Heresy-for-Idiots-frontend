@@ -430,6 +430,48 @@ export function useSetFlying() {
   });
 }
 
+/** GM marks/clears a combatant's surprised state (Phase 3.7). */
+export function useSetSurprised() {
+  const sync = useSyncBattle();
+  const t = useT();
+  return useMutation({
+    mutationFn: ({ campaignId, battleId, combatantId, surprised }: { campaignId: string; battleId: string; combatantId: string; surprised: boolean }) =>
+      battlesApi.setSurprised(campaignId, battleId, combatantId, surprised),
+    onSuccess: (res) => sync(res.data),
+    onError: (e) => toast.error(errMsg(e, t('tactical.surprise.failed'))),
+  });
+}
+
+/** Ready an action with a trigger (Phase 3.7). */
+export function useReadyAction() {
+  const sync = useSyncBattle();
+  const t = useT();
+  return useMutation({
+    mutationFn: ({ campaignId, battleId, combatantId, description }: { campaignId: string; battleId: string; combatantId: string; description: string }) =>
+      battlesApi.readyAction(campaignId, battleId, combatantId, description),
+    onSuccess: (res) => {
+      sync(res.data);
+      toast.success(t('tactical.ready.declared'));
+    },
+    onError: (e) => toast.error(errMsg(e, t('tactical.ready.failed'))),
+  });
+}
+
+/** Trigger a readied action — spends the reaction (Phase 3.7). */
+export function useTriggerReady() {
+  const sync = useSyncBattle();
+  const t = useT();
+  return useMutation({
+    mutationFn: ({ campaignId, battleId, combatantId }: { campaignId: string; battleId: string; combatantId: string }) =>
+      battlesApi.triggerReady(campaignId, battleId, combatantId),
+    onSuccess: (res) => {
+      sync(res.data);
+      toast.success(t('tactical.ready.triggered'));
+    },
+    onError: (e) => toast.error(errMsg(e, t('tactical.ready.failed'))),
+  });
+}
+
 /** GM hides or reveals a monster's identity in the tracker (Phase 2.10). */
 export function useSetIdentityHidden() {
   const sync = useSyncBattle();

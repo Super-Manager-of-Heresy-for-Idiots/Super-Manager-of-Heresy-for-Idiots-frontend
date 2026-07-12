@@ -1875,6 +1875,10 @@ export interface BattleCombatantResponse {
   flying?: boolean;
   /** Can hover (from the monster statblock) — does not fall at 0 fly speed (Phase 2.13). */
   hover?: boolean;
+  /** Surprised (Phase 3.7): can't act/react on round 1; clears after its first turn. */
+  surprised?: boolean;
+  /** Readied action text (Phase 3.7): a prepared action awaiting its trigger; null/absent when none. */
+  readiedAction?: string | null;
 }
 
 /** A standard action a combatant can take on its turn (Phase 2.7). */
@@ -2013,7 +2017,9 @@ export type BattleLogType =
   | 'TELEPORT'
   | 'TRAP'
   | 'FALL'
-  | 'UNDO';
+  | 'UNDO'
+  | 'SURPRISE'
+  | 'READY';
 
 /**
  * One persistent combat-log entry (Phase 1.2). `seq` is monotonic within a battle and drives

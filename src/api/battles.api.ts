@@ -335,6 +335,45 @@ export const battlesApi = {
     return response.data;
   },
 
+  /** GM marks/clears a combatant's surprised state (Phase 3.7). */
+  setSurprised: async (
+    campaignId: string,
+    battleId: string,
+    combatantId: string,
+    surprised: boolean,
+  ): Promise<ApiResponse<BattleResponse>> => {
+    const response = await api.patch<ApiResponse<BattleResponse>>(
+      `${base(campaignId)}/${battleId}/combatants/${combatantId}/surprised?surprised=${surprised}`,
+    );
+    return response.data;
+  },
+
+  /** Ready an action with a trigger — spends the action (Phase 3.7). */
+  readyAction: async (
+    campaignId: string,
+    battleId: string,
+    combatantId: string,
+    description: string,
+  ): Promise<ApiResponse<BattleResponse>> => {
+    const response = await api.post<ApiResponse<BattleResponse>>(
+      `${base(campaignId)}/${battleId}/combatants/${combatantId}/ready`,
+      { description },
+    );
+    return response.data;
+  },
+
+  /** Trigger a readied action — spends the reaction (Phase 3.7). */
+  triggerReady: async (
+    campaignId: string,
+    battleId: string,
+    combatantId: string,
+  ): Promise<ApiResponse<BattleResponse>> => {
+    const response = await api.post<ApiResponse<BattleResponse>>(
+      `${base(campaignId)}/${battleId}/combatants/${combatantId}/ready/trigger`,
+    );
+    return response.data;
+  },
+
   /** GM hides or reveals a monster's identity in the tracker (Phase 2.10). */
   setIdentityHidden: async (
     campaignId: string,
