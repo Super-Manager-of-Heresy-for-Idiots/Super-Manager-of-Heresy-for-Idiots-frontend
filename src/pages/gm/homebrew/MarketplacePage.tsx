@@ -177,8 +177,8 @@ export default function MarketplacePage() {
                     {/* Rating Control */}
                     <div className={s.ratingWrap}>
                       <RatingControl
-                        likes={pkg.downloadCount}
-                        dislikes={0}
+                        likes={pkg.likes ?? 0}
+                        dislikes={pkg.dislikes ?? 0}
                         size="sm"
                         onRate={(r) => handleRate(pkg.id, r)}
                       />

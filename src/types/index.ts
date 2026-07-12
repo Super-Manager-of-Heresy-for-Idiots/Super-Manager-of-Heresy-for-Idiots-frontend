@@ -1122,10 +1122,15 @@ export interface HomebrewPackageResponse {
   publishedAt?: string;
   createdAt: string;
   isDeleted: boolean;
+  // Агрегаты рейтинга витрины (P0-6). Присутствуют только в ответах marketplace.
+  likes?: number;
+  dislikes?: number;
+  netRating?: number;
 }
 
 export interface HomebrewDetailResponse extends HomebrewPackageResponse {
   contentByType: Partial<Record<ContentType, ContentSummaryDto[]>>;
+  userRating?: number;
 }
 
 export interface InstalledHomebrewResponse {

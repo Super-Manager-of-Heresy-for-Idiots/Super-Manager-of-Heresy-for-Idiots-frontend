@@ -34,8 +34,8 @@ export function useDetachHomebrew() {
   const t = useT();
 
   return useMutation({
-    mutationFn: ({ campaignId, packageId }: { campaignId: string; packageId: string }) =>
-      homebrewCampaignApi.detach(campaignId, packageId),
+    mutationFn: ({ campaignId, packageId, force }: { campaignId: string; packageId: string; force?: boolean }) =>
+      homebrewCampaignApi.detach(campaignId, packageId, force ?? false),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'homebrew'] });
       toast.success(t('hk.homebrewCampaign.detached'));
@@ -164,7 +164,7 @@ export function useHomebrewVersions(packageId: string | undefined) {
   return useQuery({
     queryKey: ['homebrew-versions', packageId],
     queryFn: async () => {
-      const response = await homebrewApi.getPackageDetail(packageId!);
+      const response = await homebrewApi.getMyPackage(packageId!);
       return response.data;
     },
     enabled: !!packageId,

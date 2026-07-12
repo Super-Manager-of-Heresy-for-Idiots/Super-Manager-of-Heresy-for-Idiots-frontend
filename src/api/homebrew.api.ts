@@ -40,16 +40,6 @@ export const homebrewApi = {
     return response.data;
   },
 
-  getPackageDetail: async (id: string): Promise<ApiResponse<HomebrewDetailResponse>> => {
-    const response = await api.get<ApiResponse<HomebrewDetailResponse>>(`/homebrew/my/${id}`);
-    return response.data;
-  },
-
-  updatePackage: async (id: string, data: UpdateHomebrewRequest): Promise<ApiResponse<HomebrewDetailResponse>> => {
-    const response = await api.put<ApiResponse<HomebrewDetailResponse>>(`/homebrew/my/${id}`, data);
-    return response.data;
-  },
-
   addContent: async (id: string, data: AddContentRequest): Promise<ApiResponse<HomebrewDetailResponse>> => {
     const response = await api.post<ApiResponse<HomebrewDetailResponse>>(`/homebrew/my/${id}/content`, data);
     return response.data;
@@ -82,11 +72,6 @@ export const homebrewApi = {
 
   unpublish: async (id: string): Promise<ApiResponse<HomebrewDetailResponse>> => {
     const response = await api.post<ApiResponse<HomebrewDetailResponse>>(`/homebrew/my/${id}/unpublish`);
-    return response.data;
-  },
-
-  deletePackage: async (id: string): Promise<ApiResponse<SoftDeleteResponse>> => {
-    const response = await api.delete<ApiResponse<SoftDeleteResponse>>(`/homebrew/my/${id}`);
     return response.data;
   },
 
@@ -161,16 +146,6 @@ export const homebrewApi = {
 
   getLibrary: async (): Promise<ApiResponse<HomebrewPackageResponse[]>> => {
     const response = await api.get<ApiResponse<HomebrewPackageResponse[]>>('/homebrew/library');
-    return response.data;
-  },
-
-  addToLibrary: async (packageId: string): Promise<ApiResponse<void>> => {
-    const response = await api.post<ApiResponse<void>>(`/homebrew/library/${packageId}`);
-    return response.data;
-  },
-
-  removeFromLibrary: async (packageId: string): Promise<ApiResponse<void>> => {
-    const response = await api.delete<ApiResponse<void>>(`/homebrew/library/${packageId}`);
     return response.data;
   },
 

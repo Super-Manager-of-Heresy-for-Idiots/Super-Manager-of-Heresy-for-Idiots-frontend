@@ -27,8 +27,11 @@ export const homebrewCampaignApi = {
     return response.data;
   },
 
-  detach: async (campaignId: string, packageId: string): Promise<ApiResponse<void>> => {
-    const response = await api.delete<ApiResponse<void>>(`/campaigns/${campaignId}/homebrew/${packageId}`);
+  detach: async (campaignId: string, packageId: string, force = false): Promise<ApiResponse<void>> => {
+    const response = await api.delete<ApiResponse<void>>(
+      `/campaigns/${campaignId}/homebrew/${packageId}`,
+      { params: force ? { force: true } : undefined },
+    );
     return response.data;
   },
 
