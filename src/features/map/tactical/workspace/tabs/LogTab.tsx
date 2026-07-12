@@ -36,6 +36,7 @@ const CATEGORY: Record<BattleLogType, string> = {
   TELEPORT: s.catFlow,
   TRAP: s.catOffense,
   FALL: s.catOffense,
+  UNDO: s.catMisc,
 };
 
 function str(v: unknown): string {

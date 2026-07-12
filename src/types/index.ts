@@ -2012,7 +2012,8 @@ export type BattleLogType =
   | 'FORCED_MOVE'
   | 'TELEPORT'
   | 'TRAP'
-  | 'FALL';
+  | 'FALL'
+  | 'UNDO';
 
 /**
  * One persistent combat-log entry (Phase 1.2). `seq` is monotonic within a battle and drives

@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { useBattleCurrentTurn } from '@/hooks/useBattles';
+import { useBattleCurrentTurn, useUndo } from '@/hooks/useBattles';
 import { useI18n, useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
 import type { BattleResponse } from '@/types';
@@ -37,6 +37,7 @@ interface TurnTabProps {
 export function TurnTab({ campaignId, battle, movement, tacticalTokens, mapSessionId }: TurnTabProps) {
   const t = useT();
   const { lang } = useI18n();
+  const undo = useUndo();
   const current = currentTurnCombatant(battle.combatants);
   const isMonsterTurn = current?.type === 'MONSTER';
   const { data: turn } = useBattleCurrentTurn(campaignId, battle.id, !!isMonsterTurn);
@@ -93,6 +94,14 @@ export function TurnTab({ campaignId, battle, movement, tacticalTokens, mapSessi
       {mapSessionId && <TrapPanel campaignId={campaignId} sessionId={mapSessionId} battle={battle} />}
       {mapSessionId && <DoorPanel sessionId={mapSessionId} />}
       <BulkActionsPanel campaignId={campaignId} battle={battle} />
+      <button
+        type="button"
+        className="ao-btn ao-btn--sm ao-btn--ghost"
+        disabled={undo.isPending}
+        onClick={() => undo.mutate({ campaignId, battleId: battle.id })}
+      >
+        {t('tactical.undo.button')}
+      </button>
     </div>
   );
 }

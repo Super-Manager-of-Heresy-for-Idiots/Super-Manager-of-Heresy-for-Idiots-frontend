@@ -263,6 +263,12 @@ export const battlesApi = {
     return response.data;
   },
 
+  /** Undo the last reversible battle operation — HP/condition/position (GM, Phase 3.5). */
+  undo: async (campaignId: string, battleId: string): Promise<ApiResponse<BattleResponse>> => {
+    const response = await api.post<ApiResponse<BattleResponse>>(`${base(campaignId)}/${battleId}/undo`);
+    return response.data;
+  },
+
   /** Apply fall damage + prone to a combatant (Phase 3.4). */
   fall: async (
     campaignId: string,

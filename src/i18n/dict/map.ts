@@ -222,6 +222,7 @@ export const map: DictModule = {
     'tactical.log.type.TELEPORT': 'Телепорт',
     'tactical.log.type.TRAP': 'Ловушка',
     'tactical.log.type.FALL': 'Падение',
+    'tactical.log.type.UNDO': 'Откат',
 
     /* ── Вкладка «Ход» ── */
     'tactical.turn.overline': 'Текущий ход',
@@ -321,6 +322,9 @@ export const map: DictModule = {
     'tactical.fall.trigger': 'Падение',
     'tactical.fall.applied': 'Падение применено',
     'tactical.fall.failed': 'Не удалось применить падение',
+    'tactical.undo.button': 'Отменить последнее',
+    'tactical.undo.done': 'Операция отменена',
+    'tactical.undo.failed': 'Отменять нечего',
     'tactical.forced.title': 'Смещение / телепорт',
     'tactical.forced.forcedTab': 'Смещение',
     'tactical.forced.teleportTab': 'Телепорт',
@@ -644,6 +648,7 @@ export const map: DictModule = {
     'tactical.log.type.TELEPORT': 'Teleport',
     'tactical.log.type.TRAP': 'Trap',
     'tactical.log.type.FALL': 'Fall',
+    'tactical.log.type.UNDO': 'Undo',
 
     /* ── Turn tab ── */
     'tactical.turn.overline': 'Current turn',
@@ -743,6 +748,9 @@ export const map: DictModule = {
     'tactical.fall.trigger': 'Fall',
     'tactical.fall.applied': 'Fall applied',
     'tactical.fall.failed': 'Fall failed',
+    'tactical.undo.button': 'Undo last',
+    'tactical.undo.done': 'Operation undone',
+    'tactical.undo.failed': 'Nothing to undo',
     'tactical.forced.title': 'Forced move / teleport',
     'tactical.forced.forcedTab': 'Forced move',
     'tactical.forced.teleportTab': 'Teleport',

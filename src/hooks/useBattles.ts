@@ -358,6 +358,21 @@ export function useTriggerTrap() {
   });
 }
 
+/** Undo the last reversible battle operation — HP/condition/position (Phase 3.5). */
+export function useUndo() {
+  const sync = useSyncBattle();
+  const t = useT();
+  return useMutation({
+    mutationFn: ({ campaignId, battleId }: { campaignId: string; battleId: string }) =>
+      battlesApi.undo(campaignId, battleId),
+    onSuccess: (res) => {
+      sync(res.data);
+      toast.success(t('tactical.undo.done'));
+    },
+    onError: (e) => toast.error(errMsg(e, t('tactical.undo.failed'))),
+  });
+}
+
 /** Apply fall damage + prone to a combatant (Phase 3.4). */
 export function useFall() {
   const sync = useSyncBattle();
