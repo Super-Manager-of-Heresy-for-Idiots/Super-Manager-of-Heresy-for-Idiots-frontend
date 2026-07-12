@@ -665,6 +665,7 @@ export function TacticalMapCenterPanel({
         onTokenDragEnd={onTokenDragEnd}
         onTokenDragCancel={onTokenDragCancel}
         onEmptyCellClick={onEmptyCellClick}
+        cellToolActive={isGm && (fogTool !== 'off' || difficultTool)}
         onCursorMove={sendCursorThrottled}
         toolbarLabels={toolbarLabels}
         emptyLabel={t('map.session.noImage')}

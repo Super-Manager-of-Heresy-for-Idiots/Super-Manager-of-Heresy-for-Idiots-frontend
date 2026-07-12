@@ -18,6 +18,11 @@ interface MapTokenLayerProps {
   flyingTokenIds?: ReadonlySet<UUID>;
   /** Visible image-space rect for viewport culling (Phase 2.14); omit to render every token. */
   visibleImageRect?: { minX: number; minY: number; maxX: number; maxY: number };
+  /**
+   * Когда у GM активен инструмент по клеткам (туман/трудная местность), токены перестают
+   * ловить клик — иначе по клетке с фишкой нельзя покрасить туман (фикс UI-бага).
+   */
+  cellToolActive?: boolean;
 }
 
 const TYPE_CLASS: Record<TokenType, string> = {
@@ -44,13 +49,14 @@ export function MapTokenLayer({
   onTokenPointerDown,
   flyingTokenIds,
   visibleImageRect,
+  cellToolActive,
 }: MapTokenLayerProps) {
   const previewByTokenId = new Map<UUID, TokenDragPreview>();
   for (const preview of remoteDragPreviews) previewByTokenId.set(preview.tokenId, preview);
   if (localDragPreview) previewByTokenId.set(localDragPreview.tokenId, localDragPreview);
 
   return (
-    <div className={s.tokenLayer}>
+    <div className={cn(s.tokenLayer, cellToolActive && s.tokenLayerPassThrough)}>
       {tokens.map((token) => {
         if (!token.visible) return null;
 

@@ -64,6 +64,11 @@ export interface MapViewportProps {
    * drop a combatant token; fires only when the pointer barely moved between down/up.
    */
   onEmptyCellClick?: (cell: GridCoord) => void;
+  /**
+   * У GM активен инструмент покраски клеток (туман/трудная местность): токены пропускают
+   * клик насквозь, чтобы можно было красить клетку под фишкой (фикс UI-бага).
+   */
+  cellToolActive?: boolean;
   /** In-world layer drawn UNDER the tokens (e.g. the movement preview), image space. */
   underlay?: ReactNode;
   /** Extra in-world overlays (e.g. the calibration overlay), drawn in image space. */
@@ -111,6 +116,7 @@ export function MapViewport({
   onTokenDragCancel,
   onCursorMove,
   onEmptyCellClick,
+  cellToolActive = false,
   underlay,
   children,
   toolbarLabels = DEFAULT_TOOLBAR_LABELS,
@@ -245,6 +251,7 @@ export function MapViewport({
               localDragPreview={localDragPreview}
               onSelectToken={onSelectToken}
               onTokenPointerDown={tokenDrag.onTokenPointerDown}
+              cellToolActive={cellToolActive}
             />
             <MapFogLayer grid={normalizedGrid} fog={fog} isGm={fogViewerIsGm} />
             <MapPingLayer grid={normalizedGrid} pings={pings} />
