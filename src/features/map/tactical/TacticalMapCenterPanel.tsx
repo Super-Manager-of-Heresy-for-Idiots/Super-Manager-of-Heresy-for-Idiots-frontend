@@ -373,16 +373,43 @@ export function TacticalMapCenterPanel({
     [difficultTiles, difficultZones],
   );
 
+  // Doors (Phase 3.3): session DOOR elements — rendered by MapDoorLayer (secret ones GM-only).
+  const doors = useMemo(
+    () =>
+      mapElements.filter(
+        (el) => el.mapSessionId != null && (el.properties as Record<string, unknown>)?.door === true,
+      ),
+    [mapElements],
+  );
+
+  // Closed / locked / secret doors (Phase 3.3) block passage: treat their cells as occupied in the
+  // reach flood fill (mirrors the map-service MovementValidator's DOOR_CLOSED rejection).
+  const closedDoorCells = useMemo(() => {
+    const set = new Set<string>();
+    for (const el of mapElements) {
+      const p = el.properties as Record<string, unknown>;
+      if (el.mapSessionId == null || p?.door !== true || p?.state === 'OPEN') continue;
+      const w = Math.max(1, Math.round(Number(p?.widthCells ?? 1)));
+      const h = Math.max(1, Math.round(Number(p?.heightCells ?? 1)));
+      const x0 = Math.round(el.gridX);
+      const y0 = Math.round(el.gridY);
+      for (let dx = 0; dx < w; dx += 1) for (let dy = 0; dy < h; dy += 1) set.add(cellKey(x0 + dx, y0 + dy));
+    }
+    return set;
+  }, [mapElements]);
+
   const reach = useMemo(() => {
     if (!movement || !origin || !map || !moveMode) return null;
+    const occupied = occupiedCells(tokens, movement.activeTokenId);
+    for (const c of closedDoorCells) occupied.add(c);
     return computeReach(
       origin,
       effectiveRange,
-      occupiedCells(tokens, movement.activeTokenId),
+      occupied,
       boundsFromGrid(map.gridConfig),
       { elevationAt, ignoreGround: nonWalkMode, difficultAt },
     );
-  }, [movement, origin, map, moveMode, nonWalkMode, effectiveRange, tokens, elevationAt, difficultAt]);
+  }, [movement, origin, map, moveMode, nonWalkMode, effectiveRange, tokens, elevationAt, difficultAt, closedDoorCells]);
 
   const reachableCells = useMemo<Cell[]>(() => {
     if (!reach || !origin) return [];
@@ -623,6 +650,8 @@ export function TacticalMapCenterPanel({
         tiles={tileStates}
         fog={fog}
         aoeZones={aoeZones}
+        doors={doors}
+        doorViewerIsGm={isGm}
         fogViewerIsGm={isGm}
         selectedTokenId={selectedTokenId}
         flyingTokenIds={flyingTokenIds}

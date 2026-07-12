@@ -14,6 +14,7 @@ import { MapTerrainLayer } from './MapTerrainLayer';
 import { MapTokenLayer } from './MapTokenLayer';
 import { MapFogLayer } from './MapFogLayer';
 import { MapAoeZoneLayer } from './MapAoeZoneLayer';
+import { MapDoorLayer } from './MapDoorLayer';
 import { MapCursorLayer } from './MapCursorLayer';
 import { MapPingLayer } from './MapPingLayer';
 import { MapToolbar, type MapToolbarLabels } from './MapToolbar';
@@ -30,6 +31,10 @@ export interface MapViewportProps {
   fog?: FogStateDto | null;
   /** Spell zones / AoE templates (Phase 2.3), drawn between terrain and tokens. */
   aoeZones?: MapElementDto[];
+  /** Interactive doors (Phase 3.3), drawn between terrain and tokens. */
+  doors?: MapElementDto[];
+  /** Whether the current viewer is a GM: secret doors are shown only to the GM. */
+  doorViewerIsGm?: boolean;
   /** Whether the current viewer is a GM (fog is drawn translucent for them). */
   fogViewerIsGm?: boolean;
   selectedTokenId?: UUID | null;
@@ -88,6 +93,8 @@ export function MapViewport({
   tiles = [],
   fog = null,
   aoeZones = [],
+  doors = [],
+  doorViewerIsGm = false,
   fogViewerIsGm = false,
   selectedTokenId = null,
   flyingTokenIds,
@@ -226,6 +233,7 @@ export function MapViewport({
             {gridVisible && <MapGridLayer grid={normalizedGrid} imageSize={vp.imageSize} />}
             <MapTerrainLayer grid={normalizedGrid} tiles={tiles} />
             <MapAoeZoneLayer grid={normalizedGrid} zones={aoeZones} />
+            <MapDoorLayer grid={normalizedGrid} doors={doors} viewerIsGm={doorViewerIsGm} />
             {underlay}
             <MapTokenLayer
               grid={normalizedGrid}

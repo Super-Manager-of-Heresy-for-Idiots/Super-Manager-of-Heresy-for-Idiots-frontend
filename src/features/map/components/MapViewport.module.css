@@ -79,6 +79,29 @@
   stroke-width: 1.5;
   stroke-dasharray: 6 4;
 }
+/* Interactive doors (Phase 3.3). Closed/locked draw a solid bar (blocks passage); open a thin outline. */
+.doorClosed {
+  fill: color-mix(in srgb, var(--gold) 40%, var(--abyss));
+  stroke: var(--gold);
+  stroke-width: 2;
+}
+.doorLocked {
+  fill: color-mix(in srgb, var(--ember) 45%, var(--abyss));
+  stroke: var(--ember-pale, var(--ember));
+  stroke-width: 2;
+}
+.doorSecret {
+  fill: color-mix(in srgb, var(--gold) 20%, transparent);
+  stroke: color-mix(in srgb, var(--gold) 60%, transparent);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 3;
+}
+.doorOpen {
+  fill: transparent;
+  stroke: color-mix(in srgb, var(--gold) 50%, transparent);
+  stroke-width: 1.5;
+  stroke-dasharray: 2 4;
+}
 
 /* ── Fog of war — Phase 1.6 (cloudy look) ─────────────────────── */
 .fogSvg {

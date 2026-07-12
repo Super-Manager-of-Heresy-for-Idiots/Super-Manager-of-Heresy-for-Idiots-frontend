@@ -111,6 +111,31 @@ export const mapSessionApi = {
     await mapHttp.delete(`/map-sessions/${sessionId}/traps/${elementId}`);
   },
 
+  /** POST …/doors — create an interactive door (GM). Closed/locked/secret doors block passage (Phase 3.3). */
+  createDoor: async (
+    sessionId: UUID,
+    body: {
+      gridX: number;
+      gridY: number;
+      widthCells?: number;
+      heightCells?: number;
+      state?: string;
+      label?: string;
+    },
+  ): Promise<void> => {
+    await mapHttp.post(`/map-sessions/${sessionId}/doors`, body);
+  },
+
+  /** POST …/doors/{elementId}/state — change a door's state OPEN/CLOSED/LOCKED/SECRET (GM) (Phase 3.3). */
+  setDoorState: async (sessionId: UUID, elementId: UUID, state: string): Promise<void> => {
+    await mapHttp.post(`/map-sessions/${sessionId}/doors/${elementId}/state`, { state });
+  },
+
+  /** DELETE …/doors/{elementId} — remove a door (Phase 3.3). */
+  deleteDoor: async (sessionId: UUID, elementId: UUID): Promise<void> => {
+    await mapHttp.delete(`/map-sessions/${sessionId}/doors/${elementId}`);
+  },
+
   /** POST …/fog/reveal — reveal one shape (GM). Returns the full new fog state. */
   revealFog: async (sessionId: UUID, shape: FogShapeDto): Promise<FogStateDto> => {
     const { data } = await mapHttp.post<FogStateDto>(`/map-sessions/${sessionId}/fog/reveal`, { shape });
