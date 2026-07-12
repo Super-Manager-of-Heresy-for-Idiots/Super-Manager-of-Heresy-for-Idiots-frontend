@@ -18,6 +18,7 @@ import type {
   ForcedMoveRequest,
   TeleportRequest,
   TrapTriggerRequest,
+  FallRequest,
   AdjustActionEconomyRequest,
 } from '@/types';
 
@@ -354,6 +355,21 @@ export function useTriggerTrap() {
       toast.success(t('tactical.trap.triggered'));
     },
     onError: (e) => toast.error(errMsg(e, t('tactical.trap.failed'))),
+  });
+}
+
+/** Apply fall damage + prone to a combatant (Phase 3.4). */
+export function useFall() {
+  const sync = useSyncBattle();
+  const t = useT();
+  return useMutation({
+    mutationFn: ({ campaignId, battleId, data }: { campaignId: string; battleId: string; data: FallRequest }) =>
+      battlesApi.fall(campaignId, battleId, data),
+    onSuccess: (res) => {
+      sync(res.data);
+      toast.success(t('tactical.fall.applied'));
+    },
+    onError: (e) => toast.error(errMsg(e, t('tactical.fall.failed'))),
   });
 }
 

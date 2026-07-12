@@ -29,6 +29,13 @@ const CATEGORY: Record<BattleLogType, string> = {
   GM_OVERRIDE: s.catMisc,
   ITEM: s.catMisc,
   SPELL: s.catSupport,
+  CONCENTRATION: s.catState,
+  STANDARD_ACTION: s.catFlow,
+  CONTEST: s.catOffense,
+  FORCED_MOVE: s.catFlow,
+  TELEPORT: s.catFlow,
+  TRAP: s.catOffense,
+  FALL: s.catOffense,
 };
 
 function str(v: unknown): string {

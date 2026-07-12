@@ -1892,6 +1892,14 @@ export interface TrapTriggerRequest {
   label?: string;
 }
 
+/** Fall from a height (Phase 3.4): 1d6 per 10ft (cap 20d6) + prone. */
+export interface FallRequest {
+  combatantId: string;
+  heightFt: number;
+  manualTotal?: number;
+  applyProne?: boolean;
+}
+
 /** Forced movement kind (Phase 2.12). */
 export type ForcedMoveType = 'PUSH' | 'PULL' | 'SLIDE';
 
@@ -1997,7 +2005,14 @@ export type BattleLogType =
   | 'DEATH_SAVE'
   | 'GM_OVERRIDE'
   | 'ITEM'
-  | 'SPELL';
+  | 'SPELL'
+  | 'CONCENTRATION'
+  | 'STANDARD_ACTION'
+  | 'CONTEST'
+  | 'FORCED_MOVE'
+  | 'TELEPORT'
+  | 'TRAP'
+  | 'FALL';
 
 /**
  * One persistent combat-log entry (Phase 1.2). `seq` is monotonic within a battle and drives

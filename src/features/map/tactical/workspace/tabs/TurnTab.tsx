@@ -15,6 +15,7 @@ import { StandardActionsPanel } from '../StandardActionsPanel';
 import { ReactionAttackPanel } from '../ReactionAttackPanel';
 import { MonsterRuntimePanel } from '../MonsterRuntimePanel';
 import { ForcedMovementPanel } from '../ForcedMovementPanel';
+import { FallPanel } from '../FallPanel';
 import { AuraPanel } from '../AuraPanel';
 import { TrapPanel } from '../TrapPanel';
 import { DoorPanel } from '../DoorPanel';
@@ -87,6 +88,7 @@ export function TurnTab({ campaignId, battle, movement, tacticalTokens, mapSessi
       <ReactionAttackPanel campaignId={campaignId} battle={battle} tacticalTokens={tacticalTokens} />
       <MonsterRuntimePanel campaignId={campaignId} battle={battle} />
       <ForcedMovementPanel campaignId={campaignId} battle={battle} tacticalTokens={tacticalTokens} />
+      <FallPanel campaignId={campaignId} battle={battle} />
       {mapSessionId && <AuraPanel sessionId={mapSessionId} tacticalTokens={tacticalTokens} />}
       {mapSessionId && <TrapPanel campaignId={campaignId} sessionId={mapSessionId} battle={battle} />}
       {mapSessionId && <DoorPanel sessionId={mapSessionId} />}

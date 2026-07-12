@@ -17,6 +17,7 @@ import type {
   ForcedMoveRequest,
   TeleportRequest,
   TrapTriggerRequest,
+  FallRequest,
   AdjustActionEconomyRequest,
   CombatantCondition,
   BattleLogEntry,
@@ -257,6 +258,19 @@ export const battlesApi = {
   ): Promise<ApiResponse<BattleResponse>> => {
     const response = await api.post<ApiResponse<BattleResponse>>(
       `${base(campaignId)}/${battleId}/trap-trigger`,
+      data,
+    );
+    return response.data;
+  },
+
+  /** Apply fall damage + prone to a combatant (Phase 3.4). */
+  fall: async (
+    campaignId: string,
+    battleId: string,
+    data: FallRequest,
+  ): Promise<ApiResponse<BattleResponse>> => {
+    const response = await api.post<ApiResponse<BattleResponse>>(
+      `${base(campaignId)}/${battleId}/fall`,
       data,
     );
     return response.data;
