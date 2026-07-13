@@ -18,6 +18,7 @@ import type {
   CreateBuffDebuffRequest,
   ContentType,
   AttachableContentResponse,
+  HomebrewReportResponse,
 } from '@/types';
 
 export interface InstallHomebrewResponse {
@@ -151,6 +152,13 @@ export const homebrewApi = {
     return response.data;
   },
 
+  // === Moderation (P2-6) ===
+
+  reportPackage: async (packageId: string, reason: string): Promise<ApiResponse<void>> => {
+    const response = await api.post<ApiResponse<void>>(`/homebrew/marketplace/${packageId}/report`, { reason });
+    return response.data;
+  },
+
   // === Library ===
 
   getLibrary: async (): Promise<ApiResponse<HomebrewPackageResponse[]>> => {
@@ -182,6 +190,28 @@ export const homebrewApi = {
 
   adminDeleteTag: async (id: string): Promise<ApiResponse<void>> => {
     const response = await api.delete<ApiResponse<void>>(`/admin/homebrew/tags/${id}`);
+    return response.data;
+  },
+
+  // === Admin moderation (ADMIN, P2-6) ===
+
+  adminGetReports: async (params: { status?: string; page?: number; size?: number } = {}): Promise<ApiResponse<Page<HomebrewReportResponse>>> => {
+    const response = await api.get<ApiResponse<Page<HomebrewReportResponse>>>('/admin/homebrew/reports', { params });
+    return response.data;
+  },
+
+  adminRejectPackage: async (id: string, reason?: string): Promise<ApiResponse<HomebrewPackageResponse>> => {
+    const response = await api.post<ApiResponse<HomebrewPackageResponse>>(`/admin/homebrew/${id}/reject`, null, { params: reason ? { reason } : undefined });
+    return response.data;
+  },
+
+  adminRestorePackage: async (id: string): Promise<ApiResponse<HomebrewPackageResponse>> => {
+    const response = await api.post<ApiResponse<HomebrewPackageResponse>>(`/admin/homebrew/${id}/restore`);
+    return response.data;
+  },
+
+  adminResolveReport: async (reportId: string, action: 'DISMISS' | 'RESOLVE'): Promise<ApiResponse<HomebrewReportResponse>> => {
+    const response = await api.post<ApiResponse<HomebrewReportResponse>>(`/admin/homebrew/reports/${reportId}/resolve`, null, { params: { action } });
     return response.data;
   },
 };

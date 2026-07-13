@@ -1133,6 +1133,20 @@ export interface HomebrewDetailResponse extends HomebrewPackageResponse {
   userRating?: number;
 }
 
+/** Жалоба на homebrew-пакет в админ-очереди модерации (P2-6). */
+export interface HomebrewReportResponse {
+  id: string;
+  packageId: string;
+  packageTitle: string;
+  packageStatus: string;
+  reporterUsername?: string;
+  reason: string;
+  status: string;
+  createdAt: string;
+  resolvedAt?: string;
+  resolvedByUsername?: string;
+}
+
 /** Существующий homebrew-контент автора, доступный для прикрепления к пакету (браузируемый пикер). */
 export interface AttachableContentResponse {
   contentId: string;

@@ -6,7 +6,7 @@ import {
   AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle,
   AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction,
 } from '@/components/ui/alert-dialog';
-import { useMarketplacePackage, useInstallPackage } from '@/hooks/useHomebrew';
+import { useMarketplacePackage, useInstallPackage, useReportPackage } from '@/hooks/useHomebrew';
 import { useT } from '@/i18n/I18nContext';
 import { formatDate, cn } from '@/lib/utils';
 import type { ContentType } from '@/types';
@@ -25,8 +25,11 @@ export default function MarketplaceDetailPage() {
   const navigate = useNavigate();
   const { data: pkg, isLoading } = useMarketplacePackage(id);
   const installMutation = useInstallPackage();
+  const reportMutation = useReportPackage();
   const [tab, setTab] = useState<ContentType>('ITEM_TYPE');
   const [showConfirm, setShowConfirm] = useState(false);
+  const [showReport, setShowReport] = useState(false);
+  const [reportReason, setReportReason] = useState('');
 
   if (isLoading || !pkg) {
     return (
@@ -46,6 +49,14 @@ export default function MarketplaceDetailPage() {
     });
   };
 
+  const handleReport = () => {
+    if (!reportReason.trim()) return;
+    reportMutation.mutate(
+      { packageId: pkg.id, reason: reportReason.trim() },
+      { onSuccess: () => { setShowReport(false); setReportReason(''); } },
+    );
+  };
+
   return (
     <div>
       {/* Top actions */}
@@ -54,7 +65,7 @@ export default function MarketplaceDetailPage() {
           <Rune kind="arrow-l" size={11} /> {t('hb.detail.catalogue')}
         </button>
         <div className={s.topRight}>
-          <button className="ao-btn ao-btn--ghost ao-btn--sm">
+          <button className="ao-btn ao-btn--ghost ao-btn--sm" onClick={() => setShowReport(true)}>
             <Rune kind="scroll" size={11} /> {t('hb.detail.report')}
           </button>
           <button className="ao-btn ao-btn--primary ao-btn--sm" onClick={() => setShowConfirm(true)}>
@@ -315,6 +326,32 @@ export default function MarketplaceDetailPage() {
           )}
         </div>
       </OrdoPanel>
+
+      {/* Report modal (P2-6) */}
+      <AlertDialog open={showReport} onOpenChange={setShowReport}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('hb.detail.reportTitle')}</AlertDialogTitle>
+            <AlertDialogDescription>{pkg.title}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <textarea
+            className="ao-input"
+            rows={4}
+            value={reportReason}
+            onChange={(e) => setReportReason(e.target.value.slice(0, 2000))}
+            placeholder={t('hb.detail.reportPlaceholder')}
+          />
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={reportMutation.isPending}>{t('hb.detail.withhold')}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => { e.preventDefault(); handleReport(); }}
+              disabled={!reportReason.trim() || reportMutation.isPending}
+            >
+              {t('hb.detail.reportSubmit')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Install confirmation modal */}
       <AlertDialog open={showConfirm} onOpenChange={setShowConfirm}>

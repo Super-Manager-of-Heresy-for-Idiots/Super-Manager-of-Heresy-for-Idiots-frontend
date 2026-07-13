@@ -12,13 +12,17 @@ import {
   useAdminHardDelete,
   useAdminTags,
   useAdminDeleteTag,
+  useHomebrewReports,
+  useRejectHomebrew,
+  useRestoreHomebrew,
+  useResolveHomebrewReport,
 } from '@/hooks/useHomebrew';
 import { formatDate, cn } from '@/lib/utils';
 import { useT } from '@/i18n/I18nContext';
-import type { HomebrewStatus, HomebrewPackageResponse, HomebrewTagResponse } from '@/types';
+import type { HomebrewStatus, HomebrewPackageResponse, HomebrewTagResponse, HomebrewReportResponse } from '@/types';
 import s from './AdminHomebrewPage.module.css';
 
-type AdminTab = 'moderation' | 'tags';
+type AdminTab = 'moderation' | 'reports' | 'tags';
 type TFunc = (key: string, vars?: Record<string, string | number>) => string;
 
 function formatContentSummary(pkg: HomebrewPackageResponse, t: TFunc) {
@@ -69,6 +73,12 @@ export default function AdminHomebrewPage() {
           {t('adm.hb.tabModeration')}
         </button>
         <button
+          className={cn('ao-tab', tab === 'reports' && 'is-active')}
+          onClick={() => setTab('reports')}
+        >
+          {t('adm.hb.tabReports')}
+        </button>
+        <button
           className={cn('ao-tab', tab === 'tags' && 'is-active')}
           onClick={() => setTab('tags')}
         >
@@ -76,7 +86,7 @@ export default function AdminHomebrewPage() {
         </button>
       </div>
 
-      {tab === 'moderation' ? <ModerationPanel /> : <TagRegistryPanel />}
+      {tab === 'moderation' ? <ModerationPanel /> : tab === 'reports' ? <ReportsPanel /> : <TagRegistryPanel />}
     </div>
   );
 }
@@ -665,5 +675,104 @@ function TagRow({ tag, onDelete }: { tag: HomebrewTagResponse; onDelete: () => v
         </div>
       </td>
     </tr>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════
+   REPORTS TAB (P2-6 — post-moderation queue)
+   ══════════════════════════════════════════════════════════════ */
+
+function ReportsPanel() {
+  const t = useT();
+  const [status, setStatus] = useState<'OPEN' | 'RESOLVED' | 'DISMISSED' | 'all'>('OPEN');
+  const [rejectTarget, setRejectTarget] = useState<HomebrewReportResponse | null>(null);
+
+  const { data, isLoading } = useHomebrewReports({ status: status === 'all' ? undefined : status, size: 50 });
+  const rejectMutation = useRejectHomebrew();
+  const restoreMutation = useRestoreHomebrew();
+  const resolveMutation = useResolveHomebrewReport();
+
+  const reports: HomebrewReportResponse[] = data?.content ?? [];
+
+  return (
+    <OrdoPanel frame padding={0}>
+      <div className={s.repFilter}>
+        {(['OPEN', 'RESOLVED', 'DISMISSED', 'all'] as const).map((st) => (
+          <button key={st} className={cn('ao-tab', status === st && 'is-active')} onClick={() => setStatus(st)}>
+            {t(`adm.hb.report.status.${st}`)}
+          </button>
+        ))}
+      </div>
+
+      {isLoading ? (
+        <div className={s.repEmpty}>{t('adm.hb.report.loading')}</div>
+      ) : reports.length === 0 ? (
+        <div className={s.repEmpty}>{t('adm.hb.report.empty')}</div>
+      ) : (
+        reports.map((r) => (
+          <div key={r.id} className={s.repRow}>
+            <div className={s.repMain}>
+              <div className={s.repHead}>
+                <span className={s.repTitle}>{r.packageTitle}</span>
+                <span className={s.repChip}>{r.packageStatus}</span>
+              </div>
+              <div className={cn('ao-italic', s.repReason)}>&ldquo;{r.reason}&rdquo;</div>
+              <div className={cn('ao-codex', s.repMeta)}>
+                {t('adm.hb.report.by', { user: r.reporterUsername ?? '—' })} &middot; {formatDate(r.createdAt)} &middot; {t(`adm.hb.report.status.${r.status}`)}
+                {r.resolvedByUsername ? ` · ${t('adm.hb.report.resolvedBy', { user: r.resolvedByUsername })}` : ''}
+              </div>
+            </div>
+            <div className={s.rowActions}>
+              {r.packageStatus !== 'REJECTED' ? (
+                <button className="ao-btn ao-btn--danger ao-btn--sm" onClick={() => setRejectTarget(r)} disabled={rejectMutation.isPending}>
+                  {t('adm.hb.report.reject')}
+                </button>
+              ) : (
+                <button className="ao-btn ao-btn--sm" onClick={() => restoreMutation.mutate(r.packageId)} disabled={restoreMutation.isPending}>
+                  {t('adm.hb.report.restore')}
+                </button>
+              )}
+              {r.status === 'OPEN' && (
+                <button
+                  className="ao-btn ao-btn--ghost ao-btn--sm"
+                  onClick={() => resolveMutation.mutate({ reportId: r.id, action: 'DISMISS' })}
+                  disabled={resolveMutation.isPending}
+                >
+                  {t('adm.hb.report.dismiss')}
+                </button>
+              )}
+            </div>
+          </div>
+        ))
+      )}
+
+      <AlertDialog open={!!rejectTarget} onOpenChange={(o) => !o && setRejectTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('adm.hb.report.rejectTitle')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('adm.hb.report.rejectDescription', { title: rejectTarget?.packageTitle ?? '' })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={rejectMutation.isPending}>{t('common.cancel')}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                if (rejectTarget) {
+                  rejectMutation.mutate(
+                    { id: rejectTarget.packageId, reason: rejectTarget.reason },
+                    { onSuccess: () => setRejectTarget(null) },
+                  );
+                }
+              }}
+              disabled={rejectMutation.isPending}
+            >
+              {t('adm.hb.report.reject')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </OrdoPanel>
   );
 }

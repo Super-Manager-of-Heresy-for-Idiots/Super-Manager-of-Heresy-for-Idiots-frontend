@@ -191,6 +191,18 @@ export function useMarketplace(params: {
   });
 }
 
+export function useReportPackage() {
+  const t = useT();
+  return useMutation({
+    mutationFn: ({ packageId, reason }: { packageId: string; reason: string }) =>
+      homebrewApi.reportPackage(packageId, reason),
+    onSuccess: () => toast.success(t('hk.homebrew.reported')),
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error.response?.data?.message || t('hk.homebrew.reportFailed'));
+    },
+  });
+}
+
 export function useMarketplacePackage(id: string | undefined) {
   return useQuery({
     queryKey: ['homebrew-marketplace', id],
@@ -262,6 +274,68 @@ export function useAdminHomebrewPackages(params: {
     queryFn: async () => {
       const response = await homebrewApi.adminGetAllPackages(params);
       return response.data;
+    },
+  });
+}
+
+// === Admin moderation (P2-6) ===
+
+export function useHomebrewReports(params: { status?: string; page?: number; size?: number } = {}) {
+  return useQuery({
+    queryKey: ['admin-homebrew-reports', params],
+    queryFn: async () => {
+      const response = await homebrewApi.adminGetReports(params);
+      return response.data;
+    },
+  });
+}
+
+export function useRejectHomebrew() {
+  const queryClient = useQueryClient();
+  const t = useT();
+  return useMutation({
+    mutationFn: ({ id, reason }: { id: string; reason?: string }) => homebrewApi.adminRejectPackage(id, reason),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-homebrew'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-homebrew-reports'] });
+      queryClient.invalidateQueries({ queryKey: ['homebrew-marketplace'] });
+      toast.success(t('hk.homebrew.rejected'));
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error.response?.data?.message || t('hk.homebrew.moderationFailed'));
+    },
+  });
+}
+
+export function useRestoreHomebrew() {
+  const queryClient = useQueryClient();
+  const t = useT();
+  return useMutation({
+    mutationFn: (id: string) => homebrewApi.adminRestorePackage(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-homebrew'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-homebrew-reports'] });
+      queryClient.invalidateQueries({ queryKey: ['homebrew-marketplace'] });
+      toast.success(t('hk.homebrew.restored'));
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error.response?.data?.message || t('hk.homebrew.moderationFailed'));
+    },
+  });
+}
+
+export function useResolveHomebrewReport() {
+  const queryClient = useQueryClient();
+  const t = useT();
+  return useMutation({
+    mutationFn: ({ reportId, action }: { reportId: string; action: 'DISMISS' | 'RESOLVE' }) =>
+      homebrewApi.adminResolveReport(reportId, action),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-homebrew-reports'] });
+      toast.success(t('hk.homebrew.reportResolved'));
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error.response?.data?.message || t('hk.homebrew.moderationFailed'));
     },
   });
 }
