@@ -2,35 +2,39 @@ import api from './axios';
 import type { ApiResponse, RaceRequest, RaceResponse } from '@/types';
 
 export const racesApi = {
-  // === ADMIN — SYSTEM races ===
-  // === GM HOMEBREW — DRAFT package races ===
+  // === GM HOMEBREW — авторинг видов в DRAFT-пакете (SP-1..SP-3) ===
+  // Пути package-scoped, по образцу авторинга классов. Легаси /homebrew/my/{id}/content/races удалён (S5).
   homebrewCreate: async (packageId: string, data: RaceRequest): Promise<ApiResponse<RaceResponse>> => {
     const response = await api.post<ApiResponse<RaceResponse>>(
-      `/homebrew/my/${packageId}/content/races`,
+      `/homebrew/packages/${packageId}/species`,
       data,
     );
     return response.data;
   },
   homebrewUpdate: async (packageId: string, raceId: string, data: RaceRequest): Promise<ApiResponse<RaceResponse>> => {
     const response = await api.put<ApiResponse<RaceResponse>>(
-      `/homebrew/my/${packageId}/content/races/${raceId}`,
+      `/homebrew/packages/${packageId}/species/${raceId}`,
       data,
     );
     return response.data;
   },
   homebrewEnable: async (packageId: string, raceId: string): Promise<ApiResponse<RaceResponse>> => {
     const response = await api.post<ApiResponse<RaceResponse>>(
-      `/homebrew/my/${packageId}/content/races/${raceId}/enable`,
+      `/homebrew/packages/${packageId}/species/${raceId}/enable`,
     );
     return response.data;
   },
   homebrewDisable: async (packageId: string, raceId: string): Promise<ApiResponse<RaceResponse>> => {
     const response = await api.post<ApiResponse<RaceResponse>>(
-      `/homebrew/my/${packageId}/content/races/${raceId}/disable`,
+      `/homebrew/packages/${packageId}/species/${raceId}/disable`,
     );
     return response.data;
   },
-  // NB: авторинг видов ждёт backend — см. docs/HB_PLAN.md (блок P0.5, задачи SP-1…SP-4;
-  // пути переедут на /api/homebrew/packages/{packageId}/species*). Мёртвые методы (duplicate,
-  // campaignList/campaignGet — легаси /campaigns/{id}/races, нет backend) удалены при аудите эндпоинтов.
+  // SP-2: глубокий клон vanilla-вида в пакет («раса на базе эльфа»).
+  homebrewDuplicate: async (packageId: string, vanillaSpeciesId: string): Promise<ApiResponse<RaceResponse>> => {
+    const response = await api.post<ApiResponse<RaceResponse>>(
+      `/homebrew/packages/${packageId}/species/duplicate-from/${vanillaSpeciesId}`,
+    );
+    return response.data;
+  },
 };

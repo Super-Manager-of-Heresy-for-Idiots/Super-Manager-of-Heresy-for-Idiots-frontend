@@ -19,12 +19,17 @@ import {
   useInitiativeBonus,
   useJoinBattle,
 } from '@/hooks/useBattles';
-import { useFeatureActions } from '@/hooks/useFeatureRuntime';
 import { battlesApi } from '@/api/battles.api';
 import { spellbookApi, type SpellPlan, type SpellPlanDamage } from '@/api/spellbook.api';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
-import type { BattleCombatantResponse, BattleResponse, CharacterV2Response, ItemInstanceResponse } from '@/types';
+import type {
+  BattleCombatantResponse,
+  BattleResponse,
+  CharacterV2Response,
+  FeatureActionResponse,
+  ItemInstanceResponse,
+} from '@/types';
 import { useMapTransientStore } from '../../../state';
 import { mapSessionApi } from '../../../api';
 import { AttackForm } from '../AttackForm';
@@ -231,6 +236,7 @@ function ActionPanel({
               campaignId={campaignId}
               battleId={battle.id}
               characterId={current.characterId}
+              classActions={turn?.featureActions ?? []}
               targets={spellTargets}
               lockedTargetId={spellLockedTargetId}
             />
@@ -703,18 +709,19 @@ function AbilityUseSection({
   campaignId,
   battleId,
   characterId,
+  classActions,
   targets,
   lockedTargetId,
 }: {
   campaignId: string;
   battleId: string;
   characterId: string;
+  classActions: FeatureActionResponse[];
   targets: BattleCombatantResponse[];
   lockedTargetId: string | null;
 }) {
   const t = useT();
   const useAbility = useBattleUseAbility();
-  const { data: classActions } = useFeatureActions(characterId);
   const { data: inventory } = useCharacterInventory(campaignId, characterId);
   const [targetId, setTargetId] = useState(lockedTargetId ?? targets[0]?.id ?? '');
 
@@ -735,7 +742,7 @@ function AbilityUseSection({
       ),
     [inventory],
   );
-  const hasAbilities = (classActions?.length ?? 0) > 0 || itemActions.length > 0;
+  const hasAbilities = classActions.length > 0 || itemActions.length > 0;
   if (!hasAbilities) return null;
 
   const commandId = () =>
@@ -802,11 +809,11 @@ function AbilityUseSection({
         </>
       )}
 
-      {(classActions?.length ?? 0) > 0 && (
+      {classActions.length > 0 && (
         <>
           <div className={cn('ao-overline', s.fieldLabel, s.mt12)}>{t('battle.action.ability.class')}</div>
           <div className={s.itemList}>
-            {classActions!.map((action) => {
+            {classActions.map((action) => {
               const disabled = useAbility.isPending || !action.available || (action.requiresTarget && !targetId);
               return (
                 <button

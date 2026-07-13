@@ -80,3 +80,21 @@ export function useDisableHomebrewRace() {
   });
 }
 
+// SP-2: глубокий клон vanilla-вида в пакет.
+export function useDuplicateSystemRace() {
+  const qc = useQueryClient();
+  const t = useT();
+  return useMutation({
+    mutationFn: ({ packageId, systemRaceId }: { packageId: string; systemRaceId: string }) =>
+      racesApi.homebrewDuplicate(packageId, systemRaceId),
+    onSuccess: (_, vars) => {
+      qc.invalidateQueries({ queryKey: homebrewListKey(vars.packageId) });
+      qc.invalidateQueries({ queryKey: ['homebrew-my', vars.packageId] });
+      toast.success(t('hk.races.duplicated'));
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error.response?.data?.message || t('hk.races.duplicateFailed'));
+    },
+  });
+}
+

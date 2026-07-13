@@ -10,7 +10,7 @@ import {
   AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle,
   AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction,
 } from '@/components/ui/alert-dialog';
-import { useAttachedHomebrew, useAttachHomebrew, useDetachHomebrew } from '@/hooks/useHomebrewCampaign';
+import { useAttachedHomebrew, useAttachHomebrew, useDetachHomebrew, usePinHomebrewVersion } from '@/hooks/useHomebrewCampaign';
 import { useMarketplace } from '@/hooks/useHomebrew';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
@@ -30,12 +30,15 @@ export default function CampaignHomebrewPage() {
   const { data: attached, isLoading } = useAttachedHomebrew(campaignId ?? '');
   const attachMutation = useAttachHomebrew();
   const detachMutation = useDetachHomebrew();
+  const pinMutation = usePinHomebrewVersion();
 
   const [browseOpen, setBrowseOpen] = useState(false);
   const [search, setSearch] = useState('');
   const { data: marketplace, isLoading: marketLoading } = useMarketplace({ search: search || undefined, size: 24 });
 
   const [detachTarget, setDetachTarget] = useState<CampaignHomebrewResponse | null>(null);
+  const [pinTarget, setPinTarget] = useState<CampaignHomebrewResponse | null>(null);
+  const [pinValue, setPinValue] = useState('');
 
   const attachedList: CampaignHomebrewResponse[] = attached ?? [];
   const attachedIds = new Set(attachedList.map((a) => a.packageId));
@@ -51,6 +54,20 @@ export default function CampaignHomebrewPage() {
     detachMutation.mutate(
       { campaignId, packageId: detachTarget.packageId, force },
       { onSuccess: () => setDetachTarget(null) },
+    );
+  };
+
+  const openPin = (a: CampaignHomebrewResponse) => {
+    setPinTarget(a);
+    setPinValue(a.pinnedVersion != null ? String(a.pinnedVersion) : '');
+  };
+
+  const handlePin = () => {
+    if (!campaignId || !pinTarget) return;
+    const trimmed = pinValue.trim();
+    pinMutation.mutate(
+      { campaignId, packageId: pinTarget.packageId, data: { pinnedVersion: trimmed ? Number(trimmed) : null } },
+      { onSuccess: () => setPinTarget(null) },
     );
   };
 
@@ -99,6 +116,13 @@ export default function CampaignHomebrewPage() {
                     compact
                   />
                 </div>
+                <button
+                  className="ao-iconbtn"
+                  title={t('camp.homebrew.changeVersion')}
+                  onClick={() => openPin(a)}
+                >
+                  <Rune kind="diamond" size={12} />
+                </button>
                 <button
                   className={cn('ao-iconbtn', s.detachBtn)}
                   title={t('camp.homebrew.detach')}
@@ -163,6 +187,32 @@ export default function CampaignHomebrewPage() {
           <p className={cn('ao-italic', s.browseHint)}>{t('camp.homebrew.browseHint')}</p>
         </DialogContent>
       </Dialog>
+
+      {/* Change pinned version (P1-7) */}
+      <AlertDialog open={!!pinTarget} onOpenChange={(o) => !o && setPinTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('camp.homebrew.pinTitle')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('camp.homebrew.pinDescription', { title: pinTarget?.title ?? '' })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <input
+            className="ao-input"
+            type="number"
+            min={1}
+            value={pinValue}
+            onChange={(e) => setPinValue(e.target.value)}
+            placeholder={t('camp.homebrew.pinPlaceholder')}
+          />
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={pinMutation.isPending}>{t('common.cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={(e) => { e.preventDefault(); handlePin(); }} disabled={pinMutation.isPending}>
+              {t('camp.homebrew.pinSave')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Detach confirm (with force for dependent characters — P1-2) */}
       <AlertDialog open={!!detachTarget} onOpenChange={(o) => !o && setDetachTarget(null)}>

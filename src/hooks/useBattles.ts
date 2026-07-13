@@ -619,7 +619,6 @@ export function useBattleUseAbility() {
     mutationFn: ({
       campaignId,
       battleId,
-      characterId,
       data,
     }: {
       campaignId: string;

@@ -46,7 +46,7 @@ export const homebrewCampaignApi = {
     data: PinHomebrewVersionRequest,
   ): Promise<ApiResponse<CampaignHomebrewResponse>> => {
     const response = await api.put<ApiResponse<CampaignHomebrewResponse>>(
-      `/campaigns/${campaignId}/homebrew/${packageId}/pin`,
+      `/campaigns/${campaignId}/homebrew/${packageId}/version`,
       data,
     );
     return response.data;

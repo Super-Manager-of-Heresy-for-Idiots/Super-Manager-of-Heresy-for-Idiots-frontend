@@ -29,6 +29,7 @@ const CATEGORY: Record<BattleLogType, string> = {
   GM_OVERRIDE: s.catMisc,
   ITEM: s.catMisc,
   SPELL: s.catSupport,
+  FEATURE_USE: s.catSupport,
   CONCENTRATION: s.catState,
   STANDARD_ACTION: s.catFlow,
   CONTEST: s.catOffense,
@@ -57,6 +58,8 @@ function summarize(e: BattleLogEntry): string {
       return `${str(p.targetName)} −${str(p.amount)} HP`;
     case 'HEAL':
       return `${str(p.targetName)} +${str(p.amount)} HP`;
+    case 'FEATURE_USE':
+      return `${str(p.featureName || p.featureId)} · ${str(p.outcome)}`;
     case 'TURN':
       return str(p.combatantName);
     case 'ROUND':

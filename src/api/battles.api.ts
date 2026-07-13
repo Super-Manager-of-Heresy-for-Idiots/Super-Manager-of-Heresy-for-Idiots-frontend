@@ -22,6 +22,7 @@ import type {
   CombatantCondition,
   BattleLogEntry,
 } from '@/types';
+import type { SpellPlan } from '@/api/spellbook.api';
 
 /**
  * Battle ("Бой") REST surface — all routes live under a campaign.
@@ -60,6 +61,7 @@ export interface SpellCastResultLite {
 /** In-battle use-ability request. Actor = active character, resolved server-side. */
 export interface UseAbilityRequest {
   featureId: string;
+  combatantId?: string;
   itemInstanceId?: string;
   targetCombatantId?: string;
   targetCombatantIds?: string[];
@@ -551,6 +553,17 @@ export const battlesApi = {
     const response = await api.post<ApiResponse<SpellCastResultLite>>(
       `${base(campaignId)}/${battleId}/cast-spell`,
       data,
+    );
+    return response.data;
+  },
+
+  planAbility: async (
+    campaignId: string,
+    battleId: string,
+    featureId: string,
+  ): Promise<ApiResponse<SpellPlan>> => {
+    const response = await api.get<ApiResponse<SpellPlan>>(
+      `${base(campaignId)}/${battleId}/abilities/${featureId}/plan`,
     );
     return response.data;
   },

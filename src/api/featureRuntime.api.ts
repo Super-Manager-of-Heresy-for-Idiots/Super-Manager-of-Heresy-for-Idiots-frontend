@@ -43,6 +43,8 @@ export interface FeatureAction {
   resourceRemaining?: number | null;
   available: boolean;
   unavailableReason?: string | null;
+  hasExecutableRules?: boolean;
+  manualOnly?: boolean;
   requiresTarget: boolean;
   requiresConfirmation: boolean;
 }

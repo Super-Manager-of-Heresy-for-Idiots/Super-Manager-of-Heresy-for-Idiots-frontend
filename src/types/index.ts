@@ -2061,6 +2061,7 @@ export type BattleLogType =
   | 'GM_OVERRIDE'
   | 'ITEM'
   | 'SPELL'
+  | 'FEATURE_USE'
   | 'CONCENTRATION'
   | 'STANDARD_ACTION'
   | 'CONTEST'
@@ -2124,6 +2125,41 @@ export interface BattleResponse {
   updatedAt: string;
 }
 
+export interface ClassAbilityResponse {
+  id?: string | null;
+  name?: string | null;
+  level?: number | null;
+  className?: string | null;
+  description?: string | null;
+  activationType?: string | null;
+  attackRoll?: boolean;
+  saveAbility?: string | null;
+  usableAsAttack?: boolean;
+  damage?: string | null;
+  damageType?: string | null;
+  healingDice?: string | null;
+  healingFlat?: number | null;
+  warning?: boolean;
+}
+
+export interface FeatureActionResponse {
+  featureId: string;
+  featureName: string;
+  featureRuleId?: string | null;
+  actionType?: string | null;
+  actionTypeLabel?: string | null;
+  resourceDefinitionId?: string | null;
+  resourceKey?: string | null;
+  resourceCost?: number | null;
+  resourceRemaining?: number | null;
+  available: boolean;
+  unavailableReason?: string | null;
+  hasExecutableRules?: boolean;
+  manualOnly?: boolean;
+  requiresTarget: boolean;
+  requiresConfirmation: boolean;
+}
+
 /**
  * Current-turn detail (GET /{battleId}/current-turn). `character`, `resources`
  * and `activeEffects` are present only on a CHARACTER turn the requester may see;
@@ -2134,9 +2170,12 @@ export interface CombatantTurnResponse {
   character?: CharacterV2Response | null;
   resources?: ResourceResponse[] | null;
   activeEffects?: CharacterActiveEffectResponse[] | null;
+  classAbilities?: ClassAbilityResponse[] | null;
+  featureActions?: FeatureActionResponse[] | null;
   /** Spell slots (per level: max / expended / available). Null when the class has no slots. */
   spellSlots?: SpellSlotsResponse | null;
   monster?: MonsterResponse | null;
+  tacticalActions?: unknown[] | null;
 }
 
 export interface CreateBattleRequest {
