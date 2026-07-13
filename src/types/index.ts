@@ -1395,6 +1395,9 @@ export interface ItemInstanceResponse {
   notes?: string;
   rarity?: Rarity;
   enchantments: EnchantmentResponse[];
+  attuned?: boolean;
+  attunementRequired?: boolean;
+  abilities?: ItemAbilitySummary[];
   itemTypeId?: string;
   itemTypeName?: string;
   priceGold?: number | string | null;
@@ -1402,6 +1405,21 @@ export interface ItemInstanceResponse {
   itemBuffs?: BuffDebuffResponse[];
   artifactName?: string;
   artifactRarity?: Rarity;
+}
+
+export interface ItemAbilitySummary {
+  ruleId: string;
+  name: string;
+  actionType?: string | null;
+  charges?: {
+    current?: number | null;
+    max?: number | null;
+  } | null;
+  consumesItem: boolean;
+  requiresAttunement: boolean;
+  requiresEquipped: boolean;
+  available: boolean;
+  unavailableReason?: string | null;
 }
 
 export type GrantItemKind = 'EQUIPMENT' | 'MAGIC' | 'TEMPLATE';
@@ -1419,6 +1437,11 @@ export interface GrantItemRequest {
 
 export interface EquipItemRequest {
   slot: EquipmentSlot;
+}
+
+export interface AttuneItemRequest {
+  gmOverride?: boolean;
+  clientCommandId?: string;
 }
 
 export interface RenameItemRequest {

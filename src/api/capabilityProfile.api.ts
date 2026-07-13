@@ -31,6 +31,11 @@ export interface WildShapeCapability {
   activeTransformation: boolean;
 }
 
+export interface AttunementCapability {
+  used: number;
+  max: number;
+}
+
 export interface ClassCapability {
   classId: string;
   classNameRu?: string | null;
@@ -52,6 +57,8 @@ export interface CapabilityProfile {
   hasActiveEffects: boolean;
   hasCompanions: boolean;
   hasFeatureSpellGrants: boolean;
+  hasItemAbilities: boolean;
+  attunement?: AttunementCapability | null;
   wildShape?: WildShapeCapability | null;
   pendingChoices: number;
   pendingPrompts: number;

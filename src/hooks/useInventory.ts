@@ -8,6 +8,7 @@ import type {
   RenameItemRequest,
   TransferItemRequest,
   EquipItemRequest,
+  AttuneItemRequest,
   CreateEnchantmentRequest,
   ApiError,
 } from '@/types';
@@ -68,6 +69,7 @@ export function useGrantItem() {
       if (variables.campaignId) {
         queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId, 'inventory'] });
         queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId] });
+        queryClient.invalidateQueries({ queryKey: ['capability-profile', variables.characterId] });
       }
       queryClient.invalidateQueries({ queryKey: ['characters', variables.characterId] });
       toast.success(t('hk.inventory.itemGranted'));
@@ -88,6 +90,7 @@ export function useRemoveItem() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId, 'inventory'] });
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId] });
+      queryClient.invalidateQueries({ queryKey: ['capability-profile', variables.characterId] });
       toast.success(t('hk.inventory.itemRemoved'));
     },
     onError: (error: AxiosError<ApiError>) => {
@@ -115,6 +118,7 @@ export function useEquipItem() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId, 'inventory'] });
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId] });
+      queryClient.invalidateQueries({ queryKey: ['capability-profile', variables.characterId] });
       toast.success(t('hk.inventory.equipUpdated'));
     },
     onError: (error: AxiosError<ApiError>) => {
@@ -140,10 +144,65 @@ export function useUnequipItem() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId, 'inventory'] });
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId] });
+      queryClient.invalidateQueries({ queryKey: ['capability-profile', variables.characterId] });
       toast.success(t('hk.inventory.unequipped'));
     },
     onError: (error: AxiosError<ApiError>) => {
       toast.error(error.response?.data?.message || t('hk.inventory.unequipFailed'));
+    },
+  });
+}
+
+export function useAttuneItem() {
+  const queryClient = useQueryClient();
+  const t = useT();
+
+  return useMutation({
+    mutationFn: ({
+      campaignId,
+      characterId,
+      instanceId,
+      data,
+    }: {
+      campaignId: string;
+      characterId: string;
+      instanceId: string;
+      data?: AttuneItemRequest;
+    }) => inventoryApi.attune(campaignId, characterId, instanceId, data ?? {}),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId, 'inventory'] });
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId] });
+      queryClient.invalidateQueries({ queryKey: ['capability-profile', variables.characterId] });
+      toast.success(t('hk.inventory.attuned'));
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error.response?.data?.message || t('hk.inventory.attuneFailed'));
+    },
+  });
+}
+
+export function useUnattuneItem() {
+  const queryClient = useQueryClient();
+  const t = useT();
+
+  return useMutation({
+    mutationFn: ({
+      campaignId,
+      characterId,
+      instanceId,
+    }: {
+      campaignId: string;
+      characterId: string;
+      instanceId: string;
+    }) => inventoryApi.unattune(campaignId, characterId, instanceId),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId, 'inventory'] });
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId] });
+      queryClient.invalidateQueries({ queryKey: ['capability-profile', variables.characterId] });
+      toast.success(t('hk.inventory.unattuned'));
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error.response?.data?.message || t('hk.inventory.unattuneFailed'));
     },
   });
 }
@@ -219,6 +278,7 @@ export function useTransferItem() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.fromCharId, 'inventory'] });
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters'] });
+      queryClient.invalidateQueries({ queryKey: ['capability-profile', variables.fromCharId] });
       toast.success(t('hk.inventory.transferred'));
     },
     onError: (error: AxiosError<ApiError>) => {

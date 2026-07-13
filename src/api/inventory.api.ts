@@ -6,6 +6,7 @@ import type {
   RenameItemRequest,
   TransferItemRequest,
   EquipItemRequest,
+  AttuneItemRequest,
   EnchantmentResponse,
   CreateEnchantmentRequest,
 } from '@/types';
@@ -43,6 +44,19 @@ export const inventoryApi = {
 
   unequip: async (campaignId: string, characterId: string, instanceId: string): Promise<ApiResponse<ItemInstanceResponse>> => {
     const response = await api.post<ApiResponse<ItemInstanceResponse>>(`/campaigns/${campaignId}/characters/${characterId}/inventory/${instanceId}/unequip`);
+    return response.data;
+  },
+
+  attune: async (campaignId: string, characterId: string, instanceId: string, data: AttuneItemRequest = {}): Promise<ApiResponse<ItemInstanceResponse>> => {
+    const response = await api.post<ApiResponse<ItemInstanceResponse>>(
+      `/campaigns/${campaignId}/characters/${characterId}/inventory/${instanceId}/attune`,
+      data,
+    );
+    return response.data;
+  },
+
+  unattune: async (campaignId: string, characterId: string, instanceId: string): Promise<ApiResponse<ItemInstanceResponse>> => {
+    const response = await api.post<ApiResponse<ItemInstanceResponse>>(`/campaigns/${campaignId}/characters/${characterId}/inventory/${instanceId}/unattune`);
     return response.data;
   },
 
