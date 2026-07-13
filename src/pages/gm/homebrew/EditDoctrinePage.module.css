@@ -41,6 +41,24 @@
 .modeBtn { flex: 1; }
 .existRow { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; align-items: center; }
 .existHint { color: var(--ink-faint); font-size: 12px; margin-top: 8px; }
+
+/* Browsable "existing content" picker (replaces the raw-UUID input). */
+.pickWrap { display: flex; flex-direction: column; gap: 10px; }
+.pickSearchRow { display: flex; align-items: center; gap: 8px; padding: 0 8px; border: 1px solid var(--hairline); background: var(--abyss); }
+.pickSearch { flex: 1; border: none; background: transparent; padding: 8px 4px; }
+.pickList { display: flex; flex-direction: column; gap: 6px; max-height: 320px; overflow-y: auto; padding-right: 2px; }
+.pickCard {
+  display: flex; align-items: center; gap: 12px; width: 100%; text-align: left;
+  padding: 8px 10px; background: var(--abyss); border: 1px solid var(--hairline); cursor: pointer;
+  transition: border-color 120ms ease, background 120ms ease;
+}
+.pickCard:hover { border-color: var(--brass); background: color-mix(in srgb, var(--gold) 6%, transparent); }
+.pickCard:disabled { opacity: 0.5; cursor: default; }
+.pickCardMain { flex: 1; min-width: 0; }
+.pickCardName { font-family: var(--font-serif); font-weight: 500; font-size: 14px; color: var(--ink-bright); }
+.pickCardDesc { color: var(--ink-faint); font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pickCardSrc { display: inline-flex; align-items: center; gap: 4px; color: var(--ink-quiet); font-size: 10px; margin-top: 2px; }
+.pickEmpty { color: var(--ink-faint); font-size: 12px; padding: 14px 4px; text-align: center; }
 .newGrid { display: grid; gap: 10px; }
 .newNameRow { display: grid; gap: 8px; }
 .buffGrid { display: grid; gap: 8px; }

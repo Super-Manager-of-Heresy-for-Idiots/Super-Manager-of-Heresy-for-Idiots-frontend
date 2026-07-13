@@ -1,0 +1,27 @@
+.topBar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+
+.stateRow { display: flex; align-items: center; gap: 8px; padding: 18px 16px; color: var(--ink-quiet); font-style: italic; }
+.emptyWrap { padding: 24px 16px; }
+
+.row { display: flex; align-items: center; gap: 12px; padding: 12px 16px; }
+.divided { border-bottom: 1px solid var(--hairline); }
+.rowMain { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.rowTitle { display: flex; align-items: center; gap: 8px; font-family: var(--font-serif); font-weight: 500; font-size: 15px; color: var(--ink-bright); }
+.pinTag {
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.04em; text-transform: uppercase;
+  color: var(--gold-pale); border: 1px solid var(--brass); padding: 1px 6px; border-radius: 2px;
+}
+.detachBtn { flex-shrink: 0; }
+.detachBtn:hover { color: var(--ember); border-color: var(--ember); }
+
+/* Browse modal */
+.browseModal { max-width: 560px; }
+.searchRow { display: flex; align-items: center; gap: 8px; padding: 0 10px; border: 1px solid var(--hairline); background: var(--abyss); }
+.searchInput { flex: 1; border: none; background: transparent; padding: 9px 4px; color: var(--ink-bright); }
+.browseList { display: flex; flex-direction: column; gap: 6px; max-height: 380px; overflow-y: auto; margin-top: 10px; padding-right: 2px; }
+.browseEmpty { color: var(--ink-faint); font-size: 12px; padding: 20px 4px; text-align: center; }
+.browseRow { display: flex; align-items: center; gap: 12px; padding: 8px 10px; background: var(--abyss); border: 1px solid var(--hairline); }
+.browseMain { flex: 1; min-width: 0; }
+.browseName { font-family: var(--font-serif); font-weight: 500; font-size: 14px; color: var(--ink-bright); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.browseBy { color: var(--ink-quiet); font-size: 11px; }
+.browseHint { color: var(--ink-faint); font-size: 12px; }

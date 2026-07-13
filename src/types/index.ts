@@ -1133,6 +1133,15 @@ export interface HomebrewDetailResponse extends HomebrewPackageResponse {
   userRating?: number;
 }
 
+/** Существующий homebrew-контент автора, доступный для прикрепления к пакету (браузируемый пикер). */
+export interface AttachableContentResponse {
+  contentId: string;
+  name: string;
+  description?: string | null;
+  sourcePackageId: string;
+  sourcePackageTitle: string;
+}
+
 export interface InstalledHomebrewResponse {
   installationId: string;
   packageId: string;
@@ -2904,6 +2913,9 @@ export interface FeatDetail {
   description: string | null;
   repeatable: boolean | null;
   packageId: string | null;
+  /** Origin marker (P0-4): 'GLOBAL' | 'HOMEBREW'. */
+  source?: string | null;
+  homebrewTitle?: string | null;
   category: ContentLabel | null;
   prerequisites: FeatPrerequisite[];
   sections: FeatSection[];
@@ -2951,6 +2963,9 @@ export interface SpellDetail {
   description: string | null;
   higherLevels: string | null;
   packageId: string | null;
+  /** Origin marker (P0-4): 'GLOBAL' | 'HOMEBREW'. */
+  source?: string | null;
+  homebrewTitle?: string | null;
   warning: boolean | null;
   warningReason: string | null;
   components: SpellComponent[];

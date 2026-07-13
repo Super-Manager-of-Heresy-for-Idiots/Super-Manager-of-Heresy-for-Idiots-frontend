@@ -210,6 +210,10 @@ export const homebrew: DictModule = {
     'hb.edit.slot': 'Внести',
     'hb.edit.existingHint':
       'Это не вызывает каталоги администратора. Используйте только когда бэкенд позволяет прикрепить ID существующего собственного или базового содержимого.',
+    'hb.edit.existingSearchPlaceholder': 'Поиск по названию…',
+    'hb.edit.existingEmpty': 'Нет вашего контента этого типа, доступного для добавления.',
+    'hb.edit.existingBrowseHint': 'Показан ваш собственный homebrew-контент из других пакетов. Нажмите, чтобы прикрепить к этому пакету.',
+    'hb.edit.existingFrom': 'из пакета',
     'hb.edit.newNamePlaceholder': 'Название нового содержимого...',
     'hb.edit.descriptionPlaceholder': 'Описание...',
     'hb.edit.skillTypePlaceholder': 'Тип навыка (необязательно)',
@@ -494,6 +498,10 @@ export const homebrew: DictModule = {
     'hb.edit.slot': 'Slot',
     'hb.edit.existingHint':
       'This does not call admin catalogs. Use it only when the backend allows attaching an existing owned or vanilla content id.',
+    'hb.edit.existingSearchPlaceholder': 'Search by name…',
+    'hb.edit.existingEmpty': 'No content of yours of this type is available to attach.',
+    'hb.edit.existingBrowseHint': 'Shows your own homebrew content from other packages. Click to attach it to this package.',
+    'hb.edit.existingFrom': 'from',
     'hb.edit.newNamePlaceholder': 'New content name...',
     'hb.edit.descriptionPlaceholder': 'Description...',
     'hb.edit.skillTypePlaceholder': 'Skill type (optional)',

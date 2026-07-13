@@ -1,0 +1,30 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 8px;
+  background: color-mix(in srgb, var(--gold) 12%, transparent);
+  border: 1px solid var(--brass);
+  border-radius: 2px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--gold-pale);
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.dot {
+  width: 4px;
+  height: 4px;
+  background: var(--gold);
+  transform: rotate(45deg);
+  flex-shrink: 0;
+}
+
+.title {
+  color: var(--ink-quiet);
+  text-transform: none;
+  letter-spacing: 0;
+}

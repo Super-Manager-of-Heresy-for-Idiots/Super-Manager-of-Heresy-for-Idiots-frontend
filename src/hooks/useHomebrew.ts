@@ -8,6 +8,7 @@ import type {
   UpdateHomebrewRequest,
   AddContentRequest,
   HomebrewStatus,
+  ContentType,
 } from '@/types';
 import { AxiosError } from 'axios';
 
@@ -31,6 +32,21 @@ export function useMyPackage(id: string | undefined) {
       return response.data;
     },
     enabled: !!id,
+  });
+}
+
+/**
+ * Существующий контент автора заданного типа, доступный для прикрепления к пакету
+ * (браузируемый пикер «существующее»). Обновляется при изменении контента пакета.
+ */
+export function useAttachableContent(packageId: string | undefined, type: ContentType, enabled: boolean) {
+  return useQuery({
+    queryKey: ['homebrew-attachable', packageId, type],
+    queryFn: async () => {
+      const response = await homebrewApi.getAttachableContent(packageId!, type);
+      return response.data;
+    },
+    enabled: !!packageId && enabled,
   });
 }
 
@@ -73,6 +89,7 @@ export function useAddContent() {
       homebrewApi.addContent(packageId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['homebrew-my'] });
+      queryClient.invalidateQueries({ queryKey: ['homebrew-attachable'] });
       toast.success(t('hk.homebrew.contentAdded'));
     },
     onError: (error: AxiosError<ApiError>) => {
@@ -93,6 +110,7 @@ export function useRemoveContent() {
       homebrewApi.removeContent(packageId, contentItemId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['homebrew-my'] });
+      queryClient.invalidateQueries({ queryKey: ['homebrew-attachable'] });
       toast.success(t('hk.homebrew.contentRemoved'));
     },
     onError: (error: AxiosError<ApiError>) => {

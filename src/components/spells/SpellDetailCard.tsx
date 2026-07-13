@@ -11,6 +11,7 @@ import {
   damageIconForType,
   spellLevelIcon,
 } from '@/components/ordo';
+import { OriginBadge } from '@/components/homebrew';
 import s from './SpellDetailCard.module.css';
 
 /**
@@ -68,7 +69,10 @@ export function SpellDetailCard({ spellId, campaignId }: { spellId: string; camp
           />
         </span>
         <div className={s.headText}>
-          <div className={s.title}>{detail.name}</div>
+          <div className={s.title}>
+            {detail.name}
+            <OriginBadge source={detail.source} homebrewTitle={detail.homebrewTitle} />
+          </div>
           <div className={s.sub}>
             <OrdoInterfaceIcon icon={spellLevelIcon(detail.level)} size={11} />
             {detail.level === 0 ? t('wiz.spells.cantrip') : t('wiz.spells.lvl', { level: detail.level ?? 0 })}

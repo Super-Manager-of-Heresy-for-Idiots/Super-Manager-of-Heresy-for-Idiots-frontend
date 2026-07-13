@@ -50,11 +50,13 @@ interface WizCardProps {
   icon?: OrdoInterfaceIconKey;
   title: string;
   sub?: string;
+  /** Опциональный бейдж рядом с названием (например, маркер происхождения homebrew). */
+  badge?: ReactNode;
   disabled?: boolean;
   children?: ReactNode;
 }
 
-export function WizCard({ active, onClick, glyph, icon, title, sub, disabled, children }: WizCardProps) {
+export function WizCard({ active, onClick, glyph, icon, title, sub, badge, disabled, children }: WizCardProps) {
   const interfaceIcon = icon ?? entityIconForGlyph(glyph);
   return (
     <button
@@ -70,6 +72,7 @@ export function WizCard({ active, onClick, glyph, icon, title, sub, disabled, ch
           <Rune kind={glyph} size={18} color={active ? 'var(--gold)' : 'var(--ink-quiet)'} />
         )}
         <span className={cn('ao-engraved', s.cardTitle)}>{title}</span>
+        {badge}
         {active && (
           <span className="wiz-card-check">
             <Rune kind="check" size={11} color="var(--gold-pale)" />

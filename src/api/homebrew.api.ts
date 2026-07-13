@@ -16,6 +16,8 @@ import type {
   CreateSkillRequest,
   CreateFeatRequest,
   CreateBuffDebuffRequest,
+  ContentType,
+  AttachableContentResponse,
 } from '@/types';
 
 export interface InstallHomebrewResponse {
@@ -42,6 +44,13 @@ export const homebrewApi = {
 
   addContent: async (id: string, data: AddContentRequest): Promise<ApiResponse<HomebrewDetailResponse>> => {
     const response = await api.post<ApiResponse<HomebrewDetailResponse>>(`/homebrew/my/${id}/content`, data);
+    return response.data;
+  },
+
+  getAttachableContent: async (packageId: string, type: ContentType): Promise<ApiResponse<AttachableContentResponse[]>> => {
+    const response = await api.get<ApiResponse<AttachableContentResponse[]>>(
+      `/homebrew/my/${packageId}/attachable`, { params: { type } },
+    );
     return response.data;
   },
 

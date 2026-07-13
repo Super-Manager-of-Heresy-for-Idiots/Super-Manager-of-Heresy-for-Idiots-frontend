@@ -37,6 +37,7 @@ import type { WizardActions, WizardChar, ScoreMethod } from './wizardState';
 import type { ContentLabel, SpellReferenceResponse, StatTypeResponse } from '@/types';
 import { isContentRewardGroup, rewardGroupKey } from '@/lib/contentAdapters';
 import { RewardGroupPicker } from '@/components/content-rewards/RewardGroupPicker';
+import { OriginBadge } from '@/components/homebrew';
 import { initialContentRewardGroupsOf } from './rewardSelection';
 import {
   DetailLine,
@@ -165,7 +166,6 @@ export function StepRace({ c, A, n, total, availability }: StepProps) {
           <div className="wiz-grid">
             {availability.raceOptions.map((option) => {
               const detail = option.detail;
-              const source = option.entry.homebrewTitle || option.entry.source;
               return (
                 <WizCard
                   key={option.key}
@@ -174,7 +174,8 @@ export function StepRace({ c, A, n, total, availability }: StepProps) {
                   glyph="hex"
                   icon="species"
                   title={option.entry.name}
-                  sub={(detail ? dbAsiText(detail.abilityScoreIncreases, gt.abilityAbbr) + ' \u00b7 ' + (detail.speed ?? 30) + ' ' + t('wiz.race.ft') : '30 ' + t('wiz.race.ft')) + ' \u00b7 ' + source}
+                  sub={detail ? dbAsiText(detail.abilityScoreIncreases, gt.abilityAbbr) + ' \u00b7 ' + (detail.speed ?? 30) + ' ' + t('wiz.race.ft') : '30 ' + t('wiz.race.ft')}
+                  badge={<OriginBadge source={option.entry.source} homebrewTitle={option.entry.homebrewTitle} compact />}
                 />
               );
             })}
@@ -321,7 +322,6 @@ export function StepClass({ c, A, n, total, availability }: StepProps) {
           <div className="wiz-grid">
             {availability.classOptions.map((option) => {
               const detail = option.detail;
-              const source = option.entry.homebrewTitle || option.entry.source;
               const primaryStat = availability.statTypes.find((stat) => stat.id === detail?.primaryAbilityStatId);
               const isSpellcaster = detail?.spellcasting?.isSpellcaster;
               return (
@@ -341,9 +341,10 @@ export function StepClass({ c, A, n, total, availability }: StepProps) {
                   glyph={glyphForClass(detail?.slug, option.entry.name)}
                   icon="class"
                   title={option.entry.name}
-                  sub={(detail
+                  sub={detail
                     ? 'd' + (detail.hitDie || 8) + ' \u00b7 ' + (primaryStat ? gt.abilityAbbr(shortStatName(primaryStat.name)) : 'DB') + (isSpellcaster ? ' \u00b7 ' + t('wiz.class.caster') : '')
-                    : 'd8') + ' \u00b7 ' + source}
+                    : 'd8'}
+                  badge={<OriginBadge source={option.entry.source} homebrewTitle={option.entry.homebrewTitle} compact />}
                 />
               );
             })}

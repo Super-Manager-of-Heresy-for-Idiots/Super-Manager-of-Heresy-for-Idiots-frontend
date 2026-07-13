@@ -60,6 +60,7 @@ const NPCDetailPage = lazy(() => import('@/pages/gm/campaigns/NPCDetailPage'));
 const QuestManagerPage = lazy(() => import('@/pages/gm/campaigns/QuestManagerPage'));
 const QuestDetailPage = lazy(() => import('@/pages/gm/campaigns/QuestDetailPage'));
 const LocationsPage = lazy(() => import('@/pages/gm/campaigns/LocationsPage'));
+const CampaignHomebrewPage = lazy(() => import('@/pages/gm/campaigns/CampaignHomebrewPage'));
 
 // Map feature (battle map / VTT) — isolated module under src/features/map
 const CampaignMapListPage = lazy(() => import('@/features/map/pages/CampaignMapListPage'));
@@ -191,6 +192,7 @@ export const router = createBrowserRouter([
               { path: 'items', element: <ItemCatalogPage /> },
               { path: 'bestiary', element: <CampaignBestiaryPage /> },
               { path: 'bestiary/monsters/:monsterId', element: <MonsterDetailPage source="campaign" /> },
+              { path: 'homebrew', element: <CampaignHomebrewPage /> },
 
               // Live map session — every member (server authorizes per-token movement)
               { path: 'map-sessions/:sessionId', element: <MapSessionPage /> },

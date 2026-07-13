@@ -20,6 +20,7 @@ import {
   useMyPackage,
   useUpdateHomebrew,
   useAddContent,
+  useAttachableContent,
   useRemoveContent,
   usePublishHomebrew,
   useDeleteHomebrew,
@@ -31,6 +32,14 @@ import { cn } from '@/lib/utils';
 import { EQUIPMENT_SLOT_LABELS, EQUIPMENT_SLOTS } from '@/types';
 import type { ContentSummaryDto, ContentType, EquipmentSlot } from '@/types';
 import s from './EditDoctrinePage.module.css';
+
+// Иконки типов контента в браузируемом пикере «существующее».
+const ADD_TYPE_ICON: Record<string, string> = {
+  ITEM_TYPE: 'sword',
+  SKILL: 'eye',
+  FEAT: 'sigil-3',
+  BUFF_DEBUFF: 'hex',
+};
 
 const CONTENT_GROUPS: { titleKey: string; icon: string; type: ContentType }[] = [
   { titleKey: 'hb.edit.groupItems', icon: 'sword', type: 'ITEM_TYPE' },
@@ -92,6 +101,9 @@ export default function EditDoctrinePage() {
   const enableRaceMutation = useEnableHomebrewRace();
   const disableRaceMutation = useDisableHomebrewRace();
 
+  // Браузируемый список существующего контента автора для режима «существующее».
+  const attachable = useAttachableContent(id, addType, adding && addMode === 'existing');
+
   if (pkg && !metaLoaded) {
     setTitle(pkg.title);
     setDescription(pkg.description || '');
@@ -143,13 +155,16 @@ export default function EditDoctrinePage() {
     });
   };
 
-  const handleAddContent = () => {
-    if (!addSearch.trim()) return;
+  const handleAttachExisting = (contentId: string) => {
     addContentMutation.mutate(
-      { packageId: pkg.id, data: { contentType: addType, contentId: addSearch.trim() } },
-      { onSuccess: () => setAddSearch('') },
+      { packageId: pkg.id, data: { contentType: addType, contentId } },
     );
   };
+
+  const attachableQuery = addSearch.trim().toLowerCase();
+  const filteredAttachable = (attachable.data ?? []).filter((it) =>
+    !attachableQuery || it.name.toLowerCase().includes(attachableQuery),
+  );
 
   const resetNewContentForm = () => {
     setNewName('');
@@ -438,30 +453,49 @@ export default function EditDoctrinePage() {
               </div>
 
               {addMode === 'existing' ? (
-                <>
-                  <div className={cn('ao-rgrid', s.existRow)}>
+                <div className={s.pickWrap}>
+                  <div className={s.pickSearchRow}>
+                    <Rune kind="search" size={13} color="var(--ink-faint)" />
                     <input
-                      className={cn('ao-input', s.inputSm2)}
+                      className={s.pickSearch}
                       value={addSearch}
                       onChange={(e) => setAddSearch(e.target.value)}
-                      placeholder={t('hb.edit.existingIdPlaceholder')}
-                      onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddContent(); } }}
+                      placeholder={t('hb.edit.existingSearchPlaceholder')}
                     />
-                    <button className="ao-btn ao-btn--ghost" onClick={() => setAddSearch('')}>
-                      <Rune kind="x" size={11} /> {t('hb.edit.clear')}
-                    </button>
-                    <button
-                      className="ao-btn ao-btn--primary"
-                      onClick={handleAddContent}
-                      disabled={!addSearch.trim() || addContentMutation.isPending}
-                    >
-                      <Rune kind="plus" size={10} /> {t('hb.edit.slot')}
-                    </button>
                   </div>
-                  <p className={cn('ao-italic', s.existHint)}>
-                    {t('hb.edit.existingHint')}
-                  </p>
-                </>
+                  {attachable.isLoading ? (
+                    <div className={cn('ao-italic', s.pickEmpty)}>{t('hb.edit.loading')}</div>
+                  ) : filteredAttachable.length === 0 ? (
+                    <div className={cn('ao-italic', s.pickEmpty)}>{t('hb.edit.existingEmpty')}</div>
+                  ) : (
+                    <div className={s.pickList}>
+                      {filteredAttachable.map((it) => (
+                        <button
+                          key={it.contentId}
+                          type="button"
+                          className={s.pickCard}
+                          disabled={addContentMutation.isPending}
+                          onClick={() => handleAttachExisting(it.contentId)}
+                        >
+                          <div className={cn('ao-slot ao-slot--epic', s.iconSlot)}>
+                            <Rune kind={ADD_TYPE_ICON[addType] || 'diamond'} size={15} color="var(--gold)" />
+                          </div>
+                          <div className={s.pickCardMain}>
+                            <div className={s.pickCardName}>{it.name}</div>
+                            <div className={cn('ao-codex', s.pickCardDesc)}>
+                              {it.description ? it.description.substring(0, 90) : '—'}
+                            </div>
+                            <div className={cn('ao-codex', s.pickCardSrc)}>
+                              <Rune kind="book" size={9} color="var(--ink-faint)" /> {t('hb.edit.existingFrom')} {it.sourcePackageTitle}
+                            </div>
+                          </div>
+                          <Rune kind="plus" size={12} color="var(--gold-pale)" />
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  <p className={cn('ao-italic', s.existHint)}>{t('hb.edit.existingBrowseHint')}</p>
+                </div>
               ) : (
                 <div className={s.newGrid}>
                   <div className={cn('ao-rgrid', s.newNameRow)} style={{ gridTemplateColumns: addType === 'ITEM_TYPE' ? '1fr 180px' : '1fr' }}>

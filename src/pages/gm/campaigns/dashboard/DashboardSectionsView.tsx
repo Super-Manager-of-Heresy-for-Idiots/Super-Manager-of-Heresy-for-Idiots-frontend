@@ -27,6 +27,9 @@ export default function DashboardSectionsView() {
         </>
       )}
       <DrillBlock label={t('camp.dash.drill.bestiary')} glyph="sword" icon="bestiary" to={`/campaigns/${campaignId}/bestiary`} />
+      {canManageCampaign && (
+        <DrillBlock label={t('camp.dash.drill.homebrew')} glyph="scroll" to={`/campaigns/${campaignId}/homebrew`} />
+      )}
       <DrillBlock label={t('camp.dash.drill.storage')} glyph="sword" icon="shared-storage" to={`/campaigns/${campaignId}/storage`} />
       <DrillBlock label={t('camp.dash.drill.invite')} glyph="cross-pat" icon="friend-request" to={`/campaigns/${campaignId}/invite`} />
       {canManageCampaign && (
