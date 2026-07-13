@@ -30,22 +30,7 @@ export const racesApi = {
     );
     return response.data;
   },
-  homebrewDuplicate: async (packageId: string, systemRaceId: string): Promise<ApiResponse<RaceResponse>> => {
-    const response = await api.post<ApiResponse<RaceResponse>>(
-      `/homebrew/my/${packageId}/content/races/${systemRaceId}/duplicate`,
-    );
-    return response.data;
-  },
-
-  // === PLAYER / CAMPAIGN ===
-  campaignList: async (campaignId: string): Promise<ApiResponse<RaceResponse[]>> => {
-    const response = await api.get<ApiResponse<RaceResponse[]>>(`/campaigns/${campaignId}/races`);
-    return response.data;
-  },
-  campaignGet: async (campaignId: string, raceId: string): Promise<ApiResponse<RaceResponse>> => {
-    const response = await api.get<ApiResponse<RaceResponse>>(
-      `/campaigns/${campaignId}/races/${raceId}`,
-    );
-    return response.data;
-  },
+  // NB: авторинг видов ждёт backend — см. docs/HB_PLAN.md (блок P0.5, задачи SP-1…SP-4;
+  // пути переедут на /api/homebrew/packages/{packageId}/species*). Мёртвые методы (duplicate,
+  // campaignList/campaignGet — легаси /campaigns/{id}/races, нет backend) удалены при аудите эндпоинтов.
 };
