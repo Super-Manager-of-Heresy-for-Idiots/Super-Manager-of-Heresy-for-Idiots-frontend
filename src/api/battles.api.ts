@@ -57,6 +57,30 @@ export interface SpellCastResultLite {
   appliedDamageModifier?: string | null;
 }
 
+/** In-battle use-ability request. Actor = active character, resolved server-side. */
+export interface UseAbilityRequest {
+  featureId: string;
+  itemInstanceId?: string;
+  targetCombatantId?: string;
+  targetCombatantIds?: string[];
+  originX?: number;
+  originY?: number;
+  rotationDeg?: number;
+  damageRollMode?: 'AUTO' | 'MANUAL';
+  manualDamage?: number;
+  clientCommandId?: string;
+}
+
+/** Lightweight use-ability result consumed by the tactical UI. */
+export interface BattleUseAbilityResultLite {
+  featureId?: string;
+  featureName?: string;
+  outcome?: 'USED' | 'MANUAL_REQUIRED' | 'DUPLICATE' | string;
+  appliedDamage?: number | null;
+  appliedDamageModifier?: string | null;
+  message?: string | null;
+}
+
 /** Mass GM operation over several combatants at once (Phase 2.4). */
 export interface BulkActionRequest {
   combatantIds: string[];
@@ -526,6 +550,19 @@ export const battlesApi = {
   ): Promise<ApiResponse<SpellCastResultLite>> => {
     const response = await api.post<ApiResponse<SpellCastResultLite>>(
       `${base(campaignId)}/${battleId}/cast-spell`,
+      data,
+    );
+    return response.data;
+  },
+
+  /** Use an active class feature on the active character's turn through feature-rules runtime. */
+  useAbility: async (
+    campaignId: string,
+    battleId: string,
+    data: UseAbilityRequest,
+  ): Promise<ApiResponse<BattleUseAbilityResultLite>> => {
+    const response = await api.post<ApiResponse<BattleUseAbilityResultLite>>(
+      `${base(campaignId)}/${battleId}/use-ability`,
       data,
     );
     return response.data;

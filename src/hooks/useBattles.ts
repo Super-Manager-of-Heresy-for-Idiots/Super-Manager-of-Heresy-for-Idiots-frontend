@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { AxiosError } from 'axios';
-import { battlesApi, type BulkActionRequest, type CastSpellRequest } from '@/api/battles.api';
+import { battlesApi, type BulkActionRequest, type CastSpellRequest, type UseAbilityRequest } from '@/api/battles.api';
 import { useT } from '@/i18n/I18nContext';
 import type {
   ApiError,
@@ -608,6 +608,44 @@ export function useBattleCastSpell() {
       }
     },
     onError: (e) => toast.error(errMsg(e, t('battle.action.spell.castFailed'))),
+  });
+}
+
+/** Use an active class feature on the active character's turn. Refreshes battle + runtime state. */
+export function useBattleUseAbility() {
+  const qc = useQueryClient();
+  const t = useT();
+  return useMutation({
+    mutationFn: ({
+      campaignId,
+      battleId,
+      characterId,
+      data,
+    }: {
+      campaignId: string;
+      battleId: string;
+      characterId?: string;
+      data: UseAbilityRequest;
+    }) => battlesApi.useAbility(campaignId, battleId, data),
+    onSuccess: (res, { campaignId, battleId, characterId }) => {
+      qc.invalidateQueries({ queryKey: ['campaigns', campaignId, 'battles'] });
+      qc.invalidateQueries({ queryKey: turnKey(campaignId, battleId) });
+      if (characterId) {
+        qc.invalidateQueries({ queryKey: ['feature-resources', characterId] });
+        qc.invalidateQueries({ queryKey: ['feature-effects', characterId] });
+        qc.invalidateQueries({ queryKey: ['feature-actions', characterId] });
+        qc.invalidateQueries({ queryKey: ['capability-profile', characterId] });
+      }
+      const dealt = res.data?.appliedDamage;
+      if (res.data?.outcome === 'MANUAL_REQUIRED') {
+        toast.success(t('battle.action.ability.manual'));
+      } else if (dealt != null && dealt > 0) {
+        toast.success(t('battle.action.ability.dealt', { n: dealt }));
+      } else {
+        toast.success(t('battle.action.ability.used'));
+      }
+    },
+    onError: (e) => toast.error(errMsg(e, t('battle.action.ability.failed'))),
   });
 }
 

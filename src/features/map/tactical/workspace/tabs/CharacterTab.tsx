@@ -10,19 +10,21 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { Bar, Rune } from '@/components/ordo';
 import { useCampaignCharacters } from '@/hooks/useCharacter';
-import { useBackpackInventory } from '@/hooks/useInventory';
+import { useBackpackInventory, useCharacterInventory } from '@/hooks/useInventory';
 import {
   useBattleCastSpell,
   useBattleCurrentTurn,
+  useBattleUseAbility,
   useEndTurn,
   useInitiativeBonus,
   useJoinBattle,
 } from '@/hooks/useBattles';
+import { useFeatureActions } from '@/hooks/useFeatureRuntime';
 import { battlesApi } from '@/api/battles.api';
 import { spellbookApi, type SpellPlan, type SpellPlanDamage } from '@/api/spellbook.api';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
-import type { BattleCombatantResponse, BattleResponse, CharacterV2Response } from '@/types';
+import type { BattleCombatantResponse, BattleResponse, CharacterV2Response, ItemInstanceResponse } from '@/types';
 import { useMapTransientStore } from '../../../state';
 import { mapSessionApi } from '../../../api';
 import { AttackForm } from '../AttackForm';
@@ -223,6 +225,16 @@ function ActionPanel({
           </div>
 
           <StandardActionsPanel campaignId={campaignId} battle={battle} combatant={current} />
+
+          {current.characterId && (
+            <AbilityUseSection
+              campaignId={campaignId}
+              battleId={battle.id}
+              characterId={current.characterId}
+              targets={spellTargets}
+              lockedTargetId={spellLockedTargetId}
+            />
+          )}
 
           {current.characterId && (
             <ItemsSection campaignId={campaignId} battleId={battle.id} characterId={current.characterId} />
@@ -680,6 +692,174 @@ function SpellPreview({ plan }: { plan: SpellPlan }) {
       ))}
       {plan.requiresManualAdjudication && (
         <div className={cn('ao-italic', s.hint)}>{t('battle.action.spell.preview.manual')}</div>
+      )}
+    </div>
+  );
+}
+
+/* ── feature-rules abilities (class + item source) ─────────── */
+
+function AbilityUseSection({
+  campaignId,
+  battleId,
+  characterId,
+  targets,
+  lockedTargetId,
+}: {
+  campaignId: string;
+  battleId: string;
+  characterId: string;
+  targets: BattleCombatantResponse[];
+  lockedTargetId: string | null;
+}) {
+  const t = useT();
+  const useAbility = useBattleUseAbility();
+  const { data: classActions } = useFeatureActions(characterId);
+  const { data: inventory } = useCharacterInventory(campaignId, characterId);
+  const [targetId, setTargetId] = useState(lockedTargetId ?? targets[0]?.id ?? '');
+
+  useEffect(() => {
+    if (lockedTargetId && targets.some((c) => c.id === lockedTargetId)) setTargetId(lockedTargetId);
+  }, [lockedTargetId, targets]);
+  useEffect(() => {
+    if (!targets.some((c) => c.id === targetId)) setTargetId(targets[0]?.id ?? '');
+  }, [targets, targetId]);
+
+  const itemActions = useMemo(
+    () =>
+      (inventory ?? []).flatMap((item) =>
+        (item.abilities ?? []).map((ability) => ({
+          item,
+          ability,
+        })),
+      ),
+    [inventory],
+  );
+  const hasAbilities = (classActions?.length ?? 0) > 0 || itemActions.length > 0;
+  if (!hasAbilities) return null;
+
+  const commandId = () =>
+    typeof crypto !== 'undefined' && 'randomUUID' in crypto
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+
+  const submitClass = (featureId: string, requiresTarget: boolean) => {
+    useAbility.mutate({
+      campaignId,
+      battleId,
+      characterId,
+      data: {
+        featureId,
+        targetCombatantId: requiresTarget ? targetId || undefined : targetId || undefined,
+        clientCommandId: commandId(),
+      },
+    });
+  };
+
+  const submitItem = (item: ItemInstanceResponse, ruleId: string) => {
+    useAbility.mutate({
+      campaignId,
+      battleId,
+      characterId,
+      data: {
+        featureId: ruleId,
+        itemInstanceId: item.id,
+        targetCombatantId: targetId || undefined,
+        clientCommandId: commandId(),
+      },
+    });
+  };
+
+  return (
+    <div className={s.block}>
+      <div className={cn('ao-overline', s.fieldLabel)}>{t('battle.action.abilities')}</div>
+
+      {targets.length > 0 && (
+        <>
+          <div className={cn('ao-overline', s.fieldLabel, s.mt12)}>{t('battle.attack.pickTarget')}</div>
+          <div className={s.optGrid}>
+            {targets.map((c) => (
+              <button
+                key={c.id}
+                type="button"
+                className={cn(s.optBtn, targetId === c.id && s.optBtnActive)}
+                onClick={() => setTargetId(c.id)}
+              >
+                <Rune
+                  kind={c.type === 'MONSTER' ? 'flame' : 'helm'}
+                  size={10}
+                  color={c.type === 'MONSTER' ? 'var(--ember)' : 'var(--gold)'}
+                />
+                <span className={s.optName}>{c.displayName}</span>
+                {c.currentHp != null && c.maxHp != null && (
+                  <span className={s.optHp}>
+                    {c.currentHp}/{c.maxHp}
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+
+      {(classActions?.length ?? 0) > 0 && (
+        <>
+          <div className={cn('ao-overline', s.fieldLabel, s.mt12)}>{t('battle.action.ability.class')}</div>
+          <div className={s.itemList}>
+            {classActions!.map((action) => {
+              const disabled = useAbility.isPending || !action.available || (action.requiresTarget && !targetId);
+              return (
+                <button
+                  key={action.featureId}
+                  type="button"
+                  className={cn('ao-btn ao-btn--sm', s.itemBtn)}
+                  disabled={disabled}
+                  onClick={() => submitClass(action.featureId, action.requiresTarget)}
+                  title={action.unavailableReason ?? t('battle.action.ability.use')}
+                >
+                  <span className={s.itemName}>{action.featureName}</span>
+                  {action.actionTypeLabel && <span className={s.chipMeta}>{action.actionTypeLabel}</span>}
+                  {action.resourceCost != null && action.resourceKey && (
+                    <span className={s.chipMeta}>
+                      {action.resourceKey} -{action.resourceCost}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </>
+      )}
+
+      {itemActions.length > 0 && (
+        <>
+          <div className={cn('ao-overline', s.fieldLabel, s.mt12)}>{t('battle.action.ability.item')}</div>
+          <div className={s.itemList}>
+            {itemActions.map(({ item, ability }) => {
+              const disabled = useAbility.isPending || !ability.available;
+              const charges = ability.charges;
+              return (
+                <button
+                  key={`${item.id}:${ability.ruleId}`}
+                  type="button"
+                  className={cn('ao-btn ao-btn--sm', s.itemBtn)}
+                  disabled={disabled}
+                  onClick={() => submitItem(item, ability.ruleId)}
+                  title={ability.unavailableReason ?? t('battle.action.ability.use')}
+                >
+                  <span className={s.itemName}>{ability.name || item.displayName}</span>
+                  <span className={s.chipMeta}>{item.displayName}</span>
+                  {charges && (
+                    <span className={s.chipMeta}>
+                      {charges.current ?? 0}/{charges.max ?? '∞'}
+                    </span>
+                  )}
+                  {ability.consumesItem && <span className={s.chipMeta}>{t('battle.action.ability.consumes')}</span>}
+                </button>
+              );
+            })}
+          </div>
+        </>
       )}
     </div>
   );
