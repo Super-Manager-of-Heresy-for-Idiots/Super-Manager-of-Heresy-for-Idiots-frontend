@@ -75,6 +75,28 @@ export const homebrewApi = {
     return response.data;
   },
 
+  // P1-6: правка/удаление сущностей контента пакета
+  updatePackageItemType: async (id: string, entityId: string, data: CreateItemTypeRequest): Promise<ApiResponse<HomebrewDetailResponse>> => {
+    const response = await api.put<ApiResponse<HomebrewDetailResponse>>(`/homebrew/my/${id}/content/item-types/${entityId}`, data);
+    return response.data;
+  },
+  updatePackageSkill: async (id: string, entityId: string, data: CreateSkillRequest): Promise<ApiResponse<HomebrewDetailResponse>> => {
+    const response = await api.put<ApiResponse<HomebrewDetailResponse>>(`/homebrew/my/${id}/content/skills/${entityId}`, data);
+    return response.data;
+  },
+  updatePackageFeat: async (id: string, entityId: string, data: CreateFeatRequest): Promise<ApiResponse<HomebrewDetailResponse>> => {
+    const response = await api.put<ApiResponse<HomebrewDetailResponse>>(`/homebrew/my/${id}/content/feats/${entityId}`, data);
+    return response.data;
+  },
+  updatePackageBuffDebuff: async (id: string, entityId: string, data: CreateBuffDebuffRequest): Promise<ApiResponse<HomebrewDetailResponse>> => {
+    const response = await api.put<ApiResponse<HomebrewDetailResponse>>(`/homebrew/my/${id}/content/buffs-debuffs/${entityId}`, data);
+    return response.data;
+  },
+  deletePackageEntity: async (id: string, kind: 'item-types' | 'skills' | 'feats' | 'buffs-debuffs', entityId: string): Promise<ApiResponse<HomebrewDetailResponse>> => {
+    const response = await api.delete<ApiResponse<HomebrewDetailResponse>>(`/homebrew/my/${id}/content/${kind}/${entityId}`);
+    return response.data;
+  },
+
   publish: async (id: string): Promise<ApiResponse<HomebrewDetailResponse>> => {
     const response = await api.post<ApiResponse<HomebrewDetailResponse>>(`/homebrew/my/${id}/publish`);
     return response.data;

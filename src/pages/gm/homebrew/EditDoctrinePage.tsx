@@ -41,6 +41,15 @@ const ADD_TYPE_ICON: Record<string, string> = {
   BUFF_DEBUFF: 'hex',
 };
 
+// P1-6: типы с полным CRUD сущности (kind в пути DELETE/PUT).
+type CrudKind = 'item-types' | 'skills' | 'feats' | 'buffs-debuffs';
+const CRUD_KIND: Partial<Record<ContentType, CrudKind>> = {
+  ITEM_TYPE: 'item-types',
+  SKILL: 'skills',
+  FEAT: 'feats',
+  BUFF_DEBUFF: 'buffs-debuffs',
+};
+
 const CONTENT_GROUPS: { titleKey: string; icon: string; type: ContentType }[] = [
   { titleKey: 'hb.edit.groupItems', icon: 'sword', type: 'ITEM_TYPE' },
   { titleKey: 'hb.edit.groupClasses', icon: 'helm', type: 'CHARACTER_CLASS' },
@@ -92,6 +101,8 @@ export default function EditDoctrinePage() {
   const [editingRichClass, setEditingRichClass] = useState<ContentSummaryDto | null>(null);
   const [showPublish, setShowPublish] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
+  const [deleteEntityTarget, setDeleteEntityTarget] = useState<{ kind: CrudKind; id: string; name: string } | null>(null);
+  const [deletingEntity, setDeletingEntity] = useState(false);
   const [showRaceEditor, setShowRaceEditor] = useState(false);
   const [editingRaceId, setEditingRaceId] = useState<string | null>(null);
   const [editingRaceSummary, setEditingRaceSummary] = useState<ContentSummaryDto | null>(null);
@@ -238,6 +249,23 @@ export default function EditDoctrinePage() {
 
   const handleRemoveContent = (contentItemId: string) => {
     removeContentMutation.mutate({ packageId: pkg.id, contentItemId });
+  };
+
+  const handleDeleteEntity = async () => {
+    if (!deleteEntityTarget) return;
+    setDeletingEntity(true);
+    try {
+      await homebrewApi.deletePackageEntity(pkg.id, deleteEntityTarget.kind, deleteEntityTarget.id);
+      queryClient.invalidateQueries({ queryKey: ['homebrew-my'] });
+      queryClient.invalidateQueries({ queryKey: ['homebrew-my', pkg.id] });
+      setDeleteEntityTarget(null);
+      toast.success(t('hb.edit.entityDeleted'));
+    } catch (e) {
+      const status = (e as { response?: { status?: number } })?.response?.status;
+      toast.error(status === 409 ? t('hb.edit.entityInUse') : t('hb.edit.toastFailed'));
+    } finally {
+      setDeletingEntity(false);
+    }
   };
 
   const handlePublish = () => {
@@ -465,6 +493,13 @@ export default function EditDoctrinePage() {
                   </div>
                   {attachable.isLoading ? (
                     <div className={cn('ao-italic', s.pickEmpty)}>{t('hb.edit.loading')}</div>
+                  ) : attachable.isError ? (
+                    <div className={cn('ao-italic', s.pickEmpty)}>
+                      {t('hb.edit.existingError')}{' '}
+                      <button className="ao-btn ao-btn--ghost ao-btn--sm" onClick={() => attachable.refetch()}>
+                        {t('common.retry')}
+                      </button>
+                    </div>
                   ) : filteredAttachable.length === 0 ? (
                     <div className={cn('ao-italic', s.pickEmpty)}>{t('hb.edit.existingEmpty')}</div>
                   ) : (
@@ -743,13 +778,17 @@ export default function EditDoctrinePage() {
                         </button>
                       )}
 
-                      {/* Remove button */}
+                      {/* Remove / delete-entity button (P1-6) */}
                       <button
                         className={cn('ao-iconbtn', s.iconBtnSm, s.ember)}
-                        onClick={() => handleRemoveContent(r.id)}
-                        title={t('hb.edit.remove')}
+                        onClick={() => {
+                          const kind = CRUD_KIND[grp.type];
+                          if (kind) setDeleteEntityTarget({ kind, id: r.id, name: r.name });
+                          else handleRemoveContent(r.id);
+                        }}
+                        title={CRUD_KIND[grp.type] ? t('hb.edit.deleteEntity') : t('hb.edit.remove')}
                       >
-                        <Rune kind="x" size={12} />
+                        <Rune kind={CRUD_KIND[grp.type] ? 'flame' : 'x'} size={12} />
                       </button>
                     </div>
                   ))
@@ -835,6 +874,28 @@ export default function EditDoctrinePage() {
             <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
               {t('hb.edit.redactAction')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete content entity (P1-6) */}
+      <AlertDialog open={!!deleteEntityTarget} onOpenChange={(o) => !o && setDeleteEntityTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('hb.edit.deleteEntityTitle')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('hb.edit.deleteEntityDesc', { name: deleteEntityTarget?.name ?? '' })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deletingEntity}>{t('common.cancel')}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => { e.preventDefault(); handleDeleteEntity(); }}
+              disabled={deletingEntity}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {t('hb.edit.deleteEntity')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
