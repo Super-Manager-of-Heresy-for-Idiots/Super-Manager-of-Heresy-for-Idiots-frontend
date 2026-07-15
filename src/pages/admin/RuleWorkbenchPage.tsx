@@ -55,6 +55,10 @@ import {
   useTargetTypes,
   useValidateFormula,
   useValidateRule,
+  useItemCoverage,
+  useItemDetail,
+  useItemBinding,
+  useSaveItemBinding,
 } from '@/hooks/useFeatureRules';
 import { useSpells } from '@/hooks/useContentCatalog';
 import FormulaInput from '@/components/admin/FormulaInput';
@@ -65,6 +69,8 @@ import type {
   ChoiceOptionAdmin,
   CompanionDefinitionRow,
   GenericFormulaRow,
+  ItemBindingEdit,
+  ItemRuleDetailResponse,
   ProblemFeatureFilters,
   StaticLanguageGrant,
   StaticProficiencyGrant,
@@ -83,6 +89,9 @@ import FormulaLab from './FormulaLab';
 import s from './RuleWorkbenchPage.module.css';
 
 const COL_COUNT = 6;
+
+/** Item owner families (Phase 4 §5.3). Fallback when metadata.ownerTypes is unavailable. */
+const ITEM_OWNER_TYPES = ['ITEM_MAGIC', 'ITEM_TEMPLATE', 'ITEM_EQUIPMENT'];
 
 const STATUS_CLASS: Record<string, string> = {
   draft: s.statusDraft,
@@ -1489,6 +1498,7 @@ export default function RuleWorkbenchPage() {
   const t = useT();
   const { data: metadata } = useFeatureRuleMetadata();
 
+  const [view, setView] = useState<'features' | 'items'>('features');
   const [ruleType, setRuleType] = useState('');
   const [reviewStatus, setReviewStatus] = useState('');
   const [severity, setSeverity] = useState('');
@@ -1530,11 +1540,30 @@ export default function RuleWorkbenchPage() {
         <p className={s.lede}>{t('adm.ruleWorkbench.lede')}</p>
       </header>
 
-      <WorkbenchSetup />
+      <div className="ao-row ao-gap-8">
+        <button
+          className={cn('ao-tab', view === 'features' && 'is-active')}
+          onClick={() => setView('features')}
+        >
+          {t('adm.ruleWorkbench.view.features')}
+        </button>
+        <button
+          className={cn('ao-tab', view === 'items' && 'is-active')}
+          onClick={() => setView('items')}
+        >
+          {t('adm.ruleWorkbench.view.items')}
+        </button>
+      </div>
 
-      <FormulaLab />
+      {view === 'items' ? (
+        <ItemsView metadata={metadata} />
+      ) : (
+        <>
+          <WorkbenchSetup />
 
-      <div className={cn('ao-panel', s.filters)}>
+          <FormulaLab />
+
+          <div className={cn('ao-panel', s.filters)}>
         <select className="ao-input" value={classFilter} onChange={(e) => setClassFilter(e.target.value)}>
           <option value="">{t('adm.ruleWorkbench.filter.allClasses')}</option>
           {classNames.map((c) => (
@@ -1634,6 +1663,249 @@ export default function RuleWorkbenchPage() {
             </tbody>
           </table>
         )}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+/* ── Items view (Phase 4 §5.3) ──────────────────────────────────────────── */
+
+function ItemsView({ metadata }: { metadata?: FeatureRuleMetadata }) {
+  const t = useT();
+  const { data: coverage } = useItemCoverage();
+
+  const itemOwnerTypes = useMemo(() => {
+    const fromMeta = (metadata?.ownerTypes ?? []).filter((o) => ITEM_OWNER_TYPES.includes(o.code));
+    if (fromMeta.length > 0) return fromMeta;
+    return ITEM_OWNER_TYPES.map((code) => ({ code, label: code }));
+  }, [metadata]);
+
+  const [ownerType, setOwnerType] = useState(itemOwnerTypes[0]?.code ?? ITEM_OWNER_TYPES[0]);
+  const [ownerIdInput, setOwnerIdInput] = useState('');
+  const [loaded, setLoaded] = useState<{ ownerType: string; ownerId: string } | null>(null);
+
+  const { data: detail, isLoading, isError } = useItemDetail(
+    loaded?.ownerType ?? null,
+    loaded?.ownerId ?? null,
+  );
+
+  const onLoad = () => {
+    if (!ownerType || !ownerIdInput.trim()) return;
+    setLoaded({ ownerType, ownerId: ownerIdInput.trim() });
+  };
+
+  return (
+    <>
+      <div className={cn('ao-panel', s.setup)}>
+        <p className="ao-overline">{t('adm.ruleWorkbench.items.coverageTitle')}</p>
+        {coverage ? (
+          <>
+            <div className="ao-row ao-wrap ao-gap-16">
+              <span>{t('adm.ruleWorkbench.items.cov.total')}: <b>{coverage.totalItems}</b></span>
+              <span>{t('adm.ruleWorkbench.items.cov.withRules')}: <b>{coverage.itemsWithRules}</b></span>
+              <span>{t('adm.ruleWorkbench.items.cov.withApproved')}: <b>{coverage.itemsWithApprovedRules}</b></span>
+              <span>{t('adm.ruleWorkbench.items.cov.without')}: <b>{coverage.itemsWithoutRules}</b></span>
+              <span>{t('adm.ruleWorkbench.items.cov.totalRules')}: <b>{coverage.totalRules}</b></span>
+              <span>{t('adm.ruleWorkbench.items.cov.approvedRules')}: <b>{coverage.approvedRules}</b></span>
+              <span>{t('adm.ruleWorkbench.items.cov.needsReview')}: <b>{coverage.needsReviewRules}</b></span>
+            </div>
+            <CoverageBreakdown
+              title={t('adm.ruleWorkbench.items.cov.byStatus')}
+              data={coverage.rulesByStatus}
+              statusLabel
+            />
+            <CoverageBreakdown
+              title={t('adm.ruleWorkbench.items.cov.byType')}
+              data={coverage.rulesByType}
+            />
+          </>
+        ) : (
+          <p className={s.muted}>{t('adm.ruleWorkbench.setup.noCoverage')}</p>
+        )}
+      </div>
+
+      <div className={cn('ao-panel', s.filters)}>
+        <select className="ao-input" value={ownerType} onChange={(e) => setOwnerType(e.target.value)}>
+          {itemOwnerTypes.map((o) => (
+            <option key={o.code} value={o.code}>{o.label}</option>
+          ))}
+        </select>
+        <input
+          className="ao-input"
+          placeholder={t('adm.ruleWorkbench.items.ownerIdPlaceholder')}
+          value={ownerIdInput}
+          onChange={(e) => setOwnerIdInput(e.target.value)}
+        />
+        <button className="ao-btn ao-btn--primary" onClick={onLoad} disabled={!ownerIdInput.trim()}>
+          {t('adm.ruleWorkbench.items.load')}
+        </button>
+      </div>
+
+      {loaded && (
+        <div className={cn('ao-panel', s.tablePanel)}>
+          {isLoading ? (
+            <DetailStatus>{t('adm.ruleWorkbench.loading')}</DetailStatus>
+          ) : isError || !detail ? (
+            <DetailStatus>{t('adm.ruleWorkbench.loadError')}</DetailStatus>
+          ) : (
+            <ItemDetailCard detail={detail} />
+          )}
+        </div>
+      )}
+    </>
+  );
+}
+
+function CoverageBreakdown({
+  title,
+  data,
+  statusLabel = false,
+}: {
+  title: string;
+  data: Record<string, number>;
+  statusLabel?: boolean;
+}) {
+  const t = useT();
+  const entries = Object.entries(data ?? {});
+  if (entries.length === 0) return null;
+  return (
+    <div className="ao-row ao-wrap ao-gap-8">
+      <span className={s.muted}>{title}:</span>
+      {entries.map(([code, count]) =>
+        statusLabel ? (
+          <span key={code} className="ao-row ao-gap-4">
+            <StatusBadge code={code} /> {count}
+          </span>
+        ) : (
+          <span key={code} className={cn(s.badge, s.badgeNeutral)}>{localizedCode(t, 'ruleType', code, code)} · {count}</span>
+        ),
+      )}
+    </div>
+  );
+}
+
+/** Small chip marking a rule as item-owned; distinguishes item rules in lists. */
+function OwnerFamilyBadge({ ownerType }: { ownerType: string }) {
+  const isItem = ITEM_OWNER_TYPES.includes(ownerType);
+  return (
+    <span className={cn(s.badge, s.badgeNeutral)} title={ownerType}>
+      {isItem ? 'ITEM' : ownerType}
+    </span>
+  );
+}
+
+function ItemDetailCard({ detail }: { detail: ItemRuleDetailResponse }) {
+  const t = useT();
+  return (
+    <div className={s.card}>
+      <div className="ao-row ao-gap-8">
+        <h3 className="ao-h3">{detail.name ?? detail.ownerId}</h3>
+        <OwnerFamilyBadge ownerType={detail.ownerType} />
+        {detail.attunementRequired && (
+          <span className={cn(s.badge, s.statusApproved)}>{t('adm.ruleWorkbench.items.attunement')}</span>
+        )}
+      </div>
+
+      <section className={s.cardSection}>
+        <p className="ao-overline">{t('adm.ruleWorkbench.card.rules')}</p>
+        {detail.rules.length === 0 ? (
+          <p className={s.muted}>{t('adm.ruleWorkbench.card.noRules')}</p>
+        ) : (
+          <ul className={s.list}>
+            {detail.rules.map((rule) => (
+              <li key={rule.id} className={s.listItem}>
+                <div className={s.listMain}>
+                  <OwnerFamilyBadge ownerType={rule.ownerType} />
+                  <span className={s.ruleTitle}>{rule.ruleTypeLabel}</span>
+                  <StatusBadge code={rule.reviewStatus} />
+                  {!rule.enabled && <span className={cn(s.badge, s.badgeNeutral)}>{t('adm.ruleWorkbench.card.off')}</span>}
+                  {rule.hasUnresolvedError && <span className={cn(s.badge, s.sevError)}>{localizedCode(t, 'severity', 'error')}</span>}
+                  {rule.notes && <span className={s.muted}>{rule.notes}</span>}
+                </div>
+                <div className={s.historyBlock}>
+                  <ItemBindingEditor ruleId={rule.id} />
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+    </div>
+  );
+}
+
+function ItemBindingEditor({ ruleId }: { ruleId: string }) {
+  const t = useT();
+  const { data: def } = useItemBinding(ruleId, true);
+  const save = useSaveItemBinding();
+
+  const [requiresEquipped, setRequiresEquipped] = useState(false);
+  const [requiresAttunement, setRequiresAttunement] = useState(false);
+  const [consumeOnUse, setConsumeOnUse] = useState(false);
+  const [consumeQuantity, setConsumeQuantity] = useState('');
+  const [allowedSlotCode, setAllowedSlotCode] = useState('');
+
+  useEffect(() => {
+    if (def) {
+      setRequiresEquipped(def.requiresEquipped);
+      setRequiresAttunement(def.requiresAttunement);
+      setConsumeOnUse(def.consumeOnUse);
+      setConsumeQuantity(def.consumeQuantity != null ? String(def.consumeQuantity) : '');
+      setAllowedSlotCode(def.allowedSlotCode ?? '');
+    }
+  }, [def]);
+
+  const onSave = () => {
+    const data: ItemBindingEdit = {
+      requiresEquipped,
+      requiresAttunement,
+      consumeOnUse,
+      consumeQuantity: consumeQuantity.trim() === '' ? null : Number(consumeQuantity),
+      allowedSlotCode: allowedSlotCode.trim() || null,
+    };
+    save.mutate({ ruleId, data });
+  };
+
+  return (
+    <div className={s.editor}>
+      <p className="ao-overline">{t('adm.ruleWorkbench.items.binding.title')}</p>
+      <label className={s.editorCheck}>
+        <input type="checkbox" checked={requiresEquipped} onChange={(e) => setRequiresEquipped(e.target.checked)} />
+        {t('adm.ruleWorkbench.items.binding.requiresEquipped')}
+      </label>
+      <label className={s.editorCheck}>
+        <input type="checkbox" checked={requiresAttunement} onChange={(e) => setRequiresAttunement(e.target.checked)} />
+        {t('adm.ruleWorkbench.items.binding.requiresAttunement')}
+      </label>
+      <label className={s.editorCheck}>
+        <input type="checkbox" checked={consumeOnUse} onChange={(e) => setConsumeOnUse(e.target.checked)} />
+        {t('adm.ruleWorkbench.items.binding.consumeOnUse')}
+      </label>
+      <div className={s.editorRow}>
+        <label className={s.editorLabel}>{t('adm.ruleWorkbench.items.binding.consumeQuantity')}</label>
+        <input
+          className="ao-input"
+          type="number"
+          min={0}
+          value={consumeQuantity}
+          onChange={(e) => setConsumeQuantity(e.target.value)}
+        />
+      </div>
+      <div className={s.editorRow}>
+        <label className={s.editorLabel}>{t('adm.ruleWorkbench.items.binding.allowedSlotCode')}</label>
+        <input
+          className="ao-input"
+          placeholder="ring / hand / …"
+          value={allowedSlotCode}
+          onChange={(e) => setAllowedSlotCode(e.target.value)}
+        />
+      </div>
+      <div className={s.editorActions}>
+        <button className="ao-btn ao-btn--primary" onClick={onSave} disabled={save.isPending}>
+          {t('adm.ruleWorkbench.resource.save')}
+        </button>
       </div>
     </div>
   );

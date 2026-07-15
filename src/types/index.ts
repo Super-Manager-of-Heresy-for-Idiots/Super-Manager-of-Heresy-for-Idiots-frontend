@@ -1237,6 +1237,15 @@ export interface HomebrewItemRequest {
   maxDexBonus?: number;
   strengthRequired?: number;
   stealthDisadvantage?: boolean;
+  // Умение предмета (IT-4) — исполняется движком
+  abilityDamageDice?: string;
+  abilityDamageType?: string;
+  abilitySaveAbility?: string;
+  abilityHalfOnSave?: boolean;
+  abilityHealingFormula?: string;
+  abilityRequiresEquipped?: boolean;
+  abilityRequiresAttunement?: boolean;
+  abilityConsumeOnUse?: boolean;
 }
 
 export interface HomebrewItemResponse {
@@ -1262,6 +1271,14 @@ export interface HomebrewItemResponse {
   maxDexBonus?: number;
   strengthRequired?: number;
   stealthDisadvantage?: boolean;
+  abilityDamageDice?: string;
+  abilityDamageType?: string;
+  abilitySaveAbility?: string;
+  abilityHalfOnSave?: boolean;
+  abilityHealingFormula?: string;
+  abilityRequiresEquipped?: boolean;
+  abilityRequiresAttunement?: boolean;
+  abilityConsumeOnUse?: boolean;
   source?: string;
   homebrewPackageId?: string;
   homebrewPackageTitle?: string;
@@ -3497,6 +3514,8 @@ export interface FeatureRuleMetadata {
   severities: CodeLabel[];
   issueTypes: CodeLabel[];
   sources: CodeLabel[];
+  /** Owner families (class-feature, background, item, …). Item families are ITEM_MAGIC/ITEM_TEMPLATE/ITEM_EQUIPMENT. */
+  ownerTypes?: CodeLabel[];
 }
 
 export interface FeatureRuleResponse {

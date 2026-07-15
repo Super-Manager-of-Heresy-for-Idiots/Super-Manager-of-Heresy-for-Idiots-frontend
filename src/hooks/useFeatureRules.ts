@@ -11,6 +11,7 @@ import {
   type GenericFormulaRuleEdit,
   type HealingRuleEdit,
   type IssueFilters,
+  type ItemBindingEdit,
   type MonsterFormEdit,
   type ProblemFeatureFilters,
   type ResolutionRuleEdit,
@@ -585,6 +586,50 @@ export function useSaveCompanionDefinitions() {
     'fr-companion-definitions',
     featureRulesApi.saveCompanionDefinitions,
   );
+}
+
+// ── Item rules (Phase 4 §5.3) ──
+
+export function useItemCoverage() {
+  return useQuery({
+    queryKey: ['fr-item-coverage'],
+    queryFn: async () => (await featureRulesApi.getItemCoverage()).data ?? null,
+    staleTime: 30 * 1000,
+  });
+}
+
+export function useItemDetail(ownerType: string | null, ownerId: string | null) {
+  const { lang } = useI18n();
+  return useQuery({
+    queryKey: ['fr-item-detail', ownerType ?? '', ownerId ?? '', lang],
+    queryFn: async () =>
+      (await featureRulesApi.getItemDetail(ownerType as string, ownerId as string, lang)).data ?? null,
+    enabled: !!ownerType && !!ownerId,
+  });
+}
+
+export function useItemBinding(ruleId: string | null, enabled: boolean) {
+  return useQuery({
+    queryKey: ['fr-item-binding', ruleId ?? ''],
+    queryFn: async () => (await featureRulesApi.getItemBinding(ruleId as string)).data ?? null,
+    enabled: !!ruleId && enabled,
+  });
+}
+
+export function useSaveItemBinding() {
+  const t = useT();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ ruleId, data }: { ruleId: string; data: ItemBindingEdit }) =>
+      featureRulesApi.saveItemBinding(ruleId, data),
+    onSuccess: (_res, { ruleId }) => {
+      queryClient.invalidateQueries({ queryKey: ['fr-item-binding', ruleId] });
+      toast.success(t('adm.ruleWorkbench.resource.saved'));
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error.response?.data?.message || t('adm.ruleWorkbench.resource.saveFailed'));
+    },
+  });
 }
 
 export function useBatchApprove() {

@@ -88,6 +88,12 @@ function itemPriceGold(d: ItemDefinition): number | null {
   return null;
 }
 
+// TODO(ITEM_ABIL Phase 5): показать бейдж «даёт умения»/«grants abilities» на записи
+// каталога, когда предмет наделяет умениями. Каталожный тип ItemDefinition сейчас НЕ
+// содержит такого флага (нет hasAbilities/abilityCount), а изобретать backend-изменения
+// в рамках FE-задачи нельзя. Как только BE начнёт отдавать признак (напр. ItemDefinition
+// .hasAbilities), добавить сюда grantsAbilities в GrantEntry и OrdoChip в опции списка,
+// строка i18n camp2.inv.grant.grantsAbilities уже заведена.
 function itemEntry(d: ItemDefinition): GrantEntry {
   return {
     id: d.id,

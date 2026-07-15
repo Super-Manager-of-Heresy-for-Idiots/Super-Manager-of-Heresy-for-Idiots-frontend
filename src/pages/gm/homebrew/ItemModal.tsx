@@ -62,7 +62,25 @@ export function ItemModal({ open, onClose, packageId, editingId, onSaved }: Item
   const [maxDexBonus, setMaxDexBonus] = useState('');
   const [strengthRequired, setStrengthRequired] = useState('');
   const [stealthDisadvantage, setStealthDisadvantage] = useState(false);
+  // умение предмета (IT-4)
+  const [abDamageDice, setAbDamageDice] = useState('');
+  const [abDamageType, setAbDamageType] = useState('');
+  const [abSaveAbility, setAbSaveAbility] = useState('');
+  const [abHalfOnSave, setAbHalfOnSave] = useState(false);
+  const [abHealingFormula, setAbHealingFormula] = useState('');
+  const [abRequiresEquipped, setAbRequiresEquipped] = useState(false);
+  const [abRequiresAttunement, setAbRequiresAttunement] = useState(false);
+  const [abConsumeOnUse, setAbConsumeOnUse] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  const ABILITIES: { slug: string; label: string }[] = [
+    { slug: 'str', label: t('hb.spell.abStr') },
+    { slug: 'dex', label: t('hb.spell.abDex') },
+    { slug: 'con', label: t('hb.spell.abCon') },
+    { slug: 'int', label: t('hb.spell.abInt') },
+    { slug: 'wis', label: t('hb.spell.abWis') },
+    { slug: 'cha', label: t('hb.spell.abCha') },
+  ];
 
   const { data: raritiesResp } = useQuery({
     queryKey: ['reference-rarities'],
@@ -99,6 +117,14 @@ export function ItemModal({ open, onClose, packageId, editingId, onSaved }: Item
           setMaxDexBonus(it.maxDexBonus != null ? String(it.maxDexBonus) : '');
           setStrengthRequired(it.strengthRequired != null ? String(it.strengthRequired) : '');
           setStealthDisadvantage(!!it.stealthDisadvantage);
+          setAbDamageDice(it.abilityDamageDice ?? '');
+          setAbDamageType(it.abilityDamageType ?? '');
+          setAbSaveAbility(it.abilitySaveAbility ?? '');
+          setAbHalfOnSave(!!it.abilityHalfOnSave);
+          setAbHealingFormula(it.abilityHealingFormula ?? '');
+          setAbRequiresEquipped(!!it.abilityRequiresEquipped);
+          setAbRequiresAttunement(!!it.abilityRequiresAttunement);
+          setAbConsumeOnUse(!!it.abilityConsumeOnUse);
         })
         .catch(() => toast.error(t('hb.item.loadFailed')));
     } else {
@@ -108,6 +134,8 @@ export function ItemModal({ open, onClose, packageId, editingId, onSaved }: Item
       setCategory(''); setCostGold(''); setWeightLb('');
       setDamageDiceCount(''); setDamageDieSize(''); setDamageBonus(''); setDamageType(''); setFlatDamage('');
       setBaseAc(''); setDexBonusAllowed(false); setMaxDexBonus(''); setStrengthRequired(''); setStealthDisadvantage(false);
+      setAbDamageDice(''); setAbDamageType(''); setAbSaveAbility(''); setAbHalfOnSave(false);
+      setAbHealingFormula(''); setAbRequiresEquipped(false); setAbRequiresAttunement(false); setAbConsumeOnUse(false);
     }
   }, [open, editingId, packageId, t]);
 
@@ -115,6 +143,16 @@ export function ItemModal({ open, onClose, packageId, editingId, onSaved }: Item
     if (!name.trim()) return;
     setSaving(true);
     try {
+      const ability: Partial<HomebrewItemRequest> = {
+        abilityDamageDice: abDamageDice.trim() || undefined,
+        abilityDamageType: abDamageType || undefined,
+        abilitySaveAbility: abSaveAbility || undefined,
+        abilityHalfOnSave: abHalfOnSave,
+        abilityHealingFormula: abHealingFormula.trim() || undefined,
+        abilityRequiresEquipped: abRequiresEquipped,
+        abilityRequiresAttunement: abRequiresAttunement,
+        abilityConsumeOnUse: abConsumeOnUse,
+      };
       const body: HomebrewItemRequest = kindUi === 'magic'
         ? {
             kind: 'MAGIC',
@@ -124,6 +162,7 @@ export function ItemModal({ open, onClose, packageId, editingId, onSaved }: Item
             rarity: rarity || undefined,
             attunementRequired,
             attunementRequirement: attunementRequirement.trim() || undefined,
+            ...ability,
           }
         : {
             kind: 'EQUIPMENT',
@@ -148,6 +187,7 @@ export function ItemModal({ open, onClose, packageId, editingId, onSaved }: Item
               strengthRequired: numOrUndef(strengthRequired),
               stealthDisadvantage,
             }),
+            ...ability,
           };
       if (editingId) await homebrewItemsApi.update(packageId, editingId, body);
       else await homebrewItemsApi.create(packageId, body);
@@ -307,6 +347,57 @@ export function ItemModal({ open, onClose, packageId, editingId, onSaved }: Item
               </label>
             </div>
           )}
+
+          {/* Умение предмета — исполняется движком (пусто = у предмета нет активного умения) */}
+          <div className={s.section}>
+            <div className={s.sectionTitle}>{t('hb.item.abilitySection')}</div>
+            <div className={s.grid2}>
+              <div>
+                <label className="ao-label">{t('hb.item.abDamageDice')}</label>
+                <input className="ao-input" value={abDamageDice} onChange={(e) => setAbDamageDice(e.target.value)} placeholder={t('hb.item.abDamageDiceHint')} />
+              </div>
+              <div>
+                <label className="ao-label">{t('hb.item.abDamageType')}</label>
+                <select className="ao-input" value={abDamageType} onChange={(e) => setAbDamageType(e.target.value)}>
+                  <option value="">{t('hb.item.abDamageTypeNone')}</option>
+                  {damageTypes.map((d) => (
+                    <option key={d.slug ?? d.id} value={d.slug ?? ''}>{d.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="ao-label">{t('hb.item.abSaveAbility')}</label>
+                <select className="ao-input" value={abSaveAbility} onChange={(e) => setAbSaveAbility(e.target.value)}>
+                  <option value="">{t('hb.item.abSaveAbilityNone')}</option>
+                  {ABILITIES.map((a) => (
+                    <option key={a.slug} value={a.slug}>{a.label}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="ao-label">{t('hb.item.abHealingFormula')}</label>
+                <input className="ao-input" value={abHealingFormula} onChange={(e) => setAbHealingFormula(e.target.value)} placeholder={t('hb.item.abHealingFormulaHint')} />
+              </div>
+            </div>
+            {abSaveAbility && (
+              <label className={cn('ao-row ao-gap-8', s.check)}>
+                <input type="checkbox" checked={abHalfOnSave} onChange={(e) => setAbHalfOnSave(e.target.checked)} />
+                {t('hb.item.abHalfOnSave')}
+              </label>
+            )}
+            <label className={cn('ao-row ao-gap-8', s.check)}>
+              <input type="checkbox" checked={abRequiresEquipped} onChange={(e) => setAbRequiresEquipped(e.target.checked)} disabled={abConsumeOnUse} />
+              {t('hb.item.abRequiresEquipped')}
+            </label>
+            <label className={cn('ao-row ao-gap-8', s.check)}>
+              <input type="checkbox" checked={abRequiresAttunement} onChange={(e) => setAbRequiresAttunement(e.target.checked)} />
+              {t('hb.item.abRequiresAttunement')}
+            </label>
+            <label className={cn('ao-row ao-gap-8', s.check)}>
+              <input type="checkbox" checked={abConsumeOnUse} onChange={(e) => setAbConsumeOnUse(e.target.checked)} />
+              {t('hb.item.abConsumeOnUse')}
+            </label>
+          </div>
 
           <div className={s.actions}>
             <button className="ao-btn ao-btn--ghost" onClick={onClose} disabled={saving}>{t('common.cancel')}</button>

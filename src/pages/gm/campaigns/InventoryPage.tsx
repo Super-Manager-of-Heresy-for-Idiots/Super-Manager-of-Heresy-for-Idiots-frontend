@@ -2,6 +2,8 @@ import { useState, useMemo } from 'react';
 import type { CSSProperties } from 'react';
 import { useParams } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { AxiosError } from 'axios';
 import { cn } from '@/lib/utils';
 import { BackLink } from '@/components/campaigns';
 import {
@@ -33,6 +35,8 @@ import {
   useUnequipItem,
   useRemoveItem,
   useUpdateItemBuffs,
+  useAttuneItem,
+  useUnattuneItem,
 } from '@/hooks/useInventory';
 import { useCharacter, useCharacterWallet, useCampaignCharacters } from '@/hooks/useCharacter';
 import { useAuthStore } from '@/store/authStore';
@@ -95,6 +99,8 @@ export default function InventoryPage() {
   const unequipMutation = useUnequipItem();
   const removeMutation = useRemoveItem();
   const updateItemBuffsMutation = useUpdateItemBuffs();
+  const attuneMutation = useAttuneItem();
+  const unattuneMutation = useUnattuneItem();
 
   const [filterText, setFilterText] = useState('');
   const [showSearch, setShowSearch] = useState(false);
@@ -154,7 +160,7 @@ export default function InventoryPage() {
   );
 
   const slotsFilled = equippedItems.length;
-  const attunedCount = items.filter((i) => i.isUnique || i.artifactName).length;
+  const attunedCount = items.filter((i) => i.attuned).length;
   const inventoryValueGold = useMemo(
     () => items.reduce((sum, item) => sum + (stackGoldValue(item.priceGold, item.quantity) ?? 0), 0),
     [items],
@@ -210,6 +216,26 @@ export default function InventoryPage() {
   const handleUnequip = (item: ItemInstanceResponse) => {
     if (!campaignId || !characterId) return;
     unequipMutation.mutate({ campaignId, characterId, instanceId: item.id });
+  };
+
+  const handleAttune = (item: ItemInstanceResponse, gmOverride?: boolean) => {
+    if (!campaignId || !characterId) return;
+    attuneMutation.mutate(
+      { campaignId, characterId, instanceId: item.id, data: gmOverride ? { gmOverride: true } : undefined },
+      {
+        onError: (error) => {
+          // HTTP 409 / ATTUNEMENT_LIMIT_REACHED → показать локализованную подсказку про лимит настройки.
+          if (error instanceof AxiosError && error.response?.status === 409) {
+            toast.error(t('camp2.inv.attuneLimit'), { id: 'attune-limit' });
+          }
+        },
+      },
+    );
+  };
+
+  const handleUnattune = (item: ItemInstanceResponse) => {
+    if (!campaignId || !characterId) return;
+    unattuneMutation.mutate({ campaignId, characterId, instanceId: item.id });
   };
 
   const handleRemove = (item: ItemInstanceResponse) => {
@@ -524,8 +550,11 @@ export default function InventoryPage() {
               item={selected}
               isGm={isGm}
               busy={equipMutation.isPending || unequipMutation.isPending || removeMutation.isPending || updateItemBuffsMutation.isPending}
+              attuneBusy={attuneMutation.isPending || unattuneMutation.isPending}
               onEquip={() => openEquip(selected)}
               onUnequip={() => handleUnequip(selected)}
+              onAttune={(gmOverride) => handleAttune(selected, gmOverride)}
+              onUnattune={() => handleUnattune(selected)}
               onRename={() => openRename(selected)}
               onTransfer={() => openTransfer(selected)}
               onConfigureBuffs={() => openItemBuffs(selected)}
@@ -678,8 +707,11 @@ function RelicDetail({
   item,
   isGm,
   busy,
+  attuneBusy,
   onEquip,
   onUnequip,
+  onAttune,
+  onUnattune,
   onRename,
   onTransfer,
   onConfigureBuffs,
@@ -688,17 +720,27 @@ function RelicDetail({
   item: ItemInstanceResponse;
   isGm: boolean;
   busy: boolean;
+  attuneBusy: boolean;
   onEquip: () => void;
   onUnequip: () => void;
+  onAttune: (gmOverride?: boolean) => void;
+  onUnattune: () => void;
   onRename: () => void;
   onTransfer: () => void;
   onConfigureBuffs: () => void;
   onRemove: () => void;
 }) {
   const t = useT();
+  const [expandedAbility, setExpandedAbility] = useState<string | null>(null);
   const rarity = item.artifactRarity ?? item.rarity;
   const dmgEnchant = item.enchantments?.find((e) => e.enchantmentType.damageDice);
   const NA = '—';
+  const abilities = item.abilities ?? [];
+  /* Заряды: берём первую способность, у которой заданы заряды; показываем current/max. */
+  const chargeAbility = abilities.find((a) => a.charges && a.charges.max != null);
+  const chargesValue = chargeAbility?.charges
+    ? `${chargeAbility.charges.current ?? 0}/${chargeAbility.charges.max ?? 0}`
+    : NA;
 
   const stats: { label: string; value: string; color?: string }[] = [
     {
@@ -713,7 +755,7 @@ function RelicDetail({
     { label: t('camp2.inv.relic.slot'), value: item.slot ? item.slot.replace('_', ' ') : t('camp2.inv.relic.unbound') },
     { label: 'Price', value: formatApproxGold(item.priceGold), color: item.priceGold != null ? 'var(--gold-pale)' : undefined },
     { label: t('camp2.inv.relic.quantity'), value: `x${item.quantity}` },
-    { label: t('camp2.inv.relic.charges'), value: NA },
+    { label: t('camp2.inv.relic.charges'), value: chargesValue },
   ];
 
   return (
@@ -726,6 +768,11 @@ function RelicDetail({
         {rarity && <RarityBadge rarity={rarity} size="md" />}
         {item.slot && <OrdoChip tone="ember" icon="item-equipped">{t('camp2.inv.relic.equipped')}</OrdoChip>}
         {item.isUnique && <OrdoChip tone="arcane" icon="magic-item">{t('camp2.inv.relic.unique')}</OrdoChip>}
+        {item.attuned ? (
+          <OrdoChip tone="gold" glyph="check">{t('camp2.inv.attuned')}</OrdoChip>
+        ) : item.attunementRequired ? (
+          <OrdoChip tone="rune" glyph="diamond">{t('camp2.inv.requiresAttunement')}</OrdoChip>
+        ) : null}
       </div>
 
       <div className={cn('ao-h5', s.relicName)}>{item.artifactName ?? item.displayName}</div>
@@ -812,6 +859,59 @@ function RelicDetail({
         </>
       )}
 
+      {abilities.length > 0 && (
+        <>
+          <OrdoDivider glyph="hex" color="var(--rule)">{t('camp2.inv.abilities')}</OrdoDivider>
+          <div className={s.enchList}>
+            {abilities.map((ability) => {
+              const open = expandedAbility === ability.ruleId;
+              return (
+                <div key={ability.ruleId} className={s.enchRow}>
+                  <Rune kind="diamond" size={8} color={ability.available ? 'var(--arcane)' : 'var(--ink-faint)'} />
+                  <div className={s.enchMain}>
+                    <button
+                      type="button"
+                      className={cn('ao-row', 'ao-between', 'ao-gap-8')}
+                      onClick={() => setExpandedAbility(open ? null : ability.ruleId)}
+                      aria-expanded={open}
+                    >
+                      <span className={s.enchName}>{ability.name}</span>
+                      <Rune kind={open ? 'chev-d' : 'chev-r'} size={10} color="var(--ink-faint)" />
+                    </button>
+                    {open && (
+                      <div className={s.enchDesc}>
+                        <div className={s.chipRow}>
+                          {ability.actionType && (
+                            <OrdoChip tone="rune">{ability.actionType}</OrdoChip>
+                          )}
+                          {ability.charges && ability.charges.max != null && (
+                            <OrdoChip tone="gold" glyph="flame">
+                              {t('camp2.inv.relic.charges')}: {ability.charges.current ?? 0}/{ability.charges.max}
+                            </OrdoChip>
+                          )}
+                          {ability.requiresAttunement && (
+                            <OrdoChip tone="arcane" glyph="diamond">{t('camp2.inv.requiresAttunement')}</OrdoChip>
+                          )}
+                          {ability.requiresEquipped && (
+                            <OrdoChip tone="ember" icon="item-equipped">{t('camp2.inv.relic.equipped')}</OrdoChip>
+                          )}
+                          {ability.consumesItem && (
+                            <OrdoChip tone="ember" glyph="x">{t('camp2.inv.abilityConsumes')}</OrdoChip>
+                          )}
+                        </div>
+                        {!ability.available && ability.unavailableReason && (
+                          <p className="ao-italic">{ability.unavailableReason}</p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </>
+      )}
+
       <OrdoDivider glyph="diamond-fill" color="var(--rule)">{t('camp2.inv.relic.provenance')}</OrdoDivider>
 
       <div className={s.provList}>
@@ -841,6 +941,20 @@ function RelicDetail({
         ) : (
           <button className={cn('ao-btn ao-btn--primary', s.grow)} onClick={onEquip} disabled={busy}>
             <Rune kind="check" size={10} /> {t('camp2.inv.relic.equip')}
+          </button>
+        )}
+        {item.attuned ? (
+          <button className="ao-btn ao-btn--ghost" onClick={onUnattune} disabled={attuneBusy} title={t('camp2.inv.unattuneBtn')}>
+            <Rune kind="x" size={10} /> {t('camp2.inv.unattuneBtn')}
+          </button>
+        ) : item.attunementRequired ? (
+          <button className="ao-btn ao-btn--ghost" onClick={() => onAttune()} disabled={attuneBusy} title={t('camp2.inv.attuneBtn')}>
+            <Rune kind="diamond" size={10} /> {t('camp2.inv.attuneBtn')}
+          </button>
+        ) : null}
+        {isGm && item.attunementRequired && !item.attuned && (
+          <button className="ao-btn ao-btn--ghost" onClick={() => onAttune(true)} disabled={attuneBusy} title={t('camp2.inv.gmOverride')}>
+            <Rune kind="helm" size={10} /> {t('camp2.inv.gmOverride')}
           </button>
         )}
         <button className="ao-btn ao-btn--ghost" onClick={onRename} title={t('camp2.inv.relic.renameTitle')}><Rune kind="scroll" size={10} /></button>

@@ -443,6 +443,47 @@ export interface CompanionDefinitionEdit {
   companions: CompanionDefinitionRow[];
 }
 
+/* ── Item rules (Phase 4 §5.3) ─────────────────────────────────────────── */
+
+/** Coverage of item content (magic items / templates / equipment) by the feature-rules model. */
+export interface ItemRuleCoverageReport {
+  totalItems: number;
+  itemsWithRules: number;
+  itemsWithApprovedRules: number;
+  itemsWithoutRules: number;
+  totalRules: number;
+  approvedRules: number;
+  needsReviewRules: number;
+  rulesByType: Record<string, number>;
+  rulesByStatus: Record<string, number>;
+}
+
+/** Detail of a single item owner + its feature rules. */
+export interface ItemRuleDetailResponse {
+  ownerType: string;
+  ownerId: string;
+  name: string | null;
+  attunementRequired: boolean | null;
+  rules: FeatureRuleResponse[];
+}
+
+/** The item-specific binding on a feature rule (how the rule attaches to an item). */
+export interface ItemBindingAdmin {
+  requiresEquipped: boolean;
+  requiresAttunement: boolean;
+  consumeOnUse: boolean;
+  consumeQuantity?: number | null;
+  allowedSlotCode?: string | null;
+}
+
+export interface ItemBindingEdit {
+  requiresEquipped: boolean;
+  requiresAttunement: boolean;
+  consumeOnUse: boolean;
+  consumeQuantity?: number | null;
+  allowedSlotCode?: string | null;
+}
+
 /** Rule Workbench admin client. Mirrors the core /api/admin conventions (ApiResponse envelope). */
 export const featureRulesApi = {
   getMetadata: async (): Promise<ApiResponse<FeatureRuleMetadata>> => {
@@ -734,4 +775,24 @@ export const featureRulesApi = {
       `/admin/feature-rules/${ruleId}/companion-definitions`,
       data,
     )).data,
+
+  // ── Item rules (Phase 4 §5.3) ──
+  getItemCoverage: async (): Promise<ApiResponse<ItemRuleCoverageReport>> =>
+    (await api.get<ApiResponse<ItemRuleCoverageReport>>('/admin/feature-rules/item-coverage')).data,
+
+  getItemDetail: async (
+    ownerType: string,
+    ownerId: string,
+    lang?: string,
+  ): Promise<ApiResponse<ItemRuleDetailResponse>> =>
+    (await api.get<ApiResponse<ItemRuleDetailResponse>>(
+      `/admin/feature-rules/items/${ownerType}/${ownerId}/detail`,
+      { params: { lang } },
+    )).data,
+
+  getItemBinding: async (ruleId: string): Promise<ApiResponse<ItemBindingAdmin | null>> =>
+    (await api.get<ApiResponse<ItemBindingAdmin | null>>(`/admin/feature-rules/${ruleId}/item-binding`)).data,
+
+  saveItemBinding: async (ruleId: string, data: ItemBindingEdit): Promise<ApiResponse<ItemBindingAdmin>> =>
+    (await api.put<ApiResponse<ItemBindingAdmin>>(`/admin/feature-rules/${ruleId}/item-binding`, data)).data,
 };

@@ -70,6 +70,14 @@ export function InvRow({ item, onRename, onTransfer, onMore }: InvRowProps) {
           {item.slot && (
             <OrdoChip tone="rune" icon="item-equipped">{t('cmp.inv.equipped')}</OrdoChip>
           )}
+          {item.attuned && (
+            <OrdoChip tone="gold" glyph="check">{t('cmp.inv.attuned')}</OrdoChip>
+          )}
+          {item.abilities && item.abilities.length > 0 && (
+            <OrdoChip tone="arcane" glyph="hex">
+              {t('cmp.inv.abilitiesCount', { count: item.abilities.length })}
+            </OrdoChip>
+          )}
         </div>
 
         {/* Meta line: rarity + slot */}
