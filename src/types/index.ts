@@ -842,6 +842,42 @@ export interface CreateBackgroundRequest {
   grantedExtras?: string;
 }
 
+/** Тело авторинга homebrew-заклинания (P2-1, идентичность). */
+export interface HomebrewSpellRequest {
+  name: string;
+  nameEn?: string;
+  level: number;
+  school: string;
+  castingTimeRaw?: string;
+  ritual?: boolean;
+  rangeText?: string;
+  durationText?: string;
+  concentration?: boolean;
+  description?: string;
+  higherLevels?: string;
+  availableToClassIds?: string[];
+}
+
+/** homebrew-заклинание для round-trip в редакторе (P2-1). */
+export interface HomebrewSpellResponse {
+  id: string;
+  name: string;
+  nameEn?: string;
+  level?: number;
+  school?: string;
+  castingTimeRaw?: string;
+  ritual?: boolean;
+  rangeText?: string;
+  durationText?: string;
+  concentration?: boolean;
+  description?: string;
+  higherLevels?: string;
+  availableToClassIds?: string[];
+  source?: string;
+  homebrewPackageId?: string;
+  homebrewPackageTitle?: string;
+}
+
 /** Тело авторинга homebrew-ресурса (P2-3) — механизм Ярость/Ки (custom_resource_types). */
 export interface CreateCustomResourceTypeRequest {
   name: string;
@@ -1095,7 +1131,7 @@ export type HomebrewStatus = 'DRAFT' | 'PUBLISHED' | 'UNPUBLISHED' | 'ARCHIVED';
 
 export type ContentType = 'ITEM_TYPE' | 'CHARACTER_CLASS' | 'SKILL' | 'FEAT' |
   'SUBCLASS' | 'RACE' | 'STAT_TYPE' | 'BUFF_DEBUFF' | 'ENCHANTMENT_TYPE' |
-  'CURRENCY' | 'CUSTOM_RESOURCE' | 'ITEM_TEMPLATE' | 'ITEM' | 'BACKGROUND';
+  'CURRENCY' | 'CUSTOM_RESOURCE' | 'ITEM_TEMPLATE' | 'ITEM' | 'BACKGROUND' | 'SPELL';
 
 export interface CreateHomebrewRequest {
   title: string;

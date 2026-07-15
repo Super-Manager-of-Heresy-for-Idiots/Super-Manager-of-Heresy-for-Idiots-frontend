@@ -59,6 +59,12 @@ export const referenceApi = {
     return response.data;
   },
 
+  // Школы магии для дропдауна авторинга заклинаний (P2-1).
+  getSpellSchools: async (): Promise<ApiResponse<ContentLabel[]>> => {
+    const response = await api.get<ApiResponse<ContentLabel[]>>('/reference/spell-schools');
+    return response.data;
+  },
+
   getClasses: async (): Promise<ApiResponse<CharacterClassDetailResponse[]>> => {
     const response = await api.get<ApiResponse<CharacterClassDetailResponse[]>>('/reference/classes');
     return {

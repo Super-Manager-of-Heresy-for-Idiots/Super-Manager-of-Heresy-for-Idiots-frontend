@@ -28,7 +28,9 @@ import {
 import { useStatTypes } from '@/hooks/useAdmin';
 import { homebrewApi } from '@/api/homebrew.api';
 import { homebrewItemsApi } from '@/api/homebrew-items.api';
+import { homebrewSpellsApi } from '@/api/homebrew-spells.api';
 import { ItemModal } from './ItemModal';
+import { SpellModal } from './SpellModal';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
 import { EQUIPMENT_SLOT_LABELS, EQUIPMENT_SLOTS } from '@/types';
@@ -43,6 +45,7 @@ const ADD_TYPE_ICON: Record<string, string> = {
   BUFF_DEBUFF: 'hex',
   BACKGROUND: 'book',
   CUSTOM_RESOURCE: 'flame',
+  SPELL: 'sigil-1',
 };
 
 // P1-6: типы с полным CRUD сущности (kind в пути DELETE/PUT).
@@ -65,6 +68,7 @@ const CONTENT_GROUPS: { titleKey: string; icon: string; type: ContentType }[] = 
   { titleKey: 'hb.edit.groupItems', icon: 'diamond', type: 'ITEM' },
   { titleKey: 'hb.edit.groupBackgrounds', icon: 'book', type: 'BACKGROUND' },
   { titleKey: 'hb.edit.groupResources', icon: 'flame', type: 'CUSTOM_RESOURCE' },
+  { titleKey: 'hb.edit.groupSpells', icon: 'sigil-1', type: 'SPELL' },
 ];
 
 export default function EditDoctrinePage() {
@@ -119,11 +123,13 @@ export default function EditDoctrinePage() {
   const [editingRichClass, setEditingRichClass] = useState<ContentSummaryDto | null>(null);
   const [showPublish, setShowPublish] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
-  const [deleteEntityTarget, setDeleteEntityTarget] = useState<{ kind: CrudKind | 'items'; id: string; name: string } | null>(null);
+  const [deleteEntityTarget, setDeleteEntityTarget] = useState<{ kind: CrudKind | 'items' | 'spells'; id: string; name: string } | null>(null);
   const [deletingEntity, setDeletingEntity] = useState(false);
   const [editingContent, setEditingContent] = useState<{ type: ContentType; id: string } | null>(null);
   const [showMagicItem, setShowMagicItem] = useState(false);
   const [editingMagicItemId, setEditingMagicItemId] = useState<string | null>(null);
+  const [showSpell, setShowSpell] = useState(false);
+  const [editingSpellId, setEditingSpellId] = useState<string | null>(null);
   const [showRaceEditor, setShowRaceEditor] = useState(false);
   const [editingRaceId, setEditingRaceId] = useState<string | null>(null);
   const [editingRaceSummary, setEditingRaceSummary] = useState<ContentSummaryDto | null>(null);
@@ -325,6 +331,8 @@ export default function EditDoctrinePage() {
     try {
       if (deleteEntityTarget.kind === 'items') {
         await homebrewItemsApi.remove(pkg.id, deleteEntityTarget.id);
+      } else if (deleteEntityTarget.kind === 'spells') {
+        await homebrewSpellsApi.remove(pkg.id, deleteEntityTarget.id);
       } else {
         await homebrewApi.deletePackageEntity(pkg.id, deleteEntityTarget.kind, deleteEntityTarget.id);
       }
@@ -509,6 +517,12 @@ export default function EditDoctrinePage() {
                   onClick={() => { setEditingMagicItemId(null); setShowMagicItem(true); }}
                 >
                   <Rune kind="diamond" size={10} /> {t('hb.item.item')}
+                </button>
+                <button
+                  className="ao-btn ao-btn--ghost ao-btn--sm"
+                  onClick={() => { setEditingSpellId(null); setShowSpell(true); }}
+                >
+                  <Rune kind="sigil-1" size={10} /> {t('hb.spell.spell')}
                 </button>
                 <button
                   className="ao-btn ao-btn--ghost ao-btn--sm"
@@ -916,7 +930,7 @@ export default function EditDoctrinePage() {
                       {/* Book / Edit button */}
                       <button
                         className={cn('ao-iconbtn', s.iconBtnSm)}
-                        title={grp.type === 'CHARACTER_CLASS' ? t('hb.edit.editRichClass') : grp.type === 'RACE' ? t('hb.edit.editSpecies') : (CRUD_KIND[grp.type] || grp.type === 'ITEM') ? t('hb.edit.editEntity') : t('hb.edit.view')}
+                        title={grp.type === 'CHARACTER_CLASS' ? t('hb.edit.editRichClass') : grp.type === 'RACE' ? t('hb.edit.editSpecies') : (CRUD_KIND[grp.type] || grp.type === 'ITEM' || grp.type === 'SPELL') ? t('hb.edit.editEntity') : t('hb.edit.view')}
                         onClick={() => {
                           if (grp.type === 'CHARACTER_CLASS') {
                             setEditingRichClass(r);
@@ -926,12 +940,15 @@ export default function EditDoctrinePage() {
                           } else if (grp.type === 'ITEM') {
                             setEditingMagicItemId(r.id);
                             setShowMagicItem(true);
+                          } else if (grp.type === 'SPELL') {
+                            setEditingSpellId(r.id);
+                            setShowSpell(true);
                           } else if (CRUD_KIND[grp.type]) {
                             startEditContent(grp.type, r);
                           }
                         }}
                       >
-                        <Rune kind={(CRUD_KIND[grp.type] || grp.type === 'ITEM') ? 'scroll' : 'book'} size={12} />
+                        <Rune kind={(CRUD_KIND[grp.type] || grp.type === 'ITEM' || grp.type === 'SPELL') ? 'scroll' : 'book'} size={12} />
                       </button>
                       {grp.type === 'RACE' && (
                         <button
@@ -957,11 +974,12 @@ export default function EditDoctrinePage() {
                           const kind = CRUD_KIND[grp.type];
                           if (kind) setDeleteEntityTarget({ kind, id: r.id, name: r.name });
                           else if (grp.type === 'ITEM') setDeleteEntityTarget({ kind: 'items', id: r.id, name: r.name });
+                          else if (grp.type === 'SPELL') setDeleteEntityTarget({ kind: 'spells', id: r.id, name: r.name });
                           else handleRemoveContent(r.id);
                         }}
-                        title={(CRUD_KIND[grp.type] || grp.type === 'ITEM') ? t('hb.edit.deleteEntity') : t('hb.edit.remove')}
+                        title={(CRUD_KIND[grp.type] || grp.type === 'ITEM' || grp.type === 'SPELL') ? t('hb.edit.deleteEntity') : t('hb.edit.remove')}
                       >
-                        <Rune kind={(CRUD_KIND[grp.type] || grp.type === 'ITEM') ? 'flame' : 'x'} size={12} />
+                        <Rune kind={(CRUD_KIND[grp.type] || grp.type === 'ITEM' || grp.type === 'SPELL') ? 'flame' : 'x'} size={12} />
                       </button>
                     </div>
                   ))
@@ -988,6 +1006,17 @@ export default function EditDoctrinePage() {
         onClose={() => { setShowMagicItem(false); setEditingMagicItemId(null); }}
         packageId={pkg.id}
         editingId={editingMagicItemId}
+        onSaved={() => {
+          queryClient.invalidateQueries({ queryKey: ['homebrew-my'] });
+          queryClient.invalidateQueries({ queryKey: ['homebrew-my', pkg.id] });
+        }}
+      />
+
+      <SpellModal
+        open={showSpell}
+        onClose={() => { setShowSpell(false); setEditingSpellId(null); }}
+        packageId={pkg.id}
+        editingId={editingSpellId}
         onSaved={() => {
           queryClient.invalidateQueries({ queryKey: ['homebrew-my'] });
           queryClient.invalidateQueries({ queryKey: ['homebrew-my', pkg.id] });
