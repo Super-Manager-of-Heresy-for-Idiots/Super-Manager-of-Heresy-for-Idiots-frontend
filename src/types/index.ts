@@ -1107,6 +1107,12 @@ export interface ContentSummaryDto {
   skillType?: string;
   prerequisites?: string;
   tier?: string;
+  // Поля баффа/дебаффа для lossless-префилла при правке (P1-6).
+  effectType?: string;
+  isBuff?: boolean;
+  modifierValue?: number;
+  durationRounds?: number;
+  targetStatId?: string;
 }
 
 export interface HomebrewPackageResponse {

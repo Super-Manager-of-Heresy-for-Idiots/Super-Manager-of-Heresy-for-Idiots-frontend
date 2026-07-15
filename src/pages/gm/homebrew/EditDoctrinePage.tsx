@@ -103,6 +103,7 @@ export default function EditDoctrinePage() {
   const [showDelete, setShowDelete] = useState(false);
   const [deleteEntityTarget, setDeleteEntityTarget] = useState<{ kind: CrudKind; id: string; name: string } | null>(null);
   const [deletingEntity, setDeletingEntity] = useState(false);
+  const [editingContent, setEditingContent] = useState<{ type: ContentType; id: string } | null>(null);
   const [showRaceEditor, setShowRaceEditor] = useState(false);
   const [editingRaceId, setEditingRaceId] = useState<string | null>(null);
   const [editingRaceSummary, setEditingRaceSummary] = useState<ContentSummaryDto | null>(null);
@@ -190,6 +191,7 @@ export default function EditDoctrinePage() {
     setNewBuffIsBuff('true');
     setNewDepClassIds([]);
     setNewDepRaceIds([]);
+    setEditingContent(null);
   };
 
   const handleCreateAndAddContent = async () => {
@@ -200,30 +202,25 @@ export default function EditDoctrinePage() {
     try {
       const description = newDescription.trim() || undefined;
 
+      const editId = editingContent?.id;
+      const depIds = {
+        classIds: newDepClassIds.length > 0 ? newDepClassIds : undefined,
+        raceIds: newDepRaceIds.length > 0 ? newDepRaceIds : undefined,
+      };
       if (addType === 'ITEM_TYPE') {
-        await homebrewApi.createPackageItemType(pkg.id, {
-          name,
-          description,
-          slot: newItemSlot,
-        });
+        const body = { name, description, slot: newItemSlot };
+        if (editId) await homebrewApi.updatePackageItemType(pkg.id, editId, body);
+        else await homebrewApi.createPackageItemType(pkg.id, body);
       } else if (addType === 'SKILL') {
-        await homebrewApi.createPackageSkill(pkg.id, {
-          name,
-          description,
-          skillType: newSkillType.trim() || undefined,
-          classIds: newDepClassIds.length > 0 ? newDepClassIds : undefined,
-          raceIds: newDepRaceIds.length > 0 ? newDepRaceIds : undefined,
-        });
+        const body = { name, description, skillType: newSkillType.trim() || undefined, ...depIds };
+        if (editId) await homebrewApi.updatePackageSkill(pkg.id, editId, body);
+        else await homebrewApi.createPackageSkill(pkg.id, body);
       } else if (addType === 'FEAT') {
-        await homebrewApi.createPackageFeat(pkg.id, {
-          name,
-          description,
-          prerequisites: newFeatPrerequisites.trim() || undefined,
-          classIds: newDepClassIds.length > 0 ? newDepClassIds : undefined,
-          raceIds: newDepRaceIds.length > 0 ? newDepRaceIds : undefined,
-        });
+        const body = { name, description, prerequisites: newFeatPrerequisites.trim() || undefined, ...depIds };
+        if (editId) await homebrewApi.updatePackageFeat(pkg.id, editId, body);
+        else await homebrewApi.createPackageFeat(pkg.id, body);
       } else if (addType === 'BUFF_DEBUFF') {
-        await homebrewApi.createPackageBuffDebuff(pkg.id, {
+        const body = {
           name,
           description,
           effectType: newBuffEffectType,
@@ -231,15 +228,17 @@ export default function EditDoctrinePage() {
           modifierValue: newBuffModifierValue ? Number(newBuffModifierValue) : undefined,
           durationRounds: newBuffDurationRounds ? Number(newBuffDurationRounds) : undefined,
           isBuff: newBuffIsBuff === 'true',
-          classIds: newDepClassIds.length > 0 ? newDepClassIds : undefined,
-          raceIds: newDepRaceIds.length > 0 ? newDepRaceIds : undefined,
-        });
+          ...depIds,
+        };
+        if (editId) await homebrewApi.updatePackageBuffDebuff(pkg.id, editId, body);
+        else await homebrewApi.createPackageBuffDebuff(pkg.id, body);
       }
 
       queryClient.invalidateQueries({ queryKey: ['homebrew-my'] });
       queryClient.invalidateQueries({ queryKey: ['homebrew-my', pkg.id] });
+      const wasEdit = !!editId;
       resetNewContentForm();
-      toast.success(t('hb.edit.toastCreated'));
+      toast.success(wasEdit ? t('hb.edit.toastUpdated') : t('hb.edit.toastCreated'));
     } catch {
       toast.error(t('hb.edit.toastFailed'));
     } finally {
@@ -249,6 +248,25 @@ export default function EditDoctrinePage() {
 
   const handleRemoveContent = (contentItemId: string) => {
     removeContentMutation.mutate({ packageId: pkg.id, contentItemId });
+  };
+
+  const startEditContent = (type: ContentType, row: ContentSummaryDto) => {
+    setAddType(type);
+    setAddMode('new');
+    setAdding(true);
+    setEditingContent({ type, id: row.id });
+    setNewName(row.name);
+    setNewDescription(row.description ?? '');
+    setNewItemSlot((row.slot as EquipmentSlot) || 'MAIN_HAND');
+    setNewSkillType(row.skillType ?? '');
+    setNewFeatPrerequisites(row.prerequisites ?? '');
+    setNewBuffEffectType(row.effectType ?? 'STAT_MODIFIER');
+    setNewBuffTargetStatId(row.targetStatId ?? '');
+    setNewBuffModifierValue(row.modifierValue != null ? String(row.modifierValue) : '');
+    setNewBuffDurationRounds(row.durationRounds != null ? String(row.durationRounds) : '');
+    setNewBuffIsBuff(row.isBuff === false ? 'false' : 'true');
+    setNewDepClassIds([]);
+    setNewDepRaceIds([]);
   };
 
   const handleDeleteEntity = async () => {
@@ -438,7 +456,7 @@ export default function EditDoctrinePage() {
                 >
                   <Rune kind="sword" size={10} /> {t('hb.edit.bestiary')}
                 </button>
-                <button className="ao-btn ao-btn--primary ao-btn--sm" onClick={() => setAdding(!adding)}>
+                <button className="ao-btn ao-btn--primary ao-btn--sm" onClick={() => { const next = !adding; setAdding(next); if (!next) resetNewContentForm(); }}>
                   <Rune kind="plus" size={10} /> {adding ? t('hb.edit.close') : t('hb.edit.slotNewEntry')}
                 </button>
               </div>
@@ -467,13 +485,14 @@ export default function EditDoctrinePage() {
                 <div className={s.modeRow}>
                   <button
                     className={cn('ao-btn', addMode === 'existing' ? 'ao-btn--primary' : 'ao-btn--ghost', s.modeBtn)}
-                    onClick={() => setAddMode('existing')}
+                    onClick={() => { setAddMode('existing'); setEditingContent(null); }}
+                    disabled={!!editingContent}
                   >
                     {t('hb.edit.existing')}
                   </button>
                   <button
                     className={cn('ao-btn', addMode === 'new' ? 'ao-btn--primary' : 'ao-btn--ghost', s.modeBtn)}
-                    onClick={() => setAddMode('new')}
+                    onClick={() => { if (editingContent) resetNewContentForm(); setAddMode('new'); }}
                   >
                     {t('hb.edit.createNew')}
                   </button>
@@ -689,14 +708,14 @@ export default function EditDoctrinePage() {
 
                   <div className={s.createRow}>
                     <p className={cn('ao-italic', s.createNote)}>
-                      {t('hb.edit.createsMissing', { type: addType.toLowerCase().replace('_', ' ') })}
+                      {editingContent ? t('hb.edit.editingEntity') : t('hb.edit.createsMissing', { type: addType.toLowerCase().replace('_', ' ') })}
                     </p>
                     <button
                       className="ao-btn ao-btn--primary"
                       onClick={handleCreateAndAddContent}
                       disabled={!newName.trim() || creatingContent || addContentMutation.isPending}
                     >
-                      <Rune kind="plus" size={10} /> {t('hb.edit.createSlot')}
+                      <Rune kind={editingContent ? 'scroll' : 'plus'} size={10} /> {editingContent ? t('hb.edit.saveEntity') : t('hb.edit.createSlot')}
                     </button>
                   </div>
                 </div>
@@ -749,17 +768,19 @@ export default function EditDoctrinePage() {
                       {/* Book / Edit button */}
                       <button
                         className={cn('ao-iconbtn', s.iconBtnSm)}
-                        title={grp.type === 'CHARACTER_CLASS' ? t('hb.edit.editRichClass') : grp.type === 'RACE' ? t('hb.edit.editSpecies') : t('hb.edit.view')}
+                        title={grp.type === 'CHARACTER_CLASS' ? t('hb.edit.editRichClass') : grp.type === 'RACE' ? t('hb.edit.editSpecies') : CRUD_KIND[grp.type] ? t('hb.edit.editEntity') : t('hb.edit.view')}
                         onClick={() => {
                           if (grp.type === 'CHARACTER_CLASS') {
                             setEditingRichClass(r);
                             setShowRichClassWizard(true);
                           } else if (grp.type === 'RACE') {
                             handleOpenEditRace(r);
+                          } else if (CRUD_KIND[grp.type]) {
+                            startEditContent(grp.type, r);
                           }
                         }}
                       >
-                        <Rune kind="book" size={12} />
+                        <Rune kind={CRUD_KIND[grp.type] ? 'scroll' : 'book'} size={12} />
                       </button>
                       {grp.type === 'RACE' && (
                         <button
