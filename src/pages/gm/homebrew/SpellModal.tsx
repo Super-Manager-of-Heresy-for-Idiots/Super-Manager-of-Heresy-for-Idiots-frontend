@@ -6,6 +6,7 @@ import {
 } from '@/components/ui/dialog';
 import { referenceApi } from '@/api/reference.api';
 import { homebrewSpellsApi } from '@/api/homebrew-spells.api';
+import { useDamageTypes } from '@/hooks/useContentCatalog';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
 import type { HomebrewSpellRequest } from '@/types';
@@ -36,6 +37,13 @@ export function SpellModal({ open, onClose, packageId, editingId, onSaved }: Spe
   const [concentration, setConcentration] = useState(false);
   const [description, setDescription] = useState('');
   const [higherLevels, setHigherLevels] = useState('');
+  // Механика (Phase B)
+  const [damageDice, setDamageDice] = useState('');
+  const [damageType, setDamageType] = useState('');
+  const [saveAbility, setSaveAbility] = useState('');
+  const [halfOnSave, setHalfOnSave] = useState(false);
+  const [requiresAttackHit, setRequiresAttackHit] = useState(false);
+  const [healingFormula, setHealingFormula] = useState('');
   const [saving, setSaving] = useState(false);
 
   const { data: schoolsResp } = useQuery({
@@ -44,6 +52,15 @@ export function SpellModal({ open, onClose, packageId, editingId, onSaved }: Spe
     enabled: open,
   });
   const schools = schoolsResp?.data ?? [];
+  const { data: damageTypes = [] } = useDamageTypes();
+  const ABILITIES: { slug: string; label: string }[] = [
+    { slug: 'str', label: t('hb.spell.abStr') },
+    { slug: 'dex', label: t('hb.spell.abDex') },
+    { slug: 'con', label: t('hb.spell.abCon') },
+    { slug: 'int', label: t('hb.spell.abInt') },
+    { slug: 'wis', label: t('hb.spell.abWis') },
+    { slug: 'cha', label: t('hb.spell.abCha') },
+  ];
 
   useEffect(() => {
     if (!open) return;
@@ -63,12 +80,20 @@ export function SpellModal({ open, onClose, packageId, editingId, onSaved }: Spe
           setConcentration(!!sp.concentration);
           setDescription(sp.description ?? '');
           setHigherLevels(sp.higherLevels ?? '');
+          setDamageDice(sp.damageDice ?? '');
+          setDamageType(sp.damageType ?? '');
+          setSaveAbility(sp.saveAbility ?? '');
+          setHalfOnSave(!!sp.halfOnSave);
+          setRequiresAttackHit(!!sp.requiresAttackHit);
+          setHealingFormula(sp.healingFormula ?? '');
         })
         .catch(() => toast.error(t('hb.spell.loadFailed')));
     } else {
       setName(''); setNameEn(''); setLevel('0'); setSchool('');
       setCastingTimeRaw(''); setRitual(false); setRangeText(''); setDurationText('');
       setConcentration(false); setDescription(''); setHigherLevels('');
+      setDamageDice(''); setDamageType(''); setSaveAbility(''); setHalfOnSave(false);
+      setRequiresAttackHit(false); setHealingFormula('');
     }
   }, [open, editingId, packageId, t]);
 
@@ -88,6 +113,12 @@ export function SpellModal({ open, onClose, packageId, editingId, onSaved }: Spe
         concentration,
         description: description.trim() || undefined,
         higherLevels: higherLevels.trim() || undefined,
+        damageDice: damageDice.trim() || undefined,
+        damageType: damageType || undefined,
+        saveAbility: saveAbility || undefined,
+        halfOnSave,
+        requiresAttackHit,
+        healingFormula: healingFormula.trim() || undefined,
       };
       if (editingId) await homebrewSpellsApi.update(packageId, editingId, body);
       else await homebrewSpellsApi.create(packageId, body);
@@ -166,6 +197,48 @@ export function SpellModal({ open, onClose, packageId, editingId, onSaved }: Spe
             <label className="ao-label">{t('hb.spell.higherLevels')}</label>
             <textarea className="ao-input" rows={2} value={higherLevels} onChange={(e) => setHigherLevels(e.target.value)} />
           </div>
+
+          {/* Механика (исполняется движком; пусто = только описание) */}
+          <div className={s.sectionTitle}>{t('hb.spell.mechanics')}</div>
+          <div className={s.grid2}>
+            <div>
+              <label className="ao-label">{t('hb.spell.damageDice')}</label>
+              <input className="ao-input" value={damageDice} onChange={(e) => setDamageDice(e.target.value)} placeholder={t('hb.spell.damageDiceHint')} />
+            </div>
+            <div>
+              <label className="ao-label">{t('hb.spell.damageType')}</label>
+              <select className="ao-input" value={damageType} onChange={(e) => setDamageType(e.target.value)}>
+                <option value="">{t('hb.spell.damageTypeNone')}</option>
+                {damageTypes.map((d) => (
+                  <option key={d.slug ?? d.id} value={d.slug ?? ''}>{d.name}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="ao-label">{t('hb.spell.saveAbility')}</label>
+              <select className="ao-input" value={saveAbility} onChange={(e) => setSaveAbility(e.target.value)}>
+                <option value="">{t('hb.spell.saveAbilityNone')}</option>
+                {ABILITIES.map((a) => (
+                  <option key={a.slug} value={a.slug}>{a.label}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="ao-label">{t('hb.spell.healingFormula')}</label>
+              <input className="ao-input" value={healingFormula} onChange={(e) => setHealingFormula(e.target.value)} placeholder={t('hb.spell.healingFormulaHint')} />
+            </div>
+          </div>
+          {saveAbility && (
+            <label className={cn('ao-row ao-gap-8', s.check)}>
+              <input type="checkbox" checked={halfOnSave} onChange={(e) => setHalfOnSave(e.target.checked)} />
+              {t('hb.spell.halfOnSave')}
+            </label>
+          )}
+          <label className={cn('ao-row ao-gap-8', s.check)}>
+            <input type="checkbox" checked={requiresAttackHit} onChange={(e) => setRequiresAttackHit(e.target.checked)} />
+            {t('hb.spell.requiresAttackHit')}
+          </label>
+
           <div className={s.actions}>
             <button className="ao-btn ao-btn--ghost" onClick={onClose} disabled={saving}>{t('common.cancel')}</button>
             <button className="ao-btn ao-btn--primary" onClick={handleSave} disabled={!name.trim() || !school || saving}>

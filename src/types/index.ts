@@ -856,6 +856,13 @@ export interface HomebrewSpellRequest {
   description?: string;
   higherLevels?: string;
   availableToClassIds?: string[];
+  // Механика (P2-1 Phase B)
+  damageDice?: string;
+  damageType?: string;
+  saveAbility?: string;
+  halfOnSave?: boolean;
+  requiresAttackHit?: boolean;
+  healingFormula?: string;
 }
 
 /** homebrew-заклинание для round-trip в редакторе (P2-1). */
@@ -873,6 +880,12 @@ export interface HomebrewSpellResponse {
   description?: string;
   higherLevels?: string;
   availableToClassIds?: string[];
+  damageDice?: string;
+  damageType?: string;
+  saveAbility?: string;
+  halfOnSave?: boolean;
+  requiresAttackHit?: boolean;
+  healingFormula?: string;
   source?: string;
   homebrewPackageId?: string;
   homebrewPackageTitle?: string;
