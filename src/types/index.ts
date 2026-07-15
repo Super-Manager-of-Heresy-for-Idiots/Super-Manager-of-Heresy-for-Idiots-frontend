@@ -1139,6 +1139,31 @@ export interface HomebrewDetailResponse extends HomebrewPackageResponse {
   userRating?: number;
 }
 
+/** Единый homebrew-предмет (P1.5 / IT-2). Снаружи — одна сущность; kind дискриминирует таблицу. */
+export interface HomebrewItemRequest {
+  kind?: 'MAGIC' | 'EQUIPMENT';
+  name: string;
+  nameEn?: string;
+  description?: string;
+  rarity?: string;
+  attunementRequired?: boolean;
+  attunementRequirement?: string;
+}
+
+export interface HomebrewItemResponse {
+  id: string;
+  kind: string;
+  name: string;
+  nameEn?: string;
+  description?: string;
+  rarity?: string;
+  attunementRequired?: boolean;
+  attunementRequirement?: string;
+  source?: string;
+  homebrewPackageId?: string;
+  homebrewPackageTitle?: string;
+}
+
 /** Жалоба на homebrew-пакет в админ-очереди модерации (P2-6). */
 export interface HomebrewReportResponse {
   id: string;
