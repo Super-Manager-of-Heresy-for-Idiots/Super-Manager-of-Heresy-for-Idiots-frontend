@@ -833,6 +833,28 @@ export interface CreateBuffDebuffRequest {
   raceIds?: string[];
 }
 
+/** Тело авторинга homebrew-предыстории (P2-3). */
+export interface CreateBackgroundRequest {
+  name: string;
+  nameEn?: string;
+  description?: string;
+  skillProficiencyNames?: string[];
+  grantedExtras?: string;
+}
+
+/** Тело авторинга homebrew-ресурса (P2-3) — механизм Ярость/Ки (custom_resource_types). */
+export interface CreateCustomResourceTypeRequest {
+  name: string;
+  description?: string;
+  maxValue?: number;
+  maxFormula?: string;
+  shortRestRecovery?: string;
+  shortRestFormula?: string;
+  longRestRecovery?: string;
+  longRestFormula?: string;
+  classBoundId?: string;
+}
+
 // === Class Authoring (new content model) — aggregate upsert ===
 // Mirrors the backend ClassWriteRequest graph: identity + mechanics + features +
 // subclasses + rewardGroups -> options -> typed grants. Children carry a server
@@ -1073,7 +1095,7 @@ export type HomebrewStatus = 'DRAFT' | 'PUBLISHED' | 'UNPUBLISHED' | 'ARCHIVED';
 
 export type ContentType = 'ITEM_TYPE' | 'CHARACTER_CLASS' | 'SKILL' | 'FEAT' |
   'SUBCLASS' | 'RACE' | 'STAT_TYPE' | 'BUFF_DEBUFF' | 'ENCHANTMENT_TYPE' |
-  'CURRENCY' | 'CUSTOM_RESOURCE' | 'ITEM_TEMPLATE';
+  'CURRENCY' | 'CUSTOM_RESOURCE' | 'ITEM_TEMPLATE' | 'ITEM' | 'BACKGROUND';
 
 export interface CreateHomebrewRequest {
   title: string;
@@ -1145,9 +1167,27 @@ export interface HomebrewItemRequest {
   name: string;
   nameEn?: string;
   description?: string;
+  // MAGIC
   rarity?: string;
   attunementRequired?: boolean;
   attunementRequirement?: string;
+  // EQUIPMENT — common
+  equipmentKind?: string; // weapon | armor | gear | tool
+  category?: string;
+  costGold?: number;
+  weightLb?: number;
+  // EQUIPMENT — weapon
+  damageDiceCount?: number;
+  damageDieSize?: number;
+  damageBonus?: number;
+  damageType?: string;
+  flatDamage?: number;
+  // EQUIPMENT — armor
+  baseAc?: number;
+  dexBonusAllowed?: boolean;
+  maxDexBonus?: number;
+  strengthRequired?: number;
+  stealthDisadvantage?: boolean;
 }
 
 export interface HomebrewItemResponse {
@@ -1159,6 +1199,20 @@ export interface HomebrewItemResponse {
   rarity?: string;
   attunementRequired?: boolean;
   attunementRequirement?: string;
+  equipmentKind?: string;
+  category?: string;
+  costGold?: number;
+  weightLb?: number;
+  damageDiceCount?: number;
+  damageDieSize?: number;
+  damageBonus?: number;
+  damageType?: string;
+  flatDamage?: number;
+  baseAc?: number;
+  dexBonusAllowed?: boolean;
+  maxDexBonus?: number;
+  strengthRequired?: number;
+  stealthDisadvantage?: boolean;
   source?: string;
   homebrewPackageId?: string;
   homebrewPackageTitle?: string;
@@ -3348,6 +3402,34 @@ export interface MagicItemDetail {
   url: string | null;
   packageId: string | null;
   allowedEquipment: MagicItemAllowedEquipment[];
+}
+
+// ---------- Unified item definition (IT-1) ----------
+// Единый внешний read-DTO «Предмет»: скрывает деление на equipment_item / magic_item /
+// item_templates. `kind` — дискриминатор; секции статов заполняются по виду.
+export type ItemDefinitionKind = 'EQUIPMENT' | 'MAGIC' | 'TEMPLATE';
+export interface ItemDefinition {
+  id: string;
+  kind: ItemDefinitionKind;
+  slug: string | null;
+  name: string;
+  nameRu: string | null;
+  nameEn: string | null;
+  description: string | null;
+  type: ContentLabel | null;
+  rarity: ContentLabel | null;
+  cost: MagicItemCost | null;
+  weightLb: string | null;
+  url: string | null;
+  packageId: string | null;
+  source: string | null;
+  homebrewTitle: string | null;
+  attunementRequired: boolean | null;
+  attunementRequirement: string | null;
+  equipmentKind: string | null;
+  weaponStat: WeaponStat | null;
+  armorStat: ArmorStat | null;
+  weaponProperties: WeaponItemProperty[] | null;
 }
 
 /* ── Feature rules runtime (Rule Workbench) ─────────────────────────────── */

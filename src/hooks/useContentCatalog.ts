@@ -167,6 +167,34 @@ export function useMagicItem(magicItemId: string | undefined, campaignId?: strin
   });
 }
 
+// ---------- Unified items (IT-1): equipment + magic + legacy template ----------
+export function useItems(campaignId?: string) {
+  return useQuery({
+    queryKey: listKey('items', campaignId),
+    queryFn: async () => {
+      const res = campaignId
+        ? await contentCatalogApi.items.campaignList(campaignId)
+        : await contentCatalogApi.items.list();
+      return res.data ?? [];
+    },
+    staleTime: STALE,
+  });
+}
+
+export function useItem(itemId: string | undefined, campaignId?: string) {
+  return useQuery({
+    queryKey: detailKey('items', itemId, campaignId),
+    queryFn: async () => {
+      const res = campaignId
+        ? await contentCatalogApi.items.campaignGet(campaignId, itemId!)
+        : await contentCatalogApi.items.get(itemId!);
+      return res.data;
+    },
+    enabled: !!itemId,
+    staleTime: STALE,
+  });
+}
+
 // ---------- Damage types (authoring dropdowns) ----------
 export function useDamageTypes() {
   return useQuery({

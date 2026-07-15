@@ -16,6 +16,8 @@ import type {
   CreateSkillRequest,
   CreateFeatRequest,
   CreateBuffDebuffRequest,
+  CreateBackgroundRequest,
+  CreateCustomResourceTypeRequest,
   ContentType,
   AttachableContentResponse,
   HomebrewReportResponse,
@@ -72,6 +74,16 @@ export const homebrewApi = {
 
   createPackageBuffDebuff: async (id: string, data: CreateBuffDebuffRequest): Promise<ApiResponse<HomebrewDetailResponse>> => {
     const response = await api.post<ApiResponse<HomebrewDetailResponse>>(`/homebrew/my/${id}/content/buffs-debuffs`, data);
+    return response.data;
+  },
+
+  createPackageBackground: async (id: string, data: CreateBackgroundRequest): Promise<ApiResponse<HomebrewDetailResponse>> => {
+    const response = await api.post<ApiResponse<HomebrewDetailResponse>>(`/homebrew/my/${id}/content/backgrounds`, data);
+    return response.data;
+  },
+
+  createPackageCustomResource: async (id: string, data: CreateCustomResourceTypeRequest): Promise<ApiResponse<HomebrewDetailResponse>> => {
+    const response = await api.post<ApiResponse<HomebrewDetailResponse>>(`/homebrew/my/${id}/content/custom-resources`, data);
     return response.data;
   },
 

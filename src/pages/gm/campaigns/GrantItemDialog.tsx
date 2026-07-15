@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { OrdoInterfaceIcon, Rune, type OrdoInterfaceIconKey } from '@/components/ordo';
 import { RarityBadge, rarityLabelKey } from '@/components/items/RarityBadge';
 import { useGrantItem } from '@/hooks/useInventory';
-import { useEquipmentItems, useMagicItems } from '@/hooks/useContentCatalog';
+import { useItems } from '@/hooks/useContentCatalog';
 import { isRetryableError } from '@/lib/errors';
 import { rarityColor, normalizeRarity, RARITY_ORDER } from '@/lib/itemVisuals';
 import { formatApproxGold, goldFromCopper } from '@/lib/price';
@@ -15,8 +15,7 @@ import { useT } from '@/i18n/I18nContext';
 import type {
   GrantItemRequest,
   GrantItemKind,
-  EquipmentItemDetail,
-  MagicItemDetail,
+  ItemDefinition,
   DiceFormula,
 } from '@/types';
 import { ItemBuffPickerDialog } from './ItemBuffPickerDialog';
@@ -65,39 +64,42 @@ function diceText(d?: DiceFormula | null): string | undefined {
   return txt || undefined;
 }
 
-function equipmentCategory(e: EquipmentItemDetail): ItemCategory {
-  const kind = (e.kind ?? '').toLowerCase();
-  if (kind === 'weapon' || e.weaponStat) return 'weapon';
-  if (kind === 'armor' || e.armorStat) return 'armor';
+/* ── unified item catalog (IT-1) → single GrantEntry normalizer ──
+   Одна выдача /campaigns/{id}/reference/items несёт три вида предметов
+   (EQUIPMENT / MAGIC / TEMPLATE-легаси); дискриминатор kind сохраняется в
+   GrantEntry, чтобы грант ушёл с правильной парой (itemId, itemKind). */
+
+function itemCategory(d: ItemDefinition): ItemCategory {
+  if (d.kind === 'MAGIC') return 'magic';
+  if (d.kind === 'TEMPLATE') return d.rarity ? 'magic' : 'gear';
+  const kind = (d.equipmentKind ?? '').toLowerCase();
+  if (kind === 'weapon' || d.weaponStat) return 'weapon';
+  if (kind === 'armor' || d.armorStat) return 'armor';
   if (kind === 'tool') return 'tool';
   return 'gear';
 }
 
-function equipmentEntry(e: EquipmentItemDetail): GrantEntry {
-  return {
-    id: e.id,
-    kind: 'EQUIPMENT',
-    category: equipmentCategory(e),
-    name: e.name,
-    itemTypeName: e.category?.name ?? e.kind,
-    damageDice: diceText(e.weaponStat?.damageDice),
-    priceGold: goldFromCopper(e.cost?.copperValue),
-    homebrew: !!e.packageId,
-    description: e.propertiesText ?? undefined,
-  };
+function itemPriceGold(d: ItemDefinition): number | null {
+  if (d.cost?.copperValue != null) return goldFromCopper(d.cost.copperValue);
+  if (d.cost?.amount != null) {
+    const n = Number(d.cost.amount);
+    return Number.isNaN(n) ? null : n;
+  }
+  return null;
 }
 
-function magicEntry(m: MagicItemDetail): GrantEntry {
+function itemEntry(d: ItemDefinition): GrantEntry {
   return {
-    id: m.id,
-    kind: 'MAGIC',
-    category: 'magic',
-    name: m.name,
-    itemTypeName: m.type?.name ?? undefined,
-    rarity: m.rarity?.slug ?? m.rarity?.name ?? undefined,
-    priceGold: goldFromCopper(m.cost?.copperValue),
-    homebrew: !!m.packageId,
-    description: m.description ?? undefined,
+    id: d.id,
+    kind: d.kind,
+    category: itemCategory(d),
+    name: d.name,
+    itemTypeName: d.type?.name ?? d.equipmentKind ?? undefined,
+    rarity: d.rarity?.slug ?? d.rarity?.name ?? undefined,
+    damageDice: diceText(d.weaponStat?.damageDice),
+    priceGold: itemPriceGold(d),
+    homebrew: !!d.packageId,
+    description: d.description ?? undefined,
   };
 }
 
@@ -120,27 +122,12 @@ export function GrantItemDialog({
   const canManageItemBuffs = user?.role === 'ADMIN' || user?.role === 'GAME_MASTER';
 
   const {
-    data: equipmentData,
-    isLoading: equipmentLoading,
-    isError: equipmentIsError,
-    error: equipmentError,
-    refetch: refetchEquipment,
-  } = useEquipmentItems(campaignId);
-  const {
-    data: magicData,
-    isLoading: magicLoading,
-    isError: magicIsError,
-    error: magicError,
-    refetch: refetchMagic,
-  } = useMagicItems(campaignId);
-
-  const loading = equipmentLoading || magicLoading;
-  const isError = equipmentIsError || magicIsError;
-  const loadError = equipmentError ?? magicError;
-  const refetchAll = () => {
-    refetchEquipment();
-    refetchMagic();
-  };
+    data: itemsData,
+    isLoading: loading,
+    isError,
+    error: loadError,
+    refetch: refetchAll,
+  } = useItems(campaignId);
 
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState<ItemCategory | 'all'>('all');
@@ -154,11 +141,10 @@ export function GrantItemDialog({
 
   /* ── derived ── */
 
-  const entries: GrantEntry[] = useMemo(() => {
-    const eq = (equipmentData ?? []).map(equipmentEntry);
-    const mg = (magicData ?? []).map(magicEntry);
-    return [...eq, ...mg];
-  }, [equipmentData, magicData]);
+  const entries: GrantEntry[] = useMemo(
+    () => (itemsData ?? []).map(itemEntry),
+    [itemsData],
+  );
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -362,7 +348,7 @@ export function GrantItemDialog({
                   <div className={s.state}>
                     <div>{t('camp2.inv.templatesLoadError')}</div>
                     {isRetryableError(loadError) && (
-                      <button type="button" className="ao-btn ao-btn--ghost" onClick={refetchAll}>
+                      <button type="button" className="ao-btn ao-btn--ghost" onClick={() => refetchAll()}>
                         <Rune kind="arrow-r" size={11} /> {t('camp2.inv.retry')}
                       </button>
                     )}

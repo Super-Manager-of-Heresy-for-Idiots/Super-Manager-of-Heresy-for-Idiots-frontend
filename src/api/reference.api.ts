@@ -53,6 +53,12 @@ export const referenceApi = {
     return response.data;
   },
 
+  // Редкости для дропдауна авторинга предметов (P1.5 / IT-3).
+  getRarities: async (): Promise<ApiResponse<ContentLabel[]>> => {
+    const response = await api.get<ApiResponse<ContentLabel[]>>('/reference/rarities');
+    return response.data;
+  },
+
   getClasses: async (): Promise<ApiResponse<CharacterClassDetailResponse[]>> => {
     const response = await api.get<ApiResponse<CharacterClassDetailResponse[]>>('/reference/classes');
     return {

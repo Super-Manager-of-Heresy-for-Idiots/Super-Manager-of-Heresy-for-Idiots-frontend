@@ -27,6 +27,8 @@ import {
 } from '@/hooks/useHomebrew';
 import { useStatTypes } from '@/hooks/useAdmin';
 import { homebrewApi } from '@/api/homebrew.api';
+import { homebrewItemsApi } from '@/api/homebrew-items.api';
+import { ItemModal } from './ItemModal';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
 import { EQUIPMENT_SLOT_LABELS, EQUIPMENT_SLOTS } from '@/types';
@@ -39,6 +41,8 @@ const ADD_TYPE_ICON: Record<string, string> = {
   SKILL: 'eye',
   FEAT: 'sigil-3',
   BUFF_DEBUFF: 'hex',
+  BACKGROUND: 'book',
+  CUSTOM_RESOURCE: 'flame',
 };
 
 // P1-6: типы с полным CRUD сущности (kind в пути DELETE/PUT).
@@ -58,6 +62,9 @@ const CONTENT_GROUPS: { titleKey: string; icon: string; type: ContentType }[] = 
   { titleKey: 'hb.edit.groupFeats', icon: 'sigil-3', type: 'FEAT' },
   { titleKey: 'hb.edit.groupSubclasses', icon: 'cross-pat', type: 'SUBCLASS' },
   { titleKey: 'hb.edit.groupBuffs', icon: 'hex', type: 'BUFF_DEBUFF' },
+  { titleKey: 'hb.edit.groupItems', icon: 'diamond', type: 'ITEM' },
+  { titleKey: 'hb.edit.groupBackgrounds', icon: 'book', type: 'BACKGROUND' },
+  { titleKey: 'hb.edit.groupResources', icon: 'flame', type: 'CUSTOM_RESOURCE' },
 ];
 
 export default function EditDoctrinePage() {
@@ -94,6 +101,17 @@ export default function EditDoctrinePage() {
   const [newBuffModifierValue, setNewBuffModifierValue] = useState('');
   const [newBuffDurationRounds, setNewBuffDurationRounds] = useState('');
   const [newBuffIsBuff, setNewBuffIsBuff] = useState('true');
+  // P2-3: предыстория
+  const [newBgSkills, setNewBgSkills] = useState('');
+  const [newBgExtras, setNewBgExtras] = useState('');
+  // P2-3: ресурс (custom_resource_types)
+  const [newCrMaxValue, setNewCrMaxValue] = useState('');
+  const [newCrMaxFormula, setNewCrMaxFormula] = useState('');
+  const [newCrShortRecovery, setNewCrShortRecovery] = useState('none');
+  const [newCrShortFormula, setNewCrShortFormula] = useState('');
+  const [newCrLongRecovery, setNewCrLongRecovery] = useState('full');
+  const [newCrLongFormula, setNewCrLongFormula] = useState('');
+  const [newCrClassId, setNewCrClassId] = useState('');
   const [newDepClassIds, setNewDepClassIds] = useState<string[]>([]);
   const [newDepRaceIds, setNewDepRaceIds] = useState<string[]>([]);
   const [creatingContent, setCreatingContent] = useState(false);
@@ -101,9 +119,11 @@ export default function EditDoctrinePage() {
   const [editingRichClass, setEditingRichClass] = useState<ContentSummaryDto | null>(null);
   const [showPublish, setShowPublish] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
-  const [deleteEntityTarget, setDeleteEntityTarget] = useState<{ kind: CrudKind; id: string; name: string } | null>(null);
+  const [deleteEntityTarget, setDeleteEntityTarget] = useState<{ kind: CrudKind | 'items'; id: string; name: string } | null>(null);
   const [deletingEntity, setDeletingEntity] = useState(false);
   const [editingContent, setEditingContent] = useState<{ type: ContentType; id: string } | null>(null);
+  const [showMagicItem, setShowMagicItem] = useState(false);
+  const [editingMagicItemId, setEditingMagicItemId] = useState<string | null>(null);
   const [showRaceEditor, setShowRaceEditor] = useState(false);
   const [editingRaceId, setEditingRaceId] = useState<string | null>(null);
   const [editingRaceSummary, setEditingRaceSummary] = useState<ContentSummaryDto | null>(null);
@@ -189,6 +209,15 @@ export default function EditDoctrinePage() {
     setNewBuffModifierValue('');
     setNewBuffDurationRounds('');
     setNewBuffIsBuff('true');
+    setNewBgSkills('');
+    setNewBgExtras('');
+    setNewCrMaxValue('');
+    setNewCrMaxFormula('');
+    setNewCrShortRecovery('none');
+    setNewCrShortFormula('');
+    setNewCrLongRecovery('full');
+    setNewCrLongFormula('');
+    setNewCrClassId('');
     setNewDepClassIds([]);
     setNewDepRaceIds([]);
     setEditingContent(null);
@@ -232,6 +261,27 @@ export default function EditDoctrinePage() {
         };
         if (editId) await homebrewApi.updatePackageBuffDebuff(pkg.id, editId, body);
         else await homebrewApi.createPackageBuffDebuff(pkg.id, body);
+      } else if (addType === 'BACKGROUND') {
+        const skillProficiencyNames = newBgSkills
+          .split(',').map((x) => x.trim()).filter(Boolean);
+        await homebrewApi.createPackageBackground(pkg.id, {
+          name,
+          description,
+          skillProficiencyNames: skillProficiencyNames.length > 0 ? skillProficiencyNames : undefined,
+          grantedExtras: newBgExtras.trim() || undefined,
+        });
+      } else if (addType === 'CUSTOM_RESOURCE') {
+        await homebrewApi.createPackageCustomResource(pkg.id, {
+          name,
+          description,
+          maxValue: newCrMaxValue ? Number(newCrMaxValue) : undefined,
+          maxFormula: newCrMaxFormula.trim() || undefined,
+          shortRestRecovery: newCrShortRecovery,
+          shortRestFormula: newCrShortRecovery === 'formula' ? (newCrShortFormula.trim() || undefined) : undefined,
+          longRestRecovery: newCrLongRecovery,
+          longRestFormula: newCrLongRecovery === 'formula' ? (newCrLongFormula.trim() || undefined) : undefined,
+          classBoundId: newCrClassId || undefined,
+        });
       }
 
       queryClient.invalidateQueries({ queryKey: ['homebrew-my'] });
@@ -273,7 +323,11 @@ export default function EditDoctrinePage() {
     if (!deleteEntityTarget) return;
     setDeletingEntity(true);
     try {
-      await homebrewApi.deletePackageEntity(pkg.id, deleteEntityTarget.kind, deleteEntityTarget.id);
+      if (deleteEntityTarget.kind === 'items') {
+        await homebrewItemsApi.remove(pkg.id, deleteEntityTarget.id);
+      } else {
+        await homebrewApi.deletePackageEntity(pkg.id, deleteEntityTarget.kind, deleteEntityTarget.id);
+      }
       queryClient.invalidateQueries({ queryKey: ['homebrew-my'] });
       queryClient.invalidateQueries({ queryKey: ['homebrew-my', pkg.id] });
       setDeleteEntityTarget(null);
@@ -452,6 +506,12 @@ export default function EditDoctrinePage() {
                 </button>
                 <button
                   className="ao-btn ao-btn--ghost ao-btn--sm"
+                  onClick={() => { setEditingMagicItemId(null); setShowMagicItem(true); }}
+                >
+                  <Rune kind="diamond" size={10} /> {t('hb.item.item')}
+                </button>
+                <button
+                  className="ao-btn ao-btn--ghost ao-btn--sm"
                   onClick={() => navigate(`/gm/homebrew/${pkg.id}/bestiary`)}
                 >
                   <Rune kind="sword" size={10} /> {t('hb.edit.bestiary')}
@@ -481,6 +541,8 @@ export default function EditDoctrinePage() {
                   <option value="SKILL">{t('hb.edit.optSkill')}</option>
                   <option value="FEAT">{t('hb.edit.optFeat')}</option>
                   <option value="BUFF_DEBUFF">{t('hb.edit.optBuffDebuff')}</option>
+                  <option value="BACKGROUND">{t('hb.edit.optBackground')}</option>
+                  <option value="CUSTOM_RESOURCE">{t('hb.edit.optResource')}</option>
                 </select>
                 <div className={s.modeRow}>
                   <button
@@ -655,6 +717,92 @@ export default function EditDoctrinePage() {
                     </div>
                   )}
 
+                  {addType === 'BACKGROUND' && (
+                    <div className={s.buffGrid}>
+                      <input
+                        className={cn('ao-input', s.inputSm2)}
+                        value={newBgSkills}
+                        onChange={(e) => setNewBgSkills(e.target.value)}
+                        placeholder={t('hb.edit.bgSkillsPlaceholder')}
+                      />
+                      <textarea
+                        className={cn('ao-input', s.inputSm2)}
+                        value={newBgExtras}
+                        onChange={(e) => setNewBgExtras(e.target.value)}
+                        placeholder={t('hb.edit.bgExtrasPlaceholder')}
+                        rows={2}
+                      />
+                    </div>
+                  )}
+
+                  {addType === 'CUSTOM_RESOURCE' && (
+                    <div className={s.buffGrid}>
+                      <div className={cn('ao-rgrid', s.buffPair)}>
+                        <input
+                          className={cn('ao-input', s.inputSm2)}
+                          type="number"
+                          value={newCrMaxValue}
+                          onChange={(e) => setNewCrMaxValue(e.target.value)}
+                          placeholder={t('hb.edit.crMaxValuePlaceholder')}
+                        />
+                        <input
+                          className={cn('ao-input', s.inputSm2)}
+                          value={newCrMaxFormula}
+                          onChange={(e) => setNewCrMaxFormula(e.target.value)}
+                          placeholder={t('hb.edit.crMaxFormulaPlaceholder')}
+                        />
+                      </div>
+                      <div className={cn('ao-rgrid', s.buffPair)}>
+                        <select
+                          className={cn('ao-input', s.inputSm)}
+                          value={newCrShortRecovery}
+                          onChange={(e) => setNewCrShortRecovery(e.target.value)}
+                        >
+                          <option value="none">{t('hb.edit.crShortNone')}</option>
+                          <option value="full">{t('hb.edit.crShortFull')}</option>
+                          <option value="formula">{t('hb.edit.crShortFormula')}</option>
+                        </select>
+                        {newCrShortRecovery === 'formula' && (
+                          <input
+                            className={cn('ao-input', s.inputSm2)}
+                            value={newCrShortFormula}
+                            onChange={(e) => setNewCrShortFormula(e.target.value)}
+                            placeholder={t('hb.edit.crShortFormulaPlaceholder')}
+                          />
+                        )}
+                      </div>
+                      <div className={cn('ao-rgrid', s.buffPair)}>
+                        <select
+                          className={cn('ao-input', s.inputSm)}
+                          value={newCrLongRecovery}
+                          onChange={(e) => setNewCrLongRecovery(e.target.value)}
+                        >
+                          <option value="none">{t('hb.edit.crLongNone')}</option>
+                          <option value="full">{t('hb.edit.crLongFull')}</option>
+                          <option value="formula">{t('hb.edit.crLongFormula')}</option>
+                        </select>
+                        {newCrLongRecovery === 'formula' && (
+                          <input
+                            className={cn('ao-input', s.inputSm2)}
+                            value={newCrLongFormula}
+                            onChange={(e) => setNewCrLongFormula(e.target.value)}
+                            placeholder={t('hb.edit.crLongFormulaPlaceholder')}
+                          />
+                        )}
+                      </div>
+                      <select
+                        className={cn('ao-input', s.inputSm)}
+                        value={newCrClassId}
+                        onChange={(e) => setNewCrClassId(e.target.value)}
+                      >
+                        <option value="">{t('hb.edit.crClassNone')}</option>
+                        {(contentByType['CHARACTER_CLASS'] || []).map((c) => (
+                          <option key={c.id} value={c.id}>{c.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+
                   {(addType === 'SKILL' || addType === 'FEAT' || addType === 'BUFF_DEBUFF') && (
                     <div className={s.depBox}>
                       <div className={cn('ao-overline', s.depTitle)}>{t('hb.edit.depTitle')}</div>
@@ -768,19 +916,22 @@ export default function EditDoctrinePage() {
                       {/* Book / Edit button */}
                       <button
                         className={cn('ao-iconbtn', s.iconBtnSm)}
-                        title={grp.type === 'CHARACTER_CLASS' ? t('hb.edit.editRichClass') : grp.type === 'RACE' ? t('hb.edit.editSpecies') : CRUD_KIND[grp.type] ? t('hb.edit.editEntity') : t('hb.edit.view')}
+                        title={grp.type === 'CHARACTER_CLASS' ? t('hb.edit.editRichClass') : grp.type === 'RACE' ? t('hb.edit.editSpecies') : (CRUD_KIND[grp.type] || grp.type === 'ITEM') ? t('hb.edit.editEntity') : t('hb.edit.view')}
                         onClick={() => {
                           if (grp.type === 'CHARACTER_CLASS') {
                             setEditingRichClass(r);
                             setShowRichClassWizard(true);
                           } else if (grp.type === 'RACE') {
                             handleOpenEditRace(r);
+                          } else if (grp.type === 'ITEM') {
+                            setEditingMagicItemId(r.id);
+                            setShowMagicItem(true);
                           } else if (CRUD_KIND[grp.type]) {
                             startEditContent(grp.type, r);
                           }
                         }}
                       >
-                        <Rune kind={CRUD_KIND[grp.type] ? 'scroll' : 'book'} size={12} />
+                        <Rune kind={(CRUD_KIND[grp.type] || grp.type === 'ITEM') ? 'scroll' : 'book'} size={12} />
                       </button>
                       {grp.type === 'RACE' && (
                         <button
@@ -805,11 +956,12 @@ export default function EditDoctrinePage() {
                         onClick={() => {
                           const kind = CRUD_KIND[grp.type];
                           if (kind) setDeleteEntityTarget({ kind, id: r.id, name: r.name });
+                          else if (grp.type === 'ITEM') setDeleteEntityTarget({ kind: 'items', id: r.id, name: r.name });
                           else handleRemoveContent(r.id);
                         }}
-                        title={CRUD_KIND[grp.type] ? t('hb.edit.deleteEntity') : t('hb.edit.remove')}
+                        title={(CRUD_KIND[grp.type] || grp.type === 'ITEM') ? t('hb.edit.deleteEntity') : t('hb.edit.remove')}
                       >
-                        <Rune kind={CRUD_KIND[grp.type] ? 'flame' : 'x'} size={12} />
+                        <Rune kind={(CRUD_KIND[grp.type] || grp.type === 'ITEM') ? 'flame' : 'x'} size={12} />
                       </button>
                     </div>
                   ))
@@ -829,6 +981,17 @@ export default function EditDoctrinePage() {
         packageId={pkg.id}
         editingId={editingRichClass?.id}
         onSaved={() => setEditingRichClass(null)}
+      />
+
+      <ItemModal
+        open={showMagicItem}
+        onClose={() => { setShowMagicItem(false); setEditingMagicItemId(null); }}
+        packageId={pkg.id}
+        editingId={editingMagicItemId}
+        onSaved={() => {
+          queryClient.invalidateQueries({ queryKey: ['homebrew-my'] });
+          queryClient.invalidateQueries({ queryKey: ['homebrew-my', pkg.id] });
+        }}
       />
 
       <RaceEditor

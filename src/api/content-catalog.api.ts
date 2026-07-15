@@ -4,6 +4,7 @@ import type {
   BackgroundDetail,
   EquipmentItemDetail,
   FeatDetail,
+  ItemDefinition,
   MagicItemDetail,
   SpellDetail,
 } from '@/types';
@@ -53,4 +54,6 @@ export const contentCatalogApi = {
   backgrounds: catalogResource<BackgroundDetail>('backgrounds'),
   equipment: catalogResource<EquipmentItemDetail>('equipment'),
   magicItems: catalogResource<MagicItemDetail>('magic-items'),
+  // Единый каталог «Предметов» (IT-1): equipment + magic + legacy template в одной выдаче.
+  items: catalogResource<ItemDefinition>('items'),
 };

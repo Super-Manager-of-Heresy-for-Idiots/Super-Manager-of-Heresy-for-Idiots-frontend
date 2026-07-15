@@ -1,0 +1,64 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.check {
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--ink-quiet);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+/* Селектор вида предмета (магический / оружие / броня / снаряжение / инструмент) */
+.kindTabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.kindTab {
+  flex: 1 1 auto;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ink-quiet);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.kindTab.kindTabOn {
+  border-color: var(--gold);
+  color: var(--gold);
+  background: color-mix(in srgb, var(--gold) 8%, transparent);
+}
+
+/* Двухколоночная сетка для числовых stat-полей */
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+}
+
+.sectionTitle {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ink-faint);
+}
