@@ -724,6 +724,9 @@ function AbilityUseSection({
   const useAbility = useBattleUseAbility();
   const { data: inventory } = useCharacterInventory(campaignId, characterId);
   const [targetId, setTargetId] = useState(lockedTargetId ?? targets[0]?.id ?? '');
+  const [selectedClassId, setSelectedClassId] = useState(classActions[0]?.featureId ?? '');
+  const [manualMode, setManualMode] = useState(false);
+  const [manualStr, setManualStr] = useState('');
 
   useEffect(() => {
     if (lockedTargetId && targets.some((c) => c.id === lockedTargetId)) setTargetId(lockedTargetId);
@@ -731,6 +734,11 @@ function AbilityUseSection({
   useEffect(() => {
     if (!targets.some((c) => c.id === targetId)) setTargetId(targets[0]?.id ?? '');
   }, [targets, targetId]);
+  useEffect(() => {
+    if (!classActions.some((action) => action.featureId === selectedClassId)) {
+      setSelectedClassId(classActions[0]?.featureId ?? '');
+    }
+  }, [classActions, selectedClassId]);
 
   const itemActions = useMemo(
     () =>
@@ -743,21 +751,46 @@ function AbilityUseSection({
     [inventory],
   );
   const hasAbilities = classActions.length > 0 || itemActions.length > 0;
-  if (!hasAbilities) return null;
 
   const commandId = () =>
     typeof crypto !== 'undefined' && 'randomUUID' in crypto
       ? crypto.randomUUID()
       : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
-  const submitClass = (featureId: string, requiresTarget: boolean) => {
+  const selectedClass = classActions.find((action) => action.featureId === selectedClassId) ?? null;
+  const { data: classPlan, isFetching: classPlanLoading } = useQuery({
+    queryKey: ['battle-ability-plan', campaignId, battleId, selectedClassId],
+    queryFn: async () => (await battlesApi.planAbility(campaignId, battleId, selectedClassId)).data ?? null,
+    enabled: !!campaignId && !!battleId && !!selectedClassId,
+    staleTime: 60_000,
+  });
+  const classHasDamage = (classPlan?.damages?.length ?? 0) > 0;
+  const manualNum = parseInt(manualStr, 10);
+  const manualValid = Number.isFinite(manualNum) && manualNum >= 0;
+  const classUseBlocked =
+    !selectedClass
+      ? null
+      : !selectedClass.available
+        ? selectedClass.unavailableReason || t('battle.action.ability.unavailable')
+        : selectedClass.requiresTarget && !targetId
+          ? t('battle.attack.pickTarget')
+          : classHasDamage && manualMode && !manualValid
+            ? t('battle.action.spell.manualDmg')
+            : null;
+
+  if (!hasAbilities) return null;
+
+  const submitClass = () => {
+    if (!selectedClass || classUseBlocked) return;
     useAbility.mutate({
       campaignId,
       battleId,
       characterId,
       data: {
-        featureId,
-        targetCombatantId: requiresTarget ? targetId || undefined : targetId || undefined,
+        featureId: selectedClass.featureId,
+        targetCombatantId: targetId || undefined,
+        damageRollMode: classHasDamage ? (manualMode ? 'MANUAL' : 'AUTO') : undefined,
+        manualDamage: classHasDamage && manualMode ? manualNum : undefined,
         clientCommandId: commandId(),
       },
     });
@@ -814,18 +847,18 @@ function AbilityUseSection({
           <div className={cn('ao-overline', s.fieldLabel, s.mt12)}>{t('battle.action.ability.class')}</div>
           <div className={s.itemList}>
             {classActions.map((action) => {
-              const disabled = useAbility.isPending || !action.available || (action.requiresTarget && !targetId);
               return (
                 <button
                   key={action.featureId}
                   type="button"
-                  className={cn('ao-btn ao-btn--sm', s.itemBtn)}
-                  disabled={disabled}
-                  onClick={() => submitClass(action.featureId, action.requiresTarget)}
+                  className={cn('ao-btn ao-btn--sm', s.itemBtn, selectedClassId === action.featureId && s.itemBtnActive)}
+                  onClick={() => setSelectedClassId(action.featureId)}
                   title={action.unavailableReason ?? t('battle.action.ability.use')}
+                  aria-pressed={selectedClassId === action.featureId}
                 >
                   <span className={s.itemName}>{action.featureName}</span>
                   {action.actionTypeLabel && <span className={s.chipMeta}>{action.actionTypeLabel}</span>}
+                  {action.manualOnly && <span className={s.chipMeta}>{t('battle.action.ability.manualOnly')}</span>}
                   {action.resourceCost != null && action.resourceKey && (
                     <span className={s.chipMeta}>
                       {action.resourceKey} -{action.resourceCost}
@@ -835,6 +868,51 @@ function AbilityUseSection({
               );
             })}
           </div>
+          {classPlanLoading && <div className={cn(s.muted, s.mt12)}>{t('battle.action.ability.previewLoading')}</div>}
+          {classPlan && <SpellPreview plan={classPlan} />}
+          {classHasDamage && (
+            <>
+              <div className={cn('ao-overline', s.fieldLabel, s.mt12)}>{t('battle.action.spell.damageRoll')}</div>
+              <div className="ao-row ao-gap-4 ao-wrap">
+                <button
+                  type="button"
+                  className={cn('ao-btn ao-btn--sm', !manualMode && 'ao-btn--primary')}
+                  onClick={() => setManualMode(false)}
+                >
+                  {t('battle.action.spell.auto')}
+                </button>
+                <button
+                  type="button"
+                  className={cn('ao-btn ao-btn--sm', manualMode && 'ao-btn--primary')}
+                  onClick={() => setManualMode(true)}
+                >
+                  {t('battle.action.spell.manual')}
+                </button>
+              </div>
+              {manualMode && (
+                <div className={cn('ao-row ao-gap-8 ao-wrap', s.mt8)}>
+                  <input
+                    className={cn('ao-input', s.numField)}
+                    type="number"
+                    min={0}
+                    value={manualStr}
+                    onChange={(e) => setManualStr(e.target.value)}
+                    placeholder={t('battle.action.spell.manualDmg')}
+                  />
+                  <span className={s.hint}>{t('battle.action.spell.manualHint')}</span>
+                </div>
+              )}
+            </>
+          )}
+          {classUseBlocked && <div className={cn('ao-italic', s.hint, s.mt8)}>{t('battle.action.ability.blocked', { reason: classUseBlocked })}</div>}
+          <button
+            type="button"
+            className={cn('ao-btn ao-btn--sm ao-btn--primary', s.mt12)}
+            disabled={useAbility.isPending || !!classUseBlocked || !selectedClass}
+            onClick={submitClass}
+          >
+            {t('battle.action.ability.use')}
+          </button>
         </>
       )}
 
