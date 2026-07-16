@@ -191,11 +191,11 @@ export function ClassBuilderModal({
 
         <div className={s.body}>
           {tab === 'identity' && <IdentityTab draft={draft} patch={patch} />}
-          {tab === 'mechanics' && <MechanicsTab draft={draft} patch={patch} ref={ref} />}
+          {tab === 'mechanics' && <MechanicsTab draft={draft} patch={patch} refData={ref} />}
           {tab === 'proficiency' && <ProficiencyTab draft={draft} patch={patch} />}
           {tab === 'features' && <FeaturesTab draft={draft} patch={patch} />}
           {tab === 'rewards' && (
-            <RewardsTab draft={draft} setGroups={setGroups} issues={issues} ref={ref} />
+            <RewardsTab draft={draft} setGroups={setGroups} issues={issues} refData={ref} />
           )}
           {tab === 'review' && (
             <ReviewTab draft={draft} issues={issues} previewCtx={previewCtx} />
@@ -314,11 +314,11 @@ function IdentityTab({ draft, patch }: { draft: ClassDraft; patch: (p: Partial<C
 function MechanicsTab({
   draft,
   patch,
-  ref,
+  refData,
 }: {
   draft: ClassDraft;
   patch: (p: Partial<ClassDraft>) => void;
-  ref: ReturnType<typeof useBuilderRefData>;
+  refData: ReturnType<typeof useBuilderRefData>;
 }) {
   const sc = draft.spellcasting;
   return (
@@ -340,14 +340,14 @@ function MechanicsTab({
         </Field>
       </div>
       <Field label="Основные характеристики*">
-        <MultiSelect options={ref.abilities} selected={draft.primaryAbilityIds} onChange={(ids) => patch({ primaryAbilityIds: ids })} />
+        <MultiSelect options={refData.abilities} selected={draft.primaryAbilityIds} onChange={(ids) => patch({ primaryAbilityIds: ids })} />
       </Field>
       <Field label="Спасброски">
-        <MultiSelect options={ref.abilities} selected={draft.savingThrowIds} onChange={(ids) => patch({ savingThrowIds: ids })} />
+        <MultiSelect options={refData.abilities} selected={draft.savingThrowIds} onChange={(ids) => patch({ savingThrowIds: ids })} />
       </Field>
       {!draft.skillChoiceAny && (
         <Field label="Пул навыков">
-          <MultiSelect options={ref.skills} selected={draft.skillOptionIds} onChange={(ids) => patch({ skillOptionIds: ids })} />
+          <MultiSelect options={refData.skills} selected={draft.skillOptionIds} onChange={(ids) => patch({ skillOptionIds: ids })} />
         </Field>
       )}
 
@@ -355,7 +355,7 @@ function MechanicsTab({
         <span className="ao-h6">Заклинательство</span>
         <button
           className="ao-btn ao-btn--sm ao-btn--ghost"
-          onClick={() => patch({ spellcasting: sc ? null : { casterProgression: 'FULL', spellcastingAbilityId: ref.abilities[0]?.id ?? '', preparation: 'KNOWN', ritualCasting: false } })}
+          onClick={() => patch({ spellcasting: sc ? null : { casterProgression: 'FULL', spellcastingAbilityId: refData.abilities[0]?.id ?? '', preparation: 'KNOWN', ritualCasting: false } })}
         >
           {sc ? 'Убрать' : 'Сделать заклинателем'}
         </button>
@@ -369,7 +369,7 @@ function MechanicsTab({
           <Field label="Базовая характеристика">
             <select className="ao-input" value={sc.spellcastingAbilityId} onChange={(e) => patch({ spellcasting: { ...sc, spellcastingAbilityId: e.target.value } })}>
               <option value="">—</option>
-              {ref.abilities.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
+              {refData.abilities.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
             </select>
           </Field>
           <Field label="Подготовка">
@@ -444,12 +444,12 @@ function RewardsTab({
   draft,
   setGroups,
   issues,
-  ref,
+  refData,
 }: {
   draft: ClassDraft;
   setGroups: (groups: RewardGroupInput[]) => void;
   issues: AuthoringValidationIssue[];
-  ref: ReturnType<typeof useBuilderRefData>;
+  refData: ReturnType<typeof useBuilderRefData>;
 }) {
   const groups = draft.rewardGroups;
   const add = (kind: 'AUTO' | 'CHOICE') => setGroups([...groups, emptyGroup(1, groups.length, kind)]);
@@ -468,7 +468,7 @@ function RewardsTab({
           index={gi}
           total={groups.length}
           issues={issues}
-          refData={ref}
+          refData={refData}
           localRefs={{ subclasses: draft.subclasses ?? [], features: draft.features }}
           onChange={(ng) => setGroups(groups.map((x, j) => j === gi ? ng : x))}
           onMove={(dir) => setGroups(moveItem(groups, gi, dir))}

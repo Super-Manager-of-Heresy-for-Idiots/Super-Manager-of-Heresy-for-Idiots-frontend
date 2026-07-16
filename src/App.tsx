@@ -1,16 +1,17 @@
-import { lazy, Suspense, useEffect } from 'react';
+import { Suspense, useEffect } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
 import { I18nProvider } from './i18n/I18nProvider';
+import { lazyWithRetry } from './lib/lazyWithRetry';
 import { isRetryableError } from './lib/errors';
 import { bootstrapAuth } from './lib/authSession';
 import { useAuthStore } from './store/authStore';
 import { PageFallback } from './components/layout/PageFallback';
 import { BugReportErrorBoundary } from './components/bug-report/BugReportErrorBoundary';
 
-const AppRouter = lazy(() => import('./AppRouter'));
+const AppRouter = lazyWithRetry(() => import('./AppRouter'));
 
-const BugReportWidget = lazy(() =>
+const BugReportWidget = lazyWithRetry(() =>
   import('./components/bug-report/BugReportWidget').then((m) => ({ default: m.BugReportWidget })),
 );
 

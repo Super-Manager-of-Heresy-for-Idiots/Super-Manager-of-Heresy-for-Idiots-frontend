@@ -1,4 +1,6 @@
-import { lazy, Suspense, type ReactNode } from 'react';
+import { Suspense, type ReactNode } from 'react';
+import { lazyWithRetry } from '@/lib/lazyWithRetry';
+import { RouteErrorBoundary } from '@/components/layout/RouteErrorBoundary';
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { ProtectedRoute } from '@/components/layout/ProtectedRoute';
 import { SuspenseOutlet } from '@/components/layout/SuspenseOutlet';
@@ -9,131 +11,136 @@ const withSuspense = (element: ReactNode) => (
   <Suspense fallback={<PageFallback />}>{element}</Suspense>
 );
 
-const AppLayout = lazy(() => import('@/components/layout/AppLayout').then((m) => ({ default: m.AppLayout })));
-const CampaignLayout = lazy(() =>
+const AppLayout = lazyWithRetry(() => import('@/components/layout/AppLayout').then((m) => ({ default: m.AppLayout })));
+const CampaignLayout = lazyWithRetry(() =>
   import('@/components/layout/CampaignLayout').then((m) => ({ default: m.CampaignLayout })),
 );
 
-const LoginPage = lazy(() => import('@/pages/auth/LoginPage'));
-const RegisterPage = lazy(() => import('@/pages/auth/RegisterPage'));
+const LoginPage = lazyWithRetry(() => import('@/pages/auth/LoginPage'));
+const RegisterPage = lazyWithRetry(() => import('@/pages/auth/RegisterPage'));
 
 // Campaign pages
-const CampaignListPage = lazy(() => import('@/pages/gm/campaigns/CampaignListPage'));
-const CampaignDashboardPage = lazy(() => import('@/pages/gm/campaigns/CampaignDashboardPage'));
-const DashboardSectionsView = lazy(() => import('@/pages/gm/campaigns/dashboard/DashboardSectionsView'));
-const DashboardRosterView = lazy(() => import('@/pages/gm/campaigns/dashboard/DashboardRosterView'));
-const DashboardBattleView = lazy(() => import('@/pages/gm/campaigns/dashboard/DashboardBattleView'));
-const CampaignMembersPage = lazy(() => import('@/pages/gm/campaigns/CampaignMembersPage'));
-const CampaignInvitePage = lazy(() => import('@/pages/gm/campaigns/CampaignInvitePage'));
-const SharedStoragePage = lazy(() => import('@/pages/gm/campaigns/SharedStoragePage'));
-const SessionNotesPage = lazy(() => import('@/pages/gm/campaigns/SessionNotesPage'));
-const XPGrantPage = lazy(() => import('@/pages/gm/campaigns/XPGrantPage'));
-const ApplyEffectPage = lazy(() => import('@/pages/gm/campaigns/ApplyEffectPage'));
-const InventoryPage = lazy(() => import('@/pages/gm/campaigns/InventoryPage'));
-const CharacterManagementPage = lazy(() => import('@/pages/gm/campaigns/CharacterManagementPage'));
-const CharacterCreationWizardPage = lazy(() => import('@/pages/gm/campaigns/CharacterCreationWizardPage'));
-const AddCharacterPage = lazy(() => import('@/pages/gm/campaigns/AddCharacterPage'));
-const LevelUpWizardPage = lazy(() => import('@/pages/gm/campaigns/LevelUpWizardPage'));
-const CharacterRewardsPage = lazy(() => import('@/pages/gm/campaigns/CharacterRewardsPage'));
-const FolioPage = lazy(() => import('@/pages/gm/campaigns/FolioPage'));
-const CharacterWalletPage = lazy(() => import('@/pages/gm/campaigns/CharacterWalletPage'));
-const CharacterResourcesPage = lazy(() => import('@/pages/gm/campaigns/CharacterResourcesPage'));
-const BalanceManagementPage = lazy(() => import('@/pages/gm/campaigns/BalanceManagementPage'));
-const MyCharactersPage = lazy(() => import('@/pages/player/MyCharactersPage'));
-const ItemCatalogPage = lazy(() => import('@/pages/library/ItemCatalogPage'));
-const TemplateWizardPage = lazy(() => import('@/pages/player/TemplateWizardPage'));
-const TemplateDetailPage = lazy(() => import('@/pages/player/TemplateDetailPage'));
-const AbilityCheckPage = lazy(() =>
+const CampaignListPage = lazyWithRetry(() => import('@/pages/gm/campaigns/CampaignListPage'));
+const CampaignDashboardPage = lazyWithRetry(() => import('@/pages/gm/campaigns/CampaignDashboardPage'));
+const DashboardSectionsView = lazyWithRetry(() => import('@/pages/gm/campaigns/dashboard/DashboardSectionsView'));
+const DashboardRosterView = lazyWithRetry(() => import('@/pages/gm/campaigns/dashboard/DashboardRosterView'));
+const DashboardBattleView = lazyWithRetry(() => import('@/pages/gm/campaigns/dashboard/DashboardBattleView'));
+const CampaignMembersPage = lazyWithRetry(() => import('@/pages/gm/campaigns/CampaignMembersPage'));
+const CampaignInvitePage = lazyWithRetry(() => import('@/pages/gm/campaigns/CampaignInvitePage'));
+const SharedStoragePage = lazyWithRetry(() => import('@/pages/gm/campaigns/SharedStoragePage'));
+const SessionNotesPage = lazyWithRetry(() => import('@/pages/gm/campaigns/SessionNotesPage'));
+const XPGrantPage = lazyWithRetry(() => import('@/pages/gm/campaigns/XPGrantPage'));
+const ApplyEffectPage = lazyWithRetry(() => import('@/pages/gm/campaigns/ApplyEffectPage'));
+const InventoryPage = lazyWithRetry(() => import('@/pages/gm/campaigns/InventoryPage'));
+const CharacterManagementPage = lazyWithRetry(() => import('@/pages/gm/campaigns/CharacterManagementPage'));
+const CharacterCreationWizardPage = lazyWithRetry(() => import('@/pages/gm/campaigns/CharacterCreationWizardPage'));
+const AddCharacterPage = lazyWithRetry(() => import('@/pages/gm/campaigns/AddCharacterPage'));
+const LevelUpWizardPage = lazyWithRetry(() => import('@/pages/gm/campaigns/LevelUpWizardPage'));
+const CharacterRewardsPage = lazyWithRetry(() => import('@/pages/gm/campaigns/CharacterRewardsPage'));
+const FolioPage = lazyWithRetry(() => import('@/pages/gm/campaigns/FolioPage'));
+const CharacterWalletPage = lazyWithRetry(() => import('@/pages/gm/campaigns/CharacterWalletPage'));
+const CharacterResourcesPage = lazyWithRetry(() => import('@/pages/gm/campaigns/CharacterResourcesPage'));
+const BalanceManagementPage = lazyWithRetry(() => import('@/pages/gm/campaigns/BalanceManagementPage'));
+const MyCharactersPage = lazyWithRetry(() => import('@/pages/player/MyCharactersPage'));
+const ItemCatalogPage = lazyWithRetry(() => import('@/pages/library/ItemCatalogPage'));
+const TemplateWizardPage = lazyWithRetry(() => import('@/pages/player/TemplateWizardPage'));
+const TemplateDetailPage = lazyWithRetry(() => import('@/pages/player/TemplateDetailPage'));
+const AbilityCheckPage = lazyWithRetry(() =>
   import('@/pages/gm/campaigns/CharacterPlaceholderPages').then((m) => ({ default: m.AbilityCheckPage })),
 );
-const CharacterEditPage = lazy(() =>
+const CharacterEditPage = lazyWithRetry(() =>
   import('@/pages/gm/campaigns/CharacterPlaceholderPages').then((m) => ({ default: m.CharacterEditPage })),
 );
-const CharacterHpPage = lazy(() =>
+const CharacterHpPage = lazyWithRetry(() =>
   import('@/pages/gm/campaigns/CharacterPlaceholderPages').then((m) => ({ default: m.CharacterHpPage })),
 );
-const CharacterStatsPage = lazy(() =>
+const CharacterStatsPage = lazyWithRetry(() =>
   import('@/pages/gm/campaigns/CharacterPlaceholderPages').then((m) => ({ default: m.CharacterStatsPage })),
 );
-const NPCManagerPage = lazy(() => import('@/pages/gm/campaigns/NPCManagerPage'));
-const NPCDetailPage = lazy(() => import('@/pages/gm/campaigns/NPCDetailPage'));
-const QuestManagerPage = lazy(() => import('@/pages/gm/campaigns/QuestManagerPage'));
-const QuestDetailPage = lazy(() => import('@/pages/gm/campaigns/QuestDetailPage'));
-const LocationsPage = lazy(() => import('@/pages/gm/campaigns/LocationsPage'));
-const CampaignHomebrewPage = lazy(() => import('@/pages/gm/campaigns/CampaignHomebrewPage'));
+const NPCManagerPage = lazyWithRetry(() => import('@/pages/gm/campaigns/NPCManagerPage'));
+const NPCDetailPage = lazyWithRetry(() => import('@/pages/gm/campaigns/NPCDetailPage'));
+const QuestManagerPage = lazyWithRetry(() => import('@/pages/gm/campaigns/QuestManagerPage'));
+const QuestDetailPage = lazyWithRetry(() => import('@/pages/gm/campaigns/QuestDetailPage'));
+const LocationsPage = lazyWithRetry(() => import('@/pages/gm/campaigns/LocationsPage'));
+const CampaignHomebrewPage = lazyWithRetry(() => import('@/pages/gm/campaigns/CampaignHomebrewPage'));
 
 // Map feature (battle map / VTT) — isolated module under src/features/map
-const CampaignMapListPage = lazy(() => import('@/features/map/pages/CampaignMapListPage'));
-const MapEditorPage = lazy(() => import('@/features/map/pages/MapEditorPage'));
-const MapSessionPage = lazy(() => import('@/features/map/pages/MapSessionPage'));
-const TacticalBattlePage = lazy(() => import('@/features/map/tactical/TacticalBattlePage'));
+const CampaignMapListPage = lazyWithRetry(() => import('@/features/map/pages/CampaignMapListPage'));
+const MapEditorPage = lazyWithRetry(() => import('@/features/map/pages/MapEditorPage'));
+const MapSessionPage = lazyWithRetry(() => import('@/features/map/pages/MapSessionPage'));
+const TacticalBattlePage = lazyWithRetry(() => import('@/features/map/tactical/TacticalBattlePage'));
 
 // Social: friends + ephemeral messenger (isolated feature module).
-const FriendsPage = lazy(() => import('@/pages/social/FriendsPage'));
-const MessengerPage = lazy(() => import('@/features/messenger/pages/MessengerPage'));
+const FriendsPage = lazyWithRetry(() => import('@/pages/social/FriendsPage'));
+const MessengerPage = lazyWithRetry(() => import('@/features/messenger/pages/MessengerPage'));
 
 // Combat / Loot prototype preview pages (screens only, no API wiring)
-const CombatPreviewIndexPage = lazy(() => import('@/pages/gm/combat/CombatPreviewIndexPage'));
-const CombatTrackerGMPage = lazy(() => import('@/pages/gm/combat/CombatTrackerGMPage'));
-const CombatTrackerPlayerPage = lazy(() => import('@/pages/gm/combat/CombatTrackerPlayerPage'));
-const EncounterBuilderPage = lazy(() => import('@/pages/gm/combat/EncounterBuilderPage'));
-const EncounterListPage = lazy(() => import('@/pages/gm/combat/EncounterListPage'));
-const CombatSummaryPage = lazy(() => import('@/pages/gm/combat/CombatSummaryPage'));
-const DashboardTilesPage = lazy(() => import('@/pages/gm/combat/DashboardTilesPage'));
-const LootTableEditorPage = lazy(() => import('@/pages/gm/combat/LootTableEditorPage'));
-const LootGeneratorPage = lazy(() => import('@/pages/gm/combat/LootGeneratorPage'));
-const QuestDetailV2Page = lazy(() => import('@/pages/gm/combat/QuestDetailV2Page'));
-const NPCDetailV2Page = lazy(() => import('@/pages/gm/combat/NPCDetailV2Page'));
-const QuestListV2Page = lazy(() => import('@/pages/gm/combat/QuestListV2Page'));
-const NPCListV2Page = lazy(() => import('@/pages/gm/combat/NPCListV2Page'));
-const SystemPatternsPage = lazy(() => import('@/pages/gm/combat/SystemPatternsPage'));
-const CombatKitReferencePage = lazy(() => import('@/pages/gm/combat/CombatKitReferencePage'));
-const MobilePreviewPage = lazy(() => import('@/pages/gm/combat/MobilePreviewPage'));
+const CombatPreviewIndexPage = lazyWithRetry(() => import('@/pages/gm/combat/CombatPreviewIndexPage'));
+const CombatTrackerGMPage = lazyWithRetry(() => import('@/pages/gm/combat/CombatTrackerGMPage'));
+const CombatTrackerPlayerPage = lazyWithRetry(() => import('@/pages/gm/combat/CombatTrackerPlayerPage'));
+const EncounterBuilderPage = lazyWithRetry(() => import('@/pages/gm/combat/EncounterBuilderPage'));
+const EncounterListPage = lazyWithRetry(() => import('@/pages/gm/combat/EncounterListPage'));
+const CombatSummaryPage = lazyWithRetry(() => import('@/pages/gm/combat/CombatSummaryPage'));
+const DashboardTilesPage = lazyWithRetry(() => import('@/pages/gm/combat/DashboardTilesPage'));
+const LootTableEditorPage = lazyWithRetry(() => import('@/pages/gm/combat/LootTableEditorPage'));
+const LootGeneratorPage = lazyWithRetry(() => import('@/pages/gm/combat/LootGeneratorPage'));
+const QuestDetailV2Page = lazyWithRetry(() => import('@/pages/gm/combat/QuestDetailV2Page'));
+const NPCDetailV2Page = lazyWithRetry(() => import('@/pages/gm/combat/NPCDetailV2Page'));
+const QuestListV2Page = lazyWithRetry(() => import('@/pages/gm/combat/QuestListV2Page'));
+const NPCListV2Page = lazyWithRetry(() => import('@/pages/gm/combat/NPCListV2Page'));
+const SystemPatternsPage = lazyWithRetry(() => import('@/pages/gm/combat/SystemPatternsPage'));
+const CombatKitReferencePage = lazyWithRetry(() => import('@/pages/gm/combat/CombatKitReferencePage'));
+const MobilePreviewPage = lazyWithRetry(() => import('@/pages/gm/combat/MobilePreviewPage'));
 
 // Dev-only content-model viewer (hidden, no nav link) — Phase 3
-const ContentClassViewerPage = lazy(() => import('@/pages/dev/ContentClassViewerPage'));
+const ContentClassViewerPage = lazyWithRetry(() => import('@/pages/dev/ContentClassViewerPage'));
 
 // Homebrew pages
-const MarketplacePage = lazy(() => import('@/pages/gm/homebrew/MarketplacePage'));
-const MarketplaceDetailPage = lazy(() => import('@/pages/gm/homebrew/MarketplaceDetailPage'));
-const MyDoctrinesPage = lazy(() => import('@/pages/gm/homebrew/MyDoctrinesPage'));
-const CreateDoctrinePage = lazy(() => import('@/pages/gm/homebrew/CreateDoctrinePage'));
-const EditDoctrinePage = lazy(() => import('@/pages/gm/homebrew/EditDoctrinePage'));
-const InstalledDoctrinesPage = lazy(() => import('@/pages/gm/homebrew/InstalledDoctrinesPage'));
-const HomebrewLibraryPage = lazy(() => import('@/pages/gm/homebrew/HomebrewLibraryPage'));
+const MarketplacePage = lazyWithRetry(() => import('@/pages/gm/homebrew/MarketplacePage'));
+const MarketplaceDetailPage = lazyWithRetry(() => import('@/pages/gm/homebrew/MarketplaceDetailPage'));
+const MyDoctrinesPage = lazyWithRetry(() => import('@/pages/gm/homebrew/MyDoctrinesPage'));
+const CreateDoctrinePage = lazyWithRetry(() => import('@/pages/gm/homebrew/CreateDoctrinePage'));
+const EditDoctrinePage = lazyWithRetry(() => import('@/pages/gm/homebrew/EditDoctrinePage'));
+const InstalledDoctrinesPage = lazyWithRetry(() => import('@/pages/gm/homebrew/InstalledDoctrinesPage'));
+const HomebrewLibraryPage = lazyWithRetry(() => import('@/pages/gm/homebrew/HomebrewLibraryPage'));
 
 // Campaign Blueprint pages
-const BlueprintMarketplacePage = lazy(() => import('@/pages/gm/blueprints/BlueprintMarketplacePage'));
-const BlueprintMarketplaceDetailPage = lazy(() => import('@/pages/gm/blueprints/BlueprintMarketplaceDetailPage'));
-const MyBlueprintsPage = lazy(() => import('@/pages/gm/blueprints/MyBlueprintsPage'));
-const BlueprintEditorPage = lazy(() => import('@/pages/gm/blueprints/BlueprintEditorPage'));
+const BlueprintMarketplacePage = lazyWithRetry(() => import('@/pages/gm/blueprints/BlueprintMarketplacePage'));
+const BlueprintMarketplaceDetailPage = lazyWithRetry(() => import('@/pages/gm/blueprints/BlueprintMarketplaceDetailPage'));
+const MyBlueprintsPage = lazyWithRetry(() => import('@/pages/gm/blueprints/MyBlueprintsPage'));
+const BlueprintEditorPage = lazyWithRetry(() => import('@/pages/gm/blueprints/BlueprintEditorPage'));
 
 // Bestiary (monsters + dictionaries)
-const BestiaryMonstersPage = lazy(() => import('@/pages/admin/BestiaryMonstersPage'));
-const BestiaryDictionariesPage = lazy(() => import('@/pages/admin/BestiaryDictionariesPage'));
-const HomebrewBestiaryPage = lazy(() => import('@/pages/gm/homebrew/HomebrewBestiaryPage'));
-const CampaignBestiaryPage = lazy(() => import('@/pages/gm/campaigns/CampaignBestiaryPage'));
-const MonsterDetailPage = lazy(() => import('@/pages/bestiary/MonsterDetailPage'));
-const MonsterFormPage = lazy(() => import('@/pages/bestiary/MonsterFormPage'));
+const BestiaryMonstersPage = lazyWithRetry(() => import('@/pages/admin/BestiaryMonstersPage'));
+const BestiaryDictionariesPage = lazyWithRetry(() => import('@/pages/admin/BestiaryDictionariesPage'));
+const HomebrewBestiaryPage = lazyWithRetry(() => import('@/pages/gm/homebrew/HomebrewBestiaryPage'));
+const CampaignBestiaryPage = lazyWithRetry(() => import('@/pages/gm/campaigns/CampaignBestiaryPage'));
+const MonsterDetailPage = lazyWithRetry(() => import('@/pages/bestiary/MonsterDetailPage'));
+const MonsterFormPage = lazyWithRetry(() => import('@/pages/bestiary/MonsterFormPage'));
 
-const AdminDashboardPage = lazy(() => import('@/pages/admin/AdminDashboardPage'));
-const UsersListPage = lazy(() => import('@/pages/admin/UsersListPage'));
-const AdminCharactersPage = lazy(() => import('@/pages/admin/AdminCharactersPage'));
-const StatTypesPage = lazy(() => import('@/pages/admin/StatTypesPage'));
-const CharacterClassesPage = lazy(() => import('@/pages/admin/CharacterClassesPage'));
-const SpeciesPage = lazy(() => import('@/pages/admin/SpeciesPage'));
-const BuffsDebuffsPage = lazy(() => import('@/pages/admin/BuffsDebuffsPage'));
-const EnchantmentTypesPage = lazy(() => import('@/pages/admin/EnchantmentTypesPage'));
-const ItemTemplatesPage = lazy(() => import('@/pages/admin/ItemTemplatesPage'));
-const AdminHomebrewPage = lazy(() => import('@/pages/admin/AdminHomebrewPage'));
-const ContentQualityPage = lazy(() => import('@/pages/admin/ContentQualityPage'));
-const SpellWarningsPage = lazy(() => import('@/pages/admin/SpellWarningsPage'));
-const ClassFeatureWarningsPage = lazy(() => import('@/pages/admin/ClassFeatureWarningsPage'));
-const RuleWorkbenchPage = lazy(() => import('@/pages/admin/RuleWorkbenchPage'));
-const ResourceTypesPage = lazy(() => import('@/pages/admin/ResourceTypesPage'));
-const SpellEditorPage = lazy(() => import('@/pages/admin/SpellEditorPage'));
+const AdminDashboardPage = lazyWithRetry(() => import('@/pages/admin/AdminDashboardPage'));
+const UsersListPage = lazyWithRetry(() => import('@/pages/admin/UsersListPage'));
+const AdminCharactersPage = lazyWithRetry(() => import('@/pages/admin/AdminCharactersPage'));
+const StatTypesPage = lazyWithRetry(() => import('@/pages/admin/StatTypesPage'));
+const CharacterClassesPage = lazyWithRetry(() => import('@/pages/admin/CharacterClassesPage'));
+const SpeciesPage = lazyWithRetry(() => import('@/pages/admin/SpeciesPage'));
+const BuffsDebuffsPage = lazyWithRetry(() => import('@/pages/admin/BuffsDebuffsPage'));
+const EnchantmentTypesPage = lazyWithRetry(() => import('@/pages/admin/EnchantmentTypesPage'));
+const ItemTemplatesPage = lazyWithRetry(() => import('@/pages/admin/ItemTemplatesPage'));
+const AdminHomebrewPage = lazyWithRetry(() => import('@/pages/admin/AdminHomebrewPage'));
+const ContentQualityPage = lazyWithRetry(() => import('@/pages/admin/ContentQualityPage'));
+const SpellWarningsPage = lazyWithRetry(() => import('@/pages/admin/SpellWarningsPage'));
+const ClassFeatureWarningsPage = lazyWithRetry(() => import('@/pages/admin/ClassFeatureWarningsPage'));
+const RuleWorkbenchPage = lazyWithRetry(() => import('@/pages/admin/RuleWorkbenchPage'));
+const ResourceTypesPage = lazyWithRetry(() => import('@/pages/admin/ResourceTypesPage'));
+const SpellEditorPage = lazyWithRetry(() => import('@/pages/admin/SpellEditorPage'));
 
 export const router = createBrowserRouter([
+  // Единый errorElement на все маршруты: аккуратный экран вместо сырого «Unexpected Application Error!»
+  // + тихая перезагрузка при устаревшем чанке (см. RouteErrorBoundary / lazyWithRetry).
+  {
+    errorElement: <RouteErrorBoundary />,
+    children: [
   // Public routes
   { path: '/login', element: withSuspense(<LoginPage />) },
   { path: '/register', element: withSuspense(<RegisterPage />) },
@@ -359,4 +366,6 @@ export const router = createBrowserRouter([
   // Default redirect
   { path: '/', element: <Navigate to="/campaigns" replace /> },
   { path: '*', element: <Navigate to="/login" replace /> },
+    ],
+  },
 ]);

@@ -1,0 +1,63 @@
+/* Экран ошибки роутера (errorElement). Токены дизайн-системы, без магических значений. */
+.wrap {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--s-6, 24px);
+  background: var(--stone, var(--abyss));
+}
+
+.card {
+  width: 100%;
+  max-width: 640px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4, 16px);
+  padding: var(--s-6, 24px);
+  border: 1px solid var(--rule);
+  background: var(--panel, var(--abyss));
+  box-shadow: var(--shadow-mid);
+}
+
+.head {
+  color: var(--ink-bright);
+}
+
+.warn {
+  color: var(--ember-pale, var(--gold));
+}
+
+.spin {
+  color: var(--arcane, var(--gold));
+  animation: routeErrSpin 1s linear infinite;
+}
+
+@keyframes routeErrSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.hint {
+  margin: 0;
+  font-size: 13px;
+  color: var(--ink-quiet);
+}
+
+.details {
+  margin: 0;
+  max-height: 40vh;
+  overflow: auto;
+  padding: var(--s-3, 12px);
+  border: 1px solid var(--hairline, var(--rule));
+  background: var(--abyss);
+  color: var(--ink-quiet);
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+  user-select: all;
+}
