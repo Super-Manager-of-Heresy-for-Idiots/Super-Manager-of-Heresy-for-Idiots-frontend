@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { AxiosError } from 'axios';
 import toast from 'react-hot-toast';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
@@ -8,8 +9,9 @@ import { referenceApi } from '@/api/reference.api';
 import { homebrewItemsApi } from '@/api/homebrew-items.api';
 import { useDamageTypes } from '@/hooks/useContentCatalog';
 import { useT } from '@/i18n/I18nContext';
+import { isPureDiceFormula, normalizeDiceNotation } from '@/lib/dice';
 import { cn } from '@/lib/utils';
-import type { HomebrewItemRequest } from '@/types';
+import type { ApiError, HomebrewItemRequest } from '@/types';
 import s from './ItemModal.module.css';
 
 interface ItemModalProps {
@@ -139,16 +141,19 @@ export function ItemModal({ open, onClose, packageId, editingId, onSaved }: Item
     }
   }, [open, editingId, packageId, t]);
 
+  // Валидация костей у поля: та же семантика, что у серверного парсера (чистая NdM, русская нотация допустима).
+  const abDamageDiceInvalid = abDamageDice.trim() !== '' && !isPureDiceFormula(abDamageDice);
+
   const handleSave = async () => {
-    if (!name.trim()) return;
+    if (!name.trim() || abDamageDiceInvalid) return;
     setSaving(true);
     try {
       const ability: Partial<HomebrewItemRequest> = {
-        abilityDamageDice: abDamageDice.trim() || undefined,
+        abilityDamageDice: abDamageDice.trim() ? normalizeDiceNotation(abDamageDice.trim()) : undefined,
         abilityDamageType: abDamageType || undefined,
         abilitySaveAbility: abSaveAbility || undefined,
         abilityHalfOnSave: abHalfOnSave,
-        abilityHealingFormula: abHealingFormula.trim() || undefined,
+        abilityHealingFormula: abHealingFormula.trim() ? normalizeDiceNotation(abHealingFormula.trim()) : undefined,
         abilityRequiresEquipped: abRequiresEquipped,
         abilityRequiresAttunement: abRequiresAttunement,
         abilityConsumeOnUse: abConsumeOnUse,
@@ -194,8 +199,9 @@ export function ItemModal({ open, onClose, packageId, editingId, onSaved }: Item
       toast.success(editingId ? t('hb.item.updated') : t('hb.item.created'));
       onSaved();
       onClose();
-    } catch {
-      toast.error(t('hb.item.saveFailed'));
+    } catch (error) {
+      const message = (error as AxiosError<ApiError>).response?.data?.message;
+      toast.error(message || t('hb.item.saveFailed'));
     } finally {
       setSaving(false);
     }
@@ -355,6 +361,7 @@ export function ItemModal({ open, onClose, packageId, editingId, onSaved }: Item
               <div>
                 <label className="ao-label">{t('hb.item.abDamageDice')}</label>
                 <input className="ao-input" value={abDamageDice} onChange={(e) => setAbDamageDice(e.target.value)} placeholder={t('hb.item.abDamageDiceHint')} />
+                {abDamageDiceInvalid && <div className={s.fieldError}>{t('hb.dice.invalid')}</div>}
               </div>
               <div>
                 <label className="ao-label">{t('hb.item.abDamageType')}</label>
@@ -401,7 +408,7 @@ export function ItemModal({ open, onClose, packageId, editingId, onSaved }: Item
 
           <div className={s.actions}>
             <button className="ao-btn ao-btn--ghost" onClick={onClose} disabled={saving}>{t('common.cancel')}</button>
-            <button className="ao-btn ao-btn--primary" onClick={handleSave} disabled={!name.trim() || saving}>
+            <button className="ao-btn ao-btn--primary" onClick={handleSave} disabled={!name.trim() || abDamageDiceInvalid || saving}>
               {editingId ? t('hb.item.save') : t('hb.item.create')}
             </button>
           </div>

@@ -62,3 +62,9 @@
   letter-spacing: 0.04em;
   color: var(--ink-faint);
 }
+
+.fieldError {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--ember-pale);
+}

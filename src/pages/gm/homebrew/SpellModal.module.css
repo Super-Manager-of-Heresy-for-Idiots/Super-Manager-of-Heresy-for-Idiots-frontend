@@ -23,6 +23,12 @@
   margin-top: 4px;
 }
 
+.fieldError {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--ember-pale);
+}
+
 .sectionTitle {
   font-size: 12px;
   text-transform: uppercase;

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { AxiosError } from 'axios';
 import toast from 'react-hot-toast';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
@@ -8,8 +9,9 @@ import { referenceApi } from '@/api/reference.api';
 import { homebrewSpellsApi } from '@/api/homebrew-spells.api';
 import { useDamageTypes } from '@/hooks/useContentCatalog';
 import { useT } from '@/i18n/I18nContext';
+import { isPureDiceFormula, normalizeDiceNotation } from '@/lib/dice';
 import { cn } from '@/lib/utils';
-import type { HomebrewSpellRequest } from '@/types';
+import type { ApiError, HomebrewSpellRequest } from '@/types';
 import s from './SpellModal.module.css';
 
 interface SpellModalProps {
@@ -97,8 +99,11 @@ export function SpellModal({ open, onClose, packageId, editingId, onSaved }: Spe
     }
   }, [open, editingId, packageId, t]);
 
+  // Валидация костей у поля: та же семантика, что у серверного парсера (чистая NdM, русская нотация допустима).
+  const damageDiceInvalid = damageDice.trim() !== '' && !isPureDiceFormula(damageDice);
+
   const handleSave = async () => {
-    if (!name.trim() || !school) return;
+    if (!name.trim() || !school || damageDiceInvalid) return;
     setSaving(true);
     try {
       const body: HomebrewSpellRequest = {
@@ -113,20 +118,21 @@ export function SpellModal({ open, onClose, packageId, editingId, onSaved }: Spe
         concentration,
         description: description.trim() || undefined,
         higherLevels: higherLevels.trim() || undefined,
-        damageDice: damageDice.trim() || undefined,
+        damageDice: damageDice.trim() ? normalizeDiceNotation(damageDice.trim()) : undefined,
         damageType: damageType || undefined,
         saveAbility: saveAbility || undefined,
         halfOnSave,
         requiresAttackHit,
-        healingFormula: healingFormula.trim() || undefined,
+        healingFormula: healingFormula.trim() ? normalizeDiceNotation(healingFormula.trim()) : undefined,
       };
       if (editingId) await homebrewSpellsApi.update(packageId, editingId, body);
       else await homebrewSpellsApi.create(packageId, body);
       toast.success(editingId ? t('hb.spell.updated') : t('hb.spell.created'));
       onSaved();
       onClose();
-    } catch {
-      toast.error(t('hb.spell.saveFailed'));
+    } catch (error) {
+      const message = (error as AxiosError<ApiError>).response?.data?.message;
+      toast.error(message || t('hb.spell.saveFailed'));
     } finally {
       setSaving(false);
     }
@@ -204,6 +210,7 @@ export function SpellModal({ open, onClose, packageId, editingId, onSaved }: Spe
             <div>
               <label className="ao-label">{t('hb.spell.damageDice')}</label>
               <input className="ao-input" value={damageDice} onChange={(e) => setDamageDice(e.target.value)} placeholder={t('hb.spell.damageDiceHint')} />
+              {damageDiceInvalid && <div className={s.fieldError}>{t('hb.dice.invalid')}</div>}
             </div>
             <div>
               <label className="ao-label">{t('hb.spell.damageType')}</label>
@@ -241,7 +248,7 @@ export function SpellModal({ open, onClose, packageId, editingId, onSaved }: Spe
 
           <div className={s.actions}>
             <button className="ao-btn ao-btn--ghost" onClick={onClose} disabled={saving}>{t('common.cancel')}</button>
-            <button className="ao-btn ao-btn--primary" onClick={handleSave} disabled={!name.trim() || !school || saving}>
+            <button className="ao-btn ao-btn--primary" onClick={handleSave} disabled={!name.trim() || !school || damageDiceInvalid || saving}>
               {editingId ? t('hb.spell.save') : t('hb.spell.create')}
             </button>
           </div>
