@@ -145,6 +145,12 @@ export const referenceApi = {
     return response.data;
   },
 
+  /** Engine gameplay-event triggers for the spell reaction-trigger picker (HB_UX Фаза 1). */
+  getReactionTriggers: async (): Promise<ApiResponse<ContentLabel[]>> => {
+    const response = await api.get<ApiResponse<ContentLabel[]>>('/reference/reaction-triggers');
+    return response.data;
+  },
+
   /** Feat options (paginated/searchable) for authoring dropdowns. */
   getFeatOptions: async (query?: string): Promise<ApiResponse<ReferenceFeatOption[]>> => {
     const response = await api.get<ApiResponse<ReferenceFeatOption[]>>('/reference/feats', {

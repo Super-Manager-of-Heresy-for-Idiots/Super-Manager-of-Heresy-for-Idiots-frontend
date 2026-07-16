@@ -848,11 +848,27 @@ export interface HomebrewSpellRequest {
   nameEn?: string;
   level: number;
   school: string;
-  castingTimeRaw?: string;
+  // Время сотворения (HB_UX Фаза 1): структурные пикеры вместо свободного текста.
+  castingActionSlug?: string;      // action | bonus-action | reaction | time
+  castingTimeAmount?: number;      // для time
+  castingTimeUnit?: string;        // minute | hour (для time)
+  reactionTriggerSlug?: string;    // trigger_event_type.code (для reaction)
   ritual?: boolean;
-  rangeText?: string;
-  durationText?: string;
+  // Дистанция (HB_UX Фаза 1)
+  rangeType?: string;              // self | touch | distance | sight | unlimited
+  rangeDistance?: number;          // для distance
+  rangeUnit?: string;              // ft
+  // Длительность (HB_UX Фаза 1)
+  durationType?: string;           // instantaneous | timed | until-dispelled | special
+  durationAmount?: number;
+  durationUnit?: string;           // round | minute | hour | day
   concentration?: boolean;
+  // Область (HB_UX Фаза 3)
+  areaShape?: string;              // SPHERE | CUBE | CONE | CYLINDER | LINE
+  areaSizeFt?: number;
+  zonePersists?: boolean;
+  zoneTerrain?: string;            // DIFFICULT
+  zoneObscurement?: string;        // LIGHT | HEAVY
   description?: string;
   higherLevels?: string;
   availableToClassIds?: string[];
@@ -873,9 +889,23 @@ export interface HomebrewSpellResponse {
   level?: number;
   school?: string;
   castingTimeRaw?: string;
+  castingActionSlug?: string;
+  castingTimeAmount?: number;
+  castingTimeUnit?: string;
+  reactionTriggerSlug?: string;
   ritual?: boolean;
-  rangeText?: string;
-  durationText?: string;
+  rangeType?: string;
+  rangeDistance?: number;
+  rangeUnit?: string;
+  durationType?: string;
+  durationAmount?: number;
+  durationUnit?: string;
+  durationRaw?: string;
+  areaShape?: string;
+  areaSizeFt?: number;
+  zonePersists?: boolean;
+  zoneTerrain?: string;
+  zoneObscurement?: string;
   concentration?: boolean;
   description?: string;
   higherLevels?: string;
@@ -1219,7 +1249,9 @@ export interface HomebrewItemRequest {
   // MAGIC
   rarity?: string;
   attunementRequired?: boolean;
-  attunementRequirement?: string;
+  attunementRequirement?: string;               // свободный текст — флейвор, не проверяется
+  attunementClassSlugs?: string[];              // структурное ограничение (enforced в /attune)
+  attunementRaceSlugs?: string[];
   // EQUIPMENT — common
   equipmentKind?: string; // weapon | armor | gear | tool
   category?: string;
@@ -1257,6 +1289,8 @@ export interface HomebrewItemResponse {
   rarity?: string;
   attunementRequired?: boolean;
   attunementRequirement?: string;
+  attunementClassSlugs?: string[];
+  attunementRaceSlugs?: string[];
   equipmentKind?: string;
   category?: string;
   costGold?: number;
