@@ -51,6 +51,7 @@ interface GrantEntry {
   damageDice?: string;
   priceGold?: number | null;
   homebrew: boolean;
+  grantsAbilities?: boolean;
   description?: string;
 }
 
@@ -88,12 +89,8 @@ function itemPriceGold(d: ItemDefinition): number | null {
   return null;
 }
 
-// TODO(ITEM_ABIL Phase 5): показать бейдж «даёт умения»/«grants abilities» на записи
-// каталога, когда предмет наделяет умениями. Каталожный тип ItemDefinition сейчас НЕ
-// содержит такого флага (нет hasAbilities/abilityCount), а изобретать backend-изменения
-// в рамках FE-задачи нельзя. Как только BE начнёт отдавать признак (напр. ItemDefinition
-// .hasAbilities), добавить сюда grantsAbilities в GrantEntry и OrdoChip в опции списка,
-// строка i18n camp2.inv.grant.grantsAbilities уже заведена.
+// ITEM_ABIL Фаза 5 §5.7: BE отдаёт ItemDefinition.grantsAbilities (true, если у определения
+// есть approved item-правило и включена item-механика). Показываем бейдж «даёт умения».
 function itemEntry(d: ItemDefinition): GrantEntry {
   return {
     id: d.id,
@@ -105,6 +102,7 @@ function itemEntry(d: ItemDefinition): GrantEntry {
     damageDice: diceText(d.weaponStat?.damageDice),
     priceGold: itemPriceGold(d),
     homebrew: !!d.packageId,
+    grantsAbilities: d.grantsAbilities ?? false,
     description: d.description ?? undefined,
   };
 }
@@ -408,6 +406,9 @@ export function GrantItemDialog({
                                   )}
                                   {e.homebrew && (
                                     <span className={s.hbBadge}>{t('camp2.inv.homebrew')}</span>
+                                  )}
+                                  {e.grantsAbilities && (
+                                    <span className={s.hbBadge}>{t('camp2.inv.grant.grantsAbilities')}</span>
                                   )}
                                 </span>
                               </span>

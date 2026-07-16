@@ -3492,6 +3492,8 @@ export interface ItemDefinition {
   homebrewTitle: string | null;
   attunementRequired: boolean | null;
   attunementRequirement: string | null;
+  /** ITEM_ABIL Фаза 5 §5.7: у определения есть approved item-правило (item-механика включена). */
+  grantsAbilities?: boolean;
   equipmentKind: string | null;
   weaponStat: WeaponStat | null;
   armorStat: ArmorStat | null;
