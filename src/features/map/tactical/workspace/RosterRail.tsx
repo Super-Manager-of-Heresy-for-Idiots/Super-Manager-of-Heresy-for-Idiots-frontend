@@ -10,10 +10,11 @@ import { useMemo, useState } from 'react';
 import { Rune } from '@/components/ordo';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
-import type { BattleResponse } from '@/types';
+import type { BattleResponse, PendingResolution } from '@/types';
 import {
   useRerollInitiative,
   useResolveConcentration,
+  useResolveSpellSave,
   useSetFlying,
   useSetIdentityHidden,
   useSetInitiativeOrder,
@@ -204,6 +205,16 @@ export function RosterRail({
                   />
                 )}
 
+                {(isYou || isGm) && (c.pendingResolutions ?? []).map((pr) => (
+                  <SaveDamagePrompt
+                    key={pr.id}
+                    campaignId={campaignId}
+                    battleId={battle.id}
+                    combatantId={c.id}
+                    pending={pr}
+                  />
+                ))}
+
                 {c.conditions && c.conditions.length > 0 && (
                   <div className={cn('ao-row ao-wrap ao-gap-4', s.condRow)}>
                     {c.conditions.map((cond) => (
@@ -392,6 +403,97 @@ function ConcentrationPrompt({
       >
         {t('tactical.conc.auto')}
       </button>
+    </div>
+  );
+}
+
+/**
+ * SAVE_PROMPT: окно исхода заклинания у цели. Свобода воли — игрок сам решает, получить весь урон,
+ * половину или ничего; движок лишь рекомендует по спасброску. Можно кинуть спасбросок сам (ввод d20)
+ * или довериться авто-рекомендации сервера; d20 идёт только в лог. Окно видит ответственный за цель (игрок/GM).
+ */
+function SaveDamagePrompt({
+  campaignId,
+  battleId,
+  combatantId,
+  pending,
+}: {
+  campaignId: string;
+  battleId: string;
+  combatantId: string;
+  pending: PendingResolution;
+}) {
+  const t = useT();
+  const resolve = useResolveSpellSave();
+  const [d20, setD20] = useState('');
+  const num = parseInt(d20, 10);
+  const ownRoll = Number.isFinite(num) && num >= 1 && num <= 20 ? num : undefined;
+
+  // Рекомендация: собственный бросок (если введён) либо авто-бросок сервера — против DC.
+  const bonus = pending.recommendedSaveBonus ?? 0;
+  const roll = ownRoll ?? pending.recommendedRoll ?? undefined;
+  const total = roll != null ? roll + bonus : undefined;
+  const saved = pending.saveDc != null && total != null ? total >= pending.saveDc : undefined;
+  const recOutcome: 'FULL' | 'HALF' | 'NONE' | undefined =
+    saved === undefined ? undefined : saved ? (pending.halfOnSave ? 'HALF' : 'NONE') : 'FULL';
+
+  const submit = (outcome: 'FULL' | 'HALF' | 'NONE') =>
+    resolve.mutate({ campaignId, battleId, combatantId, resolutionId: pending.id, outcome, d20: ownRoll });
+
+  const dmgLine = [
+    t('tactical.save.incoming', { n: pending.damageAmount }),
+    pending.damageTypeName,
+  ].filter(Boolean).join(' · ');
+  const saveLine = pending.saveDc != null
+    ? t('tactical.save.saveInfo', { ability: (pending.saveAbility ?? '').toUpperCase(), dc: pending.saveDc })
+    : null;
+
+  return (
+    <div className={cn('ao-col ao-gap-4', s.concPrompt)} onClick={(e) => e.stopPropagation()}>
+      <span className={cn('ao-overline', s.concPromptLabel)}>
+        {pending.spellName ? `${pending.spellName}: ${dmgLine}` : dmgLine}
+      </span>
+      {saveLine && (
+        <span className={s.saveHint}>
+          {saveLine}
+          {total != null && ` · ${t('tactical.save.roll', { total })}`}
+          {recOutcome && ` · ${t(`tactical.save.rec.${recOutcome}`)}`}
+        </span>
+      )}
+      <div className="ao-row ao-gap-4 ao-wrap">
+        <input
+          className={cn('ao-input', s.concInput)}
+          inputMode="numeric"
+          value={d20}
+          placeholder={t('tactical.conc.d20')}
+          onChange={(e) => setD20(e.target.value.replace(/[^0-9]/g, ''))}
+        />
+        <button
+          type="button"
+          className={cn('ao-btn ao-btn--sm ao-btn--primary', recOutcome === 'FULL' && s.recBtn)}
+          disabled={resolve.isPending}
+          onClick={() => submit('FULL')}
+        >
+          {t('tactical.save.full')}
+        </button>
+        <button
+          type="button"
+          className={cn('ao-btn ao-btn--sm ao-btn--ghost', recOutcome === 'HALF' && s.recBtn)}
+          disabled={resolve.isPending || !pending.halfOnSave}
+          title={!pending.halfOnSave ? t('tactical.save.noHalf') : undefined}
+          onClick={() => submit('HALF')}
+        >
+          {t('tactical.save.half')}
+        </button>
+        <button
+          type="button"
+          className={cn('ao-btn ao-btn--sm ao-btn--ghost', recOutcome === 'NONE' && s.recBtn)}
+          disabled={resolve.isPending}
+          onClick={() => submit('NONE')}
+        >
+          {t('tactical.save.none')}
+        </button>
+      </div>
     </div>
   );
 }

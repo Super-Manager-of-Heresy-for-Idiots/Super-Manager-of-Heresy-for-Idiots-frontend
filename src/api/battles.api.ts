@@ -625,6 +625,25 @@ export const battlesApi = {
   },
 
   /**
+   * Resolve a pending spell-save outcome (SAVE_PROMPT). The target's owner (or GM) picks the outcome —
+   * FULL / HALF / NONE — and may pass their own d20 (1–20) just for the log; the choice is authoritative.
+   */
+  resolveSpellSave: async (
+    campaignId: string,
+    battleId: string,
+    combatantId: string,
+    resolutionId: string,
+    outcome: 'FULL' | 'HALF' | 'NONE',
+    d20?: number,
+  ): Promise<ApiResponse<BattleResponse>> => {
+    const response = await api.post<ApiResponse<BattleResponse>>(
+      `${base(campaignId)}/${battleId}/combatants/${combatantId}/pending-resolutions/${resolutionId}/resolve`,
+      d20 != null ? { outcome, d20 } : { outcome },
+    );
+    return response.data;
+  },
+
+  /**
    * GM replaces the whole tracker's initiative values in one shot (Phase 1.7 drag/reorder). Every
    * combatant of the battle must be listed exactly once; the server re-sorts and keeps the turn.
    */

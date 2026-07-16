@@ -2054,6 +2054,24 @@ export type BattleStatus = 'ASSEMBLING' | 'ACTIVE' | 'COMPLETED';
 
 export type BattleCombatantType = 'MONSTER' | 'CHARACTER';
 
+/**
+ * Отложенный исход заклинания у цели (SAVE_PROMPT): скатанный урон + параметры спасброска + рекомендация
+ * движка. Ответственный за цель выбирает исход (FULL/HALF/NONE); движок только рекомендует.
+ */
+export interface PendingResolution {
+  id: string;
+  spellName?: string;
+  damageAmount: number;
+  damageTypeName?: string;
+  halfOnSave?: boolean;
+  saveDc?: number | null;
+  saveAbility?: string | null;
+  /** Рекомендация движка: SUCCESS | FAIL | null. */
+  recommendedOutcome?: string | null;
+  recommendedRoll?: number | null;
+  recommendedSaveBonus?: number | null;
+}
+
 export interface BattleCombatantResponse {
   id: string;
   type: BattleCombatantType;
@@ -2090,6 +2108,8 @@ export interface BattleCombatantResponse {
   concentrating?: boolean;
   /** DC of a pending concentration save the player must roll (Phase 2.2); null/absent when none. */
   pendingConcentrationDc?: number | null;
+  /** Отложенные исходы заклинаний, ждущие решения ответственного за цель (SAVE_PROMPT); пусто — нет. */
+  pendingResolutions?: PendingResolution[];
   // Standard-action turn state (Phase 2.7).
   /** Dash taken: movement budget doubled this turn. */
   dashing?: boolean;

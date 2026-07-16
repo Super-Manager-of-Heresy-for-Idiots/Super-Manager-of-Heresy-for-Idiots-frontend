@@ -383,6 +383,15 @@
   text-align: center;
 }
 
+/* SAVE_PROMPT: подсказка спасброска и подсветка рекомендованной кнопки исхода. */
+.saveHint {
+  font-size: 11px;
+  color: var(--ink-quiet);
+}
+.recBtn {
+  box-shadow: 0 0 0 1px var(--gold) inset;
+}
+
 /* Spell roll-plan preview (Phase 2.1): damage dice / DC / healing before casting. */
 .spellPreview {
   padding: var(--s-2);

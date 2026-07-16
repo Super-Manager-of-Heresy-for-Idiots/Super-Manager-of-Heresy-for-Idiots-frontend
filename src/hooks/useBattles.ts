@@ -699,6 +699,31 @@ export function useResolveConcentration() {
   });
 }
 
+/** SAVE_PROMPT: разрешает отложенный исход заклинания у цели — выбор FULL/HALF/NONE (+ необязательный d20). */
+export function useResolveSpellSave() {
+  const sync = useSyncBattle();
+  const t = useT();
+  return useMutation({
+    mutationFn: ({
+      campaignId,
+      battleId,
+      combatantId,
+      resolutionId,
+      outcome,
+      d20,
+    }: {
+      campaignId: string;
+      battleId: string;
+      combatantId: string;
+      resolutionId: string;
+      outcome: 'FULL' | 'HALF' | 'NONE';
+      d20?: number;
+    }) => battlesApi.resolveSpellSave(campaignId, battleId, combatantId, resolutionId, outcome, d20),
+    onSuccess: (res) => sync(res.data),
+    onError: (e) => toast.error(errMsg(e, t('tactical.save.failed'))),
+  });
+}
+
 /** GM reorders the initiative tracker (full initiative-value replacement, Phase 1.7). */
 export function useSetInitiativeOrder() {
   const sync = useSyncBattle();
