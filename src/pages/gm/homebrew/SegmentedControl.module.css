@@ -1,0 +1,40 @@
+.group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.segment {
+  flex: 1 1 auto;
+  min-width: 72px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 7px 10px;
+  border: 1px solid var(--rule);
+  background: var(--abyss);
+  color: var(--ink-quiet);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  transition: border-color 0.12s ease, color 0.12s ease, background 0.12s ease;
+}
+
+.segment:hover {
+  border-color: var(--brass);
+  color: var(--ink-bright);
+}
+
+.segmentOn {
+  border-color: var(--gold);
+  color: var(--gold-pale);
+  background: color-mix(in srgb, var(--gold) 12%, var(--abyss));
+  box-shadow: inset 0 0 10px color-mix(in srgb, var(--gold) 10%, transparent);
+}
+
+.segIcon {
+  flex: none;
+  color: currentColor;
+}

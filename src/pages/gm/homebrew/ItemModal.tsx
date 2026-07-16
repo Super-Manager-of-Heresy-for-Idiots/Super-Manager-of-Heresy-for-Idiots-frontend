@@ -12,6 +12,8 @@ import { useT } from '@/i18n/I18nContext';
 import { normalizeDiceNotation } from '@/lib/dice';
 import { cn } from '@/lib/utils';
 import { DiceBuilder } from './DiceBuilder';
+import { SegmentedControl, type SegmentOption } from './SegmentedControl';
+import { ItemPreviewCard } from './ItemPreviewCard';
 import type { ApiError, HomebrewItemRequest } from '@/types';
 import s from './ItemModal.module.css';
 
@@ -185,6 +187,21 @@ export function ItemModal({ open, onClose, packageId, editingId, onSaved }: Item
     abilityMod: t('hb.dice.abilityMod'), none: t('hb.dice.none'), avg: t('hb.dice.avg'), max: t('hb.dice.max'),
   };
 
+  // Сегмент-контрол выбора вида предмета (иконки Ordo) + разрешённые метки для живого превью.
+  const kindIconMap: Record<ItemKindUi, string> = {
+    magic: 'magic-item', weapon: 'damage-slashing', armor: 'armor', gear: 'item', tool: 'item-template',
+  };
+  const kindOptions: SegmentOption<ItemKindUi>[] = KIND_ORDER.map((k) => ({
+    value: k, label: t(`hb.item.kind.${k}`), icon: kindIconMap[k],
+  }));
+  const rarityName = rarities.find((r) => r.slug === rarity)?.name;
+  const weaponDamageTypeName = damageTypes.find((d) => d.slug === damageType)?.name;
+  const abDamageTypeName = damageTypes.find((d) => d.slug === abDamageType)?.name;
+  const labelsFor = (opts: { slug: string; label: string }[], slugs: string[]) =>
+    slugs.map((sl) => opts.find((o) => o.slug === sl)?.label ?? sl);
+  const attunementClassLabels = labelsFor(classOptions, attunementClassSlugs);
+  const attunementRaceLabels = labelsFor(raceOptions, attunementRaceSlugs);
+
   const handleSave = async () => {
     if (!name.trim()) return;
     setSaving(true);
@@ -252,27 +269,17 @@ export function ItemModal({ open, onClose, packageId, editingId, onSaved }: Item
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent>
+      <DialogContent className={s.wide}>
         <DialogHeader>
           <DialogTitle>{editingId ? t('hb.item.editTitle') : t('hb.item.createTitle')}</DialogTitle>
         </DialogHeader>
-        <div className={s.form}>
+        <div className={s.layout}>
+          <div className={s.form}>
           {/* Вид предмета — при правке зафиксирован (нельзя менять таблицу-назначение) */}
           {!editingId && (
             <div>
               <label className="ao-label">{t('hb.item.kind')}</label>
-              <div className={s.kindTabs}>
-                {KIND_ORDER.map((k) => (
-                  <button
-                    key={k}
-                    type="button"
-                    className={cn(s.kindTab, kindUi === k && s.kindTabOn)}
-                    onClick={() => setKindUi(k)}
-                  >
-                    {t(`hb.item.kind.${k}`)}
-                  </button>
-                ))}
-              </div>
+              <SegmentedControl options={kindOptions} value={kindUi} onChange={setKindUi} ariaLabel={t('hb.item.kind')} />
             </div>
           )}
 
@@ -502,12 +509,55 @@ export function ItemModal({ open, onClose, packageId, editingId, onSaved }: Item
             </label>
           </div>
 
-          <div className={s.actions}>
-            <button className="ao-btn ao-btn--ghost" onClick={onClose} disabled={saving}>{t('common.cancel')}</button>
-            <button className="ao-btn ao-btn--primary" onClick={handleSave} disabled={!name.trim() || saving}>
-              {editingId ? t('hb.item.save') : t('hb.item.create')}
-            </button>
           </div>
+
+          {/* ── Правая панель: живое превью карточки предмета ── */}
+          <aside className={s.preview}>
+            <div className={s.previewFrame}>
+              <div className={cn('ao-overline', s.previewLabel)}>{t('hb.previewTitle')}</div>
+              <ItemPreviewCard
+                kind={kindUi}
+                name={name}
+                unnamedLabel={t('hb.spell.previewUnnamed')}
+                rarity={rarity || undefined}
+                rarityName={rarityName}
+                category={category || undefined}
+                damageDiceCount={numOrUndef(damageDiceCount)}
+                damageDieSize={numOrUndef(damageDieSize)}
+                damageBonus={numOrUndef(damageBonus)}
+                flatDamage={numOrUndef(flatDamage)}
+                weaponDamageTypeName={weaponDamageTypeName}
+                baseAc={numOrUndef(baseAc)}
+                maxDexBonus={dexBonusAllowed ? numOrUndef(maxDexBonus) : undefined}
+                strengthRequired={numOrUndef(strengthRequired)}
+                dexBonusAllowed={dexBonusAllowed}
+                stealthDisadvantage={stealthDisadvantage}
+                costGold={numOrUndef(costGold)}
+                weightLb={numOrUndef(weightLb)}
+                attunementRequired={attunementRequired}
+                attunementClassLabels={attunementClassLabels}
+                attunementRaceLabels={attunementRaceLabels}
+                attunementFlavor={attunementRequirement.trim() || undefined}
+                hasAbDamage={hasAbDamage}
+                abDamageDice={abDamageDice}
+                abDamageTypeName={abDamageTypeName}
+                abSaveAbility={abSaveAbility}
+                hasAbHealing={hasAbHealing}
+                abHealingFormula={abHealingFormula}
+                abRequiresEquipped={abRequiresEquipped}
+                abRequiresAttunement={abRequiresAttunement}
+                abConsumeOnUse={abConsumeOnUse}
+                description={description}
+              />
+            </div>
+          </aside>
+        </div>
+
+        <div className={s.actions}>
+          <button className="ao-btn ao-btn--ghost" onClick={onClose} disabled={saving}>{t('common.cancel')}</button>
+          <button className="ao-btn ao-btn--primary" onClick={handleSave} disabled={!name.trim() || saving}>
+            {editingId ? t('hb.item.save') : t('hb.item.create')}
+          </button>
         </div>
       </DialogContent>
     </Dialog>

@@ -12,9 +12,10 @@ import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
 import {
   CASTING_ACTIONS, RANGE_TYPES, DURATION_TYPES, DURATION_UNITS, AREA_SHAPES,
-  castingTimeText, rangeText, durationText, areaText,
 } from '@/lib/spellDisplay';
 import { DiceBuilder } from './DiceBuilder';
+import { SegmentedControl, type SegmentOption } from './SegmentedControl';
+import { SpellPreviewCard } from './SpellPreviewCard';
 import type { ApiError, HomebrewSpellRequest } from '@/types';
 import s from './SpellModal.module.css';
 
@@ -69,6 +70,9 @@ export function SpellModal({ open, onClose, packageId, editingId, onSaved }: Spe
   const [hasHealing, setHasHealing] = useState(false);
   const [healingFormula, setHealingFormula] = useState('2d8');
   const [saving, setSaving] = useState(false);
+  // Режим конструктора: пошаговый визард (по умолчанию для новых) vs полная форма (для опытных / правки).
+  const [wizard, setWizard] = useState(true);
+  const [step, setStep] = useState(0);
 
   const { data: schoolsResp } = useQuery({
     queryKey: ['reference-spell-schools'],
@@ -94,6 +98,8 @@ export function SpellModal({ open, onClose, packageId, editingId, onSaved }: Spe
 
   useEffect(() => {
     if (!open) return;
+    setStep(0);
+    setWizard(!editingId);
     if (editingId) {
       homebrewSpellsApi.get(packageId, editingId)
         .then((r) => {
@@ -146,13 +152,28 @@ export function SpellModal({ open, onClose, packageId, editingId, onSaved }: Spe
 
   const num = (v: string): number | undefined => (v.trim() === '' ? undefined : Number(v));
 
-  // Живое превью: собираем структуру и генерируем строки карточки ровно как это сделает сервер.
-  const preview = {
-    castingActionSlug, castingTimeAmount: num(castingTimeAmount), castingTimeUnit,
-    rangeType, rangeDistance: num(rangeDistance),
-    durationType, durationAmount: num(durationAmount), durationUnit, concentration,
-    areaShape, areaSizeFt: num(areaSizeFt), zonePersists,
+  // Сегмент-пикеры: слаг → подпись (+ иконка Ordo для экономики действия).
+  const castingIcon: Record<string, string> = {
+    action: 'action', 'bonus-action': 'bonus-action', reaction: 'reaction', time: 'formula-duration',
   };
+  const castingOptions: SegmentOption<string>[] = CASTING_ACTIONS.map((slug) => ({
+    value: slug, label: t(`hb.spell.cast.${slug}`), icon: castingIcon[slug],
+  }));
+  const rangeOptions: SegmentOption<string>[] = RANGE_TYPES.map((slug) => ({
+    value: slug, label: t(`hb.spell.range.${slug}`),
+  }));
+  const durationOptions: SegmentOption<string>[] = DURATION_TYPES.map((slug) => ({
+    value: slug, label: t(`hb.spell.dur.${slug}`),
+  }));
+  const reactionTriggerName = triggers.find((tr) => tr.slug === reactionTriggerSlug)?.name;
+  const schoolName = schools.find((sc) => sc.slug === school)?.name;
+  const damageTypeName = damageTypes.find((d) => d.slug === damageType)?.name;
+
+  // Шаги визарда (каждый — смысловой блок формы); полная форма показывает все блоки сразу.
+  const STEPS = ['basics', 'targeting', 'duration', 'mechanics', 'flavor'] as const;
+  const showGroup = (g: (typeof STEPS)[number]) => !wizard || STEPS[step] === g;
+  const isLastStep = step === STEPS.length - 1;
+  const basicsValid = !!name.trim() && !!school;
 
   const handleSave = async () => {
     if (!name.trim() || !school) return;
@@ -216,6 +237,29 @@ export function SpellModal({ open, onClose, packageId, editingId, onSaved }: Spe
         <div className={s.layout}>
           {/* ── Левая панель: ввод ── */}
           <div className={s.form}>
+            {/* Переключатель режима + рейка шагов визарда */}
+            <div className={s.modeRow}>
+              {wizard ? (
+                <div className={s.stepRail}>
+                  {STEPS.map((g, i) => (
+                    <button
+                      key={g}
+                      type="button"
+                      className={cn(s.stepDot, i === step && s.stepDotOn)}
+                      onClick={() => setStep(i)}
+                      disabled={i > step && !basicsValid}
+                    >
+                      <span className={s.stepNum}>{i + 1}</span>{t(`hb.wiz.step.${g}`)}
+                    </button>
+                  ))}
+                </div>
+              ) : <span className={cn('ao-overline', s.modeLabel)}>{t('hb.wiz.fullForm')}</span>}
+              <button type="button" className={cn('ao-btn ao-btn--ghost', s.modeToggle)} onClick={() => setWizard((w) => !w)}>
+                {wizard ? t('hb.wiz.toForm') : t('hb.wiz.toWizard')}
+              </button>
+            </div>
+
+            {showGroup('basics') && (<>
             <div>
               <label className="ao-label">{t('hb.spell.name')}</label>
               <input className="ao-input" value={name} onChange={(e) => setName(e.target.value)} />
@@ -244,22 +288,13 @@ export function SpellModal({ open, onClose, packageId, editingId, onSaved }: Spe
                 </select>
               </div>
             </div>
+            </>)}
 
+            {showGroup('targeting') && (<>
             {/* Время сотворения — сегмент-пикер экономики действия */}
             <div>
               <label className="ao-label">{t('hb.spell.castingTime')}</label>
-              <div className={s.segments}>
-                {CASTING_ACTIONS.map((slug) => (
-                  <button
-                    key={slug}
-                    type="button"
-                    className={cn(s.segment, castingActionSlug === slug && s.segmentOn)}
-                    onClick={() => setCastingActionSlug(slug)}
-                  >
-                    {t(`hb.spell.cast.${slug}`)}
-                  </button>
-                ))}
-              </div>
+              <SegmentedControl options={castingOptions} value={castingActionSlug} onChange={setCastingActionSlug} ariaLabel={t('hb.spell.castingTime')} />
               {castingActionSlug === 'time' && (
                 <div className={cn(s.grid2, s.subRow)}>
                   <input
@@ -289,18 +324,7 @@ export function SpellModal({ open, onClose, packageId, editingId, onSaved }: Spe
             {/* Дистанция */}
             <div>
               <label className="ao-label">{t('hb.spell.range')}</label>
-              <div className={s.segments}>
-                {RANGE_TYPES.map((slug) => (
-                  <button
-                    key={slug}
-                    type="button"
-                    className={cn(s.segment, rangeType === slug && s.segmentOn)}
-                    onClick={() => setRangeType(slug)}
-                  >
-                    {t(`hb.spell.range.${slug}`)}
-                  </button>
-                ))}
-              </div>
+              <SegmentedControl options={rangeOptions} value={rangeType} onChange={setRangeType} ariaLabel={t('hb.spell.range')} />
               {rangeType === 'distance' && (
                 <div className={s.subRow}>
                   <input
@@ -311,22 +335,13 @@ export function SpellModal({ open, onClose, packageId, editingId, onSaved }: Spe
                 </div>
               )}
             </div>
+            </>)}
 
+            {showGroup('duration') && (<>
             {/* Длительность */}
             <div>
               <label className="ao-label">{t('hb.spell.duration')}</label>
-              <div className={s.segments}>
-                {DURATION_TYPES.map((slug) => (
-                  <button
-                    key={slug}
-                    type="button"
-                    className={cn(s.segment, durationType === slug && s.segmentOn)}
-                    onClick={() => setDurationType(slug)}
-                  >
-                    {t(`hb.spell.dur.${slug}`)}
-                  </button>
-                ))}
-              </div>
+              <SegmentedControl options={durationOptions} value={durationType} onChange={setDurationType} ariaLabel={t('hb.spell.duration')} />
               {durationType === 'timed' && (
                 <div className={cn(s.grid2, s.subRow)}>
                   <input
@@ -348,7 +363,9 @@ export function SpellModal({ open, onClose, packageId, editingId, onSaved }: Spe
               <input type="checkbox" checked={ritual} onChange={(e) => setRitual(e.target.checked)} />
               {t('hb.spell.ritual')}
             </label>
+            </>)}
 
+            {showGroup('targeting') && (<>
             {/* Область действия (AoE) */}
             <div className={s.sectionTitle}>{t('hb.spell.areaSection')}</div>
             <div>
@@ -391,7 +408,9 @@ export function SpellModal({ open, onClose, packageId, editingId, onSaved }: Spe
                 )}
               </>
             )}
+            </>)}
 
+            {showGroup('flavor') && (<>
             <div>
               <label className="ao-label">{t('hb.spell.description')} <span className={s.flavorBadge}>{t('hb.flavorBadge')}</span></label>
               <textarea className="ao-input" rows={4} value={description} onChange={(e) => setDescription(e.target.value)} />
@@ -400,7 +419,9 @@ export function SpellModal({ open, onClose, packageId, editingId, onSaved }: Spe
               <label className="ao-label">{t('hb.spell.higherLevels')}</label>
               <textarea className="ao-input" rows={2} value={higherLevels} onChange={(e) => setHigherLevels(e.target.value)} />
             </div>
+            </>)}
 
+            {showGroup('mechanics') && (<>
             {/* Механика */}
             <div className={s.sectionTitle}>{t('hb.spell.mechanics')}</div>
             <label className={cn('ao-row ao-gap-8', s.check)}>
@@ -447,33 +468,62 @@ export function SpellModal({ open, onClose, packageId, editingId, onSaved }: Spe
             {hasHealing && (
               <DiceBuilder value={healingFormula} onChange={setHealingFormula} allowBonus abilityMods={ABILITIES} labels={diceLabels} />
             )}
+            </>)}
           </div>
 
-          {/* ── Правая панель: живое превью карточки ── */}
+          {/* ── Правая панель: живое превью карточки (тот же SpellCardView, что и в игре) ── */}
           <aside className={s.preview}>
-            <div className={s.previewCard}>
-              <div className={s.previewName}>{name.trim() || t('hb.spell.previewUnnamed')}</div>
-              <div className={s.previewMeta}>
-                {Number(level) === 0 ? t('hb.spell.cantrip') : `${t('hb.spell.level')} ${level}`}
-                {school ? ` · ${schools.find((sc) => sc.slug === school)?.name ?? school}` : ''}
-              </div>
-              <dl className={s.previewRows}>
-                <div><dt>{t('hb.spell.castingTime')}</dt><dd>{castingTimeText(preview)}{ritual ? ` · ${t('hb.spell.ritual')}` : ''}</dd></div>
-                <div><dt>{t('hb.spell.range')}</dt><dd>{rangeText(preview)}</dd></div>
-                <div><dt>{t('hb.spell.duration')}</dt><dd>{durationText(preview)}</dd></div>
-                {areaShape && <div><dt>{t('hb.spell.areaSection')}</dt><dd>{areaText(preview)}</dd></div>}
-                {hasDamage && <div><dt>{t('hb.spell.damageDice')}</dt><dd>{damageDice}{damageType ? ` ${damageTypes.find((d) => d.slug === damageType)?.name ?? ''}` : ''}</dd></div>}
-                {hasHealing && <div><dt>{t('hb.spell.healingFormula')}</dt><dd>{healingFormula}</dd></div>}
-              </dl>
+            <div className={s.previewFrame}>
+              <div className={cn('ao-overline', s.previewLabel)}>{t('hb.previewTitle')}</div>
+              <SpellPreviewCard
+                name={name}
+                level={Number(level) || 0}
+                schoolName={schoolName}
+                castingActionSlug={castingActionSlug}
+                castingTimeAmount={num(castingTimeAmount)}
+                castingTimeUnit={castingTimeUnit}
+                reactionTriggerName={reactionTriggerName}
+                ritual={ritual}
+                rangeType={rangeType}
+                rangeDistance={num(rangeDistance)}
+                durationType={durationType}
+                durationAmount={num(durationAmount)}
+                durationUnit={durationUnit}
+                concentration={concentration}
+                areaShape={areaShape}
+                areaSizeFt={num(areaSizeFt)}
+                zonePersists={zonePersists}
+                hasDamage={hasDamage}
+                damageDice={damageDice}
+                damageTypeName={damageTypeName}
+                saveAbility={saveAbility}
+                requiresAttackHit={requiresAttackHit}
+                hasHealing={hasHealing}
+                healingFormula={healingFormula}
+                description={description}
+                higherLevels={higherLevels}
+                unnamedLabel={t('hb.spell.previewUnnamed')}
+              />
             </div>
           </aside>
         </div>
 
         <div className={s.actions}>
           <button className="ao-btn ao-btn--ghost" onClick={onClose} disabled={saving}>{t('common.cancel')}</button>
-          <button className="ao-btn ao-btn--primary" onClick={handleSave} disabled={!name.trim() || !school || saving}>
-            {editingId ? t('hb.spell.save') : t('hb.spell.create')}
-          </button>
+          {wizard && step > 0 && (
+            <button className="ao-btn ao-btn--ghost" onClick={() => setStep((x) => Math.max(0, x - 1))} disabled={saving}>
+              {t('hb.wiz.back')}
+            </button>
+          )}
+          {wizard && !isLastStep ? (
+            <button className="ao-btn ao-btn--primary" onClick={() => setStep((x) => Math.min(STEPS.length - 1, x + 1))} disabled={!basicsValid}>
+              {t('hb.wiz.next')}
+            </button>
+          ) : (
+            <button className="ao-btn ao-btn--primary" onClick={handleSave} disabled={!basicsValid || saving}>
+              {editingId ? t('hb.spell.save') : t('hb.spell.create')}
+            </button>
+          )}
         </div>
       </DialogContent>
     </Dialog>
