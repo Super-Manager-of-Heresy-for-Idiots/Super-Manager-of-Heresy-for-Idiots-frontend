@@ -178,6 +178,8 @@ export function spellDetailToReference(detail: SpellDetail): SpellReferenceRespo
     school: detail.school?.name ?? undefined,
     description: detail.description ?? undefined,
     availableToClassIds: detail.classes.map((c) => c.id),
+    source: detail.source ?? undefined,
+    homebrewTitle: detail.homebrewTitle ?? undefined,
   };
 }
 

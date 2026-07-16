@@ -328,6 +328,10 @@ export const campaigns: DictModule = {
     // Grouped spell picker (круги/школы + детали)
     'camp.lvl.spell.circle': '{level}-й круг',
     'camp.lvl.spell.schoolOther': 'Прочее',
+    'camp.lvl.spell.src.all': 'Все',
+    'camp.lvl.spell.src.vanilla': 'Ванильные',
+    'camp.lvl.spell.src.homebrew': 'Homebrew',
+    'camp.lvl.spell.hbShort': 'HB',
     'camp.lvl.spell.pickHint': 'Нажмите на заклинание, чтобы увидеть подробности',
     'camp.lvl.spell.choose': 'Выбрать',
     'camp.lvl.spell.remove': 'Убрать',
@@ -755,6 +759,10 @@ export const campaigns: DictModule = {
     // Grouped spell picker (circles/schools + details)
     'camp.lvl.spell.circle': 'Circle {level}',
     'camp.lvl.spell.schoolOther': 'Other',
+    'camp.lvl.spell.src.all': 'All',
+    'camp.lvl.spell.src.vanilla': 'Vanilla',
+    'camp.lvl.spell.src.homebrew': 'Homebrew',
+    'camp.lvl.spell.hbShort': 'HB',
     'camp.lvl.spell.pickHint': 'Click a spell to see its details',
     'camp.lvl.spell.choose': 'Choose',
     'camp.lvl.spell.remove': 'Remove',

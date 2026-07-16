@@ -1,5 +1,8 @@
-import { useEffect, useState } from 'react';
-import { Loader2, Plus, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { Loader2, Plus, Trash2, ChevronDown, ChevronUp, Sparkles, X } from 'lucide-react';
+import { useSpells } from '@/hooks/useContentCatalog';
+import { spellDetailToReference, localizedName } from '@/lib/contentAdapters';
+import { SpellPickerModal } from '@/components/content-rewards/SpellPickerModal';
 import {
   Dialog,
   DialogContent,
@@ -13,7 +16,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { useT } from '@/i18n/I18nContext';
+import { useT, useI18n } from '@/i18n/I18nContext';
 import {
   ABILITY_ENUMS,
   CREATURE_SIZES,
@@ -173,6 +176,66 @@ function CsvField({ label, value, onChange, placeholder }: CsvFieldProps) {
         placeholder={placeholder || t('cmp2.race.csvPlaceholder')}
         onChange={(e) => setText(e.target.value)}
         onBlur={() => onChange(csvToArray(text))}
+      />
+    </div>
+  );
+}
+
+/**
+ * Поле выбора врождённых заклинаний: вместо ручного ввода id — красивый пикер из мастера повышения
+ * уровня ({@link SpellPickerModal} → SpellGrantPicker) с группировкой по кругам/школам и фильтром
+ * ванильные/homebrew. Выбранные показываются чипами; хранится массив id (как и раньше).
+ */
+function InnateSpellsField({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string[] | null | undefined;
+  onChange: (next: string[]) => void;
+}) {
+  const t = useT();
+  const { lang } = useI18n();
+  const [open, setOpen] = useState(false);
+  const { data: spellDetails = [] } = useSpells();
+  const pool = useMemo(() => spellDetails.map(spellDetailToReference), [spellDetails]);
+  const byId = useMemo(() => new Map(pool.map((sp) => [sp.id, sp])), [pool]);
+  const selected = value ?? [];
+
+  return (
+    <div className="space-y-1">
+      <Label className="text-xs uppercase tracking-wide">{label}</Label>
+      <div className="flex flex-wrap items-center gap-1.5">
+        {selected.length === 0 && (
+          <span className="text-xs text-muted-foreground">{t('spellPicker.empty')}</span>
+        )}
+        {selected.map((id) => {
+          const sp = byId.get(id);
+          return (
+            <Badge key={id} variant="secondary" className="gap-1">
+              {sp ? localizedName(sp, lang) : id}
+              <button
+                type="button"
+                aria-label={t('common.delete')}
+                onClick={() => onChange(selected.filter((x) => x !== id))}
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </Badge>
+          );
+        })}
+      </div>
+      <Button type="button" variant="outline" size="sm" onClick={() => setOpen(true)}>
+        <Sparkles className="h-4 w-4 mr-1" /> {t('spellPicker.choose')}
+      </Button>
+      <SpellPickerModal
+        open={open}
+        onOpenChange={setOpen}
+        pool={pool}
+        value={selected}
+        onChange={onChange}
+        title={label}
       />
     </div>
   );
@@ -470,7 +533,7 @@ export function RaceEditor({ open, onClose, onSubmit, isSubmitting, scope, initi
             <CsvField label={t('cmp2.race.immunities')} value={state.immunities} onChange={(v) => patch({ immunities: v })} />
             <CsvField label={t('cmp2.race.conditionResistances')} value={state.conditionResistances} onChange={(v) => patch({ conditionResistances: v })} />
             <CsvField label={t('cmp2.race.conditionAdvantages')} value={state.conditionAdvantages} onChange={(v) => patch({ conditionAdvantages: v })} placeholder={t('cmp2.race.condCharmed')} />
-            <CsvField label={t('cmp2.race.innateSpells')} value={state.innateSpells} onChange={(v) => patch({ innateSpells: v.length ? v : null })} />
+            <InnateSpellsField label={t('cmp2.race.innateSpells')} value={state.innateSpells} onChange={(v) => patch({ innateSpells: v.length ? v : null })} />
           </CollapsibleSection>
 
           {/* === Legacy / Homebrew mechanics === */}
@@ -677,7 +740,7 @@ function LineageEditor({
         onChange={(e) => onChange({ description: e.target.value })}
       />
       <CsvField label={t('cmp2.race.resistances')} value={lineage.resistances} onChange={(v) => onChange({ resistances: v })} />
-      <CsvField label={t('cmp2.race.innateSpells')} value={lineage.innateSpells} onChange={(v) => onChange({ innateSpells: v.length ? v : null })} />
+      <InnateSpellsField label={t('cmp2.race.innateSpells')} value={lineage.innateSpells} onChange={(v) => onChange({ innateSpells: v.length ? v : null })} />
     </div>
   );
 }

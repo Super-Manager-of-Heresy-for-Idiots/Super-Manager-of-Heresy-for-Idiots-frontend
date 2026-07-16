@@ -119,7 +119,11 @@ const core: Record<Lang, Dict> = {
     'common.save': 'Сохранить',
     'common.edit': 'Изменить',
     'common.confirm': 'Подтвердить',
+    'common.done': 'Готово',
     'common.loading': 'Загрузка…',
+    'spellPicker.title': 'Выбор заклинаний',
+    'spellPicker.choose': 'Выбрать заклинания',
+    'spellPicker.empty': 'Заклинания не выбраны',
 
     /* ── Auth — shared atmospheric panel ────────────── */
     'auth.brandSub': 'Имперский Архив · {currentYearRoman}',
@@ -308,7 +312,11 @@ const core: Record<Lang, Dict> = {
     'common.save': 'Save',
     'common.edit': 'Edit',
     'common.confirm': 'Confirm',
+    'common.done': 'Done',
     'common.loading': 'Loading…',
+    'spellPicker.title': 'Choose spells',
+    'spellPicker.choose': 'Choose spells',
+    'spellPicker.empty': 'No spells selected',
 
     /* ── Auth — shared atmospheric panel ────────────── */
     'auth.brandSub': 'Imperial Archive · {currentYearRoman}',

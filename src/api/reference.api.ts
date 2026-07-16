@@ -145,6 +145,12 @@ export const referenceApi = {
     return response.data;
   },
 
+  /** Equipment categories (Simple Weapon, Armor, …) for the item authoring category picker. */
+  getEquipmentCategories: async (): Promise<ApiResponse<ContentLabel[]>> => {
+    const response = await api.get<ApiResponse<ContentLabel[]>>('/reference/equipment-categories');
+    return response.data;
+  },
+
   /** Engine gameplay-event triggers for the spell reaction-trigger picker (HB_UX Фаза 1). */
   getReactionTriggers: async (): Promise<ApiResponse<ContentLabel[]>> => {
     const response = await api.get<ApiResponse<ContentLabel[]>>('/reference/reaction-triggers');

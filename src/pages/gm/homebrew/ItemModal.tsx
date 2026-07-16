@@ -30,12 +30,6 @@ type ItemKindUi = 'magic' | 'weapon' | 'armor' | 'gear' | 'tool';
 
 const KIND_ORDER: ItemKindUi[] = ['magic', 'weapon', 'armor', 'gear', 'tool'];
 
-/** Распространённые слаги категорий снаряжения — подсказки datalist (свободный ввод всё ещё допустим). */
-const CATEGORY_SUGGESTIONS = [
-  'simple-weapon', 'martial-weapon', 'light-armor', 'medium-armor', 'heavy-armor', 'shield',
-  'adventuring-gear', 'tool', 'artisan-tools', 'gaming-set', 'musical-instrument',
-];
-
 function numOrUndef(v: string): number | undefined {
   if (v.trim() === '') return undefined;
   const n = Number(v);
@@ -104,6 +98,14 @@ export function ItemModal({ open, onClose, packageId, editingId, onSaved }: Item
     enabled: open && kindUi === 'magic',
   });
   const rarities = raritiesResp?.data ?? [];
+  // Реальные категории снаряжения из БД (slug + русское имя) — вместо захардкоженных slug-подсказок,
+  // которые бэк отбивал ошибкой «Неизвестная категория снаряжения».
+  const { data: categoriesResp } = useQuery({
+    queryKey: ['reference-equipment-categories'],
+    queryFn: () => referenceApi.getEquipmentCategories(),
+    enabled: open,
+  });
+  const categoryOptions = categoriesResp?.data ?? [];
   const { data: damageTypes = [] } = useDamageTypes();
   // Словари классов/рас для enforced-ограничения настройки (HB_UX Фаза 5).
   const { data: classesResp } = useQuery({
@@ -371,10 +373,14 @@ export function ItemModal({ open, onClose, packageId, editingId, onSaved }: Item
             <div className={s.grid2}>
               <div>
                 <label className="ao-label">{t('hb.item.category')}</label>
-                <input className="ao-input" list="hb-item-categories" value={category} onChange={(e) => setCategory(e.target.value)} placeholder={t('hb.item.categoryHint')} />
-                <datalist id="hb-item-categories">
-                  {CATEGORY_SUGGESTIONS.map((c) => <option key={c} value={c} />)}
-                </datalist>
+                <select className="ao-input" value={category} onChange={(e) => setCategory(e.target.value)}>
+                  <option value="">{t('hb.item.categoryNone')}</option>
+                  {categoryOptions.map((c) => (
+                    <option key={c.slug ?? c.id} value={c.slug ?? ''}>
+                      {c.name}{c.slug ? ` (${c.slug})` : ''}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div>
                 <label className="ao-label">{t('hb.item.costGold')}</label>

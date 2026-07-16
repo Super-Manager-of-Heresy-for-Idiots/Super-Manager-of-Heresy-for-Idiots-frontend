@@ -21,6 +21,49 @@
   flex-direction: column;
 }
 
+/* Фильтр источника (Все / Ванильные / Homebrew) — виден только при смешанном пуле. */
+.sourceTabs {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  gap: 2px;
+  padding: var(--s-1);
+  background: var(--stone);
+  border-bottom: 1px solid var(--rule);
+}
+.sourceTab {
+  flex: 1;
+  padding: 4px 6px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--ink-quiet);
+  font-size: 11px;
+  cursor: pointer;
+}
+.sourceTab:hover {
+  color: var(--ink-bright);
+}
+.sourceTab.sourceTabOn {
+  border-color: var(--gold);
+  color: var(--gold-pale);
+  background: color-mix(in srgb, var(--gold) 12%, transparent);
+}
+
+/* Бейдж homebrew-заклинания в строке списка. */
+.hbBadge {
+  flex-shrink: 0;
+  margin-left: auto;
+  padding: 0 5px;
+  border: 1px solid var(--arcane, var(--brass));
+  border-radius: 999px;
+  color: var(--arcane, var(--brass));
+  font-size: 9px;
+  line-height: 1.4;
+  letter-spacing: 0.04em;
+}
+
 .levelGroup {
   display: flex;
   flex-direction: column;

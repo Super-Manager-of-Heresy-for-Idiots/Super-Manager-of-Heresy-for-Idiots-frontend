@@ -618,6 +618,9 @@ export interface SpellReferenceResponse {
   school?: string;
   description?: string;
   availableToClassIds?: string[];
+  /** Origin marker: 'GLOBAL' | 'HOMEBREW' — для разделения ванильных/homebrew в пикере. */
+  source?: string;
+  homebrewTitle?: string;
 }
 
 // Final contract: ContentClassDetailResponse (kept name CharacterClassDetailResponse

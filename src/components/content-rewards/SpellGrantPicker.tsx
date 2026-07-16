@@ -70,21 +70,56 @@ export interface SpellGrantPickerProps {
   campaignId?: string;
 }
 
+type SourceFilter = 'all' | 'vanilla' | 'homebrew';
+const isHomebrew = (sp: SpellReferenceResponse) => sp.source === 'HOMEBREW';
+
 export function SpellGrantPicker({ pool, chosen, need, onToggle, campaignId }: SpellGrantPickerProps) {
   const t = useT();
   const { lang } = useI18n();
   const [activeId, setActiveId] = useState('');
+  const [sourceFilter, setSourceFilter] = useState<SourceFilter>('all');
 
-  const groups = useMemo(() => buildGroups(pool), [pool]);
+  // Фильтр источника показываем только когда в пуле есть и ванильные, и homebrew (иначе — лишний контрол).
+  const hasHomebrew = useMemo(() => pool.some(isHomebrew), [pool]);
+  const hasVanilla = useMemo(() => pool.some((sp) => !isHomebrew(sp)), [pool]);
+  const mixedSources = hasHomebrew && hasVanilla;
+
+  const filteredPool = useMemo(() => {
+    if (!mixedSources || sourceFilter === 'all') return pool;
+    return pool.filter((sp) => (sourceFilter === 'homebrew' ? isHomebrew(sp) : !isHomebrew(sp)));
+  }, [pool, mixedSources, sourceFilter]);
+
+  const groups = useMemo(() => buildGroups(filteredPool), [filteredPool]);
   const active = useMemo(() => pool.find((sp) => sp.id === activeId) ?? null, [pool, activeId]);
 
   const atLimit = chosen.length >= need;
+  const sourceTabs: { key: SourceFilter; label: string }[] = [
+    { key: 'all', label: t('camp.lvl.spell.src.all') },
+    { key: 'vanilla', label: t('camp.lvl.spell.src.vanilla') },
+    { key: 'homebrew', label: t('camp.lvl.spell.src.homebrew') },
+  ];
   const levelLabel = (level: number) =>
     level === 0 ? t('camp.lvl.cantrips') : t('camp.lvl.spell.circle', { level });
 
   return (
     <div className={s.wrap}>
       <div className={s.list} role="listbox" aria-label={t('camp.lvl.spells')}>
+        {mixedSources && (
+          <div className={s.sourceTabs} role="tablist" aria-label={t('camp.lvl.spell.src.all')}>
+            {sourceTabs.map((tab) => (
+              <button
+                key={tab.key}
+                type="button"
+                role="tab"
+                aria-selected={sourceFilter === tab.key}
+                className={cn(s.sourceTab, sourceFilter === tab.key && s.sourceTabOn)}
+                onClick={() => setSourceFilter(tab.key)}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        )}
         {groups.map((lvl) => (
           <div key={lvl.level} className={s.levelGroup}>
             <div className={s.levelHead}>
@@ -125,6 +160,11 @@ export function SpellGrantPicker({ pool, chosen, need, onToggle, campaignId }: S
                           onClick={() => setActiveId(sp.id)}
                         >
                           <span className={s.rowName}>{localizedName(sp, lang)}</span>
+                          {isHomebrew(sp) && (
+                            <span className={s.hbBadge} title={sp.homebrewTitle ?? t('camp.lvl.spell.src.homebrew')}>
+                              {t('camp.lvl.spell.hbShort')}
+                            </span>
+                          )}
                           <Rune kind="chev-r" size={13} className={s.rowChev} color="var(--ink-faint)" />
                         </button>
                       </div>
