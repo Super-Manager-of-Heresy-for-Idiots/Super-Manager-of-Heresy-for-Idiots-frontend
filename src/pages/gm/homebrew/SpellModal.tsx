@@ -69,6 +69,10 @@ export function SpellModal({ open, onClose, packageId, editingId, onSaved }: Spe
   const [requiresAttackHit, setRequiresAttackHit] = useState(false);
   const [hasHealing, setHasHealing] = useState(false);
   const [healingFormula, setHealingFormula] = useState('2d8');
+  // Состояния (HB_UX Фаза 4)
+  const [hasConditions, setHasConditions] = useState(false);
+  const [conditionSlugs, setConditionSlugs] = useState<string[]>([]);
+  const [conditionDurationRounds, setConditionDurationRounds] = useState('');
   const [saving, setSaving] = useState(false);
   // Режим конструктора: пошаговый визард (по умолчанию для новых) vs полная форма (для опытных / правки).
   const [wizard, setWizard] = useState(true);
@@ -87,6 +91,12 @@ export function SpellModal({ open, onClose, packageId, editingId, onSaved }: Spe
     enabled: open,
   });
   const triggers = triggersResp?.data ?? [];
+  const { data: conditionsResp } = useQuery({
+    queryKey: ['reference-conditions'],
+    queryFn: () => referenceApi.getConditions(),
+    enabled: open,
+  });
+  const conditions = conditionsResp?.data ?? [];
   const ABILITIES: { slug: string; label: string }[] = [
     { slug: 'str', label: t('hb.spell.abStr') },
     { slug: 'dex', label: t('hb.spell.abDex') },
@@ -135,6 +145,9 @@ export function SpellModal({ open, onClose, packageId, editingId, onSaved }: Spe
           setRequiresAttackHit(!!sp.requiresAttackHit);
           setHasHealing(!!sp.healingFormula);
           setHealingFormula(sp.healingFormula || '2d8');
+          setHasConditions(!!(sp.conditionSlugs && sp.conditionSlugs.length));
+          setConditionSlugs(sp.conditionSlugs ?? []);
+          setConditionDurationRounds(sp.conditionDurationRounds != null ? String(sp.conditionDurationRounds) : '');
         })
         .catch(() => toast.error(t('hb.spell.loadFailed')));
     } else {
@@ -147,6 +160,7 @@ export function SpellModal({ open, onClose, packageId, editingId, onSaved }: Spe
       setDescription(''); setHigherLevels('');
       setHasDamage(false); setDamageDice('8d6'); setDamageType(''); setSaveAbility(''); setHalfOnSave(false);
       setRequiresAttackHit(false); setHasHealing(false); setHealingFormula('2d8');
+      setHasConditions(false); setConditionSlugs([]); setConditionDurationRounds('');
     }
   }, [open, editingId, packageId, t]);
 
@@ -168,6 +182,17 @@ export function SpellModal({ open, onClose, packageId, editingId, onSaved }: Spe
   const reactionTriggerName = triggers.find((tr) => tr.slug === reactionTriggerSlug)?.name;
   const schoolName = schools.find((sc) => sc.slug === school)?.name;
   const damageTypeName = damageTypes.find((d) => d.slug === damageType)?.name;
+
+  // Мультиселект состояний: переключение слага в списке (порядок сохраняется).
+  const toggleCondition = (slug: string) => {
+    setConditionSlugs((prev) => (prev.includes(slug) ? prev.filter((x) => x !== slug) : [...prev, slug]));
+  };
+  // Готовая строка состояний для превью карточки (имена + длительность в раундах).
+  const conditionRounds = num(conditionDurationRounds);
+  const conditionsPreview = hasConditions && conditionSlugs.length
+    ? conditionSlugs.map((sl) => conditions.find((c) => c.slug === sl)?.name ?? sl).join(', ')
+      + (conditionRounds ? ` (${conditionRounds} ${t('hb.spell.unit.round')})` : '')
+    : undefined;
 
   // Шаги визарда (каждый — смысловой блок формы); полная форма показывает все блоки сразу.
   const STEPS = ['basics', 'targeting', 'duration', 'mechanics', 'flavor'] as const;
@@ -209,6 +234,8 @@ export function SpellModal({ open, onClose, packageId, editingId, onSaved }: Spe
         halfOnSave,
         requiresAttackHit,
         healingFormula: hasHealing ? healingFormula : undefined,
+        conditionSlugs: hasConditions && conditionSlugs.length ? conditionSlugs : undefined,
+        conditionDurationRounds: hasConditions ? num(conditionDurationRounds) : undefined,
       };
       if (editingId) await homebrewSpellsApi.update(packageId, editingId, body);
       else await homebrewSpellsApi.create(packageId, body);
@@ -468,6 +495,38 @@ export function SpellModal({ open, onClose, packageId, editingId, onSaved }: Spe
             {hasHealing && (
               <DiceBuilder value={healingFormula} onChange={setHealingFormula} allowBonus abilityMods={ABILITIES} labels={diceLabels} />
             )}
+
+            {/* Состояния (HB_UX Фаза 4): мультипикер из словаря + длительность в раундах. */}
+            <label className={cn('ao-row ao-gap-8', s.check)}>
+              <input type="checkbox" checked={hasConditions} onChange={(e) => setHasConditions(e.target.checked)} />
+              {t('hb.spell.hasConditions')}
+            </label>
+            {hasConditions && (
+              <>
+                <div className={s.chips}>
+                  {conditions.length === 0 && <span className={s.hint}>…</span>}
+                  {conditions.map((c) => (
+                    <button
+                      key={c.slug ?? c.id}
+                      type="button"
+                      className={cn(s.chip, conditionSlugs.includes(c.slug ?? '') && s.chipOn)}
+                      onClick={() => toggleCondition(c.slug ?? '')}
+                    >
+                      {c.name}
+                    </button>
+                  ))}
+                </div>
+                <div>
+                  <label className="ao-label">{t('hb.spell.conditionDuration')}</label>
+                  <input
+                    className="ao-input" type="number" min={1} max={1000}
+                    placeholder={t('hb.spell.conditionDurationPlaceholder')}
+                    value={conditionDurationRounds} onChange={(e) => setConditionDurationRounds(e.target.value)}
+                  />
+                </div>
+                <span className={s.hint}>{t('hb.spell.conditionsHint')}</span>
+              </>
+            )}
             </>)}
           </div>
 
@@ -500,6 +559,7 @@ export function SpellModal({ open, onClose, packageId, editingId, onSaved }: Spe
                 requiresAttackHit={requiresAttackHit}
                 hasHealing={hasHealing}
                 healingFormula={healingFormula}
+                conditions={conditionsPreview}
                 description={description}
                 higherLevels={higherLevels}
                 unnamedLabel={t('hb.spell.previewUnnamed')}

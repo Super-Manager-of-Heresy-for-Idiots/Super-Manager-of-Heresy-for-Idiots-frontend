@@ -46,6 +46,8 @@ export interface SpellCardModel {
   damage?: SpellCardDamage[];
   healing?: SpellCardHealing[];
   summoned?: SpellCardSummon[];
+  /** Готовая строка накладываемых состояний (HB_UX Фаза 4), напр. «Ослепление, Опутанность (10 раунд.)». */
+  conditions?: string;
   description?: string;
   higherLevels?: string;
 }
@@ -74,6 +76,7 @@ export function SpellCardView({ model, summonHref, emptyNote, className }: Spell
   if (model.area) stats.push({ k: t('hb.spell.areaSection'), v: model.area });
   if (model.components) stats.push({ k: t('camp.lvl.spell.components'), v: model.components });
   if (model.reactionNote) stats.push({ k: t('hb.spell.reactionTrigger'), v: model.reactionNote });
+  if (model.conditions) stats.push({ k: t('hb.spell.conditionsSection'), v: model.conditions });
 
   const damage = (model.damage ?? []).filter((d) => d.dice || d.raw || d.damageTypeName);
   const healing = (model.healing ?? []).filter((h) => h.dice || h.flat != null || h.raw);

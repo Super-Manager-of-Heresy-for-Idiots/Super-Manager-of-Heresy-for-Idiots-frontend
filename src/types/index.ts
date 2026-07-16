@@ -879,6 +879,9 @@ export interface HomebrewSpellRequest {
   halfOnSave?: boolean;
   requiresAttackHit?: boolean;
   healingFormula?: string;
+  // Состояния (HB_UX Фаза 4): мультипикер состояний + длительность в раундах.
+  conditionSlugs?: string[];        // bestiary_conditions.code
+  conditionDurationRounds?: number; // null/undefined — до снятия
 }
 
 /** homebrew-заклинание для round-trip в редакторе (P2-1). */
@@ -916,6 +919,8 @@ export interface HomebrewSpellResponse {
   halfOnSave?: boolean;
   requiresAttackHit?: boolean;
   healingFormula?: string;
+  conditionSlugs?: string[];
+  conditionDurationRounds?: number;
   source?: string;
   homebrewPackageId?: string;
   homebrewPackageTitle?: string;

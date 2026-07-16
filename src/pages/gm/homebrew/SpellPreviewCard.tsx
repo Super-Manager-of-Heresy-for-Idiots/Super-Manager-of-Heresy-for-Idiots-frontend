@@ -26,6 +26,8 @@ export interface SpellPreviewInput {
   requiresAttackHit?: boolean;
   hasHealing?: boolean;
   healingFormula?: string;
+  /** Готовая строка накладываемых состояний (HB_UX Фаза 4). */
+  conditions?: string;
   description?: string;
   higherLevels?: string;
   unnamedLabel: string;
@@ -56,6 +58,7 @@ export function SpellPreviewCard(input: SpellPreviewInput) {
       ? [{ dice: input.damageDice, damageTypeName: input.damageTypeName }]
       : [],
     healing: input.hasHealing && input.healingFormula ? [{ dice: input.healingFormula }] : [],
+    conditions: input.conditions,
     description: input.description?.trim() || undefined,
     higherLevels: input.higherLevels?.trim() || undefined,
   };
