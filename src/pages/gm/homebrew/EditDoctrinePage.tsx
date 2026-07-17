@@ -30,6 +30,7 @@ import { useStatTypes } from '@/hooks/useAdmin';
 import { homebrewApi } from '@/api/homebrew.api';
 import { homebrewItemsApi } from '@/api/homebrew-items.api';
 import { homebrewSpellsApi } from '@/api/homebrew-spells.api';
+import { ImageUploadField } from '@/components/media/ImageUploadField';
 import { ItemModal } from './ItemModal';
 import { SpellModal } from './SpellModal';
 import { useT } from '@/i18n/I18nContext';
@@ -91,6 +92,8 @@ export default function EditDoctrinePage() {
   const [tagText, setTagText] = useState('');
   const [tags, setTags] = useState<string[]>([]);
   const [metaLoaded, setMetaLoaded] = useState(false);
+  // Оптимистичный показ новой обложки сразу после загрузки/удаления, без рефетча.
+  const [coverOverride, setCoverOverride] = useState<string | null | undefined>(undefined);
 
   const [adding, setAdding] = useState(false);
   const [addMode, setAddMode] = useState<'existing' | 'new'>('new');
@@ -420,6 +423,19 @@ export default function EditDoctrinePage() {
                   className={cn('ao-input', s.titleInput)}
                   value={title}
                   onChange={(e) => setTitle(e.target.value.slice(0, 120))}
+                />
+              </div>
+              <div>
+                <label className="ao-label">Обложка</label>
+                <ImageUploadField
+                  ownerType="HOMEBREW_COVER"
+                  ownerId={pkg.id}
+                  value={coverOverride !== undefined ? coverOverride : (pkg.coverUrl ?? null)}
+                  canEdit={pkg.status === 'DRAFT' || pkg.status === 'PUBLISHED'}
+                  onChange={setCoverOverride}
+                  alt={pkg.title}
+                  placeholder="Нет обложки"
+                  previewClassName={s.coverPreview}
                 />
               </div>
               <div>

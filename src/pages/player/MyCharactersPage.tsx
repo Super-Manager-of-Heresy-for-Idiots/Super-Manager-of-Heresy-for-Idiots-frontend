@@ -150,6 +150,9 @@ function TemplateCard({
     <OrdoPanel frame padding={0}>
       <PanelHeader title={character.name} glyph="helm" tone="gold" sub={inCampaign ? t('chars.inCampaign') : t('chars.template')} />
       <div className={s.cardBody}>
+        {character.avatarUrl && (
+          <img src={character.avatarUrl} alt={character.name} className={s.cardAvatar} />
+        )}
         <div className={cn('ao-codex', s.cardClass)}>
           {classLabel} · {raceLabel}
         </div>

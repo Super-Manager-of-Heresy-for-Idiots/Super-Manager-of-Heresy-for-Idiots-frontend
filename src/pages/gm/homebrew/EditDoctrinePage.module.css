@@ -3,6 +3,7 @@
 .loadTitle { margin-top: 4px; }
 .loadList { display: flex; flex-direction: column; gap: 8px; }
 .loadPh { width: 100%; height: 48px; }
+.coverPreview { width: 100%; max-width: 280px; height: 150px; object-fit: cover; display: block; border: 1px solid var(--rule); background: var(--abyss); }
 
 /* ── top bar ─────────────────────────────────────────────────── */
 .topBar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }

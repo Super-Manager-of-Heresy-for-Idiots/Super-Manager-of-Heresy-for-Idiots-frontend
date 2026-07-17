@@ -20,6 +20,7 @@ import { useUniverses } from '@/hooks/useUniverses';
 import { useHomebrewLibrary } from '@/hooks/useHomebrewCampaign';
 import { useMyTemplates } from '@/hooks/useTemplates';
 import { CreateUniverseModal } from './CreateUniverseModal';
+import { ImageUploadField } from '@/components/media/ImageUploadField';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
 import { isRetryableError } from '@/lib/errors';
@@ -73,6 +74,8 @@ export default function BlueprintEditorPage() {
   const [universeSlug, setUniverseSlug] = useState('');
   const [allowForks, setAllowForks] = useState(true);
   const [coverUrl, setCoverUrl] = useState('');
+  // Оптимистичный показ новой обложки сразу после загрузки/удаления, без рефетча.
+  const [coverOverride, setCoverOverride] = useState<string | null | undefined>(undefined);
   const [universeModalOpen, setUniverseModalOpen] = useState(false);
 
   /* sub-entity inline forms */
@@ -210,6 +213,18 @@ export default function BlueprintEditorPage() {
               />
             </OrdoField>
             <OrdoField label={t('bp.editor.coverLabel')}>
+              {!isNew && id && (
+                <ImageUploadField
+                  ownerType="BLUEPRINT_COVER"
+                  ownerId={id}
+                  value={coverOverride !== undefined ? coverOverride : (bp?.coverUrl ?? null)}
+                  canEdit
+                  onChange={setCoverOverride}
+                  alt={title || 'Обложка'}
+                  placeholder="Нет обложки"
+                  previewClassName={s.coverPreview}
+                />
+              )}
               <input
                 className="ao-input"
                 value={coverUrl}

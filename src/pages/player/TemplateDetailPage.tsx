@@ -1,8 +1,10 @@
+import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Trash2, Loader2 } from 'lucide-react';
 import { BackLink } from '@/components/campaigns';
 import { OrdoPanel, PanelHeader, Bar, OrdoDivider } from '@/components/ordo';
 import { EditableSheetField } from '@/components/characters';
+import { ImageUploadField } from '@/components/media/ImageUploadField';
 import { useTemplate, useDeleteTemplate, useUpdateTemplate } from '@/hooks/useTemplates';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
@@ -15,6 +17,8 @@ export default function TemplateDetailPage() {
   const { data: tpl, isLoading, error } = useTemplate(templateId);
   const deleteMutation = useDeleteTemplate();
   const updateMutation = useUpdateTemplate();
+  // Оптимистичный показ нового аватара сразу после загрузки/удаления, без рефетча запроса.
+  const [avatarOverride, setAvatarOverride] = useState<string | null | undefined>(undefined);
 
   const saveField = (field: 'proficiencies' | 'equipment', next: string) => {
     if (!templateId) return;
@@ -52,6 +56,7 @@ export default function TemplateDetailPage() {
   const classLabel = tpl.classLevels?.length
     ? tpl.classLevels.map((c) => `${c.className} ${c.classLevel}`).join(' / ')
     : t('player.template.levelShort', { level: tpl.totalLevel });
+  const avatarUrl = avatarOverride !== undefined ? avatarOverride : tpl.avatarUrl;
 
   return (
     <div>
@@ -102,6 +107,20 @@ export default function TemplateDetailPage() {
       </OrdoPanel>
 
       <div className={s.sideGrid}>
+        <OrdoPanel padding={14}>
+          <div className="ao-col ao-gap-8">
+            <div className="ao-overline">Аватар</div>
+            <ImageUploadField
+              ownerType="CHARACTER_AVATAR"
+              ownerId={tpl.id}
+              value={avatarUrl}
+              canEdit
+              onChange={setAvatarOverride}
+              alt={tpl.name}
+              placeholder="Нет аватара"
+            />
+          </div>
+        </OrdoPanel>
         <OrdoPanel padding={14}>
           <div className="ao-overline">{t('camp2.folio.playerName')}</div>
           <div className={cn('ao-h6', s.ownerName)}>{tpl.ownerUsername}</div>

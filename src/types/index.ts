@@ -1240,6 +1240,8 @@ export interface HomebrewPackageResponse {
   version: number;
   downloadCount: number;
   authorUsername: string;
+  /** Обложка пакета: прокси-URL media-ассета или undefined. Источник истины — media_asset. */
+  coverUrl?: string;
   tags: string[];
   contentSummary: HomebrewContentSummary;
   publishedAt?: string;
@@ -1731,6 +1733,8 @@ export interface NpcResponse {
   publicDescription?: string;
   privateDescription?: string;
   isVisibleToPlayers: boolean;
+  /** Портрет NPC: прокси-URL media-ассета или undefined, если не загружен. */
+  portraitUrl?: string;
   sourceType?: NpcSourceType | null;
   race?: NpcRef;
   characterClass?: NpcRef;

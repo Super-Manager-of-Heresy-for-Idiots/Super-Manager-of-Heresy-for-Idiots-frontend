@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Loader2, Pencil, Trash2 } from 'lucide-react';
-import { OrdoPanel, PanelHeader, Rune, OrdoDivider, Placeholder } from '@/components/ordo';
+import { OrdoPanel, PanelHeader, Rune, OrdoDivider } from '@/components/ordo';
 import { CodexID } from '@/components/homebrew/CodexID';
 import { VisibilityToggle, QuestStatusBadge } from '@/components/narrative';
 import {
@@ -12,6 +12,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { BackLink } from '@/components/campaigns';
+import { ImageUploadField } from '@/components/media/ImageUploadField';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
 import { isRetryableError } from '@/lib/errors';
@@ -58,6 +59,8 @@ export default function NPCDetailPage() {
   const addNoteMutation = useAddNpcNote();
   const visibilityMutation = useSetNpcVisibility();
   const updateMutation = useUpdateNpc();
+  // Оптимистичный показ нового портрета сразу после загрузки/удаления, без рефетча.
+  const [portraitOverride, setPortraitOverride] = useState<string | null | undefined>(undefined);
   const deleteMutation = useDeleteNpc();
 
   const [noteText, setNoteText] = useState('');
@@ -166,6 +169,7 @@ export default function NPCDetailPage() {
   };
   const linkedQuests = npcLinks.linkedQuests ?? [];
   const linkedLocations = npcLinks.linkedLocations ?? [];
+  const portraitUrl = portraitOverride !== undefined ? portraitOverride : npc.portraitUrl;
 
   /* ── main ────────────────────────────────────────────────── */
 
@@ -178,10 +182,17 @@ export default function NPCDetailPage() {
         {/* Identity block */}
         <OrdoPanel frame padding={20}>
           <div className={s.identityRow}>
-            {/* Portrait placeholder */}
-            <Placeholder className={s.portrait}>
-              {t('camp2.npcDetail.portrait')}
-            </Placeholder>
+            {/* Portrait — GM загружает/заменяет; при отсутствии показывается заглушка */}
+            <ImageUploadField
+              ownerType="NPC_PORTRAIT"
+              ownerId={npcId!}
+              value={portraitUrl}
+              canEdit
+              onChange={setPortraitOverride}
+              alt={npc.name}
+              previewClassName={s.portrait}
+              placeholder={t('camp2.npcDetail.portrait')}
+            />
 
             <div className={s.identityMain}>
               <div className={s.idRow}>

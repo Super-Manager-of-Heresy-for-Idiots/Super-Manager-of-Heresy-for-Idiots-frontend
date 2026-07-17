@@ -4,6 +4,7 @@
 .overline { color: var(--gold); }
 .heading { margin-top: 4px; }
 .subtitle { color: var(--ink-faint); font-size: 13px; margin-top: 4px; max-width: 60ch; }
+.coverPreview { width: 100%; max-width: 320px; height: 160px; object-fit: cover; display: block; border: 1px solid var(--rule); background: var(--abyss); }
 .headRow { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
 
 /* ── search / filter / sort bar ──────────────────────────────── */

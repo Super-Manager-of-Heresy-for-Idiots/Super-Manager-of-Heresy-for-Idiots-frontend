@@ -1,0 +1,37 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+
+/* Default preview box; callers override dimensions via previewClassName. */
+.preview {
+  width: 140px;
+  height: 180px;
+  flex-shrink: 0;
+  object-fit: cover;
+  display: block;
+  border: 1px solid var(--rule);
+  background: var(--abyss);
+}
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+}
+
+.hidden {
+  display: none;
+}
+
+.busy {
+  color: var(--ink-quiet);
+  font-size: var(--t-pico);
+}
+
+.error {
+  color: var(--ember, #c0532b);
+  font-size: var(--t-pico);
+  line-height: 1.35;
+}
