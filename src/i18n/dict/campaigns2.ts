@@ -667,6 +667,8 @@ export const campaigns2: DictModule = {
     'camp2.inv.grant.descLess': 'Свернуть',
     'camp2.inv.grant.summaryLabel': 'Выдаётся:',
     'camp2.inv.grant.nothingSelected': 'Предмет не выбран',
+    'camp2.inv.grant.customItem': 'Свой предмет',
+    'camp2.inv.grant.customFailed': 'Не удалось открыть конструктор предмета',
   },
 
   en: {
@@ -1334,5 +1336,7 @@ export const campaigns2: DictModule = {
     'camp2.inv.grant.descLess': 'Collapse',
     'camp2.inv.grant.summaryLabel': 'Granting:',
     'camp2.inv.grant.nothingSelected': 'No item selected',
+    'camp2.inv.grant.customItem': 'Custom item',
+    'camp2.inv.grant.customFailed': 'Failed to open the item builder',
   },
 };

@@ -19,6 +19,9 @@ import type {
   DiceFormula,
 } from '@/types';
 import { ItemBuffPickerDialog } from './ItemBuffPickerDialog';
+import { ItemModal } from '@/pages/gm/homebrew/ItemModal';
+import { homebrewApi } from '@/api/homebrew.api';
+import toast from 'react-hot-toast';
 import s from './GrantItemDialog.module.css';
 
 /* ── grant picker model (unified over the campaign item catalog) ──
@@ -142,6 +145,10 @@ export function GrantItemDialog({
   const [descExpanded, setDescExpanded] = useState(false);
   const [buffPickerOpen, setBuffPickerOpen] = useState(false);
   const [selectedBuffIds, setSelectedBuffIds] = useState<string[]>([]);
+  // Inscribe relic (#17): «точечная настройка» — авторинг кастомного предмета формой ItemModal + мгновенный грант.
+  const [customOpen, setCustomOpen] = useState(false);
+  const [scratchPackageId, setScratchPackageId] = useState<string | null>(null);
+  const [openingCustom, setOpeningCustom] = useState(false);
 
   /* ── derived ── */
 
@@ -269,6 +276,35 @@ export function GrantItemDialog({
     );
   };
 
+  // Inscribe relic (#17): открыть авторинг кастомного предмета (в служебный пакет ГМ).
+  const openCustom = async () => {
+    setOpeningCustom(true);
+    try {
+      let pkgId = scratchPackageId;
+      if (!pkgId) {
+        const resp = await homebrewApi.getScratchPackage();
+        pkgId = resp.data?.id ?? null;
+        setScratchPackageId(pkgId);
+      }
+      if (pkgId) setCustomOpen(true);
+      else toast.error(t('camp2.inv.grant.customFailed'));
+    } catch {
+      toast.error(t('camp2.inv.grant.customFailed'));
+    } finally {
+      setOpeningCustom(false);
+    }
+  };
+
+  // Кастомный предмет создан → сразу выдаём его этому персонажу.
+  const handleCustomSaved = (created?: { id: string; kind: string }) => {
+    setCustomOpen(false);
+    if (!created) return;
+    grantMutation.mutate(
+      { campaignId, characterId, data: { itemId: created.id, itemKind: created.kind as GrantItemKind, quantity: 1 } },
+      { onSuccess: () => { reset(); onOpenChange(false); } },
+    );
+  };
+
   /* ── render ── */
 
   return (
@@ -290,6 +326,15 @@ export function GrantItemDialog({
                 <div className={cn('ao-h4', s.headText)}>{t('camp2.inv.dialog.grantTitle')}</div>
               </DialogTitle>
             </div>
+            <button
+              type="button"
+              className="ao-btn ao-btn--ghost ao-btn--sm"
+              onClick={openCustom}
+              disabled={openingCustom || grantMutation.isPending}
+            >
+              {openingCustom ? <Loader2 className="h-4 w-4 animate-spin" /> : <Rune kind="diamond" size={12} />}
+              {t('camp2.inv.grant.customItem')}
+            </button>
           </div>
 
           {/* ── body: two panes ── */}
@@ -638,6 +683,14 @@ export function GrantItemDialog({
         title="Choose item buffs"
         itemName={selected?.name}
       />
+      {scratchPackageId && (
+        <ItemModal
+          open={customOpen}
+          onClose={() => setCustomOpen(false)}
+          packageId={scratchPackageId}
+          onSaved={handleCustomSaved}
+        />
+      )}
     </Dialog>
   );
 }

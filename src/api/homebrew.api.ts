@@ -36,6 +36,12 @@ export const homebrewApi = {
     return response.data;
   },
 
+  /** Служебный пакет автора для кастомных предметов (inscribe relic — «точечная настройка» выдачи). */
+  getScratchPackage: async (): Promise<ApiResponse<HomebrewDetailResponse>> => {
+    const response = await api.get<ApiResponse<HomebrewDetailResponse>>('/homebrew/scratch-package');
+    return response.data;
+  },
+
   getMyPackages: async (params: {
     status?: HomebrewStatus | 'DELETED';
     page?: number;

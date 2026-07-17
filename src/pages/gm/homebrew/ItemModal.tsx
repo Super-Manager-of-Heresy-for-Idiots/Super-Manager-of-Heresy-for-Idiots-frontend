@@ -25,7 +25,8 @@ interface ItemModalProps {
   /** HB_MODES Фаза 1 (DERIVED): id исходного homebrew-предмета — форма предзаполняется из него,
    *  но сохраняется как НОВЫЙ (независимая копия). Игнорируется, если задан editingId. */
   duplicateFromId?: string | null;
-  onSaved: () => void;
+  /** Вызывается после сохранения; при создании передаёт {id, kind} нового предмета (для inscribe-relic грант). */
+  onSaved: (created?: { id: string; kind: string }) => void;
 }
 
 /** Внутренний дискриминатор вида для UI-селектора (магия + четыре вида снаряжения). */
@@ -261,10 +262,15 @@ export function ItemModal({ open, onClose, packageId, editingId, duplicateFromId
             }),
             ...ability,
           };
-      if (editingId) await homebrewItemsApi.update(packageId, editingId, body);
-      else await homebrewItemsApi.create(packageId, body);
+      let created: { id: string; kind: string } | undefined;
+      if (editingId) {
+        await homebrewItemsApi.update(packageId, editingId, body);
+      } else {
+        const resp = await homebrewItemsApi.create(packageId, body);
+        created = resp.data ? { id: resp.data.id, kind: resp.data.kind } : undefined;
+      }
       toast.success(editingId ? t('hb.item.updated') : t('hb.item.created'));
-      onSaved();
+      onSaved(created);
       onClose();
     } catch (error) {
       const message = (error as AxiosError<ApiError>).response?.data?.message;
