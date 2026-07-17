@@ -1186,7 +1186,7 @@ export interface SetSkillEffectsRequest {
 export type HomebrewStatus = 'DRAFT' | 'PUBLISHED' | 'UNPUBLISHED' | 'ARCHIVED';
 
 export type ContentType = 'ITEM_TYPE' | 'CHARACTER_CLASS' | 'SKILL' | 'FEAT' |
-  'SUBCLASS' | 'RACE' | 'STAT_TYPE' | 'BUFF_DEBUFF' | 'ENCHANTMENT_TYPE' |
+  'SUBCLASS' | 'RACE' | 'SPECIES' | 'STAT_TYPE' | 'BUFF_DEBUFF' | 'ENCHANTMENT_TYPE' |
   'CURRENCY' | 'CUSTOM_RESOURCE' | 'ITEM_TEMPLATE' | 'ITEM' | 'BACKGROUND' | 'SPELL';
 
 export interface CreateHomebrewRequest {

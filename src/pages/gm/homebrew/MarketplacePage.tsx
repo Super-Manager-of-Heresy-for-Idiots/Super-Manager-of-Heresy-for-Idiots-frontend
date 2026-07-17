@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
   OrdoPanel,
   Rune,
   OrdoDivider,
   EmptyVault,
 } from '@/components/ordo';
+import { MarketplacePreviewModal } from './MarketplacePreviewModal';
 import { VersionSeal } from '@/components/homebrew/VersionSeal';
 import { RatingControl } from '@/components/homebrew/RatingControl';
 import { ContentPills } from '@/components/homebrew/ContentPills';
@@ -22,7 +22,7 @@ import s from './MarketplacePage.module.css';
 
 export default function MarketplacePage() {
   const t = useT();
-  const navigate = useNavigate();
+  const [previewId, setPreviewId] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [page, setPage] = useState(0);
@@ -158,7 +158,7 @@ export default function MarketplacePage() {
             {packages.map((pkg: HomebrewPackageResponse) => {
               const isArchived = pkg.status === 'UNPUBLISHED' || pkg.isDeleted;
               const installed = installedIds.has(pkg.id);
-              const openDetail = () => navigate(`/gm/homebrew/marketplace/${pkg.id}`);
+              const openDetail = () => setPreviewId(pkg.id);
 
               return (
                 <OrdoPanel
@@ -287,6 +287,15 @@ export default function MarketplacePage() {
           )}
         </>
       )}
+
+      {/* Предпросмотр пакета: полный состав до установки */}
+      <MarketplacePreviewModal
+        packageId={previewId}
+        installed={previewId ? installedIds.has(previewId) : false}
+        installPending={installMutation.isPending}
+        onOpenChange={(o) => { if (!o) setPreviewId(null); }}
+        onInstall={handleInstall}
+      />
     </div>
   );
 }
