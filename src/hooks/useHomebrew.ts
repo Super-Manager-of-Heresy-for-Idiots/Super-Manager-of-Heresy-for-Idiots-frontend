@@ -203,6 +203,17 @@ export function useReportPackage() {
   });
 }
 
+export function usePackagePreview(id: string | undefined) {
+  return useQuery({
+    queryKey: ['homebrew-preview', id],
+    queryFn: async () => {
+      const response = await homebrewApi.getPackagePreview(id!);
+      return response.data;
+    },
+    enabled: !!id,
+  });
+}
+
 export function useMarketplacePackage(id: string | undefined) {
   return useQuery({
     queryKey: ['homebrew-marketplace', id],

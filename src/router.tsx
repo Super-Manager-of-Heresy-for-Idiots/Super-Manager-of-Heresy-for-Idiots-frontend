@@ -97,7 +97,7 @@ const ContentClassViewerPage = lazyWithRetry(() => import('@/pages/dev/ContentCl
 
 // Homebrew pages
 const MarketplacePage = lazyWithRetry(() => import('@/pages/gm/homebrew/MarketplacePage'));
-const MarketplaceDetailPage = lazyWithRetry(() => import('@/pages/gm/homebrew/MarketplaceDetailPage'));
+const MarketplaceDetailPage = lazyWithRetry(() => import('@/pages/gm/homebrew/MarketplacePreviewPage'));
 const MyDoctrinesPage = lazyWithRetry(() => import('@/pages/gm/homebrew/MyDoctrinesPage'));
 const CreateDoctrinePage = lazyWithRetry(() => import('@/pages/gm/homebrew/CreateDoctrinePage'));
 const EditDoctrinePage = lazyWithRetry(() => import('@/pages/gm/homebrew/EditDoctrinePage'));

@@ -163,6 +163,11 @@ export const homebrewApi = {
     return response.data;
   },
 
+  getPackagePreview: async (id: string): Promise<ApiResponse<import('@/types').HomebrewPreviewResponse>> => {
+    const response = await api.get<ApiResponse<import('@/types').HomebrewPreviewResponse>>(`/homebrew/marketplace/${id}/preview`);
+    return response.data;
+  },
+
   installPackage: async (id: string): Promise<ApiResponse<InstallHomebrewResponse>> => {
     const response = await api.post<ApiResponse<InstallHomebrewResponse>>(`/homebrew/marketplace/${id}/install`);
     return response.data;

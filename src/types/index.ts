@@ -1227,6 +1227,9 @@ export interface ContentSummaryDto {
   modifierValue?: number;
   durationRounds?: number;
   targetStatId?: string;
+  // Привязка к классу (сабкласс / ресурс) — заполняет summarize на бэке.
+  classId?: string;
+  className?: string;
 }
 
 export interface HomebrewPackageResponse {
@@ -1251,6 +1254,22 @@ export interface HomebrewPackageResponse {
 export interface HomebrewDetailResponse extends HomebrewPackageResponse {
   contentByType: Partial<Record<ContentType, ContentSummaryDto[]>>;
   userRating?: number;
+}
+
+/**
+ * Богатый предпросмотр пакета для витрины (флагманская фича «что я добавляю»).
+ * Тяжёлые типы приходят полными detail-DTO (переиспользование мапперов), лёгкие — в
+ * header.contentByType (ContentSummaryDto). См. docs/HB_PREVIEW_SPEC.md.
+ */
+export interface HomebrewPreviewResponse {
+  header: HomebrewDetailResponse;
+  spells: HomebrewSpellResponse[] | null;
+  items: ItemDefinition[] | null;
+  classes: ContentClassDetailResponse[] | null;
+  species: SpeciesDetail[] | null;
+  feats: FeatDetail[] | null;
+  backgrounds: BackgroundDetail[] | null;
+  monsters: MonsterResponse[] | null;
 }
 
 /** Единый homebrew-предмет (P1.5 / IT-2). Снаружи — одна сущность; kind дискриминирует таблицу. */
