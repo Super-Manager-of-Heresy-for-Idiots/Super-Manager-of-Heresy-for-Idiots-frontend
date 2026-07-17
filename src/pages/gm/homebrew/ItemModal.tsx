@@ -7,7 +7,7 @@ import {
 } from '@/components/ui/dialog';
 import { referenceApi } from '@/api/reference.api';
 import { homebrewItemsApi } from '@/api/homebrew-items.api';
-import { useDamageTypes } from '@/hooks/useContentCatalog';
+import { useDamageTypes, useItems } from '@/hooks/useContentCatalog';
 import { useT } from '@/i18n/I18nContext';
 import { normalizeDiceNotation } from '@/lib/dice';
 import { cn } from '@/lib/utils';
@@ -52,6 +52,9 @@ export function ItemModal({ open, onClose, packageId, editingId, duplicateFromId
   const [name, setName] = useState('');
   const [nameEn, setNameEn] = useState('');
   const [description, setDescription] = useState('');
+  // HB_MODES: режим создания + оригинал (для DERIVED/OVERRIDE)
+  const [originMode, setOriginMode] = useState<'NEW' | 'DERIVED' | 'OVERRIDE'>('NEW');
+  const [sourceId, setSourceId] = useState('');
   // magic
   const [rarity, setRarity] = useState('');
   const [attunementRequired, setAttunementRequired] = useState(false);
@@ -111,6 +114,23 @@ export function ItemModal({ open, onClose, packageId, editingId, duplicateFromId
   });
   const categoryOptions = categoriesResp?.data ?? [];
   const { data: damageTypes = [] } = useDamageTypes();
+  // HB_MODES: ванильный каталог предметов — пул оригиналов для DERIVED/OVERRIDE (тот же вид, что выбран).
+  const { data: vanillaItems = [] } = useItems();
+  const sourceOptions = vanillaItems
+    .filter((d) => !d.packageId)
+    .filter((d) => (kindUi === 'magic' ? d.kind === 'MAGIC'
+      : d.kind === 'EQUIPMENT' && (d.equipmentKind ?? 'gear') === kindUi))
+    .slice()
+    .sort((a, b) => a.name.localeCompare(b.name));
+
+  // Префилл из ванильного оригинала: имя/описание (+редкость для магии). Статы ГМ задаёт сам.
+  const prefillFromSource = (id: string, mode: 'DERIVED' | 'OVERRIDE') => {
+    const src = vanillaItems.find((d) => d.id === id);
+    if (!src) return;
+    setName(mode === 'OVERRIDE' ? src.name : `${src.name} (копия)`);
+    setDescription(src.description ?? '');
+    if (kindUi === 'magic' && src.rarity?.slug) setRarity(src.rarity.slug);
+  };
   // Словари классов/рас для enforced-ограничения настройки (HB_UX Фаза 5).
   const { data: classesResp } = useQuery({
     queryKey: ['reference-classes'],
@@ -170,6 +190,8 @@ export function ItemModal({ open, onClose, packageId, editingId, duplicateFromId
           setAbRequiresEquipped(!!it.abilityRequiresEquipped);
           setAbRequiresAttunement(!!it.abilityRequiresAttunement);
           setAbConsumeOnUse(!!it.abilityConsumeOnUse);
+          setOriginMode(editingId ? ((it.originMode as 'NEW' | 'DERIVED' | 'OVERRIDE') ?? 'NEW') : 'DERIVED');
+          setSourceId(editingId ? (it.sourceId ?? '') : loadId);
         })
         .catch(() => toast.error(t('hb.item.loadFailed')));
     } else {
@@ -183,6 +205,7 @@ export function ItemModal({ open, onClose, packageId, editingId, duplicateFromId
       setHasAbDamage(false); setAbDamageDice('2d6'); setAbDamageType(''); setAbSaveAbility(''); setAbHalfOnSave(false);
       setHasAbHealing(false); setAbHealingFormula('2d4');
       setAbRequiresEquipped(false); setAbRequiresAttunement(false); setAbConsumeOnUse(false);
+      setOriginMode('NEW'); setSourceId('');
     }
   }, [open, editingId, duplicateFromId, packageId, t]);
 
@@ -262,6 +285,9 @@ export function ItemModal({ open, onClose, packageId, editingId, duplicateFromId
             }),
             ...ability,
           };
+      // HB_MODES: режим и оригинал уходят с обоими видами предмета.
+      body.originMode = originMode;
+      body.sourceId = originMode !== 'NEW' && sourceId ? sourceId : undefined;
       let created: { id: string; kind: string } | undefined;
       if (editingId) {
         await homebrewItemsApi.update(packageId, editingId, body);
@@ -295,6 +321,39 @@ export function ItemModal({ open, onClose, packageId, editingId, duplicateFromId
               <SegmentedControl options={kindOptions} value={kindUi} onChange={setKindUi} ariaLabel={t('hb.item.kind')} />
             </div>
           )}
+
+          {/* HB_MODES: режим создания — Новое / На основе / Перезапись (+ селект оригинала того же вида) */}
+          <div>
+            <label className="ao-label">{t('hb.mode.label')}</label>
+            <SegmentedControl
+              options={[
+                { value: 'NEW' as const, label: t('hb.mode.NEW') },
+                { value: 'DERIVED' as const, label: t('hb.mode.DERIVED') },
+                { value: 'OVERRIDE' as const, label: t('hb.mode.OVERRIDE') },
+              ]}
+              value={originMode}
+              onChange={(m) => setOriginMode(m)}
+              ariaLabel={t('hb.mode.label')}
+            />
+            {originMode !== 'NEW' && (
+              <>
+                <select
+                  className="ao-input"
+                  value={sourceId}
+                  onChange={(e) => {
+                    setSourceId(e.target.value);
+                    if (e.target.value) prefillFromSource(e.target.value, originMode);
+                  }}
+                >
+                  <option value="">{t('hb.mode.sourceNone')}</option>
+                  {sourceOptions.map((d) => (
+                    <option key={d.id} value={d.id}>{d.name}</option>
+                  ))}
+                </select>
+                <span className={s.hint}>{t(`hb.mode.hint.${originMode}`)}</span>
+              </>
+            )}
+          </div>
 
           <div>
             <label className="ao-label">{t('hb.item.name')}</label>
@@ -572,7 +631,7 @@ export function ItemModal({ open, onClose, packageId, editingId, duplicateFromId
 
         <div className={s.actions}>
           <button className="ao-btn ao-btn--ghost" onClick={onClose} disabled={saving}>{t('common.cancel')}</button>
-          <button className="ao-btn ao-btn--primary" onClick={handleSave} disabled={!name.trim() || saving}>
+          <button className="ao-btn ao-btn--primary" onClick={handleSave} disabled={!name.trim() || (originMode === 'OVERRIDE' && !sourceId) || saving}>
             {editingId ? t('hb.item.save') : t('hb.item.create')}
           </button>
         </div>

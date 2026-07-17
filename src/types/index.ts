@@ -885,6 +885,9 @@ export interface HomebrewSpellRequest {
   // Состояния (HB_UX Фаза 4): мультипикер состояний + длительность в раундах.
   conditionSlugs?: string[];        // bestiary_conditions.code
   conditionDurationRounds?: number; // null/undefined — до снятия
+  // HB_MODES: NEW | DERIVED (на основе sourceId) | OVERRIDE (перезаписывает sourceId).
+  originMode?: string;
+  sourceId?: string;
 }
 
 /** homebrew-заклинание для round-trip в редакторе (P2-1). */
@@ -927,6 +930,8 @@ export interface HomebrewSpellResponse {
   source?: string;
   homebrewPackageId?: string;
   homebrewPackageTitle?: string;
+  originMode?: string;
+  sourceId?: string;
 }
 
 /** Тело авторинга homebrew-ресурса (P2-3) — механизм Ярость/Ки (custom_resource_types). */
@@ -1286,6 +1291,9 @@ export interface HomebrewItemRequest {
   abilityRequiresEquipped?: boolean;
   abilityRequiresAttunement?: boolean;
   abilityConsumeOnUse?: boolean;
+  // HB_MODES: NEW | DERIVED (на основе sourceId) | OVERRIDE (перезаписывает sourceId).
+  originMode?: string;
+  sourceId?: string;
 }
 
 export interface HomebrewItemResponse {
@@ -1324,6 +1332,8 @@ export interface HomebrewItemResponse {
   source?: string;
   homebrewPackageId?: string;
   homebrewPackageTitle?: string;
+  originMode?: string;
+  sourceId?: string;
 }
 
 /** Жалоба на homebrew-пакет в админ-очереди модерации (P2-6). */

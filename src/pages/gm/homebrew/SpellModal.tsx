@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import toast from 'react-hot-toast';
@@ -16,6 +16,9 @@ import {
 import { DiceBuilder } from './DiceBuilder';
 import { SegmentedControl, type SegmentOption } from './SegmentedControl';
 import { SpellPreviewCard } from './SpellPreviewCard';
+import { SpellPickerModal } from '@/components/content-rewards/SpellPickerModal';
+import { useSpells } from '@/hooks/useContentCatalog';
+import { spellDetailToReference } from '@/lib/contentAdapters';
 import type { ApiError, HomebrewSpellRequest } from '@/types';
 import s from './SpellModal.module.css';
 
@@ -72,6 +75,10 @@ export function SpellModal({ open, onClose, packageId, editingId, duplicateFromI
   const [requiresAttackHit, setRequiresAttackHit] = useState(false);
   const [hasHealing, setHasHealing] = useState(false);
   const [healingFormula, setHealingFormula] = useState('2d8');
+  // HB_MODES: режим создания + оригинал (для DERIVED/OVERRIDE)
+  const [originMode, setOriginMode] = useState<'NEW' | 'DERIVED' | 'OVERRIDE'>('NEW');
+  const [sourceId, setSourceId] = useState('');
+  const [sourcePickerOpen, setSourcePickerOpen] = useState(false);
   // Состояния (HB_UX Фаза 4)
   const [hasConditions, setHasConditions] = useState(false);
   const [conditionSlugs, setConditionSlugs] = useState<string[]>([]);
@@ -100,6 +107,31 @@ export function SpellModal({ open, onClose, packageId, editingId, duplicateFromI
     enabled: open,
   });
   const conditions = conditionsResp?.data ?? [];
+  // HB_MODES: ванильный каталог — пул пикера оригинала (DERIVED/OVERRIDE) + источник префилла формы.
+  const { data: vanillaSpells = [] } = useSpells();
+  const sourcePool = useMemo(() => vanillaSpells.map(spellDetailToReference), [vanillaSpells]);
+  const sourceName = sourcePool.find((sp) => sp.id === sourceId)?.name;
+
+  // Префилл формы из выбранного ванильного оригинала: идентичность + структурные пикеры.
+  // Механика (урон/лечение) остаётся пустой — её ГМ собирает сам (у ванили она в feature-rules).
+  const prefillFromSource = (id: string, mode: 'DERIVED' | 'OVERRIDE') => {
+    const src = vanillaSpells.find((sp) => sp.id === id);
+    if (!src) return;
+    setName(mode === 'OVERRIDE' ? (src.nameRu || src.name) : `${src.nameRu || src.name} (копия)`);
+    setNameEn(src.nameEn ?? '');
+    setLevel(String(src.level ?? 0));
+    setSchool(src.school?.slug ?? '');
+    setCastingActionSlug(src.castingActionSlug ?? 'action');
+    setRitual(!!src.ritual);
+    setRangeType(src.rangeType ?? 'self');
+    setRangeDistance(src.rangeDistance != null ? String(src.rangeDistance) : '');
+    setDurationType(src.durationType ?? 'instantaneous');
+    setDurationAmount(src.durationAmount != null ? String(src.durationAmount) : '');
+    setDurationUnit(src.durationUnit ?? 'minute');
+    setConcentration(!!src.concentration);
+    setDescription(src.description ?? '');
+    setHigherLevels(src.higherLevels ?? '');
+  };
   const ABILITIES: { slug: string; label: string }[] = [
     { slug: 'str', label: t('hb.spell.abStr') },
     { slug: 'dex', label: t('hb.spell.abDex') },
@@ -153,6 +185,8 @@ export function SpellModal({ open, onClose, packageId, editingId, duplicateFromI
           setHasConditions(!!(sp.conditionSlugs && sp.conditionSlugs.length));
           setConditionSlugs(sp.conditionSlugs ?? []);
           setConditionDurationRounds(sp.conditionDurationRounds != null ? String(sp.conditionDurationRounds) : '');
+          setOriginMode(editingId ? ((sp.originMode as 'NEW' | 'DERIVED' | 'OVERRIDE') ?? 'NEW') : 'DERIVED');
+          setSourceId(editingId ? (sp.sourceId ?? '') : loadId);
         })
         .catch(() => toast.error(t('hb.spell.loadFailed')));
     } else {
@@ -166,6 +200,7 @@ export function SpellModal({ open, onClose, packageId, editingId, duplicateFromI
       setHasDamage(false); setDamageDice('8d6'); setDamageType(''); setSaveAbility(''); setHalfOnSave(false);
       setRequiresAttackHit(false); setHasHealing(false); setHealingFormula('2d8');
       setHasConditions(false); setConditionSlugs([]); setConditionDurationRounds('');
+      setOriginMode('NEW'); setSourceId('');
     }
   }, [open, editingId, duplicateFromId, packageId, t]);
 
@@ -204,6 +239,13 @@ export function SpellModal({ open, onClose, packageId, editingId, duplicateFromI
   const showGroup = (g: (typeof STEPS)[number]) => !wizard || STEPS[step] === g;
   const isLastStep = step === STEPS.length - 1;
   const basicsValid = !!name.trim() && !!school;
+  // HB_MODES: OVERRIDE без выбранного оригинала сохранять нельзя (бэк отклонит).
+  const modeValid = originMode !== 'OVERRIDE' || !!sourceId;
+  const MODE_OPTIONS: SegmentOption<'NEW' | 'DERIVED' | 'OVERRIDE'>[] = [
+    { value: 'NEW', label: t('hb.mode.NEW') },
+    { value: 'DERIVED', label: t('hb.mode.DERIVED') },
+    { value: 'OVERRIDE', label: t('hb.mode.OVERRIDE') },
+  ];
 
   const handleSave = async () => {
     if (!name.trim() || !school) return;
@@ -241,6 +283,8 @@ export function SpellModal({ open, onClose, packageId, editingId, duplicateFromI
         healingFormula: hasHealing ? healingFormula : undefined,
         conditionSlugs: hasConditions && conditionSlugs.length ? conditionSlugs : undefined,
         conditionDurationRounds: hasConditions ? num(conditionDurationRounds) : undefined,
+        originMode,
+        sourceId: originMode !== 'NEW' && sourceId ? sourceId : undefined,
       };
       if (editingId) await homebrewSpellsApi.update(packageId, editingId, body);
       else await homebrewSpellsApi.create(packageId, body);
@@ -319,6 +363,25 @@ export function SpellModal({ open, onClose, packageId, editingId, duplicateFromI
                   ))}
                 </select>
               </div>
+            </div>
+
+            {/* HB_MODES: режим создания — Новое / На основе / Перезапись (+ пикер оригинала) */}
+            <div>
+              <label className="ao-label">{t('hb.mode.label')}</label>
+              <SegmentedControl options={MODE_OPTIONS} value={originMode} onChange={(m) => setOriginMode(m)} ariaLabel={t('hb.mode.label')} />
+              {originMode !== 'NEW' && (
+                <div className={cn('ao-row ao-gap-8 ao-wrap', s.subRow)}>
+                  <span className={s.hint}>
+                    {sourceName ? t('hb.mode.sourcePicked', { name: sourceName }) : t('hb.mode.sourceNone')}
+                  </span>
+                  <button type="button" className="ao-btn ao-btn--sm ao-btn--ghost" onClick={() => setSourcePickerOpen(true)}>
+                    {t('hb.mode.pickSource')}
+                  </button>
+                </div>
+              )}
+              {originMode !== 'NEW' && (
+                <span className={s.hint}>{t(`hb.mode.hint.${originMode}`)}</span>
+              )}
             </div>
             </>)}
 
@@ -585,12 +648,27 @@ export function SpellModal({ open, onClose, packageId, editingId, duplicateFromI
               {t('hb.wiz.next')}
             </button>
           ) : (
-            <button className="ao-btn ao-btn--primary" onClick={handleSave} disabled={!basicsValid || saving}>
+            <button className="ao-btn ao-btn--primary" onClick={handleSave} disabled={!basicsValid || !modeValid || saving}>
               {editingId ? t('hb.spell.save') : t('hb.spell.create')}
             </button>
           )}
         </div>
       </DialogContent>
+
+      {/* HB_MODES: пикер оригинала (одиночный выбор поверх мультиселект-пикера level-up). */}
+      <SpellPickerModal
+        open={sourcePickerOpen}
+        onOpenChange={setSourcePickerOpen}
+        pool={sourcePool}
+        value={sourceId ? [sourceId] : []}
+        onChange={(ids) => {
+          const next = ids.filter((x) => x !== sourceId)[0] ?? ids[0] ?? '';
+          setSourceId(next);
+          if (next && originMode !== 'NEW') prefillFromSource(next, originMode);
+          setSourcePickerOpen(false);
+        }}
+        title={t('hb.mode.pickSource')}
+      />
     </Dialog>
   );
 }
