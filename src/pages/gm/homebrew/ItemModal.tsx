@@ -22,6 +22,9 @@ interface ItemModalProps {
   onClose: () => void;
   packageId: string;
   editingId?: string | null;
+  /** HB_MODES Фаза 1 (DERIVED): id исходного homebrew-предмета — форма предзаполняется из него,
+   *  но сохраняется как НОВЫЙ (независимая копия). Игнорируется, если задан editingId. */
+  duplicateFromId?: string | null;
   onSaved: () => void;
 }
 
@@ -42,7 +45,7 @@ function numOrUndef(v: string): number | undefined {
  * «не проверяется». Умение предмета — дайс-билдер (sanity-cap'ы на сервере). Создание/правка через package-scoped
  * эндпоинт /homebrew/packages/{packageId}/items с kind в теле.
  */
-export function ItemModal({ open, onClose, packageId, editingId, onSaved }: ItemModalProps) {
+export function ItemModal({ open, onClose, packageId, editingId, duplicateFromId, onSaved }: ItemModalProps) {
   const t = useT();
   const [kindUi, setKindUi] = useState<ItemKindUi>('magic');
   const [name, setName] = useState('');
@@ -127,13 +130,15 @@ export function ItemModal({ open, onClose, packageId, editingId, onSaved }: Item
 
   useEffect(() => {
     if (!open) return;
-    if (editingId) {
-      homebrewItemsApi.get(packageId, editingId)
+    // DERIVED (HB_MODES Ф1): грузим из исходного, сохраняем как новый.
+    const loadId = editingId || duplicateFromId;
+    if (loadId) {
+      homebrewItemsApi.get(packageId, loadId)
         .then((r) => {
           const it = r.data;
           if (!it) return;
           setKindUi(it.kind === 'EQUIPMENT' ? ((it.equipmentKind as ItemKindUi) ?? 'gear') : 'magic');
-          setName(it.name);
+          setName(editingId ? it.name : `${it.name} (копия)`);
           setNameEn(it.nameEn ?? '');
           setDescription(it.description ?? '');
           setRarity(it.rarity ?? '');
@@ -178,7 +183,7 @@ export function ItemModal({ open, onClose, packageId, editingId, onSaved }: Item
       setHasAbHealing(false); setAbHealingFormula('2d4');
       setAbRequiresEquipped(false); setAbRequiresAttunement(false); setAbConsumeOnUse(false);
     }
-  }, [open, editingId, packageId, t]);
+  }, [open, editingId, duplicateFromId, packageId, t]);
 
   const toggle = (list: string[], slug: string, set: (v: string[]) => void) => {
     set(list.includes(slug) ? list.filter((x) => x !== slug) : [...list, slug]);

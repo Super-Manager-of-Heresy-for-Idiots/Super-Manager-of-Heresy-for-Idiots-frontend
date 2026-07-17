@@ -1,6 +1,6 @@
 import { useMemo, useState, type ReactNode } from 'react';
 import toast from 'react-hot-toast';
-import { ChevronDown, ChevronUp, Loader2, Plus, Save, Trash2 } from 'lucide-react';
+import { ChevronDown, ChevronUp, Info, Loader2, Plus, Save, Trash2, X } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { RewardGroupView } from '@/components/content-rewards/RewardGroupRenderer';
@@ -43,6 +43,18 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'rewards', label: 'Награды' },
   { id: 'review', label: 'Обзор' },
 ];
+
+/** Русские подписи вариантов комбобоксов — чтобы не показывать сырые коды. */
+const CASTER_PROGRESSION_LABELS: Record<string, string> = {
+  FULL: 'Полный (ячейки до 9 круга)',
+  HALF: 'Половина (до 5 круга)',
+  THIRD: 'Треть (до 4 круга)',
+  PACT: 'Пакт (магия договора)',
+};
+const PREPARATION_LABELS: Record<string, string> = {
+  PREPARED: 'Подготавливаемые',
+  KNOWN: 'Известные',
+};
 
 /** Returns a copy of `arr` with item `i` moved by `dir` (-1 up / +1 down). */
 function moveItem<T>(arr: T[], i: number, dir: -1 | 1): T[] {
@@ -98,6 +110,7 @@ export function ClassBuilderModal({
   const queryClient = useQueryClient();
   const ref = useBuilderRefData();
   const [tab, setTab] = useState<Tab>('identity');
+  const [showGuide, setShowGuide] = useState(false);
   const [draft, setDraft] = useState<ClassDraft>(() => initialDraft ?? emptyDraft());
   const [saving, setSaving] = useState(false);
   // Server-side validation issues (422) mapped back onto nodes by `path`.
@@ -167,7 +180,7 @@ export function ClassBuilderModal({
 
   return (
     <Dialog open={open} onOpenChange={(o) => !saving && onOpenChange(o)}>
-      <DialogContent className="max-w-[96vw] h-[90vh] p-0 overflow-hidden">
+      <DialogContent className="max-w-[96vw] h-[90vh] p-0 overflow-hidden flex flex-col gap-0">
         <DialogHeader className="px-5 py-4 border-b border-border">
           <DialogTitle>
             {editId ? 'Редактирование класса' : 'Новый класс'}{' '}
@@ -215,17 +228,97 @@ export function ClassBuilderModal({
             </button>
           </div>
         </div>
+
+        {/* Плавающая кнопка Info в правом нижнем углу — легенда и гайд по полям конструктора. */}
+        <button
+          type="button"
+          className={s.infoFab}
+          onClick={() => setShowGuide((v) => !v)}
+          title="Легенда и гайд"
+          aria-label="Легенда и гайд"
+        >
+          <Info size={18} />
+        </button>
+        {showGuide && <ClassBuilderGuide onClose={() => setShowGuide(false)} />}
       </DialogContent>
     </Dialog>
   );
 }
 
+/** Оверлей-легенда: что вводить в каждую вкладку/поле и что значат варианты комбобоксов. */
+function ClassBuilderGuide({ onClose }: { onClose: () => void }) {
+  return (
+    <div className={s.guideOverlay} onClick={onClose}>
+      <div className={s.guidePanel} onClick={(e) => e.stopPropagation()}>
+        <div className={s.guideHead}>
+          <span className="ao-h6">Легенда конструктора класса</span>
+          <button className="ao-btn ao-btn--sm ao-btn--ghost" onClick={onClose} aria-label="Закрыть"><X size={14} /></button>
+        </div>
+        <div className={s.guideBody}>
+          <p className={s.gLead}>Заполняйте вкладки слева направо. Обязательные поля помечены <b>*</b>. Вкладка «Обзор» показывает итог и ошибки перед сохранением.</p>
+
+          <div className={s.gSection}>
+            <div className="ao-h6">Идентичность</div>
+            <ul className={s.gList}>
+              <li><b>Название*</b> — как класс виден игрокам.</li>
+              <li><b>Slug</b> — латинский код для URL/ссылок; можно оставить пустым — сгенерируется из названия.</li>
+              <li><b>Название RU/EN</b> — локализованные имена (необязательно).</li>
+              <li><b>Подзаголовок / Описание</b> — флейвор для карточки класса.</li>
+            </ul>
+          </div>
+
+          <div className={s.gSection}>
+            <div className="ao-h6">Механики</div>
+            <ul className={s.gList}>
+              <li><b>Hit die</b> — кубик хитов: d6 (маг/чародей), d8 (жрец/плут…), d10 (воин/паладин…), d12 (варвар).</li>
+              <li><b>Выбор навыков</b> — сколько навыков игрок выбирает и из какого пула (или «любой»).</li>
+              <li><b>Основные характеристики</b> — ключевые характеристики класса. <b>Спасброски</b> — обычно две, во владении класса.</li>
+              <li><b>Заклинательство</b> — включите, если класс колдует. <b>Прогрессия</b>:
+                <ul className={s.gSub}>
+                  <li><b>Полный</b> — ячейки до 9 круга (маг, жрец, друид…).</li>
+                  <li><b>Половина</b> — до 5 круга (паладин, следопыт).</li>
+                  <li><b>Треть</b> — до 4 круга (мистический рыцарь, ловкач).</li>
+                  <li><b>Пакт</b> — магия договора (колдун).</li>
+                </ul>
+              </li>
+              <li><b>Базовая характеристика</b> — от неё считается DC/атака заклинаний. <b>Подготовка</b>: «Подготавливаемые» (жрец/маг) или «Известные» (бард/чародей).</li>
+            </ul>
+          </div>
+
+          <div className={s.gSection}>
+            <div className="ao-h6">Владения</div>
+            <ul className={s.gList}>
+              <li>Перечислите через запятую. <b>Доспехи</b>: лёгкие, средние, тяжёлые, щиты. <b>Оружие</b>: простое, воинское. <b>Инструменты</b>: напр. воровские, набор травника.</li>
+            </ul>
+          </div>
+
+          <div className={s.gSection}>
+            <div className="ao-h6">Умения</div>
+            <ul className={s.gList}>
+              <li><b>Умения по уровням</b> — что класс получает на каждом уровне (уровень 1–20 + название + описание).</li>
+              <li><b>Сабклассы</b> — архетипы/специализации класса.</li>
+            </ul>
+          </div>
+
+          <div className={s.gSection}>
+            <div className="ao-h6">Награды</div>
+            <ul className={s.gList}>
+              <li>Группы того, что выдаётся на уровне: <b>Авто</b> — выдаётся всегда; <b>Выбор</b> — игрок выбирает из вариантов (навыки, характеристики, заклинания и т.д.).</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Small controls ──────────────────────────────────────────
-function Field({ label, children }: { label: string; children: ReactNode }) {
+function Field({ label, hint, children }: { label: string; hint?: string; children: ReactNode }) {
   return (
     <label className={s.field}>
       <span className="ao-label">{label}</span>
       {children}
+      {hint && <span className={s.hint}>{hint}</span>}
     </label>
   );
 }
@@ -291,7 +384,7 @@ function IdentityTab({ draft, patch }: { draft: ClassDraft; patch: (p: Partial<C
         <Field label="Название*">
           <input className="ao-input" value={draft.name} maxLength={80} onChange={(e) => patch({ name: e.target.value })} />
         </Field>
-        <Field label="Slug">
+        <Field label="Slug" hint="Латинский код для ссылок. Оставьте пустым — сгенерируется из названия.">
           <input className="ao-input" value={draft.slug ?? ''} onChange={(e) => patch({ slug: e.target.value })} placeholder="генерится из названия" />
         </Field>
         <Field label="Название (RU)">
@@ -324,30 +417,30 @@ function MechanicsTab({
   return (
     <div className="ao-col ao-gap-12">
       <div className={s.grid3}>
-        <Field label="Hit die">
+        <Field label="Hit die" hint="Кубик хитов: d6 маг · d8 плут/жрец · d10 воин · d12 варвар">
           <select className="ao-input" value={draft.hitDie} onChange={(e) => patch({ hitDie: Number(e.target.value) })}>
             {HIT_DICE.map((d) => <option key={d} value={d}>d{d}</option>)}
           </select>
         </Field>
-        <Field label="Выбор навыков (кол-во)">
-          <input className="ao-input" type="number" min={0} value={draft.skillChoiceCount} onChange={(e) => patch({ skillChoiceCount: Number(e.target.value) || 0 })} />
+        <Field label="Выбор навыков (кол-во)" hint="Сколько навыков выбирает игрок на 1 уровне">
+          <input className="ao-input" type="number" min={0} max={18} value={draft.skillChoiceCount} onChange={(e) => patch({ skillChoiceCount: Number(e.target.value) || 0 })} />
         </Field>
-        <Field label="Любой навык">
+        <Field label="Откуда выбор навыков" hint="Из заданного пула или из всех навыков">
           <select className="ao-input" value={draft.skillChoiceAny ? 'yes' : 'no'} onChange={(e) => patch({ skillChoiceAny: e.target.value === 'yes' })}>
             <option value="no">из пула</option>
-            <option value="yes">любой</option>
+            <option value="yes">любой навык</option>
           </select>
         </Field>
       </div>
-      <Field label="Основные характеристики*">
-        <MultiSelect options={refData.abilities} selected={draft.primaryAbilityIds} onChange={(ids) => patch({ primaryAbilityIds: ids })} />
+      <Field label="Основные характеристики*" hint="Ключевые характеристики класса">
+        <MultiSelect options={refData.abilities} selected={draft.primaryAbilityIds} onChange={(ids) => patch({ primaryAbilityIds: ids })} placeholder="добавить характеристику…" />
       </Field>
-      <Field label="Спасброски">
-        <MultiSelect options={refData.abilities} selected={draft.savingThrowIds} onChange={(ids) => patch({ savingThrowIds: ids })} />
+      <Field label="Спасброски" hint="Обычно две характеристики во владении класса">
+        <MultiSelect options={refData.abilities} selected={draft.savingThrowIds} onChange={(ids) => patch({ savingThrowIds: ids })} placeholder="добавить спасбросок…" />
       </Field>
       {!draft.skillChoiceAny && (
-        <Field label="Пул навыков">
-          <MultiSelect options={refData.skills} selected={draft.skillOptionIds} onChange={(ids) => patch({ skillOptionIds: ids })} />
+        <Field label="Пул навыков" hint="Из этого списка игрок выбирает навыки">
+          <MultiSelect options={refData.skills} selected={draft.skillOptionIds} onChange={(ids) => patch({ skillOptionIds: ids })} placeholder="добавить навык…" />
         </Field>
       )}
 
@@ -362,19 +455,20 @@ function MechanicsTab({
       </div>
       {sc && (
         <div className={s.grid3}>
-          <Field label="Прогрессия">
-            <input className="ao-input" list="caster-prog" value={sc.casterProgression} onChange={(e) => patch({ spellcasting: { ...sc, casterProgression: e.target.value } })} />
-            <datalist id="caster-prog">{CASTER_PROGRESSIONS.map((c) => <option key={c} value={c} />)}</datalist>
+          <Field label="Прогрессия" hint="Как быстро растут ячейки заклинаний">
+            <select className="ao-input" value={sc.casterProgression} onChange={(e) => patch({ spellcasting: { ...sc, casterProgression: e.target.value } })}>
+              {CASTER_PROGRESSIONS.map((c) => <option key={c} value={c}>{CASTER_PROGRESSION_LABELS[c] ?? c}</option>)}
+            </select>
           </Field>
-          <Field label="Базовая характеристика">
+          <Field label="Базовая характеристика" hint="От неё считается DC/атака заклинаний">
             <select className="ao-input" value={sc.spellcastingAbilityId} onChange={(e) => patch({ spellcasting: { ...sc, spellcastingAbilityId: e.target.value } })}>
-              <option value="">—</option>
+              <option value="">— выбрать —</option>
               {refData.abilities.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
             </select>
           </Field>
-          <Field label="Подготовка">
+          <Field label="Подготовка" hint="Подготавливаемые (жрец/маг) или известные (бард/чародей)">
             <select className="ao-input" value={sc.preparation} onChange={(e) => patch({ spellcasting: { ...sc, preparation: e.target.value } })}>
-              {PREPARATIONS.map((p) => <option key={p} value={p}>{p}</option>)}
+              {PREPARATIONS.map((p) => <option key={p} value={p}>{PREPARATION_LABELS[p] ?? p}</option>)}
             </select>
           </Field>
         </div>
@@ -386,9 +480,27 @@ function MechanicsTab({
 function ProficiencyTab({ draft, patch }: { draft: ClassDraft; patch: (p: Partial<ClassDraft>) => void }) {
   return (
     <div className="ao-col ao-gap-12">
-      <Field label="Доспехи"><input className="ao-input" value={draft.armorProficiencyText ?? ''} onChange={(e) => patch({ armorProficiencyText: e.target.value })} /></Field>
-      <Field label="Оружие"><input className="ao-input" value={draft.weaponProficiencyText ?? ''} onChange={(e) => patch({ weaponProficiencyText: e.target.value })} /></Field>
-      <Field label="Инструменты"><input className="ao-input" value={draft.toolProficiencyText ?? ''} onChange={(e) => patch({ toolProficiencyText: e.target.value })} /></Field>
+      <Field label="Доспехи" hint="Через запятую. Подсказки — из списка ниже.">
+        <input className="ao-input" list="prof-armor" placeholder="напр. Лёгкие, средние, щиты"
+          value={draft.armorProficiencyText ?? ''} onChange={(e) => patch({ armorProficiencyText: e.target.value })} />
+        <datalist id="prof-armor">
+          {['Все доспехи, щиты', 'Лёгкие, средние, щиты', 'Лёгкие доспехи', 'Лёгкие, средние доспехи', 'Щиты', 'Нет'].map((v) => <option key={v} value={v} />)}
+        </datalist>
+      </Field>
+      <Field label="Оружие" hint="Через запятую.">
+        <input className="ao-input" list="prof-weapon" placeholder="напр. Простое, воинское"
+          value={draft.weaponProficiencyText ?? ''} onChange={(e) => patch({ weaponProficiencyText: e.target.value })} />
+        <datalist id="prof-weapon">
+          {['Простое оружие', 'Простое и воинское оружие', 'Воинское оружие', 'Простое оружие, ручные арбалеты, длинные мечи, короткие мечи, рапиры'].map((v) => <option key={v} value={v} />)}
+        </datalist>
+      </Field>
+      <Field label="Инструменты" hint="Через запятую (можно оставить пустым).">
+        <input className="ao-input" list="prof-tool" placeholder="напр. Воровские инструменты"
+          value={draft.toolProficiencyText ?? ''} onChange={(e) => patch({ toolProficiencyText: e.target.value })} />
+        <datalist id="prof-tool">
+          {['Воровские инструменты', 'Набор травника', 'Один музыкальный инструмент', 'Инструменты ремесленника (на выбор)', 'Нет'].map((v) => <option key={v} value={v} />)}
+        </datalist>
+      </Field>
     </div>
   );
 }

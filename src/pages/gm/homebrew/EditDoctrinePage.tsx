@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
+import { Copy } from 'lucide-react';
 import { Rune, OrdoPanel, OrdoChip, PanelHeader } from '@/components/ordo';
 import { HomebrewClassBuilder } from '@/features/class-builder/HomebrewClassBuilder';
 import { RaceEditor } from '@/components/admin/RaceEditor';
@@ -128,8 +129,10 @@ export default function EditDoctrinePage() {
   const [editingContent, setEditingContent] = useState<{ type: ContentType; id: string } | null>(null);
   const [showMagicItem, setShowMagicItem] = useState(false);
   const [editingMagicItemId, setEditingMagicItemId] = useState<string | null>(null);
+  const [duplicatingMagicItemId, setDuplicatingMagicItemId] = useState<string | null>(null);
   const [showSpell, setShowSpell] = useState(false);
   const [editingSpellId, setEditingSpellId] = useState<string | null>(null);
+  const [duplicatingSpellId, setDuplicatingSpellId] = useState<string | null>(null);
   const [showRaceEditor, setShowRaceEditor] = useState(false);
   const [editingRaceId, setEditingRaceId] = useState<string | null>(null);
   const [editingRaceSummary, setEditingRaceSummary] = useState<ContentSummaryDto | null>(null);
@@ -514,13 +517,13 @@ export default function EditDoctrinePage() {
                 </button>
                 <button
                   className="ao-btn ao-btn--ghost ao-btn--sm"
-                  onClick={() => { setEditingMagicItemId(null); setShowMagicItem(true); }}
+                  onClick={() => { setEditingMagicItemId(null); setDuplicatingMagicItemId(null); setShowMagicItem(true); }}
                 >
                   <Rune kind="diamond" size={10} /> {t('hb.item.item')}
                 </button>
                 <button
                   className="ao-btn ao-btn--ghost ao-btn--sm"
-                  onClick={() => { setEditingSpellId(null); setShowSpell(true); }}
+                  onClick={() => { setEditingSpellId(null); setDuplicatingSpellId(null); setShowSpell(true); }}
                 >
                   <Rune kind="sigil-1" size={10} /> {t('hb.spell.spell')}
                 </button>
@@ -938,9 +941,11 @@ export default function EditDoctrinePage() {
                           } else if (grp.type === 'RACE') {
                             handleOpenEditRace(r);
                           } else if (grp.type === 'ITEM') {
+                            setDuplicatingMagicItemId(null);
                             setEditingMagicItemId(r.id);
                             setShowMagicItem(true);
                           } else if (grp.type === 'SPELL') {
+                            setDuplicatingSpellId(null);
                             setEditingSpellId(r.id);
                             setShowSpell(true);
                           } else if (CRUD_KIND[grp.type]) {
@@ -964,6 +969,27 @@ export default function EditDoctrinePage() {
                           }}
                         >
                           <Rune kind="sigil-1" size={12} />
+                        </button>
+                      )}
+
+                      {/* Дублировать / создать на основе (HB_MODES Ф1 DERIVED) — для предметов и заклинаний */}
+                      {(grp.type === 'ITEM' || grp.type === 'SPELL') && (
+                        <button
+                          className={cn('ao-iconbtn', s.iconBtnSm)}
+                          title={t('hb.edit.duplicateEntity')}
+                          onClick={() => {
+                            if (grp.type === 'ITEM') {
+                              setEditingMagicItemId(null);
+                              setDuplicatingMagicItemId(r.id);
+                              setShowMagicItem(true);
+                            } else {
+                              setEditingSpellId(null);
+                              setDuplicatingSpellId(r.id);
+                              setShowSpell(true);
+                            }
+                          }}
+                        >
+                          <Copy size={12} />
                         </button>
                       )}
 
@@ -1003,9 +1029,10 @@ export default function EditDoctrinePage() {
 
       <ItemModal
         open={showMagicItem}
-        onClose={() => { setShowMagicItem(false); setEditingMagicItemId(null); }}
+        onClose={() => { setShowMagicItem(false); setEditingMagicItemId(null); setDuplicatingMagicItemId(null); }}
         packageId={pkg.id}
         editingId={editingMagicItemId}
+        duplicateFromId={duplicatingMagicItemId}
         onSaved={() => {
           queryClient.invalidateQueries({ queryKey: ['homebrew-my'] });
           queryClient.invalidateQueries({ queryKey: ['homebrew-my', pkg.id] });
@@ -1014,9 +1041,10 @@ export default function EditDoctrinePage() {
 
       <SpellModal
         open={showSpell}
-        onClose={() => { setShowSpell(false); setEditingSpellId(null); }}
+        onClose={() => { setShowSpell(false); setEditingSpellId(null); setDuplicatingSpellId(null); }}
         packageId={pkg.id}
         editingId={editingSpellId}
+        duplicateFromId={duplicatingSpellId}
         onSaved={() => {
           queryClient.invalidateQueries({ queryKey: ['homebrew-my'] });
           queryClient.invalidateQueries({ queryKey: ['homebrew-my', pkg.id] });

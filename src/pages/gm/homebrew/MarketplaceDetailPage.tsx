@@ -23,7 +23,7 @@ export default function MarketplaceDetailPage() {
   const t = useT();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { data: pkg, isLoading } = useMarketplacePackage(id);
+  const { data: pkg, isLoading, isError } = useMarketplacePackage(id);
   const installMutation = useInstallPackage();
   const reportMutation = useReportPackage();
   const [tab, setTab] = useState<ContentType>('ITEM_TYPE');
@@ -31,10 +31,25 @@ export default function MarketplaceDetailPage() {
   const [showReport, setShowReport] = useState(false);
   const [reportReason, setReportReason] = useState('');
 
-  if (isLoading || !pkg) {
+  if (isLoading) {
     return (
       <OrdoPanel frame className={s.loadingPanel}>
         <div className={cn('ao-ph', s.loadingPh)} />
+      </OrdoPanel>
+    );
+  }
+
+  // Ошибка/пусто (напр. чужой черновик или удалённый пакет) — показываем внятное сообщение,
+  // а не бесконечный плейсхолдер загрузки.
+  if (isError || !pkg) {
+    return (
+      <OrdoPanel frame className={s.loadingPanel}>
+        <div className="ao-col ao-gap-12 ao-center">
+          <p className="ao-codex">{t('hb.detail.notFound')}</p>
+          <button className="ao-btn ao-btn--ghost ao-btn--sm" onClick={() => navigate('/gm/homebrew/marketplace')}>
+            <Rune kind="arrow-l" size={11} /> {t('hb.detail.catalogue')}
+          </button>
+        </div>
       </OrdoPanel>
     );
   }
@@ -195,17 +210,24 @@ export default function MarketplaceDetailPage() {
               <ContentPills items={cs.itemTypeCount} classes={cs.classCount} skills={cs.skillCount} feats={cs.featCount} />
             </div>
 
-            {/* Authorize button */}
-            <button
-              className={cn('ao-btn ao-btn--primary ao-btn--lg ao-btn--block', s.authorizeBtn)}
-              onClick={() => setShowConfirm(true)}
-            >
-              <Rune kind="diamond-fill" size={12} /> {t('hb.detail.authorize')}
-            </button>
-
-            <div className={cn('ao-codex', s.grantsNote)}>
-              {t('hb.detail.grantsReference')}
-            </div>
+            {/* Authorize button — только для опубликованных пакетов; для своего черновика это предпросмотр. */}
+            {pkg.status === 'PUBLISHED' ? (
+              <>
+                <button
+                  className={cn('ao-btn ao-btn--primary ao-btn--lg ao-btn--block', s.authorizeBtn)}
+                  onClick={() => setShowConfirm(true)}
+                >
+                  <Rune kind="diamond-fill" size={12} /> {t('hb.detail.authorize')}
+                </button>
+                <div className={cn('ao-codex', s.grantsNote)}>
+                  {t('hb.detail.grantsReference')}
+                </div>
+              </>
+            ) : (
+              <div className={cn('ao-codex', s.grantsNote)}>
+                {t('hb.detail.draftPreview')}
+              </div>
+            )}
           </div>
         </div>
 

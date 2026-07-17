@@ -24,6 +24,9 @@ interface SpellModalProps {
   onClose: () => void;
   packageId: string;
   editingId?: string | null;
+  /** HB_MODES Фаза 1 (DERIVED): id исходного homebrew-заклинания — форма предзаполняется из него,
+   *  но сохраняется как НОВОЕ (независимая копия). Игнорируется, если задан editingId. */
+  duplicateFromId?: string | null;
   onSaved: () => void;
 }
 
@@ -32,7 +35,7 @@ interface SpellModalProps {
  * пикеры (время сотворения / дистанция / длительность / область — из словарей, без свободного текста),
  * справа живое превью карточки. Механика (урон/лечение) — через дайс-билдер; исполняется движком feature-rules.
  */
-export function SpellModal({ open, onClose, packageId, editingId, onSaved }: SpellModalProps) {
+export function SpellModal({ open, onClose, packageId, editingId, duplicateFromId, onSaved }: SpellModalProps) {
   const t = useT();
   const [name, setName] = useState('');
   const [nameEn, setNameEn] = useState('');
@@ -109,13 +112,15 @@ export function SpellModal({ open, onClose, packageId, editingId, onSaved }: Spe
   useEffect(() => {
     if (!open) return;
     setStep(0);
-    setWizard(!editingId);
-    if (editingId) {
-      homebrewSpellsApi.get(packageId, editingId)
+    // DERIVED (HB_MODES Ф1): грузим из исходного, но сохраняем как новое; форма — полная (не визард).
+    const loadId = editingId || duplicateFromId;
+    setWizard(!loadId);
+    if (loadId) {
+      homebrewSpellsApi.get(packageId, loadId)
         .then((r) => {
           const sp = r.data;
           if (!sp) return;
-          setName(sp.name);
+          setName(editingId ? sp.name : `${sp.name} (копия)`);
           setNameEn(sp.nameEn ?? '');
           setLevel(String(sp.level ?? 0));
           setSchool(sp.school ?? '');
@@ -162,7 +167,7 @@ export function SpellModal({ open, onClose, packageId, editingId, onSaved }: Spe
       setRequiresAttackHit(false); setHasHealing(false); setHealingFormula('2d8');
       setHasConditions(false); setConditionSlugs([]); setConditionDurationRounds('');
     }
-  }, [open, editingId, packageId, t]);
+  }, [open, editingId, duplicateFromId, packageId, t]);
 
   const num = (v: string): number | undefined => (v.trim() === '' ? undefined : Number(v));
 
