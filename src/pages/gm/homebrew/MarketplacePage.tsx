@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   OrdoPanel,
   Rune,
@@ -9,18 +10,19 @@ import { VersionSeal } from '@/components/homebrew/VersionSeal';
 import { RatingControl } from '@/components/homebrew/RatingControl';
 import { ContentPills } from '@/components/homebrew/ContentPills';
 import { HBTag } from '@/components/homebrew/HBTag';
-import { useMarketplace } from '@/hooks/useHomebrew';
+import { useMarketplace, useInstallPackage, useInstalledPackages } from '@/hooks/useHomebrew';
 import { useRateHomebrew } from '@/hooks/useHomebrewCampaign';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
 import { isRetryableError } from '@/lib/errors';
-import type { HomebrewPackageResponse } from '@/types';
+import type { HomebrewPackageResponse, InstalledHomebrewResponse } from '@/types';
 import s from './MarketplacePage.module.css';
 
 /* ── page ────────────────────────────────────────────────────── */
 
 export default function MarketplacePage() {
   const t = useT();
+  const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [page, setPage] = useState(0);
@@ -42,12 +44,22 @@ export default function MarketplacePage() {
   });
 
   const rateMutation = useRateHomebrew();
+  const installMutation = useInstallPackage();
+  // Список уже установленных пакетов — чтобы на карточке показать «Установлено» вместо «Установить».
+  const { data: installedData } = useInstalledPackages({ size: 200 });
+  const installedIds = new Set(
+    (installedData?.content ?? []).map((i: InstalledHomebrewResponse) => i.packageId),
+  );
 
   const packages: HomebrewPackageResponse[] = marketplaceData?.content ?? [];
   const totalPages = marketplaceData?.totalPages ?? 0;
 
   const handleRate = (packageId: string, rating: 1 | -1) => {
     rateMutation.mutate({ packageId, data: { rating } });
+  };
+
+  const handleInstall = (packageId: string) => {
+    installMutation.mutate(packageId);
   };
 
   /* ── loading ─────────────────────────────────────────────── */
@@ -145,6 +157,8 @@ export default function MarketplacePage() {
           <div className={cn('ao-rgrid', s.grid3, s.gridTop)}>
             {packages.map((pkg: HomebrewPackageResponse) => {
               const isArchived = pkg.status === 'UNPUBLISHED' || pkg.isDeleted;
+              const installed = installedIds.has(pkg.id);
+              const openDetail = () => navigate(`/gm/homebrew/marketplace/${pkg.id}`);
 
               return (
                 <OrdoPanel
@@ -153,7 +167,13 @@ export default function MarketplacePage() {
                   padding={0}
                   className={cn(s.card, isArchived && s.archived)}
                 >
-                  <div className={s.cardBody}>
+                  <div
+                    className={s.cardBody}
+                    role="button"
+                    tabIndex={0}
+                    onClick={openDetail}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openDetail(); } }}
+                  >
                     {/* Version seal + title */}
                     <div className={s.cardHead}>
                       <VersionSeal version={pkg.version} size={40} />
@@ -175,7 +195,7 @@ export default function MarketplacePage() {
                     )}
 
                     {/* Rating Control */}
-                    <div className={s.ratingWrap}>
+                    <div className={s.ratingWrap} onClick={(e) => e.stopPropagation()}>
                       <RatingControl
                         likes={pkg.likes ?? 0}
                         dislikes={pkg.dislikes ?? 0}
@@ -213,14 +233,26 @@ export default function MarketplacePage() {
                     )}
                   </div>
 
-                  {/* Footer with stats */}
+                  {/* Footer with stats + install action */}
                   <div className={s.cardFoot}>
                     <span className={cn('ao-codex', s.footStat)}>
                       <Rune kind="arrow-d" size={9} color="var(--ink-faint)" /> {t('hb.market.downloads', { count: pkg.downloadCount })}
                     </span>
-                    <span className={cn('ao-codex', s.footVersion)}>
-                      v{pkg.version}
-                    </span>
+                    {!isArchived && (
+                      installed ? (
+                        <span className={cn('ao-codex', s.installedTag)}>
+                          <Rune kind="check" size={9} color="var(--arcane)" /> {t('hb.market.installed')}
+                        </span>
+                      ) : (
+                        <button
+                          className="ao-btn ao-btn--primary ao-btn--sm"
+                          disabled={installMutation.isPending}
+                          onClick={() => handleInstall(pkg.id)}
+                        >
+                          <Rune kind="plus" size={9} /> {t('hb.market.install')}
+                        </button>
+                      )
+                    )}
                   </div>
                 </OrdoPanel>
               );
