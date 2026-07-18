@@ -1442,6 +1442,8 @@ export interface CampaignDetailResponse {
 export interface CampaignMember {
   userId: string;
   username: string;
+  /** Аватар участника: прокси-URL media-ассета или undefined. */
+  avatarUrl?: string;
   roleInCampaign: CampaignRole;
   isCreator: boolean;
   joinedAt: string;
@@ -1455,6 +1457,8 @@ export interface CampaignResponse {
   status: CampaignStatus;
   inviteCode?: string;
   memberCount: number;
+  /** Обложка кампании: прокси-URL media-ассета или undefined. */
+  coverUrl?: string;
   createdAt: string;
   updatedAt: string;
   members: CampaignMember[];
@@ -1802,6 +1806,8 @@ export interface QuestResponse {
   description?: string;
   status: QuestStatus;
   isVisibleToPlayers: boolean;
+  /** Арт квеста: прокси-URL media-ассета или undefined. */
+  artUrl?: string;
   notes: NoteResponse[];
   rewards: QuestRewardResponse[];
   createdAt: string;
@@ -1866,6 +1872,8 @@ export interface LocationResponse {
   name: string;
   description?: string;
   isVisibleToPlayers: boolean;
+  /** Превью локации: прокси-URL media-ассета или undefined. */
+  previewUrl?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -2064,6 +2072,8 @@ export interface FriendResponse {
   id: string;
   username: string;
   role: string;
+  /** Аватар друга: прокси-URL media-ассета или undefined. */
+  avatarUrl?: string;
   friendsSince: string;
 }
 

@@ -9,7 +9,14 @@ export type MediaOwnerType =
   | 'CHARACTER_AVATAR'
   | 'NPC_PORTRAIT'
   | 'HOMEBREW_COVER'
-  | 'BLUEPRINT_COVER';
+  | 'BLUEPRINT_COVER'
+  | 'LOCATION_PREVIEW'
+  | 'MONSTER_PORTRAIT'
+  | 'MONSTER_TOKEN'
+  | 'USER_AVATAR'
+  | 'CAMPAIGN_COVER'
+  | 'QUEST_ART'
+  | 'SPELL_ART';
 
 /** Response after uploading an image (mirrors the backend `MediaAssetResponse`). */
 export interface MediaAssetResponse {
