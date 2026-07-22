@@ -22,6 +22,7 @@ const RegisterPage = lazyWithRetry(() => import('@/pages/auth/RegisterPage'));
 // Campaign pages
 const WorldPage = lazyWithRetry(() => import('@/pages/campaigns/WorldPage'));
 const WorldManagementPage = lazyWithRetry(() => import('@/pages/gm/campaigns/WorldManagementPage'));
+const RollPromptsPage = lazyWithRetry(() => import('@/pages/gm/campaigns/RollPromptsPage'));
 const CampaignListPage = lazyWithRetry(() => import('@/pages/gm/campaigns/CampaignListPage'));
 const CampaignDashboardPage = lazyWithRetry(() => import('@/pages/gm/campaigns/CampaignDashboardPage'));
 const DashboardSectionsView = lazyWithRetry(() => import('@/pages/gm/campaigns/dashboard/DashboardSectionsView'));
@@ -243,6 +244,8 @@ export const router = createBrowserRouter([
                   { path: 'locations', element: <LocationsPage /> },
                   // WORLD_PLAN: ГМ-управление миром (размещение NPC, карты локаций, переходы)
                   { path: 'world-manage', element: <WorldManagementPage /> },
+                  // ROLL_PROMPT: окно мастера — запрос проверок у игроков
+                  { path: 'checks', element: <RollPromptsPage /> },
 
                   // Map authoring (GM library + grid editor)
                   { path: 'maps', element: <CampaignMapListPage /> },

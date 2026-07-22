@@ -2079,6 +2079,49 @@ export interface TraverseTransitionRequest {
   toSessionId?: string;
 }
 
+// === ROLL_PROMPT: мастер запрашивает проверку — окно броска у игрока ===
+
+export type RollPromptType = 'ABILITY_CHECK' | 'SAVING_THROW' | 'CUSTOM';
+export type RollPromptStatus = 'PENDING' | 'ROLLED' | 'CANCELLED';
+export type RollAdvantageMode = 'NORMAL' | 'ADVANTAGE' | 'DISADVANTAGE';
+
+/** Запрошенная мастером проверка и её результат. DC скрыт для игрока при hideDc до броска. */
+export interface RollPromptResponse {
+  id: string;
+  campaignId: string;
+  characterId: string;
+  characterName: string;
+  /** Владелец персонажа — окно броска показывается только ему. */
+  ownerUserId?: string;
+  rollType: RollPromptType;
+  statTypeId?: string;
+  statName?: string;
+  dc?: number;
+  hideDc?: boolean;
+  advantageMode: RollAdvantageMode;
+  description?: string;
+  status: RollPromptStatus;
+  requestedByName?: string;
+  rollNatural?: number;
+  rollSecond?: number;
+  modifier?: number;
+  total?: number;
+  success?: boolean;
+  createdAt: string;
+  rolledAt?: string;
+}
+
+/** Тело запроса мастера "запросить проверку". */
+export interface CreateRollPromptRequest {
+  characterIds: string[];
+  rollType: RollPromptType;
+  statTypeId?: string;
+  dc?: number;
+  hideDc?: boolean;
+  advantageMode?: RollAdvantageMode;
+  description?: string;
+}
+
 /** Результат прохода через переход. */
 export interface TraverseResultResponse {
   transitionId: string;
@@ -2223,7 +2266,16 @@ export type WsEventType =
   // Social graph — payloads carry { relationshipId, userId, username }; REST is the source of truth.
   | 'FRIEND_REQUEST_RECEIVED'
   | 'FRIEND_REQUEST_ACCEPTED'
-  | 'FRIEND_REMOVED';
+  | 'FRIEND_REMOVED'
+  // WORLD_PLAN — presence/quests/transitions; payloads carry ids, REST is the source of truth.
+  | 'LOCATION_PRESENCE_CHANGED'
+  | 'QUEST_ACCEPTED'
+  | 'QUEST_ABANDONED'
+  | 'MAP_TRANSITION_TRAVERSED'
+  // ROLL_PROMPT — GM-initiated checks; payloads carry { promptId, characterId, ... }.
+  | 'ROLL_PROMPT_CREATED'
+  | 'ROLL_PROMPT_RESOLVED'
+  | 'ROLL_PROMPT_CANCELLED';
 
 export interface WsEvent<T = unknown> {
   type: WsEventType;
