@@ -19,7 +19,7 @@ import { ErrorAltar } from '@/components/ordo';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/store/authStore';
-import { MapViewport, type MapToolbarLabels } from '../components';
+import { MapViewport, MapTransitionPrompt, type MapToolbarLabels } from '../components';
 import { useMapRealtime, type MapConnectionState } from '../realtime';
 import { useMapSessionStore, useMapTransientStore } from '../state';
 import {
@@ -35,7 +35,7 @@ import s from './MapSessionPage.module.css';
 
 export default function MapSessionPage() {
   const t = useT();
-  const { sessionId } = useParams<{ campaignId: string; sessionId: string }>();
+  const { campaignId, sessionId } = useParams<{ campaignId: string; sessionId: string }>();
   const me = useAuthStore((st) => st.user);
   const realtime = useMapRealtime(sessionId ?? null);
 
@@ -246,6 +246,17 @@ export default function MapSessionPage() {
           toolbarLabels={toolbarLabels}
           emptyLabel={t('map.session.noImage')}
         />
+        {campaignId && map.id && sessionId && (
+          <MapTransitionPrompt
+            campaignId={campaignId}
+            sessionId={sessionId}
+            mapId={map.id}
+            tokens={tokens}
+            movableTokenIds={permissions?.movableTokenIds ?? []}
+            canMoveAny={permissions?.canManageMap ?? false}
+            meId={me?.id}
+          />
+        )}
       </div>
     </div>
   );

@@ -49,6 +49,7 @@
   min-height: 0;
   border: 1px solid var(--rule);
   overflow: hidden;
+  position: relative;
 }
 
 .loading {

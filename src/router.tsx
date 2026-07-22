@@ -20,6 +20,8 @@ const LoginPage = lazyWithRetry(() => import('@/pages/auth/LoginPage'));
 const RegisterPage = lazyWithRetry(() => import('@/pages/auth/RegisterPage'));
 
 // Campaign pages
+const WorldPage = lazyWithRetry(() => import('@/pages/campaigns/WorldPage'));
+const WorldManagementPage = lazyWithRetry(() => import('@/pages/gm/campaigns/WorldManagementPage'));
 const CampaignListPage = lazyWithRetry(() => import('@/pages/gm/campaigns/CampaignListPage'));
 const CampaignDashboardPage = lazyWithRetry(() => import('@/pages/gm/campaigns/CampaignDashboardPage'));
 const DashboardSectionsView = lazyWithRetry(() => import('@/pages/gm/campaigns/dashboard/DashboardSectionsView'));
@@ -194,6 +196,8 @@ export const router = createBrowserRouter([
               },
 
               // Sections available to every member
+              // WORLD_PLAN: экран мира игрока (присутствие, NPC, квесты, торговля)
+              { path: 'world', element: <WorldPage /> },
               { path: 'members', element: <CampaignMembersPage /> },
               { path: 'storage', element: <SharedStoragePage /> },
               { path: 'items', element: <ItemCatalogPage /> },
@@ -237,6 +241,8 @@ export const router = createBrowserRouter([
                   { path: 'quests', element: <QuestManagerPage /> },
                   { path: 'quests/:questId', element: <QuestDetailPage /> },
                   { path: 'locations', element: <LocationsPage /> },
+                  // WORLD_PLAN: ГМ-управление миром (размещение NPC, карты локаций, переходы)
+                  { path: 'world-manage', element: <WorldManagementPage /> },
 
                   // Map authoring (GM library + grid editor)
                   { path: 'maps', element: <CampaignMapListPage /> },
