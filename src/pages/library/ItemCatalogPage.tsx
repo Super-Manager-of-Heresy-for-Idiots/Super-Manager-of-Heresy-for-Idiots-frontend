@@ -387,7 +387,7 @@ function EquipmentCatalog({ campaignId }: { campaignId?: string }) {
                   </section>
                 )}
 
-                {selected.url && (
+                {selected.url && /^https?:\/\//i.test(selected.url) && (
                   <a className={cn('ao-btn ao-btn--ghost ao-btn--sm', s.srcLink)} href={selected.url} target="_blank" rel="noreferrer">
                     <Rune kind="book" size={11} /> {t('cat.field.sourceLink')}
                   </a>
@@ -616,7 +616,7 @@ function MagicCatalog({ campaignId }: { campaignId?: string }) {
                   </section>
                 )}
 
-                {selected.url && (
+                {selected.url && /^https?:\/\//i.test(selected.url) && (
                   <a className={cn('ao-btn ao-btn--ghost ao-btn--sm', s.srcLink)} href={selected.url} target="_blank" rel="noreferrer">
                     <Rune kind="book" size={11} /> {t('cat.field.sourceLink')}
                   </a>

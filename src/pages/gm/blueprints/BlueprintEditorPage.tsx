@@ -220,6 +220,7 @@ export default function BlueprintEditorPage() {
                   value={coverOverride !== undefined ? coverOverride : (bp?.coverUrl ?? null)}
                   canEdit
                   onChange={setCoverOverride}
+                  invalidateKeys={[['blueprints', 'my', id], ['blueprints', 'my']]}
                   alt={title || 'Обложка'}
                   placeholder="Нет обложки"
                   previewClassName={s.coverPreview}

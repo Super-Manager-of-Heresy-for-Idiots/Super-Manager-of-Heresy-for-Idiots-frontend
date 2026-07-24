@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import type { ReactNode } from 'react';
+import { useQueryClient, type QueryKey } from '@tanstack/react-query';
 import { cn } from '@/lib/utils';
 import { Placeholder } from '@/components/ordo/Placeholder';
 import { mediaApi, type MediaOwnerType } from '@/api/media.api';
@@ -21,6 +22,14 @@ export interface ImageUploadFieldProps {
   canEdit?: boolean;
   /** Notified with the new proxy URL after upload, or null after delete. */
   onChange?: (url: string | null) => void;
+  /**
+   * React-query keys to invalidate after a successful upload/delete. The widget shows the new image
+   * optimistically via `onChange`, but that override lives in local state and is lost when the page
+   * remounts; the cached entity DTO still lacks the media URL. Without invalidation the image looks
+   * "unsaved" on reopen (the backend resolves it correctly, but the stale cache hides it until a hard
+   * reload). Pass the entity's detail/list query keys to force a refetch of the resolved URL.
+   */
+  invalidateKeys?: QueryKey[];
   /** Placeholder content shown when there is no image. */
   placeholder?: ReactNode;
   /** Wrapper class. */
@@ -47,6 +56,7 @@ export function ImageUploadField({
   value,
   canEdit = false,
   onChange,
+  invalidateKeys,
   placeholder,
   className,
   previewClassName,
@@ -58,6 +68,13 @@ export function ImageUploadField({
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+
+  // Сбрасывает кэш переданных запросов, чтобы страница перечитала разрешённый backend'ом URL картинки
+  // (иначе устаревший кэш скрывает только что загруженную картинку при повторном открытии).
+  const invalidate = () => {
+    invalidateKeys?.forEach((key) => queryClient.invalidateQueries({ queryKey: key }));
+  };
 
   const pickFile = () => {
     setError(null);
@@ -84,6 +101,7 @@ export function ImageUploadField({
     try {
       const res = await mediaApi.upload(ownerType, ownerId, file);
       onChange?.(res.data?.url ?? null);
+      invalidate();
     } catch (err) {
       setError(extractError(err, 'Не удалось загрузить изображение.'));
     } finally {
@@ -97,6 +115,7 @@ export function ImageUploadField({
     try {
       await mediaApi.remove(ownerType, ownerId);
       onChange?.(null);
+      invalidate();
     } catch (err) {
       setError(extractError(err, 'Не удалось удалить изображение.'));
     } finally {

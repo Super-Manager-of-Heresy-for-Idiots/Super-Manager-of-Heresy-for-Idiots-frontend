@@ -433,6 +433,7 @@ export default function EditDoctrinePage() {
                   value={coverOverride !== undefined ? coverOverride : (pkg.coverUrl ?? null)}
                   canEdit={pkg.status === 'DRAFT' || pkg.status === 'PUBLISHED'}
                   onChange={setCoverOverride}
+                  invalidateKeys={[['homebrew-my', pkg.id]]}
                   alt={pkg.title}
                   placeholder="Нет обложки"
                   previewClassName={s.coverPreview}

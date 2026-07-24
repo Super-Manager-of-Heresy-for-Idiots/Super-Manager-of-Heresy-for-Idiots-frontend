@@ -189,6 +189,10 @@ export default function NPCDetailPage() {
               value={portraitUrl}
               canEdit
               onChange={setPortraitOverride}
+              invalidateKeys={[
+                ['campaigns', campaignId, 'npcs', npcId],
+                ['campaigns', campaignId, 'npcs'],
+              ]}
               alt={npc.name}
               previewClassName={s.portrait}
               placeholder={t('camp2.npcDetail.portrait')}

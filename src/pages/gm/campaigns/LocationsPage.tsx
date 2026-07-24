@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
-import { OrdoPanel, Rune, OrdoField, Placeholder, EmptyVault, ErrorAltar } from '@/components/ordo';
+import { OrdoPanel, Rune, OrdoField, EmptyVault, ErrorAltar } from '@/components/ordo';
 import { CodexID } from '@/components/homebrew/CodexID';
+import { ImageUploadField } from '@/components/media/ImageUploadField';
 import { VisibilityToggle } from '@/components/narrative';
 import {
   Dialog,
@@ -193,10 +194,17 @@ export default function LocationsPage() {
           {locations.map((loc) => (
             <OrdoPanel key={loc.id} frame padding={0}>
               <div className={s.cardPad}>
-                {/* Map vignette placeholder */}
-                <Placeholder className={cn(s.mapVignette, !loc.isVisibleToPlayers && s.dimmed)}>
-                  {t('camp2.loc.mapVignette')}
-                </Placeholder>
+                {/* Виньетка локации: GM загружает/заменяет превью; при отсутствии — заглушка */}
+                <ImageUploadField
+                  ownerType="LOCATION_PREVIEW"
+                  ownerId={loc.id}
+                  value={loc.previewUrl}
+                  canEdit
+                  invalidateKeys={[['campaigns', campaignId, 'locations']]}
+                  alt={loc.name}
+                  placeholder={t('camp2.loc.mapVignette')}
+                  previewClassName={cn(s.mapVignette, !loc.isVisibleToPlayers && s.dimmed)}
+                />
 
                 {/* ID + Visibility */}
                 <div className={s.idRow}>

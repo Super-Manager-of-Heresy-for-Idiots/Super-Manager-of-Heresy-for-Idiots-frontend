@@ -8,7 +8,6 @@ import {
   Sigil,
   OrdoChip,
   OrdoDivider,
-  Placeholder,
   OrdoAssetIcon,
 } from '@/components/ordo';
 import { CharStatusBadge } from '@/components/campaigns';
@@ -39,6 +38,7 @@ import {
   useUpdateCharacter,
   useRest,
 } from '@/hooks/useCharacter';
+import { ImageUploadField } from '@/components/media/ImageUploadField';
 import { useCharacterEffects } from '@/hooks/useEffects';
 import { useEquippedInventory } from '@/hooks/useInventory';
 import { useCharacterRewards } from '@/hooks/useLevelUp';
@@ -139,6 +139,8 @@ export default function FolioPage() {
   };
 
   const [tab, setTab] = useState<TabId>('spells');
+  // Оптимистичный показ нового аватара сразу после загрузки/удаления (кэш перечитается инвалидацией).
+  const [avatarOverride, setAvatarOverride] = useState<string | null | undefined>(undefined);
   const [hpModalOpen, setHpModalOpen] = useState(false);
   const [checkResult, setCheckResult] = useState<{ statName: string; total: number; breakdown: { source: string; value: number }[] } | null>(null);
   const [activeStatId, setActiveStatId] = useState<string | null>(null);
@@ -647,15 +649,17 @@ export default function FolioPage() {
         {/* Identity */}
         <OrdoPanel frame padding={0}>
           <div className={s.idBody}>
-            {character.avatarUrl ? (
-              <img
-                src={character.avatarUrl}
-                alt={character.name}
-                className={s.portrait}
-              />
-            ) : (
-              <Placeholder className={s.portraitPh}>{t('camp2.folio.portrait')}</Placeholder>
-            )}
+            <ImageUploadField
+              ownerType="CHARACTER_AVATAR"
+              ownerId={character.id}
+              value={avatarOverride !== undefined ? avatarOverride : character.avatarUrl}
+              canEdit={isOwner || isChronicler}
+              onChange={setAvatarOverride}
+              invalidateKeys={[['campaigns', campaignId, 'characters', characterId]]}
+              alt={character.name}
+              previewClassName={s.portrait}
+              placeholder={t('camp2.folio.portrait')}
+            />
             <div className={s.idMain}>
               <div className={s.idChips}>
                 <span className="ao-codex">№ {character.id.slice(0, 8)}</span>

@@ -13,6 +13,11 @@ dist-ssr
 coverage
 *.local
 
+# Local env files — never commit real values (only .env.example is tracked)
+.env
+.env.*
+!.env.example
+
 # Test coverage
 coverage
 

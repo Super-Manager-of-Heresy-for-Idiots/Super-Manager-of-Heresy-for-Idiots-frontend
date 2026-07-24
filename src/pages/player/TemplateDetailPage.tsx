@@ -116,6 +116,7 @@ export default function TemplateDetailPage() {
               value={avatarUrl}
               canEdit
               onChange={setAvatarOverride}
+              invalidateKeys={[['characters', 'template', tpl.id], ['characters', 'my']]}
               alt={tpl.name}
               placeholder="Нет аватара"
             />
