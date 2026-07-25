@@ -3,6 +3,23 @@
 @tailwind utilities;
 
 /* ============================================================
+   PT Root UI — self-hosted, variable (wght 300–700).
+   The variable file covers every weight the design system uses
+   (400/500/600/700); the static Regular is the fallback for
+   browsers without variable-font support.
+   Licence: /public/fonts/PT-Root-UI-LICENSE.txt
+   ============================================================ */
+
+@font-face {
+  font-family: 'PT Root UI';
+  src: url('/fonts/PT-Root-UI_VF.woff2') format('woff2-variations'),
+       url('/fonts/PT-Root-UI_Regular.woff2') format('woff2');
+  font-weight: 300 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ============================================================
    ORDO ARCANUM — Design tokens
    Visual system for the D&D character archive
    ============================================================ */
@@ -59,19 +76,21 @@
   --rar-artifact:  var(--ember);
 
   /* ── Type ─────────────────────────────────────────── */
-  --font-display: 'Cinzel', 'Trajan Pro', 'Times New Roman', serif;
-  --font-serif:   'Cormorant Garamond', 'Garamond', 'Times New Roman', serif;
-  --font-sans:    'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-  --font-mono:    'JetBrains Mono', 'Menlo', 'Consolas', monospace;
+  /* Every role resolves to PT Root UI; the four slots stay so the
+     existing display/serif/sans/mono semantics remain addressable. */
+  --font-display: 'PT Root UI', system-ui, sans-serif;
+  --font-serif:   'PT Root UI', system-ui, sans-serif;
+  --font-sans:    'PT Root UI', system-ui, sans-serif;
+  --font-mono:    'PT Root UI', 'Menlo', 'Consolas', monospace;
 
   /* type scale */
-  --t-pico:     9px;
-  --t-nano:     10px;
-  --t-overline: 11px;
-  --t-micro:    12px;
-  --t-small:    13px;
-  --t-body:     14px;
-  --t-body-lg:  16px;
+  --t-pico:     11px;
+  --t-nano:     12px;
+  --t-overline: 13px;
+  --t-micro:    14px;
+  --t-small:    15px;
+  --t-body:     16px;
+  --t-body-lg:  18px;
   --t-h6:       18px;
   --t-h5:       22px;
   --t-h4:       28px;
