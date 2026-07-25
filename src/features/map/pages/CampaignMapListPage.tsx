@@ -24,7 +24,7 @@ export default function CampaignMapListPage() {
   const [startingId, setStartingId] = useState<UUID | null>(null);
 
   const goEditor = (mapId?: UUID) =>
-    navigate(`/campaigns/${campaignId}/maps/${mapId ?? 'new'}${mapId ? '/edit' : ''}`);
+    navigate(`/campaigns/${campaignId}/world/maps/${mapId ?? 'new'}${mapId ? '/edit' : ''}`);
 
   const startSession = (map: MapDefinitionDto) => {
     if (!campaignId) return;

@@ -1,46 +1,17 @@
 import { Suspense } from 'react';
-import { NavLink, Outlet, useOutletContext, useParams } from 'react-router-dom';
-import { BackLink, CampaignStatusPill } from '@/components/campaigns';
-import { OrdoInterfaceIcon, type OrdoInterfaceIconKey } from '@/components/ordo';
+import { Outlet, useOutletContext, useParams } from 'react-router-dom';
+import { BackLink, CampaignStatusPill, SectionTabs } from '@/components/campaigns';
 import { ConnectionIndicator } from '@/components/realtime/ConnectionIndicator';
 import { RollPromptHost } from '@/components/world/RollPromptHost';
+import { CAMPAIGN_TABS } from '@/config/campaignSections';
 import { useCampaign } from '@/hooks/useCampaigns';
 import { useWebSocket } from '@/hooks/useWebSocket';
-import { useAuthStore } from '@/store/authStore';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
 import { isRetryableError } from '@/lib/errors';
 import type { CampaignDetailResponse } from '@/types';
 import { PageFallback } from './PageFallback';
 import s from './CampaignLayout.module.css';
-
-/* ── Sub-navigation definition ──────────────────────────── */
-
-interface SubNavEntry {
-  /** Relative path from `/campaigns/:campaignId` (empty string = index). */
-  to: string;
-  labelKey: string;
-  icon: OrdoInterfaceIconKey;
-  /** When true the link is only visible to GM/ADMIN. */
-  gm?: boolean;
-  /** Match the index route exactly (no prefix matching). */
-  end?: boolean;
-}
-
-/**
- * Top tabs hold only sections that are NOT reachable via the drill tiles on
- * the dashboard "Sections" view (DashboardSectionsView) — everything else
- * (roster, bestiary, storage, invite, npcs, quests, locations, maps, notes,
- * xp, wallet) lives there to keep this strip short.
- */
-const SUBNAV: SubNavEntry[] = [
-  { to: '', labelKey: 'camp.nav.overview', icon: 'campaign', end: true },
-  { to: 'items', labelKey: 'camp.dash.drill.items', icon: 'item' },
-  { to: 'world', labelKey: 'camp.dash.drill.world', icon: 'location' },
-  { to: 'camp', labelKey: 'campfire.nav', icon: 'resource-restored' },
-  { to: 'world-manage', labelKey: 'camp.dash.drill.worldManage', icon: 'location', gm: true },
-  { to: 'checks', labelKey: 'camp.dash.drill.checks', icon: 'reward-xp', gm: true },
-];
 
 /* ── Outlet context ─────────────────────────────────────── */
 
@@ -64,16 +35,12 @@ export function useCampaignContext() {
 export function CampaignLayout() {
   const t = useT();
   const { campaignId } = useParams<{ campaignId: string }>();
-  const { user } = useAuthStore();
-  const isGm = user?.role === 'GAME_MASTER' || user?.role === 'ADMIN';
 
   const { data: campaign, isLoading, error, refetch } = useCampaign(campaignId!);
 
   // Campaign-scoped realtime: connects on enter, swaps on campaign change,
   // disconnects when leaving the campaign subtree entirely.
   useWebSocket(campaignId);
-
-  const items = SUBNAV.filter((item) => !item.gm || isGm);
 
   /* ── loading ─────────────────────────────────────────── */
   if (isLoading) {
@@ -116,19 +83,7 @@ export function CampaignLayout() {
         </div>
       </div>
 
-      <nav className={cn('ao-tabs', s.nav)} aria-label={t('camp.dash.tabs.label')}>
-        {items.map((item) => (
-          <NavLink
-            key={item.to || 'overview'}
-            to={item.to}
-            end={item.end}
-            className={({ isActive }) => cn('ao-tab', isActive && 'is-active')}
-          >
-            <OrdoInterfaceIcon icon={item.icon} size={13} className={s.navIcon} />
-            {t(item.labelKey)}
-          </NavLink>
-        ))}
-      </nav>
+      <SectionTabs sections={CAMPAIGN_TABS} labelKey="camp.dash.tabs.label" className={s.nav} />
 
       <div className={s.body}>
         <Suspense fallback={<PageFallback />}>

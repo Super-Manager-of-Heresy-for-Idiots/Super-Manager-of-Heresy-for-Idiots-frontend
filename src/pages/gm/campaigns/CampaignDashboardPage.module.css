@@ -31,7 +31,10 @@
 .valRed { color: #b06a6a; }
 .valFaint { color: var(--ink-faint); }
 
-.drillGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 24px; margin-bottom: 28px; }
+/* Разделы сгруппированы по смыслу: заголовок группы + сетка плиток. */
+.group { margin-top: 28px; }
+.groupTitle { color: var(--gold); margin-bottom: 10px; }
+.drillGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
 .rosterPanel { margin-top: 24px; }
 
@@ -42,13 +45,15 @@
 .phW50H8 { width: 50%; height: 8px; }
 
 .emptyRoster { padding: 24px 20px; text-align: center; }
-.emptyText { color: var(--ink-faint); font-size: 13px; }
-.createBtn { margin-top: 14px; }
+.emptyText { color: var(--ink-faint); font-size: var(--t-small); }
 
+/* Вся строка — кнопка: персонаж открывается кликом по карточке, а не по «Управлять». */
 .charRow {
-  display: flex; align-items: center; gap: 12px;
-  padding: 10px 16px; border-bottom: 1px solid var(--hairline);
+  display: flex; align-items: center; gap: 12px; width: 100%;
+  padding: 10px 16px; border: none; border-bottom: 1px solid var(--hairline);
+  background: transparent; text-align: left; cursor: pointer;
 }
+.charRow:hover { background: var(--panel-raised); }
 .charMain { flex: 1; min-width: 0; }
 .charNameRow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 4px; }
 .charName { font-size: 13px; }

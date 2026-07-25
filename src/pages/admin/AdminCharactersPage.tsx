@@ -276,7 +276,7 @@ export default function AdminCharactersPage() {
                         <td className={cn(s.td, s.hideSmall)}>{formatDate(character.createdAt)}</td>
                         <td className={s.td}>
                           <div className={s.actions}>
-                            <Link className="ao-btn ao-btn--ghost ao-btn--sm" to={`/campaigns/${group.campaign.id}/characters/${character.id}/sheet`}>
+                            <Link className="ao-btn ao-btn--ghost ao-btn--sm" to={`/campaigns/${group.campaign.id}/characters/${character.id}`}>
                               Открыть
                             </Link>
                           </div>

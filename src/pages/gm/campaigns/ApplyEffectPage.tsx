@@ -9,7 +9,6 @@ import {
   ModifierTag,
 } from '@/components/ordo';
 import { EffectRow } from '@/components/gm/EffectRow';
-import { BackLink } from '@/components/campaigns';
 import {
   useCharacterEffects,
   useApplyEffect,
@@ -104,11 +103,9 @@ export default function ApplyEffectPage() {
 
   /* ---- loading ---- */
   const isLoading = charLoading || effectsLoading;
-  const backTo = `/campaigns/${campaignId}/characters/${characterId}`;
   if (isLoading) {
     return (
       <div>
-        <BackLink to={backTo} label={t('camp2.back.character')} className={s.backLink} />
         <div className={s.headerBlock}>
           <p className={cn('ao-overline', s.overlineGold)}>
             {t('camp2.effect.charEffectsOverline')}
@@ -135,7 +132,6 @@ export default function ApplyEffectPage() {
   if (charError || effectsError) {
     return (
       <div>
-        <BackLink to={backTo} label={t('camp2.back.character')} className={s.backLink} />
         <div className={s.errorBlock}>
           <p className={cn('ao-italic', s.errorText)}>
             {t('camp2.effect.loadError')}
@@ -153,7 +149,6 @@ export default function ApplyEffectPage() {
   /* ---- render ---- */
   return (
     <div>
-      <BackLink to={backTo} label={t('camp2.back.character')} className={s.backLink} />
       {/* Header */}
       <div className={s.header}>
         <div>

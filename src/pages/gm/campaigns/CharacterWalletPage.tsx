@@ -1,7 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { OrdoPanel, PanelHeader, Rune, OrdoField, EmptyVault, ErrorAltar } from '@/components/ordo';
-import { BackLink } from '@/components/campaigns';
 import { WalletPanel } from '@/components/characters';
 import {
   useCharacter,
@@ -236,12 +235,8 @@ export default function CharacterWalletPage() {
   const isPrivileged = user?.role === 'GAME_MASTER' || user?.role === 'ADMIN';
   const canWrite = isOwner || isPrivileged;
 
-  const backTo = `/campaigns/${campaignId}/characters/${characterId}`;
-
   return (
     <div>
-      <BackLink to={backTo} label={t('camp2.back.character')} className={s.backLink} />
-
       {/* Header */}
       <div className={s.header}>
         <p className={cn('ao-overline', s.overlineGold)}>{t('camp.wallet.overline')}</p>

@@ -597,16 +597,10 @@ export default function FolioPage() {
   return (
     <div>
       <CompatibilityBanner character={character} />
-      {/* ── Page header (TopBar) ───────────────────────────────── */}
+      {/* ── Page actions ───────────────────────────────────────
+           Имя, статус и полосы жизни держит CharacterLayout — здесь
+           остаются только действия над телом персонажа. */}
       <div className={s.topBar}>
-        <div>
-          <p className={cn('ao-overline', s.titleOverline)}>{t('camp2.folio.overline')}</p>
-          <div className={s.titleRow}>
-            <h3 className="ao-h3">{character.name}</h3>
-            <CharStatusBadge status={character.status ?? 'ACTIVE'} />
-          </div>
-          <p className={cn('ao-codex', s.titleCodex)}>№ {character.id.slice(0, 8)} · {character.ownerUsername}</p>
-        </div>
         <div className={s.headerActions}>
           <button className="ao-btn ao-btn--primary" onClick={() => setHpModalOpen(true)}>
             <Rune kind="flame" size={11} /> <span className={s.btnLabel}>{t('camp2.folio.adjustVitae')}</span>
@@ -629,9 +623,6 @@ export default function FolioPage() {
               </button>
             </>
           )}
-          <button className="ao-btn ao-btn--ghost" onClick={() => navigate(`/campaigns/${campaignId}/characters/${characterId}`)}>
-            <Rune kind="arrow-l" size={13} /> <span className={s.btnLabel}>{t('camp2.back.character')}</span>
-          </button>
         </div>
       </div>
 

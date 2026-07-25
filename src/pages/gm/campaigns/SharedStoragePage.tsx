@@ -18,7 +18,7 @@ import {
 } from '@/hooks/useCampaigns';
 import { useCampaignCharacters } from '@/hooks/useCharacter';
 import { useCharacterInventory } from '@/hooks/useInventory';
-import { useAuthStore } from '@/store/authStore';
+import { useCampaignRole } from '@/hooks/useCampaignRole';
 import { rarityColor, slotClass } from '@/lib/itemVisuals';
 import { RarityBadge, rarityLabelKey } from '@/components/items/RarityBadge';
 import { useT } from '@/i18n/I18nContext';
@@ -413,11 +413,10 @@ export default function SharedStoragePage() {
   const { campaignId } = useParams<{ campaignId: string }>();
   const { data: containers, isLoading, error, refetch } = useCampaignStorage(campaignId!);
   const { data: characters } = useCampaignCharacters(campaignId!);
-  const { user } = useAuthStore();
+  const { isGm, userId } = useCampaignRole();
   const createMutation = useCreateStorageContainer();
 
   // Only GM/Admin may create containers; players only deposit/withdraw.
-  const isPrivileged = user?.role === 'GAME_MASTER' || user?.role === 'ADMIN';
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [formName, setFormName] = useState('');
@@ -427,8 +426,8 @@ export default function SharedStoragePage() {
   // GM/Admin may move items for any character; a player only for their own.
   const eligibleCharacters = useMemo(() => {
     const all = characters ?? [];
-    return isPrivileged ? all : all.filter((c) => c.ownerId === user?.id);
-  }, [characters, user?.id, isPrivileged]);
+    return isGm ? all : all.filter((c) => c.ownerId === userId);
+  }, [characters, userId, isGm]);
 
   const canInteract = eligibleCharacters.length > 0;
 
@@ -495,7 +494,7 @@ export default function SharedStoragePage() {
             {t('camp2.storage.subtitle')}
           </p>
         </div>
-        {isPrivileged && (
+        {isGm && (
           <button
             className="ao-btn ao-btn--primary"
             onClick={() => { setFormName(''); setDialogOpen(true); }}
@@ -513,7 +512,7 @@ export default function SharedStoragePage() {
           title={t('camp2.storage.empty.title')}
           body={t('camp2.storage.empty.body')}
           action={
-            isPrivileged ? (
+            isGm ? (
               <button
                 className="ao-btn ao-btn--primary"
                 onClick={() => { setFormName(''); setDialogOpen(true); }}
@@ -539,7 +538,7 @@ export default function SharedStoragePage() {
       )}
 
       {/* Create Container Dialog */}
-      {isPrivileged && (
+      {isGm && (
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>

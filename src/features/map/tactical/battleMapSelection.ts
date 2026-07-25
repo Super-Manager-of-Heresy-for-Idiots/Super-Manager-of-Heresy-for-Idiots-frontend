@@ -30,7 +30,7 @@ export function battleTabRoute(campaignId: UUID, sessionId?: UUID | null): strin
  * hint and the GM calibrates a gridless map manually.
  */
 export function mapEditorNewRoute(campaignId: UUID, opts?: { blank?: boolean }): string {
-  return `/campaigns/${campaignId}/maps/new${opts?.blank ? '?blank=1' : ''}`;
+  return `/campaigns/${campaignId}/world/maps/new${opts?.blank ? '?blank=1' : ''}`;
 }
 
 /** A prepared map is image-backed or a pure system grid; used to label list rows. */

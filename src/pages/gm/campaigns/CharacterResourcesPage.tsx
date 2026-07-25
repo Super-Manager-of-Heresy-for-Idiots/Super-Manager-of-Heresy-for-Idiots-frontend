@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { OrdoPanel, EmptyVault, ErrorAltar } from '@/components/ordo';
-import { BackLink } from '@/components/campaigns';
 import { ResourcesPanel, SpellSlotsPanel } from '@/components/characters';
 import { useCharacter, useCharacterResources, useModifyResource } from '@/hooks/useCharacter';
 import { useAuthStore } from '@/store/authStore';
@@ -27,8 +26,6 @@ export default function CharacterResourcesPage() {
   const isDead = character?.status === 'DEAD';
   const canWrite = (isOwner || isChronicler) && !isDead;
 
-  const backTo = `/campaigns/${campaignId}/characters/${characterId}`;
-
   function modify(resourceId: string, delta: number) {
     if (!campaignId || !characterId) return;
     modifyResource.mutate({ campaignId, characterId, resourceId, delta });
@@ -36,8 +33,6 @@ export default function CharacterResourcesPage() {
 
   return (
     <div>
-      <BackLink to={backTo} label={t('camp2.back.character')} className={s.backLink} />
-
       {/* Header */}
       <div className={s.header}>
         <p className={cn('ao-overline', s.overlineArcane)}>{t('camp.resources.overline')}</p>

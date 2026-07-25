@@ -1,0 +1,31 @@
+.back { margin-bottom: 12px; }
+
+.skelPanel { padding: 24px; min-height: 160px; }
+.phTitle { width: 36%; height: 20px; margin-bottom: 16px; }
+.phSub { width: 64%; height: 12px; }
+
+.errorBlock { text-align: center; padding: 48px 0; }
+.errorText { color: var(--ink-faint); margin-bottom: 16px; }
+
+/* Компактная шапка: имя и полосы жизни/опыта видны на всех вкладках персонажа. */
+.head {
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 16px; flex-wrap: wrap; margin-bottom: 12px;
+}
+.titleRow { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.meta { color: var(--ink-quiet); font-size: var(--t-small); }
+.deleteBtn { color: var(--ember); border-color: var(--ember); }
+.ml6 { margin-left: 6px; }
+
+.bars { display: flex; flex-wrap: wrap; gap: 10px 24px; margin-bottom: 14px; }
+.barCell { display: grid; grid-template-columns: minmax(120px, 1fr) auto; gap: 10px; align-items: center; flex: 1 1 220px; }
+.hpLabel { font-size: var(--t-micro); color: var(--ink-quiet); white-space: nowrap; }
+.xpLabel { font-size: var(--t-overline); color: var(--ink-faint); white-space: nowrap; }
+
+.levelUpBanner {
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  padding: 14px 18px; margin-bottom: 18px;
+  border: 1px solid var(--gold); background: rgba(212, 180, 120, 0.08);
+}
+.overlineGold { color: var(--gold); }
+.levelUpReady { color: var(--ink-bright); font-size: var(--t-small); margin-top: 4px; }

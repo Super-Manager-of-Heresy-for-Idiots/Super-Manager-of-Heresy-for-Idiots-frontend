@@ -5,6 +5,7 @@ import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { ProtectedRoute } from '@/components/layout/ProtectedRoute';
 import { SuspenseOutlet } from '@/components/layout/SuspenseOutlet';
 import { PageFallback } from '@/components/layout/PageFallback';
+import { CampaignSectionRedirect } from '@/components/layout/CampaignSectionRedirect';
 
 // Auth pages — eager (first paint, no surrounding Suspense boundary)
 const withSuspense = (element: ReactNode) => (
@@ -14,6 +15,12 @@ const withSuspense = (element: ReactNode) => (
 const AppLayout = lazyWithRetry(() => import('@/components/layout/AppLayout').then((m) => ({ default: m.AppLayout })));
 const CampaignLayout = lazyWithRetry(() =>
   import('@/components/layout/CampaignLayout').then((m) => ({ default: m.CampaignLayout })),
+);
+const CharacterLayout = lazyWithRetry(() =>
+  import('@/components/layout/CharacterLayout').then((m) => ({ default: m.CharacterLayout })),
+);
+const WorldLayout = lazyWithRetry(() =>
+  import('@/components/layout/WorldLayout').then((m) => ({ default: m.WorldLayout })),
 );
 
 const LoginPage = lazyWithRetry(() => import('@/pages/auth/LoginPage'));
@@ -26,9 +33,8 @@ const WorldManagementPage = lazyWithRetry(() => import('@/pages/gm/campaigns/Wor
 const RollPromptsPage = lazyWithRetry(() => import('@/pages/gm/campaigns/RollPromptsPage'));
 const CampaignListPage = lazyWithRetry(() => import('@/pages/gm/campaigns/CampaignListPage'));
 const CampaignDashboardPage = lazyWithRetry(() => import('@/pages/gm/campaigns/CampaignDashboardPage'));
-const DashboardSectionsView = lazyWithRetry(() => import('@/pages/gm/campaigns/dashboard/DashboardSectionsView'));
-const DashboardRosterView = lazyWithRetry(() => import('@/pages/gm/campaigns/dashboard/DashboardRosterView'));
-const DashboardBattleView = lazyWithRetry(() => import('@/pages/gm/campaigns/dashboard/DashboardBattleView'));
+const BattleWorkspacePage = lazyWithRetry(() => import('@/pages/gm/campaigns/battle/BattleWorkspacePage'));
+const MyCharacterPage = lazyWithRetry(() => import('@/pages/campaigns/MyCharacterPage'));
 const CampaignMembersPage = lazyWithRetry(() => import('@/pages/gm/campaigns/CampaignMembersPage'));
 const CampaignInvitePage = lazyWithRetry(() => import('@/pages/gm/campaigns/CampaignInvitePage'));
 const SharedStoragePage = lazyWithRetry(() => import('@/pages/gm/campaigns/SharedStoragePage'));
@@ -36,7 +42,6 @@ const SessionNotesPage = lazyWithRetry(() => import('@/pages/gm/campaigns/Sessio
 const XPGrantPage = lazyWithRetry(() => import('@/pages/gm/campaigns/XPGrantPage'));
 const ApplyEffectPage = lazyWithRetry(() => import('@/pages/gm/campaigns/ApplyEffectPage'));
 const InventoryPage = lazyWithRetry(() => import('@/pages/gm/campaigns/InventoryPage'));
-const CharacterManagementPage = lazyWithRetry(() => import('@/pages/gm/campaigns/CharacterManagementPage'));
 const CharacterCreationWizardPage = lazyWithRetry(() => import('@/pages/gm/campaigns/CharacterCreationWizardPage'));
 const AddCharacterPage = lazyWithRetry(() => import('@/pages/gm/campaigns/AddCharacterPage'));
 const LevelUpWizardPage = lazyWithRetry(() => import('@/pages/gm/campaigns/LevelUpWizardPage'));
@@ -49,18 +54,6 @@ const MyCharactersPage = lazyWithRetry(() => import('@/pages/player/MyCharacters
 const ItemCatalogPage = lazyWithRetry(() => import('@/pages/library/ItemCatalogPage'));
 const TemplateWizardPage = lazyWithRetry(() => import('@/pages/player/TemplateWizardPage'));
 const TemplateDetailPage = lazyWithRetry(() => import('@/pages/player/TemplateDetailPage'));
-const AbilityCheckPage = lazyWithRetry(() =>
-  import('@/pages/gm/campaigns/CharacterPlaceholderPages').then((m) => ({ default: m.AbilityCheckPage })),
-);
-const CharacterEditPage = lazyWithRetry(() =>
-  import('@/pages/gm/campaigns/CharacterPlaceholderPages').then((m) => ({ default: m.CharacterEditPage })),
-);
-const CharacterHpPage = lazyWithRetry(() =>
-  import('@/pages/gm/campaigns/CharacterPlaceholderPages').then((m) => ({ default: m.CharacterHpPage })),
-);
-const CharacterStatsPage = lazyWithRetry(() =>
-  import('@/pages/gm/campaigns/CharacterPlaceholderPages').then((m) => ({ default: m.CharacterStatsPage })),
-);
 const NPCManagerPage = lazyWithRetry(() => import('@/pages/gm/campaigns/NPCManagerPage'));
 const NPCDetailPage = lazyWithRetry(() => import('@/pages/gm/campaigns/NPCDetailPage'));
 const QuestManagerPage = lazyWithRetry(() => import('@/pages/gm/campaigns/QuestManagerPage'));
@@ -187,21 +180,15 @@ export const router = createBrowserRouter([
             path: '/campaigns/:campaignId',
             element: withSuspense(<CampaignLayout />),
             children: [
-              // Overview (dashboard) — URL-driven Sections / Characters / Battle tabs
-              {
-                element: <CampaignDashboardPage />,
-                children: [
-                  { index: true, element: <DashboardSectionsView /> },
-                  { path: 'roster', element: <DashboardRosterView /> },
-                  { path: 'battle', element: <DashboardBattleView /> },
-                ],
-              },
+              // Overview — stats, roster and the grouped section tiles, no sub-tabs
+              { index: true, element: <CampaignDashboardPage /> },
 
               // Sections available to every member
-              // WORLD_PLAN: экран мира игрока (присутствие, NPC, квесты, торговля)
-              { path: 'world', element: <WorldPage /> },
               // CAMP: лагерь и привал — общий экран мастера и игроков
               { path: 'camp', element: <CampPage /> },
+              // Бой+карта — живой экран сессии, поэтому во вкладках, а не в плитках
+              { path: 'battle', element: <BattleWorkspacePage /> },
+              { path: 'my', element: <MyCharacterPage /> },
               { path: 'members', element: <CampaignMembersPage /> },
               { path: 'storage', element: <SharedStoragePage /> },
               { path: 'items', element: <ItemCatalogPage /> },
@@ -209,27 +196,57 @@ export const router = createBrowserRouter([
               { path: 'bestiary/monsters/:monsterId', element: <MonsterDetailPage source="campaign" /> },
               { path: 'homebrew', element: <CampaignHomebrewPage /> },
 
+              // ── World: one subject area, GM tools as sub-tabs ──────────
+              // WORLD_PLAN: экран мира игрока (присутствие, NPC, квесты, торговля)
+              {
+                path: 'world',
+                element: <WorldLayout />,
+                children: [
+                  { index: true, element: <WorldPage /> },
+                  {
+                    element: <ProtectedRoute allowedRoles={['GAME_MASTER', 'ADMIN']} />,
+                    children: [
+                      { path: 'locations', element: <LocationsPage /> },
+                      // WORLD_PLAN: ГМ-управление миром (размещение NPC, карты локаций, переходы)
+                      { path: 'manage', element: <WorldManagementPage /> },
+                      // Map authoring (GM library + grid editor)
+                      { path: 'maps', element: <CampaignMapListPage /> },
+                      { path: 'maps/new', element: <MapEditorPage /> },
+                      { path: 'maps/:mapId/edit', element: <MapEditorPage /> },
+                    ],
+                  },
+                ],
+              },
+              // Пути до объединения раздела «Мир» — закладки и старые ссылки живы
+              { path: 'locations/*', element: <CampaignSectionRedirect to="world/locations" /> },
+              { path: 'maps/*', element: <CampaignSectionRedirect to="world/maps" /> },
+              { path: 'world-manage', element: <CampaignSectionRedirect to="world/manage" /> },
+              { path: 'roster', element: <CampaignSectionRedirect to="" /> },
+
               // Live map session — every member (server authorizes per-token movement)
               { path: 'map-sessions/:sessionId', element: <MapSessionPage /> },
 
               // Tactical battle workspace — battle state + linked map session (?session=)
               { path: 'battles/:battleId/tactical', element: <TacticalBattlePage /> },
 
-              // Character management (every member)
+              // ── Character: folio is the index, the rest are sub-tabs ───
               { path: 'characters/create', element: <CharacterCreationWizardPage /> },
               { path: 'characters/add', element: <AddCharacterPage /> },
-              { path: 'characters/:characterId', element: <CharacterManagementPage /> },
-              { path: 'characters/:characterId/sheet', element: <FolioPage /> },
-              { path: 'characters/:characterId/edit', element: <CharacterEditPage /> },
-              { path: 'characters/:characterId/stats', element: <CharacterStatsPage /> },
-              { path: 'characters/:characterId/ability-check/:statTypeId', element: <AbilityCheckPage /> },
-              { path: 'characters/:characterId/inventory', element: <InventoryPage /> },
-              { path: 'characters/:characterId/effects', element: <ApplyEffectPage /> },
-              { path: 'characters/:characterId/wallet', element: <CharacterWalletPage /> },
-              { path: 'characters/:characterId/resources', element: <CharacterResourcesPage /> },
-              { path: 'characters/:characterId/hp', element: <CharacterHpPage /> },
               { path: 'characters/:characterId/level-up', element: <LevelUpWizardPage /> },
-              { path: 'characters/:characterId/rewards', element: <CharacterRewardsPage /> },
+              {
+                path: 'characters/:characterId',
+                element: <CharacterLayout />,
+                children: [
+                  { index: true, element: <FolioPage /> },
+                  { path: 'inventory', element: <InventoryPage /> },
+                  { path: 'wallet', element: <CharacterWalletPage /> },
+                  { path: 'resources', element: <CharacterResourcesPage /> },
+                  { path: 'rewards', element: <CharacterRewardsPage /> },
+                  { path: 'effects', element: <ApplyEffectPage /> },
+                  // Фолио жил на /sheet, пока хабом была отдельная страница
+                  { path: 'sheet', element: <Navigate to=".." replace /> },
+                ],
+              },
 
               // GM / Admin-only campaign sections (nested role gate)
               {
@@ -244,16 +261,8 @@ export const router = createBrowserRouter([
                   { path: 'npcs/:npcId', element: <NPCDetailPage /> },
                   { path: 'quests', element: <QuestManagerPage /> },
                   { path: 'quests/:questId', element: <QuestDetailPage /> },
-                  { path: 'locations', element: <LocationsPage /> },
-                  // WORLD_PLAN: ГМ-управление миром (размещение NPC, карты локаций, переходы)
-                  { path: 'world-manage', element: <WorldManagementPage /> },
                   // ROLL_PROMPT: окно мастера — запрос проверок у игроков
                   { path: 'checks', element: <RollPromptsPage /> },
-
-                  // Map authoring (GM library + grid editor)
-                  { path: 'maps', element: <CampaignMapListPage /> },
-                  { path: 'maps/new', element: <MapEditorPage /> },
-                  { path: 'maps/:mapId/edit', element: <MapEditorPage /> },
 
                   { path: 'bestiary/monsters/new', element: <MonsterFormPage /> },
                   { path: 'bestiary/monsters/:monsterId/edit', element: <MonsterFormPage /> },

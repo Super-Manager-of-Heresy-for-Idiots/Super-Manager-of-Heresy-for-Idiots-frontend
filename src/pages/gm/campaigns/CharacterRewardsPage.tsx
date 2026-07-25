@@ -1,5 +1,4 @@
 import { useNavigate, useParams } from 'react-router-dom';
-import { BackLink } from '@/components/campaigns';
 import { useT } from '@/i18n/I18nContext';
 import { OrdoInterfaceIcon, OrdoPanel, PanelHeader, OrdoDivider } from '@/components/ordo';
 import { useCharacterRewards } from '@/hooks/useLevelUp';
@@ -57,7 +56,6 @@ export default function CharacterRewardsPage() {
             </p>
           )}
         </div>
-        <BackLink to={`/campaigns/${campaignId}/characters/${characterId}`} label={t('camp2.back.character')} size="md" />
       </div>
 
       {data.classBreakdown.length === 0 ? (

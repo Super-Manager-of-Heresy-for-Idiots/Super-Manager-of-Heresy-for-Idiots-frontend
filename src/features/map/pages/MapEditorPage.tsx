@@ -140,7 +140,7 @@ export default function MapEditorPage() {
           gridType: CALIBRATION_GRID_TYPE,
           gridConfig,
         },
-        { onSuccess: (map) => navigate(`/campaigns/${campaignId}/maps/${map.id}/edit`) },
+        { onSuccess: (map) => navigate(`/campaigns/${campaignId}/world/maps/${map.id}/edit`) },
       );
     }
   };
@@ -197,7 +197,7 @@ export default function MapEditorPage() {
     });
   };
 
-  const back = () => navigate(`/campaigns/${campaignId}/maps`);
+  const back = () => navigate(`/campaigns/${campaignId}/world/maps`);
 
   if (isEdit && mapQuery.isLoading) {
     return (

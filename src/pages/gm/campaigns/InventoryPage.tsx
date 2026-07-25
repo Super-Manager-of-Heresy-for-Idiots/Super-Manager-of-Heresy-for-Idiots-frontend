@@ -5,7 +5,6 @@ import { Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { AxiosError } from 'axios';
 import { cn } from '@/lib/utils';
-import { BackLink } from '@/components/campaigns';
 import {
   OrdoPanel,
   PanelHeader,
@@ -284,12 +283,9 @@ export default function InventoryPage() {
 
   /* ── loading / error ───────────────────────────────────────── */
 
-  const backTo = `/campaigns/${campaignId}/characters/${characterId}`;
-
   if (isLoading) {
     return (
       <div>
-        <BackLink to={backTo} label={t('camp2.back.character')} className={s.backLink} />
         <PageHeader name={character?.name} slotsFilled={0} held={0} />
         <div className={cn('ao-panel ao-frame ao-breathe', s.skelPanel)}>
           <span className="ao-frame-c" />
@@ -306,7 +302,6 @@ export default function InventoryPage() {
   if (error) {
     return (
       <div>
-        <BackLink to={backTo} label={t('camp2.back.character')} className={s.backLink} />
         <ErrorAltar
           title={t('camp2.inv.loadError')}
           error={error}
@@ -321,7 +316,6 @@ export default function InventoryPage() {
 
   return (
     <div>
-      <BackLink to={backTo} label={t('camp2.back.character')} className={s.backLink} />
       <PageHeader
         name={character?.name}
         slotsFilled={slotsFilled}

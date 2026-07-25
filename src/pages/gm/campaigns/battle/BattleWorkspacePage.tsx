@@ -1,13 +1,13 @@
 import { useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/store/authStore';
 import { useCampaignBattles } from '@/hooks/useBattles';
 import { useBattleMapSession } from '@/features/map/hooks';
 import { TacticalWorkspace } from '@/features/map/tactical/workspace/TacticalWorkspace';
+import { useCampaignContext } from '@/components/layout/CampaignLayout';
 import { isCampaignGmOrAdmin } from '@/lib/campaignAccess';
-import { BattlePanel } from '../battle/BattlePanel';
-import { useDashboardContext } from '../CampaignDashboardPage';
+import { BattlePanel } from './BattlePanel';
 
 /**
  * "Бой" tab — the unified бой+карта workspace. A live battle (assembling or active)
@@ -15,14 +15,15 @@ import { useDashboardContext } from '../CampaignDashboardPage';
  * any, rides on the `?session=` query param. With no battle, the neutral
  * empty/create panel is shown (GM can start one there).
  */
-export default function DashboardBattleView() {
-  const { campaignId, campaign } = useDashboardContext();
+export default function BattleWorkspacePage() {
+  const { campaignId } = useParams<{ campaignId: string }>();
+  const { campaign } = useCampaignContext();
   const [params] = useSearchParams();
   const sessionParam = params.get('session');
   const { user } = useAuthStore();
   const isGm = isCampaignGmOrAdmin(user, campaign);
 
-  const { data: battles, isLoading } = useCampaignBattles(campaignId);
+  const { data: battles, isLoading } = useCampaignBattles(campaignId!);
   const battle = useMemo(() => {
     const list = battles ?? [];
     return list.find((b) => b.status === 'ACTIVE') ?? list.find((b) => b.status === 'ASSEMBLING');
@@ -48,7 +49,7 @@ export default function DashboardBattleView() {
   if (battle && (battle.status === 'ACTIVE' || isGm)) {
     return (
       <TacticalWorkspace
-        campaignId={campaignId}
+        campaignId={campaignId!}
         battle={battle}
         mapSessionId={mapSessionId}
         isGm={isGm}
@@ -58,5 +59,5 @@ export default function DashboardBattleView() {
   }
 
   // No live battle (or player waiting on assembly) — neutral empty / create state.
-  return <BattlePanel campaignId={campaignId} />;
+  return <BattlePanel campaignId={campaignId!} />;
 }

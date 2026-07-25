@@ -29,7 +29,7 @@ import {
 } from '@/hooks/useCamp';
 import { useT } from '@/i18n/I18nContext';
 import { isRetryableError } from '@/lib/errors';
-import { useAuthStore } from '@/store/authStore';
+import { useCampaignRole } from '@/hooks/useCampaignRole';
 import type { CreateCampRequest } from '@/types';
 import s from './CampPage.module.css';
 
@@ -40,8 +40,7 @@ import s from './CampPage.module.css';
 export default function CampPage() {
   const t = useT();
   const { campaignId } = useParams<{ campaignId: string }>();
-  const user = useAuthStore((state) => state.user);
-  const isGm = user?.role === 'GAME_MASTER' || user?.role === 'ADMIN';
+  const { isGm, userId } = useCampaignRole();
 
   const [setupOpen, setSetupOpen] = useState(false);
   const [eventOpen, setEventOpen] = useState(false);
@@ -258,7 +257,7 @@ export default function CampPage() {
             camp={camp}
             isGm={isGm}
             ownCharacterIds={camp.participants
-              .filter((participant) => participant.ownerId === user?.id)
+              .filter((participant) => participant.ownerId === userId)
               .map((participant) => participant.characterId)}
           />
         </div>

@@ -1,0 +1,21 @@
+.tabs {
+  margin-bottom: 24px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.tabs::-webkit-scrollbar { display: none; }
+
+/* Подписи не переносятся: полоса скроллится целиком, а не ломает ритм. */
+.tabs :global(.ao-tab) {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.icon {
+  color: currentColor;
+  opacity: 0.86;
+}

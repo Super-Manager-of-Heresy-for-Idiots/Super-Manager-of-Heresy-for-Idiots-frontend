@@ -24,10 +24,10 @@ describe('tacticalRoute', () => {
 
 describe('mapEditorNewRoute', () => {
   it('routes to the plain editor for uploads', () => {
-    expect(mapEditorNewRoute('camp-1')).toBe('/campaigns/camp-1/maps/new');
+    expect(mapEditorNewRoute('camp-1')).toBe('/campaigns/camp-1/world/maps/new');
   });
   it('hints the blank grid builder', () => {
-    expect(mapEditorNewRoute('camp-1', { blank: true })).toBe('/campaigns/camp-1/maps/new?blank=1');
+    expect(mapEditorNewRoute('camp-1', { blank: true })).toBe('/campaigns/camp-1/world/maps/new?blank=1');
   });
 });
 
@@ -70,14 +70,14 @@ describe('resolveMapSelectionAction', () => {
   it('upload routes to the map editor', () => {
     expect(resolveMapSelectionAction({ type: 'upload' }, ctx)).toEqual({
       kind: 'navigate',
-      to: '/campaigns/camp-1/maps/new',
+      to: '/campaigns/camp-1/world/maps/new',
     });
   });
 
   it('blank routes to the grid builder', () => {
     expect(resolveMapSelectionAction({ type: 'blank' }, ctx)).toEqual({
       kind: 'navigate',
-      to: '/campaigns/camp-1/maps/new?blank=1',
+      to: '/campaigns/camp-1/world/maps/new?blank=1',
     });
   });
 
