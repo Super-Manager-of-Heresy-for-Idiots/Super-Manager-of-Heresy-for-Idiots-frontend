@@ -16,6 +16,7 @@ import { battle } from './battle';
 import { blueprints } from './blueprints';
 import { catalog } from './catalog';
 import { map } from './map';
+import { camp } from './camp';
 
 /** Every feature dictionary module, merged into the final translations. */
 export const modules: DictModule[] = [
@@ -36,4 +37,5 @@ export const modules: DictModule[] = [
   blueprints,
   catalog,
   map,
+  camp,
 ];

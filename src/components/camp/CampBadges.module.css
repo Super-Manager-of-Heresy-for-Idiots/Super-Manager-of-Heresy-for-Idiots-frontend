@@ -1,0 +1,61 @@
+/* Camp status badge */
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 10px;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid var(--tone);
+  font-family: var(--font-display);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--tone);
+  white-space: nowrap;
+}
+
+.statusLg {
+  gap: 10px;
+  padding: 8px 16px;
+  font-size: 14px;
+}
+
+@keyframes campPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(176, 141, 78, 0); }
+  50% { box-shadow: 0 0 14px 1px rgba(176, 141, 78, 0.3); }
+}
+
+.pulse { animation: campPulse 2.4s ease-in-out infinite; }
+
+/* Location rest safety */
+.safety {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 3px 9px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--tone);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--tone);
+  white-space: nowrap;
+}
+
+/* Participant rest state */
+.restState {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--tone);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pulse { animation: none; }
+}

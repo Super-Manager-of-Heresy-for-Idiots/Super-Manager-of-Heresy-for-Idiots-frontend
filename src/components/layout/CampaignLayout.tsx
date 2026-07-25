@@ -34,6 +34,7 @@ const SUBNAV: SubNavEntry[] = [
   { to: 'storage', labelKey: 'camp.dash.drill.storage', icon: 'shared-storage' },
   { to: 'items', labelKey: 'camp.dash.drill.items', icon: 'item' },
   { to: 'world', labelKey: 'camp.dash.drill.world', icon: 'location' },
+  { to: 'camp', labelKey: 'campfire.nav', icon: 'resource-restored' },
   { to: 'invite', labelKey: 'camp.dash.drill.invite', icon: 'friend-request', gm: true },
   { to: 'npcs', labelKey: 'camp.dash.drill.npcs', icon: 'npc', gm: true },
   { to: 'quests', labelKey: 'camp.dash.drill.quests', icon: 'quest', gm: true },

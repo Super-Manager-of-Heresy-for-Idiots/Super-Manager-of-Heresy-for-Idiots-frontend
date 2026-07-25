@@ -55,6 +55,15 @@ const EVENT_VISUAL: Record<WsEventType, EventVisual> = {
   ROLL_PROMPT_CREATED:     { glyph: 'hex',     color: 'var(--gold)' },
   ROLL_PROMPT_RESOLVED:    { glyph: 'check',   color: 'var(--arcane)' },
   ROLL_PROMPT_CANCELLED:   { glyph: 'x',       color: 'var(--ink-quiet)' },
+  // CAMP
+  CAMP_STARTED:            { glyph: 'flame',   color: 'var(--gold)' },
+  CAMP_UPDATED:            { glyph: 'scroll',  color: 'var(--ink)' },
+  CAMP_PARTICIPANT_UPDATED:{ glyph: 'helm',    color: 'var(--ink)' },
+  CAMP_REST_STARTED:       { glyph: 'hex',     color: 'var(--arcane)' },
+  CAMP_REST_COMPLETED:     { glyph: 'check',   color: 'var(--arcane)' },
+  CAMP_EVENT_TRIGGERED:    { glyph: 'scroll',  color: 'var(--gold-pale)' },
+  CAMP_INTERRUPTED:        { glyph: 'sword',   color: 'var(--ember)' },
+  CAMP_ENDED:              { glyph: 'check',   color: 'var(--gold-pale)' },
 };
 
 /* ── single notification row ─────────────────────────────── */

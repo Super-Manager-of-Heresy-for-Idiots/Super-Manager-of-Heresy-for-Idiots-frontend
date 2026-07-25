@@ -169,6 +169,26 @@ export function useWebSocket(campaignId: string | undefined): { connectionState:
           break;
         }
 
+        case 'CAMP_STARTED':
+        case 'CAMP_UPDATED':
+        case 'CAMP_PARTICIPANT_UPDATED':
+        case 'CAMP_REST_STARTED':
+        case 'CAMP_EVENT_TRIGGERED':
+        case 'CAMP_INTERRUPTED':
+        case 'CAMP_ENDED': {
+          // Payload carries only { campId, … }; GET …/camp is the source of truth.
+          queryClient.invalidateQueries({ queryKey: ['campaigns', cid, 'camp'] });
+          break;
+        }
+
+        case 'CAMP_REST_COMPLETED': {
+          // A group rest rewrites HP, hit dice, resources and spell slots of every
+          // participant, so the character subtree has to be refetched as well.
+          queryClient.invalidateQueries({ queryKey: ['campaigns', cid, 'camp'] });
+          queryClient.invalidateQueries({ queryKey: ['campaigns', cid, 'characters'] });
+          break;
+        }
+
         case 'MEMBER_KICKED': {
           // user-queue payload: { campaignId } — current user was kicked.
           // topic payload:      { userId }     — someone else in the roster was kicked.
@@ -204,6 +224,12 @@ export function useWebSocket(campaignId: string | undefined): { connectionState:
         event.type === 'BATTLE_ACTION' ||
         event.type === 'BATTLE_LOG_APPENDED'
       ) {
+        return;
+      }
+
+      // Camp bookkeeping (composition, watch order, per-participant edits) updates
+      // the screen silently; only the milestones of the camp reach the toast layer.
+      if (event.type === 'CAMP_UPDATED' || event.type === 'CAMP_PARTICIPANT_UPDATED') {
         return;
       }
 

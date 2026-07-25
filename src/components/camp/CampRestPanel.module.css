@@ -1,0 +1,152 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.progressPanel {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 14px 20px;
+  flex-wrap: wrap;
+}
+
+.restType {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.progressBody {
+  flex: 1;
+  min-width: 240px;
+}
+
+.progressTop {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 5px;
+}
+
+.bar {
+  display: flex;
+  height: 7px;
+  background: var(--abyss);
+  border: 1px solid var(--hairline);
+  overflow: hidden;
+}
+
+.barRested,
+.barPending,
+.barFailed {
+  display: block;
+  width: var(--fill);
+  height: 100%;
+  transition: width 500ms ease-out;
+}
+
+.barRested { background: linear-gradient(90deg, #3d5a44, #7a9866); }
+
+.barPending {
+  background: repeating-linear-gradient(45deg, var(--arcane-deep) 0 5px, var(--arcane) 5px 10px);
+  opacity: 0.8;
+}
+
+.barFailed { background: linear-gradient(90deg, #7d2f10, #b3461a); }
+
+.progressActions {
+  display: flex;
+  gap: 8px;
+}
+
+.columns {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.column {
+  flex: 1 1 320px;
+  min-width: 300px;
+}
+
+.columnFailed { border-color: rgba(179, 70, 26, 0.45); }
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+}
+
+.quiet {
+  font-size: 12.5px;
+  color: var(--ink-faint);
+}
+
+.okRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.result {
+  padding: 11px 13px;
+  background: rgba(122, 152, 102, 0.05);
+  border: 1px solid rgba(122, 152, 102, 0.32);
+}
+
+.resultHead {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.resultName {
+  font-size: 13px;
+  color: var(--ink-bright);
+}
+
+.resultLines {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 6px;
+}
+
+.resultLine {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--ink-quiet);
+}
+
+.failure {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-start;
+  padding: 11px 13px;
+  background: rgba(179, 70, 26, 0.07);
+  border: 1px solid rgba(179, 70, 26, 0.4);
+}
+
+.failureHead {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex-wrap: wrap;
+}
+
+.failureCode { color: #d8896a; }
+
+.failureText {
+  font-size: 12.5px;
+  color: var(--ink);
+  text-wrap: pretty;
+}

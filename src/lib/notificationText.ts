@@ -26,6 +26,14 @@ const EVENT_LABEL_KEY: Partial<Record<WsEventType | string, string>> = {
   BATTLE_TURN_CHANGED: 'cmp2.event.BATTLE_TURN_CHANGED',
   BATTLE_ACTION: 'cmp2.event.BATTLE_ACTION',
   BATTLE_ENDED: 'cmp2.event.BATTLE_ENDED',
+  CAMP_STARTED: 'campfire.event.CAMP_STARTED',
+  CAMP_UPDATED: 'campfire.event.CAMP_UPDATED',
+  CAMP_PARTICIPANT_UPDATED: 'campfire.event.CAMP_PARTICIPANT_UPDATED',
+  CAMP_REST_STARTED: 'campfire.event.CAMP_REST_STARTED',
+  CAMP_REST_COMPLETED: 'campfire.event.CAMP_REST_COMPLETED',
+  CAMP_EVENT_TRIGGERED: 'campfire.event.CAMP_EVENT_TRIGGERED',
+  CAMP_INTERRUPTED: 'campfire.event.CAMP_INTERRUPTED',
+  CAMP_ENDED: 'campfire.event.CAMP_ENDED',
 };
 
 const BODY_KEY: Partial<Record<WsEventType | string, string>> = {
@@ -52,6 +60,14 @@ const BODY_KEY: Partial<Record<WsEventType | string, string>> = {
   BATTLE_TURN_CHANGED: 'cmp2.notif.BATTLE_TURN_CHANGED',
   BATTLE_ACTION: 'cmp2.notif.BATTLE_ACTION',
   BATTLE_ENDED: 'cmp2.notif.BATTLE_ENDED',
+  CAMP_STARTED: 'campfire.notif.CAMP_STARTED',
+  CAMP_UPDATED: 'campfire.notif.CAMP_UPDATED',
+  CAMP_PARTICIPANT_UPDATED: 'campfire.notif.CAMP_PARTICIPANT_UPDATED',
+  CAMP_REST_STARTED: 'campfire.notif.CAMP_REST_STARTED',
+  CAMP_REST_COMPLETED: 'campfire.notif.CAMP_REST_COMPLETED',
+  CAMP_EVENT_TRIGGERED: 'campfire.notif.CAMP_EVENT_TRIGGERED',
+  CAMP_INTERRUPTED: 'campfire.notif.CAMP_INTERRUPTED',
+  CAMP_ENDED: 'campfire.notif.CAMP_ENDED',
 };
 
 function dataRecord(event: WsEvent): Record<string, unknown> {
@@ -110,6 +126,10 @@ export function formatNotificationBody(event: WsEvent, t: Translate): string {
     status: stringValue(data, ['status'], t('cmp2.notif.status')),
     currency: stringValue(data, ['currencyName', 'name'], t('cmp2.notif.currency')),
     combatant: stringValue(data, ['combatantName', 'targetName', 'attackerName'], t('cmp2.notif.combatant')),
+    restType: stringValue(data, ['restType'], t('campfire.notif.rest')),
+    rested: numberValue(data, 'restedCount', 0),
+    failed: numberValue(data, 'failedCount', 0),
+    reason: stringValue(data, ['reason'], t('campfire.notif.reason')),
   });
 }
 

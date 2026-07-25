@@ -1877,11 +1877,16 @@ export interface QuestCompletionResponse {
 
 // === Locations ===
 
+/** Метка безопасности привала на локации (CAMP): управляет только подсказками мастеру. */
+export type LocationRestSafety = 'SAFE' | 'RISKY' | 'DANGEROUS';
+
 export interface LocationResponse {
   id: string;
   name: string;
   description?: string;
   isVisibleToPlayers: boolean;
+  /** Метка безопасности привала; по умолчанию RISKY. */
+  restSafety?: LocationRestSafety;
   /** Превью локации: прокси-URL media-ассета или undefined. */
   previewUrl?: string;
   createdAt: string;
@@ -1895,12 +1900,248 @@ export interface CreateLocationRequest {
   name: string;
   description?: string;
   isVisibleToPlayers?: boolean;
+  restSafety?: LocationRestSafety;
 }
 
 export interface UpdateLocationRequest {
   name?: string;
   description?: string;
   isVisibleToPlayers?: boolean;
+  restSafety?: LocationRestSafety;
+}
+
+// === CAMP: лагерь и привал ===
+
+/** Статус привала. State-machine: SETTING_UP → ACTIVE → RESTING → COMPLETED, ветка INTERRUPTED. */
+export type CampStatus = 'SETTING_UP' | 'ACTIVE' | 'RESTING' | 'INTERRUPTED' | 'COMPLETED';
+
+/** Состояние участника привала по отдыху (отдых применяется per-character). */
+export type CampParticipantState = 'NOT_RESTED' | 'RESTING' | 'RESTED' | 'PARTIAL' | 'FAILED';
+
+/** Тип записи журнала привала. */
+export type CampEventType = 'AMBUSH' | 'ENCOUNTER' | 'STORY' | 'WEATHER' | 'CUSTOM';
+
+/** Причина прерывания привала. */
+export type CampInterruptReason = 'AMBUSH' | 'EVENT' | 'MANUAL';
+
+/** Происхождение даунтайм-активности: системная либо кастомная активность кампании. */
+export type CampActivityKind = 'SYSTEM' | 'CUSTOM';
+
+/** Ресурс правил-фич, восстановленный отдыхом (backend RestResourcePreview). */
+export interface CampRestResourcePreview {
+  resourceId: string;
+  resourceKey?: string;
+  displayName?: string;
+  currentValue?: number;
+  willBeValue?: number;
+}
+
+/** Снимок RestResult, сохранённый на участнике привала. */
+export interface CampRestResultSnapshot {
+  restType: string;
+  resources?: ResourceResponse[] | null;
+  featureResources?: CampRestResourcePreview[] | null;
+  spellSlots?: SpellSlotsResponse | null;
+  hp?: { characterId: string; currentHp: number; tempHp: number; maxHp: number; reachedZero: boolean } | null;
+}
+
+/** Слот дозора: номер, метка времени и назначенный персонаж. */
+export interface CampWatchSlotResponse {
+  slot: number;
+  label?: string;
+  characterId?: string;
+  characterName?: string;
+}
+
+/** Кость хитов персонажа (пул одного размера). */
+export interface CampHitDice {
+  die: number;
+  total: number;
+  remaining: number;
+}
+
+export interface CampParticipantResponse {
+  id: string;
+  characterId: string;
+  characterName: string;
+  ownerId?: string;
+  ownerUsername?: string;
+  avatarUrl?: string;
+  totalLevel?: number;
+  classLevels?: ClassLevelResponse[];
+  state: CampParticipantState;
+  currentHp?: number;
+  maxHp?: number;
+  tempHp?: number;
+  hitDice?: CampHitDice[];
+  watchSlot?: number;
+  watchSlotLabel?: string;
+  activityId?: string;
+  activityName?: string;
+  activityIconCode?: string;
+  activityNote?: string;
+  restResult?: CampRestResultSnapshot;
+  restErrorCode?: string;
+  restErrorMessage?: string;
+  restedAt?: string;
+}
+
+export interface CampEventResponse {
+  id: string;
+  type: CampEventType;
+  title: string;
+  description?: string;
+  /** Внутриигровое время события — свободная метка мастера. */
+  occurredLabel?: string;
+  visibleToPlayers: boolean;
+  /** Бой, созданный из засады. */
+  battleId?: string;
+  triggeredAt?: string;
+  createdAt: string;
+  createdByUsername?: string;
+}
+
+export interface CampActivityResponse {
+  id: string;
+  campaignId?: string;
+  kind: CampActivityKind;
+  name: string;
+  description?: string;
+  iconCode?: string;
+  skillCheckRef?: string;
+}
+
+export interface CampSessionResponse {
+  id: string;
+  campaignId: string;
+  name: string;
+  description?: string;
+  dayNumber?: number;
+  status: CampStatus;
+  /** Пройденные статусы для таймлайна привала. */
+  visitedStatuses: CampStatus[];
+  /** Единственный источник правды для кнопок мастера. */
+  availableTransitions: CampStatus[];
+  restType?: string;
+  applyPartialRest: boolean;
+  location?: LocationRef;
+  restSafety?: LocationRestSafety;
+  interruptReason?: CampInterruptReason;
+  interruptEventId?: string;
+  interruptBattleId?: string;
+  watchSlotCount: number;
+  watchSchedule: CampWatchSlotResponse[];
+  participants: CampParticipantResponse[];
+  events: CampEventResponse[];
+  createdById: string;
+  createdByUsername: string;
+  startedAt?: string;
+  restStartedAt?: string;
+  restCompletedAt?: string;
+  interruptedAt?: string;
+  endedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CampRestFailureResponse {
+  characterId: string;
+  characterName: string;
+  errorCode: string;
+  errorMessage?: string;
+}
+
+export interface CampRestSummaryResponse {
+  campId: string;
+  restType: string;
+  partial: boolean;
+  restedCount: number;
+  failedCount: number;
+  skippedCount: number;
+  failures: CampRestFailureResponse[];
+  camp: CampSessionResponse;
+}
+
+export interface CampWatchSlotRequest {
+  slot: number;
+  label?: string;
+  characterId?: string | null;
+}
+
+export interface CreateCampRequest {
+  name: string;
+  description?: string;
+  dayNumber?: number;
+  locationId?: string;
+  participantCharacterIds?: string[];
+  watchSlotCount?: number;
+  watchSchedule?: CampWatchSlotRequest[];
+}
+
+export interface UpdateCampRequest {
+  name?: string;
+  description?: string;
+  dayNumber?: number;
+  locationId?: string;
+  clearLocation?: boolean;
+  participantCharacterIds?: string[];
+}
+
+export interface UpdateCampWatchOrderRequest {
+  watchSlotCount?: number;
+  watchSchedule?: CampWatchSlotRequest[];
+}
+
+export interface StartCampRestRequest {
+  /** `long` | `short` (принимаются и канонические `long_rest` / `short_rest`). */
+  restType: 'long' | 'short';
+}
+
+export interface CompleteCampRestRequest {
+  /** Пусто — применить всем, у кого отдых ещё не применён; иначе точечный повтор. */
+  characterIds?: string[];
+}
+
+export interface InterruptCampRequest {
+  reason?: CampInterruptReason;
+  eventId?: string;
+}
+
+export interface ApplyPartialRestRequest {
+  characterIds?: string[];
+}
+
+/** Строка черновика энкаунтера засады: монстр бестиария и его количество. */
+export interface CampMonsterEntry {
+  monsterId: string;
+  count: number;
+}
+
+export interface CreateCampActivityRequest {
+  name: string;
+  description?: string;
+  iconCode?: string;
+  skillCheckRef?: string;
+}
+
+export interface AssignCampActivityRequest {
+  /** Пусто — снять активность с участника. */
+  activityId?: string | null;
+  note?: string;
+}
+
+export interface CreateCampEventRequest {
+  type: CampEventType;
+  title: string;
+  description?: string;
+  occurredLabel?: string;
+  /** false — сохранить скрытую заготовку и триггернуть её позже. */
+  triggerNow?: boolean;
+  visibleToPlayers?: boolean;
+  /** Только для AMBUSH: создать бой из засады. */
+  createBattle?: boolean;
+  battleName?: string;
+  monsters?: CampMonsterEntry[];
 }
 
 // === WORLD_PLAN: presence, quest journal, NPC interaction, trade, maps, transitions ===
@@ -2393,7 +2634,16 @@ export type WsEventType =
   // ROLL_PROMPT — GM-initiated checks; payloads carry { promptId, characterId, ... }.
   | 'ROLL_PROMPT_CREATED'
   | 'ROLL_PROMPT_RESOLVED'
-  | 'ROLL_PROMPT_CANCELLED';
+  | 'ROLL_PROMPT_CANCELLED'
+  // CAMP — лагерь и привал; payload несёт { campId, … }, авторитет — GET …/camp.
+  | 'CAMP_STARTED'
+  | 'CAMP_UPDATED'
+  | 'CAMP_PARTICIPANT_UPDATED'
+  | 'CAMP_REST_STARTED'
+  | 'CAMP_REST_COMPLETED'
+  | 'CAMP_EVENT_TRIGGERED'
+  | 'CAMP_INTERRUPTED'
+  | 'CAMP_ENDED';
 
 export interface WsEvent<T = unknown> {
   type: WsEventType;

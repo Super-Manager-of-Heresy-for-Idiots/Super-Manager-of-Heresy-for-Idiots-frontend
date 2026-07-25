@@ -53,6 +53,15 @@ const EVENT_STYLE: Record<WsEventType, EventVisual> = {
   ROLL_PROMPT_CREATED:     { glyph: 'hex',     color: 'var(--gold)',      border: 'var(--gold)' },
   ROLL_PROMPT_RESOLVED:    { glyph: 'check',   color: 'var(--arcane)',    border: 'var(--arcane)' },
   ROLL_PROMPT_CANCELLED:   { glyph: 'x',       color: 'var(--ink-quiet)', border: 'var(--ink-quiet)' },
+  // CAMP
+  CAMP_STARTED:            { glyph: 'flame',   color: 'var(--gold)',      border: 'var(--gold)' },
+  CAMP_UPDATED:            { glyph: 'scroll',  color: 'var(--ink)',       border: 'var(--bronze)' },
+  CAMP_PARTICIPANT_UPDATED:{ glyph: 'helm',    color: 'var(--ink)',       border: 'var(--bronze)' },
+  CAMP_REST_STARTED:       { glyph: 'hex',     color: 'var(--arcane)',    border: 'var(--arcane)' },
+  CAMP_REST_COMPLETED:     { glyph: 'check',   color: 'var(--arcane)',    border: 'var(--arcane)' },
+  CAMP_EVENT_TRIGGERED:    { glyph: 'scroll',  color: 'var(--gold-pale)', border: 'var(--gold-pale)' },
+  CAMP_INTERRUPTED:        { glyph: 'sword',   color: 'var(--ember)',     border: 'var(--ember)' },
+  CAMP_ENDED:              { glyph: 'check',   color: 'var(--gold-pale)', border: 'var(--gold-pale)' },
 };
 
 /* ── component ───────────────────────────────────────────── */

@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <title>Ordo Arcanum — Лагерь и Привал</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="../tokens.css" />
+  <style>
+    html, body, #root { height: 100%; margin: 0; }
+    body { background: #f0eee9; font-family: 'Inter', system-ui, sans-serif; }
+    a { color: var(--gold-pale); }
+    a:hover { color: var(--gold); }
+
+    .cp-quick { opacity: 0; pointer-events: none; transition: opacity 160ms ease; }
+    .cp-card:hover .cp-quick { opacity: 1; pointer-events: auto; }
+    .cp-card { transition: border-color 160ms, box-shadow 160ms; }
+    .cp-card:hover { border-color: var(--brass); }
+
+    .cp-quickrow { opacity: 0; transition: opacity 150ms; }
+    .cp-row:hover .cp-quickrow { opacity: 1; }
+    .cp-row { transition: background 150ms; }
+    .cp-row:hover { background: rgba(176, 141, 78, 0.04); }
+    .cp-log:hover { background: rgba(176, 141, 78, 0.03); }
+
+    @keyframes cp-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(176,141,78,0); } 50% { box-shadow: 0 0 14px 1px rgba(176,141,78,0.3); } }
+    .cp-pulse { animation: cp-pulse 2.4s ease-in-out infinite; }
+
+    @keyframes cp-breathe { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+    .cp-breathe { animation: cp-breathe 2.2s ease-in-out infinite; }
+
+    @keyframes cp-halo { 0%, 100% { opacity: 0.25; transform: rotate(45deg) scale(1); } 50% { opacity: 0.7; transform: rotate(45deg) scale(1.12); } }
+    .cp-halo { animation: cp-halo 3s ease-in-out infinite; }
+
+    @keyframes cp-alarm { 0%, 100% { background-position: 0 0; } 50% { background-position: 40px 0; } }
+    .cp-alarm::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(135deg, transparent 0 18px, rgba(179,70,26,0.06) 18px 20px); animation: cp-alarm 6s linear infinite; }
+
+    @keyframes cp-sk { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    .cp-sk {
+      background: linear-gradient(90deg, var(--panel) 25%, var(--panel-raised) 50%, var(--panel) 75%);
+      background-size: 200% 100%; animation: cp-sk 1.6s ease-in-out infinite;
+      border: 1px solid var(--hairline); display: block;
+    }
+    @media (prefers-reduced-motion: reduce) { .cp-pulse, .cp-sk, .cp-breathe, .cp-halo, .cp-alarm::after { animation: none; } }
+
+    select.ao-input option { background: var(--abyss); color: var(--ink-bright); }
+    button:disabled { cursor: not-allowed; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+  <script type="text/babel" src="../design-canvas.jsx"></script>
+  <script type="text/babel" src="../components.jsx"></script>
+  <script type="text/babel" src="../screens-shared.jsx"></script>
+  <script type="text/babel" src="camp-shared.jsx"></script>
+  <script type="text/babel" src="camp-panels.jsx"></script>
+  <script type="text/babel" src="camp-main.jsx"></script>
+  <script type="text/babel" src="camp-rest.jsx"></script>
+  <script type="text/babel" src="camp-interrupted.jsx"></script>
+  <script type="text/babel" src="camp-setup.jsx"></script>
+  <script type="text/babel" src="camp-kit.jsx"></script>
+
+  <script type="text/babel" data-presets="env,react">
+    const { DesignCanvas, DCSection, DCArtboard } = window;
+
+    function App() {
+      return (
+        <DesignCanvas>
+          {/* ── 1 · ЛАГЕРЬ · ACTIVE ─────────────────────────────────── */}
+          <DCSection id="active" title="1 · Экран лагеря — ACTIVE (флагман)"
+            subtitle="Интерактивно: кнопки статуса меняют состояние всего экрана (валидные переходы), дозор переставляется перетаскиванием, «Внимательность» создаёт ROLL_PROMPT и пишет результат в журнал, «Бросить встречу» добавляет событие. Наведите на карточку участника — быстрые действия ГМ.">
+            <DCArtboard id="active-gm" label="Десктоп 1440 · вид ГМ · локация RISKY" width={1440} height={1930}>
+              <window.CampScreen view="gm" />
+            </DCArtboard>
+            <DCArtboard id="active-danger" label="Вид ГМ · локация DANGEROUS" width={1440} height={1930}>
+              <window.CampScreen view="gm" safety="DANGEROUS" />
+            </DCArtboard>
+            <DCArtboard id="active-player" label="Вид игрока · те же данные, без управления" width={1440} height={1720}>
+              <window.CampScreen view="player" />
+            </DCArtboard>
+          </DCSection>
+
+          {/* ── 2 · RESTING ─────────────────────────────────────────── */}
+          <DCSection id="resting" title="2 · RESTING — групповой отдых"
+            subtitle="Отдых per-character: у каждого своя транзакция и свой прогресс. Ошибка одного не откатывает остальных — сводка успешных RestResult и отдельный список ошибок с повтором. Прогресс на первой доске идёт вживую.">
+            <DCArtboard id="rest-run" label="Идёт отдых · Бренн в процессе, Тоск с ошибкой" width={1440} height={1500}>
+              <window.RestingScreen phase="running" />
+            </DCArtboard>
+            <DCArtboard id="rest-done" label="Итог · 4 успешно, 1 ошибка" width={1440} height={1500}>
+              <window.RestingScreen phase="done" />
+            </DCArtboard>
+            <DCArtboard id="rest-player" label="Вид игрока · отдых идёт" width={1440} height={1500}>
+              <window.RestingScreen phase="running" view="player" />
+            </DCArtboard>
+          </DCSection>
+
+          {/* ── 3 · INTERRUPTED ─────────────────────────────────────── */}
+          <DCSection id="interrupted" title="3 · INTERRUPTED — прерывание"
+            subtitle="Баннер прерывания и ссылка на созданный бой. Тумблер applyPartialRest — переключите: статусы участников меняются на «частичный», а панель участников подписывается иначе.">
+            <DCArtboard id="int-gm" label="Вид ГМ · причина AMBUSH" width={1440} height={1560}>
+              <window.InterruptedScreen view="gm" />
+            </DCArtboard>
+            <DCArtboard id="int-player" label="Вид игрока · решение ГМ только читается" width={1440} height={1560}>
+              <window.InterruptedScreen view="player" />
+            </DCArtboard>
+          </DCSection>
+
+          {/* ── 4 · СОЗДАНИЕ ЛАГЕРЯ ─────────────────────────────────── */}
+          <DCSection id="setup" title="4 · Создание привала (SETTING_UP)"
+            subtitle="Модал старта: локация с её меткой безопасности, состав, первичная расстановка дозора. И экран лагеря в статусе SETTING_UP — отдых ещё недоступен.">
+            <DCArtboard id="setup-modal" label="Модал · Разбить лагерь" width={1280} height={880}>
+              <window.CampSetupModal />
+            </DCArtboard>
+            <DCArtboard id="setup-screen" label="Экран · статус SETTING_UP" width={1440} height={1000}>
+              <window.SettingUpScreen />
+            </DCArtboard>
+            <DCArtboard id="event-modal" label="Модал · Добавить событие (AMBUSH → бой)" width={1280} height={900}>
+              <window.AddEventModal />
+            </DCArtboard>
+          </DCSection>
+
+          {/* ── 5 · МЕТКА БЕЗОПАСНОСТИ ЛОКАЦИИ ──────────────────────── */}
+          <DCSection id="locations" title="5 · rest_safety в LocationsPage"
+            subtitle="Новое поле локации: компактный сегмент с цветовой кодировкой прямо в карточке списка и он же в редакторе с пояснением каждого значения. Переключайте — значение живёт в обоих местах.">
+            <DCArtboard id="loc-page" label="Локации · список + редактор" width={1440} height={860}>
+              <window.LocationsSafetyScreen />
+            </DCArtboard>
+          </DCSection>
+
+          {/* ── 6 · COMPLETED ───────────────────────────────────────── */}
+          <DCSection id="completed" title="6 · COMPLETED — привал завершён"
+            subtitle="Терминальный статус: переходов нет, ресурсы восстановлены, журнал закрыт последней записью.">
+            <DCArtboard id="done" label="Десктоп 1440 · завершённый привал" width={1440} height={1140}>
+              <window.CompletedScreen />
+            </DCArtboard>
+          </DCSection>
+
+          {/* ── 7 · СОСТОЯНИЯ ───────────────────────────────────────── */}
+          <DCSection id="states" title="7 · Загрузка · пусто · ошибка"
+            subtitle="Реалтайм без навязчивых спиннеров: скелетоны в форме будущего контента, тихий индикатор соединения, при ошибке — последние известные данные приглушены, а не пустой экран.">
+            <DCArtboard id="st-load" label="Загрузка · скелетон экрана" width={1440} height={800}>
+              <window.CampLoading />
+            </DCArtboard>
+            <DCArtboard id="st-nocamp" label="Пусто · лагеря нет" width={1440} height={720}>
+              <window.CampEmpty kind="no-camp" />
+            </DCArtboard>
+            <DCArtboard id="st-nomembers" label="Пусто · участников нет" width={1440} height={720}>
+              <window.CampEmpty kind="no-members" />
+            </DCArtboard>
+            <DCArtboard id="st-error" label="Ошибка · соединение потеряно" width={1440} height={820}>
+              <window.CampError />
+            </DCArtboard>
+          </DCSection>
+
+          {/* ── 0 · КИТ ─────────────────────────────────────────────── */}
+          <DCSection id="kit" title="0 · Кит лагеря — новые компоненты"
+            subtitle="Статусы, таймлайн, метка безопасности, статусы отдыха, типы событий, подсказки ГМ, карточка участника во всех состояниях — и решения дизайна.">
+            <DCArtboard id="kit-board" label="Компоненты + решения" width={1440} height={1560}>
+              <window.CampKitBoard />
+            </DCArtboard>
+          </DCSection>
+        </DesignCanvas>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>

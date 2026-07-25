@@ -1,0 +1,75 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.columns {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.partyColumn {
+  flex: 1.4 1 420px;
+  min-width: 320px;
+}
+
+.sideColumn {
+  flex: 1 1 340px;
+  min-width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.party {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+}
+
+.quiet {
+  font-size: 12.5px;
+  color: var(--ink-faint);
+  text-align: center;
+}
+
+/* ── loading skeleton ────────────────────────────────────── */
+.skelHead { height: 120px; }
+
+.skelRows {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.skelRow { height: 92px; }
+
+/* ── error ───────────────────────────────────────────────── */
+.errorBanner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 18px;
+  background: rgba(179, 70, 26, 0.1);
+  border: 1px solid rgba(179, 70, 26, 0.5);
+  border-left: 2px solid var(--ember);
+  flex-wrap: wrap;
+}
+
+.errorBody {
+  flex: 1;
+  min-width: 220px;
+}
+
+.errorTitle {
+  font-family: var(--font-display);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #d8896a;
+  margin-bottom: 3px;
+}

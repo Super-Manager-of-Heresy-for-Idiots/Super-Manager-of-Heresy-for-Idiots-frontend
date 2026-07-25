@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import { OrdoPanel, Rune, OrdoField, EmptyVault, ErrorAltar } from '@/components/ordo';
+import { CampSafetyBadge, CampSafetySegment } from '@/components/camp';
 import { CodexID } from '@/components/homebrew/CodexID';
 import { ImageUploadField } from '@/components/media/ImageUploadField';
 import { VisibilityToggle } from '@/components/narrative';
@@ -31,7 +32,7 @@ import {
 } from '@/hooks/useLocations';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
-import type { LocationResponse } from '@/types';
+import type { LocationResponse, LocationRestSafety } from '@/types';
 import s from './LocationsPage.module.css';
 
 /* ── page ────────────────────────────────────────────────────── */
@@ -52,11 +53,14 @@ export default function LocationsPage() {
   const [formName, setFormName] = useState('');
   const [formDescription, setFormDescription] = useState('');
   const [formVisible, setFormVisible] = useState(true);
+  // CAMP: метка безопасности привала. Дефолт совпадает с серверным (RISKY).
+  const [formRestSafety, setFormRestSafety] = useState<LocationRestSafety>('RISKY');
 
   const resetForm = () => {
     setFormName('');
     setFormDescription('');
     setFormVisible(true);
+    setFormRestSafety('RISKY');
   };
 
   const handleOpenCreate = () => {
@@ -70,6 +74,7 @@ export default function LocationsPage() {
     setFormName(loc.name);
     setFormDescription(loc.description || '');
     setFormVisible(loc.isVisibleToPlayers);
+    setFormRestSafety(loc.restSafety ?? 'RISKY');
     setDialogOpen(true);
   };
 
@@ -83,6 +88,7 @@ export default function LocationsPage() {
             name: formName,
             description: formDescription || undefined,
             isVisibleToPlayers: formVisible,
+            restSafety: formRestSafety,
           },
         },
         { onSuccess: () => { setDialogOpen(false); setEditing(null); } },
@@ -95,6 +101,7 @@ export default function LocationsPage() {
             name: formName,
             description: formDescription || undefined,
             isVisibleToPlayers: formVisible,
+            restSafety: formRestSafety,
           },
         },
         { onSuccess: () => { setDialogOpen(false); resetForm(); } },
@@ -209,6 +216,7 @@ export default function LocationsPage() {
                 {/* ID + Visibility */}
                 <div className={s.idRow}>
                   <CodexID>{loc.id.slice(0, 8).toUpperCase()}</CodexID>
+                  {loc.restSafety && <CampSafetyBadge level={loc.restSafety} />}
                   <VisibilityToggle visible={loc.isVisibleToPlayers} onToggle={() => toggleVisibility(loc)} />
                 </div>
 
@@ -284,6 +292,14 @@ export default function LocationsPage() {
               />
               <span className={cn('ao-label', s.checkLabel)}>{t('camp2.loc.field.visible')}</span>
             </label>
+
+            {/* CAMP: метка безопасности привала — поле локации, а не отдельная сущность. */}
+            <OrdoField
+              label={t('campfire.safety.label')}
+              hint={t(`campfire.safety.hint.${formRestSafety}`)}
+            >
+              <CampSafetySegment value={formRestSafety} onChange={setFormRestSafety} />
+            </OrdoField>
           </div>
           <DialogFooter>
             <button

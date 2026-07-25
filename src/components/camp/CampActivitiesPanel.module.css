@@ -1,0 +1,112 @@
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+}
+
+.tabs {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.tab {
+  padding: 5px 11px;
+  background: transparent;
+  border: 1px solid var(--rule);
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: 9.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.tabOn {
+  background: rgba(176, 141, 78, 0.1);
+  border-color: var(--brass);
+  color: var(--gold-pale);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 6px;
+}
+
+.card {
+  display: flex;
+  align-items: stretch;
+  gap: 4px;
+  background: var(--abyss);
+  border: 1px solid var(--hairline);
+}
+
+.cardOn {
+  border-color: var(--brass);
+  background: linear-gradient(180deg, rgba(176, 141, 78, 0.12), transparent);
+}
+
+.cardBody {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  flex: 1;
+  min-width: 0;
+  padding: 9px 11px;
+  text-align: left;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.cardText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.cardName {
+  font-size: 12.5px;
+  color: var(--ink-bright);
+}
+
+.cardDesc {
+  font-size: 11.5px;
+  color: var(--ink-quiet);
+  text-wrap: pretty;
+}
+
+.customForm {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--hairline);
+}
+
+.customForm > *:first-child { flex: 1; }
+
+.assignRow {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.assignRow > *:first-child { flex: 1 1 160px; }
+.assignRow > *:last-child { flex: 1.4 1 200px; }
+
+.assignActions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.quiet {
+  font-size: 12.5px;
+  color: var(--ink-faint);
+  text-wrap: pretty;
+}

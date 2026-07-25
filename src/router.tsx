@@ -21,6 +21,7 @@ const RegisterPage = lazyWithRetry(() => import('@/pages/auth/RegisterPage'));
 
 // Campaign pages
 const WorldPage = lazyWithRetry(() => import('@/pages/campaigns/WorldPage'));
+const CampPage = lazyWithRetry(() => import('@/pages/campaigns/CampPage'));
 const WorldManagementPage = lazyWithRetry(() => import('@/pages/gm/campaigns/WorldManagementPage'));
 const RollPromptsPage = lazyWithRetry(() => import('@/pages/gm/campaigns/RollPromptsPage'));
 const CampaignListPage = lazyWithRetry(() => import('@/pages/gm/campaigns/CampaignListPage'));
@@ -199,6 +200,8 @@ export const router = createBrowserRouter([
               // Sections available to every member
               // WORLD_PLAN: экран мира игрока (присутствие, NPC, квесты, торговля)
               { path: 'world', element: <WorldPage /> },
+              // CAMP: лагерь и привал — общий экран мастера и игроков
+              { path: 'camp', element: <CampPage /> },
               { path: 'members', element: <CampaignMembersPage /> },
               { path: 'storage', element: <SharedStoragePage /> },
               { path: 'items', element: <ItemCatalogPage /> },
