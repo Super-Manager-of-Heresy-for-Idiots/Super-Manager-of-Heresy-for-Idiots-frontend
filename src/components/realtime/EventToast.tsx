@@ -46,6 +46,8 @@ const EVENT_STYLE: Record<WsEventType, EventVisual> = {
   LOCATION_PRESENCE_CHANGED: { glyph: 'eye',   color: 'var(--arcane)',    border: 'var(--arcane)' },
   QUEST_ACCEPTED:          { glyph: 'book',    color: 'var(--gold)',      border: 'var(--gold)' },
   QUEST_ABANDONED:         { glyph: 'minus',   color: 'var(--ink-quiet)', border: 'var(--ink-quiet)' },
+  QUEST_TURNED_IN:         { glyph: 'check',   color: 'var(--gold-pale)', border: 'var(--gold-pale)' },
+  SHOP_UPDATED:            { glyph: 'coin',    color: 'var(--gold)',      border: 'var(--gold)' },
   MAP_TRANSITION_TRAVERSED:{ glyph: 'arrow-r', color: 'var(--gold-pale)', border: 'var(--gold-pale)' },
   // ROLL_PROMPT
   ROLL_PROMPT_CREATED:     { glyph: 'hex',     color: 'var(--gold)',      border: 'var(--gold)' },

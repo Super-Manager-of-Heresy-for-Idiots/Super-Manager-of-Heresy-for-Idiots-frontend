@@ -28,6 +28,8 @@ import { useCampaignReferenceContent, useCampaignReferenceSpells } from '@/hooks
 import { useCampaignMonsters } from '@/hooks/useBestiary';
 import type { NpcNoteResponse, QuestStatus } from '@/types';
 import { NpcFormFields, type NpcFormState } from './NpcFormFields';
+import { NpcShopManager } from './NpcShopManager';
+import { NpcDialogueEditor } from './NpcDialogueEditor';
 import {
   emptyNpcForm,
   npcFormFromResponse,
@@ -379,6 +381,14 @@ export default function NPCDetailPage() {
             </div>
           </OrdoPanel>
         )}
+
+        {/* Merchant shop management */}
+        {npc.npcRole === 'MERCHANT' && (
+          <NpcShopManager campaignId={campaignId!} npcId={npcId!} />
+        )}
+
+        {/* Optional NPC dialogue (GM discretion) */}
+        <NpcDialogueEditor campaignId={campaignId!} npcId={npcId!} />
 
         {/* Linked Quests */}
         <OrdoPanel frame padding={0}>

@@ -290,6 +290,12 @@ export const hooks: DictModule = {
     'hk.quest.rewardDeleteFailed': 'Не удалось удалить награду',
     'hk.quest.completed': 'Квест завершён — {name}: предметов {items}, опыт {xp}',
     'hk.quest.completeFailed': 'Не удалось завершить квест',
+    'hk.quest.objectiveAdded': 'Цель добавлена!',
+    'hk.quest.objectiveAddFailed': 'Не удалось добавить цель',
+    'hk.quest.objectiveDeleted': 'Цель удалена!',
+    'hk.quest.objectiveDeleteFailed': 'Не удалось удалить цель',
+    'hk.quest.objectiveProgressSet': 'Прогресс обновлён!',
+    'hk.quest.objectiveProgressFailed': 'Не удалось обновить прогресс',
 
     /* ── useRaces ────────────────────────────────────── */
     'hk.races.created': 'Раса создана!',
@@ -681,6 +687,12 @@ export const hooks: DictModule = {
     'hk.quest.rewardDeleteFailed': 'Failed to remove reward',
     'hk.quest.completed': 'Quest completed — {name}: {items} items, {xp} XP',
     'hk.quest.completeFailed': 'Failed to complete quest',
+    'hk.quest.objectiveAdded': 'Objective added!',
+    'hk.quest.objectiveAddFailed': 'Failed to add objective',
+    'hk.quest.objectiveDeleted': 'Objective removed!',
+    'hk.quest.objectiveDeleteFailed': 'Failed to remove objective',
+    'hk.quest.objectiveProgressSet': 'Progress updated!',
+    'hk.quest.objectiveProgressFailed': 'Failed to update progress',
 
     /* ── useRaces ────────────────────────────────────── */
     'hk.races.created': 'Race created!',

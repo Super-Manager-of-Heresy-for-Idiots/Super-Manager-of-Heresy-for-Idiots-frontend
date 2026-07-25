@@ -14,6 +14,8 @@ import type {
   CreateMapTransitionRequest,
   UpdateMapTransitionRequest,
   TraverseTransitionRequest,
+  PutNpcDialogueRequest,
+  UpdateShopSettingsRequest,
 } from '@/types';
 
 function errMessage(error: unknown, fallback: string): string {
@@ -127,6 +129,54 @@ export function useAbandonQuest() {
   });
 }
 
+export function useTurnInQuest() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ campaignId, npcId, questId, characterId }: { campaignId: string; npcId: string; questId: string; characterId: string }) =>
+      npcsApi.turnInQuest(campaignId, npcId, questId, characterId),
+    onSuccess: (result, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'npcs', variables.npcId, 'interact'] });
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId, 'quests'] });
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId, 'inventory'] });
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId] });
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'quests', 'pending-turn-ins'] });
+      toast.success(
+        result.data?.status === 'COMPLETED'
+          ? 'Квест сдан, награда получена'
+          : 'Квест сдан, ожидает подтверждения мастера',
+      );
+    },
+    onError: (error) => toast.error(errMessage(error, 'Не удалось сдать квест')),
+  });
+}
+
+export function usePendingTurnIns(campaignId: string, enabled = true) {
+  return useQuery({
+    queryKey: ['campaigns', campaignId, 'quests', 'pending-turn-ins'],
+    queryFn: async () => {
+      const response = await questsApi.pendingTurnIns(campaignId);
+      return response.data;
+    },
+    enabled: !!campaignId && enabled,
+  });
+}
+
+export function useConfirmTurnIn() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ campaignId, characterId, questId }: { campaignId: string; characterId: string; questId: string }) =>
+      questsApi.confirmTurnIn(campaignId, characterId, questId),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'quests', 'pending-turn-ins'] });
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId, 'quests'] });
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId, 'inventory'] });
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId] });
+      toast.success('Сдача подтверждена, награда выдана');
+    },
+    onError: (error) => toast.error(errMessage(error, 'Не удалось подтвердить сдачу')),
+  });
+}
+
 export function useNpcShop(campaignId: string, npcId?: string, enabled = true) {
   return useQuery({
     queryKey: ['campaigns', campaignId, 'npcs', npcId, 'shop'],
@@ -151,6 +201,20 @@ export function useStockShop() {
   });
 }
 
+export function useRemoveShopItem() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ campaignId, npcId, shopItemId }: { campaignId: string; npcId: string; shopItemId: string }) =>
+      npcsApi.removeShopItem(campaignId, npcId, shopItemId),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'npcs', variables.npcId, 'shop'] });
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'npcs', variables.npcId, 'interact'] });
+      toast.success('Товар удалён из лавки');
+    },
+    onError: (error) => toast.error(errMessage(error, 'Не удалось удалить товар')),
+  });
+}
+
 export function useBuyItem() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -158,6 +222,7 @@ export function useBuyItem() {
       npcsApi.buy(campaignId, npcId, data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'npcs', variables.npcId, 'shop'] });
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'npcs', variables.npcId, 'interact'] });
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.data.characterId] });
       toast.success('Покупка совершена');
     },
@@ -172,10 +237,94 @@ export function useSellItem() {
       npcsApi.sell(campaignId, npcId, data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'npcs', variables.npcId, 'shop'] });
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'npcs', variables.npcId, 'interact'] });
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.data.characterId, 'inventory'] });
       queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.data.characterId] });
       toast.success('Предмет продан');
     },
     onError: (error) => toast.error(errMessage(error, 'Не удалось продать предмет')),
+  });
+}
+
+// === WORLD_PLAN Этап 5: опциональная экономика торговца ===
+
+export function useShopSettings(campaignId: string, npcId?: string, enabled = true) {
+  return useQuery({
+    queryKey: ['campaigns', campaignId, 'npcs', npcId, 'shop', 'settings'],
+    queryFn: async () => {
+      const response = await npcsApi.getShopSettings(campaignId, npcId as string);
+      return response.data ?? {};
+    },
+    enabled: !!campaignId && !!npcId && enabled,
+  });
+}
+
+export function useUpdateShopSettings() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ campaignId, npcId, data }: { campaignId: string; npcId: string; data: UpdateShopSettingsRequest }) =>
+      npcsApi.updateShopSettings(campaignId, npcId, data),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'npcs', variables.npcId, 'shop'] });
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'npcs', variables.npcId, 'interact'] });
+      toast.success('Настройки торговца сохранены');
+    },
+    onError: (error) => toast.error(errMessage(error, 'Не удалось сохранить настройки')),
+  });
+}
+
+export function useRestockShop() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ campaignId, npcId }: { campaignId: string; npcId: string }) =>
+      npcsApi.restockShop(campaignId, npcId),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'npcs', variables.npcId, 'shop'] });
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'npcs', variables.npcId, 'interact'] });
+      toast.success('Запас лавки восстановлен');
+    },
+    onError: (error) => toast.error(errMessage(error, 'Не удалось восстановить запас')),
+  });
+}
+
+// === WORLD_PLAN Этап 4: опциональный диалог NPC ===
+
+export function useNpcDialogue(campaignId: string, npcId?: string, enabled = true) {
+  return useQuery({
+    queryKey: ['campaigns', campaignId, 'npcs', npcId, 'dialogue'],
+    queryFn: async () => {
+      const response = await npcsApi.getDialogue(campaignId, npcId as string);
+      return response.data ?? null;
+    },
+    enabled: !!campaignId && !!npcId && enabled,
+  });
+}
+
+export function usePutNpcDialogue() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ campaignId, npcId, data }: { campaignId: string; npcId: string; data: PutNpcDialogueRequest }) =>
+      npcsApi.putDialogue(campaignId, npcId, data),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'npcs', variables.npcId, 'dialogue'] });
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'npcs', variables.npcId, 'interact'] });
+      toast.success('Диалог сохранён');
+    },
+    onError: (error) => toast.error(errMessage(error, 'Не удалось сохранить диалог')),
+  });
+}
+
+export function useDeleteNpcDialogue() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ campaignId, npcId }: { campaignId: string; npcId: string }) =>
+      npcsApi.deleteDialogue(campaignId, npcId),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'npcs', variables.npcId, 'dialogue'] });
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'npcs', variables.npcId, 'interact'] });
+      toast.success('Диалог удалён');
+    },
+    onError: (error) => toast.error(errMessage(error, 'Не удалось удалить диалог')),
   });
 }
 

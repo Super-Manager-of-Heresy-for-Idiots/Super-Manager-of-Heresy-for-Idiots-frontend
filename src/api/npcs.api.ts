@@ -16,6 +16,10 @@ import type {
   BuyItemRequest,
   SellItemRequest,
   TradeResultResponse,
+  NpcDialogueResponse,
+  PutNpcDialogueRequest,
+  ShopSettingsResponse,
+  UpdateShopSettingsRequest,
 } from '@/types';
 
 type NpcNoteResponse = NoteResponse;
@@ -100,6 +104,15 @@ export const npcsApi = {
     return response.data;
   },
 
+  // WORLD_PLAN Этап 2: сдача квеста квестодателю.
+  turnInQuest: async (campaignId: string, npcId: string, questId: string, characterId: string): Promise<ApiResponse<CharacterQuestResponse>> => {
+    const response = await api.post<ApiResponse<CharacterQuestResponse>>(
+      `/campaigns/${campaignId}/npcs/${npcId}/quests/${questId}/turn-in`,
+      { characterId },
+    );
+    return response.data;
+  },
+
   // WORLD_PLAN Этап 3: торговля.
   listShop: async (campaignId: string, npcId: string): Promise<ApiResponse<ShopItemResponse[]>> => {
     const response = await api.get<ApiResponse<ShopItemResponse[]>>(`/campaigns/${campaignId}/npcs/${npcId}/shop`);
@@ -111,6 +124,27 @@ export const npcsApi = {
     return response.data;
   },
 
+  removeShopItem: async (campaignId: string, npcId: string, shopItemId: string): Promise<ApiResponse<void>> => {
+    const response = await api.delete<ApiResponse<void>>(`/campaigns/${campaignId}/npcs/${npcId}/shop/stock/${shopItemId}`);
+    return response.data;
+  },
+
+  // WORLD_PLAN Этап 5: рестокинг и настройки экономики торговца.
+  restockShop: async (campaignId: string, npcId: string): Promise<ApiResponse<ShopItemResponse[]>> => {
+    const response = await api.post<ApiResponse<ShopItemResponse[]>>(`/campaigns/${campaignId}/npcs/${npcId}/shop/restock`);
+    return response.data;
+  },
+
+  getShopSettings: async (campaignId: string, npcId: string): Promise<ApiResponse<ShopSettingsResponse>> => {
+    const response = await api.get<ApiResponse<ShopSettingsResponse>>(`/campaigns/${campaignId}/npcs/${npcId}/shop/settings`);
+    return response.data;
+  },
+
+  updateShopSettings: async (campaignId: string, npcId: string, data: UpdateShopSettingsRequest): Promise<ApiResponse<ShopSettingsResponse>> => {
+    const response = await api.put<ApiResponse<ShopSettingsResponse>>(`/campaigns/${campaignId}/npcs/${npcId}/shop/settings`, data);
+    return response.data;
+  },
+
   buy: async (campaignId: string, npcId: string, data: BuyItemRequest): Promise<ApiResponse<TradeResultResponse>> => {
     const response = await api.post<ApiResponse<TradeResultResponse>>(`/campaigns/${campaignId}/npcs/${npcId}/shop/buy`, data);
     return response.data;
@@ -118,6 +152,22 @@ export const npcsApi = {
 
   sell: async (campaignId: string, npcId: string, data: SellItemRequest): Promise<ApiResponse<TradeResultResponse>> => {
     const response = await api.post<ApiResponse<TradeResultResponse>>(`/campaigns/${campaignId}/npcs/${npcId}/shop/sell`, data);
+    return response.data;
+  },
+
+  // WORLD_PLAN Этап 4: опциональный диалог NPC.
+  getDialogue: async (campaignId: string, npcId: string): Promise<ApiResponse<NpcDialogueResponse | null>> => {
+    const response = await api.get<ApiResponse<NpcDialogueResponse | null>>(`/campaigns/${campaignId}/npcs/${npcId}/dialogue`);
+    return response.data;
+  },
+
+  putDialogue: async (campaignId: string, npcId: string, data: PutNpcDialogueRequest): Promise<ApiResponse<NpcDialogueResponse | null>> => {
+    const response = await api.put<ApiResponse<NpcDialogueResponse | null>>(`/campaigns/${campaignId}/npcs/${npcId}/dialogue`, data);
+    return response.data;
+  },
+
+  deleteDialogue: async (campaignId: string, npcId: string): Promise<ApiResponse<void>> => {
+    const response = await api.delete<ApiResponse<void>>(`/campaigns/${campaignId}/npcs/${npcId}/dialogue`);
     return response.data;
   },
 };

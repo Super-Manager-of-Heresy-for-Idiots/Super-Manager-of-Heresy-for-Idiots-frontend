@@ -115,6 +115,30 @@ export function useWebSocket(campaignId: string | undefined): { connectionState:
           break;
         }
 
+        case 'SHOP_UPDATED': {
+          const data = event.data as { npcId?: string };
+          if (data.npcId) {
+            queryClient.invalidateQueries({ queryKey: ['campaigns', cid, 'npcs', data.npcId, 'shop'] });
+            queryClient.invalidateQueries({ queryKey: ['campaigns', cid, 'npcs', data.npcId, 'interact'] });
+          }
+          break;
+        }
+
+        case 'QUEST_TURNED_IN': {
+          const data = event.data as { characterId?: string; npcId?: string };
+          const targetChar = data.characterId ?? charId;
+          if (targetChar) {
+            queryClient.invalidateQueries({ queryKey: ['campaigns', cid, 'characters', targetChar, 'quests'] });
+            queryClient.invalidateQueries({ queryKey: ['campaigns', cid, 'characters', targetChar, 'inventory'] });
+            queryClient.invalidateQueries({ queryKey: ['campaigns', cid, 'characters', targetChar] });
+          }
+          if (data.npcId) {
+            queryClient.invalidateQueries({ queryKey: ['campaigns', cid, 'npcs', data.npcId, 'interact'] });
+          }
+          queryClient.invalidateQueries({ queryKey: ['campaigns', cid, 'quests', 'pending-turn-ins'] });
+          break;
+        }
+
         case 'CAMPAIGN_STATUS_CHANGED': {
           queryClient.invalidateQueries({ queryKey: ['campaigns', cid] });
           queryClient.invalidateQueries({ queryKey: ['campaigns'] });

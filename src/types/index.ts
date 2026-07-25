@@ -1812,6 +1812,8 @@ export interface QuestResponse {
   description?: string;
   status: QuestStatus;
   isVisibleToPlayers: boolean;
+  /** Сдача квеста квестодателю сразу выдаёт награду (true) или ждёт подтверждения ГМа (false). */
+  autoCompleteOnTurnIn?: boolean;
   /** Арт квеста: прокси-URL media-ассета или undefined. */
   artUrl?: string;
   notes: NoteResponse[];
@@ -1837,6 +1839,7 @@ export interface CreateQuestRequest {
   description?: string;
   status?: QuestStatus;
   isVisibleToPlayers?: boolean;
+  autoCompleteOnTurnIn?: boolean;
 }
 
 export interface UpdateQuestRequest {
@@ -1844,6 +1847,7 @@ export interface UpdateQuestRequest {
   description?: string;
   status?: string;
   isVisibleToPlayers?: boolean;
+  autoCompleteOnTurnIn?: boolean;
 }
 
 export interface CreateQuestRewardRequest {
@@ -1941,12 +1945,61 @@ export interface LocationPresenceRequest {
 }
 
 /** Индивидуальный статус квеста персонажа. */
-export type CharacterQuestStatus = 'ACCEPTED' | 'COMPLETED' | 'FAILED' | 'ABANDONED';
+export type CharacterQuestStatus =
+  | 'ACCEPTED'
+  | 'READY_FOR_TURN_IN'
+  | 'COMPLETED'
+  | 'FAILED'
+  | 'ABANDONED';
+
+/** Тип опциональной цели квеста. */
+export type ObjectiveType =
+  | 'KILL_MONSTER'
+  | 'COLLECT_ITEM'
+  | 'TALK_TO_NPC'
+  | 'VISIT_LOCATION'
+  | 'CUSTOM';
+
+/** Определение опциональной цели квеста (конфигурация мастера). */
+export interface QuestObjectiveResponse {
+  id: string;
+  objectiveType: ObjectiveType;
+  targetRef?: string;
+  targetLabel?: string;
+  requiredCount?: number;
+  orderIndex?: number;
+}
+
+/** Прогресс персонажа по цели квеста. */
+export interface ObjectiveProgressResponse {
+  objectiveId: string;
+  objectiveType: ObjectiveType;
+  targetLabel?: string;
+  requiredCount?: number;
+  currentCount?: number;
+  completed?: boolean;
+}
+
+/** Тело добавления цели квеста (мастер). */
+export interface CreateQuestObjectiveRequest {
+  objectiveType: ObjectiveType;
+  targetRef?: string;
+  targetLabel?: string;
+  requiredCount?: number;
+  orderIndex?: number;
+}
+
+/** Тело выставления прогресса персонажа по цели (мастер). */
+export interface SetObjectiveProgressRequest {
+  currentCount: number;
+}
 
 /** Запись журнала квестов персонажа. */
 export interface CharacterQuestResponse {
   id: string;
   questId: string;
+  characterId?: string;
+  characterName?: string;
   title: string;
   description?: string;
   /** Мастер-статус квеста в кампании. */
@@ -1957,6 +2010,8 @@ export interface CharacterQuestResponse {
   givenByNpcName?: string;
   acceptedAt: string;
   completedAt?: string;
+  /** Опциональные цели квеста с прогрессом; отсутствует, если целей нет. */
+  objectives?: ObjectiveProgressResponse[];
 }
 
 /** Тело взятия квеста у NPC. */
@@ -1969,8 +2024,27 @@ export interface ShopItemResponse {
   id: string;
   itemTemplateId: string;
   itemName: string;
+  /** Итоговая цена с учётом модификатора цен торговца. */
   priceGold?: number;
   quantity?: number;
+  /** Базовый запас для рестокинга; отсутствует, если позиция не восстанавливается. */
+  restockQuantity?: number;
+}
+
+/** Опциональные настройки экономики торговца (задаёт мастер). */
+export interface ShopSettingsResponse {
+  /** Кошелёк торговца; отсутствует — выкуп без ограничений. */
+  merchantGold?: number;
+  /** Модификатор цен витрины в процентах (100 = базовые); отсутствует — базовые цены. */
+  priceModifierPercent?: number;
+}
+
+/** Тело обновления настроек экономики торговца (ГМ). */
+export interface UpdateShopSettingsRequest {
+  merchantGold?: number;
+  priceModifierPercent?: number;
+  clearMerchantGold?: boolean;
+  clearPriceModifier?: boolean;
 }
 
 /** Тело покупки у торговца (по шаблону предмета). */
@@ -1992,6 +2066,10 @@ export interface AddShopItemRequest {
   itemTemplateId: string;
   priceGold?: number;
   quantity?: number;
+  /** Базовый запас для рестокинга; не задан — позиция не восстанавливается. */
+  restockQuantity?: number;
+  /** true — снять базовый запас у позиции. */
+  clearRestockQuantity?: boolean;
 }
 
 /** Результат сделки купли-продажи. */
@@ -2004,6 +2082,36 @@ export interface TradeResultResponse {
   goldBalance?: number;
 }
 
+/** Действие варианта ответа в диалоге NPC. */
+export type DialogueActionType = 'END' | 'OPEN_SHOP' | 'OFFER_QUEST';
+
+/** Вариант ответа игрока в узле диалога. */
+export interface DialogueOptionDto {
+  text: string;
+  nextNodeId?: string;
+  actionType?: DialogueActionType;
+  questId?: string;
+}
+
+/** Узел диалога NPC: реплика + варианты ответа. */
+export interface DialogueNodeDto {
+  id: string;
+  npcText: string;
+  options: DialogueOptionDto[];
+}
+
+/** Дерево диалога NPC (опционально, задаётся мастером). */
+export interface NpcDialogueResponse {
+  rootNodeId?: string;
+  nodes: DialogueNodeDto[];
+}
+
+/** Тело сохранения диалога NPC целиком (мастер). Пустой nodes удаляет диалог. */
+export interface PutNpcDialogueRequest {
+  rootNodeId?: string;
+  nodes: DialogueNodeDto[];
+}
+
 /** GET /campaigns/{cid}/npcs/{id}/interact */
 export interface NpcInteractionResponse {
   npcId: string;
@@ -2013,7 +2121,15 @@ export interface NpcInteractionResponse {
   portraitUrl?: string;
   location?: LocationRef;
   availableQuests?: QuestResponse[];
+  /** Взятые квесты, которые персонаж может сдать этому NPC (ACCEPTED/READY_FOR_TURN_IN). */
+  turnInQuests?: CharacterQuestResponse[];
   shopItems?: ShopItemResponse[];
+  /** Опциональный диалог NPC; отсутствует, если мастер его не настроил. */
+  dialogue?: NpcDialogueResponse;
+  /** Курс выкупа торговцем в % от базовой цены; отсутствует, если NPC не торговец. */
+  buybackRatePercent?: number;
+  /** Баланс золота взаимодействующего персонажа (для окна торговли). */
+  goldBalance?: number;
 }
 
 /** Привязка карты map-service к локации. */
@@ -2271,6 +2387,8 @@ export type WsEventType =
   | 'LOCATION_PRESENCE_CHANGED'
   | 'QUEST_ACCEPTED'
   | 'QUEST_ABANDONED'
+  | 'QUEST_TURNED_IN'
+  | 'SHOP_UPDATED'
   | 'MAP_TRANSITION_TRAVERSED'
   // ROLL_PROMPT — GM-initiated checks; payloads carry { promptId, characterId, ... }.
   | 'ROLL_PROMPT_CREATED'

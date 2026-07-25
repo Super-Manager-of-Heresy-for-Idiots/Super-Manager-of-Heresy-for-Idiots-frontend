@@ -8,6 +8,7 @@ import type {
   CreateNoteRequest,
   CreateQuestRewardRequest,
   CompleteQuestRequest,
+  CreateQuestObjectiveRequest,
   ApiError,
 } from '@/types';
 import { AxiosError } from 'axios';
@@ -169,6 +170,71 @@ export function useDeleteQuestReward() {
     },
     onError: (error: AxiosError<ApiError>) => {
       toast.error(error.response?.data?.message || t('hk.quest.rewardDeleteFailed'));
+    },
+  });
+}
+
+// Quest Objectives (optional, GM-authored)
+
+export function useQuestObjectives(campaignId: string, questId: string, enabled = true) {
+  return useQuery({
+    queryKey: ['campaigns', campaignId, 'quests', questId, 'objectives'],
+    queryFn: async () => {
+      const response = await questsApi.listObjectives(campaignId, questId);
+      return response.data;
+    },
+    enabled: !!campaignId && !!questId && enabled,
+  });
+}
+
+export function useAddQuestObjective() {
+  const queryClient = useQueryClient();
+  const t = useT();
+
+  return useMutation({
+    mutationFn: ({ campaignId, questId, data }: { campaignId: string; questId: string; data: CreateQuestObjectiveRequest }) =>
+      questsApi.addObjective(campaignId, questId, data),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'quests', variables.questId, 'objectives'] });
+      toast.success(t('hk.quest.objectiveAdded'));
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error.response?.data?.message || t('hk.quest.objectiveAddFailed'));
+    },
+  });
+}
+
+export function useDeleteQuestObjective() {
+  const queryClient = useQueryClient();
+  const t = useT();
+
+  return useMutation({
+    mutationFn: ({ campaignId, questId, objectiveId }: { campaignId: string; questId: string; objectiveId: string }) =>
+      questsApi.deleteObjective(campaignId, questId, objectiveId),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'quests', variables.questId, 'objectives'] });
+      toast.success(t('hk.quest.objectiveDeleted'));
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error.response?.data?.message || t('hk.quest.objectiveDeleteFailed'));
+    },
+  });
+}
+
+export function useSetObjectiveProgress() {
+  const queryClient = useQueryClient();
+  const t = useT();
+
+  return useMutation({
+    mutationFn: ({ campaignId, characterId, questId, objectiveId, currentCount }: { campaignId: string; characterId: string; questId: string; objectiveId: string; currentCount: number }) =>
+      questsApi.setObjectiveProgress(campaignId, characterId, questId, objectiveId, currentCount),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'characters', variables.characterId, 'quests'] });
+      queryClient.invalidateQueries({ queryKey: ['campaigns', variables.campaignId, 'npcs'] });
+      toast.success(t('hk.quest.objectiveProgressSet'));
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error.response?.data?.message || t('hk.quest.objectiveProgressFailed'));
     },
   });
 }

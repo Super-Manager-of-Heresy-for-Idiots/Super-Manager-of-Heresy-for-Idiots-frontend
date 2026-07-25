@@ -21,6 +21,7 @@ import { useCampaignQuests, useCreateQuest } from '@/hooks/useQuests';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
 import type { QuestResponse, QuestStatus } from '@/types';
+import { PendingTurnInsPanel } from './PendingTurnInsPanel';
 import css from './QuestManagerPage.module.css';
 
 /* ── constants ───────────────────────────────────────────────── */
@@ -41,12 +42,14 @@ export default function QuestManagerPage() {
   const [formDescription, setFormDescription] = useState('');
   const [formStatus, setFormStatus] = useState<QuestStatus>('ACTIVE');
   const [formVisible, setFormVisible] = useState(true);
+  const [formAutoComplete, setFormAutoComplete] = useState(false);
 
   const resetForm = () => {
     setFormTitle('');
     setFormDescription('');
     setFormStatus('ACTIVE');
     setFormVisible(true);
+    setFormAutoComplete(false);
   };
 
   const handleCreate = () => {
@@ -58,6 +61,7 @@ export default function QuestManagerPage() {
           description: formDescription || undefined,
           status: formStatus,
           isVisibleToPlayers: formVisible,
+          autoCompleteOnTurnIn: formAutoComplete,
         },
       },
       {
@@ -139,6 +143,9 @@ export default function QuestManagerPage() {
           <span className={css.ml6}>{t('camp2.questMgr.newQuest')}</span>
         </button>
       </div>
+
+      {/* Pending turn-ins awaiting GM confirmation */}
+      <PendingTurnInsPanel campaignId={campaignId!} />
 
       {/* Quest table */}
       {sorted.length === 0 ? (
@@ -260,6 +267,17 @@ export default function QuestManagerPage() {
                 onChange={(e) => setFormVisible(e.target.checked)}
               />
               <span className={cn('ao-label', css.labelNoMb)}>{t('camp2.questMgr.field.visible')}</span>
+            </label>
+
+            <label className={css.checkRow}>
+              <input
+                type="checkbox"
+                checked={formAutoComplete}
+                onChange={(e) => setFormAutoComplete(e.target.checked)}
+              />
+              <span className={cn('ao-label', css.labelNoMb)}>
+                {t('camp2.questMgr.field.autoComplete')}
+              </span>
             </label>
           </div>
           <DialogFooter>

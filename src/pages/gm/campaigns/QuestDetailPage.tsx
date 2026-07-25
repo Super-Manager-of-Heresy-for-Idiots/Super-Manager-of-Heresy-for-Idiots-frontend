@@ -25,6 +25,7 @@ import { useCampaignItemTemplates } from '@/hooks/useInventory';
 import { cn } from '@/lib/utils';
 import { isRetryableError } from '@/lib/errors';
 import type { QuestStatus, QuestReward, CreateQuestRewardRequest } from '@/types';
+import { QuestObjectivesEditor } from './QuestObjectivesEditor';
 import s from './QuestDetailPage.module.css';
 
 /* ── constants ───────────────────────────────────────────────── */
@@ -318,6 +319,9 @@ export default function QuestDetailPage() {
             )}
           </div>
         </OrdoPanel>
+
+        {/* Optional quest objectives (GM discretion) */}
+        <QuestObjectivesEditor campaignId={campaignId!} questId={questId!} />
       </div>
 
       {/* ═══ Right column ═══ */}

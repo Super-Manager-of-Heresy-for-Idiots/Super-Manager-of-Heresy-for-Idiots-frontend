@@ -90,8 +90,13 @@ export const campaigns2: DictModule = {
     'camp2.questMgr.field.status': 'Статус',
     'camp2.questMgr.field.selectStatus': 'Выберите статус',
     'camp2.questMgr.field.visible': 'Видно игрокам',
+    'camp2.questMgr.field.autoComplete': 'Награда сразу при сдаче',
+    'camp2.questMgr.field.autoCompleteHint': 'Иначе сдача ждёт подтверждения мастера',
     'camp2.questMgr.withhold': 'Отклонить',
     'camp2.questMgr.record': 'Записать',
+    'camp2.questMgr.pending.title': 'Ожидают подтверждения',
+    'camp2.questMgr.pending.empty': 'Нет сдач, ожидающих подтверждения.',
+    'camp2.questMgr.pending.confirm': 'Подтвердить',
 
     /* ── NPCDetailPage ──────────────────────────────── */
     'camp2.npcDetail.notFound': 'Эта душа не найдена в летописи.',
@@ -759,8 +764,13 @@ export const campaigns2: DictModule = {
     'camp2.questMgr.field.status': 'Status',
     'camp2.questMgr.field.selectStatus': 'Select status',
     'camp2.questMgr.field.visible': 'Visible to players',
+    'camp2.questMgr.field.autoComplete': 'Reward instantly on turn-in',
+    'camp2.questMgr.field.autoCompleteHint': 'Otherwise a turn-in awaits GM confirmation',
     'camp2.questMgr.withhold': 'Withhold',
     'camp2.questMgr.record': 'Record',
+    'camp2.questMgr.pending.title': 'Awaiting confirmation',
+    'camp2.questMgr.pending.empty': 'No turn-ins awaiting confirmation.',
+    'camp2.questMgr.pending.confirm': 'Confirm',
 
     /* ── NPCDetailPage ──────────────────────────────── */
     'camp2.npcDetail.notFound': 'This soul could not be found within the chronicle.',

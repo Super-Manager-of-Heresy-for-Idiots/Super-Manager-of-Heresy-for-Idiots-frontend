@@ -12,6 +12,8 @@ import type {
   CompleteQuestRequest,
   QuestCompletionResponse,
   CharacterQuestResponse,
+  QuestObjectiveResponse,
+  CreateQuestObjectiveRequest,
 } from '@/types';
 
 export const questsApi = {
@@ -118,6 +120,53 @@ export const questsApi = {
   abandon: async (campaignId: string, characterId: string, questId: string): Promise<ApiResponse<void>> => {
     const response = await api.post<ApiResponse<void>>(
       `/campaigns/${campaignId}/characters/${characterId}/quests/${questId}/abandon`,
+    );
+    return response.data;
+  },
+
+  // WORLD_PLAN Этап 2: подтверждение сдачи квеста ГМом (READY_FOR_TURN_IN → COMPLETED + награда).
+  confirmTurnIn: async (campaignId: string, characterId: string, questId: string): Promise<ApiResponse<CharacterQuestResponse>> => {
+    const response = await api.post<ApiResponse<CharacterQuestResponse>>(
+      `/campaigns/${campaignId}/characters/${characterId}/quests/${questId}/confirm-turn-in`,
+    );
+    return response.data;
+  },
+
+  // WORLD_PLAN Этап 2: сдачи, ожидающие подтверждения ГМа в кампании.
+  pendingTurnIns: async (campaignId: string): Promise<ApiResponse<CharacterQuestResponse[]>> => {
+    const response = await api.get<ApiResponse<CharacterQuestResponse[]>>(
+      `/campaigns/${campaignId}/quests/pending-turn-ins`,
+    );
+    return response.data;
+  },
+
+  // WORLD_PLAN Этап 3: опциональные цели квеста (мастер).
+  listObjectives: async (campaignId: string, questId: string): Promise<ApiResponse<QuestObjectiveResponse[]>> => {
+    const response = await api.get<ApiResponse<QuestObjectiveResponse[]>>(
+      `/campaigns/${campaignId}/quests/${questId}/objectives`,
+    );
+    return response.data;
+  },
+
+  addObjective: async (campaignId: string, questId: string, data: CreateQuestObjectiveRequest): Promise<ApiResponse<QuestObjectiveResponse>> => {
+    const response = await api.post<ApiResponse<QuestObjectiveResponse>>(
+      `/campaigns/${campaignId}/quests/${questId}/objectives`,
+      data,
+    );
+    return response.data;
+  },
+
+  deleteObjective: async (campaignId: string, questId: string, objectiveId: string): Promise<ApiResponse<void>> => {
+    const response = await api.delete<ApiResponse<void>>(
+      `/campaigns/${campaignId}/quests/${questId}/objectives/${objectiveId}`,
+    );
+    return response.data;
+  },
+
+  setObjectiveProgress: async (campaignId: string, characterId: string, questId: string, objectiveId: string, currentCount: number): Promise<ApiResponse<CharacterQuestResponse>> => {
+    const response = await api.post<ApiResponse<CharacterQuestResponse>>(
+      `/campaigns/${campaignId}/characters/${characterId}/quests/${questId}/objectives/${objectiveId}/progress`,
+      { currentCount },
     );
     return response.data;
   },
