@@ -42,6 +42,15 @@ const EVENT_STYLE: Record<WsEventType, EventVisual> = {
   FRIEND_REQUEST_RECEIVED: { glyph: 'eye',     color: 'var(--gold)',      border: 'var(--gold)' },
   FRIEND_REQUEST_ACCEPTED: { glyph: 'check',   color: 'var(--arcane)',    border: 'var(--arcane)' },
   FRIEND_REMOVED:          { glyph: 'minus',   color: 'var(--ink-quiet)', border: 'var(--ink-quiet)' },
+  // WORLD_PLAN
+  LOCATION_PRESENCE_CHANGED: { glyph: 'eye',   color: 'var(--arcane)',    border: 'var(--arcane)' },
+  QUEST_ACCEPTED:          { glyph: 'book',    color: 'var(--gold)',      border: 'var(--gold)' },
+  QUEST_ABANDONED:         { glyph: 'minus',   color: 'var(--ink-quiet)', border: 'var(--ink-quiet)' },
+  MAP_TRANSITION_TRAVERSED:{ glyph: 'arrow-r', color: 'var(--gold-pale)', border: 'var(--gold-pale)' },
+  // ROLL_PROMPT
+  ROLL_PROMPT_CREATED:     { glyph: 'hex',     color: 'var(--gold)',      border: 'var(--gold)' },
+  ROLL_PROMPT_RESOLVED:    { glyph: 'check',   color: 'var(--arcane)',    border: 'var(--arcane)' },
+  ROLL_PROMPT_CANCELLED:   { glyph: 'x',       color: 'var(--ink-quiet)', border: 'var(--ink-quiet)' },
 };
 
 /* ── component ───────────────────────────────────────────── */

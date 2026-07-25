@@ -135,6 +135,8 @@ export interface CharacterResponse {
   raceSnapshot?: RaceSnapshot;
   ownerId: string;
   ownerUsername: string;
+  /** Текущая локация персонажа в мире кампании (WORLD_PLAN Этап 1). */
+  currentLocation?: LocationRef | null;
   stats: CharacterStatResponse[];
   status?: CharacterStatus;
   currentHp?: number;
@@ -1746,6 +1748,10 @@ export interface NpcResponse {
   abilities?: string;
   spells?: NpcRef[];
   sourceMonster?: NpcRef;
+  /** Роль NPC в мире (WORLD_PLAN). */
+  npcRole?: NpcRole;
+  /** Локация, в которой размещён NPC (WORLD_PLAN Этап 1). */
+  location?: NpcRef;
   notes: NoteResponse[];
   createdAt: string;
   updatedAt: string;
@@ -1878,6 +1884,9 @@ export interface LocationResponse {
   updatedAt: string;
 }
 
+/** LocationRefResponse с бэка (id + name) — алиас LocationRef для читаемости. */
+export type LocationRefResponse = LocationRef;
+
 export interface CreateLocationRequest {
   name: string;
   description?: string;
@@ -1888,6 +1897,240 @@ export interface UpdateLocationRequest {
   name?: string;
   description?: string;
   isVisibleToPlayers?: boolean;
+}
+
+// === WORLD_PLAN: presence, quest journal, NPC interaction, trade, maps, transitions ===
+
+/** Роль NPC в мире (WORLD_PLAN) — зеркало backend-enum NpcRole. */
+export type NpcRole = 'MERCHANT' | 'QUEST_GIVER' | 'TRAINER' | 'GUARD' | 'INNKEEPER' | 'COMMONER';
+
+/** Короткая ссылка на локацию (id + имя). */
+export interface LocationRef {
+  id: string;
+  name: string;
+}
+
+/** Персонаж, находящийся в локации. */
+export interface CharacterOccupant {
+  id: string;
+  name: string;
+  ownerUserId?: string;
+  ownerUsername?: string;
+  avatarUrl?: string;
+}
+
+/** NPC, размещённый в локации. */
+export interface NpcOccupant {
+  id: string;
+  name: string;
+  npcRole?: NpcRole;
+  portraitUrl?: string;
+  isVisibleToPlayers?: boolean;
+}
+
+/** GET /campaigns/{cid}/locations/{id}/occupants */
+export interface LocationOccupantsResponse {
+  locationId: string;
+  characters: CharacterOccupant[];
+  npcs: NpcOccupant[];
+}
+
+/** Тело enter/leave локации. */
+export interface LocationPresenceRequest {
+  characterId: string;
+}
+
+/** Индивидуальный статус квеста персонажа. */
+export type CharacterQuestStatus = 'ACCEPTED' | 'COMPLETED' | 'FAILED' | 'ABANDONED';
+
+/** Запись журнала квестов персонажа. */
+export interface CharacterQuestResponse {
+  id: string;
+  questId: string;
+  title: string;
+  description?: string;
+  /** Мастер-статус квеста в кампании. */
+  questStatus?: QuestStatus;
+  /** Индивидуальный статус персонажа. */
+  status: CharacterQuestStatus;
+  givenByNpcId?: string;
+  givenByNpcName?: string;
+  acceptedAt: string;
+  completedAt?: string;
+}
+
+/** Тело взятия квеста у NPC. */
+export interface AcceptQuestRequest {
+  characterId: string;
+}
+
+/** Позиция товара в лавке торговца. */
+export interface ShopItemResponse {
+  id: string;
+  itemTemplateId: string;
+  itemName: string;
+  priceGold?: number;
+  quantity?: number;
+}
+
+/** Тело покупки у торговца (по шаблону предмета). */
+export interface BuyItemRequest {
+  characterId: string;
+  itemTemplateId: string;
+  quantity?: number;
+}
+
+/** Тело продажи торговцу (по экземпляру предмета). */
+export interface SellItemRequest {
+  characterId: string;
+  itemInstanceId: string;
+  quantity?: number;
+}
+
+/** Тело добавления товара в лавку (ГМ). */
+export interface AddShopItemRequest {
+  itemTemplateId: string;
+  priceGold?: number;
+  quantity?: number;
+}
+
+/** Результат сделки купли-продажи. */
+export interface TradeResultResponse {
+  characterId: string;
+  itemName: string;
+  quantity: number;
+  unitPriceGold?: number;
+  totalPriceGold?: number;
+  goldBalance?: number;
+}
+
+/** GET /campaigns/{cid}/npcs/{id}/interact */
+export interface NpcInteractionResponse {
+  npcId: string;
+  name: string;
+  publicDescription?: string;
+  npcRole?: NpcRole;
+  portraitUrl?: string;
+  location?: LocationRef;
+  availableQuests?: QuestResponse[];
+  shopItems?: ShopItemResponse[];
+}
+
+/** Привязка карты map-service к локации. */
+export interface LocationMapResponse {
+  id: string;
+  locationId: string;
+  externalMapId: string;
+  isDefault: boolean;
+  createdAt: string;
+}
+
+/** Тело привязки карты к локации. */
+export interface AttachLocationMapRequest {
+  externalMapId: string;
+  isDefault?: boolean;
+}
+
+/** Клетка сетки карты. */
+export interface MapCell {
+  gridX: number;
+  gridY: number;
+}
+
+/** Переход между картами через ключевые клетки. */
+export interface MapTransitionResponse {
+  id: string;
+  campaignId: string;
+  fromMapId: string;
+  fromCells: MapCell[];
+  toMapId: string;
+  toCell: MapCell;
+  toLocation?: LocationRef;
+  label?: string;
+  enabled: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateMapTransitionRequest {
+  fromMapId: string;
+  fromCells: MapCell[];
+  toMapId: string;
+  toCell: MapCell;
+  toLocationId?: string;
+  label?: string;
+  enabled?: boolean;
+}
+
+export interface UpdateMapTransitionRequest {
+  fromCells?: MapCell[];
+  toCell?: MapCell;
+  toLocationId?: string;
+  clearToLocation?: boolean;
+  label?: string;
+  enabled?: boolean;
+}
+
+/** Тело прохода через переход. */
+export interface TraverseTransitionRequest {
+  characterId: string;
+  tokenId?: string;
+  fromSessionId?: string;
+  toSessionId?: string;
+}
+
+// === ROLL_PROMPT: мастер запрашивает проверку — окно броска у игрока ===
+
+export type RollPromptType = 'ABILITY_CHECK' | 'SAVING_THROW' | 'CUSTOM';
+export type RollPromptStatus = 'PENDING' | 'ROLLED' | 'CANCELLED';
+export type RollAdvantageMode = 'NORMAL' | 'ADVANTAGE' | 'DISADVANTAGE';
+
+/** Запрошенная мастером проверка и её результат. DC скрыт для игрока при hideDc до броска. */
+export interface RollPromptResponse {
+  id: string;
+  campaignId: string;
+  characterId: string;
+  characterName: string;
+  /** Владелец персонажа — окно броска показывается только ему. */
+  ownerUserId?: string;
+  rollType: RollPromptType;
+  statTypeId?: string;
+  statName?: string;
+  dc?: number;
+  hideDc?: boolean;
+  advantageMode: RollAdvantageMode;
+  description?: string;
+  status: RollPromptStatus;
+  requestedByName?: string;
+  rollNatural?: number;
+  rollSecond?: number;
+  modifier?: number;
+  total?: number;
+  success?: boolean;
+  createdAt: string;
+  rolledAt?: string;
+}
+
+/** Тело запроса мастера "запросить проверку". */
+export interface CreateRollPromptRequest {
+  characterIds: string[];
+  rollType: RollPromptType;
+  statTypeId?: string;
+  dc?: number;
+  hideDc?: boolean;
+  advantageMode?: RollAdvantageMode;
+  description?: string;
+}
+
+/** Результат прохода через переход. */
+export interface TraverseResultResponse {
+  transitionId: string;
+  characterId: string;
+  toMapId: string;
+  toCell: MapCell;
+  toLocation?: LocationRef;
+  tokenMoved?: boolean;
+  leftBattle?: boolean;
 }
 
 // === GAME_MASTER Session Notes ===
@@ -2023,7 +2266,16 @@ export type WsEventType =
   // Social graph — payloads carry { relationshipId, userId, username }; REST is the source of truth.
   | 'FRIEND_REQUEST_RECEIVED'
   | 'FRIEND_REQUEST_ACCEPTED'
-  | 'FRIEND_REMOVED';
+  | 'FRIEND_REMOVED'
+  // WORLD_PLAN — presence/quests/transitions; payloads carry ids, REST is the source of truth.
+  | 'LOCATION_PRESENCE_CHANGED'
+  | 'QUEST_ACCEPTED'
+  | 'QUEST_ABANDONED'
+  | 'MAP_TRANSITION_TRAVERSED'
+  // ROLL_PROMPT — GM-initiated checks; payloads carry { promptId, characterId, ... }.
+  | 'ROLL_PROMPT_CREATED'
+  | 'ROLL_PROMPT_RESOLVED'
+  | 'ROLL_PROMPT_CANCELLED';
 
 export interface WsEvent<T = unknown> {
   type: WsEventType;

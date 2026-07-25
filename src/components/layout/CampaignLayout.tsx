@@ -3,6 +3,7 @@ import { NavLink, Outlet, useOutletContext, useParams } from 'react-router-dom';
 import { BackLink, CampaignStatusPill } from '@/components/campaigns';
 import { OrdoInterfaceIcon, type OrdoInterfaceIconKey } from '@/components/ordo';
 import { ConnectionIndicator } from '@/components/realtime/ConnectionIndicator';
+import { RollPromptHost } from '@/components/world/RollPromptHost';
 import { useCampaign } from '@/hooks/useCampaigns';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { useAuthStore } from '@/store/authStore';
@@ -32,10 +33,13 @@ const SUBNAV: SubNavEntry[] = [
   { to: 'bestiary', labelKey: 'camp.dash.drill.bestiary', icon: 'bestiary' },
   { to: 'storage', labelKey: 'camp.dash.drill.storage', icon: 'shared-storage' },
   { to: 'items', labelKey: 'camp.dash.drill.items', icon: 'item' },
+  { to: 'world', labelKey: 'camp.dash.drill.world', icon: 'location' },
   { to: 'invite', labelKey: 'camp.dash.drill.invite', icon: 'friend-request', gm: true },
   { to: 'npcs', labelKey: 'camp.dash.drill.npcs', icon: 'npc', gm: true },
   { to: 'quests', labelKey: 'camp.dash.drill.quests', icon: 'quest', gm: true },
   { to: 'locations', labelKey: 'camp.dash.drill.locations', icon: 'location', gm: true },
+  { to: 'world-manage', labelKey: 'camp.dash.drill.worldManage', icon: 'location', gm: true },
+  { to: 'checks', labelKey: 'camp.dash.drill.checks', icon: 'reward-xp', gm: true },
   { to: 'maps', labelKey: 'camp.dash.drill.maps', icon: 'map', gm: true },
   { to: 'notes', labelKey: 'camp.dash.drill.notes', icon: 'session-note', gm: true },
   { to: 'xp', labelKey: 'camp.dash.drill.grantXp', icon: 'reward-xp', gm: true },
@@ -135,6 +139,9 @@ export function CampaignLayout() {
           <Outlet context={{ campaign } satisfies CampaignOutletContext} />
         </Suspense>
       </div>
+
+      {/* ROLL_PROMPT: окно броска у игрока — мастер инициирует проверку с любой страницы кампании. */}
+      <RollPromptHost campaignId={campaign.id} />
     </div>
   );
 }

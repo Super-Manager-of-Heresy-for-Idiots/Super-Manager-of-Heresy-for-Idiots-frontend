@@ -11,6 +11,7 @@ import type {
   CreateQuestRewardRequest,
   CompleteQuestRequest,
   QuestCompletionResponse,
+  CharacterQuestResponse,
 } from '@/types';
 
 export const questsApi = {
@@ -102,6 +103,21 @@ export const questsApi = {
     const response = await api.post<ApiResponse<QuestCompletionResponse>>(
       `/campaigns/${campaignId}/quests/${questId}/complete`,
       data,
+    );
+    return response.data;
+  },
+
+  // WORLD_PLAN Этап 2: журнал квестов персонажа.
+  journal: async (campaignId: string, characterId: string): Promise<ApiResponse<CharacterQuestResponse[]>> => {
+    const response = await api.get<ApiResponse<CharacterQuestResponse[]>>(
+      `/campaigns/${campaignId}/characters/${characterId}/quests`,
+    );
+    return response.data;
+  },
+
+  abandon: async (campaignId: string, characterId: string, questId: string): Promise<ApiResponse<void>> => {
+    const response = await api.post<ApiResponse<void>>(
+      `/campaigns/${campaignId}/characters/${characterId}/quests/${questId}/abandon`,
     );
     return response.data;
   },
