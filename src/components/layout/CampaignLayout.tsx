@@ -27,24 +27,19 @@ interface SubNavEntry {
   end?: boolean;
 }
 
+/**
+ * Top tabs hold only sections that are NOT reachable via the drill tiles on
+ * the dashboard "Sections" view (DashboardSectionsView) — everything else
+ * (roster, bestiary, storage, invite, npcs, quests, locations, maps, notes,
+ * xp, wallet) lives there to keep this strip short.
+ */
 const SUBNAV: SubNavEntry[] = [
   { to: '', labelKey: 'camp.nav.overview', icon: 'campaign', end: true },
-  { to: 'members', labelKey: 'camp.dash.drill.roster', icon: 'character-in-campaign' },
-  { to: 'bestiary', labelKey: 'camp.dash.drill.bestiary', icon: 'bestiary' },
-  { to: 'storage', labelKey: 'camp.dash.drill.storage', icon: 'shared-storage' },
   { to: 'items', labelKey: 'camp.dash.drill.items', icon: 'item' },
   { to: 'world', labelKey: 'camp.dash.drill.world', icon: 'location' },
   { to: 'camp', labelKey: 'campfire.nav', icon: 'resource-restored' },
-  { to: 'invite', labelKey: 'camp.dash.drill.invite', icon: 'friend-request', gm: true },
-  { to: 'npcs', labelKey: 'camp.dash.drill.npcs', icon: 'npc', gm: true },
-  { to: 'quests', labelKey: 'camp.dash.drill.quests', icon: 'quest', gm: true },
-  { to: 'locations', labelKey: 'camp.dash.drill.locations', icon: 'location', gm: true },
   { to: 'world-manage', labelKey: 'camp.dash.drill.worldManage', icon: 'location', gm: true },
   { to: 'checks', labelKey: 'camp.dash.drill.checks', icon: 'reward-xp', gm: true },
-  { to: 'maps', labelKey: 'camp.dash.drill.maps', icon: 'map', gm: true },
-  { to: 'notes', labelKey: 'camp.dash.drill.notes', icon: 'session-note', gm: true },
-  { to: 'xp', labelKey: 'camp.dash.drill.grantXp', icon: 'reward-xp', gm: true },
-  { to: 'wallet', labelKey: 'camp.dash.drill.balances', icon: 'wallet', gm: true },
 ];
 
 /* ── Outlet context ─────────────────────────────────────── */
