@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import { OrdoInterfaceIcon, OrdoPanel, PanelHeader, Bar } from '@/components/ordo';
-import { BackLink } from '@/components/campaigns';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -63,8 +62,6 @@ export default function AddCharacterPage() {
 
   return (
     <div>
-      <BackLink to={`/campaigns/${campaignId}`} label={t('camp2.back.campaign')} className={s.backLink} />
-
       <div className={s.header}>
         <p className={cn('ao-overline', s.overlineGold)}>{t('camp.add.overline')}</p>
         <h3 className={cn('ao-h3', s.title)}>{t('camp.add.title')}</h3>

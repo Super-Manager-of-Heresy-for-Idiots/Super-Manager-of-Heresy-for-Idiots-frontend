@@ -1,6 +1,6 @@
 import { Suspense, useState } from 'react';
 import { Outlet, useNavigate, useParams } from 'react-router-dom';
-import { BackLink, CharStatusBadge, SectionTabs } from '@/components/campaigns';
+import { CharStatusBadge, SectionTabs } from '@/components/campaigns';
 import { Bar, Rune } from '@/components/ordo';
 import {
   AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle,
@@ -83,8 +83,6 @@ export function CharacterLayout() {
 
   return (
     <div>
-      <BackLink to={`/campaigns/${campaignId}`} label={t('camp2.back.campaign')} className={s.back} />
-
       <div className={s.head}>
         <div>
           <div className={s.titleRow}>

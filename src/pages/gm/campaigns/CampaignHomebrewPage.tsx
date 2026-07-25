@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import { OrdoPanel, PanelHeader, Rune, EmptyVault, OrdoDivider } from '@/components/ordo';
 import { VersionSeal, ContentPills, StatusBadge } from '@/components/homebrew';
@@ -24,7 +24,6 @@ import s from './CampaignHomebrewPage.module.css';
  */
 export default function CampaignHomebrewPage() {
   const t = useT();
-  const navigate = useNavigate();
   const { campaignId } = useParams<{ campaignId: string }>();
 
   const { data: attached, isLoading } = useAttachedHomebrew(campaignId ?? '');
@@ -82,9 +81,6 @@ export default function CampaignHomebrewPage() {
   return (
     <div>
       <div className={s.topBar}>
-        <button className="ao-btn ao-btn--ghost ao-btn--sm" onClick={() => navigate(`/campaigns/${campaignId}`)}>
-          <Rune kind="arrow-l" size={11} /> {t('camp.homebrew.back')}
-        </button>
         <button className="ao-btn ao-btn--primary ao-btn--sm" onClick={() => setBrowseOpen(true)}>
           <Rune kind="plus" size={10} /> {t('camp.homebrew.add')}
         </button>

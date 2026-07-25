@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import { Outlet, useOutletContext, useParams } from 'react-router-dom';
+import { Outlet, useMatch, useOutletContext, useParams } from 'react-router-dom';
 import { BackLink, CampaignStatusPill, SectionTabs } from '@/components/campaigns';
 import { ConnectionIndicator } from '@/components/realtime/ConnectionIndicator';
 import { RollPromptHost } from '@/components/world/RollPromptHost';
@@ -35,6 +35,9 @@ export function useCampaignContext() {
 export function CampaignLayout() {
   const t = useT();
   const { campaignId } = useParams<{ campaignId: string }>();
+  // На обзоре кампании назад — к списку кампаний; в любом её разделе назад —
+  // на обзор, иначе один клик выбрасывал бы из кампании целиком.
+  const isOverview = !!useMatch('/campaigns/:campaignId');
 
   const { data: campaign, isLoading, error, refetch } = useCampaign(campaignId!);
 
@@ -42,11 +45,15 @@ export function CampaignLayout() {
   // disconnects when leaving the campaign subtree entirely.
   useWebSocket(campaignId);
 
+  const back = isOverview
+    ? { to: '/campaigns', label: t('camp2.back.campaigns') }
+    : { to: `/campaigns/${campaignId}`, label: t('camp2.back.campaign') };
+
   /* ── loading ─────────────────────────────────────────── */
   if (isLoading) {
     return (
       <div>
-        <BackLink to="/campaigns" label={t('camp2.back.campaigns')} className={s.back} />
+        <BackLink to={back.to} label={back.label} className={s.back} />
         <div className={cn('ao-breathe', s.headSkel)}>
           <div className={cn('ao-ph', s.phTitle)} />
           <div className={cn('ao-ph', s.phNav)} />
@@ -59,7 +66,7 @@ export function CampaignLayout() {
   if (error || !campaign) {
     return (
       <div>
-        <BackLink to="/campaigns" label={t('camp2.back.campaigns')} className={s.back} />
+        <BackLink to={back.to} label={back.label} className={s.back} />
         <div className={s.errorBlock}>
           <p className={cn('ao-italic', s.errorText)}>{t('camp.dash.loadError')}</p>
           {isRetryableError(error) && (
@@ -73,7 +80,7 @@ export function CampaignLayout() {
   /* ── shell ───────────────────────────────────────────── */
   return (
     <div className={s.shell}>
-      <BackLink to="/campaigns" label={t('camp2.back.campaigns')} className={s.back} />
+      <BackLink to={back.to} label={back.label} className={s.back} />
 
       <div className={s.head}>
         <h3 className="ao-h3">{campaign.name}</h3>
