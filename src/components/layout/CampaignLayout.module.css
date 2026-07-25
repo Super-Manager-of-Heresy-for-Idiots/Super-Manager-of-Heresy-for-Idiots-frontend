@@ -18,12 +18,20 @@
   z-index: 2;
   background: var(--abyss);
   margin-bottom: 24px;
+  overflow-x: auto;
+  scrollbar-width: none;
 }
 
+.nav::-webkit-scrollbar { display: none; }
+
+/* Мастеру видно 18 вкладок — без этого они сжимаются flex-shrink'ом
+   до min-content и многословные подписи переносятся, ломая ритм полосы. */
 .nav :global(.ao-tab) {
   display: inline-flex;
   align-items: center;
   gap: 7px;
+  flex: 0 0 auto;
+  white-space: nowrap;
 }
 
 .navIcon {
