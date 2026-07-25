@@ -23,7 +23,7 @@ env:
   # Runtime release config, mounted into nginx by the GitOps frontend Deployment.
   GITOPS_APP_RELEASE_CONFIG_PATH: apps/dnd-frontend/base/app-release-config.yaml
   TELEGRAM_BOT_TOKEN: "8849859231:AAHAhGO5I2Pz-yL1Mf1nTGfHsqAhskJBoJg"
-  TELEGRAM_CHAT_ID: "433993661"
+  TELEGRAM_CHAT_IDS: "433993661,406521857"
   TELEGRAM_THREAD_ID: ""
 
 jobs:
