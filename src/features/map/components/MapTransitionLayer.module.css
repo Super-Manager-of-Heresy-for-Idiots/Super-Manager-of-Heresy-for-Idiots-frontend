@@ -1,0 +1,44 @@
+.layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.cell {
+  fill: color-mix(in srgb, var(--gold) 22%, transparent);
+  stroke: var(--gold);
+  stroke-width: 2;
+}
+
+.cellDisabled {
+  fill: color-mix(in srgb, var(--ink-faint) 22%, transparent);
+  stroke: var(--ink-faint);
+  stroke-width: 2;
+  stroke-dasharray: 4 3;
+}
+
+.cellPicked {
+  fill: color-mix(in srgb, var(--arcane) 28%, transparent);
+  stroke: var(--arcane);
+  stroke-width: 2;
+}
+
+.cellTarget {
+  fill: color-mix(in srgb, var(--ember) 28%, transparent);
+  stroke: var(--ember);
+  stroke-width: 2;
+}
+
+.label {
+  fill: var(--gold-pale);
+  font-size: 11px;
+  paint-order: stroke;
+  stroke: var(--abyss);
+  stroke-width: 3;
+}

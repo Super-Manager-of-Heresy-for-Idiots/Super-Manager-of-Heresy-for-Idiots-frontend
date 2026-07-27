@@ -16,6 +16,13 @@ import {
   useSellItem,
 } from '@/hooks/useWorld';
 import { useBackpackInventory } from '@/hooks/useInventory';
+import {
+  availableOptions,
+  chooseOption,
+  startDialogue,
+  EMPTY_DIALOGUE_STATE,
+  type DialogueState,
+} from '@/lib/dialogueRuntime';
 import s from './NpcInteractionDialog.module.css';
 
 interface Props {
@@ -58,25 +65,21 @@ export function NpcInteractionDialog({ campaignId, npcId, characterId, open, onO
   // WORLD_PLAN Этап 4: опциональный диалог. Обход дерева — на клиенте (реплики авторские).
   const dialogue = data?.dialogue;
   const hasDialogue = !!dialogue?.nodes?.length;
-  const [nodeId, setNodeId] = useState<string | null>(null);
-  const rootNodeId = dialogue?.rootNodeId ?? dialogue?.nodes?.[0]?.id ?? null;
-  const nodeExists = !!nodeId && !!dialogue?.nodes?.some((n) => n.id === nodeId);
-  // Ставим корневой узел только когда разговор ещё не начат или текущий узел исчез.
-  // Зависимость от объекта dialogue сбрасывала бы разговор при каждом рефетче interact.
+  const [talk, setTalk] = useState<DialogueState>(EMPTY_DIALOGUE_STATE);
+  const talkOptions = availableOptions(dialogue, talk, 'Уйти');
+  // Разговор начинается сам, как только игрок подошёл: NPC здоровается первым.
+  // Перезапуск привязан к смене узлов дерева, иначе рефетч interact обрывал бы беседу.
+  const nodeSignature = dialogue?.nodes.map((n) => n.id).join('|') ?? '';
   useEffect(() => {
-    if (!nodeExists) {
-      setNodeId(rootNodeId);
-    }
-  }, [nodeExists, rootNodeId]);
-  // Начинаем разговор заново при каждом открытии окна.
-  useEffect(() => {
-    if (!open) {
-      setNodeId(null);
-    }
-  }, [open]);
-  const currentNode = dialogue?.nodes.find((n) => n.id === nodeId) ?? dialogue?.nodes[0];
+    setTalk(open && nodeSignature ? startDialogue(dialogue) : EMPTY_DIALOGUE_STATE);
+    // dialogue меняется по ссылке при каждом рефетче — следим за составом узлов.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, nodeSignature]);
 
-  const resetDialogue = () => setNodeId(rootNodeId);
+  // Игрок сразу попадает в разговор, если мастер его настроил — как в RPG.
+  useEffect(() => {
+    if (open) setTab(hasDialogue ? 'talk' : 'look');
+  }, [open, hasDialogue]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -109,29 +112,43 @@ export function NpcInteractionDialog({ campaignId, npcId, characterId, open, onO
 
             {hasDialogue && (
               <TabsContent value="talk">
-                <p className={s.dlgText}>{currentNode?.npcText}</p>
-                <ul className={s.dlgOptions}>
-                  {currentNode?.options?.map((opt, i) => (
-                    <li key={i}>
-                      <button
-                        className={s.dlgOption}
-                        onClick={() => {
-                          if (opt.nextNodeId) {
-                            setNodeId(opt.nextNodeId);
-                          } else if (opt.actionType === 'OPEN_SHOP' && isMerchant) {
-                            setTab('trade');
-                          } else if (opt.actionType === 'OFFER_QUEST') {
-                            setTab('quests');
-                          } else {
-                            resetDialogue();
-                          }
-                        }}
-                      >
-                        {opt.text}
-                      </button>
-                    </li>
+                <div className={s.dlgLog}>
+                  {talk.history.map((turn, i) => (
+                    <p
+                      key={i}
+                      className={turn.speaker === 'npc' ? s.dlgNpcLine : s.dlgPlayerLine}
+                    >
+                      {turn.speaker === 'npc' ? `${data.name}: ` : '— '}
+                      {turn.text}
+                    </p>
                   ))}
-                </ul>
+                </div>
+
+                {talk.finished ? (
+                  <div className={s.dlgEnd}>
+                    <span className={s.muted}>Разговор окончен.</span>
+                    <Button size="sm" variant="outline" onClick={() => setTalk(startDialogue(dialogue))}>
+                      Заговорить снова
+                    </Button>
+                  </div>
+                ) : (
+                  <ul className={s.dlgOptions}>
+                    {talkOptions.map((opt, i) => (
+                      <li key={i}>
+                        <button
+                          className={s.dlgOption}
+                          onClick={() => {
+                            setTalk((prev) => chooseOption(dialogue, prev, opt));
+                            if (opt.actionType === 'OPEN_SHOP' && isMerchant) setTab('trade');
+                            else if (opt.actionType === 'OFFER_QUEST') setTab('quests');
+                          }}
+                        >
+                          {opt.text}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </TabsContent>
             )}
 

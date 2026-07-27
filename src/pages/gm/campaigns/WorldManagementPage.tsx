@@ -1,10 +1,9 @@
 import { useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { Loader2, Trash2 } from 'lucide-react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { Loader2, Plus, Trash2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
@@ -21,11 +20,9 @@ import {
   useLocationMaps,
   useAttachLocationMap,
   useDetachLocationMap,
-  useMapTransitions,
-  useCreateMapTransition,
-  useUpdateMapTransition,
-  useDeleteMapTransition,
 } from '@/hooks/useWorld';
+import { NpcCreateDialog } from './NpcCreateDialog';
+import { MapTransitionEditor } from './MapTransitionEditor';
 
 /**
  * ГМ-панель управления миром (WORLD_PLAN Этап 4-5): размещение NPC в локациях,
@@ -33,6 +30,7 @@ import {
  */
 export default function WorldManagementPage() {
   const { campaignId } = useParams<{ campaignId: string }>();
+  const navigate = useNavigate();
   const cid = campaignId!;
 
   const { data: locations, isLoading: locLoading } = useCampaignLocations(cid);
@@ -48,23 +46,12 @@ export default function WorldManagementPage() {
 
   const { data: occupants } = useLocationOccupants(cid, activeLocationId);
   const { data: locationMaps } = useLocationMaps(cid, activeLocationId);
-  const { data: transitions } = useMapTransitions(cid);
 
   const setNpcLocation = useSetNpcLocation();
   const attachMap = useAttachLocationMap();
   const detachMap = useDetachLocationMap();
-  const createTransition = useCreateMapTransition();
-  const updateTransition = useUpdateMapTransition();
-  const deleteTransition = useDeleteMapTransition();
 
-  // Transition form state
-  const [fromMapId, setFromMapId] = useState('');
-  const [toMapId, setToMapId] = useState('');
-  const [fromX, setFromX] = useState('0');
-  const [fromY, setFromY] = useState('0');
-  const [toX, setToX] = useState('0');
-  const [toY, setToY] = useState('0');
-  const [label, setLabel] = useState('');
+  const [npcDialogOpen, setNpcDialogOpen] = useState(false);
 
   if (locLoading) {
     return (
@@ -77,23 +64,6 @@ export default function WorldManagementPage() {
   const unplacedNpcs = (npcs ?? []).filter((n) => n.location?.id !== activeLocationId);
 
   const mapName = (id: string) => (maps ?? []).find((m) => m.id === id)?.name ?? id.slice(0, 8);
-
-  const submitTransition = () => {
-    if (!fromMapId || !toMapId) return;
-    createTransition.mutate({
-      campaignId: cid,
-      data: {
-        fromMapId,
-        toMapId,
-        fromCells: [{ gridX: Number(fromX), gridY: Number(fromY) }],
-        toCell: { gridX: Number(toX), gridY: Number(toY) },
-        toLocationId: activeLocationId,
-        label: label || undefined,
-        enabled: true,
-      },
-    });
-    setLabel('');
-  };
 
   return (
     <div className="space-y-4 p-4">
@@ -119,8 +89,12 @@ export default function WorldManagementPage() {
         <>
           {/* Occupants + NPC placement */}
           <Card>
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0">
               <CardTitle className="text-sm">Обитатели локации</CardTitle>
+              <Button size="sm" onClick={() => setNpcDialogOpen(true)}>
+                <Plus className="mr-1 h-4 w-4" />
+                Создать NPC
+              </Button>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="space-y-1">
@@ -173,8 +147,20 @@ export default function WorldManagementPage() {
 
           {/* Location maps */}
           <Card>
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0">
               <CardTitle className="text-sm">Карты локации</CardTitle>
+              <Button
+                size="sm"
+                onClick={() =>
+                  navigate(
+                    `/campaigns/${cid}/world/maps/new?attachToLocation=${activeLocationId}` +
+                      (locationMaps?.length ? '' : '&asDefault=1'),
+                  )
+                }
+              >
+                <Plus className="mr-1 h-4 w-4" />
+                Создать карту
+              </Button>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="space-y-1">
@@ -224,97 +210,24 @@ export default function WorldManagementPage() {
             <CardHeader>
               <CardTitle className="text-sm">Переходы между картами (ключевые клетки)</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="space-y-1">
-                {transitions?.map((tr) => (
-                  <div key={tr.id} className="flex items-center justify-between rounded border p-2 text-sm">
-                    <span>
-                      {tr.label || 'Переход'}: {mapName(tr.fromMapId)} → {mapName(tr.toMapId)}
-                      {' '}
-                      {tr.fromCells[0] && `[${tr.fromCells[0].gridX},${tr.fromCells[0].gridY}]`}
-                      {' → '}
-                      [{tr.toCell.gridX},{tr.toCell.gridY}]
-                      {!tr.enabled && <Badge variant="outline" className="ml-2">заперт</Badge>}
-                    </span>
-                    <span className="flex gap-1">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() =>
-                          updateTransition.mutate({
-                            campaignId: cid,
-                            transitionId: tr.id,
-                            data: { enabled: !tr.enabled },
-                          })
-                        }
-                      >
-                        {tr.enabled ? 'Запереть' : 'Отпереть'}
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => deleteTransition.mutate({ campaignId: cid, transitionId: tr.id })}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </span>
-                  </div>
-                ))}
-                {!transitions?.length && <p className="text-sm text-muted-foreground">Переходов нет.</p>}
-              </div>
-
-              {/* New transition form */}
-              <div className="grid grid-cols-2 gap-2 rounded border p-3">
-                <Select value={fromMapId} onValueChange={setFromMapId}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Из карты" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {(maps ?? []).map((m) => (
-                      <SelectItem key={m.id} value={m.id}>
-                        {m.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Select value={toMapId} onValueChange={setToMapId}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="В карту" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {(maps ?? []).map((m) => (
-                      <SelectItem key={m.id} value={m.id}>
-                        {m.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <div className="flex gap-1">
-                  <Input placeholder="из X" value={fromX} onChange={(e) => setFromX(e.target.value)} />
-                  <Input placeholder="из Y" value={fromY} onChange={(e) => setFromY(e.target.value)} />
-                </div>
-                <div className="flex gap-1">
-                  <Input placeholder="в X" value={toX} onChange={(e) => setToX(e.target.value)} />
-                  <Input placeholder="в Y" value={toY} onChange={(e) => setToY(e.target.value)} />
-                </div>
-                <Input
-                  className="col-span-2"
-                  placeholder="Метка (напр. «Дверь в подвал»)"
-                  value={label}
-                  onChange={(e) => setLabel(e.target.value)}
-                />
-                <Button
-                  className="col-span-2"
-                  disabled={!fromMapId || !toMapId || createTransition.isPending}
-                  onClick={submitTransition}
-                >
-                  Создать переход
-                </Button>
-              </div>
+            <CardContent>
+              <MapTransitionEditor campaignId={cid} toLocationId={activeLocationId} />
             </CardContent>
           </Card>
         </>
       )}
+
+      {/* Создание NPC прямо из панели мира: новый NPC сразу попадает в выбранную локацию. */}
+      <NpcCreateDialog
+        campaignId={cid}
+        open={npcDialogOpen}
+        onOpenChange={setNpcDialogOpen}
+        onCreated={(npc) => {
+          if (activeLocationId) {
+            setNpcLocation.mutate({ campaignId: cid, npcId: npc.id, locationId: activeLocationId });
+          }
+        }}
+      />
     </div>
   );
 }

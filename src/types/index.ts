@@ -1752,6 +1752,8 @@ export interface NpcResponse {
   npcRole?: NpcRole;
   /** Локация, в которой размещён NPC (WORLD_PLAN Этап 1). */
   location?: NpcRef;
+  /** Квесты, которые NPC выдаёт. Приходит только в детальном ответе GET /npcs/{id}. */
+  linkedQuests?: NpcQuestRef[];
   notes: NoteResponse[];
   createdAt: string;
   updatedAt: string;
@@ -1769,6 +1771,8 @@ export interface CreateNpcRequest {
   abilities?: string;
   spellIds?: string[];
   sourceMonsterId?: string;
+  /** Роль NPC в мире: MERCHANT открывает лавку, остальные — сюжетные (WORLD_PLAN). */
+  npcRole?: NpcRole;
 }
 
 export interface UpdateNpcRequest {
@@ -1783,6 +1787,8 @@ export interface UpdateNpcRequest {
   abilities?: string;
   spellIds?: string[];
   sourceMonsterId?: string;
+  /** Роль NPC в мире: MERCHANT открывает лавку, остальные — сюжетные (WORLD_PLAN). */
+  npcRole?: NpcRole;
 }
 
 export interface NoteResponse {
@@ -1818,8 +1824,23 @@ export interface QuestResponse {
   artUrl?: string;
   notes: NoteResponse[];
   rewards: QuestRewardResponse[];
+  /** NPC-квестодатели. Приходит только в детальном ответе GET /quests/{id}. */
+  linkedNpcs?: QuestNpcRef[];
   createdAt: string;
   updatedAt: string;
+}
+
+/** Короткая ссылка на NPC-квестодателя. */
+export interface QuestNpcRef {
+  id: string;
+  name: string;
+}
+
+/** Короткая ссылка на квест, привязанный к NPC. */
+export interface NpcQuestRef {
+  id: string;
+  name: string;
+  status?: QuestStatus;
 }
 
 export interface QuestRewardResponse {

@@ -11,11 +11,12 @@
  */
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { ErrorAltar, OrdoInterfaceIcon } from '@/components/ordo';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
+import { useAttachLocationMap } from '@/hooks/useWorld';
 import { MapViewport, type MapToolbarLabels } from '../components';
 import {
   CalibrationClickLayer,
@@ -59,10 +60,17 @@ export default function MapEditorPage() {
   const { campaignId, mapId } = useParams<{ campaignId: string; mapId?: string }>();
   const isEdit = !!mapId && mapId !== 'new';
 
+  // Приход из панели управления миром: созданную карту сразу привязываем к локации,
+  // чтобы мастеру не приходилось возвращаться и искать её в списке вручную.
+  const [searchParams] = useSearchParams();
+  const attachToLocationId = searchParams.get('attachToLocation');
+  const attachAsDefault = searchParams.get('asDefault') === '1';
+
   const mapQuery = useMapDefinition(isEdit ? mapId : undefined);
   const createMap = useCreateMap();
   const updateGrid = useUpdateMapGridConfig();
   const uploadAsset = useUploadMapAsset();
+  const attachMap = useAttachLocationMap();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -140,7 +148,22 @@ export default function MapEditorPage() {
           gridType: CALIBRATION_GRID_TYPE,
           gridConfig,
         },
-        { onSuccess: (map) => navigate(`/campaigns/${campaignId}/world/maps/${map.id}/edit`) },
+        {
+          onSuccess: (map) => {
+            if (attachToLocationId) {
+              attachMap.mutate(
+                {
+                  campaignId,
+                  locationId: attachToLocationId,
+                  data: { externalMapId: map.id, isDefault: attachAsDefault },
+                },
+                { onSettled: () => navigate(`/campaigns/${campaignId}/world/manage`) },
+              );
+              return;
+            }
+            navigate(`/campaigns/${campaignId}/world/maps/${map.id}/edit`);
+          },
+        },
       );
     }
   };

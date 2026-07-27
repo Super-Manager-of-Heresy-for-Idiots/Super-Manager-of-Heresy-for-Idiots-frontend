@@ -1,5 +1,6 @@
 export { MapViewport, type MapViewportProps } from './MapViewport';
 export { MapTransitionPrompt } from './MapTransitionPrompt';
+export { MapTransitionLayer, type TransitionMarker } from './MapTransitionLayer';
 export { MapBackgroundLayer } from './MapBackgroundLayer';
 export { MapAssetImage } from './MapAssetImage';
 export { MapGridLayer } from './MapGridLayer';

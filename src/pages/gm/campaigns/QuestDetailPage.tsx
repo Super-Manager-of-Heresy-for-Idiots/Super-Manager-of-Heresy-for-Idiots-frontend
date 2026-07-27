@@ -26,6 +26,7 @@ import { cn } from '@/lib/utils';
 import { isRetryableError } from '@/lib/errors';
 import type { QuestStatus, QuestReward, CreateQuestRewardRequest } from '@/types';
 import { QuestObjectivesEditor } from './QuestObjectivesEditor';
+import { QuestGiversPanel } from './QuestNpcLinks';
 import s from './QuestDetailPage.module.css';
 
 /* ── constants ───────────────────────────────────────────────── */
@@ -322,6 +323,13 @@ export default function QuestDetailPage() {
 
         {/* Optional quest objectives (GM discretion) */}
         <QuestObjectivesEditor campaignId={campaignId!} questId={questId!} />
+
+        {/* Quest givers: NPCs that hand out and accept this quest */}
+        <QuestGiversPanel
+          campaignId={campaignId!}
+          questId={questId!}
+          linkedNpcs={quest.linkedNpcs ?? []}
+        />
       </div>
 
       {/* ═══ Right column ═══ */}

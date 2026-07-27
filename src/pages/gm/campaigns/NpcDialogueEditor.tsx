@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
-import { Loader2, Plus, Trash2 } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { AlertTriangle, CornerDownRight, Loader2, Plus, Trash2 } from 'lucide-react';
 import { OrdoPanel, PanelHeader } from '@/components/ordo';
 import { cn } from '@/lib/utils';
 import { useNpcDialogue, usePutNpcDialogue, useDeleteNpcDialogue } from '@/hooks/useWorld';
 import { useCampaignQuests } from '@/hooks/useQuests';
+import { findDeadEndNodeIds, findUnreachableNodeIds } from '@/lib/dialogueValidation';
 import type { DialogueNodeDto, DialogueOptionDto } from '@/types';
 
 import s from './NpcDialogueEditor.module.css';
@@ -38,10 +39,19 @@ export function NpcDialogueEditor({ campaignId, npcId }: Props) {
   const patchNode = (id: string, patch: Partial<DialogueNodeDto>) =>
     setNodes((prev) => prev.map((n) => (n.id === id ? { ...n, ...patch } : n)));
 
-  const addNode = () => {
+  // Новый узел сразу получает вариант выхода: без вариантов игрок услышит реплику
+  // и не сможет ответить — именно так диалог и «залипал» на одной фразе.
+  const addNode = (): string => {
     const id = newId();
-    setNodes((prev) => [...prev, { id, npcText: '', options: [] }]);
-    if (!rootNodeId) setRootNodeId(id);
+    setNodes((prev) => [...prev, { id, npcText: '', options: [{ text: 'Уйти', actionType: 'END' }] }]);
+    setRootNodeId((prev) => prev || id);
+    return id;
+  };
+
+  /** Создаёт узел-продолжение и сразу связывает с ним выбранный вариант ответа. */
+  const addFollowUpNode = (nodeId: string, idx: number) => {
+    const id = addNode();
+    patchOption(nodeId, idx, { nextNodeId: id, actionType: undefined, questId: undefined });
   };
 
   const removeNode = (id: string) => {
@@ -103,6 +113,12 @@ export function NpcDialogueEditor({ campaignId, npcId }: Props) {
     });
   };
 
+  const deadEndIds = useMemo(() => new Set(findDeadEndNodeIds(nodes)), [nodes]);
+  const unreachableIds = useMemo(
+    () => new Set(findUnreachableNodeIds(nodes, rootNodeId)),
+    [nodes, rootNodeId],
+  );
+
   const optionTargetValue = (o: DialogueOptionDto): string =>
     o.nextNodeId ? `node:${o.nextNodeId}` : o.actionType ? `action:${o.actionType}` : '';
 
@@ -124,10 +140,20 @@ export function NpcDialogueEditor({ campaignId, npcId }: Props) {
         ) : nodes.length === 0 ? (
           <p className={cn('ao-italic', s.empty)}>Диалога нет — взаимодействие идёт как обычно.</p>
         ) : (
-          nodes.map((node) => (
+          nodes.map((node, nodeIdx) => (
             <div key={node.id} className={s.node}>
               <div className={s.nodeHead}>
-                <span className={s.nodeId}>{node.id}</span>
+                <span className={s.nodeId}>Реплика {nodeIdx + 1}</span>
+                {deadEndIds.has(node.id) && (
+                  <span className={s.warn} title="Игроку нечего ответить — добавьте вариант">
+                    <AlertTriangle size={12} /> нет ответов
+                  </span>
+                )}
+                {unreachableIds.has(node.id) && (
+                  <span className={s.warn} title="К этой реплике не ведёт ни один вариант ответа">
+                    <AlertTriangle size={12} /> недостижима
+                  </span>
+                )}
                 <label className={s.rootLabel}>
                   <input
                     type="radio"
@@ -173,16 +199,24 @@ export function NpcDialogueEditor({ campaignId, npcId }: Props) {
                       <option value="action:OPEN_SHOP">Открыть лавку</option>
                       <option value="action:OFFER_QUEST">К квестам</option>
                     </optgroup>
-                    <optgroup label="Перейти к узлу">
-                      {nodes
-                        .filter((n) => n.id !== node.id)
-                        .map((n) => (
+                    <optgroup label="Ответ NPC">
+                      {nodes.map((n, i) =>
+                        n.id === node.id ? null : (
                           <option key={n.id} value={`node:${n.id}`}>
-                            {n.npcText ? n.npcText.slice(0, 24) : n.id}
+                            {i + 1}. {n.npcText ? n.npcText.slice(0, 24) : '(без текста)'}
                           </option>
-                        ))}
+                        ),
+                      )}
                     </optgroup>
                   </select>
+                  <button
+                    className="ao-btn ao-btn--sm"
+                    onClick={() => addFollowUpNode(node.id, idx)}
+                    title="Создать ответ NPC на этот вариант и связать с ним"
+                    aria-label="Создать продолжение"
+                  >
+                    <CornerDownRight size={12} />
+                  </button>
                   {opt.actionType === 'OFFER_QUEST' && (
                     <select
                       className={cn('ao-input', s.select)}
@@ -215,9 +249,9 @@ export function NpcDialogueEditor({ campaignId, npcId }: Props) {
         )}
 
         <div className={s.footer}>
-          <button className="ao-btn ao-btn--sm" onClick={addNode}>
+          <button className="ao-btn ao-btn--sm" onClick={() => addNode()}>
             <Plus size={13} />
-            <span>Узел</span>
+            <span>Реплика NPC</span>
           </button>
           <div className={s.spacer} />
           {nodes.length > 0 && (

@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { questsApi } from '@/api/quests.api';
 import { useT } from '@/i18n/I18nContext';
@@ -92,6 +92,58 @@ export function useDeleteQuest() {
       toast.error(error.response?.data?.message || t('hk.quest.deleteFailed'));
     },
   });
+}
+
+// Quest ↔ NPC links (квестодатели)
+
+/**
+ * Привязывает NPC к квесту: после этого NPC предлагает квест игрокам,
+ * находящимся с ним в одной локации, и принимает его сдачу.
+ */
+export function useLinkQuestNpc() {
+  const queryClient = useQueryClient();
+  const t = useT();
+
+  return useMutation({
+    mutationFn: ({ campaignId, questId, npcId }: QuestNpcLinkVars) =>
+      questsApi.linkNpc(campaignId, questId, npcId),
+    onSuccess: (_, v) => {
+      invalidateQuestNpcLink(queryClient, v);
+      toast.success(t('hk.quest.npcLinked'));
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error.response?.data?.message || t('hk.quest.npcLinkFailed'));
+    },
+  });
+}
+
+export function useUnlinkQuestNpc() {
+  const queryClient = useQueryClient();
+  const t = useT();
+
+  return useMutation({
+    mutationFn: ({ campaignId, questId, npcId }: QuestNpcLinkVars) =>
+      questsApi.unlinkNpc(campaignId, questId, npcId),
+    onSuccess: (_, v) => {
+      invalidateQuestNpcLink(queryClient, v);
+      toast.success(t('hk.quest.npcUnlinked'));
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error.response?.data?.message || t('hk.quest.npcUnlinkFailed'));
+    },
+  });
+}
+
+interface QuestNpcLinkVars {
+  campaignId: string;
+  questId: string;
+  npcId: string;
+}
+
+/** Связь видна с обеих сторон, поэтому обновляем и карточку квеста, и карточку NPC. */
+function invalidateQuestNpcLink(queryClient: QueryClient, v: QuestNpcLinkVars) {
+  queryClient.invalidateQueries({ queryKey: ['campaigns', v.campaignId, 'quests', v.questId] });
+  queryClient.invalidateQueries({ queryKey: ['campaigns', v.campaignId, 'npcs', v.npcId] });
 }
 
 // Quest Notes

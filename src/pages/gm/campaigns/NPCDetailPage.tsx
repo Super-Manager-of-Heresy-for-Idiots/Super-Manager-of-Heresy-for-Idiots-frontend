@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Loader2, Pencil, Trash2 } from 'lucide-react';
 import { OrdoPanel, PanelHeader, Rune, OrdoDivider } from '@/components/ordo';
 import { CodexID } from '@/components/homebrew/CodexID';
-import { VisibilityToggle, QuestStatusBadge } from '@/components/narrative';
+import { VisibilityToggle } from '@/components/narrative';
 import {
   Dialog,
   DialogContent,
@@ -26,10 +26,11 @@ import {
 } from '@/hooks/useNpcs';
 import { useCampaignReferenceContent, useCampaignReferenceSpells } from '@/hooks/useHomebrewCampaign';
 import { useCampaignMonsters } from '@/hooks/useBestiary';
-import type { NpcNoteResponse, QuestStatus } from '@/types';
+import type { NpcNoteResponse } from '@/types';
 import { NpcFormFields, type NpcFormState } from './NpcFormFields';
 import { NpcShopManager } from './NpcShopManager';
 import { NpcDialogueEditor } from './NpcDialogueEditor';
+import { NpcQuestsPanel } from './QuestNpcLinks';
 import {
   emptyNpcForm,
   npcFormFromResponse,
@@ -164,13 +165,10 @@ export default function NPCDetailPage() {
     );
   }
 
-  /* ── linked entities (from quest/location data on the NPC, if available) ── */
-  const npcLinks = npc as typeof npc & {
-    linkedQuests?: { id: string; name: string; status?: QuestStatus }[];
-    linkedLocations?: { id: string; name: string }[];
-  };
-  const linkedQuests = npcLinks.linkedQuests ?? [];
-  const linkedLocations = npcLinks.linkedLocations ?? [];
+  /* ── linked entities ─────────────────────────────────────── */
+  const linkedQuests = npc.linkedQuests ?? [];
+  // NPC размещается в одной локации (WORLD_PLAN Этап 1) — показываем её как связь.
+  const linkedLocations = npc.location ? [npc.location] : [];
   const portraitUrl = portraitOverride !== undefined ? portraitOverride : npc.portraitUrl;
 
   /* ── main ────────────────────────────────────────────────── */
@@ -391,28 +389,7 @@ export default function NPCDetailPage() {
         <NpcDialogueEditor campaignId={campaignId!} npcId={npcId!} />
 
         {/* Linked Quests */}
-        <OrdoPanel frame padding={0}>
-          <PanelHeader title={t('camp2.npcDetail.linkedQuests')} glyph="scroll" tone="gold" />
-          <div className={s.boxPad}>
-            {linkedQuests.length === 0 ? (
-              <p className={cn('ao-italic', s.linkEmpty)}>
-                {t('camp2.npcDetail.noLinkedQuests')}
-              </p>
-            ) : (
-              <div className={s.linkList}>
-                {linkedQuests.map((q) => (
-                  <div key={q.id} className={s.linkRow}>
-                    <Rune kind="scroll" size={12} color="var(--brass)" />
-                    <span className={s.linkNameGrow}>
-                      {q.name}
-                    </span>
-                    {q.status && <QuestStatusBadge status={q.status} />}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </OrdoPanel>
+        <NpcQuestsPanel campaignId={campaignId!} npcId={npcId!} linkedQuests={linkedQuests} />
 
         {/* Linked Locations */}
         <OrdoPanel frame padding={0}>

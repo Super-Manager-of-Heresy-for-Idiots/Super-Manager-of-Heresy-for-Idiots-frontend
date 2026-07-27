@@ -1,5 +1,15 @@
-import type { CreateNpcRequest, NpcResponse } from '@/types';
+import type { CreateNpcRequest, NpcResponse, NpcRole } from '@/types';
 import type { NpcFormState } from './NpcFormFields';
+
+/** Порядок ролей в выпадающем списке: обыватель по умолчанию, торговец — первым из «активных». */
+export const NPC_ROLES: NpcRole[] = [
+  'COMMONER',
+  'MERCHANT',
+  'QUEST_GIVER',
+  'TRAINER',
+  'GUARD',
+  'INNKEEPER',
+];
 
 export function emptyNpcForm(): NpcFormState {
   return {
@@ -14,6 +24,7 @@ export function emptyNpcForm(): NpcFormState {
     abilities: '',
     spellIds: [],
     sourceMonsterId: '',
+    npcRole: 'COMMONER',
   };
 }
 
@@ -30,6 +41,7 @@ export function npcFormFromResponse(npc: NpcResponse): NpcFormState {
     abilities: npc.abilities ?? '',
     spellIds: npc.spells?.map((sp) => sp.id) ?? [],
     sourceMonsterId: npc.sourceMonster?.id ?? '',
+    npcRole: npc.npcRole ?? 'COMMONER',
   };
 }
 
@@ -51,6 +63,7 @@ export function buildNpcPayload(f: NpcFormState): CreateNpcRequest {
     privateDescription: f.privateDescription.trim() || undefined,
     isVisibleToPlayers: f.isVisibleToPlayers,
     sourceType: f.sourceType,
+    npcRole: f.npcRole,
   };
   if (f.sourceType === 'CLASS_BASED') {
     return {

@@ -158,6 +158,26 @@ export const campaigns2: DictModule = {
     'camp2.npcMgr.inscribe': 'Начертать',
 
     /* ── NpcFormFields ──────────────────────────────── */
+    /* ── QuestNpcLinks ──────────────────────────────── */
+    'camp2.questNpc.givers': 'КВЕСТОДАТЕЛИ',
+    'camp2.questNpc.giversSub': 'NPC, у которых игрок берёт и сдаёт квест',
+    'camp2.questNpc.noGivers': 'Квест никому не поручен — игроки не смогут его получить.',
+    'camp2.questNpc.npcQuestsSub': 'Квесты, которые NPC предлагает игрокам',
+    'camp2.questNpc.chooseNpc': 'Выберите NPC…',
+    'camp2.questNpc.noNpcsLeft': 'Все NPC уже привязаны',
+    'camp2.questNpc.chooseQuest': 'Выберите квест…',
+    'camp2.questNpc.noQuestsLeft': 'Все квесты уже привязаны',
+    'camp2.questNpc.link': 'Привязать',
+    'camp2.questNpc.unlink': 'Отвязать',
+
+    'camp2.npcForm.role.label': 'Роль в мире',
+    'camp2.npcForm.role.hint': 'Торговец открывает лавку и торговлю с игроками',
+    'camp2.npcForm.role.COMMONER': 'Обыватель',
+    'camp2.npcForm.role.MERCHANT': 'Торговец',
+    'camp2.npcForm.role.QUEST_GIVER': 'Квестодатель',
+    'camp2.npcForm.role.TRAINER': 'Наставник',
+    'camp2.npcForm.role.GUARD': 'Страж',
+    'camp2.npcForm.role.INNKEEPER': 'Трактирщик',
     'camp2.npcForm.source.label': 'Природа персонажа',
     'camp2.npcForm.source.hint': 'Определяет, какие характеристики хранит NPC',
     'camp2.npcForm.source.free': 'Свободное описание',
@@ -832,6 +852,26 @@ export const campaigns2: DictModule = {
     'camp2.npcMgr.inscribe': 'Inscribe',
 
     /* ── NpcFormFields ──────────────────────────────── */
+    /* ── QuestNpcLinks ──────────────────────────────── */
+    'camp2.questNpc.givers': 'QUEST GIVERS',
+    'camp2.questNpc.giversSub': 'NPCs who hand out and accept this quest',
+    'camp2.questNpc.noGivers': 'No one hands out this quest — players cannot receive it.',
+    'camp2.questNpc.npcQuestsSub': 'Quests this NPC offers to players',
+    'camp2.questNpc.chooseNpc': 'Choose an NPC…',
+    'camp2.questNpc.noNpcsLeft': 'All NPCs are already linked',
+    'camp2.questNpc.chooseQuest': 'Choose a quest…',
+    'camp2.questNpc.noQuestsLeft': 'All quests are already linked',
+    'camp2.questNpc.link': 'Link',
+    'camp2.questNpc.unlink': 'Unlink',
+
+    'camp2.npcForm.role.label': 'World Role',
+    'camp2.npcForm.role.hint': 'Merchants open a shop and can trade with players',
+    'camp2.npcForm.role.COMMONER': 'Commoner',
+    'camp2.npcForm.role.MERCHANT': 'Merchant',
+    'camp2.npcForm.role.QUEST_GIVER': 'Quest Giver',
+    'camp2.npcForm.role.TRAINER': 'Trainer',
+    'camp2.npcForm.role.GUARD': 'Guard',
+    'camp2.npcForm.role.INNKEEPER': 'Innkeeper',
     'camp2.npcForm.source.label': 'Character Nature',
     'camp2.npcForm.source.hint': 'Determines which traits this NPC carries',
     'camp2.npcForm.source.free': 'Free-form',

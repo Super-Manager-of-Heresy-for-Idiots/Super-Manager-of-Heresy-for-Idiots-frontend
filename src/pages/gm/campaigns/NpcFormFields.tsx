@@ -7,9 +7,11 @@ import type {
   CharacterClassDetailResponse,
   CharacterRaceDetailResponse,
   MonsterSummaryResponse,
+  NpcRole,
   NpcSourceType,
   SpellReferenceResponse,
 } from '@/types';
+import { NPC_ROLES } from './NpcFormFields.helpers';
 import s from './NpcFormFields.module.css';
 
 export interface NpcFormState {
@@ -24,6 +26,7 @@ export interface NpcFormState {
   abilities: string;
   spellIds: string[];
   sourceMonsterId: string;
+  npcRole: NpcRole;
 }
 
 interface Props {
@@ -62,6 +65,20 @@ export function NpcFormFields({ value: v, onChange, classes, races, spells, mons
           onChange={(e) => onChange({ name: e.target.value })}
           placeholder={t('camp2.npcMgr.field.namePlaceholder')}
         />
+      </OrdoField>
+
+      <OrdoField label={t('camp2.npcForm.role.label')} hint={t('camp2.npcForm.role.hint')}>
+        <select
+          className={cn('ao-input', s.sel)}
+          value={v.npcRole}
+          onChange={(e) => onChange({ npcRole: e.target.value as NpcRole })}
+        >
+          {NPC_ROLES.map((role) => (
+            <option key={role} value={role} className={s.opt}>
+              {t(`camp2.npcForm.role.${role}`)}
+            </option>
+          ))}
+        </select>
       </OrdoField>
 
       <OrdoField label={t('camp2.npcForm.source.label')} hint={t('camp2.npcForm.source.hint')}>

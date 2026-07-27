@@ -19,7 +19,14 @@ import { ErrorAltar } from '@/components/ordo';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/store/authStore';
-import { MapViewport, MapTransitionPrompt, type MapToolbarLabels } from '../components';
+import { useMapTransitions } from '@/hooks/useWorld';
+import {
+  MapViewport,
+  MapTransitionPrompt,
+  MapTransitionLayer,
+  type TransitionMarker,
+  type MapToolbarLabels,
+} from '../components';
 import { useMapRealtime, type MapConnectionState } from '../realtime';
 import { useMapSessionStore, useMapTransientStore } from '../state';
 import {
@@ -69,6 +76,24 @@ export default function MapSessionPage() {
   const cursors = useMemo(
     () => Object.values(remoteCursorsByUserId).filter((c) => c.userId !== me?.id),
     [remoteCursorsByUserId, me?.id],
+  );
+
+  // Переходы этой карты: игроку видны только открытые, ГМ — ещё и запертые.
+  const { data: transitions } = useMapTransitions(campaignId ?? '', map?.id);
+  const canManageMap = permissions?.canManageMap ?? false;
+  const transitionMarkers = useMemo<TransitionMarker[]>(
+    () =>
+      (transitions ?? [])
+        .filter((tr) => tr.enabled || canManageMap)
+        .flatMap((tr) =>
+          tr.fromCells.map((cell) => ({
+            gridX: cell.gridX,
+            gridY: cell.gridY,
+            variant: tr.enabled ? ('enabled' as const) : ('disabled' as const),
+            label: tr.label,
+          })),
+        ),
+    [transitions, canManageMap],
   );
 
   const toolbarLabels = useMemo<MapToolbarLabels>(
@@ -245,7 +270,10 @@ export default function MapSessionPage() {
           }}
           toolbarLabels={toolbarLabels}
           emptyLabel={t('map.session.noImage')}
-        />
+        >
+          {/* Ключевые клетки переходов видны прямо на карте, чтобы игрок знал, куда идти. */}
+          <MapTransitionLayer grid={map.gridConfig} markers={transitionMarkers} />
+        </MapViewport>
         {campaignId && map.id && sessionId && (
           <MapTransitionPrompt
             campaignId={campaignId}

@@ -1,32 +1,16 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Loader2 } from 'lucide-react';
 import { OrdoInterfaceIcon, OrdoPanel, Rune, EmptyVault, ErrorAltar } from '@/components/ordo';
 import { CodexID } from '@/components/homebrew/CodexID';
 import { VisibilityToggle } from '@/components/narrative';
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from '@/components/ui/dialog';
-import {
   useCampaignNpcs,
-  useCreateNpc,
   useSetNpcVisibility,
 } from '@/hooks/useNpcs';
-import { useCampaignReferenceContent, useCampaignReferenceSpells } from '@/hooks/useHomebrewCampaign';
-import { useCampaignMonsters } from '@/hooks/useBestiary';
 import { useT } from '@/i18n/I18nContext';
 import { cn } from '@/lib/utils';
 import type { NpcResponse } from '@/types';
-import { NpcFormFields, type NpcFormState } from './NpcFormFields';
-import {
-  emptyNpcForm,
-  buildNpcPayload,
-  isNpcFormValid,
-} from './NpcFormFields.helpers';
+import { NpcCreateDialog } from './NpcCreateDialog';
 import s from './NPCManagerPage.module.css';
 
 /* ── helpers ─────────────────────────────────────────────────── */
@@ -39,32 +23,9 @@ export default function NPCManagerPage() {
   const { campaignId } = useParams<{ campaignId: string }>();
   const navigate = useNavigate();
   const { data: npcs, isLoading, error, refetch } = useCampaignNpcs(campaignId!);
-  const createMutation = useCreateNpc();
   const visibilityMutation = useSetNpcVisibility();
 
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [form, setForm] = useState<NpcFormState>(emptyNpcForm);
-  const patch = (p: Partial<NpcFormState>) => setForm((prev) => ({ ...prev, ...p }));
-  const resetForm = () => setForm(emptyNpcForm());
-
-  const { data: refData } = useCampaignReferenceContent(campaignId!);
-  const { data: spells = [], isLoading: spellsLoading } = useCampaignReferenceSpells(
-    campaignId!,
-    form.classId || undefined,
-  );
-  const { data: monsters = [] } = useCampaignMonsters(campaignId!);
-
-  const handleCreate = () => {
-    createMutation.mutate(
-      { campaignId: campaignId!, data: buildNpcPayload(form) },
-      {
-        onSuccess: () => {
-          setDialogOpen(false);
-          resetForm();
-        },
-      },
-    );
-  };
 
   const sourceLabel = (npc: NpcResponse): string | null => {
     if (npc.sourceType === 'CLASS_BASED') {
@@ -140,7 +101,7 @@ export default function NPCManagerPage() {
         </div>
         <button
           className="ao-btn ao-btn--primary"
-          onClick={() => { resetForm(); setDialogOpen(true); }}
+          onClick={() => setDialogOpen(true)}
         >
           <Rune kind="plus" size={14} color="currentColor" />
           <span className={s.ml6}>{t('camp2.npcMgr.newNpc')}</span>
@@ -154,7 +115,7 @@ export default function NPCManagerPage() {
           title={t('camp2.npcMgr.empty.title')}
           body={t('camp2.npcMgr.empty.body')}
           action={
-            <button className="ao-btn ao-btn--primary" onClick={() => { resetForm(); setDialogOpen(true); }}>
+            <button className="ao-btn ao-btn--primary" onClick={() => setDialogOpen(true)}>
               <Rune kind="plus" size={14} color="currentColor" />
               <span className={s.ml6}>{t('camp2.npcMgr.newNpc')}</span>
             </button>
@@ -263,44 +224,7 @@ export default function NPCManagerPage() {
       )}
 
       {/* Create Dialog */}
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t('camp2.npcMgr.dialog.title')}</DialogTitle>
-          </DialogHeader>
-          <div className={s.dialogScroll}>
-            <NpcFormFields
-              value={form}
-              onChange={patch}
-              classes={refData?.classes ?? []}
-              races={refData?.races ?? []}
-              spells={spells}
-              monsters={monsters}
-              spellsLoading={spellsLoading}
-            />
-          </div>
-          <DialogFooter>
-            <button
-              className="ao-btn ao-btn--ghost"
-              onClick={() => setDialogOpen(false)}
-              disabled={createMutation.isPending}
-            >
-              {t('camp2.npcMgr.withhold')}
-            </button>
-            <button
-              type="button"
-              className="ao-btn ao-btn--primary"
-              onClick={handleCreate}
-              disabled={!isNpcFormValid(form) || createMutation.isPending}
-            >
-              {createMutation.isPending && (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              )}
-              {t('camp2.npcMgr.inscribe')}
-            </button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <NpcCreateDialog campaignId={campaignId!} open={dialogOpen} onOpenChange={setDialogOpen} />
     </div>
   );
 }
